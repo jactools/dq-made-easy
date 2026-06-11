@@ -1844,9 +1844,9 @@ secrets:
   internal_root_ca:
     file: ./tmp/certs/internal-root-ca-2024.crt
   internal_corporate_root_ca:
-    file: ${INTERNAL_CORPORATE_ROOT_CA_FILE?INTERNAL_CORPORATE_ROOT_CA_FILE is required}
+    file: ${INTERNAL_CORPORATE_ROOT_CA_FILE:-./tmp/certs/mkcert-rootCA.pem}
   internal_ca_bundle:
-    file: ${INTERNAL_CA_BUNDLE_FILE?INTERNAL_CA_BUNDLE_FILE is required}
+    file: ${INTERNAL_CA_BUNDLE_FILE:-./tmp/certs/mkcert-rootCA.pem}
 
 # ==============================================================================
 # NETWORK: Shared with observability stack (docker-compose-observability.yml).

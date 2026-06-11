@@ -15,7 +15,6 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
     --mount=type=secret,id=internal_root_ca \
     --mount=type=secret,id=internal_ca_bundle \
     set -eux; \
-    : "${INTERNAL_CORPORATE_ROOT_CA:?INTERNAL_CORPORATE_ROOT_CA is required}"; \
     apt-get update \
     && apt-get install -y --no-install-recommends bash curl ca-certificates gnupg openssl \
     && rm -rf /var/lib/apt/lists/*; \
@@ -41,8 +40,10 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
         echo "Importing internal root CA into system truststore"; \
         import_ca_file /run/secrets/internal_root_ca /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
     fi; \
-    echo "Importing internal corporate root CA into system truststore"; \
-    printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+    if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ]; then \
+        echo "Importing internal corporate root CA into system truststore"; \
+        printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+    fi; \
     if [ -f /run/secrets/internal_ca_bundle ]; then \
         echo "Importing internal certificate bundle into system truststore"; \
         import_bundle_file /run/secrets/internal_ca_bundle /usr/local/share/ca-certificates/internal-corporate-ca; \
