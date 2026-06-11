@@ -1842,7 +1842,7 @@ secrets:
   internal_mkcert_root_ca:
     file: ./tmp/certs/mkcert-rootCA.pem
   internal_root_ca:
-    file: ./tmp/certs/internal-root-ca-2024.crt
+    file: ${INTERNAL_ROOT_CA_FILE:-./tmp/certs/mkcert-rootCA.pem}
   internal_corporate_root_ca:
     file: ${INTERNAL_CORPORATE_ROOT_CA_FILE:-./tmp/certs/mkcert-rootCA.pem}
   internal_ca_bundle:
