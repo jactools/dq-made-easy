@@ -1,0 +1,763 @@
+{
+  "group": "by-tag/incidents",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_incidents_api_rulebuilder_v1_incidents_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_incidents_api_rulebuilder_v1_incidents_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "incident_kind",
+          "required": false,
+          "schema_ref": "#/$defs/list_incidents_api_rulebuilder_v1_incidents_get_param_query_incident_kind"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_incidents_api_rulebuilder_v1_incidents_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "run_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_incidents_api_rulebuilder_v1_incidents_get_param_query_run_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_incidents_api_rulebuilder_v1_incidents_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/list_incidents_api_rulebuilder_v1_incidents_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_incidents_api_rulebuilder_v1_incidents_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Incidents",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_incident_api_rulebuilder_v1_incidents_post",
+      "path": "/api/rulebuilder/v1/incidents",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateIncidentRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_incident_api_rulebuilder_v1_incidents_post_response_201_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Incident",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "incident_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_incident_id"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/root-cause-suggestions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Root Cause Suggestions",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_post",
+      "path": "/api/rulebuilder/v1/incidents/root-cause-suggestions",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateIncidentRootCauseSuggestionRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_post_response_201_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Root Cause Suggestion",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions__suggestion_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suggestion_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_get_param_path_suggestion_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/root-cause-suggestions/{suggestion_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Root Cause Suggestion",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "accept_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions__suggestion_id__accept_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suggestion_id",
+          "required": true,
+          "schema_ref": "#/$defs/accept_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_accept_post_param_path_suggestion_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/root-cause-suggestions/{suggestion_id}/accept",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/accept_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_accept_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Accept Root Cause Suggestion",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "request_root_cause_assistance_api_rulebuilder_v1_incidents_root_cause_suggestions__suggestion_id__assistance_request_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suggestion_id",
+          "required": true,
+          "schema_ref": "#/$defs/request_root_cause_assistance_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_assistance_request_post_param_path_suggestion_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/root-cause-suggestions/{suggestion_id}/assistance-request",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/request_root_cause_assistance_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_assistance_request_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Request Root Cause Assistance",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "reject_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions__suggestion_id__reject_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suggestion_id",
+          "required": true,
+          "schema_ref": "#/$defs/reject_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_reject_post_param_path_suggestion_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/root-cause-suggestions/{suggestion_id}/reject",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/reject_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_reject_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Reject Root Cause Suggestion",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_incident_api_rulebuilder_v1_incidents__incident_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_incident_api_rulebuilder_v1_incidents_incident_id_get_param_path_incident_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_incident_api_rulebuilder_v1_incidents_incident_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Incident",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "patch_incident_api_rulebuilder_v1_incidents__incident_id__patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/patch_incident_api_rulebuilder_v1_incidents_incident_id_patch_param_path_incident_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/PatchIncidentRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/patch_incident_api_rulebuilder_v1_incidents_incident_id_patch_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Patch Incident",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_incident_comment_api_rulebuilder_v1_incidents__incident_id__comments_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/create_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_post_param_path_incident_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateIncidentCommentRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Incident Comment",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "set_incident_comments_lock_api_rulebuilder_v1_incidents__incident_id__comments_lock_patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/set_incident_comments_lock_api_rulebuilder_v1_incidents_incident_id_comments_lock_patch_param_path_incident_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments-lock",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/IncidentCommentLockRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/set_incident_comments_lock_api_rulebuilder_v1_incidents_incident_id_comments_lock_patch_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Set Incident Comments Lock",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_incident_comment_api_rulebuilder_v1_incidents__incident_id__comments__comment_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_delete_param_path_incident_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_delete_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments/{comment_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/delete_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_delete_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Incident Comment",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "update_incident_comment_api_rulebuilder_v1_incidents__incident_id__comments__comment_id__patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_patch_param_path_incident_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_patch_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments/{comment_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/UpdateIncidentCommentRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/update_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_patch_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Incident Comment",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "acknowledge_incident_comment_api_rulebuilder_v1_incidents__incident_id__comments__comment_id__acknowledge_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/acknowledge_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_acknowledge_post_param_path_incident_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/acknowledge_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_acknowledge_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments/{comment_id}/acknowledge",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/acknowledge_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_acknowledge_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Acknowledge Incident Comment",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "reopen_incident_comment_api_rulebuilder_v1_incidents__incident_id__comments__comment_id__reopen_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/reopen_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_reopen_post_param_path_incident_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/reopen_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_reopen_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments/{comment_id}/reopen",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/reopen_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_reopen_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Reopen Incident Comment",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "resolve_incident_comment_api_rulebuilder_v1_incidents__incident_id__comments__comment_id__resolve_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/resolve_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_resolve_post_param_path_incident_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/resolve_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_resolve_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments/{comment_id}/resolve",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/resolve_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_resolve_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Resolve Incident Comment",
+      "tags": [
+        "incidents"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "vote_up_incident_comment_api_rulebuilder_v1_incidents__incident_id__comments__comment_id__vote_up_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "incident_id",
+          "required": true,
+          "schema_ref": "#/$defs/vote_up_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_vote_up_post_param_path_incident_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/vote_up_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_vote_up_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/incidents/{incident_id}/comments/{comment_id}/vote-up",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/vote_up_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_vote_up_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Vote Up Incident Comment",
+      "tags": [
+        "incidents"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

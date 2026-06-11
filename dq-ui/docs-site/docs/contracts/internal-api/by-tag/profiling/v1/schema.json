@@ -1,0 +1,265 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "EnqueueRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "data_source_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Source Id"
+        },
+        "headers": {
+          "additionalProperties": true,
+          "title": "Headers",
+          "type": "object"
+        },
+        "job_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Job Id"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "title": "Payload",
+          "type": "object"
+        },
+        "profiling_request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Profiling Request Id"
+        },
+        "requested_by_user_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By User Id"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type"
+        }
+      },
+      "title": "EnqueueRequest",
+      "type": "object"
+    },
+    "EnqueueResponse": {
+      "properties": {
+        "enqueued": {
+          "title": "Enqueued",
+          "type": "boolean"
+        },
+        "job_id": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Job Id"
+        }
+      },
+      "required": [
+        "enqueued"
+      ],
+      "title": "EnqueueResponse",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ProfilingRequestReportRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "error_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Message"
+        },
+        "job_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Job Id"
+        },
+        "new_status": {
+          "enum": [
+            "started",
+            "completed",
+            "failed"
+          ],
+          "title": "New Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "profiling.status"
+        }
+      },
+      "required": [
+        "new_status"
+      ],
+      "title": "ProfilingRequestReportRequest",
+      "type": "object"
+    },
+    "ProfilingRequestReportResponse": {
+      "properties": {
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "title": "ProfilingRequestReportResponse",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "get_profiling_request_status_api_data_catalog_v1_profiling_requests_profiling_request_id_status_get_param_path_profiling_request_id": {
+      "title": "Profiling Request Id",
+      "type": "string"
+    },
+    "get_profiling_request_status_api_data_catalog_v1_profiling_requests_profiling_request_id_status_get_response_200_application_json": {},
+    "list_profiling_requests_api_data_catalog_v1_profiling_requests_get_param_query_data_source_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Data Source Id"
+    },
+    "list_profiling_requests_api_data_catalog_v1_profiling_requests_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_profiling_requests_api_data_catalog_v1_profiling_requests_get_response_200_application_json": {},
+    "report_profiling_request_status_api_rulebuilder_v1_profiling_requests_profiling_request_id_report_post_param_path_profiling_request_id": {
+      "title": "Profiling Request Id",
+      "type": "string"
+    },
+    "request_data_profiling_api_data_catalog_v1_profiling_requests_post_param_query_data_source_id": {
+      "minLength": 1,
+      "title": "Data Source Id",
+      "type": "string"
+    },
+    "request_data_profiling_api_data_catalog_v1_profiling_requests_post_param_query_workspace_id": {
+      "minLength": 1,
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "request_data_profiling_api_data_catalog_v1_profiling_requests_post_response_200_application_json": {},
+    "stream_profiling_request_events_api_data_catalog_v1_profiling_requests_profiling_request_id_events_get_param_path_profiling_request_id": {
+      "title": "Profiling Request Id",
+      "type": "string"
+    },
+    "stream_profiling_request_events_api_data_catalog_v1_profiling_requests_profiling_request_id_events_get_response_200_application_json": {}
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/profiling/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/profiling v1 schema bundle"
+}

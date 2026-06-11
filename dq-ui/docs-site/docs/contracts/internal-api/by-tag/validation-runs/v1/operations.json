@@ -1,0 +1,134 @@
+{
+  "group": "by-tag/validation-runs",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_validation_runs_api_rulebuilder_v1_rules_validation_runs_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/list_validation_runs_api_rulebuilder_v1_rules_validation_runs_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/list_validation_runs_api_rulebuilder_v1_rules_validation_runs_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_validation_runs_api_rulebuilder_v1_rules_validation_runs_get_param_query_limit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/validation-runs",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ValidationRunsPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Validation Runs",
+      "tags": [
+        "validation-runs"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_validation_run_api_rulebuilder_v1_rules_validation_runs__run_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_get_param_path_run_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/validation-runs/{run_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ValidationRunView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Validation Run",
+      "tags": [
+        "validation-runs"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "export_validation_run_api_rulebuilder_v1_rules_validation_runs__run_id__export_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_id",
+          "required": true,
+          "schema_ref": "#/$defs/export_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_export_get_param_path_run_id"
+        },
+        {
+          "in": "query",
+          "name": "format",
+          "required": false,
+          "schema_ref": "#/$defs/export_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_export_get_param_query_format"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/validation-runs/{run_id}/export",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/export_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_export_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Export Validation Run",
+      "tags": [
+        "validation-runs"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

@@ -1,0 +1,87 @@
+{
+  "group": "by-tag/health",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "health_api_system_v1_health_get",
+      "path": "/api/system/v1/health",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HealthView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Health",
+      "tags": [
+        "health"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "live_api_system_v1_live_get",
+      "path": "/api/system/v1/live",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HealthView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Live",
+      "tags": [
+        "health"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "readiness_api_system_v1_readiness_get",
+      "path": "/api/system/v1/readiness",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ReadinessView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Readiness",
+      "tags": [
+        "health"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "ready_api_system_v1_ready_get",
+      "path": "/api/system/v1/ready",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ReadinessView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Ready",
+      "tags": [
+        "health"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

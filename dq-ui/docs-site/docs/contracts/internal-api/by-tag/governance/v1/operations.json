@@ -1,0 +1,806 @@
+{
+  "group": "by-tag/governance",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_catalog_health_api_rulebuilder_v1_catalog_health_get",
+      "path": "/api/rulebuilder/v1/catalog/health",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_catalog_health_api_rulebuilder_v1_catalog_health_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Catalog Health",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_catalog_terms_api_rulebuilder_v1_catalog_terms_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "domain",
+          "required": false,
+          "schema_ref": "#/$defs/get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_param_query_domain"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "match_threshold_pct",
+          "required": false,
+          "schema_ref": "#/$defs/get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_param_query_match_threshold_pct"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/catalog/terms",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Catalog Terms",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_my_exception_fact_access_requests_api_rulebuilder_v1_exception_fact_access_requests_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_my_exception_fact_access_requests_api_rulebuilder_v1_exception_fact_access_requests_get_param_query_status"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/exception-fact-access-requests",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_my_exception_fact_access_requests_api_rulebuilder_v1_exception_fact_access_requests_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List My Exception Fact Access Requests",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_exception_fact_access_request_api_rulebuilder_v1_exception_fact_access_requests_post",
+      "path": "/api/rulebuilder/v1/exception-fact-access-requests",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/create_exception_fact_access_request_api_rulebuilder_v1_exception_fact_access_requests_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactAccessRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Exception Fact Access Request",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_drift_review_api_rulebuilder_v1_governance_drift_reviews_post",
+      "path": "/api/rulebuilder/v1/governance/drift/reviews",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/DriftReviewRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_drift_review_api_rulebuilder_v1_governance_drift_reviews_post_response_201_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Drift Review",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "check_rule_drift_api_rulebuilder_v1_governance_drift_rules__rule_id___version_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/check_rule_drift_api_rulebuilder_v1_governance_drift_rules_rule_id_version_id_get_param_path_rule_id"
+        },
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/check_rule_drift_api_rulebuilder_v1_governance_drift_rules_rule_id_version_id_get_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/drift/rules/{rule_id}/{version_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/check_rule_drift_api_rulebuilder_v1_governance_drift_rules_rule_id_version_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Check Rule Drift",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_drift_summary_api_rulebuilder_v1_governance_drift_summary_get",
+      "path": "/api/rulebuilder/v1/governance/drift/summary",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_drift_summary_api_rulebuilder_v1_governance_drift_summary_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Drift Summary",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_affected_rules_api_rulebuilder_v1_governance_drift_terms__term_id__affected_rules_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "term_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_affected_rules_api_rulebuilder_v1_governance_drift_terms_term_id_affected_rules_get_param_path_term_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/drift/terms/{term_id}/affected-rules",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_affected_rules_api_rulebuilder_v1_governance_drift_terms_term_id_affected_rules_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Affected Rules",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_governance_inboxes_api_rulebuilder_v1_governance_inboxes_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_governance_inboxes_api_rulebuilder_v1_governance_inboxes_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_governance_inboxes_api_rulebuilder_v1_governance_inboxes_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_governance_inboxes_api_rulebuilder_v1_governance_inboxes_get_param_query_limit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/inboxes",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GovernanceInboxView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Governance Inboxes",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_monitor_anomalies_api_rulebuilder_v1_governance_monitor_anomalies_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_anomalies_api_rulebuilder_v1_governance_monitor_anomalies_get_param_query_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/monitor-anomalies",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_monitor_anomalies_api_rulebuilder_v1_governance_monitor_anomalies_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Monitor Anomalies",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_monitor_definitions_api_rulebuilder_v1_governance_monitor_definitions_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_definitions_api_rulebuilder_v1_governance_monitor_definitions_get_param_query_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/monitor-definitions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_monitor_definitions_api_rulebuilder_v1_governance_monitor_definitions_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Monitor Definitions",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_monitor_drifts_api_rulebuilder_v1_governance_monitor_drifts_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_drifts_api_rulebuilder_v1_governance_monitor_drifts_get_param_query_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/monitor-drifts",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_monitor_drifts_api_rulebuilder_v1_governance_monitor_drifts_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Monitor Drifts",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_monitor_notification_preferences_api_rulebuilder_v1_governance_monitor_notification_preferences_get",
+      "path": "/api/rulebuilder/v1/governance/monitor-notification-preferences",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_monitor_notification_preferences_api_rulebuilder_v1_governance_monitor_notification_preferences_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Monitor Notification Preferences",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_monitor_notification_preferences_api_rulebuilder_v1_governance_monitor_notification_preferences_put",
+      "path": "/api/rulebuilder/v1/governance/monitor-notification-preferences",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/MonitorNotificationPreferencesRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/update_monitor_notification_preferences_api_rulebuilder_v1_governance_monitor_notification_preferences_put_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Monitor Notification Preferences",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "data_object_version_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_data_object_version_id"
+        },
+        {
+          "in": "query",
+          "name": "lookback_amount",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_lookback_amount"
+        },
+        {
+          "in": "query",
+          "name": "lookback_unit",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_lookback_unit"
+        },
+        {
+          "in": "query",
+          "name": "delivery_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_delivery_id"
+        },
+        {
+          "in": "query",
+          "name": "execution_plan_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_execution_plan_id"
+        },
+        {
+          "in": "query",
+          "name": "suite_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_suite_id"
+        },
+        {
+          "in": "query",
+          "name": "rule_version_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_rule_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/monitor-root-cause",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Monitor Root Cause",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_monitor_schedules_api_rulebuilder_v1_governance_monitor_schedules_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_monitor_schedules_api_rulebuilder_v1_governance_monitor_schedules_get_param_query_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/monitor-schedules",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_monitor_schedules_api_rulebuilder_v1_governance_monitor_schedules_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Monitor Schedules",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "upsert_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules_put",
+      "path": "/api/rulebuilder/v1/governance/monitor-schedules",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/MonitorScheduleRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/upsert_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules_put_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Upsert Monitor Schedule",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules__scope_kind___scope_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "scope_kind",
+          "required": true,
+          "schema_ref": "#/$defs/delete_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_delete_param_path_scope_kind"
+        },
+        {
+          "in": "path",
+          "name": "scope_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_delete_param_path_scope_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/monitor-schedules/{scope_kind}/{scope_id}",
+      "responses": {
+        "204": {
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Monitor Schedule",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_monitor_schedule_by_scope_api_rulebuilder_v1_governance_monitor_schedules__scope_kind___scope_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "scope_kind",
+          "required": true,
+          "schema_ref": "#/$defs/get_monitor_schedule_by_scope_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_get_param_path_scope_kind"
+        },
+        {
+          "in": "path",
+          "name": "scope_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_monitor_schedule_by_scope_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_get_param_path_scope_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/monitor-schedules/{scope_kind}/{scope_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_monitor_schedule_by_scope_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Monitor Schedule By Scope",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_revalidation_job_api_rulebuilder_v1_governance_revalidation_jobs_post",
+      "path": "/api/rulebuilder/v1/governance/revalidation/jobs",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RevalidationJobRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_revalidation_job_api_rulebuilder_v1_governance_revalidation_jobs_post_response_201_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Revalidation Job",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_revalidation_job_status_api_rulebuilder_v1_governance_revalidation_jobs__job_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "job_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_revalidation_job_status_api_rulebuilder_v1_governance_revalidation_jobs_job_id_get_param_path_job_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/revalidation/jobs/{job_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_revalidation_job_status_api_rulebuilder_v1_governance_revalidation_jobs_job_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Revalidation Job Status",
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_status_model_api_rulebuilder_v1_governance_status_models__entity__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "entity",
+          "required": true,
+          "schema_ref": "#/$defs/get_status_model_api_rulebuilder_v1_governance_status_models_entity_get_param_path_entity"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/governance/status-models/{entity}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/StatusModelView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Status Model",
+      "tags": [
+        "governance"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

@@ -1,0 +1,3588 @@
+{
+  "components": {
+    "schemas": {
+      "DeliveryExceptionSummaryView": {
+        "properties": {
+          "analytics": {
+            "$ref": "#/components/schemas/ExceptionReasonAnalyticsView"
+          },
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "data_object_version_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Data Object Version Ids",
+            "type": "array"
+          },
+          "delivery_id": {
+            "title": "Delivery Id",
+            "type": "string"
+          },
+          "delivery_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Location"
+          },
+          "execution_run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Execution Run Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "delivery_id",
+          "analytics"
+        ],
+        "title": "DeliveryExceptionSummaryView",
+        "type": "object"
+      },
+      "ExceptionAnalysisSessionStatusView": {
+        "properties": {
+          "budget_hit": {
+            "default": false,
+            "title": "Budget Hit",
+            "type": "boolean"
+          },
+          "estimated_cost_impact": {
+            "default": "",
+            "title": "Estimated Cost Impact",
+            "type": "string"
+          },
+          "estimated_remaining_record_count": {
+            "default": 0,
+            "title": "Estimated Remaining Record Count",
+            "type": "integer"
+          },
+          "estimated_remaining_slice_count": {
+            "default": 0,
+            "title": "Estimated Remaining Slice Count",
+            "type": "integer"
+          },
+          "exhausted": {
+            "default": false,
+            "title": "Exhausted",
+            "type": "boolean"
+          },
+          "materialized_record_count": {
+            "default": 0,
+            "title": "Materialized Record Count",
+            "type": "integer"
+          },
+          "max_records": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Records"
+          },
+          "max_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Seconds"
+          },
+          "max_slices": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Slices"
+          },
+          "progress_percent": {
+            "default": 0.0,
+            "title": "Progress Percent",
+            "type": "number"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "remaining_count": {
+            "default": 0,
+            "title": "Remaining Count",
+            "type": "integer"
+          },
+          "slice_count": {
+            "default": 0,
+            "title": "Slice Count",
+            "type": "integer"
+          },
+          "stalled": {
+            "default": false,
+            "title": "Stalled",
+            "type": "boolean"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "reason"
+        ],
+        "title": "ExceptionAnalysisSessionStatusView",
+        "type": "object"
+      },
+      "ExceptionAnalysisSessionView": {
+        "properties": {
+          "analysis_session_id": {
+            "title": "Analysis Session Id",
+            "type": "string"
+          },
+          "analysis_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExceptionAnalysisSessionStatusView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "anchor_total_count": {
+            "default": 0,
+            "title": "Anchor Total Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "current_slice": {
+            "$ref": "#/components/schemas/ExceptionAnalysisSliceDetailView"
+          },
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "execution_run_id": {
+            "title": "Execution Run Id",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "slice_count": {
+            "default": 0,
+            "title": "Slice Count",
+            "type": "integer"
+          },
+          "slices": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionAnalysisSliceSummaryView"
+            },
+            "title": "Slices",
+            "type": "array"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "analysis_session_id",
+          "data_object_version_id",
+          "execution_run_id",
+          "rule_id",
+          "created_at",
+          "updated_at",
+          "current_slice"
+        ],
+        "title": "ExceptionAnalysisSessionView",
+        "type": "object"
+      },
+      "ExceptionAnalysisSliceDetailView": {
+        "properties": {
+          "analysis_manifest_sha256": {
+            "title": "Analysis Manifest Sha256",
+            "type": "string"
+          },
+          "analysis_manifest_uri": {
+            "title": "Analysis Manifest Uri",
+            "type": "string"
+          },
+          "analysis_pack_sha256": {
+            "title": "Analysis Pack Sha256",
+            "type": "string"
+          },
+          "analysis_pack_uri": {
+            "title": "Analysis Pack Uri",
+            "type": "string"
+          },
+          "analysis_session_id": {
+            "title": "Analysis Session Id",
+            "type": "string"
+          },
+          "analysis_slice_id": {
+            "title": "Analysis Slice Id",
+            "type": "string"
+          },
+          "anchor_total_count": {
+            "default": 0,
+            "title": "Anchor Total Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "execution_run_id": {
+            "title": "Execution Run Id",
+            "type": "string"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ExceptionAnalysisSliceRequestView"
+          },
+          "next_slice_suggestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExceptionAnalysisSliceSuggestionView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionFactView"
+            },
+            "title": "Records",
+            "type": "array"
+          },
+          "returned_count": {
+            "default": 0,
+            "title": "Returned Count",
+            "type": "integer"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "slice_index": {
+            "title": "Slice Index",
+            "type": "integer"
+          },
+          "slice_limit": {
+            "title": "Slice Limit",
+            "type": "integer"
+          },
+          "total_matching_count": {
+            "default": 0,
+            "title": "Total Matching Count",
+            "type": "integer"
+          },
+          "truncated": {
+            "default": false,
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "analysis_session_id",
+          "analysis_slice_id",
+          "slice_index",
+          "data_object_version_id",
+          "execution_run_id",
+          "rule_id",
+          "slice_limit",
+          "analysis_pack_uri",
+          "analysis_pack_sha256",
+          "analysis_manifest_uri",
+          "analysis_manifest_sha256",
+          "filters",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ExceptionAnalysisSliceDetailView",
+        "type": "object"
+      },
+      "ExceptionAnalysisSliceRequestView": {
+        "properties": {
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "detected_after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected After"
+          },
+          "detected_before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected Before"
+          },
+          "execution_run_id": {
+            "title": "Execution Run Id",
+            "type": "string"
+          },
+          "failure_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Class"
+          },
+          "hash_stripe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hash Stripe"
+          },
+          "hash_stripe_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hash Stripe Count"
+          },
+          "max_records": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Records"
+          },
+          "max_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Seconds"
+          },
+          "max_slices": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Slices"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "record_identifier_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Identifier Type"
+          },
+          "record_identifier_value_contains": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Identifier Value Contains"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "run_until_exhausted": {
+            "default": false,
+            "title": "Run Until Exhausted",
+            "type": "boolean"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search"
+          },
+          "slice_limit": {
+            "default": 200,
+            "title": "Slice Limit",
+            "type": "integer"
+          },
+          "summary_only": {
+            "default": false,
+            "title": "Summary Only",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "data_object_version_id",
+          "execution_run_id",
+          "rule_id"
+        ],
+        "title": "ExceptionAnalysisSliceRequestView",
+        "type": "object"
+      },
+      "ExceptionAnalysisSliceSuggestionView": {
+        "properties": {
+          "detected_after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected After"
+          },
+          "detected_before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected Before"
+          },
+          "failure_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Class"
+          },
+          "hash_stripe": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hash Stripe"
+          },
+          "hash_stripe_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hash Stripe Count"
+          },
+          "partition_strategy": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Partition Strategy",
+            "type": "array"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "record_identifier_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Identifier Type"
+          },
+          "record_identifier_value_contains": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Identifier Value Contains"
+          },
+          "remaining_count": {
+            "default": 0,
+            "title": "Remaining Count",
+            "type": "integer"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search"
+          }
+        },
+        "required": [
+          "rationale"
+        ],
+        "title": "ExceptionAnalysisSliceSuggestionView",
+        "type": "object"
+      },
+      "ExceptionAnalysisSliceSummaryView": {
+        "properties": {
+          "analysis_manifest_sha256": {
+            "title": "Analysis Manifest Sha256",
+            "type": "string"
+          },
+          "analysis_manifest_uri": {
+            "title": "Analysis Manifest Uri",
+            "type": "string"
+          },
+          "analysis_pack_sha256": {
+            "title": "Analysis Pack Sha256",
+            "type": "string"
+          },
+          "analysis_pack_uri": {
+            "title": "Analysis Pack Uri",
+            "type": "string"
+          },
+          "analysis_session_id": {
+            "title": "Analysis Session Id",
+            "type": "string"
+          },
+          "analysis_slice_id": {
+            "title": "Analysis Slice Id",
+            "type": "string"
+          },
+          "anchor_total_count": {
+            "default": 0,
+            "title": "Anchor Total Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "execution_run_id": {
+            "title": "Execution Run Id",
+            "type": "string"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ExceptionAnalysisSliceRequestView"
+          },
+          "next_slice_suggestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExceptionAnalysisSliceSuggestionView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "returned_count": {
+            "default": 0,
+            "title": "Returned Count",
+            "type": "integer"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "slice_index": {
+            "title": "Slice Index",
+            "type": "integer"
+          },
+          "slice_limit": {
+            "title": "Slice Limit",
+            "type": "integer"
+          },
+          "total_matching_count": {
+            "default": 0,
+            "title": "Total Matching Count",
+            "type": "integer"
+          },
+          "truncated": {
+            "default": false,
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "analysis_session_id",
+          "analysis_slice_id",
+          "slice_index",
+          "data_object_version_id",
+          "execution_run_id",
+          "rule_id",
+          "slice_limit",
+          "analysis_pack_uri",
+          "analysis_pack_sha256",
+          "analysis_manifest_uri",
+          "analysis_manifest_sha256",
+          "filters",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ExceptionAnalysisSliceSummaryView",
+        "type": "object"
+      },
+      "ExceptionArtifactScopeView": {
+        "properties": {
+          "native_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Native Artifact Id"
+          },
+          "native_artifact_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Native Artifact Version"
+          },
+          "validation_artifact_id": {
+            "title": "Validation Artifact Id",
+            "type": "string"
+          },
+          "validation_artifact_version": {
+            "title": "Validation Artifact Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "validation_artifact_id",
+          "validation_artifact_version"
+        ],
+        "title": "ExceptionArtifactScopeView",
+        "type": "object"
+      },
+      "ExceptionDataObjectHotspotView": {
+        "properties": {
+          "data_object_name": {
+            "title": "Data Object Name",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data_object_version_id",
+          "data_object_name",
+          "total"
+        ],
+        "title": "ExceptionDataObjectHotspotView",
+        "type": "object"
+      },
+      "ExceptionExecutionScopeView": {
+        "properties": {
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "delivery_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Id"
+          },
+          "execution_plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Plan Id"
+          },
+          "execution_plan_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Plan Version Id"
+          },
+          "execution_run_id": {
+            "title": "Execution Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_run_id",
+          "data_object_version_id"
+        ],
+        "title": "ExceptionExecutionScopeView",
+        "type": "object"
+      },
+      "ExceptionFactView": {
+        "properties": {
+          "artifact_scope": {
+            "$ref": "#/components/schemas/ExceptionArtifactScopeView"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "engine_metadata": {
+            "additionalProperties": true,
+            "title": "Engine Metadata",
+            "type": "object"
+          },
+          "engine_type": {
+            "title": "Engine Type",
+            "type": "string"
+          },
+          "exception_fact_contract_version": {
+            "title": "Exception Fact Contract Version",
+            "type": "string"
+          },
+          "exception_fact_id": {
+            "title": "Exception Fact Id",
+            "type": "string"
+          },
+          "execution_scope": {
+            "$ref": "#/components/schemas/ExceptionExecutionScopeView"
+          },
+          "failure": {
+            "$ref": "#/components/schemas/ExceptionFailureView"
+          },
+          "ops_metadata": {
+            "additionalProperties": true,
+            "title": "Ops Metadata",
+            "type": "object"
+          },
+          "record_reference": {
+            "$ref": "#/components/schemas/ExceptionRecordReferenceView"
+          },
+          "rule_scope": {
+            "$ref": "#/components/schemas/ExceptionRuleScopeView"
+          }
+        },
+        "required": [
+          "exception_fact_id",
+          "exception_fact_contract_version",
+          "engine_type",
+          "execution_scope",
+          "artifact_scope",
+          "rule_scope",
+          "record_reference",
+          "failure"
+        ],
+        "title": "ExceptionFactView",
+        "type": "object"
+      },
+      "ExceptionFactsPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionFactView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "pagination"
+        ],
+        "title": "ExceptionFactsPageView",
+        "type": "object"
+      },
+      "ExceptionFailureView": {
+        "properties": {
+          "detected_at": {
+            "title": "Detected At",
+            "type": "string"
+          },
+          "failure_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Class"
+          },
+          "reason_code": {
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "reason_text": {
+            "title": "Reason Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code",
+          "reason_text",
+          "detected_at"
+        ],
+        "title": "ExceptionFailureView",
+        "type": "object"
+      },
+      "ExceptionReasonAnalyticsView": {
+        "properties": {
+          "reason_fluctuations": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionReasonFluctuationView"
+            },
+            "title": "Reason Fluctuations",
+            "type": "array"
+          },
+          "reason_trend_buckets": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionReasonTrendBucketView"
+            },
+            "title": "Reason Trend Buckets",
+            "type": "array"
+          },
+          "runs_with_failures": {
+            "title": "Runs With Failures",
+            "type": "integer"
+          },
+          "top_data_objects": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionDataObjectHotspotView"
+            },
+            "title": "Top Data Objects",
+            "type": "array"
+          },
+          "top_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionReasonHotspotView"
+            },
+            "title": "Top Reasons",
+            "type": "array"
+          },
+          "top_rules": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionRuleHotspotView"
+            },
+            "title": "Top Rules",
+            "type": "array"
+          },
+          "total_failed_records": {
+            "title": "Total Failed Records",
+            "type": "integer"
+          },
+          "trend_buckets": {
+            "items": {
+              "$ref": "#/components/schemas/ExceptionTrendBucketView"
+            },
+            "title": "Trend Buckets",
+            "type": "array"
+          }
+        },
+        "required": [
+          "total_failed_records",
+          "runs_with_failures",
+          "trend_buckets",
+          "top_rules",
+          "top_data_objects",
+          "top_reasons",
+          "reason_trend_buckets",
+          "reason_fluctuations"
+        ],
+        "title": "ExceptionReasonAnalyticsView",
+        "type": "object"
+      },
+      "ExceptionReasonFluctuationView": {
+        "properties": {
+          "bucket_count": {
+            "title": "Bucket Count",
+            "type": "integer"
+          },
+          "direction": {
+            "title": "Direction",
+            "type": "string"
+          },
+          "first_bucket_start": {
+            "title": "First Bucket Start",
+            "type": "string"
+          },
+          "first_total": {
+            "title": "First Total",
+            "type": "integer"
+          },
+          "latest_bucket_start": {
+            "title": "Latest Bucket Start",
+            "type": "string"
+          },
+          "latest_total": {
+            "title": "Latest Total",
+            "type": "integer"
+          },
+          "net_change": {
+            "title": "Net Change",
+            "type": "integer"
+          },
+          "peak_bucket_start": {
+            "title": "Peak Bucket Start",
+            "type": "string"
+          },
+          "peak_total": {
+            "title": "Peak Total",
+            "type": "integer"
+          },
+          "reason_code": {
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "reason_text": {
+            "title": "Reason Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason_code",
+          "reason_text",
+          "first_bucket_start",
+          "first_total",
+          "latest_bucket_start",
+          "latest_total",
+          "net_change",
+          "direction",
+          "peak_bucket_start",
+          "peak_total",
+          "bucket_count"
+        ],
+        "title": "ExceptionReasonFluctuationView",
+        "type": "object"
+      },
+      "ExceptionReasonHotspotView": {
+        "properties": {
+          "reason_code": {
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "reason_text": {
+            "title": "Reason Text",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reason_code",
+          "reason_text",
+          "total"
+        ],
+        "title": "ExceptionReasonHotspotView",
+        "type": "object"
+      },
+      "ExceptionReasonTrendBucketView": {
+        "properties": {
+          "bucket_start": {
+            "title": "Bucket Start",
+            "type": "string"
+          },
+          "reason_code": {
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "reason_text": {
+            "title": "Reason Text",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bucket_start",
+          "reason_code",
+          "reason_text",
+          "total"
+        ],
+        "title": "ExceptionReasonTrendBucketView",
+        "type": "object"
+      },
+      "ExceptionRecordReferenceView": {
+        "properties": {
+          "identifier_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Identifier Fields",
+            "type": "array"
+          },
+          "identifier_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identifier Hash"
+          },
+          "identifier_type": {
+            "title": "Identifier Type",
+            "type": "string"
+          },
+          "identifier_value": {
+            "title": "Identifier Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier_type",
+          "identifier_value"
+        ],
+        "title": "ExceptionRecordReferenceView",
+        "type": "object"
+      },
+      "ExceptionRuleHotspotView": {
+        "properties": {
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_name": {
+            "title": "Rule Name",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rule_id",
+          "rule_name",
+          "total"
+        ],
+        "title": "ExceptionRuleHotspotView",
+        "type": "object"
+      },
+      "ExceptionRuleScopeView": {
+        "properties": {
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_version_id": {
+            "title": "Rule Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "rule_version_id"
+        ],
+        "title": "ExceptionRuleScopeView",
+        "type": "object"
+      },
+      "ExceptionTrendBucketView": {
+        "properties": {
+          "bucket_start": {
+            "title": "Bucket Start",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bucket_start",
+          "total"
+        ],
+        "title": "ExceptionTrendBucketView",
+        "type": "object"
+      },
+      "ExecutionPlanExceptionSummaryView": {
+        "properties": {
+          "analytics": {
+            "$ref": "#/components/schemas/ExceptionReasonAnalyticsView"
+          },
+          "current_active_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Active Version Id"
+          },
+          "data_object_version_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Data Object Version Ids",
+            "type": "array"
+          },
+          "execution_plan_id": {
+            "title": "Execution Plan Id",
+            "type": "string"
+          },
+          "execution_run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Execution Run Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "execution_plan_id",
+          "analytics"
+        ],
+        "title": "ExecutionPlanExceptionSummaryView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "PaginationView": {
+        "properties": {
+          "has_next": {
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "has_previous": {
+            "title": "Has Previous",
+            "type": "boolean"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "title": "Total Pages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "total_pages",
+          "has_next",
+          "has_previous"
+        ],
+        "title": "PaginationView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/exceptions' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary": {
+      "get": {
+        "operationId": "get_delivery_exception_summary_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruleversionid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryExceptionSummaryView"
+                }
+              }
+            },
+            "description": "Delivery-scoped exception summary with reason analytics."
+          },
+          "404": {
+            "description": "Data delivery not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Exception summary is unavailable."
+          }
+        },
+        "summary": "Get Delivery Exception Summary",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary/export": {
+      "get": {
+        "operationId": "export_delivery_exception_summary_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_export_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "json",
+              "pattern": "^(json|csv|markdown|pdf)$",
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Exported delivery exception summary."
+          },
+          "404": {
+            "description": "Data delivery not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Exception summary export is unavailable."
+          }
+        },
+        "summary": "Export Delivery Exception Summary",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary/records": {
+      "get": {
+        "operationId": "get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_records_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruleversionid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionFactsPageView"
+                }
+              }
+            },
+            "description": "Delivery-scoped semantic exception records."
+          },
+          "404": {
+            "description": "Data delivery not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Semantic exception records are unavailable."
+          }
+        },
+        "summary": "Get Delivery Exception Summary Records",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary/records/{exception_fact_id}": {
+      "get": {
+        "operationId": "get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_records__exception_fact_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "exception_fact_id",
+            "required": true,
+            "schema": {
+              "title": "Exception Fact Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruleversionid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionFactView"
+                }
+              }
+            },
+            "description": "One delivery-scoped semantic exception record."
+          },
+          "404": {
+            "description": "Exception record not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Semantic exception record detail is unavailable."
+          }
+        },
+        "summary": "Get Delivery Exception Summary Record",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/exceptions/analysis-sessions": {
+      "post": {
+        "operationId": "create_exception_analysis_session_api_rulebuilder_v1_exceptions_analysis_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExceptionAnalysisSliceRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionAnalysisSessionView"
+                }
+              }
+            },
+            "description": "Stored GX analysis slice session created."
+          },
+          "403": {
+            "description": "Access denied for the analysis scope."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Analysis slice storage is unavailable."
+          }
+        },
+        "summary": "Create Exception Analysis Session",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/exceptions/analysis-sessions/{analysis_session_id}": {
+      "get": {
+        "operationId": "get_exception_analysis_session_api_rulebuilder_v1_exceptions_analysis_sessions__analysis_session_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_session_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "summary_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Summary Only",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionAnalysisSessionView"
+                }
+              }
+            },
+            "description": "Stored GX analysis slice session."
+          },
+          "404": {
+            "description": "Analysis session not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Exception Analysis Session",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/exceptions/analysis-sessions/{analysis_session_id}/slices": {
+      "post": {
+        "operationId": "append_exception_analysis_slice_api_rulebuilder_v1_exceptions_analysis_sessions__analysis_session_id__slices_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_session_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExceptionAnalysisSliceRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionAnalysisSessionView"
+                }
+              }
+            },
+            "description": "Stored GX analysis slice session updated with a new slice."
+          },
+          "404": {
+            "description": "Analysis session not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Analysis slice storage is unavailable."
+          }
+        },
+        "summary": "Append Exception Analysis Slice",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/exceptions/analysis-sessions/{analysis_session_id}/slices/{analysis_slice_id}": {
+      "get": {
+        "operationId": "get_exception_analysis_slice_api_rulebuilder_v1_exceptions_analysis_sessions__analysis_session_id__slices__analysis_slice_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_session_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "analysis_slice_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Slice Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionAnalysisSliceDetailView"
+                }
+              }
+            },
+            "description": "Stored GX analysis slice detail."
+          },
+          "404": {
+            "description": "Analysis slice not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Exception Analysis Slice",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/exceptions/facts": {
+      "get": {
+        "operationId": "list_exception_facts_api_rulebuilder_v1_exceptions_facts_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": true,
+            "schema": {
+              "title": "Dataobjectversionid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "executionRunId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Executionrunid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionFactsPageView"
+                }
+              }
+            },
+            "description": "Canonical exception facts for a filtered execution scope."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "description": "Stored exception facts cannot be projected to the canonical contract."
+          }
+        },
+        "summary": "List Exception Facts",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/exceptions/facts/{exception_fact_id}": {
+      "get": {
+        "operationId": "get_exception_fact_api_rulebuilder_v1_exceptions_facts__exception_fact_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exception_fact_id",
+            "required": true,
+            "schema": {
+              "title": "Exception Fact Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": true,
+            "schema": {
+              "title": "Dataobjectversionid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionFactView"
+                }
+              }
+            },
+            "description": "One canonical exception fact."
+          },
+          "404": {
+            "description": "Exception fact not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "description": "Stored exception fact cannot be projected to the canonical contract."
+          }
+        },
+        "summary": "Get Exception Fact",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/exceptions/reason-analytics": {
+      "get": {
+        "operationId": "get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruleversionid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionReasonAnalyticsView"
+                }
+              }
+            },
+            "description": "Exception reason analytics for the current monitoring window."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Exception analytics are unavailable."
+          }
+        },
+        "summary": "Get Exception Reason Analytics",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary": {
+      "get": {
+        "operationId": "get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_plan_id",
+            "required": true,
+            "schema": {
+              "title": "Execution Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruleversionid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionPlanExceptionSummaryView"
+                }
+              }
+            },
+            "description": "Execution-plan-scoped exception summary with reason analytics."
+          },
+          "404": {
+            "description": "Execution plan not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Exception summary is unavailable."
+          }
+        },
+        "summary": "Get Execution Plan Exception Summary",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary/export": {
+      "get": {
+        "operationId": "export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_export_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_plan_id",
+            "required": true,
+            "schema": {
+              "title": "Execution Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "json",
+              "pattern": "^(json|csv|markdown|pdf)$",
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Exported execution plan exception summary."
+          },
+          "404": {
+            "description": "Execution plan not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Exception summary export is unavailable."
+          }
+        },
+        "summary": "Export Execution Plan Exception Summary",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary/records": {
+      "get": {
+        "operationId": "get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_records_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_plan_id",
+            "required": true,
+            "schema": {
+              "title": "Execution Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruleversionid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionFactsPageView"
+                }
+              }
+            },
+            "description": "Execution-plan-scoped semantic exception records."
+          },
+          "404": {
+            "description": "Execution plan not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Semantic exception records are unavailable."
+          }
+        },
+        "summary": "Get Execution Plan Exception Summary Records",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary/records/{exception_fact_id}": {
+      "get": {
+        "operationId": "get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_records__exception_fact_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_plan_id",
+            "required": true,
+            "schema": {
+              "title": "Execution Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "exception_fact_id",
+            "required": true,
+            "schema": {
+              "title": "Exception Fact Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackAmount",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Lookbackamount",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lookbackUnit",
+            "required": false,
+            "schema": {
+              "default": "hours",
+              "title": "Lookbackunit",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
+                  ],
+                  "type": "string",
+                  "x-dq-domain-allowed-values-set": "gx.execution_status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rulename"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectName",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectname"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "reasonCode",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reasoncode"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ruleVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruleversionid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionFactView"
+                }
+              }
+            },
+            "description": "One execution-plan-scoped semantic exception record."
+          },
+          "404": {
+            "description": "Exception record not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Semantic exception record detail is unavailable."
+          }
+        },
+        "summary": "Get Execution Plan Exception Summary Record",
+        "tags": [
+          "exceptions"
+        ]
+      }
+    }
+  }
+}

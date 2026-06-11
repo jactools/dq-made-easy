@@ -1,0 +1,497 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "AdminRoleView": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Permissions",
+          "type": "array"
+        },
+        "workspace": {
+          "default": "default",
+          "title": "Workspace",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "AdminRoleView",
+      "type": "object"
+    },
+    "AdminUserView": {
+      "properties": {
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Email"
+        },
+        "external_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Id"
+        },
+        "first_name": {
+          "title": "First Name",
+          "type": "string"
+        },
+        "granted_scopes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Granted Scopes",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "last_name": {
+          "title": "Last Name",
+          "type": "string"
+        },
+        "preferences": {
+          "additionalProperties": true,
+          "title": "Preferences",
+          "type": "object"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "workspace_roles": {
+          "items": {
+            "$ref": "#/$defs/AdminWorkspaceRoleView"
+          },
+          "title": "Workspace Roles",
+          "type": "array"
+        },
+        "workspaces": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Workspaces",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "title": "AdminUserView",
+      "type": "object"
+    },
+    "AdminUsersPageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/AdminUserView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationView"
+        }
+      },
+      "required": [
+        "data",
+        "pagination"
+      ],
+      "title": "AdminUsersPageView",
+      "type": "object"
+    },
+    "AdminWorkspaceRoleView": {
+      "properties": {
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "role"
+      ],
+      "title": "AdminWorkspaceRoleView",
+      "type": "object"
+    },
+    "ExceptionFactAccessRequestView": {
+      "properties": {
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "requested_at": {
+          "default": "",
+          "title": "Requested At",
+          "type": "string"
+        },
+        "requested_duration_minutes": {
+          "default": 0,
+          "title": "Requested Duration Minutes",
+          "type": "integer"
+        },
+        "requester_id": {
+          "title": "Requester Id",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed At"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed By"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "status": {
+          "default": "pending",
+          "title": "Status",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "requester_id",
+        "workspace_id",
+        "role_id"
+      ],
+      "title": "ExceptionFactAccessRequestView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "IdResponseView": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "IdResponseView",
+      "type": "object"
+    },
+    "PaginationView": {
+      "properties": {
+        "has_next": {
+          "title": "Has Next",
+          "type": "boolean"
+        },
+        "has_previous": {
+          "title": "Has Previous",
+          "type": "boolean"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total Pages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "total_pages",
+        "has_next",
+        "has_previous"
+      ],
+      "title": "PaginationView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "create_exception_fact_access_request_api_admin_v1_exception_fact_access_requests_post_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "create_role_api_admin_v1_roles_post_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "get_roles_api_admin_v1_roles_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/AdminRoleView"
+      },
+      "title": "Response Get Roles Api Admin V1 Roles Get",
+      "type": "array"
+    },
+    "get_users_api_admin_v1_users_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_users_api_admin_v1_users_get_param_query_order": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Order"
+    },
+    "get_users_api_admin_v1_users_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "get_users_api_admin_v1_users_get_param_query_q": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Q"
+    },
+    "get_users_api_admin_v1_users_get_param_query_sort": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sort"
+    },
+    "list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_param_query_requesterId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Requesterid"
+    },
+    "list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/ExceptionFactAccessRequestView"
+      },
+      "title": "Response List Exception Fact Access Requests Api Admin V1 Exception Fact Access Requests Get",
+      "type": "array"
+    },
+    "recover_removed_rule_api_admin_v1_rules_rule_id_recover_post_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "recover_removed_rule_api_admin_v1_rules_rule_id_recover_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Recover Removed Rule Api Admin V1 Rules  Rule Id  Recover Post",
+      "type": "object"
+    },
+    "reset_user_profile_api_admin_v1_users_user_id_reset_profile_post_param_path_user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "reset_user_settings_api_admin_v1_users_user_id_reset_settings_post_param_path_user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "update_exception_fact_access_request_api_admin_v1_exception_fact_access_requests_request_id_put_param_path_request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "update_exception_fact_access_request_api_admin_v1_exception_fact_access_requests_request_id_put_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "update_me_api_admin_v1_me_put_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "update_role_api_admin_v1_roles_role_id_put_param_path_role_id": {
+      "title": "Role Id",
+      "type": "string"
+    },
+    "update_role_api_admin_v1_roles_role_id_put_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "update_user_api_admin_v1_users_user_id_put_param_path_user_id": {
+      "title": "User Id",
+      "type": "string"
+    },
+    "update_user_api_admin_v1_users_user_id_put_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/admin/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/admin v1 schema bundle"
+}

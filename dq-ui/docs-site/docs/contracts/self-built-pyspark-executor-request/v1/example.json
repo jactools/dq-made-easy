@@ -1,0 +1,164 @@
+{
+  "executor_contract_version": "v1",
+  "executor_kind": "self_built_pyspark",
+  "request_id": "sbe_sales_order_v3_batch_001",
+  "correlation_id": "corr_abs1_mr04_001",
+  "submitted_at": "2026-04-26T15:00:00Z",
+  "submitted_by": "dq-api",
+  "platform_run_ref": {
+    "execution_run_id": "gx_run_sales_order_v3_001",
+    "dispatch_mode": "queued",
+    "queue_message_id": "gx_run_sales_order_v3_001"
+  },
+  "execution_batch": {
+    "batch_id": "batch_sales_order_v3_001",
+    "engine_target": "pyspark",
+    "grouping_key": "data_object_version_id",
+    "grouping_value": "dov_sales_order_v3",
+    "execution_shape": "single_object",
+    "source_binding": {
+      "binding_kind": "resolved_object_version",
+      "data_object_version_id": "dov_sales_order_v3",
+      "source_adapter_kind": "spark",
+      "source_handle": {
+        "catalog": "lakehouse",
+        "schema_name": "sales_curated",
+        "object_name": "sales_order_v3"
+      },
+      "primary_key_fields": [
+        "order_id"
+      ],
+      "business_key_fields": [
+        "sales_order_number"
+      ]
+    },
+    "items": [
+      {
+        "item_id": "item_rule_1",
+        "engine_type": "gx",
+        "validation_artifact_ref": {
+          "validation_artifact_id": "va_sales_order_quality",
+          "validation_artifact_version": 4
+        },
+        "validation_artifact": {
+          "validation_artifact_id": "va_sales_order_quality",
+          "validation_artifact_version": 4,
+          "artifact_contract_version": "v1",
+          "engine_type": "gx",
+          "assignment_scope": {
+            "data_object_id": "do_sales_order",
+            "dataset_id": "ds_sales",
+            "data_product_id": "odcs.dp.sales-001"
+          },
+          "resolved_execution_scope": {
+            "data_object_version_ids": [
+              "dov_sales_order_v3"
+            ]
+          },
+          "compiled_from": {
+            "rule_ids": [
+              "rule_sales_order_not_null"
+            ],
+            "compiler_version": "dq-compiler-7.3",
+            "generated_at": "2026-04-26T14:45:00Z"
+          },
+          "execution_hints": {
+            "recommended_engine_target": "pyspark",
+            "primary_key_fields": [
+              "order_id"
+            ],
+            "business_key_fields": [
+              "sales_order_number"
+            ],
+            "supported_execution_shapes": [
+              "single_object"
+            ]
+          },
+          "run_planning": {
+            "engine_target": "pyspark",
+            "execution_shape": "single_object",
+            "grouping_key": "data_object_version_id",
+            "grouping_values": [
+              "dov_sales_order_v3"
+            ],
+            "traceability": {
+              "rule_id": "rule_sales_order_not_null",
+              "rule_version_id": "rv_sales_order_not_null_v4",
+              "validation_artifact_id": "va_sales_order_quality",
+              "validation_artifact_version": 4,
+              "data_object_version_id": "dov_sales_order_v3"
+            }
+          },
+          "engine_artifact": {
+            "engine_type": "gx",
+            "artifact_kind": "gx_expectation_suite",
+            "artifact_schema_version": "gx-artifact-envelope/v1",
+            "payload": {
+              "suiteId": "gx_suite_sales_order_quality",
+              "suiteVersion": 4,
+              "artifactVersion": "v1",
+              "assignmentScope": {
+                "dataObjectId": "do_sales_order",
+                "datasetId": "ds_sales",
+                "dataProductId": "odcs.dp.sales-001"
+              },
+              "resolvedExecutionScope": {
+                "dataObjectVersionIds": [
+                  "dov_sales_order_v3"
+                ]
+              },
+              "gxSuite": {
+                "expectation_suite_name": "dq_sales_order_quality_v4",
+                "expectations": [],
+                "meta": {
+                  "source": "dq-made-easy"
+                }
+              },
+              "compiledFrom": {
+                "ruleIds": [
+                  "rule_sales_order_not_null"
+                ],
+                "compilerVersion": "dq-compiler-7.3",
+                "generatedAt": "2026-04-26T14:45:00Z"
+              },
+              "executionHints": {
+                "recommendedEngine": "pyspark",
+                "primaryKeyFields": [
+                  "order_id"
+                ]
+              },
+              "executionContract": {
+                "engineTarget": "pyspark",
+                "executionShape": "single_object",
+                "traceability": {
+                  "ruleId": "rule_sales_order_not_null",
+                  "ruleVersionId": "rv_sales_order_not_null_v4",
+                  "gxSuiteId": "gx_suite_sales_order_quality",
+                  "gxSuiteVersion": 4,
+                  "dataObjectVersionId": "dov_sales_order_v3"
+                }
+              }
+            }
+          },
+          "saved_by": "rule-compiler",
+          "source_pipeline": "rule-compiler",
+          "status": "active",
+          "artifact_hash": "sha256:2f6a3021"
+        },
+        "traceability": {
+          "rule_id": "rule_sales_order_not_null",
+          "rule_version_id": "rv_sales_order_not_null_v4",
+          "validation_artifact_id": "va_sales_order_quality",
+          "validation_artifact_version": 4,
+          "data_object_version_id": "dov_sales_order_v3"
+        },
+        "required_capabilities": [
+          "aggregate_outcomes",
+          "row_level_exceptions",
+          "primary_key_projection",
+          "deterministic_row_identity"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,3293 @@
+{
+  "components": {
+    "schemas": {
+      "BatchTestRequestView": {
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "execution_correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Correlation Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "proof_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Id"
+          },
+          "requested_at": {
+            "title": "Requested At",
+            "type": "string"
+          },
+          "requested_by": {
+            "title": "Requested By",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "status": {
+            "default": "pending",
+            "title": "Status",
+            "type": "string"
+          },
+          "test_data_config": {
+            "additionalProperties": true,
+            "title": "Test Data Config",
+            "type": "object"
+          },
+          "workspace": {
+            "default": "default",
+            "title": "Workspace",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "rule_id",
+          "requested_by",
+          "requested_at"
+        ],
+        "title": "BatchTestRequestView",
+        "type": "object"
+      },
+      "BatchTestRequestsPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BatchTestRequestView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "BatchTestRequestsPageView",
+        "type": "object"
+      },
+      "BatchTestRunResultView": {
+        "properties": {
+          "execution_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionContextView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "BatchTestRunResultView",
+        "type": "object"
+      },
+      "CompilerExecutionTraceabilityView": {
+        "properties": {
+          "artifact_key": {
+            "title": "Artifact Key",
+            "type": "string"
+          },
+          "compiler_version": {
+            "pattern": "^dq-\\d+\\.\\d+\\.\\d+$",
+            "title": "Compiler Version",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_version_id": {
+            "title": "Rule Version Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "rule_version_id",
+          "artifact_key",
+          "compiler_version",
+          "schema_version"
+        ],
+        "title": "CompilerExecutionTraceabilityView",
+        "type": "object"
+      },
+      "CreateBatchTestRequest": {
+        "properties": {
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "rule_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rule Ids",
+            "type": "array"
+          },
+          "test_data_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Data Config"
+          },
+          "workspace": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace"
+          }
+        },
+        "required": [
+          "rule_ids"
+        ],
+        "title": "CreateBatchTestRequest",
+        "type": "object"
+      },
+      "CreateQueuedTestDataRequest": {
+        "properties": {
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/TestDataAttributeRequest"
+            },
+            "title": "Attributes",
+            "type": "array"
+          },
+          "data_object_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Id"
+          },
+          "sample_count": {
+            "default": 10,
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "source_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Name"
+          },
+          "target_id": {
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_type": {
+            "title": "Target Type",
+            "type": "string"
+          },
+          "version_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Name"
+          }
+        },
+        "required": [
+          "target_type",
+          "target_id"
+        ],
+        "title": "CreateQueuedTestDataRequest",
+        "type": "object"
+      },
+      "CreateTestDataMaterializationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "output_format": {
+            "default": "parquet",
+            "enum": [
+              "parquet",
+              "delta"
+            ],
+            "title": "Output Format",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "testing.output_format"
+          },
+          "output_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Uri"
+          },
+          "refresh": {
+            "default": false,
+            "title": "Refresh",
+            "type": "boolean"
+          },
+          "sample_count": {
+            "default": 1000,
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "selected_attribute_names": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Selected Attribute Names",
+            "type": "array"
+          }
+        },
+        "required": [
+          "data_object_version_id"
+        ],
+        "title": "CreateTestDataMaterializationRequest",
+        "type": "object"
+      },
+      "DataDeliveryExecutionReferenceView": {
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correlation_id": {
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "engine_target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine Target"
+          },
+          "execution_run_id": {
+            "title": "Execution Run Id",
+            "type": "string"
+          },
+          "execution_shape": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Shape"
+          },
+          "execution_status": {
+            "title": "Execution Status",
+            "type": "string"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "submitted_at": {
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Version"
+          }
+        },
+        "required": [
+          "execution_run_id",
+          "execution_status",
+          "correlation_id",
+          "submitted_at"
+        ],
+        "title": "DataDeliveryExecutionReferenceView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionSummaryView": {
+        "properties": {
+          "latest_execution_completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Completed At"
+          },
+          "latest_execution_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Run Id"
+          },
+          "latest_execution_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Status"
+          },
+          "latest_execution_submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Submitted At"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          },
+          "total_execution_runs": {
+            "default": 0,
+            "title": "Total Execution Runs",
+            "type": "integer"
+          }
+        },
+        "title": "DataDeliveryExecutionSummaryView",
+        "type": "object"
+      },
+      "DataDeliveryNoteView": {
+        "properties": {
+          "attributes_count": {
+            "default": 0,
+            "title": "Attributes Count",
+            "type": "integer"
+          },
+          "checksum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checksum"
+          },
+          "checksum_algorithm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checksum Algorithm"
+          },
+          "data_delivery_id": {
+            "default": "",
+            "title": "Data Delivery Id",
+            "type": "string"
+          },
+          "data_object_id": {
+            "default": "",
+            "title": "Data Object Id",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "delivered_at": {
+            "default": "",
+            "title": "Delivered At",
+            "type": "string"
+          },
+          "delivery_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Format"
+          },
+          "delivery_format_warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Format Warning"
+          },
+          "delivery_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Location"
+          },
+          "delivery_status": {
+            "default": "",
+            "title": "Delivery Status",
+            "type": "string"
+          },
+          "evidence_classification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Classification"
+          },
+          "execution_references": {
+            "items": {
+              "$ref": "#/components/schemas/DataDeliveryExecutionReferenceView"
+            },
+            "title": "Execution References",
+            "type": "array"
+          },
+          "execution_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataDeliveryExecutionSummaryView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Count"
+          },
+          "file_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Names"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ingestor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingestor Name"
+          },
+          "ingestor_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingestor Run Id"
+          },
+          "layer": {
+            "default": "standardized",
+            "title": "Layer",
+            "type": "string"
+          },
+          "metadata_json": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata Json"
+          },
+          "object_storage_classification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Storage Classification"
+          },
+          "record_count": {
+            "default": 0,
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "size_bytes": {
+            "default": 0,
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "source_snapshot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Snapshot Id"
+          },
+          "source_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source System"
+          },
+          "storage_exists": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Exists"
+          },
+          "storage_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Location"
+          },
+          "storage_object_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Object Count"
+          },
+          "timestamp": {
+            "default": "",
+            "title": "Timestamp",
+            "type": "string"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataDeliveryNoteView",
+        "type": "object"
+      },
+      "DiagnosticsSummaryView": {
+        "description": "Aggregated diagnostics by failure class.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "failure_class": {
+            "title": "Failure Class",
+            "type": "string"
+          },
+          "max_sample_size": {
+            "default": 5,
+            "title": "Max Sample Size",
+            "type": "integer"
+          },
+          "sample_failures": {
+            "items": {
+              "$ref": "#/components/schemas/FailureDiagnosticView"
+            },
+            "title": "Sample Failures",
+            "type": "array"
+          }
+        },
+        "required": [
+          "failure_class",
+          "count"
+        ],
+        "title": "DiagnosticsSummaryView",
+        "type": "object"
+      },
+      "ExecutionContextView": {
+        "additionalProperties": true,
+        "properties": {
+          "artifact_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Key"
+          },
+          "compile_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compile Status"
+          },
+          "compiled_expression": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compiled Expression"
+          },
+          "compiler_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compiler Revision"
+          },
+          "compiler_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compiler Version"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "executed_expression": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executed Expression"
+          },
+          "executed_expression_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executed Expression Source"
+          },
+          "execution_contract": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TestingExecutionContractView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "handoff_ready": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handoff Ready"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          },
+          "rule_version_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Number"
+          },
+          "scheduler_handoff": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SchedulerHandoffView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schema_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Version"
+          },
+          "semantic_matching": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semantic Matching"
+          },
+          "source_rule_expression": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Rule Expression"
+          }
+        },
+        "title": "ExecutionContextView",
+        "type": "object"
+      },
+      "ExecutionTraceView": {
+        "properties": {
+          "artifact_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Key"
+          },
+          "compiler_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compiler Revision"
+          },
+          "compiler_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compiler Version"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "executed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executed At"
+          },
+          "execution_id": {
+            "default": "",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "result_status": {
+            "default": "",
+            "title": "Result Status",
+            "type": "string"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          },
+          "rule_version_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Number"
+          },
+          "schema_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Version"
+          }
+        },
+        "title": "ExecutionTraceView",
+        "type": "object"
+      },
+      "FailureDiagnosticView": {
+        "description": "Represents a single failure diagnostic from rule execution.",
+        "properties": {
+          "affected_attributes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Affected Attributes"
+          },
+          "details": {
+            "default": "",
+            "title": "Details",
+            "type": "string"
+          },
+          "failure_class": {
+            "title": "Failure Class",
+            "type": "string"
+          },
+          "row_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Row Identifier"
+          }
+        },
+        "required": [
+          "failure_class"
+        ],
+        "title": "FailureDiagnosticView",
+        "type": "object"
+      },
+      "GenerateTestDataRequest": {
+        "properties": {
+          "sample_count": {
+            "default": 10,
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Sample Count",
+            "type": "integer"
+          }
+        },
+        "title": "GenerateTestDataRequest",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "JoinConsistencyExecutionMetricsView": {
+        "description": "Metrics from JOIN_CONSISTENCY rule execution.",
+        "properties": {
+          "actuality_date_mismatch_count": {
+            "default": 0,
+            "title": "Actuality Date Mismatch Count",
+            "type": "integer"
+          },
+          "eligible_joined_rows": {
+            "title": "Eligible Joined Rows",
+            "type": "integer"
+          },
+          "match_count": {
+            "title": "Match Count",
+            "type": "integer"
+          },
+          "match_rate": {
+            "title": "Match Rate",
+            "type": "number"
+          },
+          "mismatch_count": {
+            "title": "Mismatch Count",
+            "type": "integer"
+          },
+          "null_or_missing_join_key_count": {
+            "default": 0,
+            "title": "Null Or Missing Join Key Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "match_count",
+          "mismatch_count",
+          "eligible_joined_rows",
+          "match_rate"
+        ],
+        "title": "JoinConsistencyExecutionMetricsView",
+        "type": "object"
+      },
+      "LogTestActionRequest": {
+        "properties": {
+          "coverage": {
+            "title": "Coverage",
+            "type": "number"
+          },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostics"
+          },
+          "failures_found": {
+            "title": "Failures Found",
+            "type": "integer"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "proof_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Data"
+          },
+          "records_tested_count": {
+            "title": "Records Tested Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "coverage",
+          "passed",
+          "records_tested_count",
+          "failures_found"
+        ],
+        "title": "LogTestActionRequest",
+        "type": "object"
+      },
+      "PaginationView": {
+        "properties": {
+          "has_next": {
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "has_previous": {
+            "title": "Has Previous",
+            "type": "boolean"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "title": "Total Pages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "total_pages",
+          "has_next",
+          "has_previous"
+        ],
+        "title": "PaginationView",
+        "type": "object"
+      },
+      "QueuedTestDataRequestView": {
+        "properties": {
+          "business_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Key"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "events_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events Url"
+          },
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "requested_at": {
+            "title": "Requested At",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "sample_count": {
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target_id": {
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_type": {
+            "title": "Target Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "job_id",
+          "status",
+          "target_type",
+          "target_id",
+          "sample_count",
+          "requested_at"
+        ],
+        "title": "QueuedTestDataRequestView",
+        "type": "object"
+      },
+      "ReportTestDataMaterializationCompletionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "output_format": {
+            "enum": [
+              "parquet",
+              "delta"
+            ],
+            "title": "Output Format",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "testing.output_format"
+          },
+          "output_uri": {
+            "title": "Output Uri",
+            "type": "string"
+          },
+          "row_count": {
+            "minimum": 0.0,
+            "title": "Row Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "row_count",
+          "output_uri",
+          "output_format"
+        ],
+        "title": "ReportTestDataMaterializationCompletionRequest",
+        "type": "object"
+      },
+      "SchedulerHandoffView": {
+        "additionalProperties": true,
+        "properties": {
+          "batch_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batch Request Id"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "executor_target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executor Target"
+          },
+          "handoff_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handoff Id"
+          },
+          "handoff_ready": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handoff Ready"
+          },
+          "handoff_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handoff Status"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          }
+        },
+        "title": "SchedulerHandoffView",
+        "type": "object"
+      },
+      "SemanticMatchingConfigRequest": {
+        "properties": {
+          "active_synonyms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Active Synonyms",
+            "type": "array"
+          },
+          "enabled": {
+            "default": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "field_alias_mappings": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Field Alias Mappings",
+            "type": "object"
+          },
+          "inactive_synonyms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Inactive Synonyms",
+            "type": "array"
+          }
+        },
+        "title": "SemanticMatchingConfigRequest",
+        "type": "object"
+      },
+      "StoreTestProofResultView": {
+        "properties": {
+          "coverage": {
+            "title": "Coverage",
+            "type": "number"
+          },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiagnosticsSummaryView"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostics"
+          },
+          "execution_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionContextView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "execution_trace": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionTraceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "failures_found": {
+            "title": "Failures Found",
+            "type": "integer"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JoinConsistencyExecutionMetricsView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "proof_data": {
+            "additionalProperties": true,
+            "title": "Proof Data",
+            "type": "object"
+          },
+          "proof_id": {
+            "title": "Proof Id",
+            "type": "string"
+          },
+          "records_tested_count": {
+            "title": "Records Tested Count",
+            "type": "integer"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "success_rate": {
+            "title": "Success Rate",
+            "type": "number"
+          },
+          "test_date": {
+            "title": "Test Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proof_id",
+          "rule_id",
+          "test_date",
+          "coverage",
+          "passed",
+          "records_tested_count",
+          "failures_found",
+          "success_rate"
+        ],
+        "title": "StoreTestProofResultView",
+        "type": "object"
+      },
+      "TestDataAttributeRequest": {
+        "properties": {
+          "format": {
+            "default": "",
+            "title": "Format",
+            "type": "string"
+          },
+          "is_primary_key": {
+            "default": false,
+            "title": "Is Primary Key",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "type": {
+            "default": "text",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "TestDataAttributeRequest",
+        "type": "object"
+      },
+      "TestDataMaterializationCompletionView": {
+        "additionalProperties": false,
+        "properties": {
+          "data_delivery_id": {
+            "title": "Data Delivery Id",
+            "type": "string"
+          },
+          "delivery_note": {
+            "$ref": "#/components/schemas/DataDeliveryNoteView"
+          }
+        },
+        "required": [
+          "data_delivery_id",
+          "delivery_note"
+        ],
+        "title": "TestDataMaterializationCompletionView",
+        "type": "object"
+      },
+      "TestDataMaterializationRequestView": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correlation_id": {
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "events_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events Url"
+          },
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "output_format": {
+            "title": "Output Format",
+            "type": "string"
+          },
+          "output_uri": {
+            "title": "Output Uri",
+            "type": "string"
+          },
+          "processing_queue_key": {
+            "title": "Processing Queue Key",
+            "type": "string"
+          },
+          "queue_key": {
+            "title": "Queue Key",
+            "type": "string"
+          },
+          "request_contract": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Contract"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "requested_at": {
+            "title": "Requested At",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "sample_count": {
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "selection": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target_data_object_version_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Data Object Version Ids"
+          }
+        },
+        "required": [
+          "request_id",
+          "job_id",
+          "status",
+          "data_object_version_id",
+          "sample_count",
+          "output_format",
+          "output_uri",
+          "requested_at",
+          "correlation_id",
+          "queue_key",
+          "processing_queue_key"
+        ],
+        "title": "TestDataMaterializationRequestView",
+        "type": "object"
+      },
+      "TestDataPayloadView": {
+        "properties": {
+          "attribute_count": {
+            "default": 0,
+            "title": "Attribute Count",
+            "type": "integer"
+          },
+          "attributes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Attributes",
+            "type": "array"
+          },
+          "data_object_id": {
+            "title": "Data Object Id"
+          },
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "sample_count": {
+            "default": 0,
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "samples": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Samples",
+            "type": "array"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "string"
+          },
+          "version_name": {
+            "title": "Version Name"
+          }
+        },
+        "required": [
+          "version_id",
+          "generated_at"
+        ],
+        "title": "TestDataPayloadView",
+        "type": "object"
+      },
+      "TestProofView": {
+        "properties": {
+          "coverage": {
+            "default": 0.0,
+            "title": "Coverage",
+            "type": "number"
+          },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiagnosticsSummaryView"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostics"
+          },
+          "execution_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionContextView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "execution_trace": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionTraceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "failures_found": {
+            "default": 0,
+            "title": "Failures Found",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JoinConsistencyExecutionMetricsView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "proof_data": {
+            "additionalProperties": true,
+            "title": "Proof Data",
+            "type": "object"
+          },
+          "records_tested_count": {
+            "default": 0,
+            "title": "Records Tested Count",
+            "type": "integer"
+          },
+          "rule_id": {
+            "default": "",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "test_date": {
+            "default": "",
+            "title": "Test Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "TestProofView",
+        "type": "object"
+      },
+      "TestRowResultView": {
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "join_evaluated": {
+            "default": false,
+            "title": "Join Evaluated",
+            "type": "boolean"
+          },
+          "join_matched_contexts": {
+            "default": 0,
+            "title": "Join Matched Contexts",
+            "type": "integer"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "row_index": {
+            "title": "Row Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "row_index",
+          "data",
+          "passed"
+        ],
+        "title": "TestRowResultView",
+        "type": "object"
+      },
+      "TestRuleWithDataRequest": {
+        "properties": {
+          "semantic_matching": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SemanticMatchingConfigRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "test_data": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Test Data",
+            "type": "array"
+          },
+          "version_id_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id Source"
+          }
+        },
+        "required": [
+          "test_data"
+        ],
+        "title": "TestRuleWithDataRequest",
+        "type": "object"
+      },
+      "TestRuleWithGeneratedDataRequest": {
+        "properties": {
+          "proof_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Id"
+          },
+          "sample_count": {
+            "default": 10,
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "semantic_matching": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SemanticMatchingConfigRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version_id"
+        ],
+        "title": "TestRuleWithGeneratedDataRequest",
+        "type": "object"
+      },
+      "TestRunResultView": {
+        "properties": {
+          "execution_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionContextView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expression": {
+            "title": "Expression",
+            "type": "string"
+          },
+          "failed_count": {
+            "title": "Failed Count",
+            "type": "integer"
+          },
+          "passed_count": {
+            "title": "Passed Count",
+            "type": "integer"
+          },
+          "required_success_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Success Rate"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/TestRowResultView"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "rule_details": {
+            "additionalProperties": true,
+            "title": "Rule Details",
+            "type": "object"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_passed": {
+            "default": false,
+            "title": "Rule Passed",
+            "type": "boolean"
+          },
+          "stored_proof": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TestProofView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "success_rate": {
+            "title": "Success Rate",
+            "type": "number"
+          },
+          "test_data_source": {
+            "title": "Test Data Source",
+            "type": "string"
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "type": "string"
+          },
+          "total_tests": {
+            "title": "Total Tests",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rule_id",
+          "expression",
+          "test_data_source",
+          "total_tests",
+          "passed_count",
+          "failed_count",
+          "success_rate",
+          "timestamp"
+        ],
+        "title": "TestRunResultView",
+        "type": "object"
+      },
+      "TestingExecutionContractView": {
+        "additionalProperties": true,
+        "properties": {
+          "compatibility_policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compatibility Policy"
+          },
+          "engine_target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine Target"
+          },
+          "input_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Format"
+          },
+          "required_execution_result_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Execution Result Fields",
+            "type": "array"
+          },
+          "traceability": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompilerExecutionTraceabilityView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "TestingExecutionContractView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/testing' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/rulebuilder/v1/batch-test-requests": {
+      "get": {
+        "operationId": "get_batch_test_requests_api_rulebuilder_v1_batch_test_requests_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspace",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspace"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchTestRequestsPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Batch Test Requests",
+        "tags": [
+          "testing"
+        ]
+      },
+      "post": {
+        "operationId": "create_batch_test_request_api_rulebuilder_v1_batch_test_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBatchTestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BatchTestRequestView"
+                  },
+                  "title": "Response Create Batch Test Request Api Rulebuilder V1 Batch Test Requests Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Batch Test Request",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/batch-test-requests/{request_id}": {
+      "get": {
+        "operationId": "get_batch_test_request_api_rulebuilder_v1_batch_test_requests__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/BatchTestRequestView"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Batch Test Request Api Rulebuilder V1 Batch Test Requests  Request Id  Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Batch Test Request",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/batch-test-requests/{request_id}/run": {
+      "post": {
+        "operationId": "run_batch_test_request_api_rulebuilder_v1_batch_test_requests__request_id__run_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchTestRunResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Batch Test Request",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/data-object-versions/{version_id}/generate-test-data": {
+      "post": {
+        "operationId": "generate_test_data_for_version_api_rulebuilder_v1_data_object_versions__version_id__generate_test_data_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateTestDataRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDataPayloadView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Test Data For Version",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/rules/{rule_id}/test": {
+      "post": {
+        "operationId": "log_test_action_api_rulebuilder_v1_rules__rule_id__test_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogTestActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreTestProofResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Log Test Action",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/rules/{rule_id}/test-runs/start": {
+      "post": {
+        "operationId": "start_rule_test_with_generated_data_api_rulebuilder_v1_rules__rule_id__test_runs_start_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestRuleWithGeneratedDataRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestProofView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Rule Test With Generated Data",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/rules/{rule_id}/test-with-data": {
+      "post": {
+        "operationId": "test_rule_with_data_api_rulebuilder_v1_rules__rule_id__test_with_data_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestRuleWithDataRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestRunResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Test Rule With Data",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/rules/{rule_id}/test-with-generated-data": {
+      "post": {
+        "operationId": "test_rule_with_generated_data_api_rulebuilder_v1_rules__rule_id__test_with_generated_data_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestRuleWithGeneratedDataRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestRunResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Test Rule With Generated Data",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-data/materializations": {
+      "post": {
+        "operationId": "create_test_data_materialization_api_rulebuilder_v1_test_data_materializations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTestDataMaterializationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDataMaterializationRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Test Data Materialization",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-data/materializations/{request_id}": {
+      "get": {
+        "operationId": "get_test_data_materialization_api_rulebuilder_v1_test_data_materializations__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDataMaterializationRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Test Data Materialization",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-data/materializations/{request_id}/complete": {
+      "post": {
+        "operationId": "report_test_data_materialization_completion_api_rulebuilder_v1_test_data_materializations__request_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportTestDataMaterializationCompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDataMaterializationCompletionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Test Data Materialization Completion",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-data/materializations/{request_id}/events": {
+      "get": {
+        "operationId": "stream_test_data_materialization_events_api_rulebuilder_v1_test_data_materializations__request_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Test Data Materialization Events",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-data/requests": {
+      "post": {
+        "operationId": "create_test_data_request_api_rulebuilder_v1_test_data_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQueuedTestDataRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueuedTestDataRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Test Data Request",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-data/requests/{request_id}": {
+      "get": {
+        "operationId": "get_test_data_request_api_rulebuilder_v1_test_data_requests__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueuedTestDataRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Test Data Request",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-data/requests/{request_id}/events": {
+      "get": {
+        "operationId": "stream_test_data_request_events_api_rulebuilder_v1_test_data_requests__request_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Test Data Request Events",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-proofs/{rule_id}": {
+      "get": {
+        "operationId": "get_test_proofs_api_rulebuilder_v1_test_proofs__rule_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TestProofView"
+                  },
+                  "title": "Response Get Test Proofs Api Rulebuilder V1 Test Proofs  Rule Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Test Proofs",
+        "tags": [
+          "testing"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/test-proofs/{rule_id}/report": {
+      "get": {
+        "operationId": "export_test_proof_report_api_rulebuilder_v1_test_proofs__rule_id__report_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "markdown",
+              "pattern": "^(markdown|pdf)$",
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "proof_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Proof Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Test Proof Report",
+        "tags": [
+          "testing"
+        ]
+      }
+    }
+  }
+}

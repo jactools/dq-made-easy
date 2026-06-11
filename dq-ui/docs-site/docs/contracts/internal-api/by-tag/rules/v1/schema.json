@@ -1,0 +1,4020 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "AliasResolveRequest": {
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "manual_mappings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Manual Mappings",
+          "type": "object"
+        }
+      },
+      "title": "AliasResolveRequest",
+      "type": "object"
+    },
+    "BatchValidationRequestView": {
+      "properties": {
+        "rule_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rule Ids",
+          "type": "array"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        }
+      },
+      "required": [
+        "rule_ids"
+      ],
+      "title": "BatchValidationRequestView",
+      "type": "object"
+    },
+    "BatchValidationResponseView": {
+      "properties": {
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/ConflictDiagnosticView"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/BatchValidationResultItemView"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "summary": {
+          "$ref": "#/$defs/BatchValidationSummaryView"
+        }
+      },
+      "required": [
+        "run_id",
+        "summary"
+      ],
+      "title": "BatchValidationResponseView",
+      "type": "object"
+    },
+    "BatchValidationResultItemView": {
+      "properties": {
+        "artifact_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Artifact Key"
+        },
+        "compiled_expression": {
+          "title": "Compiled Expression",
+          "type": "string"
+        },
+        "compiler_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Compiler Version"
+        },
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/CompilerDiagnosticView"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Name"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        },
+        "warnings": {
+          "title": "Warnings",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rule_id",
+        "valid",
+        "compiled_expression",
+        "errors",
+        "warnings"
+      ],
+      "title": "BatchValidationResultItemView",
+      "type": "object"
+    },
+    "BatchValidationSummaryView": {
+      "properties": {
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "invalid": {
+          "title": "Invalid",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "integer"
+        },
+        "warnings": {
+          "title": "Warnings",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "valid",
+        "invalid",
+        "errors",
+        "warnings"
+      ],
+      "title": "BatchValidationSummaryView",
+      "type": "object"
+    },
+    "CheckTypeRuleDslSourceRequest": {
+      "properties": {
+        "alias_mappings": {
+          "additionalProperties": true,
+          "title": "Alias Mappings",
+          "type": "object"
+        },
+        "check_type": {
+          "title": "Check Type",
+          "type": "string"
+        },
+        "check_type_params": {
+          "additionalProperties": true,
+          "title": "Check Type Params",
+          "type": "object"
+        },
+        "join_conditions": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Join Conditions",
+          "type": "array"
+        },
+        "kind": {
+          "const": "check_type",
+          "title": "Kind",
+          "type": "string"
+        },
+        "manual_expression_override": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ManualExpressionOverrideRequest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reusable_filter_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reusable Filter Ids",
+          "type": "array"
+        },
+        "reusable_join_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reusable Join Id"
+        }
+      },
+      "required": [
+        "kind",
+        "check_type",
+        "check_type_params"
+      ],
+      "title": "CheckTypeRuleDslSourceRequest",
+      "type": "object"
+    },
+    "CompilerAliasExpectationView": {
+      "properties": {
+        "alias": {
+          "title": "Alias",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alias",
+        "expected"
+      ],
+      "title": "CompilerAliasExpectationView",
+      "type": "object"
+    },
+    "CompilerCompatibilityPolicyView": {
+      "properties": {
+        "compiler_versioning": {
+          "enum": [
+            "dq-semver"
+          ],
+          "title": "Compiler Versioning",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.compiler_versioning"
+        },
+        "minor_version_backward_compatible": {
+          "title": "Minor Version Backward Compatible",
+          "type": "boolean"
+        },
+        "schema_versioning": {
+          "enum": [
+            "semver"
+          ],
+          "title": "Schema Versioning",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.schema_versioning"
+        },
+        "supported_schema_series": {
+          "enum": [
+            "1.x.x"
+          ],
+          "title": "Supported Schema Series",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.supported_schema_series"
+        }
+      },
+      "required": [
+        "schema_versioning",
+        "compiler_versioning",
+        "supported_schema_series",
+        "minor_version_backward_compatible"
+      ],
+      "title": "CompilerCompatibilityPolicyView",
+      "type": "object"
+    },
+    "CompilerDiagnosticView": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "scope": {
+          "default": "rule",
+          "title": "Scope",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.severity"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "CompilerDiagnosticView",
+      "type": "object"
+    },
+    "CompilerExecutionContractView": {
+      "properties": {
+        "compatibility_policy": {
+          "$ref": "#/$defs/CompilerCompatibilityPolicyView"
+        },
+        "engine_target": {
+          "enum": [
+            "dq-engine"
+          ],
+          "title": "Engine Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.engine_target"
+        },
+        "input_format": {
+          "enum": [
+            "dq.intermediate-model.v1"
+          ],
+          "title": "Input Format",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.input_format"
+        },
+        "required_execution_result_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Execution Result Fields",
+          "type": "array"
+        },
+        "traceability": {
+          "$ref": "#/$defs/CompilerExecutionTraceabilityView"
+        }
+      },
+      "required": [
+        "engine_target",
+        "input_format",
+        "compatibility_policy",
+        "traceability"
+      ],
+      "title": "CompilerExecutionContractView",
+      "type": "object"
+    },
+    "CompilerExecutionTraceabilityView": {
+      "properties": {
+        "artifact_key": {
+          "title": "Artifact Key",
+          "type": "string"
+        },
+        "compiler_version": {
+          "pattern": "^dq-\\d+\\.\\d+\\.\\d+$",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_version_id": {
+          "title": "Rule Version Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "rule_version_id",
+        "artifact_key",
+        "compiler_version",
+        "schema_version"
+      ],
+      "title": "CompilerExecutionTraceabilityView",
+      "type": "object"
+    },
+    "CompilerPredicateView": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "operator": {
+          "title": "Operator",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "value_type": {
+          "title": "Value Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "operator",
+        "value",
+        "value_type"
+      ],
+      "title": "CompilerPredicateView",
+      "type": "object"
+    },
+    "CompilerRuleReferenceView": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version_id": {
+          "title": "Version Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version_id"
+      ],
+      "title": "CompilerRuleReferenceView",
+      "type": "object"
+    },
+    "ConflictDiagnosticView": {
+      "properties": {
+        "conflict_type": {
+          "title": "Conflict Type",
+          "type": "string"
+        },
+        "conflicts_with": {
+          "title": "Conflicts With",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "conflicts_with",
+        "conflict_type",
+        "message"
+      ],
+      "title": "ConflictDiagnosticView",
+      "type": "object"
+    },
+    "EnrichedValidationRequest": {
+      "properties": {
+        "detected_aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Detected Aliases",
+          "type": "array"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "manual_alias_mappings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Manual Alias Mappings",
+          "type": "object"
+        },
+        "rule_version_id": {
+          "title": "Rule Version Id",
+          "type": "string"
+        },
+        "unresolved_aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved Aliases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule_version_id",
+        "expression"
+      ],
+      "title": "EnrichedValidationRequest",
+      "type": "object"
+    },
+    "FilterExpressionRuleDslSourceRequest": {
+      "properties": {
+        "alias_mappings": {
+          "additionalProperties": true,
+          "title": "Alias Mappings",
+          "type": "object"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        },
+        "join_conditions": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Join Conditions",
+          "type": "array"
+        },
+        "kind": {
+          "const": "filter_expression",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reusable_filter_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reusable Filter Ids",
+          "type": "array"
+        },
+        "reusable_join_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reusable Join Id"
+        }
+      },
+      "required": [
+        "kind",
+        "expression"
+      ],
+      "title": "FilterExpressionRuleDslSourceRequest",
+      "type": "object"
+    },
+    "GxSuiteAutoPublishRequest": {
+      "description": "Optional body for activate_rule to auto-publish a GX suite stub.",
+      "properties": {
+        "business_key_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Business Key Fields",
+          "type": "array"
+        },
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_object_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Object Version Ids",
+          "type": "array"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "pattern": "^odcs\\..+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "primary_key_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Primary Key Fields",
+          "type": "array"
+        },
+        "suite_version": {
+          "default": 1,
+          "minimum": 1.0,
+          "title": "Suite Version",
+          "type": "integer"
+        }
+      },
+      "title": "GxSuiteAutoPublishRequest",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ManualExpressionOverrideRequest": {
+      "properties": {
+        "confirmed": {
+          "default": false,
+          "title": "Confirmed",
+          "type": "boolean"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expression"
+      ],
+      "title": "ManualExpressionOverrideRequest",
+      "type": "object"
+    },
+    "MarkForRollbackRequest": {
+      "properties": {
+        "marked": {
+          "title": "Marked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "marked"
+      ],
+      "title": "MarkForRollbackRequest",
+      "type": "object"
+    },
+    "ReusableFilterCreateRequest": {
+      "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expression"
+        },
+        "filter_expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Filter Expression"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ReusableFilterCreateRequest",
+      "type": "object"
+    },
+    "ReusableFilterUpdateRequest": {
+      "properties": {
+        "active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Active"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expression"
+        },
+        "filter_expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Filter Expression"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "title": "ReusableFilterUpdateRequest",
+      "type": "object"
+    },
+    "ReusableJoinCreateRequest": {
+      "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "join_definition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Join Definition"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ReusableJoinCreateRequest",
+      "type": "object"
+    },
+    "ReusableJoinUpdateRequest": {
+      "properties": {
+        "active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Active"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "join_definition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Join Definition"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "title": "ReusableJoinUpdateRequest",
+      "type": "object"
+    },
+    "RollbackRequest": {
+      "properties": {
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "skip_approval": {
+          "default": false,
+          "title": "Skip Approval",
+          "type": "boolean"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tags"
+        },
+        "to_version_id": {
+          "title": "To Version Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "to_version_id",
+        "reason"
+      ],
+      "title": "RollbackRequest",
+      "type": "object"
+    },
+    "RuleCheckType": {
+      "description": "Enumeration of supported parameterised rule check-types.\n\nEach check-type maps a well-known data quality concern to a set of\nstructured parameters from which a compiler-ready expression can be\nderived automatically (DQ-4.10).",
+      "enum": [
+        "THRESHOLD",
+        "ROW_COUNT",
+        "REGEX",
+        "RANGE",
+        "ALLOWLIST",
+        "BLOCKLIST",
+        "UNIQUENESS",
+        "REFERENTIAL_INTEGRITY",
+        "FRESHNESS",
+        "LAG",
+        "FUTURE_DATE",
+        "CORRECT",
+        "PRESENT",
+        "RECONCILE",
+        "PLAUSIBLE",
+        "TRANSFER_MATCH",
+        "JOIN_CONSISTENCY"
+      ],
+      "title": "RuleCheckType",
+      "type": "string"
+    },
+    "RuleCheckTypeValidationRequest": {
+      "properties": {
+        "check_type": {
+          "$ref": "#/$defs/RuleCheckType"
+        },
+        "check_type_params": {
+          "additionalProperties": true,
+          "title": "Check Type Params",
+          "type": "object"
+        }
+      },
+      "required": [
+        "check_type"
+      ],
+      "title": "RuleCheckTypeValidationRequest",
+      "type": "object"
+    },
+    "RuleCheckTypeValidationResponseView": {
+      "properties": {
+        "field_errors": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Field Errors",
+          "type": "object"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Message"
+        },
+        "normalized_check_type_params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Normalized Check Type Params"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "valid"
+      ],
+      "title": "RuleCheckTypeValidationResponseView",
+      "type": "object"
+    },
+    "RuleDslV1Request": {
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source": {
+          "discriminator": {
+            "mapping": {
+              "check_type": "#/components/schemas/CheckTypeRuleDslSourceRequest",
+              "filter_expression": "#/components/schemas/FilterExpressionRuleDslSourceRequest"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/FilterExpressionRuleDslSourceRequest"
+            },
+            {
+              "$ref": "#/$defs/CheckTypeRuleDslSourceRequest"
+            }
+          ],
+          "title": "Source"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "RuleDslV1Request",
+      "type": "object"
+    },
+    "RuleDslV2BaselineExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "lookback_runs": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lookback Runs"
+        },
+        "sensitivity": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sensitivity"
+        },
+        "strategy": {
+          "enum": [
+            "dynamic_parameters",
+            "forecast",
+            "historical_band"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "type": {
+          "const": "baseline",
+          "default": "baseline",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "strategy"
+      ],
+      "title": "RuleDslV2BaselineExpectation",
+      "type": "object"
+    },
+    "RuleDslV2ComparisonScope": {
+      "additionalProperties": false,
+      "properties": {
+        "join_keys": {
+          "items": {
+            "$ref": "#/$defs/RuleDslV2JoinKey"
+          },
+          "title": "Join Keys",
+          "type": "array"
+        },
+        "left": {
+          "$ref": "#/$defs/RuleDslV2DatasetScope"
+        },
+        "right": {
+          "$ref": "#/$defs/RuleDslV2DatasetScope"
+        }
+      },
+      "required": [
+        "left",
+        "right"
+      ],
+      "title": "RuleDslV2ComparisonScope",
+      "type": "object"
+    },
+    "RuleDslV2DatasetScope": {
+      "additionalProperties": false,
+      "properties": {
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        }
+      },
+      "title": "RuleDslV2DatasetScope",
+      "type": "object"
+    },
+    "RuleDslV2Document": {
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "$ref": "#/$defs/RuleDslV2Rule"
+        },
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule"
+      ],
+      "title": "RuleDslV2Document",
+      "type": "object"
+    },
+    "RuleDslV2EqualityExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "exact",
+            "case_insensitive",
+            "numeric_tolerance"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "tolerance": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tolerance"
+        },
+        "type": {
+          "const": "equality",
+          "default": "equality",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "RuleDslV2EqualityExpectation",
+      "type": "object"
+    },
+    "RuleDslV2Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "emit_compiled_artifact": {
+          "title": "Emit Compiled Artifact",
+          "type": "boolean"
+        },
+        "emit_generated_sql": {
+          "title": "Emit Generated Sql",
+          "type": "boolean"
+        },
+        "failed_rows": {
+          "$ref": "#/$defs/RuleDslV2FailedRowsPolicy"
+        }
+      },
+      "required": [
+        "failed_rows",
+        "emit_compiled_artifact",
+        "emit_generated_sql"
+      ],
+      "title": "RuleDslV2Evidence",
+      "type": "object"
+    },
+    "RuleDslV2FailedRowsPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "include_primary_key": {
+          "title": "Include Primary Key",
+          "type": "boolean"
+        },
+        "include_row_identifier": {
+          "title": "Include Row Identifier",
+          "type": "boolean"
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Limit"
+        },
+        "mode": {
+          "enum": [
+            "none",
+            "sample",
+            "all_with_limit"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "include_row_identifier",
+        "include_primary_key"
+      ],
+      "title": "RuleDslV2FailedRowsPolicy",
+      "type": "object"
+    },
+    "RuleDslV2GroupingScope": {
+      "additionalProperties": false,
+      "properties": {
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Keys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "RuleDslV2GroupingScope",
+      "type": "object"
+    },
+    "RuleDslV2JoinCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "left_column": {
+          "minLength": 1,
+          "title": "Left Column",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "=",
+            "!=",
+            ">",
+            ">=",
+            "<",
+            "<="
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "right_column": {
+          "minLength": 1,
+          "title": "Right Column",
+          "type": "string"
+        }
+      },
+      "required": [
+        "left_column",
+        "operator",
+        "right_column"
+      ],
+      "title": "RuleDslV2JoinCondition",
+      "type": "object"
+    },
+    "RuleDslV2JoinKey": {
+      "additionalProperties": false,
+      "properties": {
+        "left_column": {
+          "minLength": 1,
+          "title": "Left Column",
+          "type": "string"
+        },
+        "right_column": {
+          "minLength": 1,
+          "title": "Right Column",
+          "type": "string"
+        }
+      },
+      "required": [
+        "left_column",
+        "right_column"
+      ],
+      "title": "RuleDslV2JoinKey",
+      "type": "object"
+    },
+    "RuleDslV2JoinScope": {
+      "additionalProperties": false,
+      "properties": {
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RuleDslV2JoinCondition"
+          },
+          "minItems": 1,
+          "title": "Conditions",
+          "type": "array"
+        },
+        "join_type": {
+          "enum": [
+            "inner",
+            "left",
+            "right",
+            "full"
+          ],
+          "title": "Join Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "join_type",
+        "conditions"
+      ],
+      "title": "RuleDslV2JoinScope",
+      "type": "object"
+    },
+    "RuleDslV2MetricMeasure": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "enum": [
+            "row_count",
+            "missing_count",
+            "missing_percent",
+            "duplicate_count",
+            "duplicate_percent",
+            "distinct_count",
+            "min",
+            "max",
+            "avg",
+            "sum",
+            "stddev",
+            "quantile",
+            "freshness_age",
+            "match_percent"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "subject": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2Subject"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "const": "metric",
+          "default": "metric",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "RuleDslV2MetricMeasure",
+      "type": "object"
+    },
+    "RuleDslV2Operations": {
+      "additionalProperties": false,
+      "properties": {
+        "fail_if_not_native": {
+          "title": "Fail If Not Native",
+          "type": "boolean"
+        },
+        "preferred_engines": {
+          "items": {
+            "enum": [
+              "gx",
+              "sodacl",
+              "sql",
+              "pyspark_native",
+              "custom_worker"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Preferred Engines",
+          "type": "array"
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "severity",
+        "preferred_engines",
+        "fail_if_not_native"
+      ],
+      "title": "RuleDslV2Operations",
+      "type": "object"
+    },
+    "RuleDslV2QueryMeasure": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison_data_source_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comparison Data Source Name"
+        },
+        "comparison_query": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comparison Query"
+        },
+        "query": {
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "query_language": {
+          "const": "sql",
+          "default": "sql",
+          "title": "Query Language",
+          "type": "string"
+        },
+        "type": {
+          "const": "query",
+          "default": "query",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "title": "RuleDslV2QueryMeasure",
+      "type": "object"
+    },
+    "RuleDslV2RowPredicate": {
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "minLength": 1,
+          "title": "Expression",
+          "type": "string"
+        },
+        "kind": {
+          "const": "row_predicate",
+          "default": "row_predicate",
+          "title": "Kind",
+          "type": "string"
+        },
+        "language": {
+          "enum": [
+            "dq_predicate",
+            "sql"
+          ],
+          "title": "Language",
+          "type": "string"
+        }
+      },
+      "required": [
+        "language",
+        "expression"
+      ],
+      "title": "RuleDslV2RowPredicate",
+      "type": "object"
+    },
+    "RuleDslV2RowPredicateMeasure": {
+      "additionalProperties": false,
+      "properties": {
+        "predicate": {
+          "$ref": "#/$defs/RuleDslV2RowPredicate"
+        },
+        "type": {
+          "const": "row_predicate",
+          "default": "row_predicate",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "predicate"
+      ],
+      "title": "RuleDslV2RowPredicateMeasure",
+      "type": "object"
+    },
+    "RuleDslV2Rule": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/RuleDslV2Evidence"
+        },
+        "expectation": {
+          "discriminator": {
+            "mapping": {
+              "baseline": "#/components/schemas/RuleDslV2BaselineExpectation",
+              "equality": "#/components/schemas/RuleDslV2EqualityExpectation",
+              "schema_contract": "#/components/schemas/RuleDslV2SchemaContractExpectation",
+              "set_membership": "#/components/schemas/RuleDslV2SetMembershipExpectation",
+              "threshold": "#/components/schemas/RuleDslV2ThresholdExpectation"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2ThresholdExpectation"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2EqualityExpectation"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2SetMembershipExpectation"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2SchemaContractExpectation"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2BaselineExpectation"
+            }
+          ],
+          "title": "Expectation"
+        },
+        "kind": {
+          "enum": [
+            "row_assertion",
+            "metric_threshold",
+            "metric_comparison",
+            "schema_assertion",
+            "reference_assertion",
+            "reconciliation_assertion",
+            "freshness_assertion",
+            "distribution_assertion",
+            "anomaly_assertion",
+            "custom_query_assertion"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "measure": {
+          "discriminator": {
+            "mapping": {
+              "metric": "#/components/schemas/RuleDslV2MetricMeasure",
+              "query": "#/components/schemas/RuleDslV2QueryMeasure",
+              "row_predicate": "#/components/schemas/RuleDslV2RowPredicateMeasure",
+              "schema": "#/components/schemas/RuleDslV2SchemaMeasure"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2RowPredicateMeasure"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2MetricMeasure"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2SchemaMeasure"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2QueryMeasure"
+            }
+          ],
+          "title": "Measure"
+        },
+        "operations": {
+          "$ref": "#/$defs/RuleDslV2Operations"
+        },
+        "reusable_filter_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reusable Filter Ids",
+          "type": "array"
+        },
+        "reusable_join_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reusable Join Id"
+        },
+        "scope": {
+          "$ref": "#/$defs/RuleDslV2Scope"
+        }
+      },
+      "required": [
+        "kind",
+        "scope",
+        "measure",
+        "expectation",
+        "evidence",
+        "operations"
+      ],
+      "title": "RuleDslV2Rule",
+      "type": "object"
+    },
+    "RuleDslV2SchemaContractExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_types": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Types"
+        },
+        "forbidden_columns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Forbidden Columns"
+        },
+        "max_column_count": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Column Count"
+        },
+        "min_column_count": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Min Column Count"
+        },
+        "ordered_columns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ordered Columns"
+        },
+        "required_columns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Required Columns"
+        },
+        "type": {
+          "const": "schema_contract",
+          "default": "schema_contract",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "RuleDslV2SchemaContractExpectation",
+      "type": "object"
+    },
+    "RuleDslV2SchemaMeasure": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_assertion": {
+          "enum": [
+            "required_columns_present",
+            "forbidden_columns_absent",
+            "column_types_match",
+            "column_count_between",
+            "column_order_matches"
+          ],
+          "title": "Schema Assertion",
+          "type": "string"
+        },
+        "type": {
+          "const": "schema",
+          "default": "schema",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_assertion"
+      ],
+      "title": "RuleDslV2SchemaMeasure",
+      "type": "object"
+    },
+    "RuleDslV2Scope": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2ComparisonScope"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dataset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2DatasetScope"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "grouping": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2GroupingScope"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "join": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2JoinScope"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "row_filter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2RowPredicate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time_window": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleDslV2TimeWindow"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "title": "RuleDslV2Scope",
+      "type": "object"
+    },
+    "RuleDslV2SetMembershipExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allowed Values"
+        },
+        "blocked_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blocked Values"
+        },
+        "type": {
+          "const": "set_membership",
+          "default": "set_membership",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "RuleDslV2SetMembershipExpectation",
+      "type": "object"
+    },
+    "RuleDslV2Subject": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Column"
+        },
+        "columns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Columns"
+        }
+      },
+      "title": "RuleDslV2Subject",
+      "type": "object"
+    },
+    "RuleDslV2ThresholdExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "max_value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Value"
+        },
+        "min_value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Min Value"
+        },
+        "operator": {
+          "enum": [
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "between"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "type": {
+          "const": "threshold",
+          "default": "threshold",
+          "title": "Type",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "enum": [
+                "count",
+                "percent",
+                "duration",
+                "raw"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "operator"
+      ],
+      "title": "RuleDslV2ThresholdExpectation",
+      "type": "object"
+    },
+    "RuleDslV2TimeWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anchor Column"
+        },
+        "leading_duration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Leading Duration"
+        },
+        "trailing_duration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Trailing Duration"
+        }
+      },
+      "title": "RuleDslV2TimeWindow",
+      "type": "object"
+    },
+    "RuleFilterIntermediateView": {
+      "properties": {
+        "alias_expectations": {
+          "items": {
+            "$ref": "#/$defs/CompilerAliasExpectationView"
+          },
+          "title": "Alias Expectations",
+          "type": "array"
+        },
+        "ast": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ast"
+        },
+        "logical_operators": {
+          "items": {
+            "enum": [
+              "AND",
+              "OR",
+              "NOT"
+            ],
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "rule_compiler.logical_operator"
+          },
+          "title": "Logical Operators",
+          "type": "array"
+        },
+        "normalized": {
+          "title": "Normalized",
+          "type": "string"
+        },
+        "predicates": {
+          "items": {
+            "$ref": "#/$defs/CompilerPredicateView"
+          },
+          "title": "Predicates",
+          "type": "array"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "normalized"
+      ],
+      "title": "RuleFilterIntermediateView",
+      "type": "object"
+    },
+    "RuleIntermediateModelView": {
+      "properties": {
+        "artifact_key": {
+          "title": "Artifact Key",
+          "type": "string"
+        },
+        "compilable": {
+          "title": "Compilable",
+          "type": "boolean"
+        },
+        "compiler_version": {
+          "pattern": "^dq-\\d+\\.\\d+\\.\\d+$",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/CompilerDiagnosticView"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "execution_contract": {
+          "$ref": "#/$defs/CompilerExecutionContractView"
+        },
+        "filter": {
+          "$ref": "#/$defs/RuleFilterIntermediateView"
+        },
+        "join": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Join"
+        },
+        "rule": {
+          "$ref": "#/$defs/CompilerRuleReferenceView"
+        },
+        "schema_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "target": {
+          "enum": [
+            "dsl"
+          ],
+          "title": "Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.target"
+        }
+      },
+      "required": [
+        "artifact_key",
+        "compiler_version",
+        "schema_version",
+        "target",
+        "rule",
+        "filter",
+        "execution_contract",
+        "compilable"
+      ],
+      "title": "RuleIntermediateModelView",
+      "type": "object"
+    },
+    "RuleLifecycleTransitionRequest": {
+      "properties": {
+        "lifecycle_status": {
+          "title": "Lifecycle Status",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "lifecycle_status"
+      ],
+      "title": "RuleLifecycleTransitionRequest",
+      "type": "object"
+    },
+    "RuleMutationRequest": {
+      "properties": {
+        "active": {
+          "default": false,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "ai_output": {
+          "default": false,
+          "title": "Ai Output",
+          "type": "boolean"
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "dimension": {
+          "default": "",
+          "title": "Dimension",
+          "type": "string"
+        },
+        "dsl": {
+          "discriminator": {
+            "mapping": {
+              "1.0.0": "#/components/schemas/RuleDslV1Request",
+              "2.0.0": "#/components/schemas/RuleDslV2Document"
+            },
+            "propertyName": "schema_version"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RuleDslV1Request"
+            },
+            {
+              "$ref": "#/$defs/RuleDslV2Document"
+            }
+          ],
+          "title": "Dsl"
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Generated"
+        },
+        "is_template": {
+          "default": false,
+          "title": "Is Template",
+          "type": "boolean"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "suggestion_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suggestion Id"
+        },
+        "taxonomy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleTaxonomyRequest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "template_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Template Id"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "name",
+        "dsl"
+      ],
+      "title": "RuleMutationRequest",
+      "type": "object"
+    },
+    "RuleStatusHistoryView": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "changed_at": {
+          "title": "Changed At",
+          "type": "string"
+        },
+        "changed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Changed By"
+        },
+        "details": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Details"
+        },
+        "from_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From Status"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "to_status": {
+          "title": "To Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "action",
+        "to_status",
+        "changed_at"
+      ],
+      "title": "RuleStatusHistoryView",
+      "type": "object"
+    },
+    "RuleTagView": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "RuleTagView",
+      "type": "object"
+    },
+    "RuleTaxonomyRequest": {
+      "properties": {
+        "data_steward": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Steward"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain"
+        },
+        "domain_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain Owner"
+        },
+        "execution_target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Target"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Severity"
+        },
+        "sla_scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sla Scope"
+        },
+        "technical_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technical Owner"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type"
+        }
+      },
+      "title": "RuleTaxonomyRequest",
+      "type": "object"
+    },
+    "RuleTaxonomyView": {
+      "properties": {
+        "data_steward": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Steward"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain"
+        },
+        "domain_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain Owner"
+        },
+        "execution_target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Target"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Severity"
+        },
+        "sla_scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sla Scope"
+        },
+        "technical_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technical Owner"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type"
+        }
+      },
+      "title": "RuleTaxonomyView",
+      "type": "object"
+    },
+    "RuleTemplateEntity": {
+      "properties": {
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "default_risk_level": {
+          "title": "Default Risk Level",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "dimension": {
+          "title": "Dimension",
+          "type": "string"
+        },
+        "example_use": {
+          "title": "Example Use",
+          "type": "string"
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Icon"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "inheritance_chain": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Inheritance Chain",
+          "type": "array"
+        },
+        "inherits_from_template_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Inherits From Template Id"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "pack_id": {
+          "title": "Pack Id",
+          "type": "string"
+        },
+        "pack_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pack Name"
+        },
+        "parameter_schema": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Parameter Schema",
+          "type": "array"
+        },
+        "rule_type": {
+          "title": "Rule Type",
+          "type": "string"
+        },
+        "template_rule_definition": {
+          "additionalProperties": true,
+          "title": "Template Rule Definition",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "dimension",
+        "category",
+        "default_risk_level",
+        "rule_type",
+        "example_use",
+        "pack_id"
+      ],
+      "title": "RuleTemplateEntity",
+      "type": "object"
+    },
+    "RuleTemplatePackEntity": {
+      "properties": {
+        "default_template_rule_definition": {
+          "additionalProperties": true,
+          "title": "Default Template Rule Definition",
+          "type": "object"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "dimension": {
+          "title": "Dimension",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "template_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Template Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "dimension"
+      ],
+      "title": "RuleTemplatePackEntity",
+      "type": "object"
+    },
+    "RuleTemplateRequest": {
+      "properties": {
+        "template_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Template Description"
+        },
+        "template_name": {
+          "title": "Template Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "template_name"
+      ],
+      "title": "RuleTemplateRequest",
+      "type": "object"
+    },
+    "RuleTemplateResolutionEntity": {
+      "properties": {
+        "applied_overrides": {
+          "additionalProperties": true,
+          "title": "Applied Overrides",
+          "type": "object"
+        },
+        "inheritance_chain": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Inheritance Chain",
+          "type": "array"
+        },
+        "pack": {
+          "$ref": "#/$defs/RuleTemplatePackEntity"
+        },
+        "template": {
+          "$ref": "#/$defs/RuleTemplateEntity"
+        }
+      },
+      "required": [
+        "template",
+        "pack"
+      ],
+      "title": "RuleTemplateResolutionEntity",
+      "type": "object"
+    },
+    "RuleTemplateResolveRequest": {
+      "properties": {
+        "overrides": {
+          "additionalProperties": true,
+          "title": "Overrides",
+          "type": "object"
+        }
+      },
+      "title": "RuleTemplateResolveRequest",
+      "type": "object"
+    },
+    "RuleUserView": {
+      "properties": {
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "display_name"
+      ],
+      "title": "RuleUserView",
+      "type": "object"
+    },
+    "RuleValidationResponseView": {
+      "properties": {
+        "artifact_key": {
+          "title": "Artifact Key",
+          "type": "string"
+        },
+        "compiled_expression": {
+          "title": "Compiled Expression",
+          "type": "string"
+        },
+        "compiler_version": {
+          "pattern": "^dq-\\d+\\.\\d+\\.\\d+$",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/CompilerDiagnosticView"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "inferred_aliases": {
+          "items": {
+            "$ref": "#/$defs/CompilerAliasExpectationView"
+          },
+          "title": "Inferred Aliases",
+          "type": "array"
+        },
+        "intermediate_model": {
+          "$ref": "#/$defs/RuleIntermediateModelView"
+        },
+        "summary": {
+          "$ref": "#/$defs/RuleValidationSummaryView"
+        },
+        "target": {
+          "enum": [
+            "dsl"
+          ],
+          "title": "Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.target"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "valid",
+        "compiled_expression",
+        "artifact_key",
+        "compiler_version",
+        "target",
+        "intermediate_model",
+        "summary"
+      ],
+      "title": "RuleValidationResponseView",
+      "type": "object"
+    },
+    "RuleValidationSummaryView": {
+      "properties": {
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "warnings": {
+          "title": "Warnings",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "errors",
+        "warnings"
+      ],
+      "title": "RuleValidationSummaryView",
+      "type": "object"
+    },
+    "RuleView": {
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "check_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Check Type"
+        },
+        "check_type_params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Check Type Params"
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuleUserView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_by_user_id": {
+          "title": "Created By User Id",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "dimension": {
+          "title": "Dimension",
+          "type": "string"
+        },
+        "dsl": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dsl"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "lifecycle_status": {
+          "default": "active",
+          "title": "Lifecycle Status",
+          "type": "string"
+        },
+        "manual_override_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Manual Override At"
+        },
+        "manual_override_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Manual Override By"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "pending_deactivation_requested": {
+          "default": false,
+          "title": "Pending Deactivation Requested",
+          "type": "boolean"
+        },
+        "reusable_filter_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reusable Filter Ids",
+          "type": "array"
+        },
+        "reusable_join_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reusable Join Id"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/$defs/RuleTagView"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "taxonomy": {
+          "$ref": "#/$defs/RuleTaxonomyView"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "expression",
+        "dimension",
+        "active",
+        "created_by_user_id",
+        "tag_ids"
+      ],
+      "title": "RuleView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "VersionTagsUpdateRequest": {
+      "properties": {
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "tags"
+      ],
+      "title": "VersionTagsUpdateRequest",
+      "type": "object"
+    },
+    "activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_param_query_effective_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Effective At"
+    },
+    "activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_request_body_application_json": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GxSuiteAutoPublishRequest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Body"
+    },
+    "activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Activate Rule Api Rulebuilder V1 Rules  Rule Id  Activate Post",
+      "type": "object"
+    },
+    "compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_param_path_version_1": {
+      "title": "Version 1",
+      "type": "string"
+    },
+    "compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_param_path_version_2": {
+      "title": "Version 2",
+      "type": "string"
+    },
+    "compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Compare Rule Versions Api Rulebuilder V1 Rules  Rule Id  Versions  Version 1  Compare  Version 2  Get",
+      "type": "object"
+    },
+    "create_reusable_filter_api_rulebuilder_v1_reusable_filters_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Reusable Filter Api Rulebuilder V1 Reusable Filters Post",
+      "type": "object"
+    },
+    "create_reusable_join_api_rulebuilder_v1_reusable_joins_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Reusable Join Api Rulebuilder V1 Reusable Joins Post",
+      "type": "object"
+    },
+    "create_rule_api_rulebuilder_v1_rules_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Rule Api Rulebuilder V1 Rules Post",
+      "type": "object"
+    },
+    "delete_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_delete_param_path_filter_id": {
+      "title": "Filter Id",
+      "type": "string"
+    },
+    "delete_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_delete_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Delete Reusable Filter Api Rulebuilder V1 Reusable Filters  Filter Id  Delete",
+      "type": "object"
+    },
+    "delete_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_delete_param_path_join_id": {
+      "title": "Join Id",
+      "type": "string"
+    },
+    "delete_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_delete_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Delete Reusable Join Api Rulebuilder V1 Reusable Joins  Join Id  Delete",
+      "type": "object"
+    },
+    "get_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_get_param_path_filter_id": {
+      "title": "Filter Id",
+      "type": "string"
+    },
+    "get_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Reusable Filter Api Rulebuilder V1 Reusable Filters  Filter Id  Get",
+      "type": "object"
+    },
+    "get_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_get_param_path_join_id": {
+      "title": "Join Id",
+      "type": "string"
+    },
+    "get_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Reusable Join Api Rulebuilder V1 Reusable Joins  Join Id  Get",
+      "type": "object"
+    },
+    "get_rule_api_rulebuilder_v1_rules_rule_id_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_param_query_limit": {
+      "default": 10,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Rule Rollback History Api Rulebuilder V1 Rules  Rule Id  Versions Rollback History Get",
+      "type": "object"
+    },
+    "get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_param_query_limit": {
+      "default": 100,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/RuleStatusHistoryView"
+      },
+      "title": "Response Get Rule Status History Api Rulebuilder V1 Rules  Rule Id  Status History Get",
+      "type": "array"
+    },
+    "get_rule_version_active_compiler_artifact_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_active_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_rule_version_active_compiler_artifact_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_active_get_param_path_version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "get_rule_version_active_compiler_artifact_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_active_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Rule Version Active Compiler Artifact Api Rulebuilder V1 Rules  Rule Id  Versions  Version Id  Compiler Artifacts Active Get",
+      "type": "object"
+    },
+    "get_rule_version_api_rulebuilder_v1_rules_rule_id_versions_version_id_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_rule_version_api_rulebuilder_v1_rules_rule_id_versions_version_id_get_param_path_version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "get_rule_version_api_rulebuilder_v1_rules_rule_id_versions_version_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Rule Version Api Rulebuilder V1 Rules  Rule Id  Versions  Version Id  Get",
+      "type": "object"
+    },
+    "get_rule_version_statistics_api_rulebuilder_v1_rules_rule_id_versions_stats_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_rule_version_statistics_api_rulebuilder_v1_rules_rule_id_versions_stats_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Rule Version Statistics Api Rulebuilder V1 Rules  Rule Id  Versions Stats Get",
+      "type": "object"
+    },
+    "get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Rule Versions Api Rulebuilder V1 Rules  Rule Id  Versions Get",
+      "type": "object"
+    },
+    "list_reusable_filters_api_rulebuilder_v1_reusable_filters_get_param_query_q": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Q"
+    },
+    "list_reusable_filters_api_rulebuilder_v1_reusable_filters_get_param_query_workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace"
+    },
+    "list_reusable_filters_api_rulebuilder_v1_reusable_filters_get_response_200_application_json": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Response List Reusable Filters Api Rulebuilder V1 Reusable Filters Get",
+      "type": "array"
+    },
+    "list_reusable_joins_api_rulebuilder_v1_reusable_joins_get_param_query_workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace"
+    },
+    "list_reusable_joins_api_rulebuilder_v1_reusable_joins_get_response_200_application_json": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Response List Reusable Joins Api Rulebuilder V1 Reusable Joins Get",
+      "type": "array"
+    },
+    "list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_param_query_workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace"
+    },
+    "list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Rule Compiler Versions Api Rulebuilder V1 Rules Compiler Versions Get",
+      "type": "object"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Domain"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_execution_target": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Execution Target"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_includeDeleted": {
+      "default": false,
+      "title": "Includedeleted",
+      "type": "boolean"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_is_template": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Is Template"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_lifecycle_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Lifecycle Status"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Owner"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_q": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Q"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_rule_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rule Type"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_severity": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Severity"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_updated_before": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Updated Before"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_updated_since": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Updated Since"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace"
+    },
+    "list_rule_registry_api_rulebuilder_v1_rules_registry_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Rule Registry Api Rulebuilder V1 Rules Registry Get",
+      "type": "object"
+    },
+    "list_rule_template_packs_api_rulebuilder_v1_rules_template_packs_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/RuleTemplatePackEntity"
+      },
+      "title": "Response List Rule Template Packs Api Rulebuilder V1 Rules Template Packs Get",
+      "type": "array"
+    },
+    "list_rule_templates_api_rulebuilder_v1_rules_templates_get_param_query_dimension": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dimension"
+    },
+    "list_rule_templates_api_rulebuilder_v1_rules_templates_get_param_query_pack_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Pack Id"
+    },
+    "list_rule_templates_api_rulebuilder_v1_rules_templates_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/RuleTemplateEntity"
+      },
+      "title": "Response List Rule Templates Api Rulebuilder V1 Rules Templates Get",
+      "type": "array"
+    },
+    "list_rule_version_compiler_artifacts_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "list_rule_version_compiler_artifacts_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_get_param_path_version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "list_rule_version_compiler_artifacts_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Rule Version Compiler Artifacts Api Rulebuilder V1 Rules  Rule Id  Versions  Version Id  Compiler Artifacts Get",
+      "type": "object"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_includeDeleted": {
+      "default": false,
+      "title": "Includedeleted",
+      "type": "boolean"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_is_template": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Is Template"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_lifecycle_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Lifecycle Status"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Owner"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_q": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Q"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_updated_before": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Updated Before"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_updated_since": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Updated Since"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_param_query_workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace"
+    },
+    "list_rules_api_rulebuilder_v1_rules_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Rules Api Rulebuilder V1 Rules Get",
+      "type": "object"
+    },
+    "mark_rule_version_for_rollback_api_rulebuilder_v1_rules_rule_id_versions_version_id_mark_for_rollback_patch_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "mark_rule_version_for_rollback_api_rulebuilder_v1_rules_rule_id_versions_version_id_mark_for_rollback_patch_param_path_version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "mark_rule_version_for_rollback_api_rulebuilder_v1_rules_rule_id_versions_version_id_mark_for_rollback_patch_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Mark Rule Version For Rollback Api Rulebuilder V1 Rules  Rule Id  Versions  Version Id  Mark For Rollback Patch",
+      "type": "object"
+    },
+    "remove_rule_api_rulebuilder_v1_rules_rule_id_delete_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "remove_rule_api_rulebuilder_v1_rules_rule_id_delete_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Remove Rule Api Rulebuilder V1 Rules  Rule Id  Delete",
+      "type": "object"
+    },
+    "resolve_aliases_api_rulebuilder_v1_rules_aliases_resolve_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Resolve Aliases Api Rulebuilder V1 Rules Aliases Resolve Post",
+      "type": "object"
+    },
+    "resolve_rule_template_api_rulebuilder_v1_rules_templates_template_id_resolve_post_param_path_template_id": {
+      "title": "Template Id",
+      "type": "string"
+    },
+    "rollback_rule_api_rulebuilder_v1_rules_rule_id_rollback_post_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "rollback_rule_api_rulebuilder_v1_rules_rule_id_rollback_post_response_202_application_json": {
+      "additionalProperties": true,
+      "title": "Response Rollback Rule Api Rulebuilder V1 Rules  Rule Id  Rollback Post",
+      "type": "object"
+    },
+    "save_rule_as_template_api_rulebuilder_v1_rules_rule_id_template_post_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "save_rule_as_template_api_rulebuilder_v1_rules_rule_id_template_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Save Rule As Template Api Rulebuilder V1 Rules  Rule Id  Template Post",
+      "type": "object"
+    },
+    "transition_rule_lifecycle_api_rulebuilder_v1_rules_rule_id_lifecycle_patch_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "transition_rule_lifecycle_api_rulebuilder_v1_rules_rule_id_lifecycle_patch_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Transition Rule Lifecycle Api Rulebuilder V1 Rules  Rule Id  Lifecycle Patch",
+      "type": "object"
+    },
+    "update_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_put_param_path_filter_id": {
+      "title": "Filter Id",
+      "type": "string"
+    },
+    "update_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_put_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Update Reusable Filter Api Rulebuilder V1 Reusable Filters  Filter Id  Put",
+      "type": "object"
+    },
+    "update_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_put_param_path_join_id": {
+      "title": "Join Id",
+      "type": "string"
+    },
+    "update_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_put_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Update Reusable Join Api Rulebuilder V1 Reusable Joins  Join Id  Put",
+      "type": "object"
+    },
+    "update_rule_api_rulebuilder_v1_rules_rule_id_put_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "update_rule_api_rulebuilder_v1_rules_rule_id_put_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Update Rule Api Rulebuilder V1 Rules  Rule Id  Put",
+      "type": "object"
+    },
+    "update_rule_version_tags_api_rulebuilder_v1_rules_rule_id_versions_version_id_tags_patch_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "update_rule_version_tags_api_rulebuilder_v1_rules_rule_id_versions_version_id_tags_patch_param_path_version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "update_rule_version_tags_api_rulebuilder_v1_rules_rule_id_versions_version_id_tags_patch_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Update Rule Version Tags Api Rulebuilder V1 Rules  Rule Id  Versions  Version Id  Tags Patch",
+      "type": "object"
+    },
+    "validate_rule_composition_api_rulebuilder_v1_rules_rule_id_validate_post_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "validate_rule_composition_enriched_api_rulebuilder_v1_rules_rule_id_validate_enriched_post_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "validate_rule_composition_enriched_api_rulebuilder_v1_rules_rule_id_validate_enriched_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Validate Rule Composition Enriched Api Rulebuilder V1 Rules  Rule Id  Validate Enriched Post",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/rules/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/rules v1 schema bundle"
+}

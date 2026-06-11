@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/test-proof/v1/schema.json",
+  "title": "Git-Backed Test Proof v1",
+  "description": "Canonical committed proof summary for curated UI and API test evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "app_version",
+    "proof_id",
+    "proof_type",
+    "feature",
+    "summary",
+    "status",
+    "executed_at_utc",
+    "command",
+    "raw_evidence_directory",
+    "test_files",
+    "test_file_count",
+    "test_count",
+    "assertions"
+  ],
+  "properties": {
+    "app_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Application version that owns the proof artifact directory."
+    },
+    "proof_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proof_type": {
+      "type": "string",
+      "enum": [
+        "ui",
+        "ui-api",
+        "api"
+      ]
+    },
+    "feature": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "blocked",
+        "skipped"
+      ]
+    },
+    "executed_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "raw_evidence_directory": {
+      "type": "string",
+      "minLength": 1
+    },
+    "test_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "test_file_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "test_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "proof_data": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,429 @@
+{
+  "contracts": [
+    {
+      "files": {
+        "openapi": "aggregate/v1/openapi.json",
+        "operations": "aggregate/v1/operations.json",
+        "schema": "aggregate/v1/schema.json"
+      },
+      "group": "aggregate",
+      "kind": "aggregate",
+      "operation_count": 319,
+      "path_count": 274,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/admin/v1/openapi.json",
+        "operations": "by-tag/admin/v1/operations.json",
+        "schema": "by-tag/admin/v1/schema.json"
+      },
+      "group": "by-tag/admin",
+      "kind": "tag",
+      "operation_count": 13,
+      "path_count": 10,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/agent/v1/openapi.json",
+        "operations": "by-tag/agent/v1/operations.json",
+        "schema": "by-tag/agent/v1/schema.json"
+      },
+      "group": "by-tag/agent",
+      "kind": "tag",
+      "operation_count": 9,
+      "path_count": 9,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/approvals/v1/openapi.json",
+        "operations": "by-tag/approvals/v1/operations.json",
+        "schema": "by-tag/approvals/v1/schema.json"
+      },
+      "group": "by-tag/approvals",
+      "kind": "tag",
+      "operation_count": 13,
+      "path_count": 10,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/auth/v1/openapi.json",
+        "operations": "by-tag/auth/v1/operations.json",
+        "schema": "by-tag/auth/v1/schema.json"
+      },
+      "group": "by-tag/auth",
+      "kind": "tag",
+      "operation_count": 6,
+      "path_count": 5,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/configuration/v1/openapi.json",
+        "operations": "by-tag/configuration/v1/operations.json",
+        "schema": "by-tag/configuration/v1/schema.json"
+      },
+      "group": "by-tag/configuration",
+      "kind": "tag",
+      "operation_count": 2,
+      "path_count": 1,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/connectors/v1/openapi.json",
+        "operations": "by-tag/connectors/v1/operations.json",
+        "schema": "by-tag/connectors/v1/schema.json"
+      },
+      "group": "by-tag/connectors",
+      "kind": "tag",
+      "operation_count": 7,
+      "path_count": 6,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/data-assets/v1/openapi.json",
+        "operations": "by-tag/data-assets/v1/operations.json",
+        "schema": "by-tag/data-assets/v1/schema.json"
+      },
+      "group": "by-tag/data-assets",
+      "kind": "tag",
+      "operation_count": 17,
+      "path_count": 13,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/data-catalog/v1/openapi.json",
+        "operations": "by-tag/data-catalog/v1/operations.json",
+        "schema": "by-tag/data-catalog/v1/schema.json"
+      },
+      "group": "by-tag/data-catalog",
+      "kind": "tag",
+      "operation_count": 31,
+      "path_count": 28,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/data-contracts/v1/openapi.json",
+        "operations": "by-tag/data-contracts/v1/operations.json",
+        "schema": "by-tag/data-contracts/v1/schema.json"
+      },
+      "group": "by-tag/data-contracts",
+      "kind": "tag",
+      "operation_count": 4,
+      "path_count": 4,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/data-protection/v1/openapi.json",
+        "operations": "by-tag/data-protection/v1/operations.json",
+        "schema": "by-tag/data-protection/v1/schema.json"
+      },
+      "group": "by-tag/data-protection",
+      "kind": "tag",
+      "operation_count": 2,
+      "path_count": 1,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/demo/v1/openapi.json",
+        "operations": "by-tag/demo/v1/operations.json",
+        "schema": "by-tag/demo/v1/schema.json"
+      },
+      "group": "by-tag/demo",
+      "kind": "tag",
+      "operation_count": 1,
+      "path_count": 1,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/exceptions/v1/openapi.json",
+        "operations": "by-tag/exceptions/v1/operations.json",
+        "schema": "by-tag/exceptions/v1/schema.json"
+      },
+      "group": "by-tag/exceptions",
+      "kind": "tag",
+      "operation_count": 15,
+      "path_count": 15,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/governance/v1/openapi.json",
+        "operations": "by-tag/governance/v1/operations.json",
+        "schema": "by-tag/governance/v1/schema.json"
+      },
+      "group": "by-tag/governance",
+      "kind": "tag",
+      "operation_count": 22,
+      "path_count": 18,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/gx/v1/openapi.json",
+        "operations": "by-tag/gx/v1/operations.json",
+        "schema": "by-tag/gx/v1/schema.json"
+      },
+      "group": "by-tag/gx",
+      "kind": "tag",
+      "operation_count": 28,
+      "path_count": 25,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/health/v1/openapi.json",
+        "operations": "by-tag/health/v1/operations.json",
+        "schema": "by-tag/health/v1/schema.json"
+      },
+      "group": "by-tag/health",
+      "kind": "tag",
+      "operation_count": 4,
+      "path_count": 4,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/incidents/v1/openapi.json",
+        "operations": "by-tag/incidents/v1/operations.json",
+        "schema": "by-tag/incidents/v1/schema.json"
+      },
+      "group": "by-tag/incidents",
+      "kind": "tag",
+      "operation_count": 18,
+      "path_count": 14,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/master-data/v1/openapi.json",
+        "operations": "by-tag/master-data/v1/operations.json",
+        "schema": "by-tag/master-data/v1/schema.json"
+      },
+      "group": "by-tag/master-data",
+      "kind": "tag",
+      "operation_count": 1,
+      "path_count": 1,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/metadata-registry/v1/openapi.json",
+        "operations": "by-tag/metadata-registry/v1/operations.json",
+        "schema": "by-tag/metadata-registry/v1/schema.json"
+      },
+      "group": "by-tag/metadata-registry",
+      "kind": "tag",
+      "operation_count": 8,
+      "path_count": 7,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/notifications/v1/openapi.json",
+        "operations": "by-tag/notifications/v1/operations.json",
+        "schema": "by-tag/notifications/v1/schema.json"
+      },
+      "group": "by-tag/notifications",
+      "kind": "tag",
+      "operation_count": 1,
+      "path_count": 1,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/observability/v1/openapi.json",
+        "operations": "by-tag/observability/v1/operations.json",
+        "schema": "by-tag/observability/v1/schema.json"
+      },
+      "group": "by-tag/observability",
+      "kind": "tag",
+      "operation_count": 6,
+      "path_count": 5,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/onboarding/v1/openapi.json",
+        "operations": "by-tag/onboarding/v1/operations.json",
+        "schema": "by-tag/onboarding/v1/schema.json"
+      },
+      "group": "by-tag/onboarding",
+      "kind": "tag",
+      "operation_count": 3,
+      "path_count": 3,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/ontology/v1/openapi.json",
+        "operations": "by-tag/ontology/v1/operations.json",
+        "schema": "by-tag/ontology/v1/schema.json"
+      },
+      "group": "by-tag/ontology",
+      "kind": "tag",
+      "operation_count": 5,
+      "path_count": 5,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/product-specs/v1/openapi.json",
+        "operations": "by-tag/product-specs/v1/operations.json",
+        "schema": "by-tag/product-specs/v1/schema.json"
+      },
+      "group": "by-tag/product-specs",
+      "kind": "tag",
+      "operation_count": 7,
+      "path_count": 5,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/profiling/v1/openapi.json",
+        "operations": "by-tag/profiling/v1/operations.json",
+        "schema": "by-tag/profiling/v1/schema.json"
+      },
+      "group": "by-tag/profiling",
+      "kind": "tag",
+      "operation_count": 6,
+      "path_count": 5,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/registry-definitions/v1/openapi.json",
+        "operations": "by-tag/registry-definitions/v1/operations.json",
+        "schema": "by-tag/registry-definitions/v1/schema.json"
+      },
+      "group": "by-tag/registry-definitions",
+      "kind": "tag",
+      "operation_count": 3,
+      "path_count": 3,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/rules/v1/openapi.json",
+        "operations": "by-tag/rules/v1/operations.json",
+        "schema": "by-tag/rules/v1/schema.json"
+      },
+      "group": "by-tag/rules",
+      "kind": "tag",
+      "operation_count": 39,
+      "path_count": 30,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/run-plan/v1/openapi.json",
+        "operations": "by-tag/run-plan/v1/operations.json",
+        "schema": "by-tag/run-plan/v1/schema.json"
+      },
+      "group": "by-tag/run-plan",
+      "kind": "tag",
+      "operation_count": 1,
+      "path_count": 1,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/suggestions/v1/openapi.json",
+        "operations": "by-tag/suggestions/v1/operations.json",
+        "schema": "by-tag/suggestions/v1/schema.json"
+      },
+      "group": "by-tag/suggestions",
+      "kind": "tag",
+      "operation_count": 13,
+      "path_count": 13,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/support/v1/openapi.json",
+        "operations": "by-tag/support/v1/operations.json",
+        "schema": "by-tag/support/v1/schema.json"
+      },
+      "group": "by-tag/support",
+      "kind": "tag",
+      "operation_count": 1,
+      "path_count": 1,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/system/v1/openapi.json",
+        "operations": "by-tag/system/v1/operations.json",
+        "schema": "by-tag/system/v1/schema.json"
+      },
+      "group": "by-tag/system",
+      "kind": "tag",
+      "operation_count": 6,
+      "path_count": 6,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/testing/v1/openapi.json",
+        "operations": "by-tag/testing/v1/operations.json",
+        "schema": "by-tag/testing/v1/schema.json"
+      },
+      "group": "by-tag/testing",
+      "kind": "tag",
+      "operation_count": 18,
+      "path_count": 17,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/validation-run-plans/v1/openapi.json",
+        "operations": "by-tag/validation-run-plans/v1/operations.json",
+        "schema": "by-tag/validation-run-plans/v1/schema.json"
+      },
+      "group": "by-tag/validation-run-plans",
+      "kind": "tag",
+      "operation_count": 2,
+      "path_count": 2,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/validation-runs/v1/openapi.json",
+        "operations": "by-tag/validation-runs/v1/operations.json",
+        "schema": "by-tag/validation-runs/v1/schema.json"
+      },
+      "group": "by-tag/validation-runs",
+      "kind": "tag",
+      "operation_count": 3,
+      "path_count": 3,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/workspaces/v1/openapi.json",
+        "operations": "by-tag/workspaces/v1/operations.json",
+        "schema": "by-tag/workspaces/v1/schema.json"
+      },
+      "group": "by-tag/workspaces",
+      "kind": "tag",
+      "operation_count": 4,
+      "path_count": 2,
+      "version": "v1"
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  }
+}

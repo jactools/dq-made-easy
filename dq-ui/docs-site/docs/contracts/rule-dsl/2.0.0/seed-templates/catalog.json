@@ -1,0 +1,75 @@
+{
+  "version": "2.0.0",
+  "templates": [
+    {
+      "template_id": "DQ7-SEED-002-TPL-001",
+      "rule_kind": "row_assertion",
+      "status": "drafted",
+      "gx_class": "native",
+      "template_file": "row_assertion.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-002",
+      "rule_kind": "metric_threshold",
+      "status": "drafted",
+      "gx_class": "native",
+      "template_file": "metric_threshold.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-003",
+      "rule_kind": "metric_comparison",
+      "status": "reserved",
+      "gx_class": "partial",
+      "template_file": "metric_comparison.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-004",
+      "rule_kind": "schema_assertion",
+      "status": "drafted",
+      "gx_class": "partial",
+      "template_file": "schema_assertion.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-005",
+      "rule_kind": "reference_assertion",
+      "status": "drafted",
+      "gx_class": "partial",
+      "template_file": "reference_assertion.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-006",
+      "rule_kind": "reconciliation_assertion",
+      "status": "reserved",
+      "gx_class": "partial",
+      "template_file": "reconciliation_assertion.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-007",
+      "rule_kind": "freshness_assertion",
+      "status": "drafted",
+      "gx_class": "partial",
+      "template_file": "freshness_assertion.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-008",
+      "rule_kind": "distribution_assertion",
+      "status": "reserved",
+      "gx_class": "partial",
+      "template_file": "distribution_assertion.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-009",
+      "rule_kind": "anomaly_assertion",
+      "status": "reserved",
+      "gx_class": "partial",
+      "template_file": "anomaly_assertion.template.json"
+    },
+    {
+      "template_id": "DQ7-SEED-002-TPL-010",
+      "rule_kind": "custom_query_assertion",
+      "status": "drafted",
+      "gx_class": "partial",
+      "template_file": "custom_query_assertion.template.json"
+    }
+  ]
+}

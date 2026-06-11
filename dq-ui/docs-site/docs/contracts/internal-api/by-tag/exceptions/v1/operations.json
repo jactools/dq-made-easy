@@ -1,0 +1,1204 @@
+{
+  "group": "by-tag/exceptions",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_delivery_exception_summary_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_path_delivery_id"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_get_param_query_ruleVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DeliveryExceptionSummaryView"
+            }
+          },
+          "description": "Delivery-scoped exception summary with reason analytics."
+        },
+        "404": {
+          "description": "Data delivery not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Exception summary is unavailable."
+        }
+      },
+      "summary": "Get Delivery Exception Summary",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "export_delivery_exception_summary_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_export_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_path_delivery_id"
+        },
+        {
+          "in": "query",
+          "name": "format",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_format"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_param_query_reasonCode"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary/export",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/export_delivery_exception_summary_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_export_get_response_200_application_json"
+            }
+          },
+          "description": "Exported delivery exception summary."
+        },
+        "404": {
+          "description": "Data delivery not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Exception summary export is unavailable."
+        }
+      },
+      "summary": "Export Delivery Exception Summary",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_records_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_path_delivery_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_offset"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_records_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_get_param_query_ruleVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary/records",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactsPageView"
+            }
+          },
+          "description": "Delivery-scoped semantic exception records."
+        },
+        "404": {
+          "description": "Data delivery not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Semantic exception records are unavailable."
+        }
+      },
+      "summary": "Get Delivery Exception Summary Records",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries__delivery_id__exception_summary_records__exception_fact_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_path_delivery_id"
+        },
+        {
+          "in": "path",
+          "name": "exception_fact_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_path_exception_fact_id"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_exception_summary_record_api_rulebuilder_v1_deliveries_delivery_id_exception_summary_records_exception_fact_id_get_param_query_ruleVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary/records/{exception_fact_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactView"
+            }
+          },
+          "description": "One delivery-scoped semantic exception record."
+        },
+        "404": {
+          "description": "Exception record not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Semantic exception record detail is unavailable."
+        }
+      },
+      "summary": "Get Delivery Exception Summary Record",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_exception_analysis_session_api_rulebuilder_v1_exceptions_analysis_sessions_post",
+      "path": "/api/rulebuilder/v1/exceptions/analysis-sessions",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ExceptionAnalysisSliceRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionAnalysisSessionView"
+            }
+          },
+          "description": "Stored GX analysis slice session created."
+        },
+        "403": {
+          "description": "Access denied for the analysis scope."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Analysis slice storage is unavailable."
+        }
+      },
+      "summary": "Create Exception Analysis Session",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_exception_analysis_session_api_rulebuilder_v1_exceptions_analysis_sessions__analysis_session_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "analysis_session_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_exception_analysis_session_api_rulebuilder_v1_exceptions_analysis_sessions_analysis_session_id_get_param_path_analysis_session_id"
+        },
+        {
+          "in": "query",
+          "name": "summary_only",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_analysis_session_api_rulebuilder_v1_exceptions_analysis_sessions_analysis_session_id_get_param_query_summary_only"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/exceptions/analysis-sessions/{analysis_session_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionAnalysisSessionView"
+            }
+          },
+          "description": "Stored GX analysis slice session."
+        },
+        "404": {
+          "description": "Analysis session not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Exception Analysis Session",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "append_exception_analysis_slice_api_rulebuilder_v1_exceptions_analysis_sessions__analysis_session_id__slices_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "analysis_session_id",
+          "required": true,
+          "schema_ref": "#/$defs/append_exception_analysis_slice_api_rulebuilder_v1_exceptions_analysis_sessions_analysis_session_id_slices_post_param_path_analysis_session_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/exceptions/analysis-sessions/{analysis_session_id}/slices",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ExceptionAnalysisSliceRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionAnalysisSessionView"
+            }
+          },
+          "description": "Stored GX analysis slice session updated with a new slice."
+        },
+        "404": {
+          "description": "Analysis session not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Analysis slice storage is unavailable."
+        }
+      },
+      "summary": "Append Exception Analysis Slice",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_exception_analysis_slice_api_rulebuilder_v1_exceptions_analysis_sessions__analysis_session_id__slices__analysis_slice_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "analysis_session_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_exception_analysis_slice_api_rulebuilder_v1_exceptions_analysis_sessions_analysis_session_id_slices_analysis_slice_id_get_param_path_analysis_session_id"
+        },
+        {
+          "in": "path",
+          "name": "analysis_slice_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_exception_analysis_slice_api_rulebuilder_v1_exceptions_analysis_sessions_analysis_session_id_slices_analysis_slice_id_get_param_path_analysis_slice_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/exceptions/analysis-sessions/{analysis_session_id}/slices/{analysis_slice_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionAnalysisSliceDetailView"
+            }
+          },
+          "description": "Stored GX analysis slice detail."
+        },
+        "404": {
+          "description": "Analysis slice not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Exception Analysis Slice",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_exception_facts_api_rulebuilder_v1_exceptions_facts_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": true,
+          "schema_ref": "#/$defs/list_exception_facts_api_rulebuilder_v1_exceptions_facts_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "executionRunId",
+          "required": false,
+          "schema_ref": "#/$defs/list_exception_facts_api_rulebuilder_v1_exceptions_facts_get_param_query_executionRunId"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_exception_facts_api_rulebuilder_v1_exceptions_facts_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/list_exception_facts_api_rulebuilder_v1_exceptions_facts_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/exceptions/facts",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactsPageView"
+            }
+          },
+          "description": "Canonical exception facts for a filtered execution scope."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "500": {
+          "description": "Stored exception facts cannot be projected to the canonical contract."
+        }
+      },
+      "summary": "List Exception Facts",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_exception_fact_api_rulebuilder_v1_exceptions_facts__exception_fact_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "exception_fact_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_exception_fact_api_rulebuilder_v1_exceptions_facts_exception_fact_id_get_param_path_exception_fact_id"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": true,
+          "schema_ref": "#/$defs/get_exception_fact_api_rulebuilder_v1_exceptions_facts_exception_fact_id_get_param_query_dataObjectVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/exceptions/facts/{exception_fact_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactView"
+            }
+          },
+          "description": "One canonical exception fact."
+        },
+        "404": {
+          "description": "Exception fact not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "500": {
+          "description": "Stored exception fact cannot be projected to the canonical contract."
+        }
+      },
+      "summary": "Get Exception Fact",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_exception_reason_analytics_api_rulebuilder_v1_exceptions_reason_analytics_get_param_query_ruleVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/exceptions/reason-analytics",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionReasonAnalyticsView"
+            }
+          },
+          "description": "Exception reason analytics for the current monitoring window."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Exception analytics are unavailable."
+        }
+      },
+      "summary": "Get Exception Reason Analytics",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "execution_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_path_execution_plan_id"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_get_param_query_ruleVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExecutionPlanExceptionSummaryView"
+            }
+          },
+          "description": "Execution-plan-scoped exception summary with reason analytics."
+        },
+        "404": {
+          "description": "Execution plan not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Exception summary is unavailable."
+        }
+      },
+      "summary": "Get Execution Plan Exception Summary",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_export_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "execution_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_path_execution_plan_id"
+        },
+        {
+          "in": "query",
+          "name": "format",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_format"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_param_query_reasonCode"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary/export",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/export_execution_plan_exception_summary_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_export_get_response_200_application_json"
+            }
+          },
+          "description": "Exported execution plan exception summary."
+        },
+        "404": {
+          "description": "Execution plan not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Exception summary export is unavailable."
+        }
+      },
+      "summary": "Export Execution Plan Exception Summary",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_records_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "execution_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_path_execution_plan_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_offset"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_records_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_get_param_query_ruleVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary/records",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactsPageView"
+            }
+          },
+          "description": "Execution-plan-scoped semantic exception records."
+        },
+        "404": {
+          "description": "Execution plan not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Semantic exception records are unavailable."
+        }
+      },
+      "summary": "Get Execution Plan Exception Summary Records",
+      "tags": [
+        "exceptions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans__execution_plan_id__exception_summary_records__exception_fact_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "execution_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_path_execution_plan_id"
+        },
+        {
+          "in": "path",
+          "name": "exception_fact_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_path_exception_fact_id"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_execution_plan_exception_summary_record_api_rulebuilder_v1_execution_plans_execution_plan_id_exception_summary_records_exception_fact_id_get_param_query_ruleVersionId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/execution-plans/{execution_plan_id}/exception-summary/records/{exception_fact_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactView"
+            }
+          },
+          "description": "One execution-plan-scoped semantic exception record."
+        },
+        "404": {
+          "description": "Exception record not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Semantic exception record detail is unavailable."
+        }
+      },
+      "summary": "Get Execution Plan Exception Summary Record",
+      "tags": [
+        "exceptions"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

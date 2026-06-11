@@ -1,0 +1,68 @@
+{
+  "suiteId": "gx_suite_8f40b9ea",
+  "suiteVersion": 3,
+  "artifactVersion": "v1",
+  "assignmentScope": {
+    "dataObjectId": "do_sales_order",
+    "datasetId": "ds_sales",
+    "dataProductId": "odcs.dp.sales-001"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "lzv_sales_order_customer_join_v1"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "dq_sales_orders_v3",
+    "expectations": [],
+    "meta": {
+      "source": "dq-made-easy"
+    }
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "rule_1",
+      "rule_2"
+    ],
+    "compilerVersion": "dq-compiler-7.3",
+    "generatedAt": "2026-03-22T10:30:00Z"
+  },
+  "executionHints": {
+    "recommendedEngine": "pyspark",
+    "primaryKeyFields": [
+      "order_id"
+    ]
+  },
+  "executionContract": {
+    "engineTarget": "pyspark",
+    "executionShape": "join_pair",
+    "traceability": {
+      "ruleId": "rule_1",
+      "ruleVersionId": "rv_1",
+      "gxSuiteId": "gx_suite_8f40b9ea",
+      "gxSuiteVersion": 3,
+      "dataObjectVersionId": "lzv_sales_order_customer_join_v1"
+    },
+    "sourceMaterialization": {
+      "landingZoneArtifactId": "lz_sales_order_customer_join",
+      "landingZoneVersionId": "lzv_sales_order_customer_join_v1",
+      "outputLocation": "s3://dq-landing-zone/sales/order_customer_join/v1",
+      "joinType": "inner",
+      "joinKeys": [
+        "customer_id"
+      ],
+      "leftSource": {
+        "dataObjectId": "do_sales_order",
+        "dataObjectVersionId": "dov_sales_order_v3",
+        "datasetId": "ds_sales",
+        "dataProductId": "odcs.dp.sales-001"
+      },
+      "rightSource": {
+        "dataObjectId": "do_customer",
+        "dataObjectVersionId": "dov_customer_v7",
+        "datasetId": "ds_crm",
+        "dataProductId": "odcs.dp.crm-001"
+      }
+    }
+  }
+}

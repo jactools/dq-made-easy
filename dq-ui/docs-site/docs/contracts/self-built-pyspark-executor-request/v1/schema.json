@@ -1,0 +1,529 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/self-built-pyspark-executor-request/v1/schema.json",
+  "title": "Self-Built PySpark Executor Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "executor_contract_version",
+    "executor_kind",
+    "request_id",
+    "correlation_id",
+    "submitted_at",
+    "submitted_by",
+    "platform_run_ref",
+    "execution_batch"
+  ],
+  "properties": {
+    "executor_contract_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "executor_kind": {
+      "type": "string",
+      "const": "self_built_pyspark"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "submitted_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "platform_run_ref": {
+      "$ref": "#/$defs/platformRunRef"
+    },
+    "execution_batch": {
+      "$ref": "#/$defs/executionBatch"
+    }
+  },
+  "$defs": {
+    "platformRunRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_run_id",
+        "dispatch_mode"
+      ],
+      "properties": {
+        "execution_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dispatch_mode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "queue_message_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scheduled_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "executionBatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "batch_id",
+        "engine_target",
+        "grouping_key",
+        "grouping_value",
+        "execution_shape",
+        "source_binding",
+        "items"
+      ],
+      "properties": {
+        "batch_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engine_target": {
+          "type": "string",
+          "const": "pyspark"
+        },
+        "grouping_key": {
+          "type": "string",
+          "const": "data_object_version_id"
+        },
+        "grouping_value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "execution_shape": {
+          "type": "string",
+          "enum": [
+            "single_object",
+            "join_pair"
+          ]
+        },
+        "source_binding": {
+          "$ref": "#/$defs/sourceBinding"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/batchItem"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "execution_shape": {
+                "const": "single_object"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_binding": {
+                "$ref": "#/$defs/singleObjectSourceBinding"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "execution_shape": {
+                "const": "join_pair"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_binding": {
+                "$ref": "#/$defs/materializedJoinSourceBinding"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sourceBinding": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/singleObjectSourceBinding"
+        },
+        {
+          "$ref": "#/$defs/materializedJoinSourceBinding"
+        }
+      ]
+    },
+    "singleObjectSourceBinding": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/singleSparkSourceBinding"
+        },
+        {
+          "$ref": "#/$defs/singleJdbcSourceBinding"
+        },
+        {
+          "$ref": "#/$defs/singleFileSourceBinding"
+        }
+      ]
+    },
+    "singleSparkSourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binding_kind",
+        "data_object_version_id",
+        "source_adapter_kind",
+        "source_handle"
+      ],
+      "properties": {
+        "binding_kind": {
+          "type": "string",
+          "const": "resolved_object_version"
+        },
+        "data_object_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_adapter_kind": {
+          "type": "string",
+          "const": "spark"
+        },
+        "source_handle": {
+          "$ref": "#/$defs/sparkSourceHandle"
+        },
+        "primary_key_fields": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "business_key_fields": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "singleJdbcSourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binding_kind",
+        "data_object_version_id",
+        "source_adapter_kind",
+        "source_handle"
+      ],
+      "properties": {
+        "binding_kind": {
+          "type": "string",
+          "const": "resolved_object_version"
+        },
+        "data_object_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_adapter_kind": {
+          "type": "string",
+          "const": "jdbc"
+        },
+        "source_handle": {
+          "$ref": "#/$defs/jdbcSourceHandle"
+        },
+        "primary_key_fields": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "business_key_fields": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "singleFileSourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binding_kind",
+        "data_object_version_id",
+        "source_adapter_kind",
+        "source_handle"
+      ],
+      "properties": {
+        "binding_kind": {
+          "type": "string",
+          "const": "resolved_object_version"
+        },
+        "data_object_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_adapter_kind": {
+          "type": "string",
+          "const": "file"
+        },
+        "source_handle": {
+          "$ref": "#/$defs/fileSourceHandle"
+        },
+        "primary_key_fields": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "business_key_fields": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "sparkSourceHandle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalog",
+        "schema_name",
+        "object_name"
+      ],
+      "properties": {
+        "catalog": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "jdbcSourceHandle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "connection_ref",
+        "table_name"
+      ],
+      "properties": {
+        "connection_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "table_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "fileSourceHandle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uri",
+        "format"
+      ],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "parquet",
+            "delta",
+            "csv",
+            "json"
+          ]
+        }
+      }
+    },
+    "materializedJoinSourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binding_kind",
+        "landing_zone_artifact_id",
+        "landing_zone_version_id",
+        "output_location",
+        "output_format",
+        "left_source",
+        "right_source"
+      ],
+      "properties": {
+        "binding_kind": {
+          "type": "string",
+          "const": "materialized_join"
+        },
+        "landing_zone_artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "landing_zone_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "output_location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "output_format": {
+          "type": "string",
+          "enum": [
+            "parquet",
+            "delta"
+          ]
+        },
+        "left_source": {
+          "$ref": "#/$defs/sourceTargetRef"
+        },
+        "right_source": {
+          "$ref": "#/$defs/sourceTargetRef"
+        },
+        "join_keys": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "sourceTargetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "data_object_id",
+        "data_object_version_id"
+      ],
+      "properties": {
+        "data_object_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_object_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_product_id": {
+          "type": "string",
+          "pattern": "^odcs\\..+$"
+        }
+      }
+    },
+    "batchItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "engine_type",
+        "validation_artifact_ref",
+        "validation_artifact",
+        "traceability",
+        "required_capabilities"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engine_type": {
+          "type": "string",
+          "enum": [
+            "gx",
+            "pyspark_native"
+          ]
+        },
+        "validation_artifact_ref": {
+          "$ref": "#/$defs/validationArtifactRef"
+        },
+        "validation_artifact": {
+          "$ref": "../../validation-artifact-envelope/v1/schema.json"
+        },
+        "traceability": {
+          "$ref": "#/$defs/itemTraceability"
+        },
+        "required_capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "aggregate_outcomes",
+              "row_level_exceptions",
+              "primary_key_projection",
+              "deterministic_row_identity",
+              "materialized_join_input"
+            ]
+          }
+        }
+      }
+    },
+    "validationArtifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation_artifact_id",
+        "validation_artifact_version"
+      ],
+      "properties": {
+        "validation_artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_artifact_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "itemTraceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "rule_version_id",
+        "validation_artifact_id",
+        "validation_artifact_version",
+        "data_object_version_id"
+      ],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_artifact_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "data_object_version_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

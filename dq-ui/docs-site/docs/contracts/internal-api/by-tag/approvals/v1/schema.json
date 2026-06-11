@@ -1,0 +1,550 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "ApprovalAuditView": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actor Id"
+        },
+        "approval_id": {
+          "title": "Approval Id",
+          "type": "string"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "approval_id",
+        "action",
+        "timestamp"
+      ],
+      "title": "ApprovalAuditView",
+      "type": "object"
+    },
+    "ApprovalCommentEditRequest": {
+      "properties": {
+        "comment": {
+          "title": "Comment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "comment"
+      ],
+      "title": "ApprovalCommentEditRequest",
+      "type": "object"
+    },
+    "ApprovalCommentLockRequest": {
+      "properties": {
+        "locked": {
+          "title": "Locked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "locked"
+      ],
+      "title": "ApprovalCommentLockRequest",
+      "type": "object"
+    },
+    "ApprovalCommentRequest": {
+      "properties": {
+        "comment": {
+          "title": "Comment",
+          "type": "string"
+        },
+        "comment_type": {
+          "default": "general",
+          "enum": [
+            "general",
+            "note",
+            "concern",
+            "question"
+          ],
+          "title": "Comment Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "comment"
+      ],
+      "title": "ApprovalCommentRequest",
+      "type": "object"
+    },
+    "ApprovalView": {
+      "properties": {
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Business Key"
+        },
+        "comment_thread": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Comment Thread",
+          "type": "array"
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "comments_locked": {
+          "default": false,
+          "title": "Comments Locked",
+          "type": "boolean"
+        },
+        "effective_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective At"
+        },
+        "effective_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective Status"
+        },
+        "gx_run_plan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gx Run Plan Id"
+        },
+        "gx_run_plan_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gx Run Plan Version Id"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "removed_comment_count": {
+          "default": 0,
+          "title": "Removed Comment Count",
+          "type": "integer"
+        },
+        "request_type": {
+          "default": "activation",
+          "title": "Request Type",
+          "type": "string"
+        },
+        "requested_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested At"
+        },
+        "requester_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requester Id"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed At"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed By"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "workspace_id": {
+          "default": "default",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "rule_id",
+        "status"
+      ],
+      "title": "ApprovalView",
+      "type": "object"
+    },
+    "ApprovalsPageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/ApprovalView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationView"
+        }
+      },
+      "required": [
+        "data",
+        "pagination"
+      ],
+      "title": "ApprovalsPageView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "PaginationView": {
+      "properties": {
+        "has_next": {
+          "title": "Has Next",
+          "type": "boolean"
+        },
+        "has_previous": {
+          "title": "Has Previous",
+          "type": "boolean"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total Pages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "total_pages",
+        "has_next",
+        "has_previous"
+      ],
+      "title": "PaginationView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "acknowledge_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_acknowledge_post_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "acknowledge_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_acknowledge_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "append_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_post_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "create_approval_api_rulebuilder_v1_approvals_post_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "delete_approval_api_rulebuilder_v1_approvals_approval_id_delete_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "delete_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_delete_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "delete_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_delete_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_businessKey": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Businesskey"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_exclude_requester_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Exclude Requester Id"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_query": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Query"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_request_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Request Type"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_requester_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Requester Id"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "get_approvals_api_rulebuilder_v1_approvals_get_param_query_workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace"
+    },
+    "get_approvals_audit_api_rulebuilder_v1_approvals_audit_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/ApprovalAuditView"
+      },
+      "title": "Response Get Approvals Audit Api Rulebuilder V1 Approvals Audit Get",
+      "type": "array"
+    },
+    "reopen_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_reopen_post_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "reopen_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_reopen_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "resolve_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_resolve_post_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "resolve_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_resolve_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "update_approval_api_rulebuilder_v1_approvals_approval_id_put_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "update_approval_api_rulebuilder_v1_approvals_approval_id_put_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "update_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_patch_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "update_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_patch_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "update_approval_comments_lock_api_rulebuilder_v1_approvals_approval_id_comments_lock_patch_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "vote_up_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_vote_up_post_param_path_approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "vote_up_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_vote_up_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/approvals/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/approvals v1 schema bundle"
+}

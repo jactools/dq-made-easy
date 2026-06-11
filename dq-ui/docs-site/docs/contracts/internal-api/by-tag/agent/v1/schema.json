@@ -1,0 +1,1545 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "AgentAuditEventListView": {
+      "properties": {
+        "events": {
+          "items": {
+            "$ref": "#/$defs/AgentAuditEventView"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "governance_metadata": {
+          "additionalProperties": true,
+          "title": "Governance Metadata",
+          "type": "object"
+        }
+      },
+      "title": "AgentAuditEventListView",
+      "type": "object"
+    },
+    "AgentAuditEventView": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actor Id"
+        },
+        "agent_instance_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Agent Instance Id"
+        },
+        "agent_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Agent Source"
+        },
+        "agent_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Agent Type"
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "endpoint": {
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "governance_context_ref": {
+          "additionalProperties": true,
+          "title": "Governance Context Ref",
+          "type": "object"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "request_origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Request Origin"
+        },
+        "response_type": {
+          "title": "Response Type",
+          "type": "string"
+        },
+        "status_code": {
+          "title": "Status Code",
+          "type": "integer"
+        },
+        "success": {
+          "title": "Success",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "user_agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Agent"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "timestamp",
+        "action",
+        "endpoint",
+        "method",
+        "response_type",
+        "status_code",
+        "success"
+      ],
+      "title": "AgentAuditEventView",
+      "type": "object"
+    },
+    "AgentDecisionContextView": {
+      "properties": {
+        "business_context": {
+          "additionalProperties": true,
+          "title": "Business Context",
+          "type": "object"
+        },
+        "explanation_payload": {
+          "additionalProperties": true,
+          "title": "Explanation Payload",
+          "type": "object"
+        },
+        "governance_context": {
+          "additionalProperties": true,
+          "title": "Governance Context",
+          "type": "object"
+        },
+        "lineage_context": {
+          "additionalProperties": true,
+          "title": "Lineage Context",
+          "type": "object"
+        },
+        "remediation_audit_trail": {
+          "additionalProperties": true,
+          "title": "Remediation Audit Trail",
+          "type": "object"
+        },
+        "rule_context": {
+          "additionalProperties": true,
+          "title": "Rule Context",
+          "type": "object"
+        },
+        "sla_thresholds": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Sla Thresholds",
+          "type": "array"
+        }
+      },
+      "title": "AgentDecisionContextView",
+      "type": "object"
+    },
+    "AgentMetadataLookupResponseView": {
+      "properties": {
+        "data_objects": {
+          "items": {
+            "$ref": "#/$defs/DataObjectView"
+          },
+          "title": "Data Objects",
+          "type": "array"
+        }
+      },
+      "title": "AgentMetadataLookupResponseView",
+      "type": "object"
+    },
+    "AgentOpenApiSpecView": {
+      "properties": {
+        "info": {
+          "additionalProperties": true,
+          "title": "Info",
+          "type": "object"
+        },
+        "openapi": {
+          "title": "Openapi",
+          "type": "string"
+        },
+        "paths": {
+          "additionalProperties": true,
+          "title": "Paths",
+          "type": "object"
+        }
+      },
+      "required": [
+        "openapi"
+      ],
+      "title": "AgentOpenApiSpecView",
+      "type": "object"
+    },
+    "AgentPlatformDispatchRequestView": {
+      "properties": {
+        "dispatch_mode": {
+          "title": "Dispatch Mode",
+          "type": "string"
+        },
+        "event_type": {
+          "title": "Event Type",
+          "type": "string"
+        },
+        "job_arguments": {
+          "additionalProperties": true,
+          "title": "Job Arguments",
+          "type": "object"
+        },
+        "job_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Job Name"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "title": "Payload",
+          "type": "object"
+        },
+        "platform": {
+          "title": "Platform",
+          "type": "string"
+        },
+        "webhook_headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Webhook Headers",
+          "type": "object"
+        },
+        "webhook_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Webhook Url"
+        }
+      },
+      "required": [
+        "platform",
+        "dispatch_mode",
+        "event_type"
+      ],
+      "title": "AgentPlatformDispatchRequestView",
+      "type": "object"
+    },
+    "AgentPlatformDispatchResponseView": {
+      "properties": {
+        "contract_version": {
+          "default": "1.0",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "dispatch_id": {
+          "title": "Dispatch Id",
+          "type": "string"
+        },
+        "dispatch_mode": {
+          "title": "Dispatch Mode",
+          "type": "string"
+        },
+        "event_type": {
+          "title": "Event Type",
+          "type": "string"
+        },
+        "platform": {
+          "title": "Platform",
+          "type": "string"
+        },
+        "queued_at": {
+          "title": "Queued At",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "target": {
+          "additionalProperties": true,
+          "title": "Target",
+          "type": "object"
+        }
+      },
+      "required": [
+        "dispatch_id",
+        "status",
+        "platform",
+        "dispatch_mode",
+        "event_type",
+        "queued_at"
+      ],
+      "title": "AgentPlatformDispatchResponseView",
+      "type": "object"
+    },
+    "AgentPlatformIntegrationContractView": {
+      "properties": {
+        "allowlisted": {
+          "title": "Allowlisted",
+          "type": "boolean"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "dispatch_modes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dispatch Modes",
+          "type": "array"
+        },
+        "job_contract": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Job Contract"
+        },
+        "platform": {
+          "title": "Platform",
+          "type": "string"
+        },
+        "webhook_contract": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Webhook Contract"
+        }
+      },
+      "required": [
+        "platform",
+        "description",
+        "allowlisted"
+      ],
+      "title": "AgentPlatformIntegrationContractView",
+      "type": "object"
+    },
+    "AgentPlatformIntegrationContractsView": {
+      "properties": {
+        "allowlisted_platforms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowlisted Platforms",
+          "type": "array"
+        },
+        "contracts": {
+          "items": {
+            "$ref": "#/$defs/AgentPlatformIntegrationContractView"
+          },
+          "title": "Contracts",
+          "type": "array"
+        }
+      },
+      "title": "AgentPlatformIntegrationContractsView",
+      "type": "object"
+    },
+    "AgentRuleExecutionRequestView": {
+      "properties": {
+        "rule_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Rule Ids",
+          "type": "array"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        }
+      },
+      "required": [
+        "rule_ids"
+      ],
+      "title": "AgentRuleExecutionRequestView",
+      "type": "object"
+    },
+    "BatchValidationResponseView": {
+      "properties": {
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/ConflictDiagnosticView"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/BatchValidationResultItemView"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "summary": {
+          "$ref": "#/$defs/BatchValidationSummaryView"
+        }
+      },
+      "required": [
+        "run_id",
+        "summary"
+      ],
+      "title": "BatchValidationResponseView",
+      "type": "object"
+    },
+    "BatchValidationResultItemView": {
+      "properties": {
+        "artifact_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Artifact Key"
+        },
+        "compiled_expression": {
+          "title": "Compiled Expression",
+          "type": "string"
+        },
+        "compiler_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Compiler Version"
+        },
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/CompilerDiagnosticView"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Name"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        },
+        "warnings": {
+          "title": "Warnings",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rule_id",
+        "valid",
+        "compiled_expression",
+        "errors",
+        "warnings"
+      ],
+      "title": "BatchValidationResultItemView",
+      "type": "object"
+    },
+    "BatchValidationSummaryView": {
+      "properties": {
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "invalid": {
+          "title": "Invalid",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "integer"
+        },
+        "warnings": {
+          "title": "Warnings",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "valid",
+        "invalid",
+        "errors",
+        "warnings"
+      ],
+      "title": "BatchValidationSummaryView",
+      "type": "object"
+    },
+    "CompilerDiagnosticView": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "scope": {
+          "default": "rule",
+          "title": "Scope",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.severity"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "CompilerDiagnosticView",
+      "type": "object"
+    },
+    "ConflictDiagnosticView": {
+      "properties": {
+        "conflict_type": {
+          "title": "Conflict Type",
+          "type": "string"
+        },
+        "conflicts_with": {
+          "title": "Conflicts With",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "conflicts_with",
+        "conflict_type",
+        "message"
+      ],
+      "title": "ConflictDiagnosticView",
+      "type": "object"
+    },
+    "DataObjectView": {
+      "properties": {
+        "business_key": {
+          "default": "",
+          "title": "Business Key",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "default": "active",
+          "title": "Status",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataObjectView",
+      "type": "object"
+    },
+    "DeliveryExceptionSummaryView": {
+      "properties": {
+        "analytics": {
+          "$ref": "#/$defs/ExceptionReasonAnalyticsView"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "data_object_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Object Version Ids",
+          "type": "array"
+        },
+        "delivery_id": {
+          "title": "Delivery Id",
+          "type": "string"
+        },
+        "delivery_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Delivery Location"
+        },
+        "execution_run_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Execution Run Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "delivery_id",
+        "analytics"
+      ],
+      "title": "DeliveryExceptionSummaryView",
+      "type": "object"
+    },
+    "ExceptionDataObjectHotspotView": {
+      "properties": {
+        "data_object_name": {
+          "title": "Data Object Name",
+          "type": "string"
+        },
+        "data_object_version_id": {
+          "title": "Data Object Version Id",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "data_object_version_id",
+        "data_object_name",
+        "total"
+      ],
+      "title": "ExceptionDataObjectHotspotView",
+      "type": "object"
+    },
+    "ExceptionReasonAnalyticsView": {
+      "properties": {
+        "reason_fluctuations": {
+          "items": {
+            "$ref": "#/$defs/ExceptionReasonFluctuationView"
+          },
+          "title": "Reason Fluctuations",
+          "type": "array"
+        },
+        "reason_trend_buckets": {
+          "items": {
+            "$ref": "#/$defs/ExceptionReasonTrendBucketView"
+          },
+          "title": "Reason Trend Buckets",
+          "type": "array"
+        },
+        "runs_with_failures": {
+          "title": "Runs With Failures",
+          "type": "integer"
+        },
+        "top_data_objects": {
+          "items": {
+            "$ref": "#/$defs/ExceptionDataObjectHotspotView"
+          },
+          "title": "Top Data Objects",
+          "type": "array"
+        },
+        "top_reasons": {
+          "items": {
+            "$ref": "#/$defs/ExceptionReasonHotspotView"
+          },
+          "title": "Top Reasons",
+          "type": "array"
+        },
+        "top_rules": {
+          "items": {
+            "$ref": "#/$defs/ExceptionRuleHotspotView"
+          },
+          "title": "Top Rules",
+          "type": "array"
+        },
+        "total_failed_records": {
+          "title": "Total Failed Records",
+          "type": "integer"
+        },
+        "trend_buckets": {
+          "items": {
+            "$ref": "#/$defs/ExceptionTrendBucketView"
+          },
+          "title": "Trend Buckets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "total_failed_records",
+        "runs_with_failures",
+        "trend_buckets",
+        "top_rules",
+        "top_data_objects",
+        "top_reasons",
+        "reason_trend_buckets",
+        "reason_fluctuations"
+      ],
+      "title": "ExceptionReasonAnalyticsView",
+      "type": "object"
+    },
+    "ExceptionReasonFluctuationView": {
+      "properties": {
+        "bucket_count": {
+          "title": "Bucket Count",
+          "type": "integer"
+        },
+        "direction": {
+          "title": "Direction",
+          "type": "string"
+        },
+        "first_bucket_start": {
+          "title": "First Bucket Start",
+          "type": "string"
+        },
+        "first_total": {
+          "title": "First Total",
+          "type": "integer"
+        },
+        "latest_bucket_start": {
+          "title": "Latest Bucket Start",
+          "type": "string"
+        },
+        "latest_total": {
+          "title": "Latest Total",
+          "type": "integer"
+        },
+        "net_change": {
+          "title": "Net Change",
+          "type": "integer"
+        },
+        "peak_bucket_start": {
+          "title": "Peak Bucket Start",
+          "type": "string"
+        },
+        "peak_total": {
+          "title": "Peak Total",
+          "type": "integer"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason_code",
+        "reason_text",
+        "first_bucket_start",
+        "first_total",
+        "latest_bucket_start",
+        "latest_total",
+        "net_change",
+        "direction",
+        "peak_bucket_start",
+        "peak_total",
+        "bucket_count"
+      ],
+      "title": "ExceptionReasonFluctuationView",
+      "type": "object"
+    },
+    "ExceptionReasonHotspotView": {
+      "properties": {
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "reason_code",
+        "reason_text",
+        "total"
+      ],
+      "title": "ExceptionReasonHotspotView",
+      "type": "object"
+    },
+    "ExceptionReasonTrendBucketView": {
+      "properties": {
+        "bucket_start": {
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "reason_code",
+        "reason_text",
+        "total"
+      ],
+      "title": "ExceptionReasonTrendBucketView",
+      "type": "object"
+    },
+    "ExceptionRuleHotspotView": {
+      "properties": {
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_name": {
+          "title": "Rule Name",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rule_id",
+        "rule_name",
+        "total"
+      ],
+      "title": "ExceptionRuleHotspotView",
+      "type": "object"
+    },
+    "ExceptionTrendBucketView": {
+      "properties": {
+        "bucket_start": {
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "total"
+      ],
+      "title": "ExceptionTrendBucketView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "OntologyGraphProjectionEdgeView": {
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "edge_id": {
+          "title": "Edge Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "relation_type": {
+          "title": "Relation Type",
+          "type": "string"
+        },
+        "source_node_id": {
+          "title": "Source Node Id",
+          "type": "string"
+        },
+        "source_node_type": {
+          "title": "Source Node Type",
+          "type": "string"
+        },
+        "standard_mappings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Standard Mappings",
+          "type": "array"
+        },
+        "target_node_id": {
+          "title": "Target Node Id",
+          "type": "string"
+        },
+        "target_node_type": {
+          "title": "Target Node Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "edge_id",
+        "relation_type",
+        "source_node_id",
+        "target_node_id",
+        "source_node_type",
+        "target_node_type",
+        "label",
+        "description"
+      ],
+      "title": "OntologyGraphProjectionEdgeView",
+      "type": "object"
+    },
+    "OntologyGraphProjectionGraphView": {
+      "properties": {
+        "edge_count": {
+          "default": 0,
+          "title": "Edge Count",
+          "type": "integer"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/OntologyGraphProjectionEdgeView"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "graph_description": {
+          "title": "Graph Description",
+          "type": "string"
+        },
+        "graph_id": {
+          "title": "Graph Id",
+          "type": "string"
+        },
+        "graph_name": {
+          "title": "Graph Name",
+          "type": "string"
+        },
+        "node_count": {
+          "default": 0,
+          "title": "Node Count",
+          "type": "integer"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/OntologyGraphProjectionNodeView"
+          },
+          "title": "Nodes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "graph_id",
+        "graph_name",
+        "graph_description"
+      ],
+      "title": "OntologyGraphProjectionGraphView",
+      "type": "object"
+    },
+    "OntologyGraphProjectionNodeView": {
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "node_id": {
+          "title": "Node Id",
+          "type": "string"
+        },
+        "node_type": {
+          "title": "Node Type",
+          "type": "string"
+        },
+        "standard_mappings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Standard Mappings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_id",
+        "node_type",
+        "label",
+        "description"
+      ],
+      "title": "OntologyGraphProjectionNodeView",
+      "type": "object"
+    },
+    "OntologyGraphQueryRequestView": {
+      "properties": {
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "label_contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Contains"
+        },
+        "limit": {
+          "default": 100,
+          "maximum": 500.0,
+          "minimum": 1.0,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "node_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Ids",
+          "type": "array"
+        },
+        "node_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Types",
+          "type": "array"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0.0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "relation_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Relation Types",
+          "type": "array"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "title": "OntologyGraphQueryRequestView",
+      "type": "object"
+    },
+    "OntologyGraphQueryResultView": {
+      "properties": {
+        "graph": {
+          "$ref": "#/$defs/OntologyGraphProjectionGraphView"
+        },
+        "matched_edge_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched Edge Ids",
+          "type": "array"
+        },
+        "matched_node_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched Node Ids",
+          "type": "array"
+        },
+        "query_summary": {
+          "additionalProperties": true,
+          "title": "Query Summary",
+          "type": "object"
+        },
+        "snapshot": {
+          "$ref": "#/$defs/OntologyGraphSnapshotView"
+        }
+      },
+      "required": [
+        "snapshot",
+        "graph"
+      ],
+      "title": "OntologyGraphQueryResultView",
+      "type": "object"
+    },
+    "OntologyGraphSnapshotView": {
+      "properties": {
+        "captured_at": {
+          "title": "Captured At",
+          "type": "string"
+        },
+        "captured_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Captured By"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "edge_count": {
+          "default": 0,
+          "title": "Edge Count",
+          "type": "integer"
+        },
+        "graph_id": {
+          "title": "Graph Id",
+          "type": "string"
+        },
+        "graph_name": {
+          "title": "Graph Name",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "node_count": {
+          "default": 0,
+          "title": "Node Count",
+          "type": "integer"
+        },
+        "source_summary": {
+          "additionalProperties": true,
+          "title": "Source Summary",
+          "type": "object"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "id",
+        "graph_id",
+        "graph_name",
+        "captured_at"
+      ],
+      "title": "OntologyGraphSnapshotView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_query_data_asset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Data Asset Id"
+    },
+    "get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_query_lineage_snapshot_limit": {
+      "default": 3,
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Lineage Snapshot Limit",
+      "type": "integer"
+    },
+    "get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_query_recent_event_limit": {
+      "default": 10,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Recent Event Limit",
+      "type": "integer"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_path_delivery_id": {
+      "title": "Delivery Id",
+      "type": "string"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_data_object_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Data Object Name"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_data_object_version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Data Object Version Id"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_lookback_amount": {
+      "default": 24,
+      "maximum": 720,
+      "minimum": 1,
+      "title": "Lookback Amount",
+      "type": "integer"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_lookback_unit": {
+      "default": "hours",
+      "title": "Lookback Unit",
+      "type": "string"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_reason_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reason Code"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_rule_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rule Name"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_rule_version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rule Version Id"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_search": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Search"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_suite_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suite Id"
+    },
+    "list_agent_audit_events_api_agent_v1_audit_events_get_param_query_limit": {
+      "default": 100,
+      "maximum": 500,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_agent_audit_events_api_agent_v1_audit_events_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "list_data_objects_for_agent_api_agent_v1_metadata_data_objects_get_param_query_limit": {
+      "default": 100,
+      "maximum": 500,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_data_objects_for_agent_api_agent_v1_metadata_data_objects_get_param_query_search": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Search"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/agent/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/agent v1 schema bundle"
+}

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/rule-dsl/2.0.0/seed-templates/template-catalog.schema.json",
+  "title": "DQ7 DSL 2.0.0 Seed Template Catalog",
+  "description": "Catalog of canonical 2.0.0 seed templates and their file locations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "templates"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "2.0.0"
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "template_id",
+          "rule_kind",
+          "status",
+          "gx_class",
+          "template_file"
+        ],
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rule_kind": {
+            "type": "string",
+            "enum": [
+              "row_assertion",
+              "metric_threshold",
+              "metric_comparison",
+              "schema_assertion",
+              "reference_assertion",
+              "reconciliation_assertion",
+              "freshness_assertion",
+              "distribution_assertion",
+              "anomaly_assertion",
+              "custom_query_assertion"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "drafted",
+              "reserved"
+            ]
+          },
+          "gx_class": {
+            "type": "string",
+            "enum": [
+              "native",
+              "partial",
+              "canonical-only"
+            ]
+          },
+          "template_file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

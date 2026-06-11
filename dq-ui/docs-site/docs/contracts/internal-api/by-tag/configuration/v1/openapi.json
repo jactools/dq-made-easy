@@ -1,0 +1,695 @@
+{
+  "components": {
+    "schemas": {
+      "AppConfigView": {
+        "properties": {
+          "agent_access_policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Access Policy"
+          },
+          "agent_platform_allowlist": {
+            "default": [
+              "mistral_ai",
+              "microsoft_copilot"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Agent Platform Allowlist",
+            "type": "array"
+          },
+          "alert_routing_policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alert Routing Policy"
+          },
+          "alerting_pagerduty_routing_key": {
+            "default": "",
+            "title": "Alerting Pagerduty Routing Key",
+            "type": "string"
+          },
+          "alerting_slack_webhook_url": {
+            "default": "",
+            "title": "Alerting Slack Webhook Url",
+            "type": "string"
+          },
+          "allow_local_auth": {
+            "default": true,
+            "title": "Allow Local Auth",
+            "type": "boolean"
+          },
+          "allow_signup": {
+            "default": true,
+            "title": "Allow Signup",
+            "type": "boolean"
+          },
+          "allowed_workspace_data_source_types": {
+            "default": [
+              "adls",
+              "s3",
+              "oracle",
+              "sql_server"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Workspace Data Source Types",
+            "type": "array"
+          },
+          "api_retry_attempts": {
+            "default": 3,
+            "title": "Api Retry Attempts",
+            "type": "integer"
+          },
+          "api_retry_delay": {
+            "default": 1000,
+            "title": "Api Retry Delay",
+            "type": "integer"
+          },
+          "api_version": {
+            "default": "v1",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "assistance_request_destinations": {
+            "default": [
+              "email"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Assistance Request Destinations",
+            "type": "array"
+          },
+          "assistance_request_email_address": {
+            "default": "dq-made-easy-support@jaccloud.nl",
+            "title": "Assistance Request Email Address",
+            "type": "string"
+          },
+          "assistance_request_itsm_auth_token": {
+            "default": "",
+            "title": "Assistance Request Itsm Auth Token",
+            "type": "string"
+          },
+          "assistance_request_itsm_endpoint_url": {
+            "default": "http://zammad-nginx:8080/api/v1/tickets",
+            "title": "Assistance Request Itsm Endpoint Url",
+            "type": "string"
+          },
+          "assistance_request_itsm_system": {
+            "default": "Zammad",
+            "title": "Assistance Request Itsm System",
+            "type": "string"
+          },
+          "assistance_request_mode": {
+            "default": "email",
+            "title": "Assistance Request Mode",
+            "type": "string"
+          },
+          "assistance_request_teams_webhook_url": {
+            "default": "https://example.com/teams/workflow-webhook",
+            "title": "Assistance Request Teams Webhook Url",
+            "type": "string"
+          },
+          "audit_log_retention_days": {
+            "default": 90,
+            "title": "Audit Log Retention Days",
+            "type": "integer"
+          },
+          "data_protection_encryption_methods": {
+            "default": [
+              "fernet"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Data Protection Encryption Methods",
+            "type": "array"
+          },
+          "data_protection_masking_methods": {
+            "default": [
+              "none",
+              "redact",
+              "partial",
+              "tokenize"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Data Protection Masking Methods",
+            "type": "array"
+          },
+          "debounce_ms": {
+            "default": 300,
+            "title": "Debounce Ms",
+            "type": "integer"
+          },
+          "default_catalog_term_match_threshold_pct": {
+            "default": 70.0,
+            "title": "Default Catalog Term Match Threshold Pct",
+            "type": "number"
+          },
+          "default_page_size": {
+            "default": 20,
+            "title": "Default Page Size",
+            "type": "integer"
+          },
+          "default_rule_threshold_pct": {
+            "default": 0.0,
+            "title": "Default Rule Threshold Pct",
+            "type": "number"
+          },
+          "default_user_role": {
+            "default": "viewer",
+            "title": "Default User Role",
+            "type": "string"
+          },
+          "deleted_items_retention_days": {
+            "default": 30,
+            "title": "Deleted Items Retention Days",
+            "type": "integer"
+          },
+          "deployment_verification_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployment Verification Date"
+          },
+          "deployment_verified_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployment Verified By"
+          },
+          "enable_analytics": {
+            "default": true,
+            "title": "Enable Analytics",
+            "type": "boolean"
+          },
+          "enable_bulk_operations": {
+            "default": true,
+            "title": "Enable Bulk Operations",
+            "type": "boolean"
+          },
+          "enable_crash_reporting": {
+            "default": true,
+            "title": "Enable Crash Reporting",
+            "type": "boolean"
+          },
+          "enable_export": {
+            "default": true,
+            "title": "Enable Export",
+            "type": "boolean"
+          },
+          "enable_versioning": {
+            "default": true,
+            "title": "Enable Versioning",
+            "type": "boolean"
+          },
+          "exception_analytics_projection_retention_days": {
+            "default": 365,
+            "title": "Exception Analytics Projection Retention Days",
+            "type": "integer"
+          },
+          "exception_fact_archive_retention_days": {
+            "default": 180,
+            "title": "Exception Fact Archive Retention Days",
+            "type": "integer"
+          },
+          "exception_fact_jit_request_timeout_minutes": {
+            "default": 30,
+            "title": "Exception Fact Jit Request Timeout Minutes",
+            "type": "integer"
+          },
+          "exception_fact_jit_role_max_duration_minutes": {
+            "default": 240,
+            "title": "Exception Fact Jit Role Max Duration Minutes",
+            "type": "integer"
+          },
+          "exception_fact_purge_batch_size": {
+            "default": 5000,
+            "title": "Exception Fact Purge Batch Size",
+            "type": "integer"
+          },
+          "exception_fact_retention_days": {
+            "default": 30,
+            "title": "Exception Fact Retention Days",
+            "type": "integer"
+          },
+          "feature_exception_record_handling": {
+            "default": true,
+            "title": "Feature Exception Record Handling",
+            "type": "boolean"
+          },
+          "feature_exception_record_handling_stage": {
+            "default": "preview",
+            "title": "Feature Exception Record Handling Stage",
+            "type": "string"
+          },
+          "feature_governance_drift": {
+            "default": true,
+            "title": "Feature Governance Drift",
+            "type": "boolean"
+          },
+          "feature_governance_drift_stage": {
+            "default": "live",
+            "title": "Feature Governance Drift Stage",
+            "type": "string"
+          },
+          "feature_rule_dsl_v2": {
+            "default": false,
+            "title": "Feature Rule Dsl V2",
+            "type": "boolean"
+          },
+          "feature_rule_execution_monitoring": {
+            "default": true,
+            "title": "Feature Rule Execution Monitoring",
+            "type": "boolean"
+          },
+          "feature_rule_execution_monitoring_stage": {
+            "default": "preview",
+            "title": "Feature Rule Execution Monitoring Stage",
+            "type": "string"
+          },
+          "feature_rule_lifecycle_management": {
+            "default": true,
+            "title": "Feature Rule Lifecycle Management",
+            "type": "boolean"
+          },
+          "feature_rule_lifecycle_management_stage": {
+            "default": "preview",
+            "title": "Feature Rule Lifecycle Management Stage",
+            "type": "string"
+          },
+          "feature_rule_result_aggregation": {
+            "default": true,
+            "title": "Feature Rule Result Aggregation",
+            "type": "boolean"
+          },
+          "feature_rule_result_aggregation_stage": {
+            "default": "preview",
+            "title": "Feature Rule Result Aggregation Stage",
+            "type": "string"
+          },
+          "feature_rule_suggestions": {
+            "default": true,
+            "title": "Feature Rule Suggestions",
+            "type": "boolean"
+          },
+          "feature_rule_suggestions_stage": {
+            "default": "live",
+            "title": "Feature Rule Suggestions Stage",
+            "type": "string"
+          },
+          "feature_rule_validation": {
+            "default": true,
+            "title": "Feature Rule Validation",
+            "type": "boolean"
+          },
+          "feature_rule_validation_stage": {
+            "default": "preview",
+            "title": "Feature Rule Validation Stage",
+            "type": "string"
+          },
+          "icon_provider": {
+            "default": "tabler",
+            "title": "Icon Provider",
+            "type": "string"
+          },
+          "incident_governance": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incident Governance"
+          },
+          "log_level": {
+            "default": "info",
+            "title": "Log Level",
+            "type": "string"
+          },
+          "maintenance_message": {
+            "default": "",
+            "title": "Maintenance Message",
+            "type": "string"
+          },
+          "maintenance_mode": {
+            "default": false,
+            "title": "Maintenance Mode",
+            "type": "boolean"
+          },
+          "max_concurrent_tests": {
+            "default": 5,
+            "title": "Max Concurrent Tests",
+            "type": "integer"
+          },
+          "max_rules_per_workspace": {
+            "default": 1000,
+            "title": "Max Rules Per Workspace",
+            "type": "integer"
+          },
+          "max_templates_per_workspace": {
+            "default": 100,
+            "title": "Max Templates Per Workspace",
+            "type": "integer"
+          },
+          "max_users_per_workspace": {
+            "default": 100,
+            "title": "Max Users Per Workspace",
+            "type": "integer"
+          },
+          "max_workspaces": {
+            "default": 50,
+            "title": "Max Workspaces",
+            "type": "integer"
+          },
+          "metrics_forward_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics Forward Url"
+          },
+          "metrics_forwarding_enabled": {
+            "default": false,
+            "title": "Metrics Forwarding Enabled",
+            "type": "boolean"
+          },
+          "open_metadata_contract_cache_ttl_seconds": {
+            "default": 300,
+            "title": "Open Metadata Contract Cache Ttl Seconds",
+            "type": "integer"
+          },
+          "playground_source_bundle_policy": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Playground Source Bundle Policy"
+          },
+          "require_email_verification": {
+            "default": false,
+            "title": "Require Email Verification",
+            "type": "boolean"
+          },
+          "session_timeout_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 60,
+            "title": "Session Timeout Minutes"
+          },
+          "session_timeout_warning_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 10,
+            "title": "Session Timeout Warning Minutes"
+          },
+          "sso_client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sso Client Id"
+          },
+          "sso_enabled": {
+            "default": false,
+            "title": "Sso Enabled",
+            "type": "boolean"
+          },
+          "sso_issuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sso Issuer"
+          },
+          "sso_provider": {
+            "default": "none",
+            "title": "Sso Provider",
+            "type": "string"
+          },
+          "status_governance": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Governance"
+          },
+          "style_package": {
+            "default": "data-web-css",
+            "title": "Style Package",
+            "type": "string"
+          },
+          "support_email_from_address": {
+            "default": "dq-made-easy-support@jaccloud.nl",
+            "title": "Support Email From Address",
+            "type": "string"
+          },
+          "support_email_smtp_host": {
+            "default": "smtp.strato.com",
+            "title": "Support Email Smtp Host",
+            "type": "string"
+          },
+          "support_email_smtp_password": {
+            "default": "",
+            "title": "Support Email Smtp Password",
+            "type": "string"
+          },
+          "support_email_smtp_port": {
+            "default": 465,
+            "title": "Support Email Smtp Port",
+            "type": "integer"
+          },
+          "support_email_smtp_use_start_tls": {
+            "default": true,
+            "title": "Support Email Smtp Use Start Tls",
+            "type": "boolean"
+          },
+          "support_email_smtp_username": {
+            "default": "dq-made-easy-support@jaccloud.nl",
+            "title": "Support Email Smtp Username",
+            "type": "string"
+          },
+          "test_results_retention_days": {
+            "default": 30,
+            "title": "Test Results Retention Days",
+            "type": "integer"
+          },
+          "version_catalog_api": {
+            "default": "unknown",
+            "title": "Version Catalog Api",
+            "type": "string"
+          },
+          "version_catalog_components": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Catalog Components"
+          },
+          "version_catalog_ui": {
+            "default": "unknown",
+            "title": "Version Catalog Ui",
+            "type": "string"
+          }
+        },
+        "title": "AppConfigView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/configuration' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/system/v1/app-config": {
+      "get": {
+        "operationId": "get_app_config_api_system_v1_app_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get App Config",
+        "tags": [
+          "configuration"
+        ]
+      },
+      "put": {
+        "operationId": "put_app_config_api_system_v1_app_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Payload",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put App Config",
+        "tags": [
+          "configuration"
+        ]
+      }
+    }
+  }
+}

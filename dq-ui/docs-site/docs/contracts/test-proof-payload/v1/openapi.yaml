@@ -1,0 +1,147 @@
+openapi: 3.1.0
+info:
+  title: DQ Test Proof Submission Contract
+  version: v1
+  description: Canonical OpenAPI fragment for POST /api/v1/rules/{rule_id}/test.
+paths:
+  /api/v1/rules/{rule_id}/test:
+    post:
+      operationId: logTestAction
+      summary: Store a proof payload for a rule test
+      description: |
+        External callers submit snake_case proof data through this endpoint.
+        The API generates execution_trace when the proof is stored.
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          description: Rule identifier to store the proof for.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schema.json
+      responses:
+        '200':
+          description: Stored proof record with server-generated execution_trace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreTestProofResultV1'
+components:
+  schemas:
+    StoreTestProofResultV1:
+      type: object
+      additionalProperties: false
+      required:
+        - proof_id
+        - rule_id
+        - test_date
+        - coverage
+        - passed
+        - records_tested_count
+        - failures_found
+        - success_rate
+        - proof_data
+        - execution_trace
+      properties:
+        proof_id:
+          type: string
+          minLength: 1
+        rule_id:
+          type: string
+          minLength: 1
+        test_date:
+          type: string
+          format: date-time
+        coverage:
+          type: number
+          minimum: 0
+          maximum: 1
+        passed:
+          type: boolean
+        records_tested_count:
+          type: integer
+          minimum: 0
+        failures_found:
+          type: integer
+          minimum: 0
+        success_rate:
+          type: number
+          minimum: 0
+          maximum: 1
+        proof_data:
+          $ref: ./schema.json#/$defs/proofDataEnvelope
+        execution_trace:
+          $ref: '#/components/schemas/ProofExecutionTraceV1'
+        metrics:
+          $ref: '#/components/schemas/ProofMetricsV1'
+        diagnostics:
+          $ref: '#/components/schemas/ProofDiagnosticsV1'
+    ProofExecutionTraceV1:
+      type: object
+      additionalProperties: false
+      required:
+        - execution_id
+        - result_status
+      properties:
+        execution_id:
+          type: string
+          minLength: 1
+        correlation_id:
+          anyOf:
+            - type: string
+            - type: null
+        executed_at:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: null
+        result_status:
+          type: string
+          enum:
+            - pending
+            - running
+            - passed
+            - failed
+        artifact_key:
+          anyOf:
+            - type: string
+            - type: null
+        rule_version_id:
+          anyOf:
+            - type: string
+            - type: null
+        rule_version_number:
+          anyOf:
+            - type: integer
+            - type: string
+            - type: null
+        compiler_version:
+          anyOf:
+            - type: string
+            - type: null
+        compiler_revision:
+          anyOf:
+            - type: integer
+            - type: null
+        schema_version:
+          anyOf:
+            - type: string
+            - type: null
+    ProofMetricsV1:
+      anyOf:
+        - type: object
+          additionalProperties: true
+        - type: null
+    ProofDiagnosticsV1:
+      anyOf:
+        - type: array
+          items:
+            type: object
+            additionalProperties: true
+        - type: null

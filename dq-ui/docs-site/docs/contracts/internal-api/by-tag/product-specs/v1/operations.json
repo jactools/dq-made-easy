@@ -1,0 +1,328 @@
+{
+  "group": "by-tag/product-specs",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_product_specs_api_data_catalog_v1_product_specs_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "owner",
+          "required": false,
+          "schema_ref": "#/$defs/list_product_specs_api_data_catalog_v1_product_specs_get_param_query_owner"
+        },
+        {
+          "in": "query",
+          "name": "lifecycle_state",
+          "required": false,
+          "schema_ref": "#/$defs/list_product_specs_api_data_catalog_v1_product_specs_get_param_query_lifecycle_state"
+        },
+        {
+          "in": "query",
+          "name": "registry_definition_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_product_specs_api_data_catalog_v1_product_specs_get_param_query_registry_definition_id"
+        },
+        {
+          "in": "query",
+          "name": "linked_contract_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_product_specs_api_data_catalog_v1_product_specs_get_param_query_linked_contract_id"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/list_product_specs_api_data_catalog_v1_product_specs_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/list_product_specs_api_data_catalog_v1_product_specs_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_product_specs_api_data_catalog_v1_product_specs_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/product-specs",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProductSpecsPageView"
+            }
+          },
+          "description": "Product specification registry inventory."
+        },
+        "409": {
+          "description": "Product specification inventory contains conflicting stable identifiers."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "List Product Specs",
+      "tags": [
+        "product-specs"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_product_spec_api_data_catalog_v1_product_specs_post",
+      "path": "/api/data-catalog/v1/product-specs",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ProductSpecUpsertRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProductSpecView"
+            }
+          },
+          "description": "Created and synchronized product specification."
+        },
+        "409": {
+          "description": "Product specification already exists or conflicts with registry state."
+        },
+        "422": {
+          "description": "The product-spec request payload is invalid."
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "Create Product Spec",
+      "tags": [
+        "product-specs"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "import_product_specs_api_data_catalog_v1_product_specs_import_post",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "dry_run",
+          "required": false,
+          "schema_ref": "#/$defs/import_product_specs_api_data_catalog_v1_product_specs_import_post_param_query_dry_run"
+        }
+      ],
+      "path": "/api/data-catalog/v1/product-specs/import",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ProductSpecImportRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProductSpecImportReportView"
+            }
+          },
+          "description": "Imported product-spec manifest and synchronized all entries."
+        },
+        "409": {
+          "description": "Product-spec import payload conflicts with registry state."
+        },
+        "422": {
+          "description": "The product-spec import payload is invalid."
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "Import Product Specs",
+      "tags": [
+        "product-specs"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "summarize_product_specs_api_data_catalog_v1_product_specs_summary_get",
+      "path": "/api/data-catalog/v1/product-specs/summary",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProductSpecSummaryView"
+            }
+          },
+          "description": "Product-spec registry summary grouped by lifecycle state and owner."
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "Summarize Product Specs",
+      "tags": [
+        "product-specs"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_product_spec_api_data_catalog_v1_product_specs__product_spec_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "product_spec_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_product_spec_api_data_catalog_v1_product_specs_product_spec_id_get_param_path_product_spec_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/product-specs/{product_spec_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProductSpecView"
+            }
+          },
+          "description": "Resolved product specification."
+        },
+        "404": {
+          "description": "Product specification not found."
+        },
+        "409": {
+          "description": "Product specification identifier is ambiguous."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "Get Product Spec",
+      "tags": [
+        "product-specs"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_product_spec_api_data_catalog_v1_product_specs__product_spec_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "product_spec_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_product_spec_api_data_catalog_v1_product_specs_product_spec_id_put_param_path_product_spec_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/product-specs/{product_spec_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ProductSpecUpsertRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProductSpecView"
+            }
+          },
+          "description": "Updated and synchronized product specification."
+        },
+        "404": {
+          "description": "Product specification not found."
+        },
+        "409": {
+          "description": "Product specification conflicts with registry state."
+        },
+        "422": {
+          "description": "The product-spec request payload is invalid."
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "Update Product Spec",
+      "tags": [
+        "product-specs"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "apply_product_spec_stewardship_action_api_data_catalog_v1_product_specs__product_spec_id__stewardship_actions_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "product_spec_id",
+          "required": true,
+          "schema_ref": "#/$defs/apply_product_spec_stewardship_action_api_data_catalog_v1_product_specs_product_spec_id_stewardship_actions_post_param_path_product_spec_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/product-specs/{product_spec_id}/stewardship-actions",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ProductSpecStewardshipActionRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProductSpecView"
+            }
+          },
+          "description": "Applied stewardship action and synchronized lifecycle state."
+        },
+        "404": {
+          "description": "Product specification not found."
+        },
+        "409": {
+          "description": "Product specification conflicts with registry state."
+        },
+        "422": {
+          "description": "The product-spec stewardship request payload is invalid."
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "Apply Product Spec Stewardship Action",
+      "tags": [
+        "product-specs"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

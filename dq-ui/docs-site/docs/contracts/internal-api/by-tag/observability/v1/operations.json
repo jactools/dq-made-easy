@@ -1,0 +1,273 @@
+{
+  "group": "by-tag/observability",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "dataAssetId",
+          "required": false,
+          "schema_ref": "#/$defs/list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_dataAssetId"
+        },
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_lookbackUnit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/observability/health-scorecards",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HealthScorecardPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Health Scorecards",
+      "tags": [
+        "observability"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_service_levels_api_rulebuilder_v1_service_levels_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "scope_kind",
+          "required": false,
+          "schema_ref": "#/$defs/list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_scope_kind"
+        },
+        {
+          "in": "query",
+          "name": "metric_kind",
+          "required": false,
+          "schema_ref": "#/$defs/list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_metric_kind"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/service-levels",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/SlaSloSummaryView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Service Levels",
+      "tags": [
+        "observability"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_service_level_api_rulebuilder_v1_service_levels_post",
+      "path": "/api/rulebuilder/v1/service-levels",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/SlaSloDefinitionUpsertView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/SlaSloDefinitionView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Service Level",
+      "tags": [
+        "observability"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "evaluate_service_levels_api_rulebuilder_v1_service_levels_evaluate_post",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/evaluate_service_levels_api_rulebuilder_v1_service_levels_evaluate_post_param_query_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/service-levels/evaluate",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/SlaSloEvaluationView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Evaluate Service Levels",
+      "tags": [
+        "observability"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_service_level_api_rulebuilder_v1_service_levels__definition_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "definition_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_service_level_api_rulebuilder_v1_service_levels_definition_id_put_param_path_definition_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/service-levels/{definition_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/SlaSloDefinitionUpsertView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/SlaSloDefinitionView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Service Level",
+      "tags": [
+        "observability"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "approve_service_level_api_rulebuilder_v1_service_levels__definition_id__approve_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "definition_id",
+          "required": true,
+          "schema_ref": "#/$defs/approve_service_level_api_rulebuilder_v1_service_levels_definition_id_approve_post_param_path_definition_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/service-levels/{definition_id}/approve",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/SlaSloDefinitionReviewView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/SlaSloDefinitionView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Approve Service Level",
+      "tags": [
+        "observability"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

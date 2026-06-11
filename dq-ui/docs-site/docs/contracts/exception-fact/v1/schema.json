@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/exception-fact/v1/schema.json",
+  "title": "Exception Fact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "exception_fact_id",
+    "exception_fact_contract_version",
+    "engine_type",
+    "execution_scope",
+    "artifact_scope",
+    "rule_scope",
+    "record_reference",
+    "failure"
+  ],
+  "properties": {
+    "exception_fact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exception_fact_contract_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "engine_type": {
+      "type": "string",
+      "enum": ["gx", "soda", "pyspark_native"]
+    },
+    "execution_scope": {
+      "$ref": "#/$defs/executionScope"
+    },
+    "artifact_scope": {
+      "$ref": "#/$defs/artifactScope"
+    },
+    "rule_scope": {
+      "$ref": "#/$defs/ruleScope"
+    },
+    "record_reference": {
+      "$ref": "#/$defs/recordReference"
+    },
+    "failure": {
+      "$ref": "#/$defs/failure"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "engine_metadata": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true
+    },
+    "ops_metadata": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "nullableString": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "executionScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_run_id",
+        "data_object_version_id"
+      ],
+      "properties": {
+        "delivery_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "execution_plan_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "execution_plan_version_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "execution_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_object_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "data_product_id": {
+          "type": ["string", "null"],
+          "pattern": "^odcs\\..+$"
+        }
+      }
+    },
+    "artifactScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation_artifact_id",
+        "validation_artifact_version"
+      ],
+      "properties": {
+        "validation_artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_artifact_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "native_artifact_id": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "native_artifact_version": {
+          "$ref": "#/$defs/nullableString"
+        }
+      }
+    },
+    "ruleScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "rule_version_id"
+      ],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "recordReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identifier_type",
+        "identifier_value"
+      ],
+      "properties": {
+        "identifier_type": {
+          "type": "string",
+          "enum": ["primary_key", "business_key"]
+        },
+        "identifier_value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identifier_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "identifier_hash": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason_code",
+        "reason_text",
+        "detected_at"
+      ],
+      "properties": {
+        "reason_code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable cross-engine analytics code. Use controlled family prefixes such as completeness_, uniqueness_, validity_, consistency_, referential_integrity_, range_, freshness_, volume_, or custom_."
+        },
+        "reason_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failure_class": {
+          "$ref": "#/$defs/nullableString"
+        },
+        "detected_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

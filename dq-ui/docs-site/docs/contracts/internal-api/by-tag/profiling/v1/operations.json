@@ -1,0 +1,245 @@
+{
+  "group": "by-tag/profiling",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_profiling_requests_api_data_catalog_v1_profiling_requests_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "data_source_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_profiling_requests_api_data_catalog_v1_profiling_requests_get_param_query_data_source_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_profiling_requests_api_data_catalog_v1_profiling_requests_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/profiling/requests",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_profiling_requests_api_data_catalog_v1_profiling_requests_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Profiling Requests",
+      "tags": [
+        "profiling"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "request_data_profiling_api_data_catalog_v1_profiling_requests_post",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "data_source_id",
+          "required": true,
+          "schema_ref": "#/$defs/request_data_profiling_api_data_catalog_v1_profiling_requests_post_param_query_data_source_id"
+        },
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": true,
+          "schema_ref": "#/$defs/request_data_profiling_api_data_catalog_v1_profiling_requests_post_param_query_workspace_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/profiling/requests",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/request_data_profiling_api_data_catalog_v1_profiling_requests_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Request Data Profiling",
+      "tags": [
+        "profiling"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "stream_profiling_request_events_api_data_catalog_v1_profiling_requests__profiling_request_id__events_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "profiling_request_id",
+          "required": true,
+          "schema_ref": "#/$defs/stream_profiling_request_events_api_data_catalog_v1_profiling_requests_profiling_request_id_events_get_param_path_profiling_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/profiling/requests/{profiling_request_id}/events",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/stream_profiling_request_events_api_data_catalog_v1_profiling_requests_profiling_request_id_events_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Stream Profiling Request Events",
+      "tags": [
+        "profiling"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_profiling_request_status_api_data_catalog_v1_profiling_requests__profiling_request_id__status_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "profiling_request_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_profiling_request_status_api_data_catalog_v1_profiling_requests_profiling_request_id_status_get_param_path_profiling_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/profiling/requests/{profiling_request_id}/status",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_profiling_request_status_api_data_catalog_v1_profiling_requests_profiling_request_id_status_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Profiling Request Status",
+      "tags": [
+        "profiling"
+      ]
+    },
+    {
+      "description": "Enqueue a profiling job onto the Redis-backed worker queue.",
+      "method": "POST",
+      "operation_id": "enqueue_profiling_api_rulebuilder_v1_profiling_enqueue_post",
+      "path": "/api/rulebuilder/v1/profiling/enqueue",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/EnqueueRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/EnqueueResponse"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Enqueue Profiling",
+      "tags": [
+        "profiling"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "report_profiling_request_status_api_rulebuilder_v1_profiling_requests__profiling_request_id__report_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "profiling_request_id",
+          "required": true,
+          "schema_ref": "#/$defs/report_profiling_request_status_api_rulebuilder_v1_profiling_requests_profiling_request_id_report_post_param_path_profiling_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/profiling/requests/{profiling_request_id}/report",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ProfilingRequestReportRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ProfilingRequestReportResponse"
+            }
+          },
+          "description": "Profiling request status updated."
+        },
+        "404": {
+          "description": "Profiling request not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Report Profiling Request Status",
+      "tags": [
+        "profiling"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

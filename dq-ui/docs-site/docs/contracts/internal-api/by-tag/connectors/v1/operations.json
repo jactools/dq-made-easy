@@ -1,0 +1,345 @@
+{
+  "group": "by-tag/connectors",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "provider",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_param_query_provider"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/connectors/audit-events",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_response_200_application_json"
+            }
+          },
+          "description": "Return the connector audit trail."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The connector audit repository is unavailable."
+        }
+      },
+      "summary": "List Connector Audit Events",
+      "tags": [
+        "connectors"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_connector_instances_api_rulebuilder_v1_connectors_instances_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "provider",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_provider"
+        },
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "tenant_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_tenant_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/connectors/instances",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_connector_instances_api_rulebuilder_v1_connectors_instances_get_response_200_application_json"
+            }
+          },
+          "description": "Return the persisted connector instances."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The connector instance repository is unavailable."
+        }
+      },
+      "summary": "List Connector Instances",
+      "tags": [
+        "connectors"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_connector_instance_api_rulebuilder_v1_connectors_instances_post",
+      "path": "/api/rulebuilder/v1/connectors/instances",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ConnectorInstanceCreateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ConnectorInstanceEntity"
+            }
+          },
+          "description": "Persist a connector instance."
+        },
+        "400": {
+          "description": "The connector payload is invalid."
+        },
+        "404": {
+          "description": "The connector provider is not registered."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The connector instance repository is unavailable."
+        }
+      },
+      "summary": "Create Connector Instance",
+      "tags": [
+        "connectors"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_connector_registry_entries_api_rulebuilder_v1_connectors_registry_get",
+      "path": "/api/rulebuilder/v1/connectors/registry",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_connector_registry_entries_api_rulebuilder_v1_connectors_registry_get_response_200_application_json"
+            }
+          },
+          "description": "Return the persisted connector registry."
+        },
+        "503": {
+          "description": "The connector registry repository is unavailable."
+        }
+      },
+      "summary": "List Connector Registry Entries",
+      "tags": [
+        "connectors"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "discover_connector_assets_api_rulebuilder_v1_connectors__provider__discover_assets_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "provider",
+          "required": true,
+          "schema_ref": "#/$defs/discover_connector_assets_api_rulebuilder_v1_connectors_provider_discover_assets_post_param_path_provider"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/connectors/{provider}/discover-assets",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ConnectorOperationRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ConnectorDiscoveryResultEntity"
+            }
+          },
+          "description": "Discover assets exposed by the connector."
+        },
+        "400": {
+          "description": "The connector configuration is invalid."
+        },
+        "404": {
+          "description": "The connector provider is not registered."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The connector provider is unavailable."
+        }
+      },
+      "summary": "Discover Connector Assets",
+      "tags": [
+        "connectors"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "sync_connector_assets_api_rulebuilder_v1_connectors__provider__sync_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "provider",
+          "required": true,
+          "schema_ref": "#/$defs/sync_connector_assets_api_rulebuilder_v1_connectors_provider_sync_post_param_path_provider"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/connectors/{provider}/sync",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ConnectorOperationRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ConnectorSyncJobView"
+            }
+          },
+          "description": "Synchronize connector metadata and return the completed job record."
+        },
+        "400": {
+          "description": "The connector configuration is invalid."
+        },
+        "404": {
+          "description": "The connector provider is not registered."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The connector provider is unavailable."
+        }
+      },
+      "summary": "Sync Connector Assets",
+      "tags": [
+        "connectors"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "test_connector_connection_api_rulebuilder_v1_connectors__provider__test_connection_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "provider",
+          "required": true,
+          "schema_ref": "#/$defs/test_connector_connection_api_rulebuilder_v1_connectors_provider_test_connection_post_param_path_provider"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/connectors/{provider}/test-connection",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ConnectorOperationRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ConnectorHealthResultEntity"
+            }
+          },
+          "description": "Validate the connector configuration and test the live connection."
+        },
+        "400": {
+          "description": "The connector configuration is invalid."
+        },
+        "404": {
+          "description": "The connector provider is not registered."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The connector provider is unavailable."
+        }
+      },
+      "summary": "Test Connector Connection",
+      "tags": [
+        "connectors"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

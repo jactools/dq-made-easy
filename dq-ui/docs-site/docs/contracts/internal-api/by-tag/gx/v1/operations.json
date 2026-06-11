@@ -1,0 +1,1592 @@
+{
+  "group": "by-tag/gx",
+  "operations": [
+    {
+      "method": "POST",
+      "operation_id": "create_gx_assistance_request_api_rulebuilder_v1_gx_assistance_requests_post",
+      "path": "/api/rulebuilder/v1/gx/assistance-requests",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxAssistanceRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxAssistanceRequestResponseView"
+            }
+          },
+          "description": "Assistance request routed successfully."
+        },
+        "400": {
+          "description": "Assistance routing is misconfigured."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "502": {
+          "description": "Configured ITSM endpoint rejected the request."
+        },
+        "503": {
+          "description": "Configured ITSM endpoint is unavailable."
+        }
+      },
+      "summary": "Create Gx Assistance Request",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reasonCode",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_reasonCode"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "dataProductId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataProductId"
+        },
+        {
+          "in": "query",
+          "name": "datasetId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_datasetId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataObjectId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "deliveryId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_deliveryId"
+        },
+        {
+          "in": "query",
+          "name": "ruleVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_ruleVersionId"
+        },
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_workspaceId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/exception-analytics",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionAnalyticsView"
+            }
+          },
+          "description": "Exception-store-backed GX failure analytics for the current monitoring window."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Exception analytics are unavailable."
+        }
+      },
+      "summary": "Get Gx Execution Exception Analytics",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_ruleId"
+        },
+        {
+          "in": "query",
+          "name": "datasetId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_datasetId"
+        },
+        {
+          "in": "query",
+          "name": "domainId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_domainId"
+        },
+        {
+          "in": "query",
+          "name": "dataProductId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_dataProductId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/result-history/drift",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DqResultDriftSummaryView"
+            }
+          },
+          "description": "DQ result drift detections for the selected result-history scope."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "DQ result drift detection is unavailable."
+        }
+      },
+      "summary": "Get Gx Result History Drift Summary",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_status"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/run-plans",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_response_200_application_json"
+            }
+          },
+          "description": "GX run plans."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Gx Run Plans",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_gx_run_plan_api_rulebuilder_v1_gx_run_plans_post",
+      "path": "/api/rulebuilder/v1/gx/run-plans",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxRunPlanCreateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxRunPlanView"
+            }
+          },
+          "description": "Draft GX run plan created."
+        },
+        "404": {
+          "description": "Suite not found."
+        },
+        "422": {
+          "description": "Suite is not runnable."
+        }
+      },
+      "summary": "Create Gx Run Plan",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "initiate_gx_run_plan_api_rulebuilder_v1_gx_run_plans_initiate_post",
+      "path": "/api/rulebuilder/v1/gx/run-plans/initiate",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxRunPlanCreateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxRunPlanView"
+            }
+          },
+          "description": "Draft DQ run plan initiated."
+        },
+        "404": {
+          "description": "Suite not found."
+        },
+        "422": {
+          "description": "Suite is not runnable."
+        }
+      },
+      "summary": "Initiate Gx Run Plan",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_run_plan_api_rulebuilder_v1_gx_run_plans__run_plan_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_gx_run_plan_api_rulebuilder_v1_gx_run_plans_run_plan_id_get_param_path_run_plan_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/run-plans/{run_plan_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxRunPlanView"
+            }
+          },
+          "description": "GX run plan detail."
+        },
+        "404": {
+          "description": "Run plan not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Gx Run Plan",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans__run_plan_id__versions_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/create_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_post_param_path_run_plan_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/run-plans/{run_plan_id}/versions",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxRunPlanVersionCreateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxRunPlanView"
+            }
+          },
+          "description": "Draft run plan version created."
+        },
+        "404": {
+          "description": "Run plan or suite not found."
+        },
+        "409": {
+          "description": "Run plan is not editable."
+        },
+        "422": {
+          "description": "Suite is not runnable."
+        }
+      },
+      "summary": "Create Gx Run Plan Version",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "activate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans__run_plan_id__versions__run_plan_version_id__activate_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/activate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_activate_post_param_path_run_plan_id"
+        },
+        {
+          "in": "path",
+          "name": "run_plan_version_id",
+          "required": true,
+          "schema_ref": "#/$defs/activate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_activate_post_param_path_run_plan_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/run-plans/{run_plan_id}/versions/{run_plan_version_id}/activate",
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxRunPlanActivationView"
+            }
+          },
+          "description": "Run plan activated and scheduled dispatch accepted."
+        },
+        "404": {
+          "description": "Run plan or version not found."
+        },
+        "409": {
+          "description": "Run plan is not in draft state."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Scheduler/worker dependencies are unavailable."
+        }
+      },
+      "summary": "Activate Gx Run Plan Version",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "transition_gx_run_plan_version_governance_state_api_rulebuilder_v1_gx_run_plans__run_plan_id__versions__run_plan_version_id__governance_state_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/transition_gx_run_plan_version_governance_state_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_governance_state_post_param_path_run_plan_id"
+        },
+        {
+          "in": "path",
+          "name": "run_plan_version_id",
+          "required": true,
+          "schema_ref": "#/$defs/transition_gx_run_plan_version_governance_state_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_governance_state_post_param_path_run_plan_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/run-plans/{run_plan_id}/versions/{run_plan_version_id}/governance-state",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxRunPlanGovernanceTransitionRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxRunPlanView"
+            }
+          },
+          "description": "Run plan governance state updated."
+        },
+        "404": {
+          "description": "Run plan or version not found."
+        },
+        "409": {
+          "description": "Requested transition is invalid."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Transition Gx Run Plan Version Governance State",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "validate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans__run_plan_id__versions__run_plan_version_id__validate_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/validate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_validate_post_param_path_run_plan_id"
+        },
+        {
+          "in": "path",
+          "name": "run_plan_version_id",
+          "required": true,
+          "schema_ref": "#/$defs/validate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_validate_post_param_path_run_plan_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/run-plans/{run_plan_id}/versions/{run_plan_version_id}/validate",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxRunPlanValidationView"
+            }
+          },
+          "description": "Run plan version validated and status updated."
+        },
+        "404": {
+          "description": "Run plan or version not found."
+        },
+        "409": {
+          "description": "Run plan version cannot be validated from the current state."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Validate Gx Run Plan Version",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "owner",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_owner"
+        },
+        {
+          "in": "query",
+          "name": "domain",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_domain"
+        },
+        {
+          "in": "query",
+          "name": "severity",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_severity"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "dataProductId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataProductId"
+        },
+        {
+          "in": "query",
+          "name": "datasetId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_datasetId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataObjectId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "deliveryId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_deliveryId"
+        },
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "runPlanId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_runPlanId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/runs",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_response_200_application_json"
+            }
+          },
+          "description": "Recent GX execution runs with browse-friendly summary fields."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Gx Execution Runs",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_adhoc_gx_suite_runs_api_rulebuilder_v1_gx_runs_adhoc_post",
+      "path": "/api/rulebuilder/v1/gx/runs/adhoc",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxAdhocSuiteRunsRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_adhoc_gx_suite_runs_api_rulebuilder_v1_gx_runs_adhoc_post_response_202_application_json"
+            }
+          },
+          "description": "GX suite runs accepted and enqueued for dispatch."
+        },
+        "400": {
+          "description": "Invalid request payload."
+        },
+        "404": {
+          "description": "No matching suites found."
+        },
+        "422": {
+          "description": "Request is missing required selectors."
+        },
+        "503": {
+          "description": "Dispatch queue is unavailable."
+        }
+      },
+      "summary": "Create Adhoc Gx Suite Runs",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_param_query_limit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/runs/reconciliation",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_response_200_application_json"
+            }
+          },
+          "description": "Persisted reconciliation runs."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Gx Reconciliation Runs",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_gx_reconciliation_run_api_rulebuilder_v1_gx_runs_reconciliation_post",
+      "path": "/api/rulebuilder/v1/gx/runs/reconciliation",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxReconciliationRunCreateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxExecutionRunView"
+            }
+          },
+          "description": "Reconciliation run persisted."
+        },
+        "409": {
+          "description": "One or more selected datasources are already involved in an active reconciliation run."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Gx Reconciliation Run",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "lookbackAmount",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_lookbackAmount"
+        },
+        {
+          "in": "query",
+          "name": "lookbackUnit",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_lookbackUnit"
+        },
+        {
+          "in": "query",
+          "name": "recentLimit",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_recentLimit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "ruleName",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_ruleName"
+        },
+        {
+          "in": "query",
+          "name": "owner",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_owner"
+        },
+        {
+          "in": "query",
+          "name": "domain",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_domain"
+        },
+        {
+          "in": "query",
+          "name": "severity",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_severity"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectName",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataObjectName"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "dataProductId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataProductId"
+        },
+        {
+          "in": "query",
+          "name": "datasetId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_datasetId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataObjectId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "deliveryId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_deliveryId"
+        },
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "runPlanId",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_runPlanId"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/runs/stats",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxExecutionRunStatisticsView"
+            }
+          },
+          "description": "Execution run statistics for Grafana dashboards."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Execution run statistics are unavailable."
+        }
+      },
+      "summary": "Get Gx Execution Run Statistics",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_execution_run_api_rulebuilder_v1_gx_runs__run_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_gx_execution_run_api_rulebuilder_v1_gx_runs_run_id_get_param_path_run_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/runs/{run_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxExecutionRunView"
+            }
+          },
+          "description": "Persisted GX execution run metadata and lifecycle state."
+        },
+        "404": {
+          "description": "Execution run not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Gx Execution Run",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_execution_run_queue_status_api_rulebuilder_v1_gx_runs__run_id__queue_status_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_gx_execution_run_queue_status_api_rulebuilder_v1_gx_runs_run_id_queue_status_get_param_path_run_id"
+        },
+        {
+          "in": "query",
+          "name": "scanLimit",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_execution_run_queue_status_api_rulebuilder_v1_gx_runs_run_id_queue_status_get_param_query_scanLimit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/runs/{run_id}/queue-status",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxExecutionQueueStatusView"
+            }
+          },
+          "description": "GX dispatch queue length and run position."
+        },
+        "404": {
+          "description": "Execution run not found."
+        },
+        "409": {
+          "description": "Run is missing queue handoff metadata."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Dispatch queue is unavailable."
+        }
+      },
+      "summary": "Get Gx Execution Run Queue Status",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "report_gx_execution_run_api_rulebuilder_v1_gx_runs__run_id__report_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_id",
+          "required": true,
+          "schema_ref": "#/$defs/report_gx_execution_run_api_rulebuilder_v1_gx_runs_run_id_report_post_param_path_run_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/runs/{run_id}/report",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxExecutionRunReportRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxExecutionRunView"
+            }
+          },
+          "description": "Execution run state updated."
+        },
+        "404": {
+          "description": "Execution run not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Report Gx Execution Run",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_execution_run_status_history_api_rulebuilder_v1_gx_runs__run_id__status_history_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_gx_execution_run_status_history_api_rulebuilder_v1_gx_runs_run_id_status_history_get_param_path_run_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/runs/{run_id}/status-history",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_gx_execution_run_status_history_api_rulebuilder_v1_gx_runs_run_id_status_history_get_response_200_application_json"
+            }
+          },
+          "description": "Chronological status transition trail for the given GX execution run."
+        },
+        "404": {
+          "description": "Execution run not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Gx Execution Run Status History",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_gx_suites_api_rulebuilder_v1_gx_suites_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "dataObjectId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_dataObjectId"
+        },
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "datasetId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_datasetId"
+        },
+        {
+          "in": "query",
+          "name": "dataProductId",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_dataProductId"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "latestOnly",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_latestOnly"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_gx_suites_api_rulebuilder_v1_gx_suites_get_response_200_application_json"
+            }
+          },
+          "description": "GX suite envelopes retrieved by the requested scope."
+        },
+        "400": {
+          "description": "None or multiple primary scopes were provided, or values are malformed."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Gx Suites",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "save_gx_suite_api_rulebuilder_v1_gx_suites_post",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/save_gx_suite_api_rulebuilder_v1_gx_suites_post_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "expectedExistingHash",
+          "required": false,
+          "schema_ref": "#/$defs/save_gx_suite_api_rulebuilder_v1_gx_suites_post_param_query_expectedExistingHash"
+        },
+        {
+          "in": "query",
+          "name": "sourcePipeline",
+          "required": false,
+          "schema_ref": "#/$defs/save_gx_suite_api_rulebuilder_v1_gx_suites_post_param_query_sourcePipeline"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxArtifactEnvelopeView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxArtifactEnvelopeView"
+            }
+          },
+          "description": "Persisted GX suite envelope."
+        },
+        "400": {
+          "description": "Envelope validation failed."
+        },
+        "409": {
+          "description": "Existing suite version hash mismatch; overwrite rejected."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Save Gx Suite",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule__rule_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_param_path_rule_id"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "latestOnly",
+          "required": false,
+          "schema_ref": "#/$defs/list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_param_query_latestOnly"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites/by-rule/{rule_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_response_200_application_json"
+            }
+          },
+          "description": "GX suite envelopes attached to a rule."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Gx Suites For Rule",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_suite_api_rulebuilder_v1_gx_suites__suite_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suite_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_gx_suite_api_rulebuilder_v1_gx_suites_suite_id_get_param_path_suite_id"
+        },
+        {
+          "in": "query",
+          "name": "suiteVersion",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_suite_api_rulebuilder_v1_gx_suites_suite_id_get_param_query_suiteVersion"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_suite_api_rulebuilder_v1_gx_suites_suite_id_get_param_query_status"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites/{suite_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxArtifactEnvelopeView"
+            }
+          },
+          "description": "Direct suite fetch by suiteId and optional suiteVersion."
+        },
+        "404": {
+          "description": "Requested suite ID or version was not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Gx Suite",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "schedule_gx_suite_run_api_rulebuilder_v1_gx_suites__suite_id__runs_schedule_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suite_id",
+          "required": true,
+          "schema_ref": "#/$defs/schedule_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_schedule_post_param_path_suite_id"
+        },
+        {
+          "in": "query",
+          "name": "suiteVersion",
+          "required": false,
+          "schema_ref": "#/$defs/schedule_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_schedule_post_param_query_suiteVersion"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/schedule_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_schedule_post_param_query_status"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites/{suite_id}/runs/schedule",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GxSuiteRunScheduleRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxSuiteRunDispatchHandoffView"
+            }
+          },
+          "description": "GX suite run accepted and enqueued for scheduled dispatch."
+        },
+        "404": {
+          "description": "Suite not found."
+        },
+        "422": {
+          "description": "Suite payload is not runnable."
+        },
+        "503": {
+          "description": "Dispatch queue is unavailable."
+        }
+      },
+      "summary": "Schedule Gx Suite Run",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "start_gx_suite_run_api_rulebuilder_v1_gx_suites__suite_id__runs_start_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suite_id",
+          "required": true,
+          "schema_ref": "#/$defs/start_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_start_post_param_path_suite_id"
+        },
+        {
+          "in": "query",
+          "name": "suiteVersion",
+          "required": false,
+          "schema_ref": "#/$defs/start_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_start_post_param_query_suiteVersion"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/start_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_start_post_param_query_status"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites/{suite_id}/runs/start",
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxSuiteRunHandoffView"
+            }
+          },
+          "description": "GX suite run accepted and handed off for execution."
+        },
+        "404": {
+          "description": "Suite not found."
+        },
+        "422": {
+          "description": "Suite payload is not runnable."
+        }
+      },
+      "summary": "Start Gx Suite Run",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "patch_gx_suite_status_api_rulebuilder_v1_gx_suites__suite_id__status_patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suite_id",
+          "required": true,
+          "schema_ref": "#/$defs/patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_path_suite_id"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": true,
+          "schema_ref": "#/$defs/patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "suiteVersion",
+          "required": false,
+          "schema_ref": "#/$defs/patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_query_suiteVersion"
+        },
+        {
+          "in": "query",
+          "name": "reason",
+          "required": false,
+          "schema_ref": "#/$defs/patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_query_reason"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites/{suite_id}/status",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxArtifactEnvelopeView"
+            }
+          },
+          "description": "Status updated. Returns updated envelope."
+        },
+        "404": {
+          "description": "Suite not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Patch Gx Suite Status",
+      "tags": [
+        "gx"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_gx_suite_status_history_api_rulebuilder_v1_gx_suites__suite_id__status_history_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suite_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_gx_suite_status_history_api_rulebuilder_v1_gx_suites_suite_id_status_history_get_param_path_suite_id"
+        },
+        {
+          "in": "query",
+          "name": "suiteVersion",
+          "required": false,
+          "schema_ref": "#/$defs/get_gx_suite_status_history_api_rulebuilder_v1_gx_suites_suite_id_status_history_get_param_query_suiteVersion"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/gx/suites/{suite_id}/status-history",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_gx_suite_status_history_api_rulebuilder_v1_gx_suites_suite_id_status_history_get_response_200_application_json"
+            }
+          },
+          "description": "Chronological status transition trail for the given suite."
+        },
+        "404": {
+          "description": "Suite not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Gx Suite Status History",
+      "tags": [
+        "gx"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

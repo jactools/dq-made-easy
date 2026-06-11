@@ -1,0 +1,400 @@
+{
+  "group": "by-tag/metadata-registry",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "party_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_party_id"
+        },
+        {
+          "in": "query",
+          "name": "target_kind",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_target_kind"
+        },
+        {
+          "in": "query",
+          "name": "target_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_target_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/metadata-registry/access-grants",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_response_200_application_json"
+            }
+          },
+          "description": "List access grants for governed metadata targets."
+        },
+        "400": {
+          "description": "The request is invalid."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Metadata Registry Access Grants",
+      "tags": [
+        "metadata-registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "data_product_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_param_query_data_product_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/metadata-registry/exchanges",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_response_200_application_json"
+            }
+          },
+          "description": "List federated metadata exchange snapshots."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Metadata Registry Exchanges",
+      "tags": [
+        "metadata-registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "party_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_party_id"
+        },
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "tenant_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_tenant_id"
+        },
+        {
+          "in": "query",
+          "name": "approval_status",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_approval_status"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/metadata-registry/external-parties",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_response_200_application_json"
+            }
+          },
+          "description": "List registered external parties."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Metadata Registry External Parties",
+      "tags": [
+        "metadata-registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "register_metadata_registry_external_party_api_data_catalog_v1_metadata_registry_external_parties_post",
+      "path": "/api/data-catalog/v1/metadata-registry/external-parties",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/FederatedMetadataRegistryExternalPartyRegistrationRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/FederatedMetadataRegistryExternalPartyView"
+            }
+          },
+          "description": "Register or update an external party in the federated metadata registry."
+        },
+        "400": {
+          "description": "The request is invalid."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Register Metadata Registry External Party",
+      "tags": [
+        "metadata-registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "upsert_metadata_registry_access_grant_api_data_catalog_v1_metadata_registry_external_parties__party_id__access_grants_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "party_id",
+          "required": true,
+          "schema_ref": "#/$defs/upsert_metadata_registry_access_grant_api_data_catalog_v1_metadata_registry_external_parties_party_id_access_grants_post_param_path_party_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/metadata-registry/external-parties/{party_id}/access-grants",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/FederatedMetadataRegistryAccessGrantRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/FederatedMetadataRegistryAccessGrantView"
+            }
+          },
+          "description": "Grant a party access to a governed metadata target."
+        },
+        "400": {
+          "description": "The request is invalid."
+        },
+        "404": {
+          "description": "The external party was not found."
+        },
+        "409": {
+          "description": "The external party is not approved or the grant cannot be applied."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Upsert Metadata Registry Access Grant",
+      "tags": [
+        "metadata-registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "approve_metadata_registry_external_party_api_data_catalog_v1_metadata_registry_external_parties__party_id__approve_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "party_id",
+          "required": true,
+          "schema_ref": "#/$defs/approve_metadata_registry_external_party_api_data_catalog_v1_metadata_registry_external_parties_party_id_approve_post_param_path_party_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/metadata-registry/external-parties/{party_id}/approve",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/FederatedMetadataRegistryExternalPartyApprovalRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/FederatedMetadataRegistryExternalPartyView"
+            }
+          },
+          "description": "Approve an external party in the federated metadata registry."
+        },
+        "400": {
+          "description": "The request is invalid."
+        },
+        "404": {
+          "description": "The external party was not found."
+        },
+        "409": {
+          "description": "The external party is not pending approval."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Approve Metadata Registry External Party",
+      "tags": [
+        "metadata-registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "pull_metadata_registry_package_api_data_catalog_v1_metadata_registry_pull_post",
+      "path": "/api/data-catalog/v1/metadata-registry/pull",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/FederatedMetadataRegistryPackageView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/FederatedMetadataRegistryPullResultView"
+            }
+          },
+          "description": "Validate a federated metadata package received from another party."
+        },
+        "400": {
+          "description": "The submitted package is invalid."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Pull Metadata Registry Package",
+      "tags": [
+        "metadata-registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "push_metadata_registry_package_api_data_catalog_v1_metadata_registry_push_post",
+      "path": "/api/data-catalog/v1/metadata-registry/push",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/FederatedMetadataRegistryPushRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/FederatedMetadataRegistryPackageView"
+            }
+          },
+          "description": "Build a federated metadata package from the local catalog."
+        },
+        "400": {
+          "description": "The request is invalid."
+        },
+        "404": {
+          "description": "A requested data product or registry definition was not found."
+        },
+        "409": {
+          "description": "A registry definition lookup was ambiguous."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The registry definition resolver is unavailable."
+        }
+      },
+      "summary": "Push Metadata Registry Package",
+      "tags": [
+        "metadata-registry"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

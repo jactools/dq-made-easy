@@ -1,0 +1,67 @@
+{
+  "template_id": "DQ7-SEED-002-TPL-003",
+  "rule_kind": "metric_comparison",
+  "status": "reserved",
+  "gx_class": "partial",
+  "notes": "Reserved comparison template until the dedicated lowerer is complete.",
+  "payload": {
+    "name": "Metric comparison placeholder",
+    "description": "Reserved template for cross-source or grouped metric comparison.",
+    "dimension": "consistency",
+    "active": true,
+    "workspace": "default",
+    "generated": false,
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "metric_comparison",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-source-a"
+            },
+            "right": {
+              "data_object_id": "do-source-b"
+            },
+            "join_keys": [
+              {
+                "left_column": "customer_id",
+                "right_column": "customer_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "metric",
+          "metric": "match_percent",
+          "subject": {
+            "column": "customer_id"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 100,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "warning",
+          "preferred_engines": [
+            "sql"
+          ],
+          "fail_if_not_native": true
+        }
+      }
+    }
+  }
+}

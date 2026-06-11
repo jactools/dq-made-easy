@@ -1,0 +1,31 @@
+{
+  "group": "by-tag/demo",
+  "operations": [
+    {
+      "description": "Return a demo payload where the external JSON keys are snake_case.",
+      "method": "GET",
+      "operation_id": "get_demo_api_rulebuilder_v1_demo_snake_get",
+      "path": "/api/rulebuilder/v1/demo/snake",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DemoView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Demo",
+      "tags": [
+        "demo"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

@@ -1,0 +1,105 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "analyze_data_contract_api_data_catalog_v1_data_contracts_data_source_id_analysis_get_param_path_data_source_id": {
+      "title": "Data Source Id",
+      "type": "string"
+    },
+    "analyze_data_contract_api_data_catalog_v1_data_contracts_data_source_id_analysis_get_param_query_baseline_data_source_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Baseline Data Source Id"
+    },
+    "analyze_data_contract_api_data_catalog_v1_data_contracts_data_source_id_analysis_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Analyze Data Contract Api Data Catalog V1 Data Contracts  Data Source Id  Analysis Get",
+      "type": "object"
+    },
+    "get_data_contract_api_data_catalog_v1_data_contracts_data_source_id_get_param_path_data_source_id": {
+      "title": "Data Source Id",
+      "type": "string"
+    },
+    "get_data_contract_api_data_catalog_v1_data_contracts_data_source_id_get_param_query_format": {
+      "default": "yaml",
+      "title": "Format",
+      "type": "string"
+    },
+    "get_data_contract_api_data_catalog_v1_data_contracts_data_source_id_get_response_200_application_json": {},
+    "get_quality_rules_api_data_catalog_v1_data_contracts_data_source_id_quality_rules_get_param_path_data_source_id": {
+      "title": "Data Source Id",
+      "type": "string"
+    },
+    "get_quality_rules_api_data_catalog_v1_data_contracts_data_source_id_quality_rules_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Quality Rules Api Data Catalog V1 Data Contracts  Data Source Id  Quality Rules Get",
+      "type": "object"
+    },
+    "list_data_contracts_api_data_catalog_v1_data_contracts_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Data Contracts Api Data Catalog V1 Data Contracts Get",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/data-contracts/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/data-contracts v1 schema bundle"
+}

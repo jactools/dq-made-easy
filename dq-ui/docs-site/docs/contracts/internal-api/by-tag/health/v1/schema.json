@@ -1,0 +1,61 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HealthView": {
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "timestamp"
+      ],
+      "title": "HealthView",
+      "type": "object"
+    },
+    "ReadinessChecksView": {
+      "properties": {
+        "api": {
+          "title": "Api",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api"
+      ],
+      "title": "ReadinessChecksView",
+      "type": "object"
+    },
+    "ReadinessView": {
+      "properties": {
+        "checks": {
+          "$ref": "#/$defs/ReadinessChecksView"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "checks",
+        "timestamp"
+      ],
+      "title": "ReadinessView",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/health/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/health v1 schema bundle"
+}

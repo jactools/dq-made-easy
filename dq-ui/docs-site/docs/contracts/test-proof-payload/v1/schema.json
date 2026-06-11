@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/test-proof-payload/v1/schema.json",
+  "title": "Test Proof Submission Request v1",
+  "description": "Canonical request body for POST /api/v1/rules/{rule_id}/test. proof_data is the proof envelope callers should submit; the API adds execution_trace when the proof is stored.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "coverage",
+    "passed",
+    "records_tested_count",
+    "failures_found",
+    "proof_data"
+  ],
+  "properties": {
+    "coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Execution success rate as a fraction between 0 and 1."
+    },
+    "passed": {
+      "type": "boolean",
+      "description": "Whether the proof represents a passing test run."
+    },
+    "records_tested_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many records were evaluated."
+    },
+    "failures_found": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many failures were observed."
+    },
+    "proof_data": {
+      "$ref": "#/$defs/proofDataEnvelope"
+    },
+    "metrics": {
+      "$ref": "#/$defs/jsonObjectOrNull"
+    },
+    "diagnostics": {
+      "$ref": "#/$defs/diagnosticsOrNull"
+    }
+  },
+  "$defs": {
+    "jsonObjectOrNull": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "diagnosticsOrNull": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/proofDiagnostic"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "proofDataEnvelope": {
+      "type": "object",
+      "description": "Canonical proof evidence payload. Snake_case only. Additional domain-specific fields are allowed.",
+      "additionalProperties": true,
+      "required": [
+        "request_status",
+        "version_id"
+      ],
+      "properties": {
+        "request_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "running",
+            "passed",
+            "failed"
+          ],
+          "description": "Lifecycle status for the submitted proof.",
+          "examples": [
+            "passed"
+          ]
+        },
+        "request_message": {
+          "type": "string",
+          "description": "Human-readable summary or reason string."
+        },
+        "version_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Canonical data-object version identifier."
+        },
+        "version_name": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Display name or numeric version label for the version."
+        },
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Canonical data object identifier when the proof is tied to a data-object version."
+        },
+        "data_object_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Human-readable data object name when known."
+        },
+        "sample_count": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Number of generated samples associated with the proof, when applicable."
+        },
+        "test_data_request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Upstream test-data request identifier when the proof came from generated data."
+        },
+        "semantic_matching": {
+          "$ref": "#/$defs/jsonObjectOrNull"
+        },
+        "selected_attributes": {
+          "type": "array",
+          "description": "Attributes selected for the proof. String items are accepted for backward compatibility; object items should use the canonical snake_case keys.",
+          "items": {
+            "$ref": "#/$defs/selectedAttribute"
+          }
+        },
+        "failure_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Explicit failure reasons attached to the proof."
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/diagnosticsOrNull"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/proofRowResult"
+          },
+          "description": "Optional row-level proof results."
+        },
+        "execution_context": {
+          "$ref": "#/$defs/jsonObjectOrNull"
+        },
+        "error": {
+          "type": "string",
+          "description": "Failure message for unsuccessful proofs."
+        },
+        "error_type": {
+          "type": "string",
+          "description": "Machine-readable failure type for unsuccessful proofs."
+        }
+      }
+    },
+    "selectedAttribute": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "id": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            },
+            "data_object_id": {
+              "type": "string"
+            },
+            "data_object_name": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "proofDiagnostic": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string"
+        },
+        "row_index": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "proofRowResult": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "row_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "join_evaluated": {
+          "type": "boolean"
+        },
+        "join_matched_contexts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}
