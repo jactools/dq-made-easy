@@ -1,0 +1,38 @@
+{
+  "app_version": "0.11.3",
+  "proof_id": "ux-1-5-connector-workbench-2026-06-05",
+  "proof_type": "ui",
+  "feature": "UX-1.5",
+  "summary": "The connector workbench renders the backend-owned setup, validation, discovery, and sync flow, and the sidebar now exposes the canonical Administration > Connectors entry point.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-05T23:51:23Z",
+  "command": "scripts/run_test_evidence.sh ui --label ux-1-5-secret-access -- src/components/ConnectorWorkbench.test.tsx src/components/Sidebar.test.tsx",
+  "raw_evidence_directory": "test-results/evidence/0.11.3/ui/20260605T235122Z-ux-1-5-secret-access",
+  "test_files": [
+    "dq-ui/src/components/ConnectorWorkbench.test.tsx",
+    "dq-ui/src/components/Sidebar.test.tsx"
+  ],
+  "test_file_count": 2,
+  "test_count": 10,
+  "assertions": [
+    "The connector workbench loads the connector sync status model, renders provider-specific setup controls, and supports test, discovery, and sync actions against the backend routes.",
+    "The sidebar exposes the canonical Administration > Connectors entry point and maps the administration parent item to that workbench by default."
+  ],
+  "proof_data": {
+    "app_version": "0.11.3",
+    "ui_command": "scripts/run_test_evidence.sh ui --label ux-1-5-secret-access -- src/components/ConnectorWorkbench.test.tsx src/components/Sidebar.test.tsx",
+    "ui_evidence_directory": "test-results/evidence/0.11.3/ui/20260605T235122Z-ux-1-5-secret-access",
+    "ui_tests": 10,
+    "shared_primitives": [
+      "AppBadge",
+      "AppEmptyState",
+      "AppInput",
+      "AppPageHeader",
+      "AppPageShell",
+      "AppPanel",
+      "AppSelect",
+      "AppTabs",
+      "AppTextarea"
+    ]
+  }
+}

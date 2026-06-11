@@ -1,0 +1,87 @@
+.join-consistency-form .join-consistency-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  background: var(--app-surface-primary);
+}
+
+.join-consistency-form .join-consistency-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.join-consistency-form .join-consistency-catalog-title {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--app-text-secondary);
+}
+
+.join-consistency-form .join-consistency-inline-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.join-consistency-form .join-consistency-inline-input .modal-input {
+  flex: 1;
+}
+
+.join-consistency-form .join-consistency-mode-field {
+  min-width: 180px;
+}
+
+.join-consistency-form .join-consistency-remove-field {
+  display: flex;
+  align-items: flex-end;
+}
+
+.join-consistency-form .join-consistency-policy-panel {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  background: var(--app-surface-secondary);
+}
+
+.join-consistency-form .join-consistency-policy-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.join-consistency-form .join-consistency-policy-row + .join-consistency-policy-row {
+  margin-top: 0.25rem;
+}
+
+.join-consistency-form .join-consistency-policy-label {
+  color: var(--app-text-secondary);
+}
+
+.join-consistency-form .join-consistency-policy-value {
+  color: var(--app-text-primary);
+  text-align: right;
+}
+
+.join-consistency-form .join-consistency-field-error {
+  margin: 0.25rem 0 0;
+  color: var(--app-status-error-text);
+}
+
+@media (max-width: 900px) {
+  .join-consistency-form .join-consistency-inline-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .join-consistency-form .join-consistency-mode-field,
+  .join-consistency-form .join-consistency-remove-field {
+    min-width: 0;
+  }
+}

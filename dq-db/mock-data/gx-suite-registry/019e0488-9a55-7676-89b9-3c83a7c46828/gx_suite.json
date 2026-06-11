@@ -1,0 +1,70 @@
+{
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-7c5b-be3e-ae7933c031cf",
+    "datasetId": "019e0488-9a54-7dbd-bb4b-d20d2d7bf053",
+    "dataProductId": "019e0488-9a54-7541-aae5-74bbd1123584"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "019e0488-9a53-7dbb-acde-8d30e45fd2fb"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "gx_inventory_delivery_34",
+    "expectations": [
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "inventory_id"
+        }
+      },
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "stock_level"
+        }
+      },
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "warehouse_id"
+        }
+      }
+    ],
+    "meta": {
+      "delivery_id": "019e0488-9a53-7bd5-aa72-4a71a428a778",
+      "delivery_location": "s3a://analytics/do-6/v2/LOAD_DTS=20260222T141500000Z",
+      "workspace_id": "retail-banking"
+    }
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a55-771d-afc7-6a0f362aa455",
+      "019e0488-9a55-7782-8a29-d7cc7c7b8d8a",
+      "019e0488-9a55-7fb4-a050-9197a1b11713"
+    ],
+    "compilerVersion": "dq-compiler-7.3",
+    "generatedAt": "2026-04-12T09:15:00Z"
+  },
+  "executionHints": {
+    "recommendedEngine": "pyspark",
+    "primaryKeyFields": [
+      "inventory_id"
+    ],
+    "businessKeyFields": [
+      "inventory_id"
+    ]
+  },
+  "executionContract": {
+    "engineType": "gx",
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "traceability": {
+      "ruleId": "019e0488-9a55-771d-afc7-6a0f362aa455",
+      "ruleVersionId": "019e0488-9a55-72cf-8305-00dd34b1a21d",
+      "gxSuiteId": "019e0488-9a54-7a73-ae12-7355a3782d69",
+      "gxSuiteVersion": 1,
+      "dataObjectVersionId": "019e0488-9a53-7dbb-acde-8d30e45fd2fb"
+    }
+  }
+}

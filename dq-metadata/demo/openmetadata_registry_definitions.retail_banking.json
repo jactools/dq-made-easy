@@ -1,0 +1,248 @@
+{
+  "glossary": {
+    "name": "retail_banking_registry",
+    "display_name": "Retail Banking Registry",
+    "description": "Governed ISO 11179-aligned demo definitions for the retail banking stakeholder slice."
+  },
+  "definitions": [
+    {
+      "definition_id": "def.data_product.retail_banking",
+      "definition_type": "data_product",
+      "definition_name": "retail_banking",
+      "term_name": "retail_banking_product",
+      "display_name": "Retail Banking",
+      "business_definition": "Governed data product boundary covering retail banking customers, accounts, servicing, and customer interactions.",
+      "object_class": "retail_banking",
+      "property": "product",
+      "representation_term": "product",
+      "status": "approved",
+      "owner": "data-governance",
+      "version": "1.0.0",
+      "value_domain": {
+        "type": "string",
+        "allowed_values": [
+          "retail_banking"
+        ],
+        "constraints": {
+          "cardinality": "single"
+        }
+      },
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "data-governance",
+        "created_at": "2026-04-20T00:00:00Z",
+        "approved_at": "2026-04-20T00:00:00Z",
+        "change_reason": "Initial stakeholder demo slice"
+      },
+      "applies_to": [
+        "domain:retail_banking"
+      ]
+    },
+    {
+      "definition_id": "def.data_object.customer",
+      "definition_type": "data_object",
+      "definition_name": "customer",
+      "term_name": "customer_object",
+      "display_name": "Customer",
+      "business_definition": "Governed business object representing an identifiable retail banking customer across onboarding, servicing, and support workflows.",
+      "object_class": "customer",
+      "property": "entity",
+      "representation_term": "object",
+      "status": "approved",
+      "owner": "customer-domain-owner",
+      "version": "1.0.0",
+      "value_domain": {
+        "type": "object",
+        "constraints": {
+          "required_attributes": [
+            "customer_id",
+            "customer_status"
+          ]
+        }
+      },
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "customer-domain-owner",
+        "created_at": "2026-04-20T00:00:00Z",
+        "approved_at": "2026-04-20T00:00:00Z",
+        "change_reason": "Initial stakeholder demo slice"
+      },
+      "applies_to": [
+        "data_product:retail_banking"
+      ]
+    },
+    {
+      "definition_id": "def.attribute.customer_id",
+      "definition_type": "attribute",
+      "definition_name": "customer_id",
+      "term_name": "customer_id_attribute",
+      "display_name": "Customer ID",
+      "business_definition": "Stable identifier assigned to a customer within the retail banking product boundary.",
+      "object_class": "customer",
+      "property": "identifier",
+      "representation_term": "identifier",
+      "status": "approved",
+      "owner": "data-governance",
+      "version": "1.0.0",
+      "value_domain": {
+        "type": "string",
+        "format": "uuid",
+        "constraints": {
+          "nullable": false
+        }
+      },
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "data-governance",
+        "created_at": "2026-04-20T00:00:00Z",
+        "approved_at": "2026-04-20T00:00:00Z",
+        "change_reason": "Initial stakeholder demo slice"
+      },
+      "applies_to": [
+        "data_object:customer"
+      ]
+    },
+    {
+      "definition_id": "def.attribute.customer_status",
+      "definition_type": "attribute",
+      "definition_name": "customer_status",
+      "term_name": "customer_status_attribute",
+      "display_name": "Customer Status",
+      "business_definition": "Lifecycle state describing whether a retail banking customer is prospect, active, dormant, or closed.",
+      "object_class": "customer",
+      "property": "status",
+      "representation_term": "code",
+      "status": "approved",
+      "owner": "customer-domain-owner",
+      "version": "1.0.0",
+      "value_domain": {
+        "type": "string",
+        "allowed_values": [
+          "prospect",
+          "active",
+          "dormant",
+          "closed"
+        ],
+        "constraints": {
+          "nullable": false
+        }
+      },
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "customer-domain-owner",
+        "created_at": "2026-04-20T00:00:00Z",
+        "approved_at": "2026-04-20T00:00:00Z",
+        "change_reason": "Initial stakeholder demo slice"
+      },
+      "applies_to": [
+        "data_object:customer"
+      ]
+    },
+    {
+      "definition_id": "def.attribute.country_code",
+      "definition_type": "attribute",
+      "definition_name": "country_code",
+      "term_name": "country_code_attribute",
+      "display_name": "Country Code",
+      "business_definition": "ISO 3166 alpha-2 country code used for customer residence and servicing rules.",
+      "object_class": "customer",
+      "property": "country_code",
+      "representation_term": "code",
+      "status": "approved",
+      "owner": "customer-domain-owner",
+      "version": "1.0.0",
+      "value_domain": {
+        "type": "string",
+        "allowed_values": [
+          "US",
+          "GB",
+          "NL",
+          "DE"
+        ],
+        "constraints": {
+          "nullable": false
+        }
+      },
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "customer-domain-owner",
+        "created_at": "2026-04-20T00:00:00Z",
+        "approved_at": "2026-04-20T00:00:00Z",
+        "change_reason": "Initial stakeholder demo slice"
+      },
+      "applies_to": [
+        "data_object:customer"
+      ]
+    },
+    {
+      "definition_id": "def.attribute.currency_code",
+      "definition_type": "attribute",
+      "definition_name": "currency_code",
+      "term_name": "currency_code_attribute",
+      "display_name": "Currency Code",
+      "business_definition": "ISO 4217 currency code used for account balances and transaction amounts.",
+      "object_class": "account",
+      "property": "currency_code",
+      "representation_term": "code",
+      "status": "approved",
+      "owner": "accounts-domain-owner",
+      "version": "1.0.0",
+      "value_domain": {
+        "type": "string",
+        "allowed_values": [
+          "USD",
+          "EUR",
+          "GBP",
+          "CHF"
+        ],
+        "constraints": {
+          "nullable": false
+        }
+      },
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "accounts-domain-owner",
+        "created_at": "2026-04-20T00:00:00Z",
+        "approved_at": "2026-04-20T00:00:00Z",
+        "change_reason": "Initial stakeholder demo slice"
+      },
+      "applies_to": [
+        "data_object:account",
+        "data_product:retail_banking"
+      ]
+    },
+    {
+      "definition_id": "def.attribute.account_opened_at",
+      "definition_type": "attribute",
+      "definition_name": "account_opened_at",
+      "term_name": "account_opened_at_attribute",
+      "display_name": "Account Opened At",
+      "business_definition": "Timestamp recording when the customer first opened an account within the retail banking product boundary.",
+      "object_class": "account",
+      "property": "opened_at",
+      "representation_term": "timestamp",
+      "status": "approved",
+      "owner": "accounts-domain-owner",
+      "version": "1.0.0",
+      "value_domain": {
+        "type": "string",
+        "format": "date-time",
+        "constraints": {
+          "nullable": false,
+          "timezone": "UTC"
+        }
+      },
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "accounts-domain-owner",
+        "created_at": "2026-04-20T00:00:00Z",
+        "approved_at": "2026-04-20T00:00:00Z",
+        "change_reason": "Initial stakeholder demo slice"
+      },
+      "applies_to": [
+        "data_object:account",
+        "data_product:retail_banking"
+      ]
+    }
+  ]
+}

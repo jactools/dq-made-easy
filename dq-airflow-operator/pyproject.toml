@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dq-made-easy-airflow-operator"
+version = "0.1.1"
+description = "Airflow 3 operator for dq-made-easy validation run plans."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "apache-airflow==3.2.2",
+]
+
+[tool.setuptools]
+packages = ["dq_airflow_operator"]

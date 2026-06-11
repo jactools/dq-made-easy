@@ -1,0 +1,43 @@
+{
+  "schema_version": "2.0.0",
+  "rule": {
+    "kind": "custom_query_assertion",
+    "scope": {
+      "dataset": {
+        "data_object_id": "do-transaction"
+      }
+    },
+    "reusable_filter_ids": [
+      "019e0488-9a55-7576-9f45-e2f7efeaba26"
+    ],
+    "measure": {
+      "type": "query",
+      "query_language": "sql",
+      "query": "amount > (SELECT AVG(amount)*5 FROM transactions WHERE customer_id = NEW.customer_id)"
+    },
+    "expectation": {
+      "type": "threshold",
+      "operator": "gte",
+      "value": 100,
+      "unit": "percent"
+    },
+    "evidence": {
+      "failed_rows": {
+        "mode": "sample",
+        "limit": 25,
+        "include_row_identifier": true,
+        "include_primary_key": true
+      },
+      "emit_compiled_artifact": true,
+      "emit_generated_sql": false
+    },
+    "operations": {
+      "severity": "critical",
+      "preferred_engines": [
+        "gx",
+        "sql"
+      ],
+      "fail_if_not_native": false
+    }
+  }
+}

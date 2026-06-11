@@ -1,0 +1,31 @@
+FROM python:3.14-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+ARG PIP_INDEX_URL
+
+COPY dq-utils /app/dq-utils
+COPY dq-domain-validation /workspace/tmp/dq-domain-validation
+COPY dq-api/fastapi/requirements.txt /workspace/tmp/requirements.txt
+RUN PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r /workspace/tmp/requirements.txt && \
+    PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -e /app/dq-utils
+RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip wheel --no-deps --wheel-dir /workspace/tmp/wheels /workspace/tmp/dq-domain-validation && \
+    pip install --no-cache-dir /workspace/tmp/wheels/dq_made_easy_domain_validation-*.whl
+
+COPY dq-api/fastapi /app
+COPY docs/contracts/internal-api /app/docs/contracts/internal-api
+COPY data_sources/contracts /app/data_sources/contracts
+
+# Copy repo-level scripts (generator, helpers) into the image so the
+# entrypoint can run the generator inside the container during startup.
+COPY scripts /app/scripts
+COPY dq-api/fastapi/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+EXPOSE 4010
+
+# Entrypoint runs generator (inside container), alembic upgrade, and starts uvicorn
+CMD ["sh", "-c", "/app/docker-entrypoint.sh"]

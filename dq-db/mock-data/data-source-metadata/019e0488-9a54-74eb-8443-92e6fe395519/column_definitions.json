@@ -1,0 +1,12 @@
+[
+  {
+    "name": "transaction_id",
+    "type": "TEXT",
+    "nullable": false
+  },
+  {
+    "name": "amount",
+    "type": "NUMERIC",
+    "nullable": false
+  }
+]

@@ -1,0 +1,524 @@
+[
+  {
+    "case_id": "freshness_customer_created_at_within_1_day",
+    "dimension": "timeliness",
+    "version_id": "dov-3",
+    "data_object_id": "do-1",
+    "primary_key_fields": [
+      "customer_id"
+    ],
+    "assign_attribute_names": [
+      "created_at"
+    ],
+    "materialize_attribute_names": [
+      "customer_id",
+      "created_at"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "freshness_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-1"
+          }
+        },
+        "measure": {
+          "type": "metric",
+          "metric": "freshness_age",
+          "subject": {
+            "column": "created_at"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "lte",
+          "value": "P1D",
+          "unit": "duration"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "referential_integrity_contact_customer_id_exists",
+    "dimension": "consistency",
+    "version_id": "dov-23",
+    "data_object_id": "do-2",
+    "primary_key_fields": [
+      "contact_id"
+    ],
+    "assign_attribute_names": [
+      "customer_id"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "reference_assertion",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-2",
+              "data_object_version_id": "dov-23"
+            },
+            "right": {
+              "data_object_id": "do-1",
+              "data_object_version_id": "dov-3"
+            },
+            "join_keys": [
+              {
+                "left_column": "customer_id",
+                "right_column": "customer_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "metric",
+          "metric": "match_percent",
+          "subject": {
+            "column": "customer_id"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "correct_atm_cash_movement_matches_authoritative_transaction_total",
+    "dimension": "accuracy",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "transaction_id",
+      "amount"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "reconciliation_assertion",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-9"
+            },
+            "right": {
+              "data_object_id": "do-3",
+              "data_object_version_id": "dov-7"
+            },
+            "join_keys": [
+              {
+                "left_column": "transaction_id",
+                "right_column": "order_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "transaction_id = rhs.order_id AND amount = rhs.total_amount"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "reconcile_atm_cash_movement_matches_customer_transaction_total",
+    "dimension": "consistency",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "transaction_id",
+      "amount"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "reconciliation_assertion",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-9"
+            },
+            "right": {
+              "data_object_id": "do-3",
+              "data_object_version_id": "dov-7"
+            },
+            "join_keys": [
+              {
+                "left_column": "transaction_id",
+                "right_column": "order_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "amount = rhs.total_amount"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "transfer_match_delivery_row_count_matches",
+    "dimension": "consistency",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "transaction_id",
+      "amount"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "reconciliation_assertion",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-9"
+            },
+            "right": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-7"
+            },
+            "join_keys": [
+              {
+                "left_column": "transaction_id",
+                "right_column": "order_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "transaction_id = rhs.order_id AND row_count = rhs.row_count"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "transfer_match_delivery_note_file_hash_matches",
+    "dimension": "consistency",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "transaction_id",
+      "amount"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "reconciliation_assertion",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-9"
+            },
+            "right": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-7"
+            },
+            "join_keys": [
+              {
+                "left_column": "transaction_id",
+                "right_column": "order_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "transaction_id = rhs.order_id AND file_hash = rhs.target_file_hash"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "transfer_match_delivery_note_hash_count_matches",
+    "dimension": "consistency",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "transaction_id",
+      "amount"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "reconciliation_assertion",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-9"
+            },
+            "right": {
+              "data_object_id": "do-4",
+              "data_object_version_id": "dov-7"
+            },
+            "join_keys": [
+              {
+                "left_column": "transaction_id",
+                "right_column": "order_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "transaction_id = rhs.order_id AND hash_count = rhs.hash_count"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "join_consistency_customer_contact_email_and_actuality_align",
+    "dimension": "consistency",
+    "version_id": "dov-3",
+    "data_object_id": "do-1",
+    "primary_key_fields": [
+      "customer_id"
+    ],
+    "assign_attribute_names": [
+      "customer_id",
+      "email",
+      "created_at"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "reconciliation_assertion",
+        "scope": {
+          "comparison": {
+            "left": {
+              "data_object_id": "do-1",
+              "data_object_version_id": "dov-3"
+            },
+            "right": {
+              "data_object_id": "do-2",
+              "data_object_version_id": "dov-23"
+            },
+            "join_keys": [
+              {
+                "left_column": "customer_id",
+                "right_column": "customer_id"
+              }
+            ]
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "customer_id = rhs.customer_id AND LOWER(email) = LOWER(rhs.email_address) AND ABS(TIMESTAMPDIFF(HOUR, created_at, rhs.last_contacted)) <= 24"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  }
+]

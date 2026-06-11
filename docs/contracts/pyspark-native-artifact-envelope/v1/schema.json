@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/pyspark-native-artifact-envelope/v1/schema.json",
+  "title": "PySpark-Native Artifact Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "artifact_revision",
+    "artifact_version",
+    "engine_type",
+    "engine_target",
+    "assignment_scope",
+    "resolved_execution_scope",
+    "compiled_from",
+    "execution_hints",
+    "traceability",
+    "pyspark_plan"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "artifact_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "engine_type": {
+      "type": "string",
+      "const": "pyspark_native"
+    },
+    "engine_target": {
+      "type": "string",
+      "const": "pyspark"
+    },
+    "assignment_scope": {
+      "$ref": "#/$defs/assignmentScope"
+    },
+    "resolved_execution_scope": {
+      "$ref": "#/$defs/resolvedExecutionScope"
+    },
+    "compiled_from": {
+      "$ref": "#/$defs/compiledFrom"
+    },
+    "execution_hints": {
+      "$ref": "#/$defs/executionHints"
+    },
+    "traceability": {
+      "$ref": "#/$defs/traceability"
+    },
+    "pyspark_plan": {
+      "$ref": "#/$defs/pysparkPlan"
+    }
+  },
+  "$defs": {
+    "assignmentScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "data_object_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_product_id": {
+          "type": "string",
+          "pattern": "^odcs\\..+$"
+        }
+      },
+      "anyOf": [
+        {"required": ["data_object_id"]},
+        {"required": ["dataset_id"]},
+        {"required": ["data_product_id"]}
+      ]
+    },
+    "resolvedExecutionScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data_object_version_ids"],
+      "properties": {
+        "data_object_version_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "compiledFrom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_ids", "compiler_version", "generated_at"],
+      "properties": {
+        "rule_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "compiler_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "executionHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary_key_fields", "supported_execution_shapes"],
+      "properties": {
+        "primary_key_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "business_key_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "supported_execution_shapes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["single_object", "join_pair"]
+          }
+        },
+        "required_inputs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["spark_dataframe", "materialized_join", "primary_key_projection"]
+          }
+        }
+      }
+    },
+    "traceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "rule_version_id",
+        "artifact_id",
+        "artifact_revision"
+      ],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "data_object_version_id": {
+          "type": ["string", "null"],
+          "minLength": 1
+        }
+      }
+    },
+    "pysparkPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["execution_shape", "input_mode", "checks"],
+      "properties": {
+        "execution_shape": {
+          "type": "string",
+          "enum": ["single_object", "join_pair"]
+        },
+        "input_mode": {
+          "type": "string",
+          "enum": ["spark_dataframe", "materialized_join"]
+        },
+        "row_filter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/check"
+          }
+        },
+        "failure_output": {
+          "$ref": "#/$defs/failureOutput"
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_id", "check_kind", "column_refs", "assertion"],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check_kind": {
+          "type": "string",
+          "enum": [
+            "not_null",
+            "unique",
+            "accepted_values",
+            "range",
+            "regex",
+            "sql_predicate"
+          ]
+        },
+        "column_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "assertion": {
+          "$ref": "#/$defs/assertion"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"]
+        }
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predicate_sql"],
+      "properties": {
+        "predicate_sql": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed_values": {
+          "type": "array",
+          "items": {
+            "type": ["string", "number", "integer", "boolean", "null"]
+          }
+        },
+        "min_value": {
+          "type": ["number", "integer", "null"]
+        },
+        "max_value": {
+          "type": ["number", "integer", "null"]
+        },
+        "regex_pattern": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "failureOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emit_row_level_failures"],
+      "properties": {
+        "emit_row_level_failures": {
+          "type": "boolean"
+        },
+        "failure_reason_template": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

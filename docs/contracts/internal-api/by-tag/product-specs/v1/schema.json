@@ -1,0 +1,696 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "PaginationView": {
+      "properties": {
+        "has_next": {
+          "title": "Has Next",
+          "type": "boolean"
+        },
+        "has_previous": {
+          "title": "Has Previous",
+          "type": "boolean"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total Pages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "total_pages",
+        "has_next",
+        "has_previous"
+      ],
+      "title": "PaginationView",
+      "type": "object"
+    },
+    "ProductSpecContractReferenceView": {
+      "properties": {
+        "odcs_contract_id": {
+          "default": "",
+          "title": "Odcs Contract Id",
+          "type": "string"
+        },
+        "odcs_contract_name": {
+          "default": "",
+          "title": "Odcs Contract Name",
+          "type": "string"
+        },
+        "odcs_contract_version": {
+          "default": "",
+          "title": "Odcs Contract Version",
+          "type": "string"
+        },
+        "openmetadata_entity_id": {
+          "default": "",
+          "title": "Openmetadata Entity Id",
+          "type": "string"
+        },
+        "openmetadata_entity_type": {
+          "default": "data_contract",
+          "title": "Openmetadata Entity Type",
+          "type": "string"
+        },
+        "source_system": {
+          "default": "openmetadata",
+          "title": "Source System",
+          "type": "string"
+        }
+      },
+      "title": "ProductSpecContractReferenceView",
+      "type": "object"
+    },
+    "ProductSpecGlossaryView": {
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "display_name",
+        "description"
+      ],
+      "title": "ProductSpecGlossaryView",
+      "type": "object"
+    },
+    "ProductSpecImportEntryView": {
+      "properties": {
+        "business_definition": {
+          "default": "",
+          "title": "Business Definition",
+          "type": "string"
+        },
+        "migration": {
+          "additionalProperties": true,
+          "title": "Migration",
+          "type": "object"
+        },
+        "odcs_contract_refs": {
+          "items": {
+            "$ref": "#/$defs/ProductSpecContractReferenceView"
+          },
+          "title": "Odcs Contract Refs",
+          "type": "array"
+        },
+        "product_lifecycle_state": {
+          "default": "",
+          "title": "Product Lifecycle State",
+          "type": "string"
+        },
+        "product_name": {
+          "default": "",
+          "title": "Product Name",
+          "type": "string"
+        },
+        "product_objective": {
+          "default": "",
+          "title": "Product Objective",
+          "type": "string"
+        },
+        "product_owner": {
+          "default": "",
+          "title": "Product Owner",
+          "type": "string"
+        },
+        "product_scope": {
+          "additionalProperties": true,
+          "title": "Product Scope",
+          "type": "object"
+        },
+        "product_spec_id": {
+          "title": "Product Spec Id",
+          "type": "string"
+        },
+        "product_version": {
+          "default": "",
+          "title": "Product Version",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/ProductSpecProvenanceView"
+        },
+        "registry_definition_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Registry Definition Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "product_spec_id"
+      ],
+      "title": "ProductSpecImportEntryView",
+      "type": "object"
+    },
+    "ProductSpecImportItemView": {
+      "properties": {
+        "outcome": {
+          "title": "Outcome",
+          "type": "string"
+        },
+        "product_spec": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProductSpecView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "product_spec_id": {
+          "title": "Product Spec Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product_spec_id",
+        "outcome"
+      ],
+      "title": "ProductSpecImportItemView",
+      "type": "object"
+    },
+    "ProductSpecImportReportView": {
+      "properties": {
+        "created": {
+          "default": 0,
+          "title": "Created",
+          "type": "integer"
+        },
+        "dry_run": {
+          "default": false,
+          "title": "Dry Run",
+          "type": "boolean"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ProductSpecImportItemView"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "default": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "updated": {
+          "default": 0,
+          "title": "Updated",
+          "type": "integer"
+        },
+        "validated": {
+          "default": 0,
+          "title": "Validated",
+          "type": "integer"
+        }
+      },
+      "title": "ProductSpecImportReportView",
+      "type": "object"
+    },
+    "ProductSpecImportRequestView": {
+      "properties": {
+        "glossary": {
+          "$ref": "#/$defs/ProductSpecGlossaryView"
+        },
+        "product_specs": {
+          "items": {
+            "$ref": "#/$defs/ProductSpecImportEntryView"
+          },
+          "title": "Product Specs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "glossary"
+      ],
+      "title": "ProductSpecImportRequestView",
+      "type": "object"
+    },
+    "ProductSpecProvenanceView": {
+      "properties": {
+        "approved_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved At"
+        },
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved By"
+        },
+        "change_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Change Reason"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created At"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        }
+      },
+      "title": "ProductSpecProvenanceView",
+      "type": "object"
+    },
+    "ProductSpecStewardshipActionRequestView": {
+      "properties": {
+        "action": {
+          "enum": [
+            "submit_for_approval",
+            "approve",
+            "request_changes",
+            "deprecate",
+            "retire"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "actor": {
+          "title": "Actor",
+          "type": "string"
+        },
+        "change_reason": {
+          "title": "Change Reason",
+          "type": "string"
+        },
+        "glossary": {
+          "$ref": "#/$defs/ProductSpecGlossaryView"
+        }
+      },
+      "required": [
+        "glossary",
+        "action",
+        "actor",
+        "change_reason"
+      ],
+      "title": "ProductSpecStewardshipActionRequestView",
+      "type": "object"
+    },
+    "ProductSpecSummaryView": {
+      "properties": {
+        "by_lifecycle_state": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Lifecycle State",
+          "type": "object"
+        },
+        "by_owner": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Owner",
+          "type": "object"
+        },
+        "total": {
+          "default": 0,
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "title": "ProductSpecSummaryView",
+      "type": "object"
+    },
+    "ProductSpecUpsertRequestView": {
+      "properties": {
+        "business_definition": {
+          "default": "",
+          "title": "Business Definition",
+          "type": "string"
+        },
+        "glossary": {
+          "$ref": "#/$defs/ProductSpecGlossaryView"
+        },
+        "migration": {
+          "additionalProperties": true,
+          "title": "Migration",
+          "type": "object"
+        },
+        "odcs_contract_refs": {
+          "items": {
+            "$ref": "#/$defs/ProductSpecContractReferenceView"
+          },
+          "title": "Odcs Contract Refs",
+          "type": "array"
+        },
+        "product_lifecycle_state": {
+          "default": "",
+          "title": "Product Lifecycle State",
+          "type": "string"
+        },
+        "product_name": {
+          "default": "",
+          "title": "Product Name",
+          "type": "string"
+        },
+        "product_objective": {
+          "default": "",
+          "title": "Product Objective",
+          "type": "string"
+        },
+        "product_owner": {
+          "default": "",
+          "title": "Product Owner",
+          "type": "string"
+        },
+        "product_scope": {
+          "additionalProperties": true,
+          "title": "Product Scope",
+          "type": "object"
+        },
+        "product_spec_id": {
+          "title": "Product Spec Id",
+          "type": "string"
+        },
+        "product_version": {
+          "default": "",
+          "title": "Product Version",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/ProductSpecProvenanceView"
+        },
+        "registry_definition_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Registry Definition Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "glossary",
+        "product_spec_id"
+      ],
+      "title": "ProductSpecUpsertRequestView",
+      "type": "object"
+    },
+    "ProductSpecView": {
+      "properties": {
+        "business_definition": {
+          "default": "",
+          "title": "Business Definition",
+          "type": "string"
+        },
+        "migration": {
+          "additionalProperties": true,
+          "title": "Migration",
+          "type": "object"
+        },
+        "odcs_contract_refs": {
+          "items": {
+            "$ref": "#/$defs/ProductSpecContractReferenceView"
+          },
+          "title": "Odcs Contract Refs",
+          "type": "array"
+        },
+        "openmetadata_entity_id": {
+          "default": "",
+          "title": "Openmetadata Entity Id",
+          "type": "string"
+        },
+        "openmetadata_entity_type": {
+          "default": "glossary_term",
+          "title": "Openmetadata Entity Type",
+          "type": "string"
+        },
+        "product_lifecycle_state": {
+          "default": "",
+          "title": "Product Lifecycle State",
+          "type": "string"
+        },
+        "product_name": {
+          "default": "",
+          "title": "Product Name",
+          "type": "string"
+        },
+        "product_objective": {
+          "default": "",
+          "title": "Product Objective",
+          "type": "string"
+        },
+        "product_owner": {
+          "default": "",
+          "title": "Product Owner",
+          "type": "string"
+        },
+        "product_scope": {
+          "additionalProperties": true,
+          "title": "Product Scope",
+          "type": "object"
+        },
+        "product_spec_id": {
+          "title": "Product Spec Id",
+          "type": "string"
+        },
+        "product_version": {
+          "default": "",
+          "title": "Product Version",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/ProductSpecProvenanceView"
+        },
+        "registry_definition_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Registry Definition Ids",
+          "type": "array"
+        },
+        "source_system": {
+          "default": "openmetadata",
+          "title": "Source System",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product_spec_id"
+      ],
+      "title": "ProductSpecView",
+      "type": "object"
+    },
+    "ProductSpecsPageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/ProductSpecView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationView"
+        }
+      },
+      "required": [
+        "pagination"
+      ],
+      "title": "ProductSpecsPageView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "apply_product_spec_stewardship_action_api_data_catalog_v1_product_specs_product_spec_id_stewardship_actions_post_param_path_product_spec_id": {
+      "title": "Product Spec Id",
+      "type": "string"
+    },
+    "get_product_spec_api_data_catalog_v1_product_specs_product_spec_id_get_param_path_product_spec_id": {
+      "title": "Product Spec Id",
+      "type": "string"
+    },
+    "import_product_specs_api_data_catalog_v1_product_specs_import_post_param_query_dry_run": {
+      "default": false,
+      "title": "Dry Run",
+      "type": "boolean"
+    },
+    "list_product_specs_api_data_catalog_v1_product_specs_get_param_query_lifecycle_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Lifecycle State"
+    },
+    "list_product_specs_api_data_catalog_v1_product_specs_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_product_specs_api_data_catalog_v1_product_specs_get_param_query_linked_contract_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Linked Contract Id"
+    },
+    "list_product_specs_api_data_catalog_v1_product_specs_get_param_query_owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Owner"
+    },
+    "list_product_specs_api_data_catalog_v1_product_specs_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "list_product_specs_api_data_catalog_v1_product_specs_get_param_query_registry_definition_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Registry Definition Id"
+    },
+    "list_product_specs_api_data_catalog_v1_product_specs_get_param_query_search": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Search"
+    },
+    "update_product_spec_api_data_catalog_v1_product_specs_product_spec_id_put_param_path_product_spec_id": {
+      "title": "Product Spec Id",
+      "type": "string"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/product-specs/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/product-specs v1 schema bundle"
+}

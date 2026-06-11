@@ -1,0 +1,69 @@
+.reusable-joins-body {
+  overflow: auto;
+  display: grid;
+  gap: 14px;
+}
+
+.reusable-joins-rule {
+  font-size: 14px;
+  color: var(--app-text-secondary);
+}
+
+.reusable-joins-error {
+  margin: 0;
+}
+
+.reusable-joins-assign {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.reusable-joins-hint {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+  background: var(--app-surface-secondary);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.reusable-joins-hint p {
+  margin: 0;
+}
+
+.reusable-joins-list {
+  display: grid;
+  gap: 8px;
+}
+
+.reusable-join-item {
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 8px;
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.reusable-join-title {
+  font-weight: 600;
+}
+
+.reusable-join-description {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.reusable-join-summary {
+  font-size: 12px;
+  background: var(--app-surface-secondary);
+  border-radius: 6px;
+  padding: 6px 8px;
+  white-space: pre-wrap;
+}
+
+.reusable-join-actions {
+  display: flex;
+  justify-content: flex-end;
+}

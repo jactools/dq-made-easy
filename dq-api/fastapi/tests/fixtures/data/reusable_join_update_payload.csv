@@ -1,0 +1,2 @@
+name,joinDefinition,description,active
+Updated Join,"{ ""joinType"": ""left"", ""conditions"": [ { ""leftDataObjectId"": ""orders"", ""leftAttributeId"": ""customer_id"", ""rightDataObjectId"": ""customers"", ""rightAttributeId"": ""id"", ""operator"": ""="" } ] }",  updated join description  ,false

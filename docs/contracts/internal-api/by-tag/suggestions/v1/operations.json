@@ -1,0 +1,482 @@
+{
+  "group": "by-tag/suggestions",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_suggestions_api_data_catalog_v1_suggestions_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "data_source_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_suggestions_api_data_catalog_v1_suggestions_get_param_query_data_source_id"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_suggestions_api_data_catalog_v1_suggestions_get_param_query_status"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_suggestions_api_data_catalog_v1_suggestions_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Suggestions",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_sources_api_data_catalog_v1_suggestions_data_sources_get",
+      "path": "/api/data-catalog/v1/suggestions/data-sources",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_data_sources_api_data_catalog_v1_suggestions_data_sources_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Data Sources",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_dq7_dsl_assistant_preview_api_data_catalog_v1_suggestions_dq7_dsl_assistant_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "check_type",
+          "required": true,
+          "schema_ref": "#/$defs/RuleCheckType"
+        },
+        {
+          "in": "query",
+          "name": "current_workspace_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_dq7_dsl_assistant_preview_api_data_catalog_v1_suggestions_dq7_dsl_assistant_get_param_query_current_workspace_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions/dq7-dsl-assistant",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/Dq7DslAssistantPreviewResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Dq7 Dsl Assistant Preview",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "clear_suggestions_metrics_api_data_catalog_v1_suggestions_metrics_clear_post",
+      "path": "/api/data-catalog/v1/suggestions/metrics/clear",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/clear_suggestions_metrics_api_data_catalog_v1_suggestions_metrics_clear_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Clear Suggestions Metrics",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_natural_language_rule_preview_api_data_catalog_v1_suggestions_natural_language_rule_previews_post",
+      "path": "/api/data-catalog/v1/suggestions/natural-language-rule-previews",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/NaturalLanguageRulePreviewRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/NaturalLanguageRulePreviewResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Natural Language Rule Preview",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_natural_language_rule_draft_suggestion_api_data_catalog_v1_suggestions_natural_language_rule_previews_create_suggestion_post",
+      "path": "/api/data-catalog/v1/suggestions/natural-language-rule-previews/create-suggestion",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/NaturalLanguageRulePreviewCreateSuggestionRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/NaturalLanguageDraftSuggestionResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Natural Language Rule Draft Suggestion",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_natural_language_rule_draft_requests_api_data_catalog_v1_suggestions_natural_language_rule_previews_requests_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_natural_language_rule_draft_requests_api_data_catalog_v1_suggestions_natural_language_rule_previews_requests_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_natural_language_rule_draft_requests_api_data_catalog_v1_suggestions_natural_language_rule_previews_requests_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions/natural-language-rule-previews/requests",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/NaturalLanguageDraftRequestHistoryResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Natural Language Rule Draft Requests",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_natural_language_rule_draft_request_status_api_data_catalog_v1_suggestions_natural_language_rule_previews_requests__request_id__status_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_natural_language_rule_draft_request_status_api_data_catalog_v1_suggestions_natural_language_rule_previews_requests_request_id_status_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions/natural-language-rule-previews/requests/{request_id}/status",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/NaturalLanguageDraftRequestStatusResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Natural Language Rule Draft Request Status",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "record_natural_language_rule_preview_telemetry_api_data_catalog_v1_suggestions_natural_language_rule_previews_telemetry_post",
+      "path": "/api/data-catalog/v1/suggestions/natural-language-rule-previews/telemetry",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/NaturalLanguageRulePreviewTelemetryRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/record_natural_language_rule_preview_telemetry_api_data_catalog_v1_suggestions_natural_language_rule_previews_telemetry_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Record Natural Language Rule Preview Telemetry",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_tag_suggestions_api_data_catalog_v1_suggestions_tags_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "query",
+          "required": false,
+          "schema_ref": "#/$defs/get_tag_suggestions_api_data_catalog_v1_suggestions_tags_get_param_query_query"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_tag_suggestions_api_data_catalog_v1_suggestions_tags_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions/tags",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TagSuggestionsResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Tag Suggestions",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "accept_suggestion_api_data_catalog_v1_suggestions__suggestion_id__accept_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suggestion_id",
+          "required": true,
+          "schema_ref": "#/$defs/accept_suggestion_api_data_catalog_v1_suggestions_suggestion_id_accept_post_param_path_suggestion_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions/{suggestion_id}/accept",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/accept_suggestion_api_data_catalog_v1_suggestions_suggestion_id_accept_post_request_body_application_json"
+          }
+        },
+        "required": false
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/accept_suggestion_api_data_catalog_v1_suggestions_suggestion_id_accept_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Accept Suggestion",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "apply_suggestion_api_data_catalog_v1_suggestions__suggestion_id__apply_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suggestion_id",
+          "required": true,
+          "schema_ref": "#/$defs/apply_suggestion_api_data_catalog_v1_suggestions_suggestion_id_apply_post_param_path_suggestion_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions/{suggestion_id}/apply",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/apply_suggestion_api_data_catalog_v1_suggestions_suggestion_id_apply_post_request_body_application_json"
+          }
+        },
+        "required": false
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/apply_suggestion_api_data_catalog_v1_suggestions_suggestion_id_apply_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Apply Suggestion",
+      "tags": [
+        "suggestions"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "dismiss_suggestion_api_data_catalog_v1_suggestions__suggestion_id__dismiss_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "suggestion_id",
+          "required": true,
+          "schema_ref": "#/$defs/dismiss_suggestion_api_data_catalog_v1_suggestions_suggestion_id_dismiss_post_param_path_suggestion_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/suggestions/{suggestion_id}/dismiss",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/dismiss_suggestion_api_data_catalog_v1_suggestions_suggestion_id_dismiss_post_request_body_application_json"
+          }
+        },
+        "required": false
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/dismiss_suggestion_api_data_catalog_v1_suggestions_suggestion_id_dismiss_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Dismiss Suggestion",
+      "tags": [
+        "suggestions"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

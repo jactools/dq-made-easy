@@ -1,0 +1,7 @@
+{
+  "name": "Email Format Validation",
+  "description": "Validate email field format using regex pattern",
+  "expression": "email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'",
+  "ruleType": "FORMAT_VALIDATION",
+  "dimension": "Validity"
+}

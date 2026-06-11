@@ -1,0 +1,1700 @@
+{
+  "group": "by-tag/rules",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_reusable_filters_api_rulebuilder_v1_reusable_filters_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/list_reusable_filters_api_rulebuilder_v1_reusable_filters_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "q",
+          "required": false,
+          "schema_ref": "#/$defs/list_reusable_filters_api_rulebuilder_v1_reusable_filters_get_param_query_q"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-filters",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_reusable_filters_api_rulebuilder_v1_reusable_filters_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Reusable Filters",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_reusable_filter_api_rulebuilder_v1_reusable_filters_post",
+      "path": "/api/rulebuilder/v1/reusable-filters",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ReusableFilterCreateRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_reusable_filter_api_rulebuilder_v1_reusable_filters_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Reusable Filter",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_reusable_filter_api_rulebuilder_v1_reusable_filters__filter_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "filter_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_delete_param_path_filter_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-filters/{filter_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/delete_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_delete_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Reusable Filter",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_reusable_filter_api_rulebuilder_v1_reusable_filters__filter_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "filter_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_get_param_path_filter_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-filters/{filter_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Reusable Filter",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_reusable_filter_api_rulebuilder_v1_reusable_filters__filter_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "filter_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_put_param_path_filter_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-filters/{filter_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ReusableFilterUpdateRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/update_reusable_filter_api_rulebuilder_v1_reusable_filters_filter_id_put_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Reusable Filter",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_reusable_joins_api_rulebuilder_v1_reusable_joins_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/list_reusable_joins_api_rulebuilder_v1_reusable_joins_get_param_query_workspace"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-joins",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_reusable_joins_api_rulebuilder_v1_reusable_joins_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Reusable Joins",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_reusable_join_api_rulebuilder_v1_reusable_joins_post",
+      "path": "/api/rulebuilder/v1/reusable-joins",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ReusableJoinCreateRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_reusable_join_api_rulebuilder_v1_reusable_joins_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Reusable Join",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_reusable_join_api_rulebuilder_v1_reusable_joins__join_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "join_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_delete_param_path_join_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-joins/{join_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/delete_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_delete_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Reusable Join",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_reusable_join_api_rulebuilder_v1_reusable_joins__join_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "join_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_get_param_path_join_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-joins/{join_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Reusable Join",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_reusable_join_api_rulebuilder_v1_reusable_joins__join_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "join_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_put_param_path_join_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/reusable-joins/{join_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ReusableJoinUpdateRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/update_reusable_join_api_rulebuilder_v1_reusable_joins_join_id_put_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Reusable Join",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_rules_api_rulebuilder_v1_rules_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "includeDeleted",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_includeDeleted"
+        },
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "is_template",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_is_template"
+        },
+        {
+          "in": "query",
+          "name": "q",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_q"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "lifecycle_status",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_lifecycle_status"
+        },
+        {
+          "in": "query",
+          "name": "owner",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_owner"
+        },
+        {
+          "in": "query",
+          "name": "updated_since",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_updated_since"
+        },
+        {
+          "in": "query",
+          "name": "updated_before",
+          "required": false,
+          "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_param_query_updated_before"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_rules_api_rulebuilder_v1_rules_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Rules",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_rule_api_rulebuilder_v1_rules_post",
+      "path": "/api/rulebuilder/v1/rules",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RuleMutationRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_rule_api_rulebuilder_v1_rules_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Rule",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "resolve_aliases_api_rulebuilder_v1_rules_aliases_resolve_post",
+      "path": "/api/rulebuilder/v1/rules/aliases/resolve",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/AliasResolveRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/resolve_aliases_api_rulebuilder_v1_rules_aliases_resolve_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Resolve Aliases",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_param_query_workspace"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/compiler-versions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_rule_compiler_versions_api_rulebuilder_v1_rules_compiler_versions_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Rule Compiler Versions",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_rule_registry_api_rulebuilder_v1_rules_registry_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "includeDeleted",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_includeDeleted"
+        },
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "is_template",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_is_template"
+        },
+        {
+          "in": "query",
+          "name": "q",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_q"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "lifecycle_status",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_lifecycle_status"
+        },
+        {
+          "in": "query",
+          "name": "owner",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_owner"
+        },
+        {
+          "in": "query",
+          "name": "domain",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_domain"
+        },
+        {
+          "in": "query",
+          "name": "severity",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_severity"
+        },
+        {
+          "in": "query",
+          "name": "execution_target",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_execution_target"
+        },
+        {
+          "in": "query",
+          "name": "rule_type",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_rule_type"
+        },
+        {
+          "in": "query",
+          "name": "updated_since",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_updated_since"
+        },
+        {
+          "in": "query",
+          "name": "updated_before",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_param_query_updated_before"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/registry",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_rule_registry_api_rulebuilder_v1_rules_registry_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Rule Registry",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_rule_template_packs_api_rulebuilder_v1_rules_template_packs_get",
+      "path": "/api/rulebuilder/v1/rules/template-packs",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_rule_template_packs_api_rulebuilder_v1_rules_template_packs_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "List Rule Template Packs",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_rule_templates_api_rulebuilder_v1_rules_templates_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "pack_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_templates_api_rulebuilder_v1_rules_templates_get_param_query_pack_id"
+        },
+        {
+          "in": "query",
+          "name": "dimension",
+          "required": false,
+          "schema_ref": "#/$defs/list_rule_templates_api_rulebuilder_v1_rules_templates_get_param_query_dimension"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/templates",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_rule_templates_api_rulebuilder_v1_rules_templates_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Rule Templates",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "resolve_rule_template_api_rulebuilder_v1_rules_templates__template_id__resolve_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "template_id",
+          "required": true,
+          "schema_ref": "#/$defs/resolve_rule_template_api_rulebuilder_v1_rules_templates_template_id_resolve_post_param_path_template_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/templates/{template_id}/resolve",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RuleTemplateResolveRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/RuleTemplateResolutionEntity"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Resolve Rule Template",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "validate_rules_batch_api_rulebuilder_v1_rules_validate_batch_post",
+      "path": "/api/rulebuilder/v1/rules/validate/batch",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/BatchValidationRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/BatchValidationResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Validate Rules Batch",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "validate_check_type_draft_api_rulebuilder_v1_rules_validate_check_type_post",
+      "path": "/api/rulebuilder/v1/rules/validate/check-type",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RuleCheckTypeValidationRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/RuleCheckTypeValidationResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Validate Check Type Draft",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "remove_rule_api_rulebuilder_v1_rules__rule_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/remove_rule_api_rulebuilder_v1_rules_rule_id_delete_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/remove_rule_api_rulebuilder_v1_rules_rule_id_delete_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Remove Rule",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_api_rulebuilder_v1_rules__rule_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_api_rulebuilder_v1_rules_rule_id_get_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/RuleView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Rule",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_rule_api_rulebuilder_v1_rules__rule_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_rule_api_rulebuilder_v1_rules_rule_id_put_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RuleMutationRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/update_rule_api_rulebuilder_v1_rules_rule_id_put_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Rule",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "activate_rule_api_rulebuilder_v1_rules__rule_id__activate_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_param_path_rule_id"
+        },
+        {
+          "in": "query",
+          "name": "effective_at",
+          "required": false,
+          "schema_ref": "#/$defs/activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_param_query_effective_at"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/activate",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_request_body_application_json"
+          }
+        },
+        "required": false
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/activate_rule_api_rulebuilder_v1_rules_rule_id_activate_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Activate Rule",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "transition_rule_lifecycle_api_rulebuilder_v1_rules__rule_id__lifecycle_patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/transition_rule_lifecycle_api_rulebuilder_v1_rules_rule_id_lifecycle_patch_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/lifecycle",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RuleLifecycleTransitionRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/transition_rule_lifecycle_api_rulebuilder_v1_rules_rule_id_lifecycle_patch_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Transition Rule Lifecycle",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "rollback_rule_api_rulebuilder_v1_rules__rule_id__rollback_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/rollback_rule_api_rulebuilder_v1_rules_rule_id_rollback_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/rollback",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RollbackRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/rollback_rule_api_rulebuilder_v1_rules_rule_id_rollback_post_response_202_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Rollback Rule",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_status_history_api_rulebuilder_v1_rules__rule_id__status_history_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_param_path_rule_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/status-history",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_rule_status_history_api_rulebuilder_v1_rules_rule_id_status_history_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Rule Status History",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "save_rule_as_template_api_rulebuilder_v1_rules__rule_id__template_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/save_rule_as_template_api_rulebuilder_v1_rules_rule_id_template_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/template",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RuleTemplateRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/save_rule_as_template_api_rulebuilder_v1_rules_rule_id_template_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Save Rule As Template",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "validate_rule_composition_api_rulebuilder_v1_rules__rule_id__validate_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/validate_rule_composition_api_rulebuilder_v1_rules_rule_id_validate_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/validate",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/RuleValidationResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Validate Rule Composition",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "validate_rule_composition_enriched_api_rulebuilder_v1_rules__rule_id__validate_enriched_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/validate_rule_composition_enriched_api_rulebuilder_v1_rules_rule_id_validate_enriched_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/validate/enriched",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/EnrichedValidationRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/validate_rule_composition_enriched_api_rulebuilder_v1_rules_rule_id_validate_enriched_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Validate Rule Composition Enriched",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_versions_api_rulebuilder_v1_rules__rule_id__versions_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_param_path_rule_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Rule Versions",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_rollback_history_api_rulebuilder_v1_rules__rule_id__versions_rollback_history_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_param_path_rule_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_param_query_offset"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/rollback-history",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_rule_rollback_history_api_rulebuilder_v1_rules_rule_id_versions_rollback_history_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Rule Rollback History",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_version_statistics_api_rulebuilder_v1_rules__rule_id__versions_stats_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_version_statistics_api_rulebuilder_v1_rules_rule_id_versions_stats_get_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/stats",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_rule_version_statistics_api_rulebuilder_v1_rules_rule_id_versions_stats_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Rule Version Statistics",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "compare_rule_versions_api_rulebuilder_v1_rules__rule_id__versions__version_1__compare__version_2__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_param_path_rule_id"
+        },
+        {
+          "in": "path",
+          "name": "version_1",
+          "required": true,
+          "schema_ref": "#/$defs/compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_param_path_version_1"
+        },
+        {
+          "in": "path",
+          "name": "version_2",
+          "required": true,
+          "schema_ref": "#/$defs/compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_param_path_version_2"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/{version_1}/compare/{version_2}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/compare_rule_versions_api_rulebuilder_v1_rules_rule_id_versions_version_1_compare_version_2_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Compare Rule Versions",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_version_api_rulebuilder_v1_rules__rule_id__versions__version_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_version_api_rulebuilder_v1_rules_rule_id_versions_version_id_get_param_path_rule_id"
+        },
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_version_api_rulebuilder_v1_rules_rule_id_versions_version_id_get_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/{version_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_rule_version_api_rulebuilder_v1_rules_rule_id_versions_version_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Rule Version",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_rule_version_compiler_artifacts_api_rulebuilder_v1_rules__rule_id__versions__version_id__compiler_artifacts_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/list_rule_version_compiler_artifacts_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_get_param_path_rule_id"
+        },
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/list_rule_version_compiler_artifacts_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_get_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/{version_id}/compiler-artifacts",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_rule_version_compiler_artifacts_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Rule Version Compiler Artifacts",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_version_active_compiler_artifact_api_rulebuilder_v1_rules__rule_id__versions__version_id__compiler_artifacts_active_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_version_active_compiler_artifact_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_active_get_param_path_rule_id"
+        },
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_rule_version_active_compiler_artifact_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_active_get_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/{version_id}/compiler-artifacts/active",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_rule_version_active_compiler_artifact_api_rulebuilder_v1_rules_rule_id_versions_version_id_compiler_artifacts_active_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Rule Version Active Compiler Artifact",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "mark_rule_version_for_rollback_api_rulebuilder_v1_rules__rule_id__versions__version_id__mark_for_rollback_patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/mark_rule_version_for_rollback_api_rulebuilder_v1_rules_rule_id_versions_version_id_mark_for_rollback_patch_param_path_rule_id"
+        },
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/mark_rule_version_for_rollback_api_rulebuilder_v1_rules_rule_id_versions_version_id_mark_for_rollback_patch_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/{version_id}/mark-for-rollback",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/MarkForRollbackRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/mark_rule_version_for_rollback_api_rulebuilder_v1_rules_rule_id_versions_version_id_mark_for_rollback_patch_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Mark Rule Version For Rollback",
+      "tags": [
+        "rules"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "update_rule_version_tags_api_rulebuilder_v1_rules__rule_id__versions__version_id__tags_patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_rule_version_tags_api_rulebuilder_v1_rules_rule_id_versions_version_id_tags_patch_param_path_rule_id"
+        },
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_rule_version_tags_api_rulebuilder_v1_rules_rule_id_versions_version_id_tags_patch_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/versions/{version_id}/tags",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/VersionTagsUpdateRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/update_rule_version_tags_api_rulebuilder_v1_rules_rule_id_versions_version_id_tags_patch_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Rule Version Tags",
+      "tags": [
+        "rules"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

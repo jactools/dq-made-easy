@@ -1,0 +1,67 @@
+{
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-7c72-af10-87d726eef784",
+    "datasetId": "019e0488-9a54-7678-a935-3e65933617ae",
+    "dataProductId": "019e0488-9a54-7ccd-8b26-ac440ebc2f3c"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "019e0488-9a53-7a7f-8cde-a785bd046bc9"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "gx_customer_filtered_row_count_condition_v1",
+    "expectations": [
+      {
+        "expectation_type": "expect_table_row_count_to_be_between",
+        "kwargs": {
+          "min_value": 1,
+          "max_value": 1000000,
+          "row_condition": {
+            "type": "comparison",
+            "column": {
+              "name": "customer_segment"
+            },
+            "operator": "==",
+            "parameter": "__seeded_violation__"
+          }
+        },
+        "meta": {
+          "dq.artifact_key": "019e0488-9a56-7caa-b001-000000000008",
+          "dq.rule_id": "019e0488-9a56-7caa-b001-000000000008"
+        }
+      }
+    ],
+    "meta": {
+      "dq.artifact_key": "019e0488-9a56-7caa-b001-000000000008",
+      "dq.rule_id": "019e0488-9a56-7caa-b001-000000000008",
+      "dq.rule_kind": "metric_threshold",
+      "dq.schema_version": "2.0.0"
+    }
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a56-7caa-b001-000000000008"
+    ],
+    "compilerVersion": "seed-v1",
+    "generatedAt": "2026-05-19T09:10:00Z"
+  },
+  "executionHints": {
+    "recommendedEngine": "pyspark",
+    "primaryKeyFields": [
+      "customer_id"
+    ]
+  },
+  "executionContract": {
+    "engineType": "gx",
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "traceability": {
+      "ruleId": "019e0488-9a56-7caa-b001-000000000008",
+      "ruleVersionId": "019e0488-9a56-7caa-b001-000000000009",
+      "gxSuiteId": "gx_customer_filtered_row_count_condition",
+      "gxSuiteVersion": 1,
+      "dataObjectVersionId": "019e0488-9a53-7a7f-8cde-a785bd046bc9"
+    }
+  }
+}

@@ -1,0 +1,82 @@
+# Purpose: Deploy any dq-made-easy Docker image to an existing Azure Container Apps environment with OpenTofu.
+# What it does:
+# - Selects the env-specific dq-made-easy parameter template.
+# - Passes the selected environment, image, and ingress settings into the OpenTofu deployment job template.
+# - Fails fast when required deploy inputs are missing.
+# Version: 1.0
+# Last modified: 2026-06-10
+
+trigger: none
+pr: none
+name: dq-made-easy-deploy-container-app_$(Date:yyyyMMdd)$(Rev:.r)
+
+parameters:
+  - name: environment
+    displayName: Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - test
+      - prod
+  - name: containerAppName
+    displayName: Container App name
+    type: string
+  - name: containerImage
+    displayName: Docker image
+    type: string
+  - name: targetPort
+    displayName: Target port
+    type: number
+    default: 80
+  - name: ingress
+    displayName: Ingress
+    type: string
+    default: internal
+    values:
+      - internal
+      - external
+  - name: revisionSuffix
+    displayName: Revision suffix
+    type: string
+    default: ''
+  - name: containerName
+    displayName: Container name
+    type: string
+    default: app
+  - name: registryServer
+    displayName: Registry server
+    type: string
+    default: ''
+  - name: registryUsername
+    displayName: Registry username
+    type: string
+    default: ''
+  - name: registryPassword
+    displayName: Registry password
+    type: string
+    default: ''
+
+variables:
+  - ${{ if eq(parameters.environment, 'dev') }}:
+    - template: parameters/dq-made-easy-dev.yml
+  - ${{ if eq(parameters.environment, 'test') }}:
+    - template: parameters/dq-made-easy-test.yml
+  - ${{ if eq(parameters.environment, 'prod') }}:
+    - template: parameters/dq-made-easy-prod.yml
+
+stages:
+  - stage: Deploy
+    displayName: dq-made-easy - Deploy Container App
+    jobs:
+      - template: templates/dq-made-easy-container-app-deploy-tofu.yml
+        parameters:
+          containerAppName: ${{ parameters.containerAppName }}
+          containerImage: ${{ parameters.containerImage }}
+          targetPort: ${{ parameters.targetPort }}
+          ingress: ${{ parameters.ingress }}
+          revisionSuffix: ${{ parameters.revisionSuffix }}
+          containerName: ${{ parameters.containerName }}
+          registryServer: ${{ parameters.registryServer }}
+          registryUsername: ${{ parameters.registryUsername }}
+          registryPassword: ${{ parameters.registryPassword }}

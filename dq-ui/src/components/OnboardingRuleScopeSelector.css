@@ -1,0 +1,50 @@
+.onboarding-scope-selector__description {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text-default);
+}
+
+.onboarding-scope-selector__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.onboarding-scope-selector__label {
+  display: block;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text-strong);
+  margin-bottom: 0.25rem;
+}
+
+.onboarding-scope-selector__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: var(--color-background-secondary);
+  border-radius: 0.375rem;
+  font-size: 0.9375rem;
+}
+
+.onboarding-scope-selector__summary-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.onboarding-scope-selector__summary-label {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.onboarding-scope-selector__summary-value {
+  color: var(--color-text-default);
+  font-weight: 600;
+}
+
+.onboarding-scope-selector__summary-separator {
+  color: var(--color-border-default);
+}

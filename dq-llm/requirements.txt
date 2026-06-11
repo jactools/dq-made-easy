@@ -1,0 +1,29 @@
+fastapi>=0.109.0
+uvicorn>=0.27.0
+spacy>=3.7.0
+spacy-llm>=0.6.0
+transformers>=4.37.0,<5.0.0
+torch>=2.1.0
+bitsandbytes>=0.41.0
+sentencepiece>=0.2.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+accelerate>=0.27.0
+
+# HTTP client for API calls
+httpx>=0.26.0
+
+# Pi Agent Harness for LLM-1
+# Provider-agnostic agent framework for tool-using AI agents
+pi-agent>=0.1.0
+
+# Database persistence for LLM-1.15, LLM-1.16
+# PostgreSQL async support for session storage and audit logging
+sqlalchemy>=2.0,<3.0
+asyncpg>=0.29.0
+
+# OpenTelemetry tracing for LLM-1.18 agent-harness operations
+opentelemetry-api>=1.40.0
+opentelemetry-sdk>=1.40.0
+opentelemetry-exporter-otlp>=1.40.0
+opentelemetry-instrumentation-fastapi>=0.61b0

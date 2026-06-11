@@ -1,0 +1,43 @@
+{
+  "schema_version": "2.0.0",
+  "rule": {
+    "kind": "row_assertion",
+    "scope": {
+      "dataset": {
+        "data_object_id": "do-loan"
+      }
+    },
+    "measure": {
+      "type": "row_predicate",
+      "predicate": {
+        "kind": "row_predicate",
+        "language": "sql",
+        "expression": "interest_rate >= 0 AND interest_rate <= 25"
+      }
+    },
+    "expectation": {
+      "type": "threshold",
+      "operator": "gte",
+      "value": 100,
+      "unit": "percent"
+    },
+    "evidence": {
+      "failed_rows": {
+        "mode": "sample",
+        "limit": 25,
+        "include_row_identifier": true,
+        "include_primary_key": true
+      },
+      "emit_compiled_artifact": true,
+      "emit_generated_sql": false
+    },
+    "operations": {
+      "severity": "critical",
+      "preferred_engines": [
+        "gx",
+        "sql"
+      ],
+      "fail_if_not_native": false
+    }
+  }
+}

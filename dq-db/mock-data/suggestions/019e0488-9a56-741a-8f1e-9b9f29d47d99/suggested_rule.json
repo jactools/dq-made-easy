@@ -1,0 +1,7 @@
+{
+  "name": "Date Range Validation",
+  "description": "Validate order_date is within acceptable range",
+  "expression": "order_date >= '2020-01-01' AND order_date <= CURRENT_DATE",
+  "ruleType": "RANGE_CHECK",
+  "dimension": "Timeliness"
+}

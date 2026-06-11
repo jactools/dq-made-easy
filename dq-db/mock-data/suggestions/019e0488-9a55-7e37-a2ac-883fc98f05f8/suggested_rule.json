@@ -1,0 +1,7 @@
+{
+  "name": "Non-null Customer ID",
+  "description": "Ensure customer_id field is never null",
+  "expression": "customer_id IS NOT NULL",
+  "ruleType": "NOT_NULL",
+  "dimension": "Completeness"
+}

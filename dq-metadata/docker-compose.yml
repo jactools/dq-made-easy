@@ -1,0 +1,146 @@
+services:
+  openmetadata-db:
+    image: ${DQ_OPENMETADATA_DB_REGISTRY:-}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:-dq-openmetadata-db}:${DQ_OPENMETADATA_DB_TAG:-18}
+    build:
+      context: ..
+      dockerfile: dq-metadata/Dockerfile.openmetadata-db
+      args:
+        OPENMETADATA_DB_BASE_IMAGE: ${OPENMETADATA_DB_BASE_IMAGE?OPENMETADATA_DB_BASE_IMAGE is required}
+    container_name: openmetadata-db
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.max=10000
+      - -c
+      - pg_stat_statements.track=all
+    environment:
+      POSTGRES_USER: ${OM_DB_USER:-openmetadata_user}
+      POSTGRES_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
+      POSTGRES_DB: ${OM_DB_NAME:-openmetadata_db}
+    volumes:
+      - openmetadata_pgdata_v18:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${OM_DB_USER:-openmetadata_user} -d ${OM_DB_NAME:-openmetadata_db} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  openmetadata-search:
+    image: ${OPENMETADATA_SEARCH_IMAGE:-docker.io/library/elasticsearch}:${OPENMETADATA_SEARCH_TAG:-8.11.4}
+    container_name: openmetadata-search
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+    ports:
+      - "19200:9200"
+    volumes:
+      - openmetadata_search_v9_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  openmetadata-migrate:
+    image: openmetadata/server:${OPENMETADATA_VERSION:-latest}
+    container_name: openmetadata-migrate
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+      openmetadata-search:
+        condition: service_healthy
+    environment:
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_HOST: openmetadata-db
+      DB_PORT: 5432
+      OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
+      DB_USER: ${OM_DB_USER:-openmetadata_user}
+      DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
+      DB_PARAMS: sslmode=disable
+      OM_SEARCH_TYPE: elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-search
+      ELASTICSEARCH_PORT: 9200
+      SECRET_MANAGER: db
+    entrypoint: ["/opt/openmetadata/bootstrap/openmetadata-ops.sh"]
+    command: ["migrate"]
+    restart: "no"
+
+  openmetadata-server:
+    image: ${DQ_OPENMETADATA_SERVER_REGISTRY:-}${DQ_OPENMETADATA_SERVER_NAMESPACE:-}${DQ_OPENMETADATA_SERVER_IMAGE:-dq-openmetadata}:${DQ_OPENMETADATA_SERVER_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: dq-metadata/Dockerfile.openmetadata-server
+      args:
+        OPENMETADATA_BASE_IMAGE: openmetadata/server:${OPENMETADATA_VERSION:-latest}
+        OTEL_JAVAAGENT_HELPER_IMAGE: ${OTEL_JAVAAGENT_HELPER_IMAGE?OTEL_JAVAAGENT_HELPER_IMAGE is required}
+    container_name: openmetadata-server
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+      openmetadata-search:
+        condition: service_healthy
+      openmetadata-migrate:
+        condition: service_completed_successfully
+    environment:
+      SERVER_PORT: 8585
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_HOST: openmetadata-db
+      DB_PORT: 5432
+      OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
+      DB_USER: ${OM_DB_USER:-openmetadata_user}
+      DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
+      DB_PARAMS: sslmode=disable
+      OM_SEARCH_TYPE: elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-search
+      ELASTICSEARCH_PORT: 9200
+      AUTHORIZER_CLASS_NAME: org.openmetadata.service.security.DefaultAuthorizer
+      AUTHORIZER_REQUEST_FILTER: org.openmetadata.service.security.JwtFilter
+      AIRFLOW_HOST: http://openmetadata-ingestion:8080
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
+      SECRET_MANAGER: db
+    entrypoint: ["/bin/bash"]
+    command: ["/openmetadata-https-start.sh"]
+    ports:
+      - "8585:8585"
+    volumes:
+      - ../tmp/certs/openmetadata-keystore.p12:/opt/openmetadata/conf/openmetadata.p12:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-check-certificate -q -O /dev/null https://127.0.0.1:8585/api/v1/system/version || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 180s
+
+  openmetadata-ingestion:
+    profiles: ["metadata-ingestion"]
+    image: openmetadata/ingestion:${OPENMETADATA_VERSION:-latest}
+    container_name: openmetadata-ingestion
+    depends_on:
+      openmetadata-server:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////tmp/airflow.db
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${OM_AIRFLOW_SECRET_KEY:-openmetadata_airflow_secret}
+      OPENMETADATA_SERVER_URL: https://openmetadata-server:8585/api
+      OPENMETADATA_VERIFY_SSL: "true"
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      OPENMETADATA_AIRFLOW_ADMIN_EMAIL: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME is required}
+      OPENMETADATA_AIRFLOW_ADMIN_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD is required}
+    command: ["bash", "-c", "airflow db init && airflow users create --username admin --firstname Open --lastname Metadata --role Admin --email \"$${OPENMETADATA_AIRFLOW_ADMIN_EMAIL}\" --password \"$${OPENMETADATA_AIRFLOW_ADMIN_PASSWORD}\" || true && airflow webserver -p 8080"]
+    ports:
+      - "18080:8080"
+    volumes:
+      - ../tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+
+volumes:
+  openmetadata_pgdata_v18:
+  openmetadata_search_v9_data:

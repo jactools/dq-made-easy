@@ -1,0 +1,328 @@
+/* Global Theme Configuration */
+/* This file defines all CSS variables for light and dark themes */
+/* Component CSS files should only use these variables, never define theme-specific rules */
+
+/* ===== LIGHT THEME (DEFAULT) ===== */
+:root {
+  /* Layer Colors */
+  --app-color-layer-0: #ffffff;
+  --app-color-layer-1: #ffffff;
+  --app-color-layer-2: #fafafa;
+  --app-color-layer-3: #eef2f7;
+
+  /* Text Colors */
+  --app-color-text-default: #1a1a1a;
+  --app-color-text-secondary: #666666;
+  --app-color-text-inverse: #ffffff;
+  --app-color-text-disabled: #999999;
+  --app-color-text-contrast: #1a1a1a;
+
+  /* Stroke Colors */
+  --app-color-stroke-default: #e8e8e8;
+  --app-color-stroke-interactive: #003d99;
+
+  /* Fill Colors */
+  --app-color-fill-interactive-default: #f0f0f0;
+  --app-color-fill-interactive-hover: #e0e8f0;
+  --app-color-fill-success: #e8f5e9;
+  --app-color-fill-danger: #ffebee;
+
+  /* Brand Colors */
+  --app-color-brand-02: #003d99;
+  --app-color-brand-02-lighter: #e8f0ff;
+  --app-color-brand-02-darker: #002b6e;
+
+  /* Actionable Background */
+  --app-color-background-actionable-1: #f5f5f5;
+  --app-color-background-actionable-1-hover: #efefef;
+
+  /* Semantic Backgrounds */
+  --app-color-background-success: #e8f5e9;
+  --app-color-background-warning: #fff3e0;
+  --app-color-background-error: #ffebee;
+  --app-color-background-info: #e3f2fd;
+
+  /* Status Colors */
+  --app-color-success: #4caf50;
+  --app-color-success-hover: #43a047;
+  --app-color-success-overlay: rgba(76, 175, 80, 0.1);
+  --app-color-warning: #ff9800;
+  --app-color-warning-light: #fff3e0;
+  --app-color-warning-overlay: rgba(255, 152, 0, 0.1);
+  --app-color-danger: #f44336;
+  --app-color-danger-hover: #d32f2f;
+  --app-color-danger-light: #ffebee;
+  --app-color-danger-overlay: rgba(244, 67, 54, 0.1);
+  --app-color-info: #2196f3;
+  --app-color-info-overlay: rgba(33, 150, 243, 0.1);
+  --app-color-info-secondary: #9c27b0;
+
+  /* Rule Status Tokens */
+  --dq-status-success-bg: var(--app-color-background-success);
+  --dq-status-success-text: var(--app-color-success);
+  --dq-status-warning-bg: var(--app-color-background-warning);
+  --dq-status-warning-text: var(--app-color-warning);
+  --dq-status-info-bg: var(--app-color-background-info);
+  --dq-status-info-text: var(--app-color-info);
+  --dq-status-error-bg: var(--app-color-background-error);
+  --dq-status-error-text: var(--app-color-danger);
+  --dq-status-neutral-bg: var(--app-color-background-actionable-1);
+  --dq-status-neutral-text: var(--app-color-text-secondary);
+
+  /* Borders */
+  --app-color-border-default: #e8e8e8;
+
+  /* Background */
+  --app-color-background-default: #ffffff;
+
+  /* App Semantic Surfaces */
+  --app-page-bg: #f7f9fc;
+  --app-surface-primary: var(--app-color-layer-0);
+  --app-surface-secondary: var(--app-color-layer-1);
+  --app-surface-tertiary: var(--app-color-layer-2);
+  --app-surface-elevated: var(--app-color-layer-0);
+  --app-border-subtle: var(--app-color-stroke-default);
+  --app-border-strong: #cfd8e3;
+  --app-text-primary: var(--app-color-text-default);
+  --app-text-secondary: var(--app-color-text-secondary);
+  --app-hover-bg: #f1f5f9;
+  --app-selected-bg: #e8f0ff;
+  --app-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --app-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --app-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+  --app-status-success-bg: color-mix(in srgb, var(--app-color-success) 12%, var(--app-surface-primary));
+  --app-status-success-border: color-mix(in srgb, var(--app-color-success) 28%, transparent);
+  --app-status-success-text: var(--app-color-success);
+  --app-status-info-bg: color-mix(in srgb, var(--app-color-info) 12%, var(--app-surface-primary));
+  --app-status-info-border: color-mix(in srgb, var(--app-color-info) 28%, transparent);
+  --app-status-info-text: var(--app-color-info);
+  --app-status-warning-bg: var(--app-warning-bg);
+  --app-status-warning-border: var(--app-warning-border);
+  --app-status-warning-text: var(--app-warning-text);
+  --app-status-error-bg: color-mix(in srgb, var(--app-color-danger) 12%, var(--app-surface-primary));
+  --app-status-error-border: color-mix(in srgb, var(--app-color-danger) 28%, transparent);
+  --app-status-error-text: var(--app-color-danger);
+  --app-status-neutral-bg: color-mix(in srgb, var(--app-surface-tertiary) 88%, var(--app-surface-primary));
+  --app-status-neutral-border: var(--app-border-subtle);
+  --app-status-neutral-text: var(--app-color-text-secondary);
+  --app-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --app-brand-primary: #003d99;
+  --app-brand-primary-strong: #002b6e;
+  --app-brand-primary-soft: #e8f0ff;
+  --app-text-inverse: #ffffff;
+  --app-focus-ring: #003d99;
+  --app-input-background: var(--app-surface-primary);
+  --app-input-text: var(--app-text-primary);
+  --app-input-border: var(--app-border-subtle);
+  --app-input-placeholder: var(--app-text-secondary);
+  --app-input-label: var(--app-text-secondary);
+  --app-select-background: var(--app-surface-primary);
+  --app-select-text: var(--app-text-primary);
+  --app-select-border: var(--app-border-subtle);
+  --app-shell-bg: var(--app-page-bg);
+  --app-header-bg: var(--app-brand-primary);
+  --app-header-text: var(--app-text-inverse);
+  --app-sidebar-bg: #f5f5f5;
+  --app-sidebar-border: var(--app-border-subtle);
+  --app-sidebar-submenu-bg: #ffffff;
+  --app-nav-text: var(--app-text-primary);
+  --app-nav-hover-bg: #efefef;
+  --app-nav-active-bg: var(--app-brand-primary-soft);
+  --app-nav-active-text: var(--app-brand-primary);
+  --app-nav-active-border: var(--app-brand-primary);
+  --app-control-bg: var(--app-surface-primary);
+  --app-control-hover-bg: #f3f6fb;
+  --app-control-border: var(--app-border-subtle);
+  --app-control-focus-border: var(--app-brand-primary);
+  --app-control-focus-text: #0a2e6d;
+  --app-warning-bg: #fff4d6;
+  --app-warning-bg-strong: #fff3e0;
+  --app-warning-text: #1a1a1a;
+  --app-warning-text-muted: #4d4d4d;
+  --app-warning-border: rgba(255, 193, 7, 0.35);
+  --app-warning-accent: #c77700;
+  --app-warning-icon-bg: rgba(255, 193, 7, 0.18);
+  --app-runtime-dev-text: #0b3d20;
+  --app-runtime-dev-bg: rgba(181, 242, 206, 0.92);
+  --app-runtime-dev-border: rgba(30, 134, 82, 0.55);
+  --app-runtime-prod-text: #133455;
+  --app-runtime-prod-bg: rgba(196, 226, 255, 0.92);
+  --app-runtime-prod-border: rgba(31, 109, 184, 0.55);
+
+  /* Modal/Dialog */
+  --app-color-modal-backdrop: rgba(0, 0, 0, 0.5);
+
+  /* Typography */
+  --app-body-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --app-heading-2-color-text: #1a1a1a;
+  --app-body-color-text: #1a1a1a;
+  --app-body-color-background: #ffffff;
+}
+
+/* ===== DARK THEME ===== */
+[data-theme='dark'] {
+  /* Layer Colors */
+  --app-color-layer-0: #0f172a;
+  --app-color-layer-1: #1a1a1a;
+  --app-color-layer-2: #2a2a2a;
+  --app-color-layer-3: #334155;
+
+  /* Text Colors */
+  --app-color-text-default: #ffffff;
+  --app-color-text-secondary: #cccccc;
+  --app-color-text-inverse: #1a1a1a;
+  --app-color-text-disabled: #999999;
+  --app-color-text-contrast: #ffffff;
+
+  /* Stroke Colors */
+  --app-color-stroke-default: #333333;
+  --app-color-stroke-interactive: #4a9eff;
+
+  /* Fill Colors */
+  --app-color-fill-interactive-default: #2a3a4a;
+  --app-color-fill-interactive-hover: #3a4a5a;
+  --app-color-fill-success: #1b5e20;
+  --app-color-fill-danger: #b71c1c;
+
+  /* Brand Colors */
+  --app-color-brand-02: #4a9eff;
+  --app-color-brand-02-lighter: #1a3a5a;
+  --app-color-brand-02-darker: #2a5aaa;
+
+  /* Actionable Background */
+  --app-color-background-actionable-1: #2a2a2a;
+  --app-color-background-actionable-1-hover: #3a3a3a;
+
+  /* Semantic Backgrounds */
+  --app-color-background-success: #16351d;
+  --app-color-background-warning: #4a360d;
+  --app-color-background-error: #4a1f24;
+  --app-color-background-info: #132c46;
+
+  /* Status Colors */
+  --app-color-success: #4caf50;
+  --app-color-success-hover: #66bb6a;
+  --app-color-success-overlay: rgba(76, 175, 80, 0.15);
+  --app-color-warning: #ff9800;
+  --app-color-warning-light: #443300;
+  --app-color-warning-overlay: rgba(255, 152, 0, 0.15);
+  --app-color-danger: #ff6b6b;
+  --app-color-danger-hover: #ff4444;
+  --app-color-danger-light: #4a1a1a;
+  --app-color-danger-overlay: rgba(255, 107, 107, 0.15);
+  --app-color-info: #4a9eff;
+  --app-color-info-overlay: rgba(74, 158, 255, 0.15);
+  --app-color-info-secondary: #bb86fc;
+
+  /* Rule Status Tokens */
+  --dq-status-success-bg: var(--app-color-background-success);
+  --dq-status-success-text: var(--app-color-success);
+  --dq-status-warning-bg: var(--app-color-background-warning);
+  --dq-status-warning-text: var(--app-color-warning);
+  --dq-status-info-bg: var(--app-color-background-info);
+  --dq-status-info-text: var(--app-color-info);
+  --dq-status-error-bg: var(--app-color-background-error);
+  --dq-status-error-text: var(--app-color-danger);
+  --dq-status-neutral-bg: var(--app-color-background-actionable-1);
+  --dq-status-neutral-text: var(--app-color-text-secondary);
+
+  /* Borders */
+  --app-color-border-default: #333333;
+
+  /* Background */
+  --app-color-background-default: #1a1a1a;
+
+  /* App Semantic Surfaces */
+  --app-page-bg: #0b1220;
+  --app-surface-primary: var(--app-color-layer-0);
+  --app-surface-secondary: var(--app-color-layer-1);
+  --app-surface-tertiary: var(--app-color-layer-2);
+  --app-surface-elevated: #162033;
+  --app-border-subtle: rgba(255, 255, 255, 0.14);
+  --app-border-strong: rgba(255, 255, 255, 0.22);
+  --app-text-primary: var(--app-color-text-default);
+  --app-text-secondary: var(--app-color-text-secondary);
+  --app-hover-bg: #1e293b;
+  --app-selected-bg: #1a3a5a;
+  --app-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.24);
+  --app-shadow-md: 0 10px 28px rgba(0, 0, 0, 0.34);
+  --app-shadow-lg: 0 18px 46px rgba(0, 0, 0, 0.42);
+  --app-status-success-bg: color-mix(in srgb, var(--app-color-success) 18%, var(--app-surface-primary));
+  --app-status-success-border: color-mix(in srgb, var(--app-color-success) 40%, transparent);
+  --app-status-success-text: var(--app-color-success);
+  --app-status-info-bg: color-mix(in srgb, var(--app-color-info) 18%, var(--app-surface-primary));
+  --app-status-info-border: color-mix(in srgb, var(--app-color-info) 40%, transparent);
+  --app-status-info-text: var(--app-color-info);
+  --app-status-warning-bg: var(--app-warning-bg);
+  --app-status-warning-border: var(--app-warning-border);
+  --app-status-warning-text: var(--app-warning-text);
+  --app-status-error-bg: color-mix(in srgb, var(--app-color-danger) 18%, var(--app-surface-primary));
+  --app-status-error-border: color-mix(in srgb, var(--app-color-danger) 40%, transparent);
+  --app-status-error-text: var(--app-color-danger);
+  --app-status-neutral-bg: color-mix(in srgb, var(--app-surface-tertiary) 92%, var(--app-surface-primary));
+  --app-status-neutral-border: var(--app-border-subtle);
+  --app-status-neutral-text: var(--app-color-text-secondary);
+  --app-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --app-brand-primary: #4a9eff;
+  --app-brand-primary-strong: #2a5aaa;
+  --app-brand-primary-soft: #1a3a5a;
+  --app-text-inverse: #0f172a;
+  --app-focus-ring: #4a9eff;
+  --app-input-background: var(--app-surface-primary);
+  --app-input-text: var(--app-text-primary);
+  --app-input-border: var(--app-border-subtle);
+  --app-input-placeholder: var(--app-text-secondary);
+  --app-input-label: var(--app-text-secondary);
+  --app-select-background: var(--app-surface-primary);
+  --app-select-text: var(--app-text-primary);
+  --app-select-border: var(--app-border-subtle);
+  --app-shell-bg: var(--app-page-bg);
+  --app-header-bg: #1a3a5a;
+  --app-header-text: #ffffff;
+  --app-sidebar-bg: #1a1a1a;
+  --app-sidebar-border: var(--app-border-subtle);
+  --app-sidebar-submenu-bg: #0f172a;
+  --app-nav-text: var(--app-text-primary);
+  --app-nav-hover-bg: #3a3a3a;
+  --app-nav-active-bg: var(--app-brand-primary-soft);
+  --app-nav-active-text: var(--app-brand-primary);
+  --app-nav-active-border: var(--app-brand-primary);
+  --app-control-bg: var(--app-surface-primary);
+  --app-control-hover-bg: #243247;
+  --app-control-border: var(--app-border-subtle);
+  --app-control-focus-border: var(--app-brand-primary);
+  --app-control-focus-text: #dbeafe;
+  --app-warning-bg: rgba(86, 62, 12, 0.94);
+  --app-warning-bg-strong: rgba(63, 47, 13, 0.96);
+  --app-warning-text: #fff7de;
+  --app-warning-text-muted: rgba(255, 247, 222, 0.82);
+  --app-warning-border: rgba(255, 193, 7, 0.35);
+  --app-warning-accent: #ffd36b;
+  --app-warning-icon-bg: rgba(255, 193, 7, 0.2);
+  --app-runtime-dev-text: #d8ffe9;
+  --app-runtime-dev-bg: rgba(19, 83, 53, 0.88);
+  --app-runtime-dev-border: rgba(92, 199, 149, 0.6);
+  --app-runtime-prod-text: #e2f1ff;
+  --app-runtime-prod-bg: rgba(27, 66, 106, 0.88);
+  --app-runtime-prod-border: rgba(112, 176, 240, 0.6);
+
+  /* Modal/Dialog */
+  --app-color-modal-backdrop: rgba(0, 0, 0, 0.7);
+
+  /* Typography */
+  --app-heading-2-color-text: #ffffff;
+  --app-body-color-text: #ffffff;
+  --app-body-color-background: #1a1a1a;
+}
+
+/* ===== APPLY THEME TO HTML ELEMENT ===== */
+html {
+  background-color: var(--app-shell-bg);
+  color: var(--app-text-primary);
+}
+
+body {
+  background-color: var(--app-shell-bg);
+  color: var(--app-text-primary);
+  font-family: var(--app-font-family);
+}

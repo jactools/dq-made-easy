@@ -1,0 +1,26 @@
+{
+  "operations": [
+    "POST /v1/rule-attributes",
+    "PUT /v1/app-config",
+    "GET /v1/users",
+    "GET /v1/roles",
+    "PUT /v1/users/{user_id}",
+    "POST /v1/users/{user_id}/reset-profile",
+    "POST /v1/users/{user_id}/reset-settings",
+    "GET /v1/me",
+    "PUT /v1/me",
+    "POST /v1/login",
+    "POST /v1/logout",
+    "GET /v1/auth/redirect",
+    "GET /v1/auth/callback",
+    "GET /v1/approvals",
+    "GET /v1/approvals/audit",
+    "POST /v1/approvals",
+    "PUT /v1/approvals/{approval_id}",
+    "DELETE /v1/approvals/{approval_id}",
+    "GET /v1/workspaces",
+    "POST /v1/workspaces",
+    "PUT /v1/workspaces/{workspace_id}",
+    "DELETE /v1/workspaces/{workspace_id}"
+  ]
+}

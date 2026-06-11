@@ -1,0 +1,38 @@
+# syntax=docker/dockerfile:1.7
+###
+# Dockerfile.kong
+# Description: Kong API Gateway container with optional plugins and configuration
+###
+
+FROM kong:3.9.1
+
+# Add any custom Kong plugins or configuration here
+# Example: RUN luarocks install kong-plugin-myplugin
+
+USER root
+RUN --mount=type=secret,id=internal_corporate_root_ca \
+	set -eux; \
+	cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+	update-ca-certificates; \
+    for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
+        [ -e "$apt_sources" ] || continue; \
+        sed -i 's|http://|https://|g' "$apt_sources"; \
+    done; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends curl jq python3 \
+    && rm -f /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt \
+    && update-ca-certificates --fresh \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY scripts/bootstrap_kong.sh /opt/dq-kong/scripts/bootstrap_kong.sh
+COPY scripts/start-with-bootstrap.sh /opt/dq-kong/scripts/start-with-bootstrap.sh
+RUN chmod +x /opt/dq-kong/scripts/bootstrap_kong.sh /opt/dq-kong/scripts/start-with-bootstrap.sh
+
+USER kong
+ENTRYPOINT ["/opt/dq-kong/scripts/start-with-bootstrap.sh"]
+
+# Health check
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+    CMD kong health || exit 1
+
+EXPOSE 8000 8443 8001 8002

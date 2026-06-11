@@ -1,0 +1,74 @@
+[
+  {
+    "checkId": "DQ1_EMPTY_EXPRESSION",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ1_EXPRESSION_SYNTAX",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ1_UNSUPPORTED_KEYWORD",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ1_MISSING_ALIAS",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ1_JOIN_VALIDATION",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ1_DUPLICATE_EXPRESSION",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ1_DUPLICATE_NAME",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ1_CONTRADICTORY_PREDICATES",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ7_FILTER_VALIDATION",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ7_UNSUPPORTED_KEYWORD",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ7_JOIN_VALIDATION",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  },
+  {
+    "checkId": "DQ7_AST_PARSE",
+    "enabled": true,
+    "severityOverride": null,
+    "scope": "all"
+  }
+]

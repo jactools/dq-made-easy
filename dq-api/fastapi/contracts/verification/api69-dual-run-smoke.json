@@ -1,0 +1,18 @@
+{
+  "scenarios": [
+    {
+      "name": "Readiness auth gate parity",
+      "method": "GET",
+      "legacyPath": "/v1/readiness",
+      "fastapiPath": "/api/v1/readiness",
+      "compareBody": false
+    },
+    {
+      "name": "Workspaces auth gate parity",
+      "method": "GET",
+      "legacyPath": "/v1/workspaces",
+      "fastapiPath": "/api/v1/workspaces",
+      "compareBody": false
+    }
+  ]
+}

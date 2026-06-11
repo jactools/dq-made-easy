@@ -1,0 +1,28 @@
+id,login,firstname,lastname,email,web,phone,fax,mobile,department,street,zip,city,country,address,vip,verified,active,note,last_login,out_of_office,out_of_office_start_at,out_of_office_end_at,roles,out_of_office_replacement,organizations,organization
+,dq-admin@jaccloud.nl,Admin,,dq-admin@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,alice@jaccloud.nl,Alice,,alice@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,bob@jaccloud.nl,Bob,,bob@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,charlie@jaccloud.nl,Charlie,,charlie@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,sofie@jaccloud.nl,Sofie,,sofie@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,oliver@jaccloud.nl,Oliver,,oliver@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,jan@jaccloud.nl,Jan,,jan@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,corporate-banking
+,emma@jaccloud.nl,Emma,,emma@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,investment-banking
+,william@jaccloud.nl,William,,william@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,risk-compliance
+,maaike@jaccloud.nl,Maaike,,maaike@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,treasury
+,james@jaccloud.nl,James,,james@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,wealth-management
+,bram@jaccloud.nl,Bram,,bram@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,payments
+,charlotte@jaccloud.nl,Charlotte,,charlotte@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,operations
+,daan@jaccloud.nl,Daan,,daan@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,technology
+,olivia@jaccloud.nl,Olivia,,olivia@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,human-resources
+,ruben@jaccloud.nl,Ruben,,ruben@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,unknown
+,fleur@jaccloud.nl,Fleur,,fleur@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,unknown
+,thomas@jaccloud.nl,Thomas,,thomas@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,unknown
+,jacbeekers@jaccloud.nl,Jac.,,jacbeekers@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,sophie@jaccloud.nl,Sophie,,sophie@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,operations
+,retail-admin@jaccloud.nl,Retail,Admin,retail-admin@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,corporate-admin@jaccloud.nl,Corporate,Admin,corporate-admin@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,global,corporate-banking
+,multi.workspace@jaccloud.nl,Multi,Workspace User,multi.workspace@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,corporate-banking,retail-banking
+,demo-analyst@jaccloud.nl,Demo,Analyst,demo-analyst@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,demo-data-steward@jaccloud.nl,Demo,Data Steward,demo-data-steward@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,demo-viewer@jaccloud.nl,Demo,Viewer,demo-viewer@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,dq-made-easy-support@jaccloud.nl,Proto,Type,dq-made-easy-support@jaccloud.nl,,,,,,,,,,,false,false,true,,2026-04-14T20:14:36Z,false,,,Admin~~~Agent,,,

@@ -1,0 +1,31 @@
+{
+  "app_version": "0.11.3",
+  "proof_id": "api-1.7-s3-blob-connector-2026-06-06",
+  "proof_type": "api",
+  "feature": "API-1.7",
+  "summary": "The S3/Blob connector now ingests metadata from configured s3:// or s3a:// delivery locations, redacts secret values from the public configuration, and registers the s3_blob provider in the connector catalog.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-06T00:02:00Z",
+  "command": "cd /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-api/fastapi && PYTHONPATH=/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-utils/src:/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-domain-validation/src /Users/jacbeekers/gitrepos/dq-rulebuilder/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest -o addopts='' tests/domain/test_connector_registry.py tests/application/services/test_s3_blob_connector.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.3/api/20260606T000200Z-api-1.7-s3-blob-connector",
+  "test_files": [
+    "tests/domain/test_connector_registry.py",
+    "tests/application/services/test_s3_blob_connector.py"
+  ],
+  "test_file_count": 2,
+  "test_count": 8,
+  "assertions": [
+    "The connector registry exposes the s3_blob provider and loads the S3BlobConnector implementation path.",
+    "The connector returns a redacted public configuration without a credentials field.",
+    "Discovery returns bucket, folder, and object items for the configured S3/Blob root.",
+    "Sync invokes the sink with the public configuration and discovery result.",
+    "The configuration model rejects empty delivery_locations values."
+  ],
+  "proof_data": {
+    "provider": "s3_blob",
+    "bucket_count": 1,
+    "folder_count": 2,
+    "object_count": 2,
+    "warnings": 2
+  }
+}

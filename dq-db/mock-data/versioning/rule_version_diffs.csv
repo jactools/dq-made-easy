@@ -1,0 +1,4 @@
+"id","rule_id","from_version_number","to_version_number","field_name","old_value","new_value","created_at"
+"019e0488-9a56-7ad9-a536-10f34637fb07","019e0488-9a55-7177-a9f7-1118ca1aea5a","1","1","description","","Initial version from migration","2026-03-01T10:00:00Z"
+"019e0488-9a56-73f9-a706-b5156e86ffe9","019e0488-9a54-7663-9bf6-7e512282aaa2","1","1","active","false","true","2026-03-01T10:01:00Z"
+"019e0488-9a56-7ca1-aa75-fd516a4a640a","019e0488-9a54-735c-86f2-409d0d749ff8","1","1","dimension","","Consistency","2026-03-01T10:02:00Z"

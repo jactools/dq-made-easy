@@ -1,0 +1,11 @@
+{
+  "workspace_id": "treasury",
+  "product_id": "019e0488-9a54-707f-977f-2605e27f3587",
+  "data_set_id": "019e0488-9a54-75e4-8485-facd0192c876",
+  "data_object_id": "RegulatoryRecord",
+  "data_object_version_id": "019e0488-9a53-736e-97d2-d2b0d1991737",
+  "notes": [
+    "regulatory record",
+    "hudi seed"
+  ]
+}

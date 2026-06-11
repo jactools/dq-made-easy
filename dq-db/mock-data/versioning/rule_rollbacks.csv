@@ -1,0 +1,4 @@
+"id","rule_id","from_version_number","to_version_number","rolled_back_by","rolled_back_at","reason","new_version_number"
+"019e0488-9a56-7f00-b2c6-8d4829653118","019e0488-9a55-7177-a9f7-1118ca1aea5a","1","1","data-steward-user","2026-03-01T11:00:00Z","Seeded rollback audit entry","1"
+"019e0488-9a56-7237-a1c1-9355252a64b0","019e0488-9a54-7663-9bf6-7e512282aaa2","1","1","data-steward-user","2026-03-01T11:05:00Z","Seeded rollback audit entry","1"
+"019e0488-9a56-73ad-bd35-9e61e6cb20c4","019e0488-9a54-735c-86f2-409d0d749ff8","1","1","data-steward-user","2026-03-01T11:10:00Z","Seeded rollback audit entry","1"

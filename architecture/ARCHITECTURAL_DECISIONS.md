@@ -1,0 +1,36 @@
+# Architectural Decision Records (ADR)
+
+This document captures key architectural decisions made for the DQ API Gateway transition and modernization.
+
+## ADR Subpages
+
+- [ADR-001: RFC 7807 Problem Details for Error Responses](./adr/ADR-001-rfc-7807-problem-details-for-error-responses.md)
+- [ADR-002: Correlation IDs for Distributed Tracing](./adr/ADR-002-correlation-ids-for-distributed-tracing.md)
+- [ADR-003: Standardized Pagination](./adr/ADR-003-standardized-pagination.md)
+- [ADR-004: OpenAPI 3.0 Specification with Swagger](./adr/ADR-004-openapi-3-0-specification-with-swagger.md)
+- [ADR-005: Health and Readiness Endpoints](./adr/ADR-005-health-and-readiness-endpoints.md)
+- [ADR-006: Versioned API Routes](./adr/ADR-006-versioned-api-routes.md)
+- [ADR-007: Dual-Standard API Contracts (OpenAPI + ODCS)](./adr/ADR-007-dual-standard-api-contracts-openapi-odcs.md)
+- [ADR-008: Authentication Flow for Gateway Integration](./adr/ADR-008-authentication-flow-for-gateway-integration.md)
+- [ADR-009: API Gateway Technology Selection](./adr/ADR-009-api-gateway-technology-selection.md)
+- [ADR-010: ApiService Decomposition into Focused Sub-Services](./adr/ADR-010-apiservice-decomposition-into-focused-sub-services.md)
+- [ADR-011: Executable Rule Transformation Strategy (DSL-First with Great Expectations Adapter)](./adr/ADR-011-executable-rule-transformation-strategy-dsl-first-with-great-expectations-adapter.md)
+- [ADR-012: Test Automation Tool Selection and Evidence Strategy](./adr/ADR-012-test-automation-tool-selection-and-evidence-strategy.md)
+- [ADR-013: FastAPI API Platform Mandate and Migration Plan](./adr/ADR-013-fastapi-api-platform-mandate-and-migration-plan.md)
+- [ADR-014: GX Suite Registry, PySpark Execution, Self-Built PySpark Integration, and Exception Store Separation](./adr/ADR-014-gx-suite-registry-pyspark-execution-and-exception-store-separation.md)
+- [ADR-015: OpenTelemetry Instrumentation for Distributed Tracing & Observability](./adr/ADR-015-opentelemetry-instrumentation-for-distributed-tracing.md)
+- [ADR-016: ISO 27001-Aligned Logging and Monitoring Policy Adoption](./adr/ADR-016-iso27001-logging-and-monitoring-policy-adoption.md)
+- [ADR-017: Canonical API JSON field naming — snake_case](./adr/ADR-017-canonical-snake_case-api-fields.md)
+- [ADR-018: ISO 11179-Based Data Definition Framework for BCBS 239 and MiFID II](./adr/ADR-018-iso-11179-based-data-definition-framework-for-bcbs-239-and-mifid-ii.md)
+- [ADR-019: Platform Business Keys and Stable Identity Surfaces](./adr/ADR-019-platform-business-keys-and-stable-identity-surfaces.md)
+- [ADR-020: Shared Runtime Domain Validation Wheel](./adr/ADR-020-shared-runtime-domain-validation-wheel.md)
+- [ADR-021: Core Package Features First and Custom Extension Gating](./adr/ADR-021-core-package-features-first-and-custom-extension-gating.md)
+- [ADR-022: Domain-Driven Design Boundaries for FastAPI](./adr/ADR-022-domain-driven-design-boundaries-for-fastapi.md)
+- [ADR-026: Shell Scripts Must Run on macOS and Debian Linux](./adr/ADR-026-shell-scripts-must-run-on-macos-and-debian-linux.md)
+- [ADR-027: Internal Service Communication Uses Repository-Managed TLS](./adr/ADR-027-internal-service-communication-uses-repository-managed-tls.md)
+- [ADR-028: Post-Quantum Cryptography Must Be Implemented by 2026-12-31](./adr/ADR-028-post-quantum-cryptography-must-be-implemented-by-2026-12-31.md)
+- [ADR-029: EU Financial C=3 Security Baseline Mandate](./adr/ADR-029-eu-financial-c3-security-baseline-mandate.md)
+- [ADR-030: EU Financial Regulatory Baseline and Control Mapping](./adr/ADR-030-eu-financial-regulatory-baseline-and-control-mapping.md)
+- [ADR-031: Synthetic/Test Object Storage Buckets and Synthetic Evidence Boundaries](./adr/ADR-031-synthetic-test-object-storage-buckets-and-synthetic-evidence-boundaries.md)
+- [ADR-033: Business Term and Technical Attribute Terminology for Governance Screens](./adr/ADR-033-business-term-and-technical-attribute-terminology-for-governance-screens.md)
+

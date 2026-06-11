@@ -1,0 +1,57 @@
+{
+  "template_id": "DQ7-SEED-002-TPL-009",
+  "rule_kind": "anomaly_assertion",
+  "status": "reserved",
+  "gx_class": "partial",
+  "notes": "Reserved history-aware template until anomaly lowering is dedicated.",
+  "payload": {
+    "name": "Anomaly placeholder",
+    "description": "Reserved template for history-aware anomaly detection.",
+    "dimension": "stability",
+    "active": true,
+    "workspace": "default",
+    "generated": false,
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "anomaly_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-customer"
+          },
+          "time_window": {
+            "anchor_column": "created_at",
+            "trailing_duration": "P7D"
+          }
+        },
+        "measure": {
+          "type": "metric",
+          "metric": "row_count"
+        },
+        "expectation": {
+          "type": "baseline",
+          "strategy": "historical_band",
+          "lookback_runs": 7,
+          "sensitivity": 3
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 100,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "warning",
+          "preferred_engines": [
+            "custom-worker"
+          ],
+          "fail_if_not_native": true
+        }
+      }
+    }
+  }
+}

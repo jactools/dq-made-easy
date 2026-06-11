@@ -1,0 +1,25 @@
+{
+  "app_version": "0.11.3",
+  "proof_id": "api-1.8-connector-test-discovery-2026-06-05",
+  "proof_type": "api",
+  "feature": "API-1.8",
+  "summary": "The connector test-connection and discover-assets endpoints now route through the connector registry, validate connector configuration payloads, and return connector health and discovery results behind the internal API contract gate.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-05T23:27:55Z",
+  "command": "cd /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-api/fastapi && PYTHONPATH=/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-utils/src:/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-domain-validation/src /Users/jacbeekers/gitrepos/dq-rulebuilder/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest -o addopts='' tests/api/test_connector_endpoints.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.3/api/20260605T232755Z-api-1.8-connector-test-discovery",
+  "test_files": [
+    "tests/api/test_connector_endpoints.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 3,
+  "assertions": [
+    "The test-connection route returns a healthy connector result for the configured provider.",
+    "The discover-assets route returns connector discovery data for the configured provider.",
+    "A provider mismatch is rejected with a 400 response."
+  ],
+  "proof_data": {
+    "routes": 2,
+    "warnings": 2
+  }
+}

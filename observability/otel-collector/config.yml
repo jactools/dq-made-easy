@@ -1,0 +1,231 @@
+# OpenTelemetry Collector Configuration
+# Collects traces, metrics, and logs from all services
+# Sends to Tempo (traces), Prometheus (metrics), Loki (logs)
+
+receivers:
+  # ========================================================================
+  # OTLP Receivers (OpenTelemetry Protocol)
+  # ========================================================================
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4319
+        cors:
+          allowed_origins:
+            - http://dq-made-easy.jac.dot:5173
+            - http://dq-made-easy.jac.dot:5174
+            - http://localhost:5173
+            - http://localhost:5174
+            - http://127.0.0.1:5173
+            - http://127.0.0.1:5174
+          allowed_headers:
+            - Content-Type
+            - traceparent
+            - tracestate
+            - x-correlation-id
+          max_age: 7200
+  otlp/https:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+        tls:
+          cert_file: /etc/otel/certs/observability.jac.dot+3.pem
+          key_file: /etc/otel/certs/observability.jac.dot+3-key.pem
+        cors:
+          allowed_origins:
+            - https://dq-made-easy.jac.dot:5173
+            - https://dq-made-easy.jac.dot:5174
+            - http://dq-made-easy.jac.dot:5173
+            - http://dq-made-easy.jac.dot:5174
+            - https://localhost:5173
+            - https://localhost:5174
+            - http://localhost:5173
+            - http://localhost:5174
+            - https://127.0.0.1:5173
+            - https://127.0.0.1:5174
+            - http://127.0.0.1:5173
+            - http://127.0.0.1:5174
+          allowed_headers:
+            - Content-Type
+            - traceparent
+            - tracestate
+            - x-correlation-id
+          max_age: 7200
+
+  # ========================================================================
+  # Prometheus Receiver (scrape targets)
+  # ========================================================================
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: otel-collector
+          static_configs:
+            - targets: ['observability.jac.dot:8888']
+
+  # ========================================================================
+  # Jaeger Receiver (for legacy Jaeger clients)
+  # ========================================================================
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+      thrift_compact:
+        endpoint: 0.0.0.0:6831
+
+  # ========================================================================
+  # Zipkin Receiver (for legacy Zipkin clients)
+  # ========================================================================
+  zipkin:
+    endpoint: 0.0.0.0:9411
+
+processors:
+  # ========================================================================
+  # Batch Processor (reduces overhead by batching signals)
+  # ========================================================================
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+  # ========================================================================
+  # Memory Limiter (prevent OOM)
+  # ========================================================================
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 20
+
+  # ========================================================================
+  # Trace Processors
+  # ========================================================================
+  probabilistic_sampler:
+    sampling_percentage: 100  # Sample 100% of traces (local dev)
+
+  filter/profiling_traces:
+    error_mode: ignore
+    traces:
+      span:
+        - 'name == "profiling.enqueue.persist"'
+        - 'name == "profiling.enqueue.redis_push"'
+        - 'name == "profiling.worker.process"'
+        - 'name == "POST /api/v1/profiling/enqueue"'
+        - 'attributes["http.route"] == "/api/v1/profiling/enqueue"'
+
+  # ========================================================================
+  # Attribute Processors (add/remove attributes)
+  # ========================================================================
+  attributes:
+    actions:
+      - key: service.version
+        value: "1.0"
+        action: insert
+      - key: environment
+        value: "dev"
+        action: insert
+      - key: cluster
+        value: "dq-rulebuilder"
+        action: insert
+
+exporters:
+  # ========================================================================
+  # Tempo Exporter (traces)
+  # ========================================================================
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # ========================================================================
+  # OTLP HTTP Exporter (traces via HTTP)
+  # ========================================================================
+  otlp_http:
+    endpoint: http://tempo:4318
+    # The collector appends /v1/traces for OTLP/HTTP trace exports.
+    tls:
+      insecure: true
+
+  otlp_http/profiling:
+    endpoint: http://tempo:4318
+    tls:
+      insecure: true
+
+  # ========================================================================
+  # Prometheus Exporter (metrics)
+  # ========================================================================
+  prometheus:
+    endpoint: 0.0.0.0:8889
+
+  # ========================================================================
+  # Logging Exporter (debug)
+  # ========================================================================
+  debug:
+    verbosity: detailed
+
+  debug/profiling:
+    verbosity: detailed
+
+  # ========================================================================
+  # File Exporter (debug - writes received telemetry to disk for inspection)
+  # ========================================================================
+  file:
+    # path inside the collector container where trace batches will be written
+    path: /var/tmp/otel_traces.json
+    # keep human-readable JSON lines when possible
+    # (collector supports simple file exporter; advanced options omitted for local debug)
+    format: json
+
+  # (Removed unsupported 'loki' exporter — using OTLP/HTTP for traces.)
+
+  # ========================================================================
+  # Jaeger Exporter (for external Jaeger)
+  # ========================================================================
+  # jaeger:
+  #   endpoint: http://jaeger-collector:14250
+  #   tls:
+  #     insecure: true
+
+service:
+  pipelines:
+    # ========================================================================
+    # Traces Pipeline
+    # ========================================================================
+    traces:
+      receivers: [otlp, otlp/https, jaeger, zipkin]
+      processors: [memory_limiter, probabilistic_sampler, batch]
+      exporters: [otlp_http, debug, file]
+
+    traces/profiling-debug:
+      receivers: [otlp, otlp/https, jaeger, zipkin]
+      processors: [memory_limiter, filter/profiling_traces, batch]
+      exporters: [otlp_http/profiling, debug/profiling]
+
+    # ========================================================================
+    # Metrics Pipeline
+    # ========================================================================
+    metrics:
+      receivers: [otlp, otlp/https, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus, debug]
+
+    # ========================================================================
+    # Logs Pipeline (optional)
+    # ========================================================================
+    logs:
+      receivers: [otlp, otlp/https]
+      processors: [memory_limiter, batch]
+      exporters: [debug, file]
+
+  extensions: [health_check, pprof, zpages]
+
+extensions:
+  health_check:
+    endpoint: :13133
+
+  pprof:
+    endpoint: :1777
+
+  zpages:
+    endpoint: :55679

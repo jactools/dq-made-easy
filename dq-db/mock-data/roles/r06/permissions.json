@@ -1,0 +1,8 @@
+[
+  "dq:rules:read",
+  "dq:rules:create",
+  "dq:rules:edit",
+  "dq:rules:test",
+  "dq:profiling:request",
+  "dq:rules:approve"
+]

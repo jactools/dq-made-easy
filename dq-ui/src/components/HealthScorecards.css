@@ -1,0 +1,173 @@
+.health-scorecards-history-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.health-scorecards-view-control {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+}
+
+.health-scorecards-dashboard-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.health-scorecards-dashboard-panel {
+  height: 100%;
+}
+
+.health-scorecards-dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.health-scorecards-dashboard-score {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+  text-align: right;
+}
+
+.health-scorecards-dashboard-score strong {
+  font-size: 2.75rem;
+  line-height: 1;
+}
+
+.health-scorecards-section-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--app-text-secondary);
+}
+
+.health-scorecards-metric-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.health-scorecards-metric-card {
+  padding: 0.85rem 0.9rem;
+  border-radius: 8px;
+  background: var(--app-surface-secondary);
+}
+
+.health-scorecards-metric-card strong {
+  display: block;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.health-scorecards-metric-card div {
+  margin-top: 0.2rem;
+}
+
+.health-scorecards-list {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+}
+
+.health-scorecards-list-item {
+  margin-bottom: 0.7rem;
+}
+
+.health-scorecards-link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.health-scorecards-sla-summary {
+  display: grid;
+  gap: 1rem;
+}
+
+.health-scorecards-sla-metrics {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin-top: 0.5rem;
+}
+
+.health-scorecards-view-switcher {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.health-scorecards-history-scope-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.health-scorecards-history-scope-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.health-scorecards-history-scope-control {
+  --app-segmented-control-color-background: var(--app-surface-secondary);
+  --app-segmented-control-border-radius: 999px;
+  --app-segmented-control-padding: 2px;
+  --app-segmented-control-button-padding: 6px 12px;
+  --app-segmented-control-button-border-radius: 999px;
+  --app-segmented-control-button-font-size: 13px;
+  --app-segmented-control-button-font-weight-default: 600;
+  --app-segmented-control-button-font-weight-selected: 600;
+  display: inline-flex;
+  width: max-content;
+  max-width: none;
+}
+
+.health-scorecards-history-scope-button {
+  white-space: nowrap;
+}
+
+.health-scorecards-history-fields {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.health-scorecards-history-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.health-scorecards-history-field > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-secondary);
+}
+
+.health-scorecards-history-actions {
+  display: flex;
+  align-items: flex-start;
+}
+
+@media (max-width: 760px) {
+  .health-scorecards-dashboard-hero {
+    flex-direction: column;
+  }
+
+  .health-scorecards-dashboard-score {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .health-scorecards-view-control {
+    width: 100%;
+  }
+}
+
+[data-theme='dark'] .health-scorecards-history-field > span {
+  color: var(--app-text-secondary);
+}

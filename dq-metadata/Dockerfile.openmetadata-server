@@ -1,0 +1,30 @@
+## syntax=docker/dockerfile:1.7
+ARG OTEL_JAVAAGENT_HELPER_IMAGE=docker.io/debian:bookworm-slim
+ARG OTEL_JAVAAGENT_VERSION=2.16.0
+ARG OPENMETADATA_BASE_IMAGE=docker.io/openmetadata/server:latest
+
+FROM ${OTEL_JAVAAGENT_HELPER_IMAGE} AS otel_javaagent
+ARG OTEL_JAVAAGENT_VERSION
+USER root
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+	--mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+	--mount=type=secret,id=internal_corporate_root_ca \
+	set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		ca-certificates \
+		curl; \
+	cp /etc/ssl/certs/ca-certificates.crt /tmp/ca-bundle.crt; \
+	cat /run/secrets/internal_corporate_root_ca >> /tmp/ca-bundle.crt; \
+	curl --cacert /tmp/ca-bundle.crt -fsSL "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar" \
+		-o /tmp/opentelemetry-javaagent.jar; \
+	rm -f /tmp/ca-bundle.crt; \
+	test -s /tmp/opentelemetry-javaagent.jar; \
+	rm -rf /var/lib/apt/lists/*
+
+ARG OPENMETADATA_BASE_IMAGE
+FROM ${OPENMETADATA_BASE_IMAGE}
+
+COPY --from=otel_javaagent /tmp/opentelemetry-javaagent.jar /otel/agent/opentelemetry-javaagent.jar
+
+COPY --chmod=755 scripts/openmetadata_https_start.sh /openmetadata-https-start.sh

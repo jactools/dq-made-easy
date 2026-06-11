@@ -1,0 +1,256 @@
+[allowed_values."approval.request_type"]
+description = "Allowed approval request types."
+values = ["activation", "deactivation", "gx_suite_repair"]
+
+[allowed_values."data_delivery.execution_mode"]
+description = "Allowed delivery execution modes returned by the catalog runtime."
+values = ["single_suite", "grouped_scope"]
+
+[allowed_values."data_delivery.execution_request_status"]
+description = "Allowed delivery execution request statuses."
+values = ["accepted"]
+
+[allowed_values."data_delivery.execution_selector_type"]
+description = "Allowed delivery execution selector types."
+values = ["gx_suite", "run_plan"]
+
+[allowed_values."gx.assistance_delivery_mode"]
+description = "Allowed delivery modes for GX assistance requests."
+values = ["email", "itsm"]
+
+[allowed_values."gx.artifact_version"]
+description = "Allowed GX artifact envelope versions."
+values = ["v1"]
+
+[allowed_values."gx.dispatch_mode"]
+description = "Allowed GX dispatch modes."
+values = ["queued"]
+
+[allowed_values."gx.engine_target"]
+description = "Allowed GX execution engine targets."
+values = ["pyspark"]
+
+[allowed_values."gx.execution_shape"]
+description = "Allowed GX execution shapes."
+values = ["single_object", "join_pair", "streaming", "micro_batch", "grouped_scope"]
+
+[allowed_values."gx.executor_target"]
+description = "Allowed GX execution worker targets."
+values = ["dq-engine"]
+
+[allowed_values."gx.handoff_status"]
+description = "Allowed GX handoff statuses."
+values = ["accepted"]
+
+[allowed_values."gx.join_type"]
+description = "Allowed GX landing-zone join types."
+values = ["inner", "left", "right", "full"]
+
+[allowed_values."gx.notification_type"]
+description = "Allowed GX notification types."
+values = ["gx_suite_empty"]
+
+[allowed_values."gx.violation_failure_class"]
+description = "Allowed GX violation failure classes."
+values = ["value_mismatch", "actuality_date_drift", "null_or_missing_join_key", "other"]
+
+[allowed_values."gx.run_plan_governance_state"]
+description = "Allowed GX run-plan governance states."
+values = [
+  "draft",
+  "inactive",
+  "activation-requested",
+  "pending_validation",
+  "validation_failed",
+  "pending_review",
+  "approved_pending_activation",
+  "active",
+  "deactivation-requested",
+  "deactivated",
+  "superseded",
+  "cancelled",
+]
+
+[allowed_values."gx.run_plan_planning_mode"]
+description = "Allowed GX run-plan planning modes."
+values = ["single_suite", "grouped_scope"]
+
+[allowed_values."gx.run_plan_target_state"]
+description = "Allowed GX run-plan governance transition targets."
+values = [
+  "pending_validation",
+  "validation_failed",
+  "pending_review",
+  "approved_pending_activation",
+  "activation-requested",
+  "deactivation-requested",
+  "cancelled",
+]
+
+[allowed_values."gx.run_plan_validation_status"]
+description = "Allowed GX run-plan validation outcomes."
+values = ["passed", "failed"]
+
+[allowed_values."gx.source_override_format"]
+description = "Allowed source override formats for GX execution requests."
+values = ["parquet", "delta"]
+
+[allowed_values."gx.status"]
+description = "Allowed GX suite status filters."
+values = ["active", "deprecated", "disabled"]
+
+[allowed_values."gx.execution_status"]
+description = "Allowed GX execution run statuses."
+values = ["pending", "running", "succeeded", "failed", "cancelled"]
+
+[allowed_values."notification.notification_type"]
+description = "Allowed platform notification types."
+values = ["gx_suite_empty", "contract_change"]
+
+[allowed_values."query.lookback_unit"]
+description = "Allowed lookback units for query parameters."
+values = ["hours", "days"]
+
+[allowed_values."profiling.status"]
+description = "Allowed profiling request report statuses."
+values = ["started", "completed", "failed"]
+
+[allowed_values."rule_check_type.allowlist"]
+description = "Allowed rule-check types for allowlist checks."
+values = ["ALLOWLIST"]
+
+[allowed_values."rule_check_type.comparison_mode"]
+description = "Allowed comparison modes for cross-object correctness and reconciliation checks."
+values = ["exact", "case_insensitive", "numeric_tolerance"]
+
+[allowed_values."rule_check_type.correct"]
+description = "Allowed rule-check types for correctness checks."
+values = ["CORRECT"]
+
+[allowed_values."rule_check_type.anchor"]
+description = "Allowed rule-check anchor values."
+values = ["now", "processing_date"]
+
+[allowed_values."rule_check_type.blocklist"]
+description = "Allowed rule-check types for blocklist checks."
+values = ["BLOCKLIST"]
+
+[allowed_values."rule_check_type.freshness"]
+description = "Allowed rule-check types for freshness checks."
+values = ["FRESHNESS"]
+
+[allowed_values."rule_check_type.future_date"]
+description = "Allowed rule-check types for future-date checks."
+values = ["FUTURE_DATE"]
+
+[allowed_values."rule_check_type.join_consistency"]
+description = "Allowed rule-check types for join consistency checks."
+values = ["JOIN_CONSISTENCY"]
+
+[allowed_values."rule_check_type.lag"]
+description = "Allowed rule-check types for lag checks."
+values = ["LAG"]
+
+[allowed_values."rule_check_type.metric"]
+description = "Allowed metric values for completeness checks."
+values = ["null_pct", "empty_pct", "default_val_pct", "quantile"]
+
+[allowed_values."rule_check_type.mode"]
+description = "Allowed comparison modes for join consistency checks."
+values = ["exact", "case_insensitive"]
+
+[allowed_values."rule_check_type.operator"]
+description = "Allowed operator values for completeness checks."
+values = ["gt", "gte", "lt", "lte"]
+
+[allowed_values."rule_check_type.plausibility_mode"]
+description = "Allowed plausibility modes for contextual validity checks."
+values = ["contextual_range", "conditional_allowlist"]
+
+[allowed_values."rule_check_type.plausible"]
+description = "Allowed rule-check types for plausibility checks."
+values = ["PLAUSIBLE"]
+
+[allowed_values."rule_check_type.present"]
+description = "Allowed rule-check types for presence checks."
+values = ["PRESENT"]
+
+[allowed_values."rule_check_type.range"]
+description = "Allowed rule-check types for range checks."
+values = ["RANGE"]
+
+[allowed_values."rule_check_type.reconcile"]
+description = "Allowed rule-check types for reconciliation checks."
+values = ["RECONCILE"]
+
+[allowed_values."rule_check_type.referential_integrity"]
+description = "Allowed rule-check types for referential-integrity checks."
+values = ["REFERENTIAL_INTEGRITY"]
+
+[allowed_values."rule_check_type.regex"]
+description = "Allowed rule-check types for regex checks."
+values = ["REGEX"]
+
+[allowed_values."rule_check_type.threshold"]
+description = "Allowed rule-check types for threshold checks."
+values = ["THRESHOLD"]
+
+[allowed_values."rule_check_type.transfer_match"]
+description = "Allowed rule-check types for transfer-match checks."
+values = ["TRANSFER_MATCH"]
+
+[allowed_values."rule_check_type.transfer_match_mode"]
+description = "Allowed modes for transfer-match checks."
+values = ["row_value_match", "payload_hash_match"]
+
+[allowed_values."rule_check_type.tolerance_source"]
+description = "Allowed tolerance source values for join consistency checks."
+values = ["DELIVERY_CONTRACT"]
+
+[allowed_values."rule_check_type.tolerance_unit"]
+description = "Allowed tolerance units for join consistency checks."
+values = ["minutes", "hours", "days"]
+
+[allowed_values."rule_check_type.uniqueness"]
+description = "Allowed rule-check types for uniqueness checks."
+values = ["UNIQUENESS"]
+
+[allowed_values."rule_compiler.compiler_versioning"]
+description = "Allowed compiler versioning schemes."
+values = ["dq-semver"]
+
+[allowed_values."rule_compiler.engine_target"]
+description = "Allowed rule compiler engine targets."
+values = ["dq-engine"]
+
+[allowed_values."rule_compiler.input_format"]
+description = "Allowed rule compiler input formats."
+values = ["dq.intermediate-model.v1"]
+
+[allowed_values."rule_compiler.logical_operator"]
+description = "Allowed logical operators in rule compiler payloads."
+values = ["AND", "OR", "NOT"]
+
+[allowed_values."rule_compiler.schema_versioning"]
+description = "Allowed compiler schema versioning schemes."
+values = ["semver"]
+
+[allowed_values."rule_compiler.severity"]
+description = "Allowed compiler diagnostic severities."
+values = ["error", "warning", "info"]
+
+[allowed_values."rule_compiler.supported_schema_series"]
+description = "Allowed compiler-supported schema series."
+values = ["1.x.x"]
+
+[allowed_values."rule_compiler.target"]
+description = "Allowed compiler targets."
+values = ["dsl"]
+
+[allowed_values."support.delivery_mode"]
+description = "Allowed support delivery modes."
+values = ["email", "itsm", "teams"]
+
+[allowed_values."testing.output_format"]
+description = "Allowed test data materialization output formats."
+values = ["parquet", "delta"]

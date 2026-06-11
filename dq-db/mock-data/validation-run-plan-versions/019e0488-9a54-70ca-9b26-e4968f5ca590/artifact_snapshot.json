@@ -1,0 +1,42 @@
+{
+  "suiteId": "019e0488-9a54-7c46-bff4-e0b4abb2bb83",
+  "suiteVersion": 1,
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-7203-b971-1ca3f76a4c1f",
+    "datasetId": "019e0488-9a54-7678-a935-3e65933617ae",
+    "dataProductId": "019e0488-9a54-7ccd-8b26-ac440ebc2f3c"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "019e0488-9a53-7825-811b-761e3e99314c"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "gx_contact_delivery_32",
+    "expectations": [],
+    "meta": {}
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a54-7663-9bf6-7e512282aaa2"
+    ],
+    "compilerVersion": "seed-v1",
+    "generatedAt": "2026-04-12T09:20:00Z"
+  },
+  "executionHints": {
+    "recommendedEngineTarget": "pyspark",
+    "primaryKeyFields": []
+  },
+  "executionContract": {
+    "engineType": "gx",
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "traceability": {
+      "ruleId": "019e0488-9a54-7663-9bf6-7e512282aaa2",
+      "ruleVersionId": "019e0488-9a54-73e0-9eaa-75341c333ac1",
+      "gxSuiteId": "019e0488-9a54-7c46-bff4-e0b4abb2bb83",
+      "gxSuiteVersion": 1,
+      "dataObjectVersionId": "019e0488-9a53-7825-811b-761e3e99314c"
+    }
+  }
+}

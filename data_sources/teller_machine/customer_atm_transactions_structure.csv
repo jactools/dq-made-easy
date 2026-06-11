@@ -1,0 +1,11 @@
+﻿Column,Type,Description
+transaction_id,STRING,Unique ID for the transaction (matches Dataset 1).
+customer_id,STRING,Unique customer ID (e.g., CUST_1001).
+account_number,STRING,Customer’s account number (e.g., NL91ABNA0417164300).
+atm_id,STRING,ID of the ATM (matches Dataset 1).
+timestamp,DATETIME,Transaction timestamp.
+transaction_type,STRING,"withdrawal" or "deposit".
+total_amount,DECIMAL,Total amount (e.g., 120.00).
+currency,STRING,Currency (e.g., "EUR").
+location,STRING,ATM location (e.g., "Amsterdam Centraal Station").
+customer_segment,STRING,"retail", "corporate", or "private".

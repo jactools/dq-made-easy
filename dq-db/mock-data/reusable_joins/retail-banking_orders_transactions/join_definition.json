@@ -1,0 +1,14 @@
+[
+  {
+    "joinType": "left",
+    "conditions": [
+      {
+        "leftDataObjectId": "orders",
+        "leftAttributeId": "order_id",
+        "rightDataObjectId": "transactions",
+        "rightAttributeId": "order_id",
+        "operator": "="
+      }
+    ]
+  }
+]

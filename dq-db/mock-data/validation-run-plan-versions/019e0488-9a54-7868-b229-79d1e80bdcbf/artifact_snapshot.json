@@ -1,0 +1,74 @@
+{
+  "suiteId": "019e0488-9a54-7af3-8fca-c4bffc4baa6e",
+  "suiteVersion": 1,
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
+    "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
+    "dataProductId": "019e0488-9a54-7bb4-a49e-98434c26d7a7"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "019e0488-9a53-76be-ab52-240e4250f6a4"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "gx_transaction_quantile_36",
+    "expectations": [
+      {
+        "expectation_type": "expect_column_quantile_values_to_be_between",
+        "kwargs": {
+          "column": "fee_amount",
+          "quantile_ranges": {
+            "quantiles": [
+              0.95
+            ],
+            "value_ranges": [
+              [
+                null,
+                50000
+              ]
+            ]
+          },
+          "allow_relative_error": false
+        },
+        "meta": {
+          "delivery_id": "del-36",
+          "workspace_id": "retail-banking"
+        }
+      }
+    ],
+    "meta": {
+      "delivery_id": "del-36",
+      "delivery_location": "s3a://analytics/do-4/v2/LOAD_DTS=20260222T120000000Z",
+      "workspace_id": "retail-banking"
+    }
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a55-7149-8e7f-04abd00f718f"
+    ],
+    "compilerVersion": "dq-compiler-7.3",
+    "generatedAt": "2026-04-20T09:00:00Z"
+  },
+  "executionHints": {
+    "recommendedEngine": "pyspark",
+    "primaryKeyFields": [
+      "transaction_id"
+    ],
+    "businessKeyFields": [
+      "transaction_id"
+    ]
+  },
+  "executionContract": {
+    "engineType": "gx",
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "traceability": {
+      "ruleId": "019e0488-9a55-7149-8e7f-04abd00f718f",
+      "ruleVersionId": "019e0488-9a55-7233-9c96-9f1b3c06fe81",
+      "gxSuiteId": "019e0488-9a54-7af3-8fca-c4bffc4baa6e",
+      "gxSuiteVersion": 1,
+      "dataObjectVersionId": "019e0488-9a53-76be-ab52-240e4250f6a4"
+    }
+  }
+}

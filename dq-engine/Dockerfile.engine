@@ -1,0 +1,111 @@
+# syntax=docker/dockerfile:1.7
+FROM python:3.13-slim
+
+LABEL version="0.3.0"
+LABEL description="Data Quality rule execution engine (Python/FastAPI)"
+
+WORKDIR /app
+
+ARG PIP_INDEX_URL
+ARG MAVEN_REPOSITORIES
+ARG SKIP_SPARK_WARMUP=false
+ARG MKCERT_ROOT_CA
+ARG INTERNAL_ROOT_CA
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+ENV SPARK_JARS_REPOSITORIES=${MAVEN_REPOSITORIES:-}
+ENV MAVEN_REPOSITORIES=${MAVEN_REPOSITORIES:-}
+
+# Install system deps (cached unless this line changes)
+# - Java runtime is required for PySpark.
+# - Use default-jre-headless to stay compatible across Debian releases.
+RUN --mount=type=secret,id=internal_corporate_root_ca \
+	set -eux; \
+	cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+	update-ca-certificates; \
+	for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
+		[ -e "$apt_sources" ] || continue; \
+		sed -i 's|http://|https://|g' "$apt_sources"; \
+	done; \
+	apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		build-essential \
+		git \
+		default-jre-headless \
+		ca-certificates \
+		ca-certificates-java \
+	&& rm -f /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt \
+	&& update-ca-certificates --fresh \
+	&& rm -rf /var/lib/apt/lists/*
+
+# Optionally import a mkcert root CA provided as a base64-encoded build-arg
+# Usage: docker build --build-arg MKCERT_ROOT_CA="$(base64 -w0 tmp/certs/mkcert-rootCA.pem)" ...
+RUN if [ -n "${MKCERT_ROOT_CA:-}" ]; then \
+	echo "Importing mkcert root CA into system truststore"; \
+	echo "$MKCERT_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
+	update-ca-certificates || true; \
+	fi
+
+RUN if [ -n "${INTERNAL_ROOT_CA:-}" ]; then \
+	echo "Importing internal root CA into system truststore"; \
+	echo "$INTERNAL_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
+	update-ca-certificates || true; \
+	fi
+
+# Create a dedicated non-root user and a project-local virtual environment.
+RUN useradd --create-home --shell /bin/bash appuser \
+	&& python -m venv ${VIRTUAL_ENV} \
+	&& chown -R appuser:appuser /app ${VIRTUAL_ENV}
+
+# NOTE: This Dockerfile lives in dq-engine, but the build context is the repository root.
+# Copy shared utils package and install it (cached unless dq-utils changes)
+COPY --chown=appuser:appuser dq-utils/ /app/dq-utils/
+
+# Copy requirements first (cached unless requirements.txt changes)
+COPY --chown=appuser:appuser dq-engine/requirements.txt /app/requirements.txt
+
+USER appuser
+ENV HOME=/home/appuser
+RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir --upgrade pip \
+	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -e /app/dq-utils \
+	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -r requirements.txt
+
+# Copy application code last (changes frequently)
+COPY --chown=appuser:appuser dq-engine/ /app/
+COPY --chown=appuser:appuser scripts/ /app/scripts/
+COPY --chown=appuser:appuser dq-db/mock-data/ /app/dq-db/mock-data/
+
+RUN mkdir -p /home/appuser/.cache/tmp /home/appuser/.cache/spark-local /home/appuser/.dq-spark-jars
+
+ENV DQ_SPARK_JAR_DIR=/home/appuser/.dq-spark-jars
+ENV DQ_SPARK_TMP_DIR=/home/appuser/.cache/tmp
+ENV TMPDIR=/home/appuser/.cache/tmp
+ENV SPARK_LOCAL_DIRS=/home/appuser/.cache/spark-local
+ENV JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/home/appuser/.cache/tmp
+
+# Warm the Spark package cache so runtime seeding does not depend on network access.
+RUN [ "${SKIP_SPARK_WARMUP:-false}" = "true" ] || python scripts/warmup_spark_jars.py \
+	--ivy-dir /home/appuser/.ivy2 \
+	--jar-dir /home/appuser/.dq-spark-jars \
+	--packages "org.apache.spark:spark-avro_2.13:4.1.1,org.apache.hadoop:hadoop-aws:3.4.2,io.delta:delta-spark_2.13:4.1.0,org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.1"
+
+RUN [ "${SKIP_SPARK_WARMUP:-true}" = "true" ] && echo "Skipping spark jars copy (warm-up skipped)" || python - <<'PY'
+from pathlib import Path
+import shutil
+
+source_dir = Path("/home/appuser/.ivy2/jars")
+target_dir = Path("/home/appuser/.dq-spark-jars")
+target_dir.mkdir(parents=True, exist_ok=True)
+
+jar_paths = sorted(path for path in source_dir.glob("*.jar") if path.is_file())
+if not jar_paths:
+    raise SystemExit("No Spark jars were downloaded during the dq-engine image build")
+
+for jar_path in jar_paths:
+    shutil.copy2(jar_path, target_dir / jar_path.name)
+PY
+
+ENV PORT=8000
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

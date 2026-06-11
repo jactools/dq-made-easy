@@ -1,0 +1,11 @@
+{
+  "workspace_id": "retail-banking",
+  "product_id": "019e0488-9a54-79f5-9056-7f5e3afbff08",
+  "data_set_id": "019e0488-9a54-7124-aeb7-21cd8f34fff5",
+  "data_object_id": "Currency",
+  "data_object_version_id": "019e0488-9a53-7b7a-8b7e-db30bbce0048",
+  "notes": [
+    "currency reference",
+    "parquet seed"
+  ]
+}

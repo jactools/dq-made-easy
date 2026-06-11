@@ -1,0 +1,10 @@
+variables:
+  azureServiceConnection: dq-made-easy-test-azure
+  resourceGroupName: dq-made-easy-test-aca-rg
+  region: westeurope
+  containerAppEnvironmentName: dq-made-easy-test-aca
+  logAnalyticsWorkspaceName: dq-made-easy-test-logs
+  stateResourceGroupName: dq-made-easy-tfstate-rg
+  stateStorageAccountName: dqmadeeasytesttfstate
+  stateStorageContainerName: dq-made-easy-tofu-state
+  stateKeyPrefix: dq-made-easy/container-app-environment

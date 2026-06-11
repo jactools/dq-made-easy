@@ -1,0 +1,1419 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "ApprovalView": {
+      "properties": {
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Business Key"
+        },
+        "comment_thread": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Comment Thread",
+          "type": "array"
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "comments_locked": {
+          "default": false,
+          "title": "Comments Locked",
+          "type": "boolean"
+        },
+        "effective_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective At"
+        },
+        "effective_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective Status"
+        },
+        "gx_run_plan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gx Run Plan Id"
+        },
+        "gx_run_plan_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gx Run Plan Version Id"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "removed_comment_count": {
+          "default": 0,
+          "title": "Removed Comment Count",
+          "type": "integer"
+        },
+        "request_type": {
+          "default": "activation",
+          "title": "Request Type",
+          "type": "string"
+        },
+        "requested_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested At"
+        },
+        "requester_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requester Id"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed At"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed By"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "workspace_id": {
+          "default": "default",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "rule_id",
+        "status"
+      ],
+      "title": "ApprovalView",
+      "type": "object"
+    },
+    "ApprovalsPageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/ApprovalView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationView"
+        }
+      },
+      "required": [
+        "data",
+        "pagination"
+      ],
+      "title": "ApprovalsPageView",
+      "type": "object"
+    },
+    "DriftReviewRequest": {
+      "properties": {
+        "affected_rules": {
+          "items": {
+            "$ref": "#/$defs/DriftReviewRuleView"
+          },
+          "title": "Affected Rules",
+          "type": "array"
+        },
+        "triggered_by_term_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Triggered By Term Id"
+        },
+        "triggered_by_term_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Triggered By Term Name"
+        }
+      },
+      "title": "DriftReviewRequest",
+      "type": "object"
+    },
+    "DriftReviewRuleView": {
+      "properties": {
+        "affected_aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Aliases",
+          "type": "array"
+        },
+        "needs_revalidation": {
+          "default": false,
+          "title": "Needs Revalidation",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_name": {
+          "title": "Rule Name",
+          "type": "string"
+        },
+        "rule_version_id": {
+          "title": "Rule Version Id",
+          "type": "string"
+        },
+        "total_drifts": {
+          "default": 0,
+          "title": "Total Drifts",
+          "type": "integer"
+        },
+        "version_number": {
+          "title": "Version Number",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rule_id",
+        "rule_name",
+        "rule_version_id",
+        "version_number"
+      ],
+      "title": "DriftReviewRuleView",
+      "type": "object"
+    },
+    "ExceptionFactAccessRequestView": {
+      "properties": {
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "requested_at": {
+          "default": "",
+          "title": "Requested At",
+          "type": "string"
+        },
+        "requested_duration_minutes": {
+          "default": 0,
+          "title": "Requested Duration Minutes",
+          "type": "integer"
+        },
+        "requester_id": {
+          "title": "Requester Id",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed At"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed By"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "status": {
+          "default": "pending",
+          "title": "Status",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "requester_id",
+        "workspace_id",
+        "role_id"
+      ],
+      "title": "ExceptionFactAccessRequestView",
+      "type": "object"
+    },
+    "GovernanceInboxRulePageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/GovernanceInboxRuleView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationView"
+        }
+      },
+      "required": [
+        "data",
+        "pagination"
+      ],
+      "title": "GovernanceInboxRulePageView",
+      "type": "object"
+    },
+    "GovernanceInboxRuleView": {
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "alias_mappings": {
+          "additionalProperties": true,
+          "title": "Alias Mappings",
+          "type": "object"
+        },
+        "check_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Check Type"
+        },
+        "check_type_params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Check Type Params"
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        },
+        "current_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Version Id"
+        },
+        "data_steward": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Steward"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "dimension": {
+          "title": "Dimension",
+          "type": "string"
+        },
+        "domain_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain Owner"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        },
+        "generated": {
+          "default": false,
+          "title": "Generated",
+          "type": "boolean"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_template": {
+          "default": false,
+          "title": "Is Template",
+          "type": "boolean"
+        },
+        "join_conditions": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Join Conditions",
+          "type": "array"
+        },
+        "lifecycle_status": {
+          "title": "Lifecycle Status",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "pending_deactivation_requested": {
+          "default": false,
+          "title": "Pending Deactivation Requested",
+          "type": "boolean"
+        },
+        "reusable_filter_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reusable Filter Ids",
+          "type": "array"
+        },
+        "reusable_join_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reusable Join Id"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "suggestion_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suggestion Id"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        },
+        "taxonomy": {
+          "$ref": "#/$defs/RuleTaxonomyView"
+        },
+        "technical_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technical Owner"
+        },
+        "template_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Template Id"
+        },
+        "total_versions": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Versions"
+        },
+        "version_created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version Created At"
+        },
+        "version_updated_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version Updated At"
+        },
+        "versioning_enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Versioning Enabled"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "expression",
+        "dimension",
+        "active",
+        "status",
+        "lifecycle_status"
+      ],
+      "title": "GovernanceInboxRuleView",
+      "type": "object"
+    },
+    "GovernanceInboxView": {
+      "properties": {
+        "approval_inbox": {
+          "$ref": "#/$defs/ApprovalsPageView"
+        },
+        "deprecation_review_inbox": {
+          "$ref": "#/$defs/GovernanceInboxRulePageView"
+        },
+        "reassignment_inbox": {
+          "$ref": "#/$defs/GovernanceInboxRulePageView"
+        }
+      },
+      "required": [
+        "approval_inbox",
+        "reassignment_inbox",
+        "deprecation_review_inbox"
+      ],
+      "title": "GovernanceInboxView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "MonitorNotificationPreferenceView": {
+      "properties": {
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Categories",
+          "type": "array"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Channels",
+          "type": "array"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id"
+      ],
+      "title": "MonitorNotificationPreferenceView",
+      "type": "object"
+    },
+    "MonitorNotificationPreferencesRequest": {
+      "properties": {
+        "monitor_notification_preferences": {
+          "items": {
+            "$ref": "#/$defs/MonitorNotificationPreferenceView"
+          },
+          "title": "Monitor Notification Preferences",
+          "type": "array"
+        }
+      },
+      "title": "MonitorNotificationPreferencesRequest",
+      "type": "object"
+    },
+    "MonitorScheduleRequest": {
+      "properties": {
+        "cron_expression": {
+          "title": "Cron Expression",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_kind": {
+          "title": "Scope Kind",
+          "type": "string"
+        },
+        "signals": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signals"
+        },
+        "timezone": {
+          "default": "UTC",
+          "title": "Timezone",
+          "type": "string"
+        },
+        "window_minutes": {
+          "default": 1440,
+          "title": "Window Minutes",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope_kind",
+        "scope_id",
+        "workspace_id",
+        "cron_expression"
+      ],
+      "title": "MonitorScheduleRequest",
+      "type": "object"
+    },
+    "PaginationView": {
+      "properties": {
+        "has_next": {
+          "title": "Has Next",
+          "type": "boolean"
+        },
+        "has_previous": {
+          "title": "Has Previous",
+          "type": "boolean"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total Pages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "total_pages",
+        "has_next",
+        "has_previous"
+      ],
+      "title": "PaginationView",
+      "type": "object"
+    },
+    "RevalidationJobRequest": {
+      "properties": {
+        "rule_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rule Version Ids",
+          "type": "array"
+        },
+        "triggered_by_term_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Triggered By Term Id"
+        },
+        "triggered_by_term_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Triggered By Term Name"
+        }
+      },
+      "title": "RevalidationJobRequest",
+      "type": "object"
+    },
+    "RuleTaxonomyView": {
+      "properties": {
+        "data_steward": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Steward"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain"
+        },
+        "domain_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain Owner"
+        },
+        "execution_target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Target"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Severity"
+        },
+        "sla_scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sla Scope"
+        },
+        "technical_owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technical Owner"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type"
+        }
+      },
+      "title": "RuleTaxonomyView",
+      "type": "object"
+    },
+    "StatusModelView": {
+      "properties": {
+        "allowed_transitions_by_status": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Allowed Transitions By Status",
+          "type": "object"
+        },
+        "entity": {
+          "title": "Entity",
+          "type": "string"
+        },
+        "statuses": {
+          "items": {
+            "$ref": "#/$defs/StatusValueView"
+          },
+          "title": "Statuses",
+          "type": "array"
+        },
+        "transitions": {
+          "items": {
+            "$ref": "#/$defs/StatusTransitionView"
+          },
+          "title": "Transitions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "entity",
+        "statuses",
+        "transitions",
+        "allowed_transitions_by_status"
+      ],
+      "title": "StatusModelView",
+      "type": "object"
+    },
+    "StatusTransitionView": {
+      "properties": {
+        "from_status": {
+          "title": "From Status",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "required_any_scopes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Any Scopes",
+          "type": "array"
+        },
+        "to_status": {
+          "title": "To Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from_status",
+        "to_status",
+        "label"
+      ],
+      "title": "StatusTransitionView",
+      "type": "object"
+    },
+    "StatusValueView": {
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "is_initial": {
+          "default": false,
+          "title": "Is Initial",
+          "type": "boolean"
+        },
+        "is_terminal": {
+          "default": false,
+          "title": "Is Terminal",
+          "type": "boolean"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "title": "StatusValueView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "check_rule_drift_api_rulebuilder_v1_governance_drift_rules_rule_id_version_id_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "check_rule_drift_api_rulebuilder_v1_governance_drift_rules_rule_id_version_id_get_param_path_version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "check_rule_drift_api_rulebuilder_v1_governance_drift_rules_rule_id_version_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Check Rule Drift Api Rulebuilder V1 Governance Drift Rules  Rule Id   Version Id  Get",
+      "type": "object"
+    },
+    "create_drift_review_api_rulebuilder_v1_governance_drift_reviews_post_response_201_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Drift Review Api Rulebuilder V1 Governance Drift Reviews Post",
+      "type": "object"
+    },
+    "create_exception_fact_access_request_api_rulebuilder_v1_exception_fact_access_requests_post_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "create_revalidation_job_api_rulebuilder_v1_governance_revalidation_jobs_post_response_201_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Revalidation Job Api Rulebuilder V1 Governance Revalidation Jobs Post",
+      "type": "object"
+    },
+    "delete_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_delete_param_path_scope_id": {
+      "title": "Scope Id",
+      "type": "string"
+    },
+    "delete_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_delete_param_path_scope_kind": {
+      "title": "Scope Kind",
+      "type": "string"
+    },
+    "get_affected_rules_api_rulebuilder_v1_governance_drift_terms_term_id_affected_rules_get_param_path_term_id": {
+      "title": "Term Id",
+      "type": "string"
+    },
+    "get_affected_rules_api_rulebuilder_v1_governance_drift_terms_term_id_affected_rules_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Affected Rules Api Rulebuilder V1 Governance Drift Terms  Term Id  Affected Rules Get",
+      "type": "object"
+    },
+    "get_catalog_health_api_rulebuilder_v1_catalog_health_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Catalog Health Api Rulebuilder V1 Catalog Health Get",
+      "type": "object"
+    },
+    "get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_param_query_domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Domain"
+    },
+    "get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_param_query_match_threshold_pct": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Match Threshold Pct"
+    },
+    "get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_param_query_search": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Search"
+    },
+    "get_catalog_terms_api_rulebuilder_v1_catalog_terms_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Catalog Terms Api Rulebuilder V1 Catalog Terms Get",
+      "type": "object"
+    },
+    "get_drift_summary_api_rulebuilder_v1_governance_drift_summary_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Drift Summary Api Rulebuilder V1 Governance Drift Summary Get",
+      "type": "object"
+    },
+    "get_governance_inboxes_api_rulebuilder_v1_governance_inboxes_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_governance_inboxes_api_rulebuilder_v1_governance_inboxes_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "get_governance_inboxes_api_rulebuilder_v1_governance_inboxes_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "get_monitor_anomalies_api_rulebuilder_v1_governance_monitor_anomalies_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "get_monitor_anomalies_api_rulebuilder_v1_governance_monitor_anomalies_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Monitor Anomalies Api Rulebuilder V1 Governance Monitor Anomalies Get",
+      "type": "object"
+    },
+    "get_monitor_definitions_api_rulebuilder_v1_governance_monitor_definitions_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "get_monitor_definitions_api_rulebuilder_v1_governance_monitor_definitions_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Monitor Definitions Api Rulebuilder V1 Governance Monitor Definitions Get",
+      "type": "object"
+    },
+    "get_monitor_drifts_api_rulebuilder_v1_governance_monitor_drifts_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "get_monitor_drifts_api_rulebuilder_v1_governance_monitor_drifts_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Monitor Drifts Api Rulebuilder V1 Governance Monitor Drifts Get",
+      "type": "object"
+    },
+    "get_monitor_notification_preferences_api_rulebuilder_v1_governance_monitor_notification_preferences_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Monitor Notification Preferences Api Rulebuilder V1 Governance Monitor Notification Preferences Get",
+      "type": "object"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_data_object_version_id": {
+      "title": "Data Object Version Id",
+      "type": "string"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_delivery_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Delivery Id"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_execution_plan_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Execution Plan Id"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_lookback_amount": {
+      "default": 24,
+      "maximum": 720,
+      "minimum": 1,
+      "title": "Lookback Amount",
+      "type": "integer"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_lookback_unit": {
+      "default": "hours",
+      "title": "Lookback Unit",
+      "type": "string"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_rule_version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rule Version Id"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_param_query_suite_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suite Id"
+    },
+    "get_monitor_root_cause_api_rulebuilder_v1_governance_monitor_root_cause_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Monitor Root Cause Api Rulebuilder V1 Governance Monitor Root Cause Get",
+      "type": "object"
+    },
+    "get_monitor_schedule_by_scope_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_get_param_path_scope_id": {
+      "title": "Scope Id",
+      "type": "string"
+    },
+    "get_monitor_schedule_by_scope_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_get_param_path_scope_kind": {
+      "title": "Scope Kind",
+      "type": "string"
+    },
+    "get_monitor_schedule_by_scope_api_rulebuilder_v1_governance_monitor_schedules_scope_kind_scope_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Monitor Schedule By Scope Api Rulebuilder V1 Governance Monitor Schedules  Scope Kind   Scope Id  Get",
+      "type": "object"
+    },
+    "get_revalidation_job_status_api_rulebuilder_v1_governance_revalidation_jobs_job_id_get_param_path_job_id": {
+      "title": "Job Id",
+      "type": "string"
+    },
+    "get_revalidation_job_status_api_rulebuilder_v1_governance_revalidation_jobs_job_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Revalidation Job Status Api Rulebuilder V1 Governance Revalidation Jobs  Job Id  Get",
+      "type": "object"
+    },
+    "get_status_model_api_rulebuilder_v1_governance_status_models_entity_get_param_path_entity": {
+      "title": "Entity",
+      "type": "string"
+    },
+    "list_monitor_schedules_api_rulebuilder_v1_governance_monitor_schedules_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_monitor_schedules_api_rulebuilder_v1_governance_monitor_schedules_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Monitor Schedules Api Rulebuilder V1 Governance Monitor Schedules Get",
+      "type": "object"
+    },
+    "list_my_exception_fact_access_requests_api_rulebuilder_v1_exception_fact_access_requests_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_my_exception_fact_access_requests_api_rulebuilder_v1_exception_fact_access_requests_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/ExceptionFactAccessRequestView"
+      },
+      "title": "Response List My Exception Fact Access Requests Api Rulebuilder V1 Exception Fact Access Requests Get",
+      "type": "array"
+    },
+    "update_monitor_notification_preferences_api_rulebuilder_v1_governance_monitor_notification_preferences_put_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Update Monitor Notification Preferences Api Rulebuilder V1 Governance Monitor Notification Preferences Put",
+      "type": "object"
+    },
+    "upsert_monitor_schedule_api_rulebuilder_v1_governance_monitor_schedules_put_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Upsert Monitor Schedule Api Rulebuilder V1 Governance Monitor Schedules Put",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/governance/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/governance v1 schema bundle"
+}

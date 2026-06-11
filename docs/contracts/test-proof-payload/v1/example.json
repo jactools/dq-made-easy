@@ -1,0 +1,31 @@
+{
+  "coverage": 0.92,
+  "passed": true,
+  "records_tested_count": 120,
+  "failures_found": 0,
+  "proof_data": {
+    "request_status": "passed",
+    "request_message": "Manual proof submission from an external validator.",
+    "version_id": "dov_sales_order_v3",
+    "version_name": 3,
+    "data_object_id": "do_sales_order",
+    "data_object_name": "Sales Order",
+    "sample_count": 120,
+    "selected_attributes": [
+      {
+        "name": "order_id",
+        "id": "attr_order_id",
+        "data_object_name": "Sales Order"
+      },
+      {
+        "name": "customer_id",
+        "id": "attr_customer_id",
+        "data_object_name": "Sales Order"
+      }
+    ],
+    "execution_context": {
+      "submitted_by": "external-validator",
+      "submitted_at": "2026-04-06T10:30:00Z"
+    }
+  }
+}

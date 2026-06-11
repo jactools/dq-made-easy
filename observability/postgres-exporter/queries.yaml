@@ -1,0 +1,201 @@
+connections:
+  query: |
+    SELECT
+      count(*)::bigint AS used,
+      current_setting('max_connections')::bigint AS max
+    FROM pg_stat_activity
+  master: true
+  metrics:
+    - used:
+        usage: "GAUGE"
+        description: "Current PostgreSQL connections in use"
+    - max:
+        usage: "GAUGE"
+        description: "Configured PostgreSQL max connections"
+
+slow_queries:
+  query: |
+    SELECT
+      count(*)::bigint AS total
+    FROM pg_stat_activity
+    WHERE state = 'active'
+      AND now() - query_start > interval '5 minutes'
+  master: true
+  metrics:
+    - total:
+        usage: "GAUGE"
+        description: "Currently active PostgreSQL queries running longer than five minutes"
+
+gx_execution_runs:
+  query: |
+    SELECT
+      COALESCE(status, 'unknown') AS status,
+      count(*)::bigint AS total
+    FROM gx_execution_runs
+    GROUP BY COALESCE(status, 'unknown')
+  master: true
+  metrics:
+    - status:
+        usage: "LABEL"
+        description: "Current GX execution run status"
+    - total:
+        usage: "GAUGE"
+        description: "Current GX execution runs grouped by status"
+
+gx_execution_run_transitions_last_24h:
+  query: |
+    SELECT
+      COALESCE(to_status, 'unknown') AS to_status,
+      count(*)::bigint AS total
+    FROM gx_execution_run_status_history
+    WHERE changed_at >= NOW() - interval '24 hours'
+    GROUP BY COALESCE(to_status, 'unknown')
+  master: true
+  metrics:
+    - to_status:
+        usage: "LABEL"
+        description: "Destination status of recent GX execution run transitions"
+    - total:
+        usage: "GAUGE"
+        description: "GX execution run transitions recorded in the last 24 hours"
+
+gx_execution_runs_stale_running:
+  query: |
+    SELECT
+      count(*) FILTER (
+        WHERE status = 'running'
+          AND NOW() - COALESCE(started_at, submitted_at) > interval '5 minutes'
+      )::bigint AS total
+    FROM gx_execution_runs
+  master: true
+  metrics:
+    - total:
+        usage: "GAUGE"
+        description: "GX execution runs that have remained in the running state for more than five minutes"
+
+gx_execution_runs_oldest_running_age:
+  query: |
+    SELECT
+      COALESCE(
+        MAX(EXTRACT(EPOCH FROM NOW() - COALESCE(started_at, submitted_at))) FILTER (WHERE status = 'running'),
+        0
+      )::double precision AS seconds
+    FROM gx_execution_runs
+  master: true
+  metrics:
+    - seconds:
+        usage: "GAUGE"
+        description: "Age in seconds of the oldest GX execution run that is still running"
+
+data_definition_tasks:
+  query: |
+    SELECT
+      COALESCE(status, 'unknown') AS status,
+      count(*)::bigint AS total
+    FROM natural_language_analysis_requests
+    WHERE analysis_type = 'definition_task'
+    GROUP BY COALESCE(status, 'unknown')
+  master: true
+  metrics:
+    - status:
+        usage: "LABEL"
+        description: "Current data-definition task status"
+    - total:
+        usage: "GAUGE"
+        description: "Current data-definition tasks grouped by status"
+
+data_definition_tasks_stale_started:
+  query: |
+    SELECT
+      count(*) FILTER (
+        WHERE status = 'started'
+          AND NOW() - COALESCE(started_at, requested_at, created_at) > interval '5 minutes'
+      )::bigint AS total
+    FROM natural_language_analysis_requests
+    WHERE analysis_type = 'definition_task'
+  master: true
+  metrics:
+    - total:
+        usage: "GAUGE"
+        description: "Data-definition tasks that have remained in the started state for more than five minutes"
+
+data_definition_tasks_oldest_started_age:
+  query: |
+    SELECT
+      COALESCE(
+        MAX(EXTRACT(EPOCH FROM NOW() - COALESCE(started_at, requested_at, created_at))) FILTER (WHERE status = 'started'),
+        0
+      )::double precision AS seconds
+    FROM natural_language_analysis_requests
+    WHERE analysis_type = 'definition_task'
+  master: true
+  metrics:
+    - seconds:
+        usage: "GAUGE"
+        description: "Age in seconds of the oldest data-definition task that is still started"
+
+gx_exception_facts_noncanonical:
+  query: |
+    SELECT
+      count(*) FILTER (
+        WHERE NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'engine_type', '')), '') IS NULL
+          OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'validation_artifact_id', '')), '') IS NULL
+          OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'validation_artifact_version', '')), '') IS NULL
+          OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'rule_version_id', '')), '') IS NULL
+          OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'record_identifier_type', '')), '') IS NULL
+          OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'record_identifier_value', '')), '') IS NULL
+          OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'reason_code', '')), '') IS NULL
+          OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'reason_text', '')), '') IS NULL
+      )::bigint AS total
+    FROM gx_execution_violations
+  master: true
+  metrics:
+    - total:
+        usage: "GAUGE"
+        description: "GX exception facts that cannot yet satisfy the canonical exception-fact contract"
+
+gx_exception_facts_oldest_noncanonical_age:
+  query: |
+    SELECT
+      COALESCE(
+        MAX(EXTRACT(EPOCH FROM NOW() - detected_at)) FILTER (
+          WHERE NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'engine_type', '')), '') IS NULL
+            OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'validation_artifact_id', '')), '') IS NULL
+            OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'validation_artifact_version', '')), '') IS NULL
+            OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'rule_version_id', '')), '') IS NULL
+            OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'record_identifier_type', '')), '') IS NULL
+            OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'record_identifier_value', '')), '') IS NULL
+            OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'reason_code', '')), '') IS NULL
+            OR NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'reason_text', '')), '') IS NULL
+        ),
+        0
+      )::double precision AS seconds
+    FROM gx_execution_violations
+  master: true
+  metrics:
+    - seconds:
+        usage: "GAUGE"
+        description: "Age in seconds of the oldest non-canonical GX exception fact awaiting backfill or repair"
+
+gx_exception_facts_latest_canonical_detected_age:
+  query: |
+    SELECT
+      COALESCE(
+        EXTRACT(EPOCH FROM NOW() - MAX(detected_at) FILTER (
+          WHERE NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'engine_type', '')), '') IS NOT NULL
+            AND NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'validation_artifact_id', '')), '') IS NOT NULL
+            AND NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'validation_artifact_version', '')), '') IS NOT NULL
+            AND NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'rule_version_id', '')), '') IS NOT NULL
+            AND NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'record_identifier_type', '')), '') IS NOT NULL
+            AND NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'record_identifier_value', '')), '') IS NOT NULL
+            AND NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'reason_code', '')), '') IS NOT NULL
+            AND NULLIF(BTRIM(COALESCE(ops_metadata_json ->> 'reason_text', '')), '') IS NOT NULL
+        )),
+        0
+      )::double precision AS seconds
+    FROM gx_execution_violations
+  master: true
+  metrics:
+    - seconds:
+        usage: "GAUGE"
+        description: "Age in seconds of the most recent canonical GX exception fact available for analytics"

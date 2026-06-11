@@ -1,0 +1,26 @@
+{
+  "sample_size": 5000,
+  "data_object_id": "019e0488-9a53-7203-b971-1ca3f76a4c1f",
+  "data_object_name": "Contact",
+  "version_id": "019e0488-9a53-7825-811b-761e3e99314c",
+  "version_name": 3,
+  "request_message": "Seeded proof data for Contact version 3.",
+  "selected_attributes": [
+    {
+      "id": "019e0488-9a53-76e9-b9cf-7a99fd4c1485",
+      "name": "contact_id",
+      "data_object_id": "019e0488-9a53-7203-b971-1ca3f76a4c1f",
+      "data_object_name": "Contact",
+      "version_id": "019e0488-9a53-7825-811b-761e3e99314c",
+      "data_object_version": 3
+    },
+    {
+      "id": "019e0488-9a53-7c10-9934-3a64e27090b6",
+      "name": "contact_type",
+      "data_object_id": "019e0488-9a53-7203-b971-1ca3f76a4c1f",
+      "data_object_name": "Contact",
+      "version_id": "019e0488-9a53-7825-811b-761e3e99314c",
+      "data_object_version": 3
+    }
+  ]
+}

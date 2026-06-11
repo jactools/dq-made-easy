@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/rule-dsl/2.0.0/seed-templates/template-entry.schema.json",
+  "title": "DQ7 DSL 2.0.0 Seed Template Entry",
+  "description": "Metadata plus a canonical 2.0.0 rule payload used as a seed template.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "template_id",
+    "rule_kind",
+    "status",
+    "gx_class",
+    "payload"
+  ],
+  "properties": {
+    "template_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rule_kind": {
+      "type": "string",
+      "enum": [
+        "row_assertion",
+        "metric_threshold",
+        "metric_comparison",
+        "schema_assertion",
+        "reference_assertion",
+        "reconciliation_assertion",
+        "freshness_assertion",
+        "distribution_assertion",
+        "anomaly_assertion",
+        "custom_query_assertion"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "drafted",
+        "reserved"
+      ]
+    },
+    "gx_class": {
+      "type": "string",
+      "enum": [
+        "native",
+        "partial",
+        "canonical-only"
+      ]
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payload": {
+      "$ref": "../schema.json"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+src/dq_domain_validation/__init__.py
+src/dq_domain_validation/errors.py
+src/dq_domain_validation/presets.py
+src/dq_domain_validation/py.typed
+src/dq_domain_validation/pydantic.py
+src/dq_domain_validation/registry.py
+src/dq_domain_validation/data/allowed_values.toml
+src/dq_made_easy_domain_validation.egg-info/PKG-INFO
+src/dq_made_easy_domain_validation.egg-info/SOURCES.txt
+src/dq_made_easy_domain_validation.egg-info/dependency_links.txt
+src/dq_made_easy_domain_validation.egg-info/requires.txt
+src/dq_made_easy_domain_validation.egg-info/top_level.txt
+tests/test_domain_validation.py

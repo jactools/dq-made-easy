@@ -1,0 +1,12 @@
+# Keep the dq-llm build context small and deterministic
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.hypothesis
+.ruff_cache
+.cache
+*.log

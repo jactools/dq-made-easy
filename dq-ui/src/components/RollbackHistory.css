@@ -1,0 +1,55 @@
+.rollback-history-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--app-border-subtle);
+}
+
+.rollback-history-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.rollback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rollback-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--app-status-info-bg);
+  border-radius: 8px;
+  border-left: 4px solid var(--app-status-info-text);
+}
+
+.rollback-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.rollback-details {
+  flex: 1;
+}
+
+.rollback-action {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9375rem;
+  color: var(--app-text-primary);
+}
+
+.rollback-meta {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--app-text-secondary);
+}
+
+.rollback-reason {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+  color: var(--app-text-primary);
+  font-style: italic;
+}

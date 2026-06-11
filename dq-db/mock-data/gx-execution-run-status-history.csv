@@ -1,0 +1,3 @@
+"id","run_id","from_status","to_status","changed_by","changed_at","reason","details"
+"019e0488-9a54-7f06-90ba-20b863417879","019e0488-9a54-720c-ad63-80fc923aeb82","","succeeded","data-steward-user","2026-04-12T09:18:10Z","seeded execution","gx-execution-run-status-history/019e0488-9a54-7f06-90ba-20b863417879/details.json"
+"019e0488-9a54-71f1-8787-33bc3aadc968","019e0488-9a54-7714-a768-28870e5765f2","","succeeded","data-steward-user","2026-04-12T09:23:20Z","seeded execution","gx-execution-run-status-history/019e0488-9a54-71f1-8787-33bc3aadc968/details.json"

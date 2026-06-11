@@ -1,0 +1,44 @@
+{
+  "schema_version": "2.0.0",
+  "rule": {
+    "kind": "metric_threshold",
+    "scope": {
+      "dataset": {
+        "data_object_id": "do-customer"
+      },
+      "row_filter": {
+        "kind": "row_predicate",
+        "language": "dq_predicate",
+        "expression": "customer_segment = '__seeded_violation__'"
+      }
+    },
+    "measure": {
+      "type": "metric",
+      "metric": "row_count"
+    },
+    "expectation": {
+      "type": "threshold",
+      "operator": "gte",
+      "value": 1,
+      "unit": "count"
+    },
+    "evidence": {
+      "failed_rows": {
+        "mode": "sample",
+        "limit": 25,
+        "include_row_identifier": true,
+        "include_primary_key": true
+      },
+      "emit_compiled_artifact": true,
+      "emit_generated_sql": false
+    },
+    "operations": {
+      "severity": "critical",
+      "preferred_engines": [
+        "gx",
+        "sql"
+      ],
+      "fail_if_not_native": false
+    }
+  }
+}

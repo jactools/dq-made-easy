@@ -1,0 +1,173 @@
+{
+  "group": "by-tag/system",
+  "operations": [
+    {
+      "description": "Return API request metrics aggregated from the in-process store.\n\nFiltering is applied based on the Application Settings:\n- ``logLevel``              \u2014 controls which error statuses appear in\n                              *recentErrors* (error\u21925xx, warn/info\u21924xx+5xx,\n                              debug\u2192all)\n- ``auditLogRetentionDays`` \u2014 only include requests recorded within this\n                              many days",
+      "method": "GET",
+      "operation_id": "get_api_metrics_api_system_v1_api_metrics_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "apiEndpointFilter",
+          "required": false,
+          "schema_ref": "#/$defs/get_api_metrics_api_system_v1_api_metrics_get_param_query_apiEndpointFilter"
+        },
+        {
+          "in": "query",
+          "name": "apiMethodFilter",
+          "required": false,
+          "schema_ref": "#/$defs/get_api_metrics_api_system_v1_api_metrics_get_param_query_apiMethodFilter"
+        },
+        {
+          "in": "query",
+          "name": "apiMinRequests",
+          "required": false,
+          "schema_ref": "#/$defs/get_api_metrics_api_system_v1_api_metrics_get_param_query_apiMinRequests"
+        },
+        {
+          "in": "query",
+          "name": "recentErrorStatusFilter",
+          "required": false,
+          "schema_ref": "#/$defs/get_api_metrics_api_system_v1_api_metrics_get_param_query_recentErrorStatusFilter"
+        },
+        {
+          "in": "query",
+          "name": "recentErrorPathFilter",
+          "required": false,
+          "schema_ref": "#/$defs/get_api_metrics_api_system_v1_api_metrics_get_param_query_recentErrorPathFilter"
+        },
+        {
+          "in": "query",
+          "name": "excludeHealthEndpoints",
+          "required": false,
+          "schema_ref": "#/$defs/get_api_metrics_api_system_v1_api_metrics_get_param_query_excludeHealthEndpoints"
+        }
+      ],
+      "path": "/api/system/v1/api-metrics",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_api_metrics_api_system_v1_api_metrics_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Api Metrics",
+      "tags": [
+        "system"
+      ]
+    },
+    {
+      "description": "Seed a tracked API metric event so trend charts can initialize quickly.",
+      "method": "POST",
+      "operation_id": "ping_api_metrics_api_system_v1_api_metrics_ping_post",
+      "path": "/api/system/v1/api-metrics/ping",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ping_api_metrics_api_system_v1_api_metrics_ping_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Ping Api Metrics",
+      "tags": [
+        "system"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_auth_login_metrics_api_system_v1_auth_login_metrics_get",
+      "path": "/api/system/v1/auth-login-metrics",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_auth_login_metrics_api_system_v1_auth_login_metrics_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Auth Login Metrics",
+      "tags": [
+        "system"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_suggestions_metrics_api_system_v1_suggestions_metrics_get",
+      "path": "/api/system/v1/suggestions/metrics",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_suggestions_metrics_api_system_v1_suggestions_metrics_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Suggestions Metrics",
+      "tags": [
+        "system"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_system_info_api_system_v1_system_info_get",
+      "path": "/api/system/v1/system-info",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/SystemInfoView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get System Info",
+      "tags": [
+        "system"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_version_catalog_api_system_v1_version_catalog_get",
+      "path": "/api/system/v1/version-catalog",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/VersionCatalogView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Version Catalog",
+      "tags": [
+        "system"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

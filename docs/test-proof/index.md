@@ -1,0 +1,19 @@
+---
+title: "Test Proof"
+description: "Human-readable test proof generated from git-backed proof JSON."
+---
+
+# Test Proof
+
+This section is generated from committed JSON proof files under `test-results/test-proof/<app_version>/<proof_type>/`. Run `scripts/publish_test_proof.sh` after adding or changing proof JSON.
+
+| App Version | Proof | Type | Status | Source JSON |
+| --- | --- | --- | --- | --- |
+| 0.11.3 | [The external API connector accepts an explicit API operation inventory, augments discovery from an optional OpenAPI document when available, redacts secret values from public configuration, and registers the external_api provider in the connector catalog.](0.11.3/api/api-1.5-external-api-connector-2026-06-06.md) | api | passed | `test-results/test-proof/0.11.3/api/api-1.5-external-api-connector-2026-06-06.json` |
+| 0.11.3 | [The Azure ADLS connector now discovers filesystems, directories, and files from configured roots, redacts secret values from the public configuration, and registers the azure_adls provider in the connector catalog.](0.11.3/api/api-1.6-azure-adls-connector-2026-06-06.md) | api | passed | `test-results/test-proof/0.11.3/api/api-1.6-azure-adls-connector-2026-06-06.json` |
+| 0.11.3 | [The S3/Blob connector now ingests metadata from configured s3:// or s3a:// delivery locations, redacts secret values from the public configuration, and registers the s3_blob provider in the connector catalog.](0.11.3/api/api-1.7-s3-blob-connector-2026-06-06.md) | api | passed | `test-results/test-proof/0.11.3/api/api-1.7-s3-blob-connector-2026-06-06.json` |
+| 0.11.3 | [The connector test-connection and discover-assets endpoints now route through the connector registry, validate connector configuration payloads, and return connector health and discovery results behind the internal API contract gate.](0.11.3/api/api-1.8-connector-test-discovery-2026-06-05.md) | api | passed | `test-results/test-proof/0.11.3/api/api-1.8-connector-test-discovery-2026-06-05.json` |
+| 0.11.3 | [The connector sync endpoint now orchestrates metadata sync jobs, returns a completed job record with synced counts, and the governance status model exposes connector_sync_job lifecycle states.](0.11.3/api/api-1.9-metadata-sync-job-2026-06-06.md) | api | passed | `test-results/test-proof/0.11.3/api/api-1.9-metadata-sync-job-2026-06-06.json` |
+| 0.11.3 | [The data-catalog API now persists immutable natural-language draft request history and exposes a dedicated audit-history endpoint. The internal API contract registry recognizes the new route, and the endpoint returns the request's append-only audit trail in canonical snake_case JSON.](0.11.3/api/ws8-a01-data-catalog-history-2026-06-05.md) | api | passed | `test-results/test-proof/0.11.3/api/ws8-a01-data-catalog-history-2026-06-05.json` |
+| 0.11.3 | [The connector workbench renders the backend-owned setup, validation, discovery, and sync flow, and the sidebar now exposes the canonical Administration &gt; Connectors entry point.](0.11.3/ui/ux-1-5-connector-workbench-2026-06-05.md) | ui | passed | `test-results/test-proof/0.11.3/ui/ux-1-5-connector-workbench-2026-06-05.json` |
+| 0.11.3 | [The revamped Audit Trail page renders rule, data-definition, validation, and approval history from the canonical backend seams, and keeps audit reporting on the dedicated audit surface instead of extending compliance.](0.11.3/ui/ws8-a02-audit-trail-2026-06-05.md) | ui | passed | `test-results/test-proof/0.11.3/ui/ws8-a02-audit-trail-2026-06-05.json` |

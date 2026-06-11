@@ -1,0 +1,266 @@
+.discussion-hub-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  background: var(--app-surface-primary);
+  border-radius: 8px;
+}
+
+.discussion-hub-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.discussion-hub-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--app-text-primary);
+}
+
+.discussion-hub-workspace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--app-surface-secondary);
+  border: 1px solid var(--app-border-subtle);
+  color: var(--app-text-secondary);
+  font-size: 12px;
+}
+
+.discussion-hub-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.discussion-hub-search-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.discussion-hub-search-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-search {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  min-height: 48px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 12px;
+  background: var(--app-surface-secondary);
+}
+
+.discussion-hub-search input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--app-text-primary);
+}
+
+.discussion-hub-search input:focus {
+  outline: none;
+}
+
+.discussion-hub-clear-search {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-comment-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.discussion-hub-comment-filter .app-field__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-comment-filter-select {
+  min-width: 220px;
+  --app-input-border: var(--app-border-subtle);
+  --app-input-background: var(--app-surface-secondary);
+  --app-input-text: var(--app-text-primary);
+  --app-input-placeholder: var(--app-text-secondary);
+  --app-input-label: var(--app-text-secondary);
+}
+
+.discussion-hub-comment-filter-select .app-select {
+  min-height: 48px;
+  --app-control-focus-border: var(--app-brand-primary);
+}
+
+.discussion-hub-topic-tabs {
+  min-width: 0;
+}
+
+.discussion-hub-topic-tabs-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.discussion-hub-topic-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.discussion-hub-topic-tabs-control {
+  display: inline-flex;
+  width: max-content;
+  max-width: none;
+}
+
+.discussion-hub-topic-button {
+  white-space: nowrap;
+}
+
+.discussion-hub-topic-count {
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--app-surface-primary);
+  color: var(--app-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.discussion-hub-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.discussion-hub-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 12px;
+  background: var(--app-surface-secondary);
+}
+
+.discussion-hub-stat strong {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.discussion-hub-stat span {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-thread-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.discussion-hub-thread-card {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--app-border-subtle);
+  background: linear-gradient(180deg, var(--app-surface-primary), var(--app-surface-secondary));
+}
+
+.discussion-hub-thread-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.discussion-hub-thread-topic {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-thread-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.discussion-hub-thread-subtitle {
+  margin: 6px 0 0 0;
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-thread-count {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--app-surface-secondary);
+  border: 1px solid var(--app-border-subtle);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.discussion-hub-thread-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.discussion-hub-thread-detail {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--app-brand-primary-soft);
+  color: var(--app-brand-primary);
+  font-size: 12px;
+}
+
+.discussion-hub-empty-state {
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px dashed var(--app-border-subtle);
+  background: var(--app-surface-secondary);
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-source-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--app-text-secondary);
+}
+
+.discussion-hub-source-error {
+  color: var(--app-status-error-text);
+}
+
+@media (max-width: 960px) {
+  .discussion-hub-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .discussion-hub-summary {
+    grid-template-columns: 1fr;
+  }
+}

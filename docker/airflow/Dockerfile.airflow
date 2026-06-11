@@ -1,0 +1,11 @@
+FROM apache/airflow:3.2.2-python3.11
+
+USER root
+RUN mkdir -p /opt/airflow/wheels /opt/airflow/dags
+COPY tmp/dq-airflow-sdk-dist/dq_made_easy_airflow_sdk-*.whl /opt/airflow/wheels/
+COPY tmp/dq-airflow-operator-dist/dq_made_easy_airflow_operator-*.whl /opt/airflow/wheels/
+COPY tmp/dq-airflow-dags-dist/dq-airflow-dags.zip /opt/airflow/dags/dq-airflow-dags.zip
+RUN python -m pip install --disable-pip-version-check --no-deps apache-airflow-providers-fab PyJWT requests cryptography && \
+	python -m pip install --disable-pip-version-check --no-deps /opt/airflow/wheels/dq_made_easy_airflow_operator-*.whl
+COPY docker/airflow/webserver_config.py /opt/airflow/webserver_config.py
+USER airflow

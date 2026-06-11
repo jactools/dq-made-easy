@@ -1,0 +1,18 @@
+[
+  "dq:rules:read",
+  "dq:rules:write",
+  "dq:rules:approve",
+  "dq:rules:activate",
+  "dq:users:manage",
+  "dq:workspace:manage",
+  "dq:config:manage",
+  "dq:workspace:read",
+  "dq:admin:read",
+  "dq:profiling:request",
+  "dq:data_catalog:read",
+  "dq:reports:read",
+  "dq:audit:read",
+  "dq:templates:read",
+  "dq:templates:write",
+  "dq:notifications:read"
+]

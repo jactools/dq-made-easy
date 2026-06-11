@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-03-15T21:32:33+00:00",
+  "legacyBaseUrl": "http://127.0.0.1:4001",
+  "fastapiBaseUrl": "http://127.0.0.1:4010",
+  "scenarioFile": "contracts/verification/api69-dual-run-smoke.json",
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "name": "Readiness auth gate parity",
+      "method": "GET",
+      "path": "/api/v1/readiness",
+      "passed": true,
+      "skipped": false,
+      "skipReason": "",
+      "differences": [],
+      "legacy": {
+        "url": "http://127.0.0.1:4001/v1/readiness",
+        "status": 401,
+        "durationMs": 3.122,
+        "body": {
+          "type": "https://httpstatuses.com/401",
+          "title": "Unauthorized",
+          "status": 401,
+          "detail": "Bearer token is required for this endpoint",
+          "instance": "/v1/readiness"
+        }
+      },
+      "fastapi": {
+        "url": "http://127.0.0.1:4010/api/v1/readiness",
+        "status": 401,
+        "durationMs": 0.672,
+        "body": {
+          "type": "https://httpstatuses.com/401",
+          "title": "Unauthorized",
+          "status": 401,
+          "detail": "Bearer token is required for this endpoint",
+          "instance": "/api/v1/readiness"
+        }
+      }
+    },
+    {
+      "name": "Workspaces auth gate parity",
+      "method": "GET",
+      "path": "/api/v1/workspaces",
+      "passed": true,
+      "skipped": false,
+      "skipReason": "",
+      "differences": [],
+      "legacy": {
+        "url": "http://127.0.0.1:4001/v1/workspaces",
+        "status": 401,
+        "durationMs": 2.495,
+        "body": {
+          "type": "https://httpstatuses.com/401",
+          "title": "Unauthorized",
+          "status": 401,
+          "detail": "Bearer token is required for this endpoint",
+          "instance": "/v1/workspaces"
+        }
+      },
+      "fastapi": {
+        "url": "http://127.0.0.1:4010/api/v1/workspaces",
+        "status": 401,
+        "durationMs": 0.537,
+        "body": {
+          "type": "https://httpstatuses.com/401",
+          "title": "Unauthorized",
+          "status": 401,
+          "detail": "Bearer token is required for this endpoint",
+          "instance": "/api/v1/workspaces"
+        }
+      }
+    }
+  ]
+}

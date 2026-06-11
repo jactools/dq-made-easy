@@ -1,0 +1,218 @@
+.test-results-visualization {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  background: var(--app-surface-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--app-border-subtle);
+}
+
+.test-results-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--app-text-secondary);
+  background: var(--app-surface-primary);
+  border-radius: 8px;
+  border: 1px dashed var(--app-border-subtle);
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--app-border-subtle);
+}
+
+.results-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.test-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.test-status.status-passed {
+  background: var(--app-status-success-bg);
+  color: var(--app-status-success-text);
+}
+
+.test-status.status-failed {
+  background: var(--app-status-error-bg);
+  color: var(--app-status-error-text);
+}
+
+.test-status.status-pending {
+  background: var(--app-status-warning-bg);
+  color: var(--app-status-warning-text);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--app-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--app-text-primary);
+}
+
+.metric-bar {
+  height: 6px;
+  background: var(--app-border-subtle);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+
+.metric-bar-fill.coverage-fill {
+  background: linear-gradient(90deg, var(--app-brand-primary), var(--app-brand-primary-strong));
+}
+
+.metric-bar-fill.success-fill {
+  background: linear-gradient(90deg, var(--app-status-success-text), var(--app-status-success-border));
+}
+
+.metric-bar-fill.tested-fill {
+  background: linear-gradient(90deg, var(--app-status-info-text), var(--app-status-info-border));
+}
+
+.metric-bar-fill.failure-fill {
+  background: linear-gradient(90deg, var(--app-status-error-text), var(--app-status-error-border));
+}
+
+.metric-note {
+  font-size: 11px;
+  color: var(--app-text-secondary);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.detail-box {
+  padding: 14px;
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+}
+
+.detail-box h4 {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.summary-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.summary-row .value {
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.summary-row .value.passed {
+  color: var(--app-status-success-text);
+}
+
+.summary-row .value.failed {
+  color: var(--app-status-error-text);
+}
+
+.quality-circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 12px 0;
+  color: var(--app-text-primary);
+}
+
+.quality-circle svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.quality-label {
+  text-align: center;
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.trend-section {
+  border-top: 1px solid var(--app-border-subtle);
+  padding-top: 16px;
+}
+
+.trend-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.trend-chart {
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+.trend-chart svg {
+  color: var(--app-text-secondary);
+}
+
+.test-timestamp {
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--app-border-subtle);
+  color: var(--app-text-secondary);
+}

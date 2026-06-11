@@ -1,0 +1,12 @@
+{
+  "engineType": "gx",
+  "engineTarget": "pyspark",
+  "executionShape": "single_object",
+  "traceability": {
+    "ruleId": "019e0488-9a55-7149-8e7f-04abd00f718f",
+    "ruleVersionId": "019e0488-9a55-7233-9c96-9f1b3c06fe81",
+    "gxSuiteId": "019e0488-9a54-7af3-8fca-c4bffc4baa6e",
+    "gxSuiteVersion": 1,
+    "dataObjectVersionId": "019e0488-9a53-76be-ab52-240e4250f6a4"
+  }
+}

@@ -1,0 +1,8 @@
+.metrics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  min-height: 100%;
+  background: var(--app-surface-primary);
+}

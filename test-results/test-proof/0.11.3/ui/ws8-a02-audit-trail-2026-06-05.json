@@ -1,0 +1,32 @@
+{
+  "app_version": "0.11.3",
+  "proof_id": "ws8-a02-audit-trail-2026-06-05",
+  "proof_type": "ui",
+  "feature": "WS8-A02",
+  "summary": "The revamped Audit Trail page renders rule, data-definition, validation, and approval history from the canonical backend seams, and keeps audit reporting on the dedicated audit surface instead of extending compliance.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-05T22:06:10Z",
+  "command": "scripts/run_test_evidence.sh ui --label ws8-a02-audit-trail -- src/components/AuditTrail.test.tsx --reporter=dot --no-isolate --no-file-parallelism --maxWorkers=1 --minWorkers=1 --pool=forks",
+  "raw_evidence_directory": "test-results/evidence/0.11.3/ui/20260605T220610Z-ws8-a02-audit-trail",
+  "test_files": [
+    "dq-ui/src/components/AuditTrail.test.tsx"
+  ],
+  "test_file_count": 1,
+  "test_count": 1,
+  "assertions": [
+    "The Audit Trail page renders the canonical rule, data-definition, validation, and approval history sections.",
+    "The page fetches the expected history endpoints for rule status, data-definition requests, validation runs, and approvals."
+  ],
+  "proof_data": {
+    "app_version": "0.11.3",
+    "ui_command": "scripts/run_test_evidence.sh ui --label ws8-a02-audit-trail -- src/components/AuditTrail.test.tsx --reporter=dot --no-isolate --no-file-parallelism --maxWorkers=1 --minWorkers=1 --pool=forks",
+    "ui_evidence_directory": "test-results/evidence/0.11.3/ui/20260605T220610Z-ws8-a02-audit-trail",
+    "ui_tests": 1,
+    "shared_primitives": [
+      "AppTabs",
+      "AppButton",
+      "AppSelect",
+      "AppIcon"
+    ]
+  }
+}

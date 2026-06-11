@@ -1,0 +1,185 @@
+#!/bin/bash
+
+# Pre-commit hook: Database Schema Version Enforcement
+# Automatically checks and updates database version when schema files change
+
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Get repository root
+REPO_ROOT=$(git rev-parse --show-toplevel)
+SYSTEM_INFO_CSV="$REPO_ROOT/dq-db/mock-data/system_info.csv"
+DB_VERSION_MD="$REPO_ROOT/dq-db/DB_VERSION.md"
+
+# Schema files to watch
+SCHEMA_FILES=(
+    "dq-db/init/01_schema.sql"
+    "dq-db/init/02_profiling_schema.sql"
+)
+
+# Check if any schema files are being committed
+SCHEMA_CHANGED=false
+CHANGED_FILES=""
+
+for schema_file in "${SCHEMA_FILES[@]}"; do
+    if git diff --cached --name-only | grep -q "^${schema_file}$"; then
+        SCHEMA_CHANGED=true
+        CHANGED_FILES="$CHANGED_FILES\n  - $schema_file"
+    fi
+done
+
+# If no schema changes, exit early
+if [ "$SCHEMA_CHANGED" = false ]; then
+    exit 0
+fi
+
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${YELLOW}Database Schema Changes Detected${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}Changed files:${NC}$CHANGED_FILES"
+echo ""
+
+# Get current version from system_info.csv
+if [ ! -f "$SYSTEM_INFO_CSV" ]; then
+    echo -e "${RED}Error: $SYSTEM_INFO_CSV not found${NC}"
+    exit 1
+fi
+
+CURRENT_VERSION=$(grep "^db_schema_version," "$SYSTEM_INFO_CSV" | cut -d',' -f2)
+echo -e "Current schema version: ${GREEN}$CURRENT_VERSION${NC}"
+
+# Check if system_info.csv is also staged
+VERSION_FILE_STAGED=false
+if git diff --cached --name-only | grep -q "dq-db/mock-data/system_info.csv"; then
+    VERSION_FILE_STAGED=true
+fi
+
+# Get git commit hash (short)
+GIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "0000000")
+
+# Check if DB_VERSION.md is staged
+VERSION_DOC_STAGED=false
+if git diff --cached --name-only | grep -q "dq-db/DB_VERSION.md"; then
+    VERSION_DOC_STAGED=true
+fi
+
+# Determine action based on environment variable
+AUTO_INCREMENT=${DB_VERSION_AUTO_INCREMENT:-"prompt"}
+
+if [ "$VERSION_FILE_STAGED" = true ]; then
+    # Version file is staged, check if it was actually changed
+    VERSION_CHANGED=$(git diff --cached "$SYSTEM_INFO_CSV" | grep "^+db_schema_version," || echo "")
+    
+    if [ -n "$VERSION_CHANGED" ]; then
+        NEW_VERSION=$(echo "$VERSION_CHANGED" | sed 's/^+db_schema_version,//' | cut -d',' -f1)
+        echo -e "${GREEN}✓${NC} Version update detected: ${GREEN}$CURRENT_VERSION${NC} → ${GREEN}$NEW_VERSION${NC}"
+        
+        if [ "$VERSION_DOC_STAGED" = false ]; then
+            echo -e "${YELLOW}⚠${NC}  Warning: DB_VERSION.md not updated"
+            echo -e "   Consider documenting this change in dq-db/DB_VERSION.md"
+        fi
+        
+        echo -e "${GREEN}✓${NC} Schema version enforcement: ${GREEN}PASSED${NC}"
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        exit 0
+    fi
+fi
+
+echo -e "${YELLOW}⚠${NC}  Schema changed but version not updated"
+echo ""
+
+if [ "$AUTO_INCREMENT" = "auto" ]; then
+    # Auto-increment PATCH version
+    IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+    NEW_PATCH=$((patch + 1))
+    NEW_VERSION="$major.$minor.$NEW_PATCH"
+    
+    echo -e "${BLUE}Auto-incrementing version:${NC} $CURRENT_VERSION → $NEW_VERSION"
+    
+    # Update system_info.csv
+    CURRENT_TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S.%6N+00")
+    cat > "$SYSTEM_INFO_CSV" << EOF
+info_key,info_value,description,updated_at
+db_schema_version,$NEW_VERSION,Database schema version,$CURRENT_TIMESTAMP
+db_schema_updated,$CURRENT_TIMESTAMP,Last schema update timestamp,$CURRENT_TIMESTAMP
+db_git_commit,$GIT_HASH,Git commit hash of schema change,$CURRENT_TIMESTAMP
+EOF
+    
+    # Stage the updated file
+    git add "$SYSTEM_INFO_CSV"
+    
+    echo -e "${GREEN}✓${NC} Version auto-incremented and staged"
+    echo -e "${YELLOW}⚠${NC}  Don't forget to document this change in DB_VERSION.md"
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 0
+    
+elif [ "$AUTO_INCREMENT" = "strict" ]; then
+    # Strict mode: block commit
+    echo -e "${RED}✗ COMMIT BLOCKED${NC}"
+    echo ""
+    echo "Schema files changed but version not updated."
+    echo ""
+    echo "To fix this, run:"
+    echo -e "  ${BLUE}./dq-db/scripts/update_schema_version.sh <new_version>${NC}"
+    echo ""
+    echo "Or to bypass this check:"
+    echo -e "  ${BLUE}DB_VERSION_AUTO_INCREMENT=skip git commit -m \"...\"${NC}"
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 1
+    
+else
+    # Prompt mode (default)
+    echo "Options:"
+    echo "  1) Auto-increment PATCH version (recommended for minor fixes)"
+    echo "  2) Run update script manually (for MAJOR/MINOR changes)"
+    echo "  3) Skip version check (not recommended)"
+    echo ""
+    read -p "Choose [1/2/3]: " -n 1 -r
+    echo ""
+    
+    case $REPLY in
+        1)
+            # Auto-increment
+            IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+            NEW_PATCH=$((patch + 1))
+            NEW_VERSION="$major.$minor.$NEW_PATCH"
+            
+            echo -e "${BLUE}Incrementing version:${NC} $CURRENT_VERSION → $NEW_VERSION"
+            
+            CURRENT_TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S.%6N+00")
+            cat > "$SYSTEM_INFO_CSV" << EOF
+info_key,info_value,description,updated_at
+db_schema_version,$NEW_VERSION,Database schema version,$CURRENT_TIMESTAMP
+db_schema_updated,$CURRENT_TIMESTAMP,Last schema update timestamp,$CURRENT_TIMESTAMP
+db_git_commit,$GIT_HASH,Git commit hash of schema change,$CURRENT_TIMESTAMP
+EOF
+            
+            git add "$SYSTEM_INFO_CSV"
+            echo -e "${GREEN}✓${NC} Version updated and staged"
+            ;;
+        2)
+            echo -e "${RED}✗ COMMIT ABORTED${NC}"
+            echo ""
+            echo "Run this command and commit again:"
+            echo -e "  ${BLUE}./dq-db/scripts/update_schema_version.sh <new_version>${NC}"
+            exit 1
+            ;;
+        3)
+            echo -e "${YELLOW}⚠${NC}  Skipping version check"
+            echo -e "${YELLOW}Warning: Schema and version may be out of sync${NC}"
+            ;;
+        *)
+            echo -e "${RED}✗ Invalid choice, aborting commit${NC}"
+            exit 1
+            ;;
+    esac
+fi
+
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+exit 0

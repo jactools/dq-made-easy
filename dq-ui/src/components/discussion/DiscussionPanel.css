@@ -1,0 +1,177 @@
+.comment-thread-section {
+  padding: 16px;
+  background: var(--app-surface-secondary);
+  border-radius: 6px;
+  margin: 16px 0;
+}
+
+.comment-thread-section h5 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.discussion-thread-subtitle {
+  margin: -4px 0 12px 0;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.comment-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.discussion-thread-empty-state {
+  padding: 10px 12px;
+  border: 1px dashed var(--app-border-subtle);
+  border-radius: 4px;
+  color: var(--app-text-secondary);
+  background: var(--app-surface-primary);
+  font-size: 13px;
+}
+
+.comment-item {
+  padding: 8px 10px;
+  background: var(--app-surface-primary);
+  border-left: 3px solid var(--app-brand-primary);
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: var(--app-text-primary);
+  font-size: 12px;
+}
+
+.comment-type {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--app-text-inverse);
+}
+
+.comment-type-general {
+  background: var(--app-surface-secondary);
+  color: var(--app-text-primary);
+}
+
+.comment-type-note {
+  background: var(--app-brand-primary);
+}
+
+.comment-type-concern {
+  background: var(--app-status-error-text);
+}
+
+.comment-type-question {
+  background: var(--app-status-warning-text);
+}
+
+.comment-time {
+  font-size: 11px;
+  color: var(--app-text-secondary);
+  margin-left: auto;
+}
+
+.discussion-entry-edited {
+  font-size: 11px;
+  color: var(--app-text-secondary);
+  font-style: italic;
+}
+
+.comment-content {
+  color: var(--app-text-primary);
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.comment-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.comment-input-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment-input-header label,
+.discussion-textarea-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--app-text-primary);
+}
+
+.discussion-textarea-label {
+  margin-top: 4px;
+}
+
+.comment-type-select {
+  padding: 4px 8px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 3px;
+  font-size: 12px;
+  background: var(--app-surface-primary);
+  color: var(--app-text-primary);
+  cursor: pointer;
+}
+
+.discussion-textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 8px 10px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+  font: inherit;
+  resize: vertical;
+  background: var(--app-surface-primary);
+  color: var(--app-text-primary);
+}
+
+.discussion-textarea:focus,
+.comment-type-select:focus {
+  outline: 2px solid var(--app-focus-ring);
+  outline-offset: 1px;
+}
+
+.discussion-submit-button {
+  align-self: flex-end;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--app-brand-primary);
+  color: var(--app-text-inverse);
+  cursor: pointer;
+}
+
+.discussion-submit-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

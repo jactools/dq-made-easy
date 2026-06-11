@@ -1,0 +1,14 @@
+[
+  {
+    "joinType": "inner",
+    "conditions": [
+      {
+        "leftDataObjectId": "customers",
+        "leftAttributeId": "customer_id",
+        "rightDataObjectId": "accounts",
+        "rightAttributeId": "customer_id",
+        "operator": "="
+      }
+    ]
+  }
+]

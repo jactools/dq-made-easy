@@ -1,0 +1,418 @@
+/* Revalidation Progress Component */
+.revalidation-progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.revalidation-progress-dialog {
+  background-color: var(--app-surface-primary);
+  border-radius: 8px;
+  box-shadow: var(--app-shadow-md);
+  width: 500px;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+.progress-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--app-border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-header h3 {
+  margin: 0;
+  color: var(--app-text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.status-badge.in-progress {
+  background-color: var(--app-status-info-bg);
+  color: var(--app-status-info-text);
+}
+
+.status-badge.completed {
+  background-color: var(--app-status-success-bg);
+  color: var(--app-status-success-text);
+}
+
+.status-badge.failed {
+  background-color: var(--app-status-error-bg);
+  color: var(--app-status-error-text);
+}
+
+.progress-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.triggered-by {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  background-color: var(--app-surface-secondary);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.triggered-by .label {
+  color: var(--app-text-secondary);
+}
+
+.triggered-by strong {
+  color: var(--app-text-primary);
+}
+
+/* Progress bar section */
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-text-primary);
+}
+
+.progress-percent {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-brand-primary);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 24px;
+  background-color: var(--app-surface-secondary);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--app-border-subtle);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--app-brand-primary),
+    var(--app-brand-primary-strong)
+  );
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-text-inverse);
+  font-size: 12px;
+  font-weight: 600;
+  position: relative;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Statistics grid */
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.stat-box {
+  padding: 12px;
+  background-color: var(--app-surface-secondary);
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid var(--app-border-subtle);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.stat-value.completed {
+  color: var(--app-status-success-text);
+}
+
+/* Validation summary */
+.validation-summary {
+  padding: 12px;
+  background-color: var(--app-surface-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--app-border-subtle);
+}
+
+.summary-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+  margin-bottom: 8px;
+}
+
+.summary-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 6px;
+  border-radius: 3px;
+}
+
+.metric.improved {
+  color: var(--app-status-success-text);
+  background-color: var(--app-status-success-bg);
+}
+
+.metric.degraded {
+  color: var(--app-status-error-text);
+  background-color: var(--app-status-error-bg);
+}
+
+.metric.unchanged {
+  color: var(--app-status-neutral-text);
+  background-color: var(--app-status-neutral-bg);
+}
+
+.metric i {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Error message */
+.error-message {
+  padding: 12px;
+  background-color: var(--app-status-error-bg);
+  border: 1px solid var(--app-status-error-border);
+  border-radius: 4px;
+  color: var(--app-status-error-text);
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.error-message i {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Loading indicator */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.loading-indicator i {
+  font-size: 16px;
+}
+
+/* Results summary */
+.results-summary {
+  padding: 12px;
+  background-color: var(--app-surface-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--app-border-subtle);
+}
+
+.results-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+  margin-bottom: 8px;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.result-item {
+  padding: 8px;
+  background-color: var(--app-surface-primary);
+  border-radius: 3px;
+  border-left: 3px solid;
+  font-size: 12px;
+}
+
+.result-item.result-success {
+  border-left-color: var(--app-status-success-border);
+}
+
+.result-item.result-failed {
+  border-left-color: var(--app-status-error-border);
+}
+
+.result-name {
+  font-weight: 500;
+  color: var(--app-text-primary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-status {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+
+.result-status span {
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+
+.result-status .improved {
+  background-color: var(--app-status-success-bg);
+  color: var(--app-status-success-text);
+}
+
+.result-status .degraded {
+  background-color: var(--app-status-error-bg);
+  color: var(--app-status-error-text);
+}
+
+.result-status .new-issues {
+  background-color: var(--app-status-warning-bg);
+  color: var(--app-status-warning-text);
+}
+
+/* Footer */
+.progress-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--app-border-subtle);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background-color: var(--app-surface-secondary);
+}
+
+.close-button {
+  padding: 8px 16px;
+  border: 1px solid var(--app-brand-primary);
+  background-color: var(--app-brand-primary);
+  color: var(--app-text-inverse);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-button:hover:not(:disabled) {
+  background-color: var(--app-brand-primary-strong);
+  border-color: var(--app-brand-primary-strong);
+}
+
+.close-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .revalidation-progress-dialog {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .progress-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .progress-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}

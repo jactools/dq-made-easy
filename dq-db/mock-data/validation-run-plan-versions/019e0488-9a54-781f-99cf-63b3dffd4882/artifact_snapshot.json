@@ -1,0 +1,72 @@
+{
+  "suiteId": "019e0488-9a54-768e-aa7c-e1115ffb25a1",
+  "suiteVersion": 1,
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
+    "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
+    "dataProductId": "019e0488-9a54-7bb4-a49e-98434c26d7a7"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "019e0488-9a53-76be-ab52-240e4250f6a4"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "gx_transaction_delivery_33",
+    "expectations": [
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "transaction_id"
+        }
+      },
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "amount"
+        }
+      },
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "transaction_date"
+        }
+      }
+    ],
+    "meta": {
+      "delivery_id": "019e0488-9a53-78de-93ea-bb14dfab6c23",
+      "delivery_location": "s3a://analytics/do-4/v2/LOAD_DTS=20260222T120000000Z",
+      "workspace_id": "retail-banking"
+    }
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a54-7663-9bf6-7e512282aaa2",
+      "019e0488-9a55-7b8b-9e15-28c6255d52ce",
+      "019e0488-9a55-7696-8c22-7e3c2b3a6891"
+    ],
+    "compilerVersion": "dq-compiler-7.3",
+    "generatedAt": "2026-04-12T09:10:00Z"
+  },
+  "executionHints": {
+    "recommendedEngine": "pyspark",
+    "primaryKeyFields": [
+      "transaction_id"
+    ],
+    "businessKeyFields": [
+      "transaction_id"
+    ]
+  },
+  "executionContract": {
+    "engineType": "gx",
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "traceability": {
+      "ruleId": "019e0488-9a54-7663-9bf6-7e512282aaa2",
+      "ruleVersionId": "019e0488-9a54-73e0-9eaa-75341c333ac1",
+      "gxSuiteId": "019e0488-9a54-768e-aa7c-e1115ffb25a1",
+      "gxSuiteVersion": 1,
+      "dataObjectVersionId": "019e0488-9a53-76be-ab52-240e4250f6a4"
+    }
+  }
+}

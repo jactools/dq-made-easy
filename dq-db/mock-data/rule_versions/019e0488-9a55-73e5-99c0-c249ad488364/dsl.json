@@ -1,0 +1,44 @@
+{
+  "schema_version": "2.0.0",
+  "rule": {
+    "kind": "metric_threshold",
+    "scope": {
+      "dataset": {
+        "data_object_id": "do-account"
+      }
+    },
+    "measure": {
+      "type": "metric",
+      "metric": "duplicate_count",
+      "subject": {
+        "columns": [
+          "account_number"
+        ]
+      }
+    },
+    "expectation": {
+      "type": "threshold",
+      "operator": "lte",
+      "value": 0,
+      "unit": "count"
+    },
+    "evidence": {
+      "failed_rows": {
+        "mode": "sample",
+        "limit": 25,
+        "include_row_identifier": true,
+        "include_primary_key": true
+      },
+      "emit_compiled_artifact": true,
+      "emit_generated_sql": false
+    },
+    "operations": {
+      "severity": "critical",
+      "preferred_engines": [
+        "gx",
+        "sql"
+      ],
+      "fail_if_not_native": false
+    }
+  }
+}

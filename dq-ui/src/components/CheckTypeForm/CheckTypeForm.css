@@ -1,0 +1,44 @@
+.check-type-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.check-type-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.check-type-form-field--half {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.check-type-form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.check-type-form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--app-text-secondary);
+}
+
+.check-type-form-hint {
+  font-size: 0.75rem;
+  color: var(--app-text-secondary);
+}
+
+.check-type-form-field-error {
+  color: var(--app-status-error-text);
+}
+
+.check-type-form-unsupported {
+  font-size: 0.875rem;
+  color: var(--app-text-secondary);
+  margin-top: 0.5rem;
+  font-style: italic;
+}

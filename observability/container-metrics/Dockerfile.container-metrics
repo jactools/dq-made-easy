@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1.7
+FROM python:3.14-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+ARG PIP_INDEX_URL
+
+COPY requirements.txt /tmp/requirements.txt
+RUN set -eux; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN --mount=type=secret,id=internal_corporate_root_ca \
+    set -eux; \
+    cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+    update-ca-certificates; \
+    PIP_CERT=/etc/ssl/certs/ca-certificates.crt PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r /tmp/requirements.txt; \
+    rm -f /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+    update-ca-certificates --fresh
+
+COPY container_metrics_exporter.py /app/container_metrics_exporter.py
+
+ENTRYPOINT ["python", "/app/container_metrics_exporter.py"]

@@ -1,0 +1,6 @@
+[
+  "dq:rules:read",
+  "dq:workspace:read",
+  "dq:admin:read",
+  "dq:workspace:manage"
+]

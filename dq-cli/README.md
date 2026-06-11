@@ -1,0 +1,83 @@
+# dq-made-easy-cli
+
+Standalone CLI package for **rule onboarding**, **run plan management**, and **execution tracking** in dq-made-easy.
+
+## Commands
+
+### `dq-onboard` — Workspace Rule Onboarding
+
+Discover, filter, and bulk-submit rule onboarding proposals based on template matching.
+
+```bash
+dq-onboard --workspace "Retail Banking" --all --insecure --submit
+```
+
+✅ **Features**:
+- Fetch workspace scope summary (attribute counts)
+- Generate template-based rule proposals
+- Filter by template type or select all
+- Preview with `--dry-run` or submit with `--submit`
+- JSON output for automation
+
+📖 **Full Documentation**: [ONBOARDING.md](ONBOARDING.md)
+
+**Verified Examples** (Retail Banking workspace: 157 attributes, 356 proposals):
+- View single sample proposal: `dq-onboard --workspace "Retail Banking" --dry-run`
+- Filter to NULL checks (157): `dq-onboard --workspace "Retail Banking" --template "NULL Value" --all --dry-run`
+- Submit all proposals: `dq-onboard --workspace "Retail Banking" --all --submit`
+- JSON output: `dq-onboard --workspace "Retail Banking" --json --dry-run | jq .`
+
+---
+
+### `dq-run-plan` — Execution & Replay
+
+List, initiate, replay, and export run plans (existing command).
+
+```bash
+dq-run-plan --help
+```
+
+---
+
+### `dq-mcp-server` — Agent Tools via MCP
+
+Runs a stdio MCP server that exposes three tools backed by canonical dq-api routes:
+
+- `validate_dataset` -> `POST /api/rulebuilder/v1/rules/validate/batch`
+- `get_anomalies` -> `GET /api/rulebuilder/v1/deliveries/{delivery_id}/exception-summary`
+- `trigger_remediation` -> `POST /api/rulebuilder/v1/incidents`
+
+```bash
+dq-mcp-server --base-url http://localhost:8000/api --token "$DQ_MCP_API_TOKEN"
+```
+
+Environment variables:
+
+- `DQ_MCP_API_BASE_URL` (required unless `--base-url` is provided)
+- `DQ_MCP_API_TOKEN` (optional bearer token)
+- `DQ_MCP_API_TIMEOUT_SECONDS` (required unless `--timeout-seconds` is provided)
+
+The server fails fast if base URL or timeout are missing.
+
+---
+
+## Installation
+
+```bash
+pip install dq-made-easy-cli
+```
+
+Or from source:
+
+```bash
+cd dq-cli
+pip install -e .
+```
+
+Verify both commands are available:
+
+```bash
+dq-onboard --help
+dq-run-plan --help
+dq-mcp-server --help
+```

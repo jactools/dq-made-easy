@@ -1,0 +1,60 @@
+# syntax=docker/dockerfile:1.7
+FROM python:3.14-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /workspace
+
+ARG PIP_INDEX_URL
+ARG INTERNAL_CORPORATE_ROOT_CA
+
+COPY dq-api/fastapi/requirements.txt /tmp/requirements.txt
+
+RUN --mount=type=secret,id=internal_mkcert_root_ca \
+    --mount=type=secret,id=internal_root_ca \
+    --mount=type=secret,id=internal_ca_bundle \
+    set -eux; \
+    : "${INTERNAL_CORPORATE_ROOT_CA:?INTERNAL_CORPORATE_ROOT_CA is required}"; \
+    apt-get update \
+    && apt-get install -y --no-install-recommends bash curl ca-certificates gnupg openssl \
+    && rm -rf /var/lib/apt/lists/*; \
+    import_ca_file() { \
+        source_file="$1"; \
+        target_file="$2"; \
+        if openssl x509 -in "$source_file" -noout >/dev/null 2>&1; then \
+            cp "$source_file" "$target_file"; \
+        else \
+            openssl x509 -inform DER -in "$source_file" -out "$target_file"; \
+        fi; \
+    }; \
+    import_bundle_file() { \
+        source_file="$1"; \
+        target_prefix="$2"; \
+        awk -v prefix="$target_prefix" 'BEGIN { count = 0; target = "" } /BEGIN CERTIFICATE/ { count++; target = sprintf("%s-%02d.crt", prefix, count) } { if (target != "") print > target } /END CERTIFICATE/ { close(target); target = "" }' "$source_file"; \
+    }; \
+    if [ -f /run/secrets/internal_mkcert_root_ca ]; then \
+        echo "Importing internal mkcert root CA into system truststore"; \
+        import_ca_file /run/secrets/internal_mkcert_root_ca /usr/local/share/ca-certificates/internal-mkcert-rootCA.crt; \
+    fi; \
+    if [ -f /run/secrets/internal_root_ca ]; then \
+        echo "Importing internal root CA into system truststore"; \
+        import_ca_file /run/secrets/internal_root_ca /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
+    fi; \
+    echo "Importing internal corporate root CA into system truststore"; \
+    printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+    if [ -f /run/secrets/internal_ca_bundle ]; then \
+        echo "Importing internal certificate bundle into system truststore"; \
+        import_bundle_file /run/secrets/internal_ca_bundle /usr/local/share/ca-certificates/internal-corporate-ca; \
+    fi; \
+    update-ca-certificates || true; \
+    install -d /usr/share/keyrings \
+    && curl -fsSL --insecure https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo \"$VERSION_CODENAME\")-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-18 \
+    && PIP_CERT=/etc/ssl/certs/ca-certificates.crt PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /usr/local/share/ca-certificates/internal-*.crt \
+    && update-ca-certificates --fresh \
+    && rm -rf /var/lib/apt/lists/*
+

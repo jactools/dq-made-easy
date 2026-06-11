@@ -1,0 +1,129 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:dq:contract:retail-banking-customer-360-delivery
+name: retail_banking_customer_360_delivery
+version: 1.0.0
+status: active
+owner:
+  name: Customer Data Team
+contact:
+  name: Customer Domain Steward
+  email: customer-data@example.com
+domain: retail_banking
+tags:
+  - retail-banking
+  - customer-360
+  - pii
+description:
+  purpose: |
+    Curated delivery contract for the retail banking customer 360 product.
+    Provides the governed customer profile surface used by servicing, contact-center,
+    and customer-risk workflows.
+  limitations: |
+    - Internal analytics and operations use only
+    - Row-level access policy required for direct access
+    - Near-real-time updates are not guaranteed
+  usage: |
+    Sensitive customer information.
+    Access requires customer-domain approval and audit logging.
+
+servers:
+  production:
+    type: postgres
+    server: retail-banking-postgres.internal:5432
+    database: customer360
+    schema: curated
+    table: customer_360_profile
+
+schema:
+  - name: customer_360_profile
+    logicalType: object
+    physicalType: table
+    description: Curated retail banking customer 360 profile records
+    properties:
+      - name: customer_id
+        logicalType: string
+        description: Stable customer identifier across the retail banking domain
+        required: true
+        unique: true
+        classification: confidential
+        physicalType: UUID
+        primaryKey: true
+        primaryKeyPosition: 1
+        logicalTypeOptions:
+          maxLength: 36
+      - name: customer_status
+        logicalType: string
+        description: Current lifecycle status for the customer relationship
+        required: true
+        unique: false
+        classification: internal
+        physicalType: STRING
+        logicalTypeOptions:
+          maxLength: 20
+      - name: segment_code
+        logicalType: string
+        description: Commercial segment assigned to the customer
+        required: true
+        unique: false
+        classification: internal
+        physicalType: STRING
+        logicalTypeOptions:
+          maxLength: 32
+      - name: primary_country_code
+        logicalType: string
+        description: ISO 3166 alpha-2 country code for the primary residence
+        required: true
+        unique: false
+        classification: internal
+        physicalType: STRING
+        logicalTypeOptions:
+          maxLength: 2
+      - name: profile_last_refreshed_at
+        logicalType: timestamp
+        description: Timestamp of the latest successful customer 360 profile refresh
+        required: true
+        unique: false
+        classification: internal
+        physicalType: TIMESTAMP
+
+slaProperties:
+  - property: freshness
+    value: "24"
+    unit: hour
+
+quality:
+  type: SodaCL
+  specification: |
+    checks for customer_360_profile:
+      - missing_count(customer_id) = 0:
+          name: Customer ID completeness
+          severity: critical
+      - duplicate_count(customer_id) = 0:
+          name: Customer ID uniqueness
+          severity: critical
+      - missing_count(customer_status) = 0:
+          name: Customer status completeness
+          severity: high
+      - freshness(profile_last_refreshed_at) < 1d:
+          name: Daily refresh timeliness
+          severity: high
+
+servicelevels:
+  availability:
+    description: Curated customer-domain delivery service
+    percentage: 99.5
+  support:
+    time: 24/5
+    responseTime: 4h
+
+stakeholders:
+  - role: Data Owner
+    name: Head of Retail Banking Data
+    contact: retail-data-owner@example.com
+  - role: Data Steward
+    name: Customer Domain Steward
+    contact: customer-data@example.com
+  - role: Consumers
+    name: Servicing App, Contact Center, Customer Risk Monitoring
+    contact: customer-consumers@example.com

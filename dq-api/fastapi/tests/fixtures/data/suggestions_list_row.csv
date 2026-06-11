@@ -1,0 +1,2 @@
+id,userId,dataSourceId,suggestedRule,confidenceScore,status
+sug-1,user-123,source-1,"{""name"":""Null check"",""expression"":""col_x IS NOT NULL""}",0.92,pending

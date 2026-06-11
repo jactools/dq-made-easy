@@ -1,0 +1,160 @@
+.modal-shell-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--app-text-primary) 50%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-height: calc(100vh - 40px);
+  background-color: var(--app-surface-primary);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.modal-shell * {
+  box-sizing: border-box;
+}
+
+.modal-shell--sm {
+  max-width: 420px;
+}
+
+.modal-shell--md {
+  max-width: 640px;
+}
+
+.modal-shell--lg {
+  max-width: 840px;
+}
+
+.modal-shell--xl {
+  max-width: 1000px;
+}
+
+.modal-shell__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 24px;
+  border-bottom: 1px solid var(--app-border-subtle);
+  background-color: var(--app-surface-primary);
+}
+
+.modal-shell__title {
+  margin: 0;
+  flex: 1;
+  padding-right: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--app-text-primary);
+  letter-spacing: -0.5px;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.modal-shell__close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: var(--app-text-primary);
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.modal-shell__close:hover {
+  background-color: var(--app-hover-bg);
+  color: var(--app-brand-primary);
+}
+
+.modal-shell__close:active {
+  background-color: var(--app-selected-bg);
+}
+
+.modal-shell__body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: clip;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: var(--app-surface-primary);
+}
+
+.modal-shell__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid var(--app-border-subtle);
+  background-color: var(--app-surface-primary);
+}
+
+/* Ensure app buttons inside modal Shadow DOM inherit the intended modal theme tokens */
+[data-theme='light'] .modal-shell,
+[data-theme='light'] .modal-shell__footer,
+.modal-shell,
+.modal-shell__footer {
+  --app-button-color-background-primary-default: var(--app-brand-primary);
+  --app-button-color-background-primary-default-hover: var(--app-brand-primary-strong);
+  --app-button-color-text-primary-default: var(--app-text-inverse);
+  --app-button-color-text-primary-default-hover: var(--app-text-inverse);
+  --app-button-color-border-secondary-default: var(--app-brand-primary);
+  --app-button-color-border-secondary-default-hover: var(--app-brand-primary);
+  --app-button-color-text-secondary-default: var(--app-brand-primary);
+  --app-button-color-text-secondary-default-hover: var(--app-brand-primary);
+  --app-button-color-background-secondary-default: transparent;
+  --app-button-color-background-secondary-default-hover: var(--app-hover-bg);
+}
+
+[data-theme='dark'] .modal-shell,
+[data-theme='dark'] .modal-shell__footer {
+  --app-button-color-background-primary-default: var(--app-brand-primary);
+  --app-button-color-background-primary-default-hover: var(--app-brand-primary-strong);
+  --app-button-color-text-primary-default: var(--app-text-inverse);
+  --app-button-color-text-primary-default-hover: var(--app-text-inverse);
+  --app-button-color-background-secondary-default: transparent;
+  --app-button-color-background-secondary-default-hover: var(--app-hover-bg);
+  --app-button-color-border-secondary-default: var(--app-border-subtle);
+  --app-button-color-border-secondary-default-hover: var(--app-brand-primary);
+  --app-button-color-text-secondary-default: var(--app-text-inverse);
+  --app-button-color-text-secondary-default-hover: var(--app-text-inverse);
+}
+
+@media (max-width: 640px) {
+  .modal-shell-backdrop {
+    padding: 16px;
+  }
+
+  .modal-shell__header,
+  .modal-shell__body,
+  .modal-shell__footer {
+    padding: 20px;
+  }
+
+  .modal-shell__footer {
+    flex-direction: column-reverse;
+  }
+}

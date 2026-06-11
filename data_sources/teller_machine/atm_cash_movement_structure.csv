@@ -1,0 +1,13 @@
+﻿Column,Type,Description
+transaction_id,STRING,Unique ID for the transaction (e.g., ATM_20260418_001).
+atm_id,STRING,ID of the ATM (e.g., ATM_NL_AMS_001).
+timestamp,DATETIME,Transaction timestamp (e.g., 2026-04-18 14:30:45).
+transaction_type,STRING,"withdrawal" or "deposit".
+eur_5,INTEGER,Number of €5 notes (e.g., 0).
+eur_10,INTEGER,Number of €10 notes (e.g., 2).
+eur_20,INTEGER,Number of €20 notes (e.g., 5).
+eur_50,INTEGER,Number of €50 notes (e.g., 1).
+eur_100,INTEGER,Number of €100 notes (e.g., 0).
+eur_200,INTEGER,Number of €200 notes (e.g., 0).
+total_amount,DECIMAL,Total amount (e.g., 120.00).
+status,STRING,"success", "failed", or "partial" (e.g., ATM ran out of €20 notes).

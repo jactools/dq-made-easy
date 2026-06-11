@@ -1,0 +1,427 @@
+{
+  "group": "by-tag/agent",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries__delivery_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_path_delivery_id"
+        },
+        {
+          "in": "query",
+          "name": "lookback_amount",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_lookback_amount"
+        },
+        {
+          "in": "query",
+          "name": "lookback_unit",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_lookback_unit"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "rule_name",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_rule_name"
+        },
+        {
+          "in": "query",
+          "name": "data_object_name",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_data_object_name"
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "reason_code",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_reason_code"
+        },
+        {
+          "in": "query",
+          "name": "suite_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_suite_id"
+        },
+        {
+          "in": "query",
+          "name": "data_object_version_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_data_object_version_id"
+        },
+        {
+          "in": "query",
+          "name": "rule_version_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_anomalies_for_agent_api_agent_v1_anomalies_deliveries_delivery_id_get_param_query_rule_version_id"
+        }
+      ],
+      "path": "/api/agent/v1/anomalies/deliveries/{delivery_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DeliveryExceptionSummaryView"
+            }
+          },
+          "description": "Delivery-scoped anomaly summary for agent workflows."
+        },
+        "403": {
+          "description": "Insufficient scope or agent not allowed."
+        },
+        "404": {
+          "description": "Delivery not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Anomaly summary unavailable."
+        }
+      },
+      "summary": "Get Delivery Anomalies For Agent",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_agent_audit_events_api_agent_v1_audit_events_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_agent_audit_events_api_agent_v1_audit_events_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/list_agent_audit_events_api_agent_v1_audit_events_get_param_query_offset"
+        }
+      ],
+      "path": "/api/agent/v1/audit/events",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AgentAuditEventListView"
+            }
+          },
+          "description": "List registered agent request audit events."
+        },
+        "403": {
+          "description": "Insufficient scope."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Agent Audit Events",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_agent_decision_context_api_agent_v1_context_decisions__rule_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_path_rule_id"
+        },
+        {
+          "in": "query",
+          "name": "data_asset_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_query_data_asset_id"
+        },
+        {
+          "in": "query",
+          "name": "recent_event_limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_query_recent_event_limit"
+        },
+        {
+          "in": "query",
+          "name": "lineage_snapshot_limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_agent_decision_context_api_agent_v1_context_decisions_rule_id_get_param_query_lineage_snapshot_limit"
+        }
+      ],
+      "path": "/api/agent/v1/context/decisions/{rule_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AgentDecisionContextView"
+            }
+          },
+          "description": "Governance and observability context for an agent decision."
+        },
+        "403": {
+          "description": "Insufficient scope or agent not allowed."
+        },
+        "404": {
+          "description": "Rule not found or data asset not found."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "Invalid or unavailable policy/configuration or repository data."
+        }
+      },
+      "summary": "Get Agent Decision Context",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_agent_platform_integration_contracts_api_agent_v1_integrations_contracts_get",
+      "path": "/api/agent/v1/integrations/contracts",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AgentPlatformIntegrationContractsView"
+            }
+          },
+          "description": "List external agent platform integration contracts and current allowlist."
+        },
+        "403": {
+          "description": "Insufficient scope or agent not allowed."
+        },
+        "503": {
+          "description": "Invalid or unavailable platform allowlist configuration."
+        }
+      },
+      "summary": "List Agent Platform Integration Contracts",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "dispatch_agent_platform_integration_api_agent_v1_integrations_dispatches_post",
+      "path": "/api/agent/v1/integrations/dispatches",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/AgentPlatformDispatchRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AgentPlatformDispatchResponseView"
+            }
+          },
+          "description": "Queue an external agent platform dispatch through operator-owned webhook or job contract."
+        },
+        "403": {
+          "description": "Insufficient scope, agent not allowed, or platform not allowlisted."
+        },
+        "422": {
+          "description": "Unsupported platform or invalid dispatch contract payload."
+        },
+        "503": {
+          "description": "Invalid or unavailable platform allowlist configuration."
+        }
+      },
+      "summary": "Dispatch Agent Platform Integration",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_data_objects_for_agent_api_agent_v1_metadata_data_objects_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema_ref": "#/$defs/list_data_objects_for_agent_api_agent_v1_metadata_data_objects_get_param_query_search"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_data_objects_for_agent_api_agent_v1_metadata_data_objects_get_param_query_limit"
+        }
+      ],
+      "path": "/api/agent/v1/metadata/data-objects",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AgentMetadataLookupResponseView"
+            }
+          },
+          "description": "Metadata lookup endpoint for agent-friendly data object search."
+        },
+        "403": {
+          "description": "Insufficient scope or agent not allowed."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Data Objects For Agent",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "query_lineage_graph_for_agent_api_agent_v1_metadata_lineage_query_post",
+      "path": "/api/agent/v1/metadata/lineage/query",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/OntologyGraphQueryRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/OntologyGraphQueryResultView"
+            }
+          },
+          "description": "Lineage graph query endpoint for agent workflows."
+        },
+        "403": {
+          "description": "Insufficient scope or agent not allowed."
+        },
+        "404": {
+          "description": "No ontology graph snapshot exists for the requested scope."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Query Lineage Graph For Agent",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_agent_openapi_spec_api_agent_v1_openapi_get",
+      "path": "/api/agent/v1/openapi",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AgentOpenApiSpecView"
+            }
+          },
+          "description": "Published OpenAPI spec subset for agent endpoints."
+        },
+        "403": {
+          "description": "Insufficient scope or agent not allowed."
+        }
+      },
+      "summary": "Get Agent Openapi Spec",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "execute_rules_batch_for_agent_api_agent_v1_rules_execute_batch_post",
+      "path": "/api/agent/v1/rules/execute-batch",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/AgentRuleExecutionRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/BatchValidationResponseView"
+            }
+          },
+          "description": "Batch rule execution/validation response for agent workflows."
+        },
+        "403": {
+          "description": "Insufficient scope or agent not allowed."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Execute Rules Batch For Agent",
+      "tags": [
+        "agent"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

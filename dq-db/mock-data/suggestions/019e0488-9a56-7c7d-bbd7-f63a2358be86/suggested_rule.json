@@ -1,0 +1,7 @@
+{
+  "name": "Amount Range Check",
+  "description": "Validate transaction amount within expected range",
+  "expression": "amount > 0 AND amount < 1000000",
+  "ruleType": "RANGE_CHECK",
+  "dimension": "Accuracy"
+}

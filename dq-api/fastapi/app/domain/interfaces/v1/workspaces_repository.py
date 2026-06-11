@@ -1,0 +1,13 @@
+from typing import Protocol
+
+from app.domain.entities.workspaces import WorkspaceEntity
+
+
+class WorkspacesRepository(Protocol):
+    def list_workspaces(self) -> list[WorkspaceEntity]: ...
+
+    def create_workspace(self, payload: dict, max_workspaces: int) -> WorkspaceEntity: ...
+
+    def update_workspace(self, workspace_id: str, payload: dict) -> WorkspaceEntity | None: ...
+
+    def delete_workspace(self, workspace_id: str) -> bool: ...

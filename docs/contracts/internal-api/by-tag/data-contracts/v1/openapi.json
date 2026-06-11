@@ -1,0 +1,244 @@
+{
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/data-contracts' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/data-catalog/v1/data-contracts": {
+      "get": {
+        "operationId": "list_data_contracts_api_data_catalog_v1_data_contracts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Data Contracts Api Data Catalog V1 Data Contracts Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Data Contracts",
+        "tags": [
+          "data-contracts"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-contracts/{data_source_id}": {
+      "get": {
+        "operationId": "get_data_contract_api_data_catalog_v1_data_contracts__data_source_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_source_id",
+            "required": true,
+            "schema": {
+              "title": "Data Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "yaml",
+              "title": "Format",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Contract",
+        "tags": [
+          "data-contracts"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-contracts/{data_source_id}/analysis": {
+      "get": {
+        "operationId": "analyze_data_contract_api_data_catalog_v1_data_contracts__data_source_id__analysis_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_source_id",
+            "required": true,
+            "schema": {
+              "title": "Data Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baseline_data_source_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Baseline Data Source Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Analyze Data Contract Api Data Catalog V1 Data Contracts  Data Source Id  Analysis Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Analyze Data Contract",
+        "tags": [
+          "data-contracts"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-contracts/{data_source_id}/quality-rules": {
+      "get": {
+        "operationId": "get_quality_rules_api_data_catalog_v1_data_contracts__data_source_id__quality_rules_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_source_id",
+            "required": true,
+            "schema": {
+              "title": "Data Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Quality Rules Api Data Catalog V1 Data Contracts  Data Source Id  Quality Rules Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Quality Rules",
+        "tags": [
+          "data-contracts"
+        ]
+      }
+    }
+  }
+}

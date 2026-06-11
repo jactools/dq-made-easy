@@ -1,0 +1,82 @@
+{
+  "artifact_id": "psa_sales_order_quality",
+  "artifact_revision": 1,
+  "artifact_version": "v1",
+  "engine_type": "pyspark_native",
+  "engine_target": "pyspark",
+  "assignment_scope": {
+    "data_object_id": "do_sales_order",
+    "dataset_id": "ds_sales",
+    "data_product_id": "odcs.dp.sales-001"
+  },
+  "resolved_execution_scope": {
+    "data_object_version_ids": [
+      "dov_sales_order_v3"
+    ]
+  },
+  "compiled_from": {
+    "rule_ids": [
+      "rule_sales_order_not_null",
+      "rule_sales_order_amount_range"
+    ],
+    "compiler_version": "dq-compiler-7.3",
+    "generated_at": "2026-04-26T16:15:00Z"
+  },
+  "execution_hints": {
+    "primary_key_fields": [
+      "order_id"
+    ],
+    "business_key_fields": [
+      "sales_order_number"
+    ],
+    "supported_execution_shapes": [
+      "single_object"
+    ],
+    "required_inputs": [
+      "spark_dataframe",
+      "primary_key_projection"
+    ]
+  },
+  "traceability": {
+    "rule_id": "rule_sales_order_not_null",
+    "rule_version_id": "rv_sales_order_not_null_v4",
+    "artifact_id": "psa_sales_order_quality",
+    "artifact_revision": 1,
+    "data_object_version_id": "dov_sales_order_v3"
+  },
+  "pyspark_plan": {
+    "execution_shape": "single_object",
+    "input_mode": "spark_dataframe",
+    "row_filter": "is_deleted = false",
+    "checks": [
+      {
+        "check_id": "check_not_null_order_id",
+        "check_kind": "not_null",
+        "column_refs": [
+          "order_id"
+        ],
+        "assertion": {
+          "predicate_sql": "order_id IS NOT NULL"
+        },
+        "severity": "error"
+      },
+      {
+        "check_id": "check_amount_range",
+        "check_kind": "range",
+        "column_refs": [
+          "total_amount"
+        ],
+        "assertion": {
+          "predicate_sql": "total_amount >= 0 AND total_amount <= 1000000",
+          "min_value": 0,
+          "max_value": 1000000
+        },
+        "severity": "error"
+      }
+    ],
+    "failure_output": {
+      "emit_row_level_failures": true,
+      "failure_reason_template": "pyspark_native_check_failed"
+    }
+  }
+}

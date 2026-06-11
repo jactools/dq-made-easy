@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: dq-utils
+Version: 0.1.0
+Summary: Shared utilities for dq-made-easy Python services
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: jsonschema>=4.25.1
+Requires-Dist: requests>=2.32.0
+
+# dq-utils
+
+Shared Python utilities used across dq-made-easy services.
+
+Import package name: `dq_utils`.

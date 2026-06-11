@@ -1,0 +1,149 @@
+{
+  "group": "by-tag/registry-definitions",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_registry_definitions_api_data_catalog_v1_registry_definitions_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "query",
+          "required": false,
+          "schema_ref": "#/$defs/list_registry_definitions_api_data_catalog_v1_registry_definitions_get_param_query_query"
+        },
+        {
+          "in": "query",
+          "name": "definition_type",
+          "required": false,
+          "schema_ref": "#/$defs/list_registry_definitions_api_data_catalog_v1_registry_definitions_get_param_query_definition_type"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_registry_definitions_api_data_catalog_v1_registry_definitions_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/registry/definitions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_registry_definitions_api_data_catalog_v1_registry_definitions_get_response_200_application_json"
+            }
+          },
+          "description": "List or search governed registry definitions."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "List Registry Definitions",
+      "tags": [
+        "registry-definitions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_registry_definition_api_data_catalog_v1_registry_definitions__definition_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "definition_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_registry_definition_api_data_catalog_v1_registry_definitions_definition_id_get_param_path_definition_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/registry/definitions/{definition_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/RegistryDefinitionView"
+            }
+          },
+          "description": "Resolved governed registry definition."
+        },
+        "404": {
+          "description": "Registry definition not found."
+        },
+        "409": {
+          "description": "Registry definition identifier is ambiguous."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "Get Registry Definition",
+      "tags": [
+        "registry-definitions"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_reference_domains_api_data_catalog_v1_registry_reference_domains_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "query",
+          "required": false,
+          "schema_ref": "#/$defs/list_reference_domains_api_data_catalog_v1_registry_reference_domains_get_param_query_query"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_reference_domains_api_data_catalog_v1_registry_reference_domains_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/registry/reference-domains",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_reference_domains_api_data_catalog_v1_registry_reference_domains_get_response_200_application_json"
+            }
+          },
+          "description": "List governed reference domains and code lists."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "OpenMetadata is unavailable or misconfigured."
+        }
+      },
+      "summary": "List Reference Domains",
+      "tags": [
+        "registry-definitions"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

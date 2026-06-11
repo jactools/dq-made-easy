@@ -1,0 +1,5317 @@
+{
+  "components": {
+    "schemas": {
+      "AddRuleAttributesResultView": {
+        "properties": {
+          "added": {
+            "title": "Added",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "added"
+        ],
+        "title": "AddRuleAttributesResultView",
+        "type": "object"
+      },
+      "AttributeCatalogPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeCatalogView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "AttributeCatalogPageView",
+        "type": "object"
+      },
+      "AttributeCatalogView": {
+        "properties": {
+          "data_object_id": {
+            "default": "",
+            "title": "Data Object Id",
+            "type": "string"
+          },
+          "definition_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Id"
+          },
+          "definition_mapping_attribute_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Mapping Attribute Id"
+          },
+          "definition_mapping_created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Mapping Created At"
+          },
+          "definition_mapping_mapped_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Mapping Mapped By"
+          },
+          "definition_mapping_status": {
+            "default": "unmapped",
+            "title": "Definition Mapping Status",
+            "type": "string"
+          },
+          "definition_mapping_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Mapping Version Id"
+          },
+          "encryption_key_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Encryption Key Id"
+          },
+          "encryption_required": {
+            "default": false,
+            "title": "Encryption Required",
+            "type": "boolean"
+          },
+          "format": {
+            "default": "",
+            "title": "Format",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_business_key": {
+            "default": false,
+            "title": "Is Business Key",
+            "type": "boolean"
+          },
+          "is_cde": {
+            "default": false,
+            "title": "Is Cde",
+            "type": "boolean"
+          },
+          "is_primary_key": {
+            "default": false,
+            "title": "Is Primary Key",
+            "type": "boolean"
+          },
+          "masking_method": {
+            "default": "none",
+            "title": "Masking Method",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "protection_configured_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protection Configured By"
+          },
+          "protection_updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protection Updated At"
+          },
+          "source_kind": {
+            "default": "data_object",
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "source_name": {
+            "default": "",
+            "title": "Source Name",
+            "type": "string"
+          },
+          "source_version_label": {
+            "default": "",
+            "title": "Source Version Label",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "type": {
+            "default": "",
+            "title": "Type",
+            "type": "string"
+          },
+          "version_id": {
+            "default": "",
+            "title": "Version Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "default": "",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "AttributeCatalogView",
+        "type": "object"
+      },
+      "AttributeDefinitionMappingUpsertRequestView": {
+        "properties": {
+          "attribute_id": {
+            "title": "Attribute Id",
+            "type": "string"
+          },
+          "definition_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Id"
+          },
+          "mapped_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapped By"
+          },
+          "mapping_state": {
+            "default": "mapped",
+            "title": "Mapping State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attribute_id"
+        ],
+        "title": "AttributeDefinitionMappingUpsertRequestView",
+        "type": "object"
+      },
+      "AttributeDefinitionMappingUpsertResultView": {
+        "properties": {
+          "attribute_id": {
+            "title": "Attribute Id",
+            "type": "string"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "definition_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Id"
+          },
+          "definition_mapping_status": {
+            "default": "explicit",
+            "title": "Definition Mapping Status",
+            "type": "string"
+          },
+          "mapped_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapped By"
+          },
+          "mapping_state": {
+            "default": "mapped",
+            "title": "Mapping State",
+            "type": "string"
+          },
+          "updated_at": {
+            "default": "",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version_id": {
+            "default": "",
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attribute_id"
+        ],
+        "title": "AttributeDefinitionMappingUpsertResultView",
+        "type": "object"
+      },
+      "AttributeDefinitionMappingView": {
+        "properties": {
+          "attribute_id": {
+            "title": "Attribute Id",
+            "type": "string"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "definition_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mapped_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapped By"
+          },
+          "mapping_state": {
+            "default": "mapped",
+            "title": "Mapping State",
+            "type": "string"
+          },
+          "updated_at": {
+            "default": "",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "attribute_id"
+        ],
+        "title": "AttributeDefinitionMappingView",
+        "type": "object"
+      },
+      "ContractImportRequestView": {
+        "properties": {
+          "contract_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Format"
+          },
+          "contract_text": {
+            "title": "Contract Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract_text"
+        ],
+        "title": "ContractImportRequestView",
+        "type": "object"
+      },
+      "CreateCatalogMaterializationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "data_object_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Id"
+          },
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "data_set_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Set Id"
+          },
+          "output_format": {
+            "default": "parquet",
+            "enum": [
+              "parquet",
+              "delta"
+            ],
+            "title": "Output Format",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "testing.output_format"
+          },
+          "output_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Uri"
+          },
+          "refresh": {
+            "default": false,
+            "title": "Refresh",
+            "type": "boolean"
+          },
+          "sample_count": {
+            "default": 1000,
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "selected_attribute_names": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Selected Attribute Names",
+            "type": "array"
+          }
+        },
+        "title": "CreateCatalogMaterializationRequest",
+        "type": "object"
+      },
+      "DataDefinitionTaskApprovalUpdateRequestView": {
+        "properties": {
+          "auto_import": {
+            "default": false,
+            "title": "Auto Import",
+            "type": "boolean"
+          },
+          "board_approval": {
+            "$ref": "#/components/schemas/DataDefinitionTaskBoardApprovalView"
+          }
+        },
+        "required": [
+          "board_approval"
+        ],
+        "title": "DataDefinitionTaskApprovalUpdateRequestView",
+        "type": "object"
+      },
+      "DataDefinitionTaskAuditEventView": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Id"
+          },
+          "changed_at": {
+            "title": "Changed At",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          }
+        },
+        "required": [
+          "id",
+          "request_id",
+          "action",
+          "changed_at"
+        ],
+        "title": "DataDefinitionTaskAuditEventView",
+        "type": "object"
+      },
+      "DataDefinitionTaskAuditHistoryResponseView": {
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/DataDefinitionTaskAuditEventView"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request_id"
+        ],
+        "title": "DataDefinitionTaskAuditHistoryResponseView",
+        "type": "object"
+      },
+      "DataDefinitionTaskBoardApprovalView": {
+        "properties": {
+          "approval_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Notes"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "approver_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approver Name"
+          },
+          "board_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Board Name"
+          },
+          "status": {
+            "default": "pending",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "DataDefinitionTaskBoardApprovalView",
+        "type": "object"
+      },
+      "DataDefinitionTaskContextDocumentView": {
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "document_type": {
+            "minLength": 1,
+            "title": "Document Type",
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "source_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Uri"
+          }
+        },
+        "required": [
+          "document_type",
+          "name",
+          "content"
+        ],
+        "title": "DataDefinitionTaskContextDocumentView",
+        "type": "object"
+      },
+      "DataDefinitionTaskCreateRequestView": {
+        "properties": {
+          "auto_import": {
+            "default": false,
+            "title": "Auto Import",
+            "type": "boolean"
+          },
+          "board_approval": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataDefinitionTaskBoardApprovalView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "board_name": {
+            "default": "Data Definition Board",
+            "title": "Board Name",
+            "type": "string"
+          },
+          "context_documents": {
+            "items": {
+              "$ref": "#/components/schemas/DataDefinitionTaskContextDocumentView"
+            },
+            "title": "Context Documents",
+            "type": "array"
+          },
+          "current_workspace_id": {
+            "minLength": 1,
+            "title": "Current Workspace Id",
+            "type": "string"
+          },
+          "domain_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain Name"
+          },
+          "feedback_items": {
+            "items": {
+              "$ref": "#/components/schemas/DataDefinitionTaskFeedbackItemView"
+            },
+            "title": "Feedback Items",
+            "type": "array"
+          },
+          "glossary_display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glossary Display Name"
+          },
+          "glossary_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glossary Name"
+          },
+          "policies": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Policies",
+            "type": "array"
+          },
+          "selected_attribute_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Selected Attribute Ids",
+            "type": "array"
+          },
+          "source_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source System"
+          },
+          "steward_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steward Name"
+          },
+          "user_input": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Input"
+          },
+          "version_id": {
+            "minLength": 1,
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_workspace_id",
+          "version_id",
+          "selected_attribute_ids"
+        ],
+        "title": "DataDefinitionTaskCreateRequestView",
+        "type": "object"
+      },
+      "DataDefinitionTaskCreateResponseView": {
+        "properties": {
+          "events_url": {
+            "title": "Events Url",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "queued": {
+            "default": true,
+            "title": "Queued",
+            "type": "boolean"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request_id",
+          "events_url",
+          "message"
+        ],
+        "title": "DataDefinitionTaskCreateResponseView",
+        "type": "object"
+      },
+      "DataDefinitionTaskFeedbackItemView": {
+        "properties": {
+          "author_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Name"
+          },
+          "comment": {
+            "minLength": 1,
+            "title": "Comment",
+            "type": "string"
+          },
+          "disposition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disposition"
+          },
+          "feedback_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Id"
+          },
+          "source_role": {
+            "minLength": 1,
+            "title": "Source Role",
+            "type": "string"
+          },
+          "target_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source_role",
+          "comment"
+        ],
+        "title": "DataDefinitionTaskFeedbackItemView",
+        "type": "object"
+      },
+      "DataDefinitionTaskHistoryResponseView": {
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/DataDefinitionTaskStatusView"
+            },
+            "title": "Requests",
+            "type": "array"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "title": "DataDefinitionTaskHistoryResponseView",
+        "type": "object"
+      },
+      "DataDefinitionTaskImportResponseView": {
+        "properties": {
+          "import_report": {
+            "additionalProperties": true,
+            "title": "Import Report",
+            "type": "object"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request_id",
+          "message",
+          "import_report"
+        ],
+        "title": "DataDefinitionTaskImportResponseView",
+        "type": "object"
+      },
+      "DataDefinitionTaskStatusResponseView": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/DataDefinitionTaskStatusView"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "title": "DataDefinitionTaskStatusResponseView",
+        "type": "object"
+      },
+      "DataDefinitionTaskStatusView": {
+        "properties": {
+          "analysis_provider": {
+            "title": "Analysis Provider",
+            "type": "string"
+          },
+          "analysis_type": {
+            "title": "Analysis Type",
+            "type": "string"
+          },
+          "auto_import": {
+            "default": false,
+            "title": "Auto Import",
+            "type": "boolean"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "current_workspace_id": {
+            "title": "Current Workspace Id",
+            "type": "string"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "requested_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested At"
+          },
+          "requested_by_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By Email"
+          },
+          "requested_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By User Id"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "selected_attribute_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Selected Attribute Ids",
+            "type": "array"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "task_payload": {
+            "additionalProperties": true,
+            "title": "Task Payload",
+            "type": "object"
+          },
+          "version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          }
+        },
+        "required": [
+          "request_id",
+          "current_workspace_id",
+          "prompt",
+          "status",
+          "analysis_type",
+          "analysis_provider"
+        ],
+        "title": "DataDefinitionTaskStatusView",
+        "type": "object"
+      },
+      "DataDeliveriesPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DataDeliveryView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "DataDeliveriesPageView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionReceiptView": {
+        "properties": {
+          "data_delivery_id": {
+            "title": "Data Delivery Id",
+            "type": "string"
+          },
+          "delivery_note": {
+            "$ref": "#/components/schemas/DataDeliveryNoteView"
+          },
+          "execution_dispatch": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Dispatch"
+          },
+          "execution_mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "single_suite",
+                  "grouped_scope"
+                ],
+                "type": "string",
+                "x-dq-domain-allowed-values-set": "data_delivery.execution_mode"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Mode"
+          },
+          "execution_request_status": {
+            "default": "accepted",
+            "enum": [
+              "accepted"
+            ],
+            "title": "Execution Request Status",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "data_delivery.execution_request_status"
+          },
+          "execution_resolution": {
+            "$ref": "#/components/schemas/DataDeliveryExecutionResolutionView"
+          },
+          "execution_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Run Id"
+          },
+          "execution_selector": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataDeliveryExecutionSelectorView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolved_data_object_version_id": {
+            "title": "Resolved Data Object Version Id",
+            "type": "string"
+          },
+          "resolved_delivery_location": {
+            "title": "Resolved Delivery Location",
+            "type": "string"
+          },
+          "resolved_engine_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Engine Type"
+          },
+          "resolved_gx_suite_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Gx Suite Id"
+          },
+          "resolved_gx_suite_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Gx Suite Version"
+          },
+          "resolved_run_plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Run Plan Id"
+          },
+          "resolved_run_plan_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Run Plan Version Id"
+          }
+        },
+        "required": [
+          "data_delivery_id",
+          "resolved_data_object_version_id",
+          "resolved_delivery_location",
+          "delivery_note",
+          "execution_resolution"
+        ],
+        "title": "DataDeliveryExecutionReceiptView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionReferenceView": {
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correlation_id": {
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "engine_target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine Target"
+          },
+          "execution_run_id": {
+            "title": "Execution Run Id",
+            "type": "string"
+          },
+          "execution_shape": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Shape"
+          },
+          "execution_status": {
+            "title": "Execution Status",
+            "type": "string"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "submitted_at": {
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Version"
+          }
+        },
+        "required": [
+          "execution_run_id",
+          "execution_status",
+          "correlation_id",
+          "submitted_at"
+        ],
+        "title": "DataDeliveryExecutionReferenceView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionRequestView": {
+        "properties": {
+          "execution_selector": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataDeliveryExecutionSelectorView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "DataDeliveryExecutionRequestView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionResolutionView": {
+        "properties": {
+          "applicable_gx_suites": {
+            "items": {
+              "$ref": "#/components/schemas/DataDeliveryExecutionSuiteCandidateView"
+            },
+            "title": "Applicable Gx Suites",
+            "type": "array"
+          },
+          "applicable_run_plans": {
+            "items": {
+              "$ref": "#/components/schemas/DataDeliveryExecutionRunPlanCandidateView"
+            },
+            "title": "Applicable Run Plans",
+            "type": "array"
+          },
+          "grouped_execution_plan": {
+            "additionalProperties": true,
+            "title": "Grouped Execution Plan",
+            "type": "object"
+          }
+        },
+        "title": "DataDeliveryExecutionResolutionView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionRunPlanCandidateView": {
+        "properties": {
+          "active_version": {
+            "$ref": "#/components/schemas/DataDeliveryExecutionRunPlanVersionCandidateView"
+          },
+          "current_active_version_id": {
+            "title": "Current Active Version Id",
+            "type": "string"
+          },
+          "planning_mode": {
+            "enum": [
+              "single_suite",
+              "grouped_scope"
+            ],
+            "title": "Planning Mode",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "gx.run_plan_planning_mode"
+          },
+          "run_plan_id": {
+            "title": "Run Plan Id",
+            "type": "string"
+          },
+          "scope_selector": {
+            "additionalProperties": true,
+            "title": "Scope Selector",
+            "type": "object"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_plan_id",
+          "workspace_id",
+          "planning_mode",
+          "status",
+          "scope_selector",
+          "current_active_version_id",
+          "active_version"
+        ],
+        "title": "DataDeliveryExecutionRunPlanCandidateView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionRunPlanVersionCandidateView": {
+        "properties": {
+          "engine_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine Type"
+          },
+          "governance_state": {
+            "title": "Governance State",
+            "type": "string"
+          },
+          "run_plan_version_id": {
+            "title": "Run Plan Version Id",
+            "type": "string"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Version"
+          }
+        },
+        "required": [
+          "run_plan_version_id",
+          "governance_state"
+        ],
+        "title": "DataDeliveryExecutionRunPlanVersionCandidateView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionSelectorView": {
+        "properties": {
+          "gx_suite_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gx Suite Id"
+          },
+          "run_plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Plan Id"
+          },
+          "run_plan_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Plan Version Id"
+          },
+          "selector_type": {
+            "enum": [
+              "gx_suite",
+              "run_plan"
+            ],
+            "title": "Selector Type",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "data_delivery.execution_selector_type"
+          },
+          "suite_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Version"
+          }
+        },
+        "required": [
+          "selector_type"
+        ],
+        "title": "DataDeliveryExecutionSelectorView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionSuiteCandidateView": {
+        "properties": {
+          "assignment_scope": {
+            "additionalProperties": true,
+            "title": "Assignment Scope",
+            "type": "object"
+          },
+          "engine_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine Type"
+          },
+          "execution_hints": {
+            "additionalProperties": true,
+            "title": "Execution Hints",
+            "type": "object"
+          },
+          "resolved_execution_scope": {
+            "additionalProperties": true,
+            "title": "Resolved Execution Scope",
+            "type": "object"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "suite_id": {
+            "title": "Suite Id",
+            "type": "string"
+          },
+          "suite_version": {
+            "title": "Suite Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "suite_id",
+          "suite_version",
+          "status",
+          "assignment_scope",
+          "resolved_execution_scope",
+          "execution_hints"
+        ],
+        "title": "DataDeliveryExecutionSuiteCandidateView",
+        "type": "object"
+      },
+      "DataDeliveryExecutionSummaryView": {
+        "properties": {
+          "latest_execution_completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Completed At"
+          },
+          "latest_execution_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Run Id"
+          },
+          "latest_execution_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Status"
+          },
+          "latest_execution_submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Execution Submitted At"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          },
+          "total_execution_runs": {
+            "default": 0,
+            "title": "Total Execution Runs",
+            "type": "integer"
+          }
+        },
+        "title": "DataDeliveryExecutionSummaryView",
+        "type": "object"
+      },
+      "DataDeliveryInventoryPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DataDeliveryInventoryView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "DataDeliveryInventoryPageView",
+        "type": "object"
+      },
+      "DataDeliveryInventoryView": {
+        "properties": {
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "delivered_at": {
+            "default": "",
+            "title": "Delivered At",
+            "type": "string"
+          },
+          "delivery_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Location"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "layer": {
+            "default": "standardized",
+            "title": "Layer",
+            "type": "string"
+          },
+          "storage_exists": {
+            "default": false,
+            "title": "Storage Exists",
+            "type": "boolean"
+          },
+          "storage_object_count": {
+            "default": 0,
+            "title": "Storage Object Count",
+            "type": "integer"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataDeliveryInventoryView",
+        "type": "object"
+      },
+      "DataDeliveryNoteView": {
+        "properties": {
+          "attributes_count": {
+            "default": 0,
+            "title": "Attributes Count",
+            "type": "integer"
+          },
+          "checksum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checksum"
+          },
+          "checksum_algorithm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checksum Algorithm"
+          },
+          "data_delivery_id": {
+            "default": "",
+            "title": "Data Delivery Id",
+            "type": "string"
+          },
+          "data_object_id": {
+            "default": "",
+            "title": "Data Object Id",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "delivered_at": {
+            "default": "",
+            "title": "Delivered At",
+            "type": "string"
+          },
+          "delivery_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Format"
+          },
+          "delivery_format_warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Format Warning"
+          },
+          "delivery_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Location"
+          },
+          "delivery_status": {
+            "default": "",
+            "title": "Delivery Status",
+            "type": "string"
+          },
+          "evidence_classification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Classification"
+          },
+          "execution_references": {
+            "items": {
+              "$ref": "#/components/schemas/DataDeliveryExecutionReferenceView"
+            },
+            "title": "Execution References",
+            "type": "array"
+          },
+          "execution_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataDeliveryExecutionSummaryView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Count"
+          },
+          "file_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Names"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ingestor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingestor Name"
+          },
+          "ingestor_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingestor Run Id"
+          },
+          "layer": {
+            "default": "standardized",
+            "title": "Layer",
+            "type": "string"
+          },
+          "metadata_json": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata Json"
+          },
+          "object_storage_classification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Storage Classification"
+          },
+          "record_count": {
+            "default": 0,
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "size_bytes": {
+            "default": 0,
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "source_snapshot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Snapshot Id"
+          },
+          "source_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source System"
+          },
+          "storage_exists": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Exists"
+          },
+          "storage_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Location"
+          },
+          "storage_object_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Object Count"
+          },
+          "timestamp": {
+            "default": "",
+            "title": "Timestamp",
+            "type": "string"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataDeliveryNoteView",
+        "type": "object"
+      },
+      "DataDeliveryView": {
+        "properties": {
+          "attributes_count": {
+            "default": 0,
+            "title": "Attributes Count",
+            "type": "integer"
+          },
+          "data_object_id": {
+            "default": "",
+            "title": "Data Object Id",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "delivered_at": {
+            "default": "",
+            "title": "Delivered At",
+            "type": "string"
+          },
+          "delivery_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Location"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "layer": {
+            "default": "standardized",
+            "title": "Layer",
+            "type": "string"
+          },
+          "record_count": {
+            "default": 0,
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "size_bytes": {
+            "default": 0,
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "timestamp": {
+            "default": "",
+            "title": "Timestamp",
+            "type": "string"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataDeliveryView",
+        "type": "object"
+      },
+      "DataObjectCatalogPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DataObjectCatalogView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "DataObjectCatalogPageView",
+        "type": "object"
+      },
+      "DataObjectCatalogView": {
+        "properties": {
+          "business_key": {
+            "default": "",
+            "title": "Business Key",
+            "type": "string"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset_id": {
+            "default": "",
+            "title": "Dataset Id",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "icon": {
+            "default": "",
+            "title": "Icon",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "latest_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Version Id"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataObjectCatalogView",
+        "type": "object"
+      },
+      "DataObjectVersionView": {
+        "properties": {
+          "attribute_count": {
+            "default": 0,
+            "title": "Attribute Count",
+            "type": "integer"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_object_id": {
+            "default": "",
+            "title": "Data Object Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "schema_hash": {
+            "default": "",
+            "title": "Schema Hash",
+            "type": "string"
+          },
+          "storage_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Format"
+          },
+          "storage_options_json": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Options Json"
+          },
+          "storage_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Uri"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataObjectVersionView",
+        "type": "object"
+      },
+      "DataObjectVersionsPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DataObjectVersionView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "DataObjectVersionsPageView",
+        "type": "object"
+      },
+      "DataObjectView": {
+        "properties": {
+          "business_key": {
+            "default": "",
+            "title": "Business Key",
+            "type": "string"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "default": "active",
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataObjectView",
+        "type": "object"
+      },
+      "DataProductView": {
+        "properties": {
+          "business_key": {
+            "default": "",
+            "title": "Business Key",
+            "type": "string"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "icon": {
+            "default": "",
+            "title": "Icon",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "odcs_data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Odcs Data Product Id"
+          },
+          "owner": {
+            "default": "",
+            "title": "Owner",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "workspace_id": {
+            "default": "",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataProductView",
+        "type": "object"
+      },
+      "DataProductsPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "DataProductsPageView",
+        "type": "object"
+      },
+      "DataSetView": {
+        "properties": {
+          "business_key": {
+            "default": "",
+            "title": "Business Key",
+            "type": "string"
+          },
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_contract_download_url": {
+            "default": "",
+            "title": "Data Contract Download Url",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "owner": {
+            "default": "",
+            "title": "Owner",
+            "type": "string"
+          },
+          "product_id": {
+            "default": "",
+            "title": "Product Id",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "workspace_id": {
+            "default": "",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataSetView",
+        "type": "object"
+      },
+      "DataSetsPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DataSetView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ],
+        "title": "DataSetsPageView",
+        "type": "object"
+      },
+      "GxExecutionProgressView": {
+        "properties": {
+          "completed_steps": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed Steps"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "integer"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "total_steps": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Steps"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "percent"
+        ],
+        "title": "GxExecutionProgressView",
+        "type": "object"
+      },
+      "GxExecutionRunStatusHistoryView": {
+        "properties": {
+          "changed_at": {
+            "title": "Changed At",
+            "type": "string"
+          },
+          "changed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed By"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "pending",
+                  "running",
+                  "succeeded",
+                  "failed",
+                  "cancelled"
+                ],
+                "type": "string",
+                "x-dq-domain-allowed-values-set": "gx.execution_status"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "to_status": {
+            "enum": [
+              "pending",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ],
+            "title": "To Status",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "gx.execution_status"
+          }
+        },
+        "required": [
+          "id",
+          "run_id",
+          "to_status",
+          "changed_at"
+        ],
+        "title": "GxExecutionRunStatusHistoryView",
+        "type": "object"
+      },
+      "GxExecutionRunView": {
+        "properties": {
+          "comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correlation_id": {
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "diagnostics": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Diagnostics",
+            "type": "array"
+          },
+          "engine_target": {
+            "enum": [
+              "pyspark"
+            ],
+            "title": "Engine Target",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "gx.engine_target"
+          },
+          "execution_contract": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Contract"
+          },
+          "execution_progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GxExecutionProgressView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "execution_shape": {
+            "enum": [
+              "single_object",
+              "join_pair",
+              "streaming",
+              "micro_batch",
+              "grouped_scope"
+            ],
+            "title": "Execution Shape",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "gx.execution_shape"
+          },
+          "failure_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Code"
+          },
+          "failure_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Message"
+          },
+          "handoff_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handoff Payload"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "performance_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performance Summary"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "resolved_data_delivery_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved Data Delivery Id"
+          },
+          "result_summary": {
+            "additionalProperties": true,
+            "title": "Result Summary",
+            "type": "object"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          },
+          "run_plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Plan Id"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "running",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "gx.execution_status"
+          },
+          "status_history": {
+            "items": {
+              "$ref": "#/components/schemas/GxExecutionRunStatusHistoryView"
+            },
+            "title": "Status History",
+            "type": "array"
+          },
+          "submitted_at": {
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Version"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "correlation_id",
+          "engine_target",
+          "execution_shape",
+          "status",
+          "submitted_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "GxExecutionRunView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "MaterializationCompletionBatchView": {
+        "additionalProperties": false,
+        "properties": {
+          "data_deliveries": {
+            "items": {
+              "$ref": "#/components/schemas/MaterializationDeliveryView"
+            },
+            "title": "Data Deliveries",
+            "type": "array"
+          },
+          "data_delivery_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Delivery Id"
+          },
+          "delivery_note": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataDeliveryNoteView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "delivery_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Summary"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "data_deliveries"
+        ],
+        "title": "MaterializationCompletionBatchView",
+        "type": "object"
+      },
+      "MaterializationDeliveryView": {
+        "additionalProperties": false,
+        "properties": {
+          "data_delivery_id": {
+            "title": "Data Delivery Id",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "delivery_note": {
+            "$ref": "#/components/schemas/DataDeliveryNoteView"
+          },
+          "output_format": {
+            "title": "Output Format",
+            "type": "string"
+          },
+          "output_uri": {
+            "title": "Output Uri",
+            "type": "string"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data_object_version_id",
+          "row_count",
+          "output_uri",
+          "output_format",
+          "data_delivery_id",
+          "delivery_note"
+        ],
+        "title": "MaterializationDeliveryView",
+        "type": "object"
+      },
+      "MaterializationTargetResultRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "output_format": {
+            "enum": [
+              "parquet",
+              "delta"
+            ],
+            "title": "Output Format",
+            "type": "string",
+            "x-dq-domain-allowed-values-set": "testing.output_format"
+          },
+          "output_uri": {
+            "title": "Output Uri",
+            "type": "string"
+          },
+          "row_count": {
+            "minimum": 0.0,
+            "title": "Row Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data_object_version_id",
+          "row_count",
+          "output_uri",
+          "output_format"
+        ],
+        "title": "MaterializationTargetResultRequest",
+        "type": "object"
+      },
+      "PaginationView": {
+        "properties": {
+          "has_next": {
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "has_previous": {
+            "title": "Has Previous",
+            "type": "boolean"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "title": "Total Pages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "total_pages",
+          "has_next",
+          "has_previous"
+        ],
+        "title": "PaginationView",
+        "type": "object"
+      },
+      "ReportCatalogMaterializationCompletionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "output_format": {
+            "anyOf": [
+              {
+                "enum": [
+                  "parquet",
+                  "delta"
+                ],
+                "type": "string",
+                "x-dq-domain-allowed-values-set": "testing.output_format"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Format"
+          },
+          "output_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Uri"
+          },
+          "row_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Row Count"
+          },
+          "target_results": {
+            "items": {
+              "$ref": "#/components/schemas/MaterializationTargetResultRequest"
+            },
+            "title": "Target Results",
+            "type": "array"
+          }
+        },
+        "title": "ReportCatalogMaterializationCompletionRequest",
+        "type": "object"
+      },
+      "RuleAttributeView": {
+        "properties": {
+          "attribute_id": {
+            "default": "",
+            "title": "Attribute Id",
+            "type": "string"
+          },
+          "rule_id": {
+            "default": "",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "threshold_override": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Override"
+          }
+        },
+        "title": "RuleAttributeView",
+        "type": "object"
+      },
+      "RuleAttributesUpsertRequest": {
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "title": "RuleAttributesUpsertRequest",
+        "type": "object"
+      },
+      "TestDataMaterializationRequestView": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correlation_id": {
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "data_object_version_id": {
+            "title": "Data Object Version Id",
+            "type": "string"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "events_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events Url"
+          },
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "output_format": {
+            "title": "Output Format",
+            "type": "string"
+          },
+          "output_uri": {
+            "title": "Output Uri",
+            "type": "string"
+          },
+          "processing_queue_key": {
+            "title": "Processing Queue Key",
+            "type": "string"
+          },
+          "queue_key": {
+            "title": "Queue Key",
+            "type": "string"
+          },
+          "request_contract": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Contract"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "requested_at": {
+            "title": "Requested At",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "sample_count": {
+            "title": "Sample Count",
+            "type": "integer"
+          },
+          "selection": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target_data_object_version_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Data Object Version Ids"
+          }
+        },
+        "required": [
+          "request_id",
+          "job_id",
+          "status",
+          "data_object_version_id",
+          "sample_count",
+          "output_format",
+          "output_uri",
+          "requested_at",
+          "correlation_id",
+          "queue_key",
+          "processing_queue_key"
+        ],
+        "title": "TestDataMaterializationRequestView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/data-catalog' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/data-catalog/v1/attribute-definition-mappings": {
+      "get": {
+        "operationId": "get_attribute_definition_mappings_api_data_catalog_v1_attribute_definition_mappings_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "versionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Versionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "attributeId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attributeid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeDefinitionMappingView"
+                  },
+                  "title": "Response Get Attribute Definition Mappings Api Data Catalog V1 Attribute Definition Mappings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Attribute Definition Mappings",
+        "tags": [
+          "data-catalog"
+        ]
+      },
+      "post": {
+        "operationId": "post_attribute_definition_mapping_api_data_catalog_v1_attribute_definition_mappings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeDefinitionMappingUpsertRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeDefinitionMappingUpsertResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Attribute Definition Mapping",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/attribute-rule-counts": {
+      "get": {
+        "operationId": "get_attribute_rule_counts_api_data_catalog_v1_attribute_rule_counts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Get Attribute Rule Counts Api Data Catalog V1 Attribute Rule Counts Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Attribute Rule Counts",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/attributes-catalog": {
+      "get": {
+        "operationId": "get_attributes_catalog_api_data_catalog_v1_attributes_catalog_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "versionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Versionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "businessKeyOnly",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Businesskeyonly"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeCatalogPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Attributes Catalog",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/attributes-catalog/{attribute_id}/protection": {
+      "get": {
+        "operationId": "get_attribute_protection_api_data_catalog_v1_attributes_catalog__attribute_id__protection_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attribute_id",
+            "required": true,
+            "schema": {
+              "title": "Attribute Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeCatalogView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Attribute Protection",
+        "tags": [
+          "data-catalog"
+        ]
+      },
+      "put": {
+        "operationId": "put_attribute_protection_api_data_catalog_v1_attributes_catalog__attribute_id__protection_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attribute_id",
+            "required": true,
+            "schema": {
+              "title": "Attribute Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Payload",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeCatalogView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Attribute Protection",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-definition-tasks": {
+      "post": {
+        "operationId": "create_data_definition_task_api_data_catalog_v1_data_definition_tasks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataDefinitionTaskCreateRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDefinitionTaskCreateResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Data Definition Task",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-definition-tasks/requests": {
+      "get": {
+        "operationId": "list_data_definition_tasks_api_data_catalog_v1_data_definition_tasks_requests_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspace_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspace Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDefinitionTaskHistoryResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Data Definition Tasks",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/approval": {
+      "post": {
+        "operationId": "update_data_definition_task_approval_api_data_catalog_v1_data_definition_tasks_requests__request_id__approval_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataDefinitionTaskApprovalUpdateRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDefinitionTaskStatusResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Data Definition Task Approval",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/events": {
+      "get": {
+        "operationId": "stream_data_definition_task_events_api_data_catalog_v1_data_definition_tasks_requests__request_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stream Data Definition Task Events",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/history": {
+      "get": {
+        "operationId": "list_data_definition_task_history_api_data_catalog_v1_data_definition_tasks_requests__request_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDefinitionTaskAuditHistoryResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Data Definition Task History",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/openmetadata-sync": {
+      "post": {
+        "operationId": "import_data_definition_task_to_openmetadata_api_data_catalog_v1_data_definition_tasks_requests__request_id__openmetadata_sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDefinitionTaskImportResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Data Definition Task To Openmetadata",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/status": {
+      "get": {
+        "operationId": "get_data_definition_task_status_api_data_catalog_v1_data_definition_tasks_requests__request_id__status_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDefinitionTaskStatusResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Definition Task Status",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-deliveries": {
+      "get": {
+        "operationId": "get_data_deliveries_api_data_catalog_v1_data_deliveries_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Versionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "workspace",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspace"
+            }
+          },
+          {
+            "in": "query",
+            "name": "businessKey",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Businesskey"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDeliveriesPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Deliveries",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-deliveries/{data_delivery_id}/executions": {
+      "post": {
+        "operationId": "post_data_delivery_execution_request_api_data_catalog_v1_data_deliveries__data_delivery_id__executions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Data Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DataDeliveryExecutionRequestView"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDeliveryExecutionReceiptView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Data Delivery Execution Request",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-deliveries/{data_delivery_id}/executions/{execution_id}": {
+      "get": {
+        "operationId": "get_data_delivery_execution_status_api_data_catalog_v1_data_deliveries__data_delivery_id__executions__execution_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Data Delivery Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "title": "Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GxExecutionRunView"
+                }
+              }
+            },
+            "description": "Delivery-linked GX execution run metadata and lifecycle state."
+          },
+          "404": {
+            "description": "Delivery or execution run not found."
+          },
+          "409": {
+            "description": "Execution run does not belong to the requested delivery."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Delivery Execution Status",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-deliveries/{delivery_id}/note": {
+      "get": {
+        "operationId": "get_data_delivery_note_api_data_catalog_v1_data_deliveries__delivery_id__note_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_storage_details",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Storage Details",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDeliveryNoteView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Delivery Note",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-object-versions": {
+      "get": {
+        "operationId": "get_data_object_versions_api_data_catalog_v1_data_object_versions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "objectId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Objectid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataObjectVersionsPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Object Versions",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-object-versions/{version_id}": {
+      "get": {
+        "operationId": "get_data_object_version_api_data_catalog_v1_data_object_versions__version_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataObjectVersionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Object Version",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-objects": {
+      "get": {
+        "operationId": "get_data_objects_api_data_catalog_v1_data_objects_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "businessKey",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Businesskey"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DataObjectView"
+                  },
+                  "title": "Response Get Data Objects Api Data Catalog V1 Data Objects Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Objects",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-objects-catalog": {
+      "get": {
+        "operationId": "get_data_objects_catalog_api_data_catalog_v1_data_objects_catalog_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dataSetId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Datasetid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "businessKey",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Businesskey"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataObjectCatalogPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Objects Catalog",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-products": {
+      "get": {
+        "operationId": "get_data_products_api_data_catalog_v1_data_products_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspace",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspace"
+            }
+          },
+          {
+            "in": "query",
+            "name": "businessKey",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Businesskey"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataProductsPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Products",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-sets": {
+      "get": {
+        "operationId": "get_data_sets_api_data_catalog_v1_data_sets_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "productId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Productid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "workspace",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspace"
+            }
+          },
+          {
+            "in": "query",
+            "name": "standalone",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Standalone"
+            }
+          },
+          {
+            "in": "query",
+            "name": "businessKey",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Businesskey"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSetsPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Data Sets",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-sets/{data_set_id}/contract": {
+      "get": {
+        "operationId": "download_data_set_contract_api_data_catalog_v1_data_sets__data_set_id__contract_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_set_id",
+            "required": true,
+            "schema": {
+              "title": "Data Set Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "yaml",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Data Set Contract",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/data-sets/{data_set_id}/contract/import": {
+      "post": {
+        "operationId": "import_data_set_contract_api_data_catalog_v1_data_sets__data_set_id__contract_import_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "data_set_id",
+            "required": true,
+            "schema": {
+              "title": "Data Set Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractImportRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSetView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Data Set Contract",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/delivery-inventory": {
+      "get": {
+        "operationId": "get_delivery_inventory_api_data_catalog_v1_delivery_inventory_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dataObjectVersionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataobjectversionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versionId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Versionid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "workspace",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspace"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDeliveryInventoryPageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Delivery Inventory",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/materialization-requests": {
+      "post": {
+        "operationId": "create_materialization_request_api_data_catalog_v1_materialization_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCatalogMaterializationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDataMaterializationRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Materialization Request",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/materialization-requests/{request_id}": {
+      "get": {
+        "operationId": "get_materialization_request_api_data_catalog_v1_materialization_requests__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestDataMaterializationRequestView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Materialization Request",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/materialization-requests/{request_id}/complete": {
+      "post": {
+        "operationId": "report_materialization_request_completion_api_data_catalog_v1_materialization_requests__request_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCatalogMaterializationCompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterializationCompletionBatchView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Materialization Request Completion",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/rule-attributes": {
+      "get": {
+        "operationId": "get_rule_attributes_api_data_catalog_v1_rule_attributes_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RuleAttributeView"
+                  },
+                  "title": "Response Get Rule Attributes Api Data Catalog V1 Rule Attributes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Rule Attributes",
+        "tags": [
+          "data-catalog"
+        ]
+      },
+      "post": {
+        "operationId": "post_rule_attributes_api_data_catalog_v1_rule_attributes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleAttributesUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddRuleAttributesResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Rule Attributes",
+        "tags": [
+          "data-catalog"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,2 @@
+[console_scripts]
+dq-run-plan = dq_cli.run_plan:main

@@ -1,0 +1,6 @@
+"id","validation_artifact_id","validation_artifact_version","from_status","to_status","changed_by","changed_at","reason"
+"019e0488-9a56-761d-8045-162770f7ede1","019e0488-9a54-74a7-8a42-123dac4c8bff","1","","active","data-steward-user","2026-04-12T09:00:00Z",""
+"019e0488-9a56-7219-bf13-599955f0adc8","019e0488-9a54-7c46-bff4-e0b4abb2bb83","1","","active","data-steward-user","2026-04-12T09:05:00Z",""
+"019e0488-9a56-7ba0-b378-62d656630d7f","019e0488-9a54-768e-aa7c-e1115ffb25a1","1","","active","data-steward-user","2026-04-12T09:10:00Z",""
+"019e0488-9a56-7d3a-8c8b-7bc0cf737488","019e0488-9a54-7a73-ae12-7355a3782d69","1","","active","data-steward-user","2026-04-12T09:15:00Z",""
+"019e0488-9a56-7caa-b001-000000000014","gx_customer_filtered_row_count_condition","1","","active","data-steward-user","2026-05-19T09:10:00Z",""

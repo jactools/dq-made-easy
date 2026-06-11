@@ -1,0 +1,214 @@
+.reconciliation-workbench {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reconciliation-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid var(--app-border-subtle);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--app-brand-primary) 8%, var(--app-surface-primary)), color-mix(in srgb, var(--app-brand-primary) 1%, var(--app-surface-primary))),
+    var(--app-surface-primary);
+}
+
+.reconciliation-hero-copy {
+  max-width: 760px;
+}
+
+.reconciliation-kicker,
+.reconciliation-panel-kicker {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.reconciliation-hero h2,
+.reconciliation-panel h3 {
+  margin: 0;
+  color: var(--app-text-primary);
+}
+
+.reconciliation-description,
+.reconciliation-panel-note {
+  margin: 8px 0 0;
+  color: var(--app-text-secondary);
+  line-height: 1.5;
+}
+
+.reconciliation-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reconciliation-error {
+  padding: 12px 14px;
+  border-left: 4px solid var(--app-status-error-text);
+  border-radius: 12px;
+  background: var(--app-status-error-bg);
+  color: var(--app-status-error-text);
+  font-weight: 600;
+}
+
+.reconciliation-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reconciliation-summary-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--app-border-subtle);
+  background: var(--app-surface-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reconciliation-summary-card span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.reconciliation-summary-card strong {
+  font-size: 28px;
+  line-height: 1;
+  color: var(--app-text-primary);
+}
+
+.reconciliation-layout,
+.reconciliation-results,
+.reconciliation-source-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.reconciliation-layout,
+.reconciliation-results {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.reconciliation-panel {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--app-border-subtle);
+  background: var(--app-surface-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reconciliation-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.reconciliation-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reconciliation-field span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.reconciliation-textarea {
+  min-height: 260px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--app-border-subtle);
+  background: var(--app-surface-secondary);
+  color: var(--app-text-primary);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.reconciliation-textarea:focus {
+  outline: none;
+  border-color: var(--app-brand-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-brand-primary) 12%, transparent);
+}
+
+.reconciliation-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reconciliation-history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--app-border-subtle);
+  background: var(--app-surface-secondary);
+}
+
+.reconciliation-history-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reconciliation-history-item span {
+  color: var(--app-text-secondary);
+  font-size: 13px;
+}
+
+.reconciliation-empty-state {
+  margin: 0;
+  color: var(--app-text-secondary);
+}
+
+@media (max-width: 1180px) {
+  .reconciliation-layout,
+  .reconciliation-results,
+  .reconciliation-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .reconciliation-hero {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 780px) {
+  .reconciliation-layout,
+  .reconciliation-results,
+  .reconciliation-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reconciliation-history-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

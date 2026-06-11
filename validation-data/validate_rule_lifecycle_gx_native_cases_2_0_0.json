@@ -1,0 +1,774 @@
+[
+  {
+    "case_id": "threshold_customer_email_not_null",
+    "dimension": "completeness",
+    "version_id": "dov-3",
+    "data_object_id": "do-1",
+    "primary_key_fields": [
+      "customer_id"
+    ],
+    "assign_attribute_names": [
+      "email"
+    ],
+    "materialize_attribute_names": [
+      "customer_id",
+      "email"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-1"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "email IS NOT NULL"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "threshold_contact_phone_not_blank",
+    "dimension": "completeness",
+    "version_id": "dov-23",
+    "data_object_id": "do-2",
+    "primary_key_fields": [
+      "contact_id"
+    ],
+    "assign_attribute_names": [
+      "phone_number"
+    ],
+    "materialize_attribute_names": [
+      "contact_id",
+      "phone_number"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-2"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "phone_number IS NOT NULL AND TRIM(phone_number) != ''"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "regex_customer_email_format",
+    "dimension": "validity",
+    "version_id": "dov-3",
+    "data_object_id": "do-1",
+    "primary_key_fields": [
+      "customer_id"
+    ],
+    "assign_attribute_names": [
+      "email"
+    ],
+    "materialize_attribute_names": [
+      "customer_id",
+      "email"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-1"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "REGEXP_MATCHES(email, '^[^@]+@[^@]+\\.[^@]+$')"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "present_contact_phone_number_not_blank",
+    "dimension": "completeness",
+    "version_id": "dov-23",
+    "data_object_id": "do-2",
+    "primary_key_fields": [
+      "contact_id"
+    ],
+    "assign_attribute_names": [
+      "phone_number"
+    ],
+    "materialize_attribute_names": [
+      "contact_id",
+      "phone_number"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-2"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "phone_number IS NOT NULL AND TRIM(phone_number) != ''"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "uniqueness_customer_email_compound_key",
+    "dimension": "uniqueness",
+    "version_id": "dov-3",
+    "data_object_id": "do-1",
+    "primary_key_fields": [
+      "customer_id"
+    ],
+    "assign_attribute_names": [
+      "customer_id",
+      "email"
+    ],
+    "materialize_attribute_names": [
+      "customer_id",
+      "email"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "metric_threshold",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-1"
+          }
+        },
+        "measure": {
+          "type": "metric",
+          "metric": "duplicate_count",
+          "subject": {
+            "columns": [
+              "customer_id",
+              "email"
+            ]
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "lte",
+          "value": 0,
+          "unit": "count"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "future_date_customer_created_at_not_in_future",
+    "dimension": "timeliness",
+    "version_id": "dov-3",
+    "data_object_id": "do-1",
+    "primary_key_fields": [
+      "customer_id"
+    ],
+    "assign_attribute_names": [
+      "created_at"
+    ],
+    "materialize_attribute_names": [
+      "customer_id",
+      "created_at"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-1"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "created_at <= NOW()"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "lag_campaign_end_date_within_24h_of_start_date",
+    "dimension": "timeliness",
+    "version_id": "dov-30",
+    "data_object_id": "do-15",
+    "primary_key_fields": [
+      "campaign_id"
+    ],
+    "assign_attribute_names": [
+      "start_date",
+      "end_date"
+    ],
+    "materialize_attribute_names": [
+      "campaign_id",
+      "start_date",
+      "end_date"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-15"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "TIMESTAMPDIFF(HOUR, start_date, end_date) <= 24"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "range_order_total_amount_band",
+    "dimension": "validity",
+    "version_id": "dov-7",
+    "data_object_id": "do-3",
+    "primary_key_fields": [
+      "order_id"
+    ],
+    "assign_attribute_names": [
+      "total_amount"
+    ],
+    "materialize_attribute_names": [
+      "order_id",
+      "total_amount"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-3"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "total_amount >= 0 AND total_amount <= 100000"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "range_inventory_quantity_non_negative",
+    "dimension": "validity",
+    "version_id": "dov-24",
+    "data_object_id": "do-6",
+    "primary_key_fields": [
+      "inventory_id"
+    ],
+    "assign_attribute_names": [
+      "quantity_on_hand"
+    ],
+    "materialize_attribute_names": [
+      "inventory_id",
+      "quantity_on_hand"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-6"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "quantity_on_hand >= 0"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "allowlist_order_status_operational_values",
+    "dimension": "validity",
+    "version_id": "dov-7",
+    "data_object_id": "do-3",
+    "primary_key_fields": [
+      "order_id"
+    ],
+    "assign_attribute_names": [
+      "status"
+    ],
+    "materialize_attribute_names": [
+      "order_id",
+      "status"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-3"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "LOWER(status) IN ('pending', 'completed', 'cancelled')"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "allowlist_contact_type_approved_channels",
+    "dimension": "validity",
+    "version_id": "dov-23",
+    "data_object_id": "do-2",
+    "primary_key_fields": [
+      "contact_id"
+    ],
+    "assign_attribute_names": [
+      "contact_type"
+    ],
+    "materialize_attribute_names": [
+      "contact_id",
+      "contact_type"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-2"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "LOWER(contact_type) IN ('email', 'phone', 'sms')"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "blocklist_contact_preferred_contact_legacy_values",
+    "dimension": "validity",
+    "version_id": "dov-23",
+    "data_object_id": "do-2",
+    "primary_key_fields": [
+      "contact_id"
+    ],
+    "assign_attribute_names": [
+      "preferred_contact"
+    ],
+    "materialize_attribute_names": [
+      "contact_id",
+      "preferred_contact"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-2"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "LOWER(preferred_contact) NOT IN ('legacy', 'unknown')"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "blocklist_transaction_payment_method_deprecated",
+    "dimension": "validity",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "payment_method"
+    ],
+    "materialize_attribute_names": [
+      "transaction_id",
+      "payment_method"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "row_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-4"
+          }
+        },
+        "measure": {
+          "type": "row_predicate",
+          "predicate": {
+            "kind": "row_predicate",
+            "language": "dq_predicate",
+            "expression": "LOWER(payment_method) NOT IN ('deprecated', 'manual')"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,18 @@
+[run]
+branch = True
+data_file = ../.coverage
+source =
+    app
+omit =
+    app/infrastructure/orm/*
+
+[report]
+fail_under = 25
+omit =
+    app/infrastructure/orm/*
+
+[xml]
+output = ../test-results/coverage.xml
+
+[json]
+output = ../test-results/coverage.json

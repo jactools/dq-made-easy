@@ -1,0 +1,56 @@
+{
+  "template_id": "DQ7-SEED-002-TPL-010",
+  "rule_kind": "custom_query_assertion",
+  "status": "drafted",
+  "gx_class": "partial",
+  "notes": "Explicit SQL query template for canonical custom-query rewrites.",
+  "payload": {
+    "name": "Customer activity SQL check",
+    "description": "SQL-based business logic remains explicit in the canonical seed.",
+    "dimension": "consistency",
+    "active": true,
+    "workspace": "default",
+    "generated": false,
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "custom_query_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-customer",
+            "data_object_version_id": "dov-customer-v5"
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "select count(*) from customers where status = 'ACTIVE'"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 1,
+          "unit": "count"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 100,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": true
+        },
+        "operations": {
+          "severity": "info",
+          "preferred_engines": [
+            "sql",
+            "gx"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  }
+}

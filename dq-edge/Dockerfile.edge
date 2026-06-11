@@ -1,0 +1,7 @@
+FROM nginx:stable-bookworm
+
+COPY docker-entrypoint.d/40-render-edge-config.sh /opt/edge/render-edge-config.sh
+
+RUN chmod +x /opt/edge/render-edge-config.sh
+
+EXPOSE 443

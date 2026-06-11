@@ -1,0 +1,3 @@
+customer_id_prefix,email,created_at,repeat_count
+cust-invalid,invalid-email-format@example,2026-04-18 08:00:00,205
+cust-valid,valid.customer@example.com,2026-04-18 09:00:00,5

@@ -1,0 +1,15 @@
+
+> dq-ui@0.11.3 test
+> NODE_ENV=test vitest run src/components/TemplateLibrary.test.tsx
+
+
+ RUN  v2.1.9 /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-ui
+
+ ✓ src/components/TemplateLibrary.test.tsx (3 tests) 850ms
+   ✓ TemplateLibrary > renders the shared shell and closes from the page header 557ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  23:27:26
+   Duration  2.45s (transform 417ms, setup 30ms, collect 793ms, tests 850ms, environment 435ms, prepare 46ms)
+

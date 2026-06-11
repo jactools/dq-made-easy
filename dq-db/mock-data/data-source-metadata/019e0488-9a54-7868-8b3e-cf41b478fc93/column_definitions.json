@@ -1,0 +1,12 @@
+[
+  {
+    "name": "customer_id",
+    "type": "TEXT",
+    "nullable": false
+  },
+  {
+    "name": "email",
+    "type": "TEXT",
+    "nullable": true
+  }
+]

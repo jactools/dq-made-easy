@@ -1,0 +1,188 @@
+apiVersion: v3.1.0
+kind: DataContract
+id: urn:dq:contract:demo-azure-payments-sql
+name: payments_transaction_ledger
+version: 1.2.0
+status: active
+owner:
+  name: Finance Data Team
+contact:
+  name: Finance Data Steward
+  email: finance-data@example.com
+domain: finance
+tags:
+  - payments
+  - financial
+  - pci-scope
+description:
+  purpose: |
+    Daily payment transactions from Azure SQL production ledger.
+    Critical financial data supporting downstream reporting, reconciliation, and analytics.
+  limitations: |
+    - No cross-border transfer without legal approval
+    - Retention: 7 years minimum per regulatory requirements
+    - Rate limit: 1000 queries/hour per application
+  usage: |
+    Data classified as Confidential.
+    Access requires Finance role approval.
+    PCI compliance required for processing.
+
+servers:
+  production:
+    type: azure-sql
+    server: payments-prod.database.windows.net
+    database: transactions
+    schema: dbo
+    table: payments_ledger
+
+schema:
+  - name: payments_ledger
+    logicalType: object
+    physicalType: table
+    description: Core payment transaction records
+    properties:
+      - name: transaction_id
+        logicalType: string
+        description: Unique transaction identifier
+        required: true
+        unique: true
+        classification: public
+        physicalType: UUID
+        primaryKey: true
+        primaryKeyPosition: 1
+        logicalTypeOptions:
+          maxLength: 36
+      - name: customer_id
+        logicalType: string
+        description: Reference to customer master record
+        required: true
+        unique: false
+        classification: confidential
+        physicalType: UUID
+        logicalTypeOptions:
+          maxLength: 36
+      - name: amount_eur
+        logicalType: number
+        description: Transaction amount in EUR
+        required: true
+        unique: false
+        classification: confidential
+        physicalType: DECIMAL
+        logicalTypeOptions:
+          precision: 12
+          scale: 2
+          minimum: 0.0
+      - name: currency
+        logicalType: string
+        description: ISO 4217 currency code
+        required: true
+        unique: false
+        classification: public
+        physicalType: STRING
+        logicalTypeOptions:
+          maxLength: 3
+      - name: booking_date
+        logicalType: date
+        description: Date transaction was booked
+        required: true
+        unique: false
+        classification: public
+        physicalType: DATE
+        logicalTypeOptions:
+          format: "%Y-%m-%d"
+
+slaProperties:
+  - property: freshness
+    value: "24"
+    unit: hour
+
+quality:
+  type: SodaCL
+  specification: |
+    checks for payments_ledger:
+      # Completeness
+      - missing_count(transaction_id) = 0:
+          name: Transaction ID completeness
+          severity: critical
+      - missing_count(customer_id) = 0:
+          name: Customer ID completeness
+          severity: critical
+      - missing_count(amount_eur) = 0:
+          name: Amount completeness
+          severity: critical
+
+      # Uniqueness
+      - duplicate_count(transaction_id) = 0:
+          name: Transaction ID uniqueness
+          severity: critical
+
+      # Validity
+      - invalid_count(currency) = 0:
+          valid regex: '^(EUR|USD|GBP|CHF)$'
+          name: Currency format validation
+          severity: high
+
+      # Accuracy
+      - failed rows:
+          fail condition: amount_eur < 0
+          name: Non-negative amount check
+          severity: critical
+
+      # Timeliness
+      - freshness(booking_date) < 1d:
+          name: Daily load timeliness
+          severity: high
+
+      # Referential Integrity
+      - values in (customer_id) must exist in customers (customer_id):
+          name: Valid customer reference
+          severity: high
+
+  slos:
+    completeness:
+      target: 99.95%
+      description: Critical fields must be populated
+    validity:
+      target: 99.9%
+      description: Data must conform to business rules
+    freshness:
+      target: 24h
+      description: Daily batch must complete within SLA
+    accuracy:
+      target: 99.99%
+      description: Financial calculations must be precise
+
+examples:
+  - type: json
+    description: Valid transaction record
+    model: payments_ledger
+    data: |
+      {
+        "transaction_id": "550e8400-e29b-41d4-a716-446655440000",
+        "customer_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+        "amount_eur": 1250.50,
+        "currency": "EUR",
+        "booking_date": "2026-03-01"
+      }
+
+servicelevels:
+  availability:
+    description: Azure SQL HA guarantee
+    percentage: 99.9
+  retention:
+    period: 7 years
+    archival: azure-archive-storage
+  support:
+    time: 24/7
+    responseTime: 1h
+
+stakeholders:
+  - role: Data Owner
+    name: CFO
+    contact: cfo@example.com
+  - role: Data Steward
+    name: Finance Data Team
+    contact: finance-data@example.com
+  - role: Consumers
+    name: BI Team, Reconciliation Service, Fraud Detection
+    contact: data-consumers@example.com

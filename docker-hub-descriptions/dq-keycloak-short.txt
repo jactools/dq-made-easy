@@ -1,0 +1,1 @@
+Keycloak 26 image with the Data Quality Made Easy realm import bundled in

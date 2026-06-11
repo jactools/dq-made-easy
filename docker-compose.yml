@@ -1,0 +1,1859 @@
+x-zammad-service: &zammad-service
+  profiles: ["support"]
+  image: ${ZAMMAD_IMAGE}
+  restart: unless-stopped
+  environment:
+    MEMCACHE_SERVERS: ${ZAMMAD_MEMCACHE_SERVERS}
+    POSTGRESQL_DB: ${ZAMMAD_POSTGRES_DB}
+    POSTGRESQL_HOST: ${ZAMMAD_POSTGRES_HOST}
+    POSTGRESQL_USER: ${ZAMMAD_POSTGRES_USER}
+    POSTGRESQL_PASS: ${ZAMMAD_POSTGRES_PASSWORD}
+    POSTGRESQL_PORT: ${ZAMMAD_POSTGRES_PORT}
+    POSTGRESQL_OPTIONS: ${ZAMMAD_POSTGRESQL_OPTIONS}
+    REDIS_URL: ${ZAMMAD_REDIS_URL}
+    ELASTICSEARCH_ENABLED: ${ZAMMAD_ELASTICSEARCH_ENABLED}
+    ELASTICSEARCH_HOST: ${ZAMMAD_ELASTICSEARCH_HOST}
+    ELASTICSEARCH_PORT: ${ZAMMAD_ELASTICSEARCH_PORT}
+    ELASTICSEARCH_SCHEMA: ${ZAMMAD_ELASTICSEARCH_SCHEMA}
+    ELASTICSEARCH_NAMESPACE: ${ZAMMAD_ELASTICSEARCH_NAMESPACE}
+    ELASTICSEARCH_SSL_VERIFY: ${ZAMMAD_ELASTICSEARCH_SSL_VERIFY}
+    AUTOWIZARD_JSON: ${AUTOWIZARD_JSON:-}
+    AUTOWIZARD_RELATIVE_PATH: ${AUTOWIZARD_RELATIVE_PATH:-tmp/auto_wizard.json}
+    NGINX_PORT: ${ZAMMAD_NGINX_PORT}
+    NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
+    NGINX_SERVER_SCHEME: ${ZAMMAD_NGINX_SERVER_SCHEME}
+    RAILS_TRUSTED_PROXIES: ${ZAMMAD_RAILS_TRUSTED_PROXIES}
+    ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE}
+    ZAMMAD_FQDN: ${ZAMMAD_FQDN}
+    ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
+    ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
+    KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL?KEYCLOAK_SERVER_SIDE_URL is required}
+    SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
+    CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
+    TZ: ${TZ}
+  volumes:
+    - zammad_backup:/var/tmp/zammad:ro
+    - zammad_storage:/opt/zammad/storage
+    - ${EDGE_SSL_CERTS_DIR}/mkcert-rootCA.pem:/etc/zammad/certs/mkcert-rootCA.pem:ro
+    - ./docker/zammad/initializers/99-openid-connect-server-side-url.rb:/opt/zammad/config/initializers/99-openid-connect-server-side-url.rb:ro
+  networks:
+    - default
+    - dq-network
+
+services:
+  base:
+    profiles: ["base"]
+    # Pre-built base image with all dependencies
+    image: ${DQ_BASE_REGISTRY}${DQ_BASE_NAMESPACE}${DQ_BASE_IMAGE}:${DQ_BASE_TAG}
+    build:
+      context: ./dq-base
+      dockerfile: Dockerfile.base
+      args:
+        NODE_REGISTRY: ${DQ_BASE_REGISTRY}
+        NODE_NAMESPACE: ${DQ_BASE_NAMESPACE}
+        NODE_IMAGE: "${DQ_BASE_IMAGE}"
+        NODE_TAG: ${DQ_BASE_TAG}
+
+  db:
+    profiles: ["core","gateway","engine","profiling","observability"]
+    image: ${DQ_DB_REGISTRY:-}${DQ_DB_NAMESPACE:-}${DQ_DB_IMAGE:-dq-db}:${DQ_DB_TAG:-latest}
+    build:
+      context: ./dq-db
+      dockerfile: Dockerfile.db
+    command: postgres -c shared_preload_libraries=pg_stat_statements
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dq
+      TZ: UTC
+    ports:
+      - "${DB_HOST_BIND}:${DB_HOST_PORT}:5432"
+    volumes:
+      - pgdata_v18:/var/lib/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dq -h localhost || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  db-seed:
+    profiles: ["seed"]
+    environment:
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
+      DATABASE_SCHEMA: dq
+      REQUIRE_DATABASE: "true"
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: dq
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL?KEYCLOAK_PUBLIC_URL is required}
+      SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+    build:
+      context: .
+      dockerfile: dq-db/Dockerfile.dq-db.seed
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
+      secrets:
+        - internal_mkcert_root_ca
+        - internal_root_ca
+        - internal_ca_bundle
+    env_file: ${ROOT_ENV_FILE:-.env}
+    entrypoint: ["/bin/bash", "/workspace/dq-db/scripts/run_db_seed_container.sh"]
+
+    volumes:
+      - ./dq-utils:/workspace/dq-utils:ro
+      - ./dq-api/fastapi:/workspace/dq-api/fastapi
+      - ./scripts:/workspace/scripts:ro
+      - ./dq-api/scripts/generate_sql_seeds.py:/workspace/dq-api/scripts/generate_sql_seeds.py:ro
+      - ./dq-api/scripts/quote_mock_data.py:/workspace/dq-api/scripts/quote_mock_data.py:ro
+      - ./dq-db/mock-data:/workspace/dq-db/mock-data:ro
+      - ./dq-db/scripts:/workspace/dq-db/scripts:ro
+      - ./VERSION_MANIFEST.json:/workspace/VERSION_MANIFEST.json:ro
+      - ./docs/contracts/internal-api:/workspace/dq-api/fastapi/docs/contracts/internal-api:ro
+      - ./data_sources/contracts:/workspace/dq-api/fastapi/data_sources/contracts:ro
+    restart: "no"
+
+  dq-db-postgres-exporter:
+    profiles: ["observability"]
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+    container_name: dq-db-postgres-exporter
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: postgresql://postgres:postgres@db:5432/dq?sslmode=disable
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+    volumes:
+      - ./observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+    restart: unless-stopped
+    networks:
+      - default
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  redis:
+    profiles: ["redis","core","gateway","observability","support"]
+    image: ${REDIS_REGISTRY}${REDIS_NAMESPACE}${REDIS_IMAGE}:${REDIS_TAG}
+    ports:
+      - "${REDIS_HOST_BIND}:${REDIS_HOST_PORT}:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  redis-exporter:
+    profiles: ["observability"]
+    image: oliver006/redis_exporter:v1.67.0
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - default
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  spark-master:
+    profiles: ["spark"]
+    image: bitnami/spark:3.5.1
+    environment:
+      SPARK_MODE: master
+      SPARK_MASTER_PORT: 7077
+      SPARK_MASTER_WEBUI_PORT: 8080
+    ports:
+      - "7077:7077"
+      - "8085:8080"
+    restart: unless-stopped
+    networks:
+      - default
+      - dq-network
+
+  spark-worker-1:
+    profiles: ["spark"]
+    image: bitnami/spark:3.5.1
+    depends_on:
+      spark-master:
+        condition: service_started
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+    restart: unless-stopped
+    networks:
+      - default
+      - dq-network
+
+  spark-worker-2:
+    profiles: ["spark"]
+    image: bitnami/spark:3.5.1
+    depends_on:
+      spark-master:
+        condition: service_started
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+    restart: unless-stopped
+    networks:
+      - default
+      - dq-network
+
+  # Zammad support stack (optional)
+  zammad-postgresql:
+    profiles: ["support"]
+    image: postgres:${ZAMMAD_POSTGRES_VERSION}
+    environment:
+      POSTGRES_DB: ${ZAMMAD_POSTGRES_DB}
+      POSTGRES_USER: ${ZAMMAD_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ZAMMAD_POSTGRES_PASSWORD}
+    volumes:
+      - zammad_postgresql_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    labels:
+      - "monitoring=true"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ZAMMAD_POSTGRES_USER} -d ${ZAMMAD_POSTGRES_DB} -h localhost || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - default
+      - dq-network
+
+  zammad-redis:
+    profiles: ["zammad-legacy"]
+    image: redis:${ZAMMAD_REDIS_VERSION}
+    command: redis-server --appendonly yes
+    volumes:
+      - zammad_redis_data:/data
+    restart: unless-stopped
+    labels:
+      - "monitoring=true"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - default
+      - dq-network
+
+  zammad-memcached:
+    profiles: ["support"]
+    image: memcached:${ZAMMAD_MEMCACHE_VERSION}
+    command: memcached -m 256M
+    restart: unless-stopped
+    labels:
+      - "monitoring=true"
+    networks:
+      - default
+      - dq-network
+
+  zammad-init:
+    <<: *zammad-service
+    command: ["zammad-init"]
+    depends_on:
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    restart: on-failure
+    user: 0:0
+    labels:
+      - "monitoring=true"
+
+  zammad-railsserver:
+    <<: *zammad-service
+    command: ["zammad-railsserver"]
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    labels:
+      - "monitoring=true"
+
+  zammad-scheduler:
+    <<: *zammad-service
+    command: ["zammad-scheduler"]
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    labels:
+      - "monitoring=true"
+
+  zammad-websocket:
+    <<: *zammad-service
+    command: ["zammad-websocket"]
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    labels:
+      - "monitoring=true"
+
+  zammad-nginx:
+    <<: *zammad-service
+    command: ["zammad-nginx"]
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-railsserver:
+        condition: service_started
+      zammad-scheduler:
+        condition: service_started
+      zammad-websocket:
+        condition: service_started
+    labels:
+      - "monitoring=true"
+
+  zammad-https:
+    profiles: ["zammad-direct-https"]
+    image: nginx:stable-bookworm
+    restart: unless-stopped
+    depends_on:
+      zammad-nginx:
+        condition: service_started
+    environment:
+      ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
+      EDGE_SSL_CERT_FILE_NAME: ${EDGE_SSL_CERT_FILE_NAME}
+      EDGE_SSL_KEY_FILE_NAME: ${EDGE_SSL_KEY_FILE_NAME}
+    volumes:
+      - ${EDGE_SSL_CERTS_DIR}:/etc/nginx/certs:ro
+      - ./docker/zammad/nginx-https.conf.template:/etc/nginx/templates/default.conf.template:ro
+    ports:
+      - "${ZAMMAD_HOST_BIND}:${ZAMMAD_EXPOSE_PORT}:443"
+    networks:
+      - default
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  zammad-seed:
+    profiles: ["support"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.zammad.seed
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+      secrets:
+        - internal_corporate_root_ca
+    depends_on:
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+      zammad-railsserver:
+        condition: service_started
+    env_file:
+      - ${ROOT_ENV_FILE:-.env}
+    environment:
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
+      APP_CONFIG_ENCRYPTION_KEY: ${APP_CONFIG_ENCRYPTION_KEY?APP_CONFIG_ENCRYPTION_KEY is required}
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM?KEYCLOAK_ADMIN_REALM is required}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER?KEYCLOAK_ADMIN_USER is required}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS?KEYCLOAK_ADMIN_PASS is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
+      KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL?KEYCLOAK_SERVER_SIDE_URL is required}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
+      ZAMMAD_SUPPORT_TOKEN_NAME: ${ZAMMAD_SUPPORT_TOKEN_NAME:-dq-made-easy support integration}
+      ZAMMAD_SUPPORT_TOKEN_PERMISSION: ${ZAMMAD_SUPPORT_TOKEN_PERMISSION:-ticket.agent}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: "no"
+
+  keycloak-seed-artifacts:
+    profiles: ["auth", "gateway"]
+    build:
+      context: .
+      dockerfile: dq-keycloak/Dockerfile.keycloak.seed
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT?ENVIRONMENT is required}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
+      KEYCLOAK_REALM_DISPLAY_NAME: ${KEYCLOAK_REALM_DISPLAY_NAME}
+      KEYCLOAK_JACCLOUD_USERNAME: ${KEYCLOAK_JACCLOUD_USERNAME?KEYCLOAK_JACCLOUD_USERNAME is required}
+      SMOKE_LOGIN_EMAIL: ${SMOKE_LOGIN_EMAIL?SMOKE_LOGIN_EMAIL is required}
+      OPERATOR_LOGIN_EMAIL: ${OPERATOR_LOGIN_EMAIL:-operator@jaccloud.nl}
+      AUDITOR_LOGIN_EMAIL: ${AUDITOR_LOGIN_EMAIL:-auditor@jaccloud.nl}
+      REGULATOR_LOGIN_EMAIL: ${REGULATOR_LOGIN_EMAIL:-regulator@jaccloud.nl}
+      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:-${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}}
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      EDGE_LOCAL_SUPPORT_HOST: ${EDGE_LOCAL_SUPPORT_HOST?EDGE_LOCAL_SUPPORT_HOST is required}
+      UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
+      UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
+      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
+      OPENMETADATA_CALLBACK: ${OPENMETADATA_CALLBACK:-https://openmetadata.jac.dot:8585/callback}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-http://observability.jac.dot:3000}
+      GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    volumes:
+      - keycloak_seed_artifacts:/seed-data
+      - ./tmp:/workspace-tmp
+    restart: "no"
+
+  keycloak:
+    profiles: ["auth", "gateway"]
+    image: ${DQ_KEYCLOAK_REGISTRY:-}${DQ_KEYCLOAK_NAMESPACE:-}${DQ_KEYCLOAK_IMAGE:-dq-keycloak}:${DQ_KEYCLOAK_TAG:-latest}
+    build:
+      context: ./dq-keycloak
+      dockerfile: Dockerfile.keycloak
+    depends_on:
+      keycloak-seed-artifacts:
+        condition: service_completed_successfully
+    environment:
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}
+      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL?OIDC_REDIRECT_BASE_URL is required}
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-http://observability.jac.dot:3000}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_REALM_ROLE: ${DQ_ENGINE_OIDC_REALM_ROLE:-dq:rules:write}
+      UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
+      UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
+      # Explicit admin user variables recognized by the Keycloak container
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_HTTP_RELATIVE_PATH: ${KEYCLOAK_HTTP_RELATIVE_PATH}
+      KEYCLOAK_HTTPS_CERT_FILE: /opt/keycloak/certs/keycloak.jac.dot+3.pem
+      KEYCLOAK_HTTPS_KEY_FILE: /opt/keycloak/certs/keycloak.jac.dot+3-key.pem
+      KEYCLOAK_HTTPS_KEYSTORE_FILE: /opt/keycloak/keystore/keycloak.p12
+      KEYCLOAK_HTTPS_KEYSTORE_PASSWORD: ${KEYCLOAK_HTTPS_KEYSTORE_PASSWORD:-changeit}
+    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTP_RELATIVE_PATH}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME}", "--hostname-strict=false"]
+    ports:
+      - "${KEYCLOAK_HTTP_HOST_BIND}:${KEYCLOAK_HTTP_HOST_PORT}:8080"
+      - "${KEYCLOAK_HTTPS_HOST_BIND}:${KEYCLOAK_HTTPS_HOST_PORT}:8443"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - keycloak_seed_artifacts:/opt/keycloak/realm-import:ro
+      - ./tmp/certs/keycloak.jac.dot+3.pem:/opt/keycloak/certs/keycloak.jac.dot+3.pem:ro
+      - ./tmp/certs/keycloak.jac.dot+3-key.pem:/opt/keycloak/certs/keycloak.jac.dot+3-key.pem:ro
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/keycloak/bin/kc.sh --version >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  dq-engine:
+    profiles: ["engine"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: dq-engine/Dockerfile.engine
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
+        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:-false}
+        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
+        INTERNAL_ROOT_CA: ${INTERNAL_ROOT_CA:-}
+      secrets:
+        - internal_corporate_root_ca
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8003:8000"
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      TZ: UTC
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-engine
+      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_CONSOLE_EXPORT: "1"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: "1.0"
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-engine
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/docs')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  delivery-seed:
+    profiles: ["seed"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: dq-engine/Dockerfile.engine
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
+        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:-true}
+        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
+        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
+    env_file:
+      - ${ROOT_ENV_FILE:-.env}
+    working_dir: /app
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+    entrypoint: ["python", "scripts/seed_delivery_objects.py"]
+    environment:
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: delivery-seed
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
+      DQ_DELIVERY_OUTPUT_BUCKET: ${DQ_DELIVERY_OUTPUT_BUCKET:-}
+      TZ: UTC
+    networks:
+      - default
+      - dq-network
+    restart: "no"
+
+  dq-engine-warmup:
+    profiles: ["engine"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: dq-engine/Dockerfile.engine
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
+        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
+        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
+      secrets:
+        - internal_corporate_root_ca
+    env_file:
+      - ${ROOT_ENV_FILE:-.env}
+    command: ["python", "scripts/warmup_spark_jars.py", "--ivy-dir", "/home/appuser/.ivy2", "--jar-dir", "/home/appuser/.dq-spark-jars"]
+    environment:
+      MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+    networks:
+      - default
+      - dq-network
+    restart: "no"
+
+  dq-engine-gx-worker:
+    profiles: ["workers"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    depends_on:
+      kong:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["python", "-u", "gx_dispatch_worker.py"]
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+    environment:
+      TZ: UTC
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-engine-gx-worker
+      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-otel-collector:4317}
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: "1.0"
+      GX_EXECUTION_REDIS_URL: redis://redis:6379/0
+      GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY}
+      # Spark + S3-compatible object storage execution config.
+      # The worker resolves dataObjectVersionId -> storage_uri/storage_format from the data catalog DB.
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-engine-gx-worker
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
+      # API access: worker must call FastAPI through Kong (no direct DB connections).
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+
+  dq-engine-join-pair-etl-worker:
+    profiles: ["workers"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    depends_on:
+      kong:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["python", "-u", "join_pair_materialization_worker.py"]
+    environment:
+      TZ: UTC
+      REDIS_URL: redis://redis:6379/0
+      GX_JOIN_PAIR_MATERIALIZATION_REDIS_URL: redis://redis:6379/0
+      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-engine-join-pair-etl-worker
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+
+  dq-engine-test-data-worker:
+    profiles: ["workers"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["python", "-u", "test_data_materialization_worker.py"]
+    environment:
+      TZ: UTC
+      TEST_DATA_MATERIALIZATION_REDIS_URL: redis://redis:6379/0
+      TEST_DATA_MATERIALIZATION_QUEUE_KEY: ${TEST_DATA_MATERIALIZATION_QUEUE_KEY:-dq-test-data:materialize}
+      TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS}
+      # Spark + S3-compatible object storage materialization config.
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-engine-test-data-worker
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_TEST_DATA_OUTPUT_PREFIX: ${DQ_TEST_DATA_OUTPUT_PREFIX:-}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+
+  api-migrate:
+    profiles: ["core", "gateway", "observability"]
+    image: ${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:${DQ_API_TAG:-latest}
+    environment:
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL}
+      ENVIRONMENT: ${ENVIRONMENT}
+      TZ: UTC
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL}
+      REQUIRE_DATABASE: "true"
+    build:
+      context: .
+      dockerfile: dq-api/Dockerfile.fastapi
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-lc"]
+    command: ["cd /app && python -m alembic -c alembic.ini upgrade head"]
+    env_file: ${ROOT_ENV_FILE:-.env}
+    networks:
+      - default
+    restart: "no"
+
+  api:
+    profiles: ["core", "gateway", "observability"]
+    image: ${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:${DQ_API_TAG:-latest}
+    environment:
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL}
+      ENVIRONMENT: ${ENVIRONMENT}
+      TZ: UTC
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL}
+      APP_CONFIG_ENCRYPTION_KEY: ${APP_CONFIG_ENCRYPTION_KEY?APP_CONFIG_ENCRYPTION_KEY is required}
+      REQUIRE_DATABASE: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379/0
+      PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
+      GX_EXECUTION_QUEUE_KEY: "${GX_EXECUTION_QUEUE_KEY}"
+      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: "${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}"
+      DQ_PROFILING_LOCAL_QUEUE: dq-profiling:local-queue
+      SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}
+      SSO_PROVIDER: ${SSO_PROVIDER}
+      SSO_ISSUER: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID}
+      SSO_ALLOWED_CLIENT_IDS: ${SSO_ALLOWED_CLIENT_IDS:-dq-rules-ui,dq-engine-gx-worker}
+      SSO_ENABLED: ${SSO_ENABLED:-true}
+      ALLOW_LOCAL_AUTH: ${ALLOW_LOCAL_AUTH}
+      CATALOG_PROVIDER: ${CATALOG_PROVIDER:-openmetadata}
+      CATALOG_ENDPOINT: ${CATALOG_ENDPOINT:-https://openmetadata-server:8585/api}
+      CATALOG_API_KEY: ${CATALOG_API_KEY:-}
+      SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      CATALOG_OIDC_ISSUER: ${CATALOG_OIDC_ISSUER:-http://keycloak:8080/realms/jaccloud}
+      CATALOG_OIDC_TOKEN_URL: ${CATALOG_OIDC_TOKEN_URL:-http://keycloak:8080/realms/jaccloud/protocol/openid-connect/token}
+      CATALOG_OIDC_CLIENT_ID: ${CATALOG_OIDC_CLIENT_ID:-openmetadata}
+      CATALOG_OIDC_CLIENT_SECRET: ${CATALOG_OIDC_CLIENT_SECRET:-}
+      CATALOG_OIDC_SCOPE: ${CATALOG_OIDC_SCOPE:-}
+      CATALOG_OIDC_USERNAME: ${CATALOG_OIDC_USERNAME:-${SMOKE_LOGIN_EMAIL:-dq-admin@jaccloud.nl}}
+      CATALOG_OIDC_PASSWORD: ${CATALOG_OIDC_PASSWORD:-${SMOKE_LOGIN_PASSWORD:-${KEYCLOAK_JACCLOUD_PASSWORD:-password}}}
+      # Set TRUST_PROXY_AUTH=true only when the backend is exclusively
+      # accessible via Kong and Kong is configured with the JWT plugin.
+      # When true, the backend skips JWT re-validation and performs
+      # authorisation (scope checking) only.
+      TRUST_PROXY_AUTH: ${TRUST_PROXY_AUTH:-false}
+      GX_EXCEPTION_STORAGE_BACKEND: ${GX_EXCEPTION_STORAGE_BACKEND:-s3}
+      GX_EXCEPTION_STORAGE_BUCKET: ${GX_EXCEPTION_STORAGE_BUCKET:-dq-gx-exceptions}
+      GX_EXCEPTION_STORAGE_PREFIX: ${GX_EXCEPTION_STORAGE_PREFIX:-gx-exceptions}
+      GX_EXCEPTION_STORAGE_ENDPOINT: ${GX_EXCEPTION_STORAGE_ENDPOINT}
+      GX_EXCEPTION_STORAGE_ACCESS_KEY: ${GX_EXCEPTION_STORAGE_ACCESS_KEY}
+      GX_EXCEPTION_STORAGE_SECRET_KEY: ${GX_EXCEPTION_STORAGE_SECRET_KEY}
+      GX_EXCEPTION_STORAGE_REGION: ${GX_EXCEPTION_STORAGE_REGION:-us-east-1}
+      GX_EXCEPTION_STORAGE_SSL_ENABLED: ${GX_EXCEPTION_STORAGE_SSL_ENABLED:-false}
+      DQ_ENGINE_INTERNAL_URL: ${DQ_ENGINE_INTERNAL_URL}
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:-}
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-api
+      OTEL_SERVICE_VERSION: ${DQ_API_TAG:-dev}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_CONSOLE_EXPORT: "1"
+      # Force OTLP exporter in containerized runs (collector may be on the same compose network)
+      OTEL_EXPORTER_OTLP_FORCE: "1"
+      OTEL_TRACE_EXPORT_DEBUG: "1"
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: "1.0"
+      KEYCLOAK_TOKEN_REALM: ${KEYCLOAK_TOKEN_REALM}
+    build:
+      context: .
+      dockerfile: dq-api/Dockerfile.fastapi
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+      # Fail fast if Dockerfile is missing or build context is wrong
+      # Docker Compose will now fail immediately if the Dockerfile is not found
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api-migrate:
+        condition: service_completed_successfully
+    ports:
+      - "${API_HOST_BIND}:${API_HOST_PORT}:4010"
+    # load canonical envs from repo .env and expose Keycloak admin creds
+    env_file: ${ROOT_ENV_FILE:-.env}
+    volumes:
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:4010/health')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  dq-llm:
+    profiles: ["llm"]
+    image: ${DQ_LLM_REGISTRY}${DQ_LLM_NAMESPACE}${DQ_LLM_IMAGE}:${DQ_LLM_TAG}
+    build:
+      context: ./dq-llm
+      dockerfile: Dockerfile.llm
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+    env_file: ${ROOT_ENV_FILE:-.env}
+    ports:
+      - "${DQ_LLM_HOST_BIND:-127.0.0.1}:${DQ_LLM_HOST_PORT:-8123}:8000"
+    volumes:
+      - dq-llm-hf-cache:/cache/huggingface
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  profiling-worker:
+    profiles: ["workers", "profiling", "observability"]
+    image: ${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:${DQ_PROFILING_TAG:-latest}
+    build:
+      args:
+        DQ_BASE_REGISTRY: ${DQ_BASE_REGISTRY}
+        DQ_BASE_NAMESPACE: ${DQ_BASE_NAMESPACE}
+        DQ_BASE_IMAGE: ${DQ_BASE_IMAGE}
+        DQ_BASE_TAG: ${DQ_BASE_TAG}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+      context: ./dq-profiling
+      dockerfile: Dockerfile.profiling
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    environment:
+      # Profiling worker must not connect directly to Postgres; it reports status via the API.
+      # Status reporting uses the internal API service endpoint; requests include X-Kong-Request-Id
+      # so the backend's RequireKongGatewayMiddleware accepts them.
+      DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379/0
+      PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
+      DQ_PROFILING_LOCAL_QUEUE: dq-profiling:local-queue
+      ENVIRONMENT: ${ENVIRONMENT}
+      TZ: UTC
+      PROFILING_WORKER_CONCURRENCY: 2
+      PROFILING_METRICS_PORT: 8001
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-profiling
+      OTEL_SERVICE_VERSION: ${DQ_PROFILING_TAG:-dev}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_EXPORTER_OTLP_FORCE: "1"
+      OTEL_CONSOLE_EXPORT: "1"
+      OTEL_TRACE_EXPORT_DEBUG: "1"
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: "1.0"
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+
+  frontend:
+    profiles: ["core"]
+    image: ${DQ_FRONTEND_REGISTRY}${DQ_FRONTEND_NAMESPACE}${DQ_FRONTEND_IMAGE}:${DQ_FRONTEND_TAG:-latest}
+    build:
+      context: ./dq-ui
+      dockerfile: Dockerfile.frontend
+      args:
+        NGINX_REGISTRY: ${NGINX_REGISTRY}
+        NGINX_NAMESPACE: ${NGINX_NAMESPACE}
+        NGINX_IMAGE: "${NGINX_IMAGE}"
+        NGINX_TAG: ${NGINX_TAG}
+        # OpenTelemetry (baked into the static build by Vite)
+        VITE_OTEL_ENABLED: ${VITE_OTEL_ENABLED:-false}
+        VITE_OTEL_ENDPOINT: ${VITE_OTEL_ENDPOINT:-}
+        VITE_ENVIRONMENT: ${ENVIRONMENT}
+        VITE_SERVICE_VERSION: ${DQ_FRONTEND_TAG:-dev}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_HOST_BIND}:${FRONTEND_HTTPS_HOST_PORT}:443"
+    environment:
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      VITE_SSO_PROVIDER: ${VITE_SSO_PROVIDER}
+      VITE_SSO_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      VITE_SSO_CLIENT_ID: ${VITE_SSO_CLIENT_ID}
+      VITE_OTEL_ENABLED: ${VITE_OTEL_ENABLED:-false}
+      VITE_OTEL_ENDPOINT: ${VITE_OTEL_ENDPOINT:-}
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-ui
+      OTEL_SERVICE_VERSION: ${DQ_FRONTEND_TAG:-dev}
+      ENVIRONMENT: ${ENVIRONMENT}
+    volumes:
+      - ./tmp/certs:/etc/nginx/certs:ro
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fk https://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Kong Gateway - API Gateway for multi-consumer access
+  kong-db:
+    profiles: ["gateway", "observability"]
+    image: postgres:17-bookworm
+    container_name: kong-database
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kongpass
+    volumes:
+      - kong-db-data-v17:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kong-postgres-exporter:
+    profiles: ["observability"]
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+    container_name: kong-postgres-exporter
+    depends_on:
+      kong-db:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: postgresql://kong:kongpass@kong-db:5432/kong?sslmode=disable
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+    volumes:
+      - ./observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+    restart: unless-stopped
+    networks:
+      - default
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  kong-migrations:
+    profiles: ["gateway"]
+    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
+    container_name: kong-migrations
+    entrypoint: ["kong"]
+    command: ["migrations", "bootstrap"]
+    depends_on:
+      kong-db:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_DATABASE: kong
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+    restart: "no"
+
+  kong:
+    profiles: ["gateway"]
+    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
+    build:
+      context: ./dq-kong
+      dockerfile: Dockerfile.kong
+      secrets:
+        - internal_corporate_root_ca
+    container_name: kong-gateway
+    depends_on:
+      kong-db:
+        condition: service_healthy
+      kong-migrations:
+        condition: service_completed_successfully
+      api:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_DATABASE: kong
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-http://localhost:8002}
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+      DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
+      SSO_ENABLED: ${SSO_ENABLED?SSO_ENABLED is required}
+      SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      TRUST_PROXY_AUTH: ${TRUST_PROXY_AUTH?TRUST_PROXY_AUTH is required}
+      UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
+      UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM?KEYCLOAK_ADMIN_REALM is required}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER?KEYCLOAK_ADMIN_USER is required}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS?KEYCLOAK_ADMIN_PASS is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      # Keep Docker DNS resolutions fresh to avoid stale upstream IPs after container recreates
+      KONG_DNS_VALID_TTL: 1
+      KONG_DNS_STALE_TTL: 0
+      # OpenTelemetry — Kong 3.x native tracing (plugin configured via bootstrap_kong.sh)
+      KONG_TRACING_INSTRUMENTATIONS: ${KONG_TRACING_INSTRUMENTATIONS?KONG_TRACING_INSTRUMENTATIONS is required}
+      KONG_TRACING_SAMPLING_RATE: ${KONG_TRACING_SAMPLING_RATE?KONG_TRACING_SAMPLING_RATE is required}
+      KONG_OTEL_ENDPOINT: http://dq-otel-collector:4319/v1/traces
+      KONG_SSL_CERT: /etc/kong/certs/kong.jac.dot+3.pem
+      KONG_SSL_CERT_KEY: /etc/kong/certs/kong.jac.dot+3-key.pem
+    networks:
+      - default
+      - dq-network
+    ports:
+      - "${KONG_PROXY_HOST_BIND}:${KONG_PROXY_HOST_PORT}:8443"   # HTTPS proxy (public browser/API entrypoint)
+      - "${KONG_ADMIN_HOST_BIND}:${KONG_ADMIN_HOST_PORT}:8001"   # Admin API
+      - "${KONG_MANAGER_HOST_BIND}:${KONG_MANAGER_HOST_PORT}:8002"   # Kong Manager (GUI)
+    volumes:
+      - ./tmp/certs:/etc/kong/certs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow:
+    profiles: ["airflow"]
+    build:
+      context: .
+      dockerfile: docker/airflow/Dockerfile.airflow
+    command: ["airflow", "standalone"]
+    depends_on:
+      kong:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+      SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      SSO_INTERNAL_ISSUER_URL: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      AIRFLOW_FAB_CLIENT_ID: ${AIRFLOW_FAB_CLIENT_ID:-airflow}
+      AIRFLOW_FAB_CLIENT_SECRET: ${AIRFLOW_FAB_CLIENT_SECRET:-changeme}
+      DQ_AIRFLOW_BASE_URL: ${DQ_AIRFLOW_BASE_URL}
+      DQ_AIRFLOW_ISSUER_URL: ${DQ_AIRFLOW_ISSUER_URL}
+      DQ_AIRFLOW_CLIENT_ID: ${DQ_AIRFLOW_CLIENT_ID:-${SSO_CLIENT_ID?SSO_CLIENT_ID is required}}
+      DQ_AIRFLOW_USERNAME: ${DQ_AIRFLOW_USERNAME:-${KEYCLOAK_JACCLOUD_USERNAME?KEYCLOAK_JACCLOUD_USERNAME is required}}
+      DQ_AIRFLOW_PASSWORD: ${DQ_AIRFLOW_PASSWORD:-${KEYCLOAK_JACCLOUD_PASSWORD?KEYCLOAK_JACCLOUD_PASSWORD is required}}
+      DQ_AIRFLOW_RUN_PLAN_ID: ${DQ_AIRFLOW_RUN_PLAN_ID:-}
+      DQ_AIRFLOW_SOURCE_PIPELINE: ${DQ_AIRFLOW_SOURCE_PIPELINE:-airflow}
+      DQ_AIRFLOW_WAIT_TIMEOUT_SECONDS: ${DQ_AIRFLOW_WAIT_TIMEOUT_SECONDS:-1800}
+      DQ_AIRFLOW_POLL_INTERVAL_SECONDS: ${DQ_AIRFLOW_POLL_INTERVAL_SECONDS:-5}
+    ports:
+      - "${AIRFLOW_HOST_BIND:-127.0.0.1}:${AIRFLOW_HOST_PORT:-8088}:8080"
+    restart: unless-stopped
+
+  # OpenMetadata stack (optional)
+  openmetadata-db:
+    profiles: ["metadata"]
+    image: ${DQ_OPENMETADATA_DB_REGISTRY:-}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:-dq-openmetadata-db}:${DQ_OPENMETADATA_DB_TAG:-18}
+    build:
+      context: .
+      dockerfile: dq-metadata/Dockerfile.openmetadata-db
+      args:
+        OPENMETADATA_DB_BASE_IMAGE: ${OPENMETADATA_DB_BASE_IMAGE?OPENMETADATA_DB_BASE_IMAGE is required}
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.max=10000
+      - -c
+      - pg_stat_statements.track=all
+    environment:
+      POSTGRES_USER: ${OM_DB_USER:-openmetadata_user}
+      POSTGRES_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
+      POSTGRES_DB: ${OM_DB_NAME:-openmetadata_db}
+    ports:
+      - "${OPENMETADATA_DB_HOST_BIND}:${OPENMETADATA_DB_HOST_PORT}:5432"
+    volumes:
+      - openmetadata_pgdata_v18:/var/lib/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${OM_DB_USER:-openmetadata_user} -d ${OM_DB_NAME:-openmetadata_db} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - default
+      - dq-network
+
+  openmetadata-db-postgres-exporter:
+    profiles: ["metadata"]
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+    container_name: openmetadata-db-postgres-exporter
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: postgresql://${OM_DB_USER:-openmetadata_user}:${OM_DB_PASSWORD:-openmetadata_pass}@openmetadata-db:5432/${OM_DB_NAME:-openmetadata_db}?sslmode=disable
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+    volumes:
+      - ./observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+    restart: unless-stopped
+    networks:
+      - default
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  openmetadata-search:
+    profiles: ["support"]
+    # Legacy shared search node kept for the support stack. OpenMetadata uses
+    # the dedicated openmetadata-search-v9 service below so it can start on a
+    # fresh Elasticsearch 9.x data path without touching existing 8.x data.
+    image: ${DOCKER_DOMAIN:-docker.io}/library/elasticsearch:8.11.4
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+    ports:
+      - "${OPENMETADATA_SEARCH_HOST_BIND}:${OPENMETADATA_SEARCH_HOST_PORT}:9200"
+    volumes:
+      - openmetadata_search_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  openmetadata-search-v9:
+    profiles: ["metadata"]
+    image: ${OPENMETADATA_SEARCH_IMAGE:-docker.io/library/elasticsearch}:${OPENMETADATA_SEARCH_TAG:-8.11.4}
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+    volumes:
+      - openmetadata_search_v9_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  openmetadata-migrate:
+    profiles: ["metadata"]
+    image: ${OPENMETADATA_REGISTRY}${OPENMETADATA_NAMESPACE}${OPENMETADATA_IMAGE}:${OPENMETADATA_TAG:-latest}
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+      openmetadata-search-v9:
+        condition: service_healthy
+    environment:
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_HOST: openmetadata-db
+      DB_PORT: 5432
+      OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
+      DB_USER: ${OM_DB_USER:-openmetadata_user}
+      DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
+      DB_PARAMS: sslmode=disable
+      OM_SEARCH_TYPE: elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-search-v9
+      ELASTICSEARCH_PORT: 9200
+      SECRET_MANAGER: db
+    command: ["/opt/openmetadata/bootstrap/openmetadata-ops.sh", "migrate"]
+    restart: "no"
+
+  openmetadata-server:
+    profiles: ["metadata"]
+    image: ${DQ_OPENMETADATA_SERVER_REGISTRY:-}${DQ_OPENMETADATA_SERVER_NAMESPACE:-}${DQ_OPENMETADATA_SERVER_IMAGE:-dq-openmetadata}:${DQ_OPENMETADATA_SERVER_TAG:-latest}
+    build:
+      context: .
+      dockerfile: dq-metadata/Dockerfile.openmetadata-server
+      args:
+        OPENMETADATA_BASE_IMAGE: ${OPENMETADATA_REGISTRY}${OPENMETADATA_NAMESPACE}${OPENMETADATA_IMAGE}:${OPENMETADATA_TAG:-latest}
+        OTEL_JAVAAGENT_HELPER_IMAGE: ${OTEL_JAVAAGENT_HELPER_IMAGE?OTEL_JAVAAGENT_HELPER_IMAGE is required}
+        OTEL_JAVAAGENT_VERSION: ${OTEL_JAVAAGENT_VERSION:-2.16.0}
+      secrets:
+        - internal_corporate_root_ca
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+      openmetadata-search-v9:
+        condition: service_healthy
+      openmetadata-migrate:
+        condition: service_completed_successfully
+    environment:
+      SERVER_PORT: 8585
+      BASE_PATH: ${OPENMETADATA_BASE_PATH:-/}
+      SERVER_USE_FORWARDED_HEADERS: ${OPENMETADATA_USE_FORWARDED_HEADERS:-false}
+      OPENMETADATA_SERVER_URL: ${OPENMETADATA_PUBLIC_URL:-https://openmetadata.jac.dot:8585}
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_HOST: openmetadata-db
+      DB_PORT: 5432
+      OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
+      DB_USER: ${OM_DB_USER:-openmetadata_user}
+      DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
+      DB_PARAMS: sslmode=disable
+      OM_SEARCH_TYPE: elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-search-v9
+      ELASTICSEARCH_PORT: 9200
+      AUTHORIZER_CLASS_NAME: org.openmetadata.service.security.DefaultAuthorizer
+      AUTHORIZER_REQUEST_FILTER: org.openmetadata.service.security.JwtFilter
+      AUTHORIZER_ADMIN_PRINCIPALS: ${OM_AUTHORIZER_ADMIN_PRINCIPALS:-[dq-admin]}
+      AUTHORIZER_PRINCIPAL_DOMAIN: ${OM_AUTHORIZER_PRINCIPAL_DOMAIN:-jaccloud.nl}
+      AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:-custom-oidc}
+      CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:-Keycloak}
+      AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[http://keycloak:8080/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
+      AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:-https://keycloak.jac.dot:9444/realms/jaccloud}
+      AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}
+      AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-https://openmetadata.jac.dot:8585/callback}
+      AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}
+      AUTHENTICATION_RESPONSE_TYPE: ${OM_AUTHENTICATION_RESPONSE_TYPE:-code}
+      AIRFLOW_HOST: http://openmetadata-ingestion:8080
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
+      SECRET_MANAGER: db
+      # OpenTelemetry (enabled when the image/runtime supports OTEL env wiring)
+      OTEL_SERVICE_NAME: dq-openmetadata
+      OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-otel-collector:4317}
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_RESOURCE_ATTRIBUTES: service.name=dq-openmetadata,deployment.environment=${ENVIRONMENT}
+      OTEL_LOGS_EXPORTER: none
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
+      ENVIRONMENT: ${ENVIRONMENT}
+    entrypoint: ["/bin/bash"]
+    command: ["/openmetadata-https-start.sh"]
+    ports:
+      - "${OPENMETADATA_HOST_BIND:-127.0.0.1}:${OPENMETADATA_HOST_PORT:-8585}:8585"
+    volumes:
+      - ./tmp/certs/openmetadata.p12:/opt/openmetadata/conf/openmetadata.p12:ro
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "base_path='${OPENMETADATA_BASE_PATH:-/}'; if [ \"$$base_path\" = \"/\" ]; then base_path=''; fi; wget --no-check-certificate -q -O /dev/null \"https://127.0.0.1:8585$${base_path}/api/v1/system/version\" || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 180s
+
+  # One-shot container: configures OpenMetadata auth settings and optionally
+  # seeds users / syncs the catalog.  Runs entirely on the Docker network –
+  # the git repo is NOT required on the host.
+  # Mount the Docker socket so the container can restart openmetadata-server
+  # after writing the auth config and exec into the ingestion container.
+  # To run with seeding:  docker compose --profile metadata run --rm openmetadata-configure --seed-all
+  openmetadata-configure:
+    profiles: ["metadata"]
+    build:
+      context: .
+      dockerfile: dq-metadata/Dockerfile.configure
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
+    image: ${DQ_METADATA_CONFIGURE_REGISTRY:-}${DQ_METADATA_CONFIGURE_NAMESPACE:-}${DQ_METADATA_CONFIGURE_IMAGE:-dq-metadata-configure}:${DQ_METADATA_CONFIGURE_TAG:-latest}
+    depends_on:
+      openmetadata-server:
+        condition: service_healthy
+    environment:
+      OM_DB_USER: ${OM_DB_USER:-openmetadata_user}
+      OM_DB_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
+      OM_DB_NAME: ${OM_DB_NAME:-openmetadata_db}
+      OM_DB_SSL_MODE: ${OM_DB_SSL_MODE:-disable}
+      OPENMETADATA_BASE_PATH: ${OPENMETADATA_BASE_PATH:-/}
+      OM_AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:-custom-oidc}
+      OM_OIDC_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:-Keycloak}
+      OM_AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:-https://keycloak.jac.dot:9444/realms/jaccloud}
+      OM_AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}
+      OM_AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-https://openmetadata.jac.dot:8585/callback}
+      OM_AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}
+      OM_AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[http://keycloak:8080/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
+      OM_ENABLE_AUTO_REDIRECT: ${OM_ENABLE_AUTO_REDIRECT:-false}
+      OM_TOKEN: ${OM_TOKEN:-}
+      SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      KEYCLOAK_USER_PASSWORD: ${KEYCLOAK_USER_PASSWORD:-password}
+      OPENMETADATA_OIDC_SEED_USERNAME: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME is required}
+      OPENMETADATA_OIDC_SEED_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD is required}
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      SEED_ALL: ${SEED_ALL:-false}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+    restart: "no"
+
+  openmetadata-ingestion:
+    profiles: ["metadata"]
+    image: ${OPENMETADATA_INGESTION_REGISTRY:-openmetadata/}${OPENMETADATA_INGESTION_NAMESPACE:-}${OPENMETADATA_INGESTION_IMAGE:-ingestion}:${OPENMETADATA_TAG:-latest}
+    depends_on:
+      openmetadata-server:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////tmp/airflow.db
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${OM_AIRFLOW_SECRET_KEY:-openmetadata_airflow_secret}
+      OPENMETADATA_SERVER_URL: https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api
+      OPENMETADATA_VERIFY_SSL: "true"
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      # OpenTelemetry (for Python/Airflow instrumentation when enabled)
+      OTEL_SERVICE_NAME: dq-openmetadata-ingestion
+      OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-otel-collector:4317}
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
+      ENVIRONMENT: ${ENVIRONMENT}
+      OPENMETADATA_AIRFLOW_ADMIN_EMAIL: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME is required}
+      OPENMETADATA_AIRFLOW_ADMIN_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD is required}
+    entrypoint: ["/bin/bash"]
+    command: ["-c", "airflow db migrate && airflow users create --username admin --firstname Open --lastname Metadata --role Admin --email \"$${OPENMETADATA_AIRFLOW_ADMIN_EMAIL}\" --password \"$${OPENMETADATA_AIRFLOW_ADMIN_PASSWORD}\" || true && airflow api-server -p 8080"]
+    ports:
+      - "${OPENMETADATA_INGESTION_HOST_BIND}:${OPENMETADATA_INGESTION_HOST_PORT}:8080"
+    volumes:
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # OBSERVABILITY: Loki (Log aggregation)
+  # ============================================================================
+  loki:
+    profiles: ["observability"]
+    image: grafana/loki:3.6.4
+    container_name: dq-loki
+    ports:
+      - "${LOKI_HOST_BIND:-0.0.0.0}:${LOKI_HOST_PORT:-3100}:3100"
+    environment:
+      LOKI_CONFIG_FILE: /etc/loki/local-config.yml
+    volumes:
+      - ./observability/loki/loki-config.yml:/etc/loki/local-config.yml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yml
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://loki:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  # ============================================================================
+  # OBSERVABILITY: Prometheus (Metrics collection)
+  # ============================================================================
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v3
+    container_name: dq-prometheus
+    user: "0:0"
+    ports:
+      - "${PROMETHEUS_HOST_BIND:-0.0.0.0}:${PROMETHEUS_HOST_PORT:-9090}:9090"
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - ./observability/prometheus/tmp/bearer_token:/etc/prometheus/bearer_token:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=90d"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://prometheus:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - dq-network
+    depends_on:
+      - loki
+    labels:
+      - "monitoring=true"
+
+  # ============================================================================
+  # OBSERVABILITY: Tempo (Distributed tracing)
+  # ============================================================================
+  tempo:
+    profiles: ["observability"]
+    image: grafana/tempo:2.6.1
+    container_name: dq-tempo
+    user: "0:0"
+    ports:
+      - "${TEMPO_HOST_BIND:-0.0.0.0}:${TEMPO_HOST_PORT:-3200}:3200"   # HTTP API
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./observability/tempo/tempo-config.yml:/etc/tempo/tempo.yml
+      - tempo_data:/var/tempo
+    command:
+      - "-config.file=/etc/tempo/tempo.yml"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://tempo:3200/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - dq-network
+    depends_on:
+      - prometheus
+    labels:
+      - "monitoring=true"
+
+  # ============================================================================
+  # OBSERVABILITY: Grafana (Unified dashboards & UI)
+  # ============================================================================
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:12.3
+    container_name: dq-grafana
+    ports:
+      - "${GRAFANA_HOST_BIND:-0.0.0.0}:${GRAFANA_HOST_PORT:-3000}:3000"
+    environment:
+      # ---- Basic Auth (fallback, for when OIDC is down) ----
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-changeme}"
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER:-admin}"
+      GF_AUTH_BASIC_ENABLED: "${GRAFANA_AUTH_BASIC_ENABLED:-true}"
+      GF_AUTH_DISABLE_LOGIN_FORM: "${GRAFANA_AUTH_DISABLE_LOGIN_FORM:-false}"
+      GF_USERS_ALLOW_SIGN_UP: "true"
+      
+      # ---- OIDC/OAuth2 Authentication (Step 1 Configuration) ----
+      # Keycloak OIDC Integration for role-based access control
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+      GF_AUTH_GENERIC_OAUTH_NAME: "Keycloak"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "${GRAFANA_OIDC_SECRET:-changeme}"
+      GF_AUTH_GENERIC_OAUTH_SCOPES: "openid profile email roles"
+      # AUTH_URL is followed by the browser — must use the public hostname, not the internal Docker service name
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: "${KEYCLOAK_PUBLIC_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/auth"
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "${SSO_INTERNAL_ISSUER_URL}/protocol/openid-connect/token"
+      GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH: "email"
+      GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH: "email"
+      GF_AUTH_GENERIC_OAUTH_NAME_ATTRIBUTE_PATH: "email"
+      # Map the seeded smoke admin identity to a Grafana role using the stable email claim.
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(email, 'dq-admin@jaccloud.nl') && 'Admin' || 'Viewer'"
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT: "true"
+      GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
+      GF_AUTH_GENERIC_OAUTH_SKIP_ORG_ROLE_SYNC: "true"
+      GF_AUTH_GENERIC_OAUTH_ALLOW_ASSIGN_GRAFANA_ADMIN: "true"
+      GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN: "${GRAFANA_AUTH_GENERIC_OAUTH_AUTO_LOGIN:-false}"
+
+      # Public URL used by browser callbacks (container-internal URLs still use service names)
+      GF_SERVER_DOMAIN: ${GRAFANA_PUBLIC_DOMAIN?GRAFANA_PUBLIC_DOMAIN is required}
+      GF_SERVER_HTTP_ADDR: "0.0.0.0"
+      GF_SERVER_HTTP_PORT: "3000"
+      GF_SERVER_ROOT_URL: ${GRAFANA_PUBLIC_URL?GRAFANA_PUBLIC_URL is required}
+      GF_SERVER_SERVE_FROM_SUB_PATH: ${GRAFANA_SERVE_FROM_SUB_PATH?GRAFANA_SERVE_FROM_SUB_PATH is required}
+      
+      # ---- Grafana RBAC Configuration ----
+      GF_RBAC_PERMISSION_CACHE_TTL: "3600"
+
+      # ---- Internet Access Hardening ----
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_PLUGINS_PUBLIC_KEY_RETRIEVAL_DISABLED: "true"
+      GF_PLUGINS_PLUGIN_ADMIN_ENABLED: "false"
+      GF_INSTALL_PLUGINS: "yesoreyeram-infinity-datasource"
+      SSL_CERT_FILE: /run/secrets/internal_corporate_root_ca
+      
+      # ---- Plugins & UI ----
+      TZ: UTC
+    secrets:
+      - internal_corporate_root_ca
+    volumes:
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./observability/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://grafana:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - dq-network
+    depends_on:
+      - loki
+      - prometheus
+      - tempo
+    labels:
+      - "monitoring=true"
+
+  edge:
+    profiles: ["edge"]
+    build:
+      context: ./dq-edge
+      dockerfile: Dockerfile.edge
+    entrypoint:
+      - /bin/sh
+      - -c
+      - /bin/sh /opt/edge/render-edge-config.sh && exec /docker-entrypoint.sh nginx -g 'daemon off;'
+    environment:
+      EDGE_MODE: ${EDGE_MODE:-local}
+      EDGE_LOCAL_APP_HOST: ${EDGE_LOCAL_APP_HOST:-__MISSING_EDGE_LOCAL_APP_HOST__}
+      EDGE_LOCAL_KONG_HOST: ${EDGE_LOCAL_KONG_HOST:-__MISSING_EDGE_LOCAL_KONG_HOST__}
+      EDGE_LOCAL_KEYCLOAK_HOST: ${EDGE_LOCAL_KEYCLOAK_HOST:-__MISSING_EDGE_LOCAL_KEYCLOAK_HOST__}
+      EDGE_LOCAL_OPENMETADATA_HOST: ${EDGE_LOCAL_OPENMETADATA_HOST:-__MISSING_EDGE_LOCAL_OPENMETADATA_HOST__}
+      EDGE_LOCAL_OBSERVABILITY_HOST: ${EDGE_LOCAL_OBSERVABILITY_HOST:-__MISSING_EDGE_LOCAL_OBSERVABILITY_HOST__}
+      EDGE_LOCAL_SUPPORT_HOST: ${EDGE_LOCAL_SUPPORT_HOST:-__MISSING_EDGE_LOCAL_SUPPORT_HOST__}
+      EDGE_LOCAL_AIRFLOW_HOST: ${EDGE_LOCAL_AIRFLOW_HOST:-}
+      EDGE_PUBLIC_APEX_HOST: ${PUBLIC_APEX_HOST:-__MISSING_PUBLIC_APEX_HOST__}
+      EDGE_PUBLIC_CANONICAL_HOST: ${PUBLIC_CANONICAL_HOST:-__MISSING_PUBLIC_CANONICAL_HOST__}
+      EDGE_SSL_CERT_FILE: /etc/nginx/certs/${EDGE_SSL_CERT_FILE_NAME:-__MISSING_EDGE_SSL_CERT_FILE_NAME__}
+      EDGE_SSL_KEY_FILE: /etc/nginx/certs/${EDGE_SSL_KEY_FILE_NAME:-__MISSING_EDGE_SSL_KEY_FILE_NAME__}
+    ports:
+      - "${EDGE_BIND_HOST:-0.0.0.0}:${EDGE_PUBLIC_PORT:-443}:443"
+    volumes:
+      - type: bind
+        source: ${EDGE_SSL_CERTS_DIR:-__MISSING_EDGE_SSL_CERTS_DIR__}
+        target: /etc/nginx/certs
+        read_only: true
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+
+  container-metrics:
+    profiles: ["observability"]
+    build:
+      context: ./observability/container-metrics
+      dockerfile: Dockerfile.container-metrics
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+      secrets:
+        - internal_corporate_root_ca
+    container_name: dq-container-metrics
+    environment:
+      COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME?COMPOSE_PROJECT_NAME is required}
+      LOG_LEVEL: INFO
+      PORT: 8000
+      NEXUSCLOUD_USERNAME: ${NEXUSCLOUD_USERNAME:-}
+      NEXUSCLOUD_PASSWORD: ${NEXUSCLOUD_PASSWORD:-}
+      NEXUSCLOUD_DNS: ${NEXUSCLOUD_DNS:-}
+      NEXUSCLOUD_PYPI_GROUP_REPO: ${NEXUSCLOUD_PYPI_GROUP_REPO:-}
+    ports:
+      - "${CONTAINER_METRICS_HOST_BIND:-0.0.0.0}:${CONTAINER_METRICS_HOST_PORT:-8881}:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  # ============================================================================
+  # OBSERVABILITY (OPTIONAL): Prometheus Pushgateway
+  # For ephemeral jobs (batch rule executions) to push metrics
+  # ============================================================================
+  pushgateway:
+    profiles: ["observability", "pushgateway"]
+    image: prom/pushgateway:v1.11.2
+    container_name: dq-pushgateway
+    ports:
+      - "${PUSHGATEWAY_HOST_BIND:-0.0.0.0}:${PUSHGATEWAY_HOST_PORT:-9091}:9091"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://pushgateway:9091/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  # ============================================================================
+  # OBSERVABILITY (OPTIONAL): OpenTelemetry Collector
+  # Centralized instrumentation collection (advanced)
+  # ============================================================================
+  otel-collector:
+    profiles: ["observability", "otel"]
+    image: otel/opentelemetry-collector-contrib:0.148.0
+    container_name: dq-otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    ports:
+      - "${OTEL_GRPC_HOST_BIND:-0.0.0.0}:${OTEL_GRPC_HOST_PORT:-4317}:4317"   # OTLP gRPC ingress for apps and local tooling
+      - "${OTEL_HTTP_HOST_BIND:-0.0.0.0}:${OTEL_HTTP_HOST_PORT:-4318}:4318"   # OTLP HTTP ingress for apps and local tooling
+      - "${OTEL_JAEGER_HOST_BIND:-0.0.0.0}:${OTEL_JAEGER_HOST_PORT:-14250}:14250" # Jaeger gRPC ingress
+      - "${OTEL_ZIPKIN_HOST_BIND:-0.0.0.0}:${OTEL_ZIPKIN_HOST_PORT:-9411}:9411"   # Zipkin ingress
+    volumes:
+      - ./observability/otel-collector/config.yml:/etc/otel-collector-config.yml
+      - ./tmp/certs:/etc/otel/certs:ro
+      - ./tmp:/var/tmp
+    environment:
+      TZ: UTC
+    networks:
+      - dq-network
+    depends_on:
+      - tempo
+      - prometheus
+
+  # ============================================================================
+  # OBSERVABILITY (OPTIONAL): AIStor (S3-compatible object storage)
+  # For persisting delivery, validation, and observability objects in a scalable backend
+  # ============================================================================
+  aistor:
+    profiles: ["observability", "aistor"]
+    image: quay.io/minio/aistor/minio:latest
+    container_name: dq-aistor
+    ports:
+      - "${AISTOR_API_HOST_BIND:-0.0.0.0}:${AISTOR_API_HOST_PORT:-9222}:9000"   # API
+      - "${AISTOR_CONSOLE_HOST_BIND:-0.0.0.0}:${AISTOR_CONSOLE_HOST_PORT:-9001}:9001"   # Console
+    environment:
+      MINIO_ROOT_USER: ${AISTOR_ROOT_USER?AISTOR_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${AISTOR_ROOT_PASSWORD?AISTOR_ROOT_PASSWORD is required}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    volumes:
+      - aistor_data:/mnt/data
+      - ${AISTOR_LICENSE_FILE:?AISTOR_LICENSE_FILE is required}:/minio.license:ro
+    command: ["minio", "server", "/mnt/data", "--console-address", ":9001", "--license", "/minio.license"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - dq-network
+    labels:
+      - "monitoring=false"
+
+  # ============================================================================
+  # OBSERVABILITY INIT: Grafana Teams & Dashboard Provisioning
+  # Runs once after Grafana is healthy to set up teams and permissions
+  # ============================================================================
+  grafana-init:
+    profiles: ["observability"]
+    image: curlimages/curl:latest
+    container_name: dq-grafana-init
+    entrypoint: sh -c
+    command:
+      - |
+        echo "Waiting for Grafana to be ready..."
+        until curl -sf http://grafana:3000/api/health > /dev/null 2>&1; do
+          echo "  Grafana not ready yet, waiting..."
+          sleep 2
+        done
+        
+        echo "Grafana is ready!"
+        echo "Setting up teams and dashboard permissions..."
+        echo ""
+       
+        # Create Viewers team
+        VIEWER_RESPONSE=$$(curl -s -X POST \
+          -u admin:changeme \
+          -H "Content-Type: application/json" \
+          http://grafana:3000/api/teams \
+          -d '{"name": "Viewers", "email": "viewers@dq-rulebuilder.local"}')
+        VIEWER_ID=$$(echo $$VIEWER_RESPONSE | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || echo "")
+        if [ -z "$$VIEWER_ID" ]; then
+          VIEWER_ID=$$(curl -s -X GET \
+            -u admin:changeme \
+            'http://grafana:3000/api/teams/search?query=Viewers' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
+        fi
+        echo "✓ Viewers team ID: $$VIEWER_ID"
+        
+        # Create Editors team
+        EDITOR_RESPONSE=$$(curl -s -X POST \
+          -u admin:changeme \
+          -H "Content-Type: application/json" \
+          http://grafana:3000/api/teams \
+          -d '{"name": "Editors", "email": "editors@dq-rulebuilder.local"}')
+        EDITOR_ID=$$(echo $$EDITOR_RESPONSE | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || echo "")
+        if [ -z "$$EDITOR_ID" ]; then
+          EDITOR_ID=$$(curl -s -X GET \
+            -u admin:changeme \
+            'http://grafana:3000/api/teams/search?query=Editors' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
+        fi
+        echo "✓ Editors team ID: $$EDITOR_ID"
+        
+        # Create Admins team
+        ADMIN_RESPONSE=$$(curl -s -X POST \
+          -u admin:changeme \
+          -H "Content-Type: application/json" \
+          http://grafana:3000/api/teams \
+          -d '{"name": "Admins", "email": "admins@dq-rulebuilder.local"}')
+        ADMIN_ID=$$(echo $$ADMIN_RESPONSE | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || echo "")
+        if [ -z "$$ADMIN_ID" ]; then
+          ADMIN_ID=$$(curl -s -X GET \
+            -u admin:changeme \
+            'http://grafana:3000/api/teams/search?query=Admins' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
+        fi
+        echo "✓ Admins team ID: $$ADMIN_ID"
+        
+         echo ""
+         echo "Setting dashboard permissions..."
+       
+        # Find execution monitoring dashboard by UID
+        DASHBOARD_ID=$$(curl -s -X GET \
+          -u admin:changeme \
+          "http://grafana:3000/api/search?type=dash-db&query=$$OBSERVABILITY_DASHBOARD_UID" \
+          | sed -n 's/.*"id":\([0-9][0-9]*\).*/\1/p' | head -1)
+       
+         if [ -z "$$DASHBOARD_ID" ]; then
+           echo "⚠ Dashboard '$$OBSERVABILITY_DASHBOARD_TITLE' (uid=$$OBSERVABILITY_DASHBOARD_UID) not found. Skipping permissions setup."
+           echo "  You can set permissions manually after the dashboard is available."
+         else
+           echo "✓ Found dashboard ID: $$DASHBOARD_ID"
+         
+          # Set dashboard ACL in a single request (1=View, 2=Edit, 4=Admin)
+          curl -s -X POST \
+            -u admin:changeme \
+            -H "Content-Type: application/json" \
+            http://grafana:3000/api/dashboards/id/$$DASHBOARD_ID/permissions \
+            -d "{\"items\":[{\"teamId\": $$VIEWER_ID, \"permission\": 1},{\"teamId\": $$EDITOR_ID, \"permission\": 2},{\"teamId\": $$ADMIN_ID, \"permission\": 4}]}" > /dev/null 2>&1
+          echo "✓ Viewers: Read-only access (permission: 1)"
+          echo "✓ Editors: Edit access (permission: 2)"
+          echo "✓ Admins: Admin access (permission: 4)"
+         fi
+       
+         echo ""
+         echo "✅ Grafana provisioning complete!"
+         echo "   Teams: Viewers, Editors, Admins"
+         echo "   Ready for OIDC + permission enforcement"
+    environment:
+      TZ: UTC
+      OBSERVABILITY_DASHBOARD_UID: ${OBSERVABILITY_DASHBOARD_UID:-dq-execution-monitoring}
+      OBSERVABILITY_DASHBOARD_TITLE: ${OBSERVABILITY_DASHBOARD_TITLE:-Data Quality Made Easy - Execution Monitoring}
+    networks:
+      - dq-network
+    depends_on:
+      grafana:
+        condition: service_healthy
+    restart: "no"
+    labels:
+      - "monitoring=false"
+
+# ============================================================================
+# VOLUMES: Persistent storage for observability stack
+# ============================================================================
+volumes:
+  loki_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  tempo_data:
+    driver: local
+  grafana_data:
+    driver: local
+  aistor_data:
+    driver: local
+  pgdata_v18:
+  keycloak_data:
+  keycloak_seed_artifacts:
+  redis_data:
+  zammad_postgresql_data:
+  zammad_redis_data:
+  zammad_storage:
+  zammad_backup:
+  kong-db-data-v17:
+  openmetadata_pgdata_v18:
+  openmetadata_search_data:
+  openmetadata_search_v9_data:
+  spark-jars:
+  ivy2_cache:
+  dq-llm-hf-cache:
+
+secrets:
+  internal_mkcert_root_ca:
+    file: ./tmp/certs/mkcert-rootCA.pem
+  internal_root_ca:
+    file: ./tmp/certs/internal-root-ca-2024.crt
+  internal_corporate_root_ca:
+    file: ${INTERNAL_CORPORATE_ROOT_CA_FILE?INTERNAL_CORPORATE_ROOT_CA_FILE is required}
+  internal_ca_bundle:
+    file: ${INTERNAL_CA_BUNDLE_FILE?INTERNAL_CA_BUNDLE_FILE is required}
+
+# ==============================================================================
+# NETWORK: Shared with observability stack (docker-compose-observability.yml).
+# Start the observability stack first so this network exists:
+#   docker compose -f docker-compose-observability.yml up -d
+# ==============================================================================
+networks:
+  dq-network:
+    external: false
+    name: dq-network

@@ -1,0 +1,11 @@
+{
+  "workspace_id": "risk-compliance",
+  "product_id": "019e0488-9a54-79f5-9056-7f5e3afbff08",
+  "data_set_id": "019e0488-9a54-7581-81d0-3e089c1d9868",
+  "data_object_id": "Ticket",
+  "data_object_version_id": "019e0488-9a53-7dac-a94a-64225515bb48",
+  "notes": [
+    "ticket data",
+    "csv seed"
+  ]
+}

@@ -1,0 +1,106 @@
+.reusable-filters-body {
+  overflow: auto;
+  display: grid;
+  gap: 14px;
+}
+
+.reusable-filters-rule {
+  font-size: 14px;
+  color: var(--app-text-secondary);
+}
+
+.reusable-filters-error {
+  margin: 0;
+}
+
+.reusable-filters-assign,
+.reusable-filters-create {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.reusable-filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.reusable-filters-search-hint {
+  color: var(--app-text-secondary);
+  font-size: 12px;
+}
+
+.reusable-filters-list {
+  display: grid;
+  gap: 8px;
+}
+
+.reusable-filter-item {
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 8px;
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.reusable-filter-title {
+  font-weight: 600;
+}
+
+.reusable-filter-description {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.reusable-filter-expression {
+  font-size: 12px;
+  background: var(--app-surface-secondary);
+  border-radius: 6px;
+  padding: 6px 8px;
+  white-space: pre-wrap;
+}
+
+.reusable-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.reusable-filters-validation-error {
+  color: var(--app-status-error-text);
+  font-size: 13px;
+}
+
+.reusable-filters-help {
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 8px;
+  background: var(--app-surface-primary);
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.reusable-filters-help h5 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.reusable-filters-help ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.reusable-filters-help-example {
+  margin: 0;
+  font-size: 12px;
+  background: var(--app-surface-secondary);
+  border-radius: 6px;
+  padding: 8px;
+  white-space: pre-wrap;
+}

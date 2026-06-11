@@ -1,0 +1,70 @@
+{
+  "group": "by-tag/master-data",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_master_records_api_master_data_v1_master_records_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "domain",
+          "required": false,
+          "schema_ref": "#/$defs/get_master_records_api_master_data_v1_master_records_get_param_query_domain"
+        },
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_master_records_api_master_data_v1_master_records_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "business_key",
+          "required": false,
+          "schema_ref": "#/$defs/get_master_records_api_master_data_v1_master_records_get_param_query_business_key"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_master_records_api_master_data_v1_master_records_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_master_records_api_master_data_v1_master_records_get_param_query_limit"
+        }
+      ],
+      "path": "/api/master-data/v1/master-records",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/MasterRecordsPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Master Records",
+      "tags": [
+        "master-data"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

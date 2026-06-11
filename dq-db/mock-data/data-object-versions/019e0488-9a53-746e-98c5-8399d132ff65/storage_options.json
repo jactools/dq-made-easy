@@ -1,0 +1,8 @@
+{
+  "retention_policy": {
+    "exception_fact_retention_days": 30,
+    "exception_fact_archive_retention_days": 90,
+    "exception_analytics_projection_retention_days": 365,
+    "exception_fact_purge_batch_size": 1000
+  }
+}

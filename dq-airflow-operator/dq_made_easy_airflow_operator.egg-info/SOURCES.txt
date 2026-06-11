@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+dq_airflow_operator/__init__.py
+dq_airflow_operator/validation_run_plan_operator.py
+dq_made_easy_airflow_operator.egg-info/PKG-INFO
+dq_made_easy_airflow_operator.egg-info/SOURCES.txt
+dq_made_easy_airflow_operator.egg-info/dependency_links.txt
+dq_made_easy_airflow_operator.egg-info/requires.txt
+dq_made_easy_airflow_operator.egg-info/top_level.txt

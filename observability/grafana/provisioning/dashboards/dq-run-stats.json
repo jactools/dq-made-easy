@@ -1,0 +1,576 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Overview",
+      "tooltip": "Open the high-level observability overview",
+      "type": "link",
+      "url": "/d/dq-overview"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Execution Monitoring",
+      "tooltip": "Open rule, profiling, and execution metrics",
+      "type": "link",
+      "url": "/d/dq-execution-monitoring"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "API Observability",
+      "tooltip": "Open the detailed API metrics dashboard",
+      "type": "link",
+      "url": "/d/dq-api-observability"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 3,
+        "h": 5
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "total_runs",
+              "text": "total_runs",
+              "type": "number"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Total Runs",
+      "type": "stat"
+    },
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 3,
+        "y": 0,
+        "w": 3,
+        "h": 5
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "running_runs",
+              "text": "running_runs",
+              "type": "number"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Running Runs",
+      "type": "stat"
+    },
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 3,
+        "h": 5
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "failed_runs",
+              "text": "failed_runs",
+              "type": "number"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Failed Runs",
+      "type": "stat"
+    },
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 9,
+        "y": 0,
+        "w": 3,
+        "h": 5
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "succeeded_runs",
+              "text": "succeeded_runs",
+              "type": "number"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Succeeded Runs",
+      "type": "stat"
+    },
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 8,
+        "h": 7
+      },
+      "id": 5,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "name",
+              "text": "name",
+              "type": "string"
+            },
+            {
+              "selector": "count",
+              "text": "count",
+              "type": "number"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "status_breakdown",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Status Breakdown",
+      "type": "table"
+    },
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 5,
+        "w": 8,
+        "h": 7
+      },
+      "id": 6,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "name",
+              "text": "name",
+              "type": "string"
+            },
+            {
+              "selector": "count",
+              "text": "count",
+              "type": "number"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "engine_target_breakdown",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Engine Targets",
+      "type": "table"
+    },
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 5,
+        "w": 8,
+        "h": 7
+      },
+      "id": 7,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "name",
+              "text": "name",
+              "type": "string"
+            },
+            {
+              "selector": "count",
+              "text": "count",
+              "type": "number"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "execution_shape_breakdown",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Execution Shapes",
+      "type": "table"
+    },
+    {
+      "datasource": "Infinity",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 10
+      },
+      "id": 8,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "columns": [
+            {
+              "selector": "id",
+              "text": "id",
+              "type": "string"
+            },
+            {
+              "selector": "submitted_at",
+              "text": "submitted_at",
+              "type": "string"
+            },
+            {
+              "selector": "status",
+              "text": "status",
+              "type": "string"
+            },
+            {
+              "selector": "engine_target",
+              "text": "engine_target",
+              "type": "string"
+            },
+            {
+              "selector": "execution_shape",
+              "text": "execution_shape",
+              "type": "string"
+            },
+            {
+              "selector": "failed_record_count",
+              "text": "failed_record_count",
+              "type": "number"
+            },
+            {
+              "selector": "rule_name",
+              "text": "rule_name",
+              "type": "string"
+            },
+            {
+              "selector": "requested_by",
+              "text": "requested_by",
+              "type": "string"
+            },
+            {
+              "selector": "correlation_id",
+              "text": "correlation_id",
+              "type": "string"
+            }
+          ],
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "recent_runs",
+          "source": "url",
+          "type": "json",
+          "url": "http://kong:8000/rulebuilder/v1/gx/runs/stats?lookbackAmount=24&lookbackUnit=hours&recentLimit=10",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Recent Runs",
+      "type": "table"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "dq-made-easy",
+    "execution",
+    "api",
+    "grafana"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "DQ Run Stats",
+  "uid": "dq-run-stats",
+  "version": 1
+}

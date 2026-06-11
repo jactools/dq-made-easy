@@ -1,0 +1,4 @@
+customer_id,email_address,last_contacted
+c-1001,alice@example.com,2026-02-20 12:00:00
+c-1002,BOB@EXAMPLE.COM,2026-02-20 14:45:00
+c-1003,Carol@Example.com,2026-02-20 16:00:00

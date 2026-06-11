@@ -1,0 +1,11 @@
+{
+  "workspace_id": "corporate-banking",
+  "product_id": "019e0488-9a54-7b50-a724-9ced506179c3",
+  "data_set_id": "019e0488-9a54-7e73-8e89-d8ef19234a17",
+  "data_object_id": "DimDate",
+  "data_object_version_id": "019e0488-9a53-7610-9b56-fef2778ca70b",
+  "notes": [
+    "date dimension",
+    "hudi seed"
+  ]
+}

@@ -1,0 +1,4971 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "DqResultDriftDetectionView": {
+      "properties": {
+        "baseline_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Baseline Value"
+        },
+        "current_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Value"
+        },
+        "delta": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Delta"
+        },
+        "detector_type": {
+          "title": "Detector Type",
+          "type": "string"
+        },
+        "evidence": {
+          "additionalProperties": true,
+          "title": "Evidence",
+          "type": "object"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "observed_at": {
+          "title": "Observed At",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/DqResultDriftScopeView"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Threshold"
+        }
+      },
+      "required": [
+        "detector_type",
+        "severity",
+        "scope",
+        "observed_at",
+        "message"
+      ],
+      "title": "DqResultDriftDetectionView",
+      "type": "object"
+    },
+    "DqResultDriftScopeView": {
+      "properties": {
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "domain_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain Id"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Id"
+        }
+      },
+      "title": "DqResultDriftScopeView",
+      "type": "object"
+    },
+    "DqResultDriftSummaryView": {
+      "properties": {
+        "detections_by_severity": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Detections By Severity",
+          "type": "object"
+        },
+        "detections_by_type": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Detections By Type",
+          "type": "object"
+        },
+        "drifts": {
+          "items": {
+            "$ref": "#/$defs/DqResultDriftDetectionView"
+          },
+          "title": "Drifts",
+          "type": "array"
+        },
+        "latest_observed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Latest Observed At"
+        },
+        "lookback_amount": {
+          "title": "Lookback Amount",
+          "type": "integer"
+        },
+        "lookback_unit": {
+          "title": "Lookback Unit",
+          "type": "string"
+        },
+        "scoped_groups": {
+          "title": "Scoped Groups",
+          "type": "integer"
+        },
+        "total_detections": {
+          "title": "Total Detections",
+          "type": "integer"
+        },
+        "total_events": {
+          "title": "Total Events",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lookback_amount",
+        "lookback_unit",
+        "total_events",
+        "scoped_groups",
+        "total_detections"
+      ],
+      "title": "DqResultDriftSummaryView",
+      "type": "object"
+    },
+    "ExceptionAnalyticsView": {
+      "properties": {
+        "reason_fluctuations": {
+          "items": {
+            "$ref": "#/$defs/ExceptionReasonFluctuationView"
+          },
+          "title": "Reason Fluctuations",
+          "type": "array"
+        },
+        "reason_trend_buckets": {
+          "items": {
+            "$ref": "#/$defs/ExceptionReasonTrendBucketView"
+          },
+          "title": "Reason Trend Buckets",
+          "type": "array"
+        },
+        "runs_with_failures": {
+          "title": "Runs With Failures",
+          "type": "integer"
+        },
+        "top_data_objects": {
+          "items": {
+            "$ref": "#/$defs/ExceptionDataObjectHotspotView"
+          },
+          "title": "Top Data Objects",
+          "type": "array"
+        },
+        "top_reasons": {
+          "items": {
+            "$ref": "#/$defs/ExceptionReasonHotspotView"
+          },
+          "title": "Top Reasons",
+          "type": "array"
+        },
+        "top_rules": {
+          "items": {
+            "$ref": "#/$defs/ExceptionRuleHotspotView"
+          },
+          "title": "Top Rules",
+          "type": "array"
+        },
+        "total_failed_records": {
+          "title": "Total Failed Records",
+          "type": "integer"
+        },
+        "trend_buckets": {
+          "items": {
+            "$ref": "#/$defs/ExceptionTrendBucketView"
+          },
+          "title": "Trend Buckets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "total_failed_records",
+        "runs_with_failures",
+        "trend_buckets",
+        "top_rules",
+        "top_data_objects",
+        "top_reasons",
+        "reason_trend_buckets",
+        "reason_fluctuations"
+      ],
+      "title": "ExceptionAnalyticsView",
+      "type": "object"
+    },
+    "ExceptionDataObjectHotspotView": {
+      "properties": {
+        "data_object_name": {
+          "title": "Data Object Name",
+          "type": "string"
+        },
+        "data_object_version_id": {
+          "title": "Data Object Version Id",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "data_object_version_id",
+        "data_object_name",
+        "total"
+      ],
+      "title": "ExceptionDataObjectHotspotView",
+      "type": "object"
+    },
+    "ExceptionReasonFluctuationView": {
+      "properties": {
+        "bucket_count": {
+          "title": "Bucket Count",
+          "type": "integer"
+        },
+        "direction": {
+          "title": "Direction",
+          "type": "string"
+        },
+        "first_bucket_start": {
+          "title": "First Bucket Start",
+          "type": "string"
+        },
+        "first_total": {
+          "title": "First Total",
+          "type": "integer"
+        },
+        "latest_bucket_start": {
+          "title": "Latest Bucket Start",
+          "type": "string"
+        },
+        "latest_total": {
+          "title": "Latest Total",
+          "type": "integer"
+        },
+        "net_change": {
+          "title": "Net Change",
+          "type": "integer"
+        },
+        "peak_bucket_start": {
+          "title": "Peak Bucket Start",
+          "type": "string"
+        },
+        "peak_total": {
+          "title": "Peak Total",
+          "type": "integer"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason_code",
+        "reason_text",
+        "first_bucket_start",
+        "first_total",
+        "latest_bucket_start",
+        "latest_total",
+        "net_change",
+        "direction",
+        "peak_bucket_start",
+        "peak_total",
+        "bucket_count"
+      ],
+      "title": "ExceptionReasonFluctuationView",
+      "type": "object"
+    },
+    "ExceptionReasonHotspotView": {
+      "properties": {
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "reason_code",
+        "reason_text",
+        "total"
+      ],
+      "title": "ExceptionReasonHotspotView",
+      "type": "object"
+    },
+    "ExceptionReasonTrendBucketView": {
+      "properties": {
+        "bucket_start": {
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "reason_code",
+        "reason_text",
+        "total"
+      ],
+      "title": "ExceptionReasonTrendBucketView",
+      "type": "object"
+    },
+    "ExceptionRuleHotspotView": {
+      "properties": {
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_name": {
+          "title": "Rule Name",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rule_id",
+        "rule_name",
+        "total"
+      ],
+      "title": "ExceptionRuleHotspotView",
+      "type": "object"
+    },
+    "ExceptionTrendBucketView": {
+      "properties": {
+        "bucket_start": {
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "total"
+      ],
+      "title": "ExceptionTrendBucketView",
+      "type": "object"
+    },
+    "GxAdhocSuiteRunsRequestView": {
+      "properties": {
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "latest_only": {
+          "default": true,
+          "title": "Latest Only",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Id"
+        },
+        "rule_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rule Ids",
+          "type": "array"
+        },
+        "source_override_format": {
+          "anyOf": [
+            {
+              "enum": [
+                "parquet",
+                "delta"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.source_override_format"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Override Format"
+        },
+        "source_override_options": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Override Options"
+        },
+        "source_override_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Override Uri"
+        },
+        "status": {
+          "default": "active",
+          "enum": [
+            "active",
+            "deprecated",
+            "disabled"
+          ],
+          "title": "Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.status"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        },
+        "target_data_object_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Data Object Version Ids",
+          "type": "array"
+        }
+      },
+      "title": "GxAdhocSuiteRunsRequestView",
+      "type": "object"
+    },
+    "GxArtifactAssignmentScopeView": {
+      "properties": {
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "pattern": "^(odcs\\..+|prod-.+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        }
+      },
+      "title": "GxArtifactAssignmentScopeView",
+      "type": "object"
+    },
+    "GxArtifactCompiledFromView": {
+      "properties": {
+        "compiler_version": {
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "rule_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rule Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "compiler_version",
+        "generated_at"
+      ],
+      "title": "GxArtifactCompiledFromView",
+      "type": "object"
+    },
+    "GxArtifactEnvelopeView": {
+      "properties": {
+        "artifact_version": {
+          "enum": [
+            "v1"
+          ],
+          "title": "Artifact Version",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.artifact_version"
+        },
+        "assignment_scope": {
+          "$ref": "#/$defs/GxArtifactAssignmentScopeView"
+        },
+        "compiled_from": {
+          "$ref": "#/$defs/GxArtifactCompiledFromView"
+        },
+        "execution_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactExecutionContractView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_hints": {
+          "$ref": "#/$defs/GxArtifactExecutionHintsView"
+        },
+        "gx_suite": {
+          "additionalProperties": true,
+          "title": "Gx Suite",
+          "type": "object"
+        },
+        "resolved_execution_scope": {
+          "$ref": "#/$defs/GxArtifactResolvedExecutionScopeView"
+        },
+        "saved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Saved By"
+        },
+        "source_pipeline": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Pipeline"
+        },
+        "suite_id": {
+          "title": "Suite Id",
+          "type": "string"
+        },
+        "suite_version": {
+          "minimum": 1.0,
+          "title": "Suite Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "suite_id",
+        "suite_version",
+        "artifact_version",
+        "assignment_scope",
+        "resolved_execution_scope",
+        "gx_suite",
+        "compiled_from",
+        "execution_hints"
+      ],
+      "title": "GxArtifactEnvelopeView",
+      "type": "object"
+    },
+    "GxArtifactEvidencePolicyView": {
+      "properties": {
+        "emit_compiled_artifact": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emit Compiled Artifact"
+        },
+        "emit_generated_sql": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emit Generated Sql"
+        },
+        "failed_rows": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactFailedRowsPolicyView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "title": "GxArtifactEvidencePolicyView",
+      "type": "object"
+    },
+    "GxArtifactExecutionContractView": {
+      "properties": {
+        "delivery_resolution_mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Delivery Resolution Mode"
+        },
+        "engine_target": {
+          "enum": [
+            "pyspark"
+          ],
+          "title": "Engine Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.engine_target"
+        },
+        "engine_type": {
+          "title": "Engine Type",
+          "type": "string"
+        },
+        "execution_shape": {
+          "enum": [
+            "single_object",
+            "join_pair",
+            "streaming",
+            "micro_batch",
+            "grouped_scope"
+          ],
+          "title": "Execution Shape",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_shape"
+        },
+        "resolved_data_delivery_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved Data Delivery Id"
+        },
+        "resolved_data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved Data Object Version Id"
+        },
+        "resolved_delivery_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved Delivery Location"
+        },
+        "source_materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactLandingZoneMaterializationView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "traceability": {
+          "$ref": "#/$defs/GxArtifactExecutionTraceabilityView"
+        }
+      },
+      "required": [
+        "engine_type",
+        "engine_target",
+        "execution_shape",
+        "traceability"
+      ],
+      "title": "GxArtifactExecutionContractView",
+      "type": "object"
+    },
+    "GxArtifactExecutionHintsView": {
+      "properties": {
+        "business_key_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Business Key Fields",
+          "type": "array"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactEvidencePolicyView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "primary_key_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Primary Key Fields",
+          "type": "array"
+        },
+        "recommended_engine": {
+          "enum": [
+            "pyspark"
+          ],
+          "title": "Recommended Engine",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.engine_target"
+        }
+      },
+      "required": [
+        "recommended_engine"
+      ],
+      "title": "GxArtifactExecutionHintsView",
+      "type": "object"
+    },
+    "GxArtifactExecutionTraceabilityView": {
+      "properties": {
+        "artifact_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Artifact Key"
+        },
+        "compiled_expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Compiled Expression"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "gx_suite_id": {
+          "title": "Gx Suite Id",
+          "type": "string"
+        },
+        "gx_suite_version": {
+          "minimum": 1.0,
+          "title": "Gx Suite Version",
+          "type": "integer"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_version_id": {
+          "title": "Rule Version Id",
+          "type": "string"
+        },
+        "source_rule_expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Rule Expression"
+        }
+      },
+      "required": [
+        "rule_id",
+        "rule_version_id",
+        "gx_suite_id",
+        "gx_suite_version"
+      ],
+      "title": "GxArtifactExecutionTraceabilityView",
+      "type": "object"
+    },
+    "GxArtifactFailedRowsPolicyView": {
+      "properties": {
+        "include_primary_key": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Include Primary Key"
+        },
+        "include_row_identifier": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Include Row Identifier"
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Limit"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mode"
+        }
+      },
+      "title": "GxArtifactFailedRowsPolicyView",
+      "type": "object"
+    },
+    "GxArtifactLandingZoneMaterializationView": {
+      "properties": {
+        "join_key_pairs": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Join Key Pairs",
+          "type": "array"
+        },
+        "join_keys": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Join Keys",
+          "type": "array"
+        },
+        "join_type": {
+          "default": "inner",
+          "enum": [
+            "inner",
+            "left",
+            "right",
+            "full"
+          ],
+          "title": "Join Type",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.join_type"
+        },
+        "landing_zone_artifact_id": {
+          "title": "Landing Zone Artifact Id",
+          "type": "string"
+        },
+        "landing_zone_version_id": {
+          "title": "Landing Zone Version Id",
+          "type": "string"
+        },
+        "left_source": {
+          "$ref": "#/$defs/GxArtifactSourceTargetView"
+        },
+        "output_location": {
+          "title": "Output Location",
+          "type": "string"
+        },
+        "right_source": {
+          "$ref": "#/$defs/GxArtifactSourceTargetView"
+        }
+      },
+      "required": [
+        "landing_zone_artifact_id",
+        "landing_zone_version_id",
+        "output_location",
+        "left_source",
+        "right_source"
+      ],
+      "title": "GxArtifactLandingZoneMaterializationView",
+      "type": "object"
+    },
+    "GxArtifactResolvedExecutionScopeView": {
+      "properties": {
+        "data_object_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Data Object Version Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "data_object_version_ids"
+      ],
+      "title": "GxArtifactResolvedExecutionScopeView",
+      "type": "object"
+    },
+    "GxArtifactSourceTargetView": {
+      "properties": {
+        "data_object_id": {
+          "title": "Data Object Id",
+          "type": "string"
+        },
+        "data_object_version_id": {
+          "title": "Data Object Version Id",
+          "type": "string"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "pattern": "^(odcs\\..+|prod-.+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        }
+      },
+      "required": [
+        "data_object_id",
+        "data_object_version_id"
+      ],
+      "title": "GxArtifactSourceTargetView",
+      "type": "object"
+    },
+    "GxAssistanceRequestResponseView": {
+      "properties": {
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "delivery_mode": {
+          "enum": [
+            "email",
+            "itsm"
+          ],
+          "title": "Delivery Mode",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.assistance_delivery_mode"
+        },
+        "mailto_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mailto Url"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "recipient_email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recipient Email"
+        },
+        "ticket_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Number"
+        },
+        "ticket_system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket System"
+        },
+        "ticket_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Url"
+        }
+      },
+      "required": [
+        "delivery_mode",
+        "message",
+        "correlation_id"
+      ],
+      "title": "GxAssistanceRequestResponseView",
+      "type": "object"
+    },
+    "GxAssistanceRequestView": {
+      "properties": {
+        "diagnostics": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Diagnostics"
+        },
+        "error_message": {
+          "title": "Error Message",
+          "type": "string"
+        },
+        "run_plan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Plan Id"
+        },
+        "run_plan_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Plan Version Id"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "error_message"
+      ],
+      "title": "GxAssistanceRequestView",
+      "type": "object"
+    },
+    "GxExecutionProgressView": {
+      "properties": {
+        "completed_steps": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed Steps"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label"
+        },
+        "percent": {
+          "title": "Percent",
+          "type": "integer"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source"
+        },
+        "total_steps": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Steps"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Updated At"
+        }
+      },
+      "required": [
+        "percent"
+      ],
+      "title": "GxExecutionProgressView",
+      "type": "object"
+    },
+    "GxExecutionQueueStatusView": {
+      "description": "Queue visibility for a queued GX execution run.\n\nThe dispatch queue is a Redis list. The API enqueues via LPUSH.\n\nMany workers consume via (B)RPOP to process oldest-first.\nWe report both:\n- index_from_head: 0 = newest element\n- index_from_tail: 0 = oldest element (next to be popped by RPOP)",
+      "properties": {
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Business Key"
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "found": {
+          "title": "Found",
+          "type": "boolean"
+        },
+        "index_from_head": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Index From Head"
+        },
+        "index_from_tail": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Index From Tail"
+        },
+        "inspected_depth": {
+          "minimum": 0.0,
+          "title": "Inspected Depth",
+          "type": "integer"
+        },
+        "queue_key": {
+          "title": "Queue Key",
+          "type": "string"
+        },
+        "queue_length": {
+          "minimum": 0.0,
+          "title": "Queue Length",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "queue_key",
+        "queue_length",
+        "inspected_depth",
+        "found"
+      ],
+      "title": "GxExecutionQueueStatusView",
+      "type": "object"
+    },
+    "GxExecutionRunCountView": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "count"
+      ],
+      "title": "GxExecutionRunCountView",
+      "type": "object"
+    },
+    "GxExecutionRunReportRequestView": {
+      "properties": {
+        "changed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Changed By"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "details": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Details"
+        },
+        "diagnostics": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Diagnostics"
+        },
+        "execution_progress": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Progress"
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Code"
+        },
+        "failure_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Message"
+        },
+        "new_status": {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "New Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        "performance_summary": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performance Summary"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "result_summary": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Summary"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        }
+      },
+      "required": [
+        "new_status"
+      ],
+      "title": "GxExecutionRunReportRequestView",
+      "type": "object"
+    },
+    "GxExecutionRunStatisticsView": {
+      "properties": {
+        "cancelled_runs": {
+          "title": "Cancelled Runs",
+          "type": "integer"
+        },
+        "engine_target_breakdown": {
+          "items": {
+            "$ref": "#/$defs/GxExecutionRunCountView"
+          },
+          "title": "Engine Target Breakdown",
+          "type": "array"
+        },
+        "execution_shape_breakdown": {
+          "items": {
+            "$ref": "#/$defs/GxExecutionRunCountView"
+          },
+          "title": "Execution Shape Breakdown",
+          "type": "array"
+        },
+        "failed_runs": {
+          "title": "Failed Runs",
+          "type": "integer"
+        },
+        "lookback_amount": {
+          "title": "Lookback Amount",
+          "type": "integer"
+        },
+        "lookback_unit": {
+          "enum": [
+            "hours",
+            "days"
+          ],
+          "title": "Lookback Unit",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "query.lookback_unit"
+        },
+        "pending_runs": {
+          "title": "Pending Runs",
+          "type": "integer"
+        },
+        "recent_limit": {
+          "title": "Recent Limit",
+          "type": "integer"
+        },
+        "recent_runs": {
+          "items": {
+            "$ref": "#/$defs/GxExecutionRunSummaryView"
+          },
+          "title": "Recent Runs",
+          "type": "array"
+        },
+        "running_runs": {
+          "title": "Running Runs",
+          "type": "integer"
+        },
+        "status_breakdown": {
+          "items": {
+            "$ref": "#/$defs/GxExecutionRunCountView"
+          },
+          "title": "Status Breakdown",
+          "type": "array"
+        },
+        "succeeded_runs": {
+          "title": "Succeeded Runs",
+          "type": "integer"
+        },
+        "total_runs": {
+          "title": "Total Runs",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lookback_amount",
+        "lookback_unit",
+        "recent_limit",
+        "total_runs",
+        "pending_runs",
+        "running_runs",
+        "succeeded_runs",
+        "failed_runs",
+        "cancelled_runs"
+      ],
+      "title": "GxExecutionRunStatisticsView",
+      "type": "object"
+    },
+    "GxExecutionRunStatusHistoryView": {
+      "properties": {
+        "changed_at": {
+          "title": "Changed At",
+          "type": "string"
+        },
+        "changed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Changed By"
+        },
+        "details": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Details"
+        },
+        "from_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "pending",
+                "running",
+                "succeeded",
+                "failed",
+                "cancelled"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.execution_status"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From Status"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "to_status": {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "To Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        }
+      },
+      "required": [
+        "id",
+        "run_id",
+        "to_status",
+        "changed_at"
+      ],
+      "title": "GxExecutionRunStatusHistoryView",
+      "type": "object"
+    },
+    "GxExecutionRunSummaryView": {
+      "properties": {
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_object_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Object Names",
+          "type": "array"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Domain"
+        },
+        "engine_target": {
+          "enum": [
+            "pyspark"
+          ],
+          "title": "Engine Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.engine_target"
+        },
+        "execution_shape": {
+          "enum": [
+            "single_object",
+            "join_pair",
+            "streaming",
+            "micro_batch",
+            "grouped_scope"
+          ],
+          "title": "Execution Shape",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_shape"
+        },
+        "failed_record_count": {
+          "default": 0,
+          "minimum": 0.0,
+          "title": "Failed Record Count",
+          "type": "integer"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By"
+        },
+        "resolved_data_delivery_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved Data Delivery Id"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Id"
+        },
+        "rule_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Name"
+        },
+        "run_plan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Plan Id"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Severity"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        "submitted_at": {
+          "title": "Submitted At",
+          "type": "string"
+        },
+        "suite_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Id"
+        },
+        "suite_version": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Version"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "correlation_id",
+        "engine_target",
+        "execution_shape",
+        "status",
+        "submitted_at",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "GxExecutionRunSummaryView",
+      "type": "object"
+    },
+    "GxExecutionRunView": {
+      "properties": {
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "diagnostics": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "engine_target": {
+          "enum": [
+            "pyspark"
+          ],
+          "title": "Engine Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.engine_target"
+        },
+        "execution_contract": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Contract"
+        },
+        "execution_progress": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxExecutionProgressView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_shape": {
+          "enum": [
+            "single_object",
+            "join_pair",
+            "streaming",
+            "micro_batch",
+            "grouped_scope"
+          ],
+          "title": "Execution Shape",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_shape"
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Code"
+        },
+        "failure_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Message"
+        },
+        "handoff_payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Handoff Payload"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "performance_summary": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performance Summary"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By"
+        },
+        "resolved_data_delivery_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved Data Delivery Id"
+        },
+        "result_summary": {
+          "additionalProperties": true,
+          "title": "Result Summary",
+          "type": "object"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Id"
+        },
+        "rule_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Version Id"
+        },
+        "run_plan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Plan Id"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        "status_history": {
+          "items": {
+            "$ref": "#/$defs/GxExecutionRunStatusHistoryView"
+          },
+          "title": "Status History",
+          "type": "array"
+        },
+        "submitted_at": {
+          "title": "Submitted At",
+          "type": "string"
+        },
+        "suite_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Id"
+        },
+        "suite_version": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Version"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "correlation_id",
+        "engine_target",
+        "execution_shape",
+        "status",
+        "submitted_at",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "GxExecutionRunView",
+      "type": "object"
+    },
+    "GxReconciliationRunCreateRequestView": {
+      "additionalProperties": false,
+      "properties": {
+        "left_datasource_id": {
+          "title": "Left Datasource Id",
+          "type": "string"
+        },
+        "left_datasource_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Left Datasource Name"
+        },
+        "left_datasource_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Left Datasource Type"
+        },
+        "preview_left_rows": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Preview Left Rows",
+          "type": "array"
+        },
+        "preview_right_rows": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Preview Right Rows",
+          "type": "array"
+        },
+        "reconciliation_params": {
+          "additionalProperties": true,
+          "title": "Reconciliation Params",
+          "type": "object"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By"
+        },
+        "right_datasource_id": {
+          "title": "Right Datasource Id",
+          "type": "string"
+        },
+        "right_datasource_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Right Datasource Name"
+        },
+        "right_datasource_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Right Datasource Type"
+        },
+        "scheduled_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled At"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "left_datasource_id",
+        "right_datasource_id"
+      ],
+      "title": "GxReconciliationRunCreateRequestView",
+      "type": "object"
+    },
+    "GxRunPlanActivationView": {
+      "properties": {
+        "dispatch": {
+          "additionalProperties": true,
+          "title": "Dispatch",
+          "type": "object"
+        },
+        "plan": {
+          "$ref": "#/$defs/GxRunPlanView"
+        }
+      },
+      "required": [
+        "plan",
+        "dispatch"
+      ],
+      "title": "GxRunPlanActivationView",
+      "type": "object"
+    },
+    "GxRunPlanAssignmentScopeView": {
+      "additionalProperties": true,
+      "properties": {
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        }
+      },
+      "title": "GxRunPlanAssignmentScopeView",
+      "type": "object"
+    },
+    "GxRunPlanCreateRequestView": {
+      "properties": {
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "planning_mode": {
+          "default": "single_suite",
+          "enum": [
+            "single_suite",
+            "grouped_scope"
+          ],
+          "title": "Planning Mode",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.run_plan_planning_mode"
+        },
+        "scheduled_at": {
+          "format": "date-time",
+          "title": "Scheduled At",
+          "type": "string"
+        },
+        "suite_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Id"
+        },
+        "suite_version": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Version"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "scheduled_at"
+      ],
+      "title": "GxRunPlanCreateRequestView",
+      "type": "object"
+    },
+    "GxRunPlanGovernanceTransitionRequestView": {
+      "properties": {
+        "effective_from": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective From"
+        },
+        "target_state": {
+          "enum": [
+            "pending_validation",
+            "validation_failed",
+            "pending_review",
+            "approved_pending_activation",
+            "activation-requested",
+            "deactivation-requested",
+            "cancelled"
+          ],
+          "title": "Target State",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.run_plan_target_state"
+        }
+      },
+      "required": [
+        "target_state"
+      ],
+      "title": "GxRunPlanGovernanceTransitionRequestView",
+      "type": "object"
+    },
+    "GxRunPlanGroupedExecutionContractSnapshotView": {
+      "properties": {
+        "batch_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Batch Count"
+        },
+        "selection_mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "single_suite",
+                "grouped_scope"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.run_plan_planning_mode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Selection Mode"
+        },
+        "suite_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Count"
+        }
+      },
+      "title": "GxRunPlanGroupedExecutionContractSnapshotView",
+      "type": "object"
+    },
+    "GxRunPlanGroupedExecutionPlanView": {
+      "properties": {
+        "batch_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Batch Count"
+        },
+        "suite_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Count"
+        }
+      },
+      "title": "GxRunPlanGroupedExecutionPlanView",
+      "type": "object"
+    },
+    "GxRunPlanGroupedSuiteSnapshotView": {
+      "properties": {
+        "grouped_execution_plan": {
+          "$ref": "#/$defs/GxRunPlanGroupedExecutionPlanView"
+        },
+        "suite_envelopes": {
+          "items": {
+            "$ref": "#/$defs/GxRunPlanSingleSuiteSnapshotView"
+          },
+          "title": "Suite Envelopes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "grouped_execution_plan"
+      ],
+      "title": "GxRunPlanGroupedSuiteSnapshotView",
+      "type": "object"
+    },
+    "GxRunPlanScheduleDefinitionView": {
+      "properties": {
+        "scheduled_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled At"
+        }
+      },
+      "title": "GxRunPlanScheduleDefinitionView",
+      "type": "object"
+    },
+    "GxRunPlanScopeSelectorView": {
+      "additionalProperties": true,
+      "properties": {
+        "assignment_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxRunPlanAssignmentScopeView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "title": "GxRunPlanScopeSelectorView",
+      "type": "object"
+    },
+    "GxRunPlanSingleSuiteSnapshotView": {
+      "additionalProperties": true,
+      "properties": {
+        "artifact_version": {
+          "anyOf": [
+            {
+              "enum": [
+                "v1"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.artifact_version"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Artifact Version"
+        },
+        "assignment_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactAssignmentScopeView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compiled_from": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactCompiledFromView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "execution_contract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactExecutionContractView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_hints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactExecutionHintsView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gx_suite": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gx Suite"
+        },
+        "resolved_execution_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactResolvedExecutionScopeView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "saved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Saved By"
+        },
+        "source_pipeline": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Pipeline"
+        },
+        "suite_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Id"
+        },
+        "suite_version": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Version"
+        }
+      },
+      "title": "GxRunPlanSingleSuiteSnapshotView",
+      "type": "object"
+    },
+    "GxRunPlanSuiteRefView": {
+      "properties": {
+        "engine_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Engine Type"
+        },
+        "suite_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Id"
+        },
+        "suite_version": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Version"
+        }
+      },
+      "title": "GxRunPlanSuiteRefView",
+      "type": "object"
+    },
+    "GxRunPlanSuiteSelectionView": {
+      "properties": {
+        "grouped_execution_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxRunPlanGroupedExecutionPlanView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_selector": {
+          "$ref": "#/$defs/GxRunPlanScopeSelectorView"
+        },
+        "selection_mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "single_suite",
+                "grouped_scope"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.run_plan_planning_mode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Selection Mode"
+        },
+        "suite_refs": {
+          "items": {
+            "$ref": "#/$defs/GxRunPlanSuiteRefView"
+          },
+          "title": "Suite Refs",
+          "type": "array"
+        }
+      },
+      "title": "GxRunPlanSuiteSelectionView",
+      "type": "object"
+    },
+    "GxRunPlanTransitionEventView": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actor Id"
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "effective_from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective From"
+        },
+        "from_state": {
+          "anyOf": [
+            {
+              "enum": [
+                "draft",
+                "inactive",
+                "activation-requested",
+                "pending_validation",
+                "validation_failed",
+                "pending_review",
+                "approved_pending_activation",
+                "active",
+                "deactivation-requested",
+                "deactivated",
+                "superseded",
+                "cancelled"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.run_plan_governance_state"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From State"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "occurred_at": {
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "run_plan_id": {
+          "title": "Run Plan Id",
+          "type": "string"
+        },
+        "run_plan_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Plan Version Id"
+        },
+        "to_state": {
+          "anyOf": [
+            {
+              "enum": [
+                "draft",
+                "inactive",
+                "activation-requested",
+                "pending_validation",
+                "validation_failed",
+                "pending_review",
+                "approved_pending_activation",
+                "active",
+                "deactivation-requested",
+                "deactivated",
+                "superseded",
+                "cancelled"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.run_plan_governance_state"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "To State"
+        }
+      },
+      "required": [
+        "id",
+        "run_plan_id",
+        "action",
+        "occurred_at"
+      ],
+      "title": "GxRunPlanTransitionEventView",
+      "type": "object"
+    },
+    "GxRunPlanValidationDiagnosticView": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "details": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Details"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "scope": {
+          "title": "Scope",
+          "type": "string"
+        },
+        "severity": {
+          "default": "error",
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope",
+        "code",
+        "message"
+      ],
+      "title": "GxRunPlanValidationDiagnosticView",
+      "type": "object"
+    },
+    "GxRunPlanValidationView": {
+      "properties": {
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/GxRunPlanValidationDiagnosticView"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "plan": {
+          "$ref": "#/$defs/GxRunPlanView"
+        },
+        "validation_status": {
+          "enum": [
+            "passed",
+            "failed"
+          ],
+          "title": "Validation Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.run_plan_validation_status"
+        }
+      },
+      "required": [
+        "plan",
+        "validation_status",
+        "message"
+      ],
+      "title": "GxRunPlanValidationView",
+      "type": "object"
+    },
+    "GxRunPlanVersionCreateRequestView": {
+      "properties": {
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "planning_mode": {
+          "default": "single_suite",
+          "enum": [
+            "single_suite",
+            "grouped_scope"
+          ],
+          "title": "Planning Mode",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.run_plan_planning_mode"
+        },
+        "scheduled_at": {
+          "format": "date-time",
+          "title": "Scheduled At",
+          "type": "string"
+        },
+        "suite_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Id"
+        },
+        "suite_version": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Version"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scheduled_at"
+      ],
+      "title": "GxRunPlanVersionCreateRequestView",
+      "type": "object"
+    },
+    "GxRunPlanVersionView": {
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        },
+        "effective_from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective From"
+        },
+        "execution_contract_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxArtifactExecutionContractView"
+            },
+            {
+              "$ref": "#/$defs/GxRunPlanGroupedExecutionContractSnapshotView"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Contract Snapshot"
+        },
+        "governance_state": {
+          "enum": [
+            "draft",
+            "inactive",
+            "activation-requested",
+            "pending_validation",
+            "validation_failed",
+            "pending_review",
+            "approved_pending_activation",
+            "active",
+            "deactivation-requested",
+            "deactivated",
+            "superseded",
+            "cancelled"
+          ],
+          "title": "Governance State",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.run_plan_governance_state"
+        },
+        "gx_suite_selection": {
+          "$ref": "#/$defs/GxRunPlanSuiteSelectionView"
+        },
+        "review_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Review Status"
+        },
+        "run_plan_id": {
+          "title": "Run Plan Id",
+          "type": "string"
+        },
+        "run_plan_version_id": {
+          "title": "Run Plan Version Id",
+          "type": "string"
+        },
+        "schedule_definition": {
+          "$ref": "#/$defs/GxRunPlanScheduleDefinitionView"
+        },
+        "suite_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Id"
+        },
+        "suite_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GxRunPlanGroupedSuiteSnapshotView"
+            },
+            {
+              "$ref": "#/$defs/GxRunPlanSingleSuiteSnapshotView"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Snapshot"
+        },
+        "suite_version": {
+          "anyOf": [
+            {
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Suite Version"
+        },
+        "supersedes_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Supersedes Version Id"
+        },
+        "validation_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Validation Status"
+        }
+      },
+      "required": [
+        "run_plan_version_id",
+        "run_plan_id",
+        "governance_state",
+        "created_at"
+      ],
+      "title": "GxRunPlanVersionView",
+      "type": "object"
+    },
+    "GxRunPlanView": {
+      "properties": {
+        "activated_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Activated At"
+        },
+        "activated_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Activated By"
+        },
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Business Key"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        },
+        "current_active_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Active Version Id"
+        },
+        "last_dispatched_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Dispatched Run Id"
+        },
+        "pending_version_governance_state": {
+          "anyOf": [
+            {
+              "enum": [
+                "draft",
+                "inactive",
+                "activation-requested",
+                "pending_validation",
+                "validation_failed",
+                "pending_review",
+                "approved_pending_activation",
+                "active",
+                "deactivation-requested",
+                "deactivated",
+                "superseded",
+                "cancelled"
+              ],
+              "type": "string",
+              "x-dq-domain-allowed-values-set": "gx.run_plan_governance_state"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pending Version Governance State"
+        },
+        "pending_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pending Version Id"
+        },
+        "planning_mode": {
+          "enum": [
+            "single_suite",
+            "grouped_scope"
+          ],
+          "title": "Planning Mode",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.run_plan_planning_mode"
+        },
+        "run_plan_id": {
+          "title": "Run Plan Id",
+          "type": "string"
+        },
+        "scope_selector": {
+          "$ref": "#/$defs/GxRunPlanScopeSelectorView"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "inactive",
+            "activation-requested",
+            "pending_validation",
+            "validation_failed",
+            "pending_review",
+            "approved_pending_activation",
+            "active",
+            "deactivation-requested",
+            "deactivated",
+            "superseded",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.run_plan_governance_state"
+        },
+        "transition_events": {
+          "items": {
+            "$ref": "#/$defs/GxRunPlanTransitionEventView"
+          },
+          "title": "Transition Events",
+          "type": "array"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/GxRunPlanVersionView"
+          },
+          "title": "Versions",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_plan_id",
+        "workspace_id",
+        "planning_mode",
+        "status",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "GxRunPlanView",
+      "type": "object"
+    },
+    "GxSuiteRunDispatchHandoffView": {
+      "properties": {
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Business Key"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "dispatch_mode": {
+          "enum": [
+            "queued"
+          ],
+          "title": "Dispatch Mode",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.dispatch_mode"
+        },
+        "engine_target": {
+          "enum": [
+            "pyspark"
+          ],
+          "title": "Engine Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.engine_target"
+        },
+        "engine_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Engine Type"
+        },
+        "execution_contract": {
+          "$ref": "#/$defs/GxArtifactExecutionContractView"
+        },
+        "execution_shape": {
+          "enum": [
+            "single_object",
+            "join_pair",
+            "streaming",
+            "micro_batch",
+            "grouped_scope"
+          ],
+          "title": "Execution Shape",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_shape"
+        },
+        "executor_target": {
+          "enum": [
+            "dq-engine"
+          ],
+          "title": "Executor Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.executor_target"
+        },
+        "handoff_ready": {
+          "title": "Handoff Ready",
+          "type": "boolean"
+        },
+        "handoff_status": {
+          "enum": [
+            "accepted"
+          ],
+          "title": "Handoff Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.handoff_status"
+        },
+        "queue_key": {
+          "title": "Queue Key",
+          "type": "string"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "scheduled_at": {
+          "title": "Scheduled At",
+          "type": "string"
+        },
+        "submitted_at": {
+          "title": "Submitted At",
+          "type": "string"
+        },
+        "suite_id": {
+          "title": "Suite Id",
+          "type": "string"
+        },
+        "suite_version": {
+          "minimum": 1.0,
+          "title": "Suite Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "run_id",
+        "suite_id",
+        "suite_version",
+        "correlation_id",
+        "engine_target",
+        "execution_shape",
+        "handoff_status",
+        "handoff_ready",
+        "submitted_at",
+        "execution_contract",
+        "dispatch_mode",
+        "executor_target",
+        "queue_key",
+        "scheduled_at"
+      ],
+      "title": "GxSuiteRunDispatchHandoffView",
+      "type": "object"
+    },
+    "GxSuiteRunHandoffView": {
+      "properties": {
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Business Key"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "engine_target": {
+          "enum": [
+            "pyspark"
+          ],
+          "title": "Engine Target",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.engine_target"
+        },
+        "engine_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Engine Type"
+        },
+        "execution_contract": {
+          "$ref": "#/$defs/GxArtifactExecutionContractView"
+        },
+        "execution_shape": {
+          "enum": [
+            "single_object",
+            "join_pair",
+            "streaming",
+            "micro_batch",
+            "grouped_scope"
+          ],
+          "title": "Execution Shape",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_shape"
+        },
+        "handoff_ready": {
+          "title": "Handoff Ready",
+          "type": "boolean"
+        },
+        "handoff_status": {
+          "enum": [
+            "accepted"
+          ],
+          "title": "Handoff Status",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.handoff_status"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By"
+        },
+        "submitted_at": {
+          "title": "Submitted At",
+          "type": "string"
+        },
+        "suite_id": {
+          "title": "Suite Id",
+          "type": "string"
+        },
+        "suite_version": {
+          "minimum": 1.0,
+          "title": "Suite Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "suite_id",
+        "suite_version",
+        "correlation_id",
+        "engine_target",
+        "execution_shape",
+        "handoff_status",
+        "handoff_ready",
+        "submitted_at",
+        "execution_contract"
+      ],
+      "title": "GxSuiteRunHandoffView",
+      "type": "object"
+    },
+    "GxSuiteRunScheduleRequestView": {
+      "properties": {
+        "scheduled_at": {
+          "format": "date-time",
+          "title": "Scheduled At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scheduled_at"
+      ],
+      "title": "GxSuiteRunScheduleRequestView",
+      "type": "object"
+    },
+    "GxSuiteStatusHistoryView": {
+      "properties": {
+        "changed_at": {
+          "title": "Changed At",
+          "type": "string"
+        },
+        "changed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Changed By"
+        },
+        "from_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From Status"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "suite_id": {
+          "title": "Suite Id",
+          "type": "string"
+        },
+        "suite_version": {
+          "title": "Suite Version",
+          "type": "integer"
+        },
+        "to_status": {
+          "title": "To Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "suite_id",
+        "suite_version",
+        "to_status",
+        "changed_at"
+      ],
+      "title": "GxSuiteStatusHistoryView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "activate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_activate_post_param_path_run_plan_id": {
+      "title": "Run Plan Id",
+      "type": "string"
+    },
+    "activate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_activate_post_param_path_run_plan_version_id": {
+      "title": "Run Plan Version Id",
+      "type": "string"
+    },
+    "create_adhoc_gx_suite_runs_api_rulebuilder_v1_gx_runs_adhoc_post_response_202_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxSuiteRunDispatchHandoffView"
+      },
+      "title": "Response Create Adhoc Gx Suite Runs Api Rulebuilder V1 Gx Runs Adhoc Post",
+      "type": "array"
+    },
+    "create_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_post_param_path_run_plan_id": {
+      "title": "Run Plan Id",
+      "type": "string"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataObjectId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectid"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataObjectName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectname"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataObjectVersionId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectversionid"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_dataProductId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataproductid"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_datasetId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Datasetid"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_deliveryId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Deliveryid"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_lookbackAmount": {
+      "default": 24,
+      "maximum": 720,
+      "minimum": 1,
+      "title": "Lookbackamount",
+      "type": "integer"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_lookbackUnit": {
+      "default": "hours",
+      "title": "Lookbackunit",
+      "type": "string"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_reasonCode": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reasoncode"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_ruleName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rulename"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_ruleVersionId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Ruleversionid"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_search": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Search"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_suiteId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteid"
+    },
+    "get_gx_execution_exception_analytics_api_rulebuilder_v1_gx_exception_analytics_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "get_gx_execution_run_api_rulebuilder_v1_gx_runs_run_id_get_param_path_run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "get_gx_execution_run_queue_status_api_rulebuilder_v1_gx_runs_run_id_queue_status_get_param_path_run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "get_gx_execution_run_queue_status_api_rulebuilder_v1_gx_runs_run_id_queue_status_get_param_query_scanLimit": {
+      "default": 500,
+      "maximum": 5000,
+      "minimum": 1,
+      "title": "Scanlimit",
+      "type": "integer"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataObjectId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectid"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataObjectName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectname"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataObjectVersionId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectversionid"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_dataProductId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataproductid"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_datasetId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Datasetid"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_deliveryId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Deliveryid"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Domain"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_lookbackAmount": {
+      "default": 24,
+      "maximum": 720,
+      "minimum": 1,
+      "title": "Lookbackamount",
+      "type": "integer"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_lookbackUnit": {
+      "default": "hours",
+      "title": "Lookbackunit",
+      "type": "string"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Owner"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_recentLimit": {
+      "default": 10,
+      "maximum": 50,
+      "minimum": 1,
+      "title": "Recentlimit",
+      "type": "integer"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_ruleName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rulename"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_runPlanId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Runplanid"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_search": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Search"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_severity": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Severity"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "get_gx_execution_run_statistics_api_rulebuilder_v1_gx_runs_stats_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "get_gx_execution_run_status_history_api_rulebuilder_v1_gx_runs_run_id_status_history_get_param_path_run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "get_gx_execution_run_status_history_api_rulebuilder_v1_gx_runs_run_id_status_history_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxExecutionRunStatusHistoryView"
+      },
+      "title": "Response Get Gx Execution Run Status History Api Rulebuilder V1 Gx Runs  Run Id  Status History Get",
+      "type": "array"
+    },
+    "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_dataProductId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataproductid"
+    },
+    "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_datasetId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Datasetid"
+    },
+    "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_domainId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Domainid"
+    },
+    "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_lookbackAmount": {
+      "default": 24,
+      "maximum": 720,
+      "minimum": 1,
+      "title": "Lookbackamount",
+      "type": "integer"
+    },
+    "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_lookbackUnit": {
+      "default": "hours",
+      "title": "Lookbackunit",
+      "type": "string"
+    },
+    "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_ruleId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Ruleid"
+    },
+    "get_gx_result_history_drift_summary_api_rulebuilder_v1_gx_result_history_drift_get_param_query_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "get_gx_run_plan_api_rulebuilder_v1_gx_run_plans_run_plan_id_get_param_path_run_plan_id": {
+      "title": "Run Plan Id",
+      "type": "string"
+    },
+    "get_gx_suite_api_rulebuilder_v1_gx_suites_suite_id_get_param_path_suite_id": {
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "get_gx_suite_api_rulebuilder_v1_gx_suites_suite_id_get_param_query_status": {
+      "default": "active",
+      "title": "Status",
+      "type": "string"
+    },
+    "get_gx_suite_api_rulebuilder_v1_gx_suites_suite_id_get_param_query_suiteVersion": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteversion"
+    },
+    "get_gx_suite_status_history_api_rulebuilder_v1_gx_suites_suite_id_status_history_get_param_path_suite_id": {
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "get_gx_suite_status_history_api_rulebuilder_v1_gx_suites_suite_id_status_history_get_param_query_suiteVersion": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteversion"
+    },
+    "get_gx_suite_status_history_api_rulebuilder_v1_gx_suites_suite_id_status_history_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxSuiteStatusHistoryView"
+      },
+      "title": "Response Get Gx Suite Status History Api Rulebuilder V1 Gx Suites  Suite Id  Status History Get",
+      "type": "array"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataObjectId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectid"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataObjectName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectname"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataObjectVersionId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectversionid"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_dataProductId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataproductid"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_datasetId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Datasetid"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_deliveryId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Deliveryid"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Domain"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_limit": {
+      "default": 25,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_lookbackAmount": {
+      "default": 24,
+      "maximum": 720,
+      "minimum": 1,
+      "title": "Lookbackamount",
+      "type": "integer"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_lookbackUnit": {
+      "default": "hours",
+      "title": "Lookbackunit",
+      "type": "string"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Owner"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_ruleName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Rulename"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_runPlanId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Runplanid"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_search": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Search"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_severity": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Severity"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "list_gx_execution_runs_api_rulebuilder_v1_gx_runs_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxExecutionRunSummaryView"
+      },
+      "title": "Response List Gx Execution Runs Api Rulebuilder V1 Gx Runs Get",
+      "type": "array"
+    },
+    "list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_param_query_limit": {
+      "default": 10,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_param_query_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "pending",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "gx.execution_status"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "list_gx_reconciliation_runs_api_rulebuilder_v1_gx_runs_reconciliation_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxExecutionRunView"
+      },
+      "title": "Response List Gx Reconciliation Runs Api Rulebuilder V1 Gx Runs Reconciliation Get",
+      "type": "array"
+    },
+    "list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_businessKey": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Businesskey"
+    },
+    "list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_suiteId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteid"
+    },
+    "list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "list_gx_run_plans_api_rulebuilder_v1_gx_run_plans_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxRunPlanView"
+      },
+      "title": "Response List Gx Run Plans Api Rulebuilder V1 Gx Run Plans Get",
+      "type": "array"
+    },
+    "list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_dataObjectId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectid"
+    },
+    "list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_dataObjectVersionId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataobjectversionid"
+    },
+    "list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_dataProductId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataproductid"
+    },
+    "list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_datasetId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Datasetid"
+    },
+    "list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_latestOnly": {
+      "default": true,
+      "title": "Latestonly",
+      "type": "boolean"
+    },
+    "list_gx_suites_api_rulebuilder_v1_gx_suites_get_param_query_status": {
+      "default": "active",
+      "title": "Status",
+      "type": "string"
+    },
+    "list_gx_suites_api_rulebuilder_v1_gx_suites_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxArtifactEnvelopeView"
+      },
+      "title": "Response List Gx Suites Api Rulebuilder V1 Gx Suites Get",
+      "type": "array"
+    },
+    "list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_param_path_rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_param_query_latestOnly": {
+      "default": true,
+      "title": "Latestonly",
+      "type": "boolean"
+    },
+    "list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_param_query_status": {
+      "default": "active",
+      "title": "Status",
+      "type": "string"
+    },
+    "list_gx_suites_for_rule_api_rulebuilder_v1_gx_suites_by_rule_rule_id_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/GxArtifactEnvelopeView"
+      },
+      "title": "Response List Gx Suites For Rule Api Rulebuilder V1 Gx Suites By Rule  Rule Id  Get",
+      "type": "array"
+    },
+    "patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_path_suite_id": {
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_query_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Reason"
+    },
+    "patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_query_status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "patch_gx_suite_status_api_rulebuilder_v1_gx_suites_suite_id_status_patch_param_query_suiteVersion": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteversion"
+    },
+    "report_gx_execution_run_api_rulebuilder_v1_gx_runs_run_id_report_post_param_path_run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "save_gx_suite_api_rulebuilder_v1_gx_suites_post_param_query_expectedExistingHash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Expectedexistinghash"
+    },
+    "save_gx_suite_api_rulebuilder_v1_gx_suites_post_param_query_sourcePipeline": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sourcepipeline"
+    },
+    "save_gx_suite_api_rulebuilder_v1_gx_suites_post_param_query_status": {
+      "default": "active",
+      "title": "Status",
+      "type": "string"
+    },
+    "schedule_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_schedule_post_param_path_suite_id": {
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "schedule_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_schedule_post_param_query_status": {
+      "default": "active",
+      "title": "Status",
+      "type": "string"
+    },
+    "schedule_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_schedule_post_param_query_suiteVersion": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteversion"
+    },
+    "start_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_start_post_param_path_suite_id": {
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "start_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_start_post_param_query_status": {
+      "default": "active",
+      "title": "Status",
+      "type": "string"
+    },
+    "start_gx_suite_run_api_rulebuilder_v1_gx_suites_suite_id_runs_start_post_param_query_suiteVersion": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteversion"
+    },
+    "transition_gx_run_plan_version_governance_state_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_governance_state_post_param_path_run_plan_id": {
+      "title": "Run Plan Id",
+      "type": "string"
+    },
+    "transition_gx_run_plan_version_governance_state_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_governance_state_post_param_path_run_plan_version_id": {
+      "title": "Run Plan Version Id",
+      "type": "string"
+    },
+    "validate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_validate_post_param_path_run_plan_id": {
+      "title": "Run Plan Id",
+      "type": "string"
+    },
+    "validate_gx_run_plan_version_api_rulebuilder_v1_gx_run_plans_run_plan_id_versions_run_plan_version_id_validate_post_param_path_run_plan_version_id": {
+      "title": "Run Plan Version Id",
+      "type": "string"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/gx/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/gx v1 schema bundle"
+}

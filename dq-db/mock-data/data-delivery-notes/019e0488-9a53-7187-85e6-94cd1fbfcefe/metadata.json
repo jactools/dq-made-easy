@@ -1,0 +1,11 @@
+{
+  "workspace_id": "retail-banking",
+  "product_id": "019e0488-9a54-7ccd-8b26-ac440ebc2f3c",
+  "data_set_id": "019e0488-9a54-7678-a935-3e65933617ae",
+  "data_object_id": "Customer",
+  "data_object_version_id": "019e0488-9a53-7a7f-8cde-a785bd046bc9",
+  "notes": [
+    "customer snapshot",
+    "parquet seed"
+  ]
+}

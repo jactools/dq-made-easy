@@ -1,0 +1,234 @@
+[
+  {
+    "case_id": "plausible_transaction_amount_by_currency",
+    "dimension": "accuracy",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "amount",
+      "currency"
+    ],
+    "materialize_attribute_names": [
+      "transaction_id",
+      "amount",
+      "currency"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "custom_query_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-4"
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "(currency = 'USD' AND amount >= 0 AND amount <= 100000) OR (currency = 'EUR' AND amount >= 0 AND amount <= 90000)"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "plausible_inventory_quantity_by_warehouse",
+    "dimension": "accuracy",
+    "version_id": "dov-24",
+    "data_object_id": "do-6",
+    "primary_key_fields": [
+      "inventory_id"
+    ],
+    "assign_attribute_names": [
+      "quantity_on_hand",
+      "warehouse_id"
+    ],
+    "materialize_attribute_names": [
+      "inventory_id",
+      "quantity_on_hand",
+      "warehouse_id"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "custom_query_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-6"
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "(warehouse_id = 'WH-001' AND quantity_on_hand >= 0 AND quantity_on_hand <= 5000) OR (warehouse_id = 'WH-002' AND quantity_on_hand >= 0 AND quantity_on_hand <= 10000)"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "plausible_contact_type_by_preference",
+    "dimension": "consistency",
+    "version_id": "dov-23",
+    "data_object_id": "do-2",
+    "primary_key_fields": [
+      "contact_id"
+    ],
+    "assign_attribute_names": [
+      "contact_type",
+      "preferred_contact"
+    ],
+    "materialize_attribute_names": [
+      "contact_id",
+      "contact_type",
+      "preferred_contact"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "custom_query_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-2"
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "(preferred_contact = 'email' AND LOWER(contact_type) IN ('billing', 'support')) OR (preferred_contact = 'phone' AND LOWER(contact_type) IN ('sales', 'service'))"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  },
+  {
+    "case_id": "plausible_payment_method_by_currency",
+    "dimension": "consistency",
+    "version_id": "dov-9",
+    "data_object_id": "do-4",
+    "primary_key_fields": [
+      "transaction_id"
+    ],
+    "assign_attribute_names": [
+      "payment_method",
+      "currency"
+    ],
+    "materialize_attribute_names": [
+      "transaction_id",
+      "payment_method",
+      "currency"
+    ],
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "custom_query_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-4"
+          }
+        },
+        "measure": {
+          "type": "query",
+          "query_language": "sql",
+          "query": "(currency = 'USD' AND LOWER(payment_method) IN ('card', 'ach')) OR (currency = 'EUR' AND LOWER(payment_method) IN ('card', 'sepa'))"
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "gte",
+          "value": 100,
+          "unit": "percent"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 25,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "critical",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  }
+]

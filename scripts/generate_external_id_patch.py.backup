@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+"""Generate a safe SQL patch to populate `users.external_id` from mock CSV data.
+
+This updated script will attempt to resolve the Keycloak user id (the OIDC
+`sub`) for each email from `dq-db/mock-data/users.csv` by calling the
+Keycloak admin API. When a Keycloak user is found for an email, the script
+will emit an UPDATE statement that sets `users.external_id` only when the
+database value is NULL or empty.
+
+    Environment variables required to query Keycloak (STRICT, single-source):
+        - KEYCLOAK_BASE: full base URL for Keycloak (e.g. http://localhost:8080)
+        - KEYCLOAK_REALM: realm that contains the user accounts to look up
+        - KEYCLOAK_TOKEN_REALM: realm to request an admin token from (defaults to "master")
+        - KEYCLOAK_SYSTEM_ADMIN_USERNAME: admin username (required)
+        - KEYCLOAK_SYSTEM_ADMIN_PASSWORD: admin password (required)
+    Optional:
+        - KEYCLOAK_CLIENT_ID: client id to use for token requests (defaults to admin-cli)
+
+This script is strict and fail-fast: Keycloak configuration and a valid
+admin token are required. The script will abort with a non-zero exit code
+if Keycloak is unavailable, missing, or no users are found for the emails
+in `users.csv`.
+"""
+import argparse
+import csv
+import json
+import os
+import urllib.parse
+import urllib.request
+import shlex
+import subprocess
+import shutil
+import urllib.error
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+
+ROOT = Path(__file__).resolve().parents[1]
+# The generator now expects the Keycloak-exported CSV to be present in the
+# FastAPI migrations directory so Alembic revisions can access it adjacent
+# to the generated revision. Fail fast if missing.
+# OUT_DIR is the migrations/versions dir; parent is migrations.
+OUT_DIR = ROOT / "dq-api" / "fastapi" / "migrations" / "versions"
+OUT_DIR = OUT_DIR.resolve()
+INPUT = OUT_DIR.parent / "keycloak_users.csv"
+INPUT = INPUT.resolve()
+# Write the generated SQL directly into the FastAPI alembic revisions directory
+OUT_DIR = ROOT / "dq-api" / "fastapi" / "migrations" / "versions"
+OUT = OUT_DIR / "ensure_external_ids.sql"
+
+
+def _keycloak_token(
+    base: str,
+    token_realm: str,
+    username: Optional[str] = None,
+    password: Optional[str] = None,
+    client_id: str = "admin-cli",
+    client_secret: Optional[str] = None,
+) -> Optional[str]:
+    """Obtain a Keycloak token.
+
+    Behavior:
+    - If `client_secret` is provided, use `client_credentials` against `token_realm`.
+    - Otherwise, if username/password are provided, use the password grant.
+    - Returns access_token or None on failure.
+    """
+    # If `docker` is not available (we're already inside a container), use direct
+    # HTTP calls via urllib. When docker is available, prefer the docker-run
+    # curl approach to reach the compose network from the host.
+    token_url = urllib.parse.urljoin(base.rstrip('/') + '/', f"realms/{token_realm}/protocol/openid-connect/token")
+    # prefer the compose service host which resolves inside the Compose network
+    compose_token_url = f"http://keycloak:8080/realms/{token_realm}/protocol/openid-connect/token"
+
+    if client_secret:
+        data_pairs = ["grant_type=client_credentials", f"client_id={client_id}", f"client_secret={client_secret}"]
+    elif username and password:
+        data_pairs = ["grant_type=password", f"username={username}", f"password={password}", f"client_id={client_id}"]
+    else:
+        print("Keycloak token request failed: insufficient credentials (provide client secret or username/password)")
+        return None
+
+    # detect docker compose network name
+    project_dir = Path.cwd().name
+    candidate_network = f"{project_dir}_default"
+    network = candidate_network
+    try:
+        rc = subprocess.run(["docker", "network", "inspect", network], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if rc.returncode != 0:
+            # fallback: try to find a network containing project_dir
+            out = subprocess.run(["docker", "network", "ls", "--format", "{{.Name}}"], capture_output=True, text=True)
+            for line in out.stdout.splitlines():
+                if project_dir in line:
+                    network = line.strip()
+                    break
+    except Exception:
+        network = candidate_network
+
+    # try compose host first, then provided base
+    attempts = [compose_token_url, token_url]
+
+    # If docker is not available, try direct HTTP requests (useful when running
+    # inside the python container attached to the compose network).
+    if shutil.which("docker") is None:
+        for attempt in attempts:
+            data = "&".join(data_pairs).encode()
+            req = urllib.request.Request(attempt, data=data, method="POST")
+            req.add_header("Content-Type", "application/x-www-form-urlencoded")
+            try:
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    body = resp.read().decode()
+                    try:
+                        payload = json.loads(body)
+                        token = payload.get("access_token")
+                        if token:
+                            return token
+                        else:
+                            print(f"Keycloak token response from {attempt} contained no access_token; response: {body}")
+                    except json.JSONDecodeError:
+                        print(f"Keycloak token response from {attempt} was not JSON: {body}")
+            except urllib.error.HTTPError as he:
+                try:
+                    body = he.read().decode()
+                except Exception:
+                    body = str(he)
+                print(f"Keycloak token request to {attempt} failed: HTTP {he.code} {body}")
+            except Exception as exc:
+                print(f"Keycloak token request to {attempt} failed: {exc}")
+        return None
+
+    for attempt in attempts:
+        curl_cmd = [
+            "docker", "run", "--rm", "--network", network, "curlimages/curl:8.7.1",
+            "-s", "-X", "POST", attempt,
+            "-H", "Content-Type: application/x-www-form-urlencoded",
+        ]
+        for p in data_pairs:
+            curl_cmd += ["-d", p]
+        try:
+            proc = subprocess.run(curl_cmd, capture_output=True, text=True, timeout=15)
+            if proc.returncode != 0:
+                print(f"Keycloak token request to {attempt} failed (curl rc={proc.returncode}). stderr: {proc.stderr.strip()} stdout: {proc.stdout.strip()}")
+                continue
+            try:
+                payload = json.loads(proc.stdout)
+                token = payload.get("access_token")
+                if token:
+                    return token
+                else:
+                    print(f"Keycloak token response from {attempt} contained no access_token; response: {proc.stdout.strip()}")
+            except json.JSONDecodeError:
+                print(f"Keycloak token response from {attempt} was not JSON: {proc.stdout.strip()}")
+        except Exception as exc:
+            print(f"Keycloak token request to {attempt} failed: {exc}")
+    return None
+
+
+def _keycloak_user_id_by_email(base: str, realm: str, token: str, email: str) -> Optional[str]:
+    # Use docker-in-network curl to query the admin users endpoint by email
+    url = urllib.parse.urljoin(base.rstrip('/') + '/', f"admin/realms/{realm}/users")
+    full = url + "?" + urllib.parse.urlencode({"email": email})
+
+    project_dir = Path.cwd().name
+    candidate_network = f"{project_dir}_default"
+    network = candidate_network
+    try:
+        rc = subprocess.run(["docker", "network", "inspect", network], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if rc.returncode != 0:
+            out = subprocess.run(["docker", "network", "ls", "--format", "{{.Name}}"], capture_output=True, text=True)
+            for line in out.stdout.splitlines():
+                if project_dir in line:
+                    network = line.strip()
+                    break
+    except Exception:
+        network = candidate_network
+
+    # If docker is not available, perform direct HTTP request (useful when
+    # running inside the python container on the compose network).
+    if shutil.which("docker") is None:
+        try:
+            req = urllib.request.Request(full, method="GET")
+            req.add_header("Authorization", f"Bearer {token}")
+            req.add_header("Accept", "application/json")
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                body = resp.read().decode()
+                data = json.loads(body)
+                if isinstance(data, list) and data:
+                    return data[0].get("id")
+        except urllib.error.HTTPError as he:
+            try:
+                body = he.read().decode()
+            except Exception:
+                body = str(he)
+            print(f"Keycloak user lookup HTTP error for {email}: {he.code} {body}")
+        except Exception as exc:
+            print(f"Keycloak user lookup failed for {email}: {exc}")
+        return None
+
+    curl_cmd = [
+        "docker", "run", "--rm", "--network", network, "curlimages/curl:8.7.1",
+        "-s", "-X", "GET", full,
+        "-H", f"Authorization: Bearer {token}",
+        "-H", "Accept: application/json",
+    ]
+    try:
+        proc = subprocess.run(curl_cmd, capture_output=True, text=True, timeout=15)
+        if proc.returncode != 0:
+            print(f"Keycloak user lookup failed for {email}: curl rc={proc.returncode} stderr={proc.stderr.strip()}")
+            # Retry using the compose service host
+            try:
+                alt_base = f"http://keycloak:8080"
+                alt_full = alt_base.rstrip('/') + f"/admin/realms/{realm}/users?" + urllib.parse.urlencode({"email": email})
+                alt_cmd = [
+                    "docker", "run", "--rm", "--network", network, "curlimages/curl:8.7.1",
+                    "-s", "-X", "GET", alt_full,
+                    "-H", f"Authorization: Bearer {token}",
+                    "-H", "Accept: application/json",
+                ]
+                proc2 = subprocess.run(alt_cmd, capture_output=True, text=True, timeout=15)
+                if proc2.returncode == 0:
+                    data = json.loads(proc2.stdout)
+                    if isinstance(data, list) and data:
+                        return data[0].get("id")
+                else:
+                    print(f"Fallback user lookup also failed (rc={proc2.returncode}): {proc2.stderr.strip()}")
+            except Exception:
+                pass
+            return None
+        data = json.loads(proc.stdout)
+        if isinstance(data, list) and data:
+            return data[0].get("id")
+    except Exception as exc:
+        print(f"Keycloak user lookup failed for {email}: {exc}")
+    return None
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate SQL patch mapping users.external_id from Keycloak")
+    parser.add_argument("--dry-run", action="store_true", help="Don't write SQL file; only report matches")
+    parser.add_argument("--verbose", action="store_true", help="Print per-email diagnostics")
+    parser.add_argument("--unmatched-file", default=str(OUT_DIR / "unmatched_emails.txt"), help="Path to write unmatched emails")
+    args = parser.parse_args()
+
+    if not INPUT.exists():
+        print(f"keycloak_users.csv not found at {INPUT} (expected in fastapi/migrations)")
+        raise SystemExit(2)
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Keycloak configuration is REQUIRED by repository policy (no fallbacks).
+    kc_base = os.environ.get("KEYCLOAK_BASE")
+    kc_realm = os.environ.get("KEYCLOAK_REALM")
+    kc_token_realm = os.environ.get("KEYCLOAK_TOKEN_REALM", "master")
+    # Use a single, strict auth source: the system-admin username/password only.
+    kc_user = os.environ.get("KEYCLOAK_SYSTEM_ADMIN_USERNAME")
+    kc_pass = os.environ.get("KEYCLOAK_SYSTEM_ADMIN_PASSWORD")
+    # Client id: use KEYCLOAK_CLIENT_ID if present, otherwise default to 'admin-cli'.
+    kc_client = os.environ.get("KEYCLOAK_CLIENT_ID", "admin-cli")
+    # For determinism we do NOT support client_credentials here; client secret
+    # is intentionally ignored to enforce a single env var source for auth.
+    kc_client_secret = None
+
+    if not all([kc_base, kc_realm]):
+        print(
+            "ERROR: Keycloak configuration missing. Set KEYCLOAK_BASE and KEYCLOAK_REALM."
+        )
+        raise SystemExit(2)
+
+    # Obtain token from token_realm. Prefer client_credentials when a secret is provided,
+    # otherwise fall back to password grant using username/password against token_realm.
+    token = _keycloak_token(kc_base, kc_token_realm, username=kc_user, password=kc_pass, client_id=kc_client, client_secret=kc_client_secret)
+    if not token:
+        print("ERROR: failed to obtain Keycloak admin token.")
+        raise SystemExit(3)
+
+    mappings: List[Tuple[str, str]] = []
+    unmatched: List[str] = []
+    with INPUT.open(newline="") as fh:
+        reader = csv.DictReader(fh)
+        for r in reader:
+            email = (r.get("email") or "").strip()
+            if not email:
+                continue
+            kc_id = _keycloak_user_id_by_email(kc_base, kc_realm, token, email)
+            if kc_id:
+                mappings.append((email, kc_id))
+                if args.verbose:
+                    print(f"MATCH: {email} -> {kc_id}")
+            else:
+                unmatched.append(email)
+                if args.verbose:
+                    print(f"NO MATCH: {email}")
+
+    # Write unmatched report
+    if unmatched:
+        with open(args.unmatched_file, "w") as uout:
+            for e in unmatched:
+                uout.write(e + "\n")
+        print(f"Wrote unmatched emails to {args.unmatched_file}")
+
+    if not mappings:
+        print("ERROR: no Keycloak users found for emails in keycloak_users.csv; aborting.")
+        raise SystemExit(4)
+
+    if args.dry_run:
+        print(f"Found {len(mappings)} matches; dry-run mode, not writing SQL.")
+        return
+
+    from datetime import datetime
+
+    ts = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    with OUT.open("w") as out:
+        out.write(f"-- Generated patch: populate users.external_id from fastapi/migrations/keycloak_users.csv\n")
+        out.write(f"-- Generated at UTC: {ts}\n")
+        out.write("BEGIN;\n")
+        for email, ext in mappings:
+            out.write(
+                "UPDATE users SET external_id = '%s' WHERE lower(email) = lower('%s') AND (external_id IS NULL OR external_id = '');\n" % (ext.replace("'", "''"), email.replace("'", "''"))
+            )
+        out.write("COMMIT;\n")
+
+    print(f"Wrote SQL patch to {OUT}")
+
+
+if __name__ == "__main__":
+    main()

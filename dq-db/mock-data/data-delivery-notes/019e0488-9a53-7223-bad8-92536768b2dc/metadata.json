@@ -1,0 +1,11 @@
+{
+  "workspace_id": "retail-banking",
+  "product_id": "019e0488-9a54-7bb4-a49e-98434c26d7a7",
+  "data_set_id": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
+  "data_object_id": "Transaction",
+  "data_object_version_id": "019e0488-9a53-76be-ab52-240e4250f6a4",
+  "notes": [
+    "validated",
+    "published"
+  ]
+}

@@ -1,0 +1,1 @@
+Base Node.js 20 image with build essentials for Data Quality Made Easy services

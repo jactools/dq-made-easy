@@ -1,0 +1,218 @@
+{
+  "group": "by-tag/auth",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "auth_callback_api_auth_v1_callback_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "code",
+          "required": false,
+          "schema_ref": "#/$defs/auth_callback_api_auth_v1_callback_get_param_query_code"
+        },
+        {
+          "in": "query",
+          "name": "state",
+          "required": false,
+          "schema_ref": "#/$defs/auth_callback_api_auth_v1_callback_get_param_query_state"
+        }
+      ],
+      "path": "/api/auth/v1/callback",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/auth_callback_api_auth_v1_callback_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Auth Callback",
+      "tags": [
+        "auth"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "login_api_auth_v1_login_post",
+      "path": "/api/auth/v1/login",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/login_api_auth_v1_login_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/LoginResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Login",
+      "tags": [
+        "auth"
+      ]
+    },
+    {
+      "description": "Redirect the browser to Keycloak's end-session endpoint.\n\nThe frontend navigates here instead of constructing the Keycloak logout URL\nclient-side. This avoids relying on React settings state and is always\nreliable because the backend reads the issuer/client from the database.",
+      "method": "GET",
+      "operation_id": "auth_logout_redirect_api_auth_v1_logout_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "id_token",
+          "required": false,
+          "schema_ref": "#/$defs/auth_logout_redirect_api_auth_v1_logout_get_param_query_id_token"
+        },
+        {
+          "in": "query",
+          "name": "frontend",
+          "required": false,
+          "schema_ref": "#/$defs/auth_logout_redirect_api_auth_v1_logout_get_param_query_frontend"
+        }
+      ],
+      "path": "/api/auth/v1/logout",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/auth_logout_redirect_api_auth_v1_logout_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Auth Logout Redirect",
+      "tags": [
+        "auth"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "logout_api_auth_v1_logout_post",
+      "path": "/api/auth/v1/logout",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/LogoutResponseView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Logout",
+      "tags": [
+        "auth"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "auth_redirect_api_auth_v1_redirect_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "frontend",
+          "required": false,
+          "schema_ref": "#/$defs/auth_redirect_api_auth_v1_redirect_get_param_query_frontend"
+        }
+      ],
+      "path": "/api/auth/v1/redirect",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/auth_redirect_api_auth_v1_redirect_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Auth Redirect",
+      "tags": [
+        "auth"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "auth_refresh_api_auth_v1_refresh_post",
+      "path": "/api/auth/v1/refresh",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/auth_refresh_api_auth_v1_refresh_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/auth_refresh_api_auth_v1_refresh_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Auth Refresh",
+      "tags": [
+        "auth"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

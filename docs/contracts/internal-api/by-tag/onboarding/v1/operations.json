@@ -1,0 +1,119 @@
+{
+  "group": "by-tag/onboarding",
+  "operations": [
+    {
+      "description": "Create onboarding draft rules for selected proposal IDs.",
+      "method": "POST",
+      "operation_id": "create_batch_api_rulebuilder_v1_onboarding_create_batch_post",
+      "path": "/api/rulebuilder/v1/onboarding/create-batch",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateBatchRequestSchema"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/CreateBatchResponseSchema"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Batch",
+      "tags": [
+        "onboarding"
+      ]
+    },
+    {
+      "description": "Generate rule proposals for the given scope.\n\n- **scope_type**: One of: workspace, product, dataset, object\n- **scope_id**: The ID of the scope (workspace ID, product ID, dataset ID, or data object version ID)\n- **workspace_id**: The workspace context\n\nReturns a grouped proposal tree with proposals grouped by template type,\nthen by dataset, then by data object.\n\nFail-fast behavior:\n- 400 if scope does not exist\n- 401 if user lacks access to workspace\n- 503 if metadata or rules service is unavailable (with correlation_id)",
+      "method": "POST",
+      "operation_id": "generate_proposals_api_rulebuilder_v1_onboarding_generate_proposals_post",
+      "path": "/api/rulebuilder/v1/onboarding/generate-proposals",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GenerateProposalsRequestSchema"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GenerateProposalsResponseSchema"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Generate Proposals",
+      "tags": [
+        "onboarding"
+      ]
+    },
+    {
+      "description": "Return object/attribute counts for the selected onboarding scope.",
+      "method": "POST",
+      "operation_id": "scope_summary_api_rulebuilder_v1_onboarding_scope_summary_post",
+      "path": "/api/rulebuilder/v1/onboarding/scope-summary",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GenerateProposalsRequestSchema"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ScopeSummaryResponseSchema"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Scope Summary",
+      "tags": [
+        "onboarding"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

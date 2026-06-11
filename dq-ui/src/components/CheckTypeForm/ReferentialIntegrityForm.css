@@ -1,0 +1,133 @@
+.check-type-form.referential-integrity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.check-type-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--app-surface-secondary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+}
+
+.check-type-form-label-with-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.check-type-form-label-with-actions .check-type-form-label {
+  margin: 0;
+  flex: 1;
+  min-width: 150px;
+}
+
+.reference-selection-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+}
+
+.reference-selection-summary .summary-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.reference-selection-summary .summary-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--app-text-secondary);
+  font-weight: 600;
+  min-width: 70px;
+}
+
+.reference-selection-summary .summary-value {
+  font-size: 0.875rem;
+  color: var(--app-text-primary);
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  background: var(--app-surface-secondary);
+  border-radius: 3px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reference-selection-summary .btn-change-reference {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+.reference-selection-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: var(--app-surface-primary);
+  border: 2px dashed var(--app-border-subtle);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.reference-selection-empty .btn {
+  width: auto;
+}
+
+.reference-selection-empty .btn i {
+  margin-right: 0.375rem;
+}
+
+.check-type-form.referential-integrity-form .check-type-form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.check-type-form.referential-integrity-form .check-type-form-field {
+  flex: 1;
+}
+
+.check-type-form.referential-integrity-form .check-type-form-field--half {
+  flex: 0 1 calc(50% - 0.5rem);
+}
+
+@media (max-width: 768px) {
+  .picker-button-group {
+    width: 100%;
+  }
+
+  .picker-toggle-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .check-type-form-label-with-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .check-type-form.referential-integrity-form .check-type-form-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .check-type-form.referential-integrity-form .check-type-form-field--half {
+    flex: 1;
+  }
+}

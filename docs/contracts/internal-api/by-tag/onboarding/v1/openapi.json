@@ -1,0 +1,374 @@
+{
+  "components": {
+    "schemas": {
+      "CreateBatchRequestSchema": {
+        "description": "Request schema for create-batch endpoint.",
+        "properties": {
+          "accepted_proposal_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted Proposal Ids",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "accepted_proposal_ids"
+        ],
+        "title": "CreateBatchRequestSchema",
+        "type": "object"
+      },
+      "CreateBatchResponseSchema": {
+        "description": "Response schema for create-batch endpoint.",
+        "properties": {
+          "batch_id": {
+            "title": "Batch Id",
+            "type": "string"
+          },
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "outcomes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outcomes",
+            "type": "array"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "total_accepted": {
+            "title": "Total Accepted",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "batch_id",
+          "workspace_id",
+          "total_accepted",
+          "created",
+          "skipped",
+          "failed",
+          "outcomes",
+          "created_at"
+        ],
+        "title": "CreateBatchResponseSchema",
+        "type": "object"
+      },
+      "GenerateProposalsRequestSchema": {
+        "description": "Request schema for generate-proposals endpoint.",
+        "properties": {
+          "scope_id": {
+            "title": "Scope Id",
+            "type": "string"
+          },
+          "scope_type": {
+            "title": "Scope Type",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope_type",
+          "scope_id",
+          "workspace_id"
+        ],
+        "title": "GenerateProposalsRequestSchema",
+        "type": "object"
+      },
+      "GenerateProposalsResponseSchema": {
+        "description": "Response schema for generate-proposals endpoint.",
+        "properties": {
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "proposals": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Proposals",
+            "type": "array"
+          },
+          "scope_id": {
+            "title": "Scope Id",
+            "type": "string"
+          },
+          "scope_type": {
+            "title": "Scope Type",
+            "type": "string"
+          },
+          "total_attributes": {
+            "title": "Total Attributes",
+            "type": "integer"
+          },
+          "total_proposals": {
+            "title": "Total Proposals",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope_type",
+          "scope_id",
+          "total_attributes",
+          "total_proposals",
+          "proposals",
+          "generated_at"
+        ],
+        "title": "GenerateProposalsResponseSchema",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ScopeSummaryResponseSchema": {
+        "description": "Response schema for scope-summary endpoint.",
+        "properties": {
+          "attribute_count": {
+            "title": "Attribute Count",
+            "type": "integer"
+          },
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "object_count": {
+            "title": "Object Count",
+            "type": "integer"
+          },
+          "scope_id": {
+            "title": "Scope Id",
+            "type": "string"
+          },
+          "scope_type": {
+            "title": "Scope Type",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope_type",
+          "scope_id",
+          "workspace_id",
+          "object_count",
+          "attribute_count",
+          "generated_at"
+        ],
+        "title": "ScopeSummaryResponseSchema",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/onboarding' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/rulebuilder/v1/onboarding/create-batch": {
+      "post": {
+        "description": "Create onboarding draft rules for selected proposal IDs.",
+        "operationId": "create_batch_api_rulebuilder_v1_onboarding_create_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBatchRequestSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBatchResponseSchema"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Batch",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/onboarding/generate-proposals": {
+      "post": {
+        "description": "Generate rule proposals for the given scope.\n\n- **scope_type**: One of: workspace, product, dataset, object\n- **scope_id**: The ID of the scope (workspace ID, product ID, dataset ID, or data object version ID)\n- **workspace_id**: The workspace context\n\nReturns a grouped proposal tree with proposals grouped by template type,\nthen by dataset, then by data object.\n\nFail-fast behavior:\n- 400 if scope does not exist\n- 401 if user lacks access to workspace\n- 503 if metadata or rules service is unavailable (with correlation_id)",
+        "operationId": "generate_proposals_api_rulebuilder_v1_onboarding_generate_proposals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateProposalsRequestSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateProposalsResponseSchema"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Proposals",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/onboarding/scope-summary": {
+      "post": {
+        "description": "Return object/attribute counts for the selected onboarding scope.",
+        "operationId": "scope_summary_api_rulebuilder_v1_onboarding_scope_summary_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateProposalsRequestSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopeSummaryResponseSchema"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Scope Summary",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    }
+  }
+}

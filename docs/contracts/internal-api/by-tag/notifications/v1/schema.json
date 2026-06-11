@@ -1,0 +1,146 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "NotificationView": {
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "notification_type": {
+          "enum": [
+            "gx_suite_empty",
+            "contract_change"
+          ],
+          "title": "Notification Type",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "notification.notification_type"
+        },
+        "recipient_id": {
+          "title": "Recipient Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "notification_type",
+        "recipient_id",
+        "message",
+        "created_at",
+        "details"
+      ],
+      "title": "NotificationView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "list_notifications_api_rulebuilder_v1_notifications_get_param_query_action": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Action"
+    },
+    "list_notifications_api_rulebuilder_v1_notifications_get_param_query_limit": {
+      "default": 50,
+      "maximum": 200,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_notifications_api_rulebuilder_v1_notifications_get_param_query_notification_type": {
+      "default": "gx_suite_empty",
+      "enum": [
+        "gx_suite_empty",
+        "contract_change"
+      ],
+      "title": "Notification Type",
+      "type": "string",
+      "x-dq-domain-allowed-values-set": "notification.notification_type"
+    },
+    "list_notifications_api_rulebuilder_v1_notifications_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "list_notifications_api_rulebuilder_v1_notifications_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/NotificationView"
+      },
+      "title": "Response List Notifications Api Rulebuilder V1 Notifications Get",
+      "type": "array"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/notifications/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/notifications v1 schema bundle"
+}

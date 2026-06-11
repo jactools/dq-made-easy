@@ -1,0 +1,43 @@
+server:
+  http_listen_port: 3200
+  log_level: debug
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    zipkin: {}
+
+ingester:
+  max_block_duration: 5m
+
+memberlist:
+  abort_if_cluster_join_fails: false
+  bind_port: 7946
+  join_members:
+    - tempo:7946
+
+compactor:
+  compaction:
+    block_retention: 48h
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/traces
+
+querier:
+  frontend_worker:
+    frontend_address: 127.0.0.1:9095
+
+
+
+
+

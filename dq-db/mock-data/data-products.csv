@@ -1,0 +1,7 @@
+"id","name","description","owner","created_at","icon","workspace_id","business_key"
+"019e0488-9a54-7ccd-8b26-ac440ebc2f3c","Customer & Order Management","Complete customer lifecycle and order processing data","Customer Experience Team","2025-01-15T10:00:00Z","icon-users","retail-banking","customer-order-management"
+"019e0488-9a54-7bb4-a49e-98434c26d7a7","Financial Transactions","Payment processing and financial data","Finance Operations","2025-03-01T10:00:00Z","icon-coin-euro","retail-banking","financial-transactions"
+"019e0488-9a54-7541-aae5-74bbd1123584","Product Catalog","Product master data and inventory information","Product Management","2025-04-01T10:00:00Z","icon-grid","retail-banking","product-catalog"
+"019e0488-9a54-7b50-a724-9ced506179c3","Analytics & Reporting","Business intelligence and reporting data warehouse","Analytics Team","2025-05-01T10:00:00Z","icon-pie-chart","corporate-banking","analytics-reporting"
+"019e0488-9a54-79f5-9056-7f5e3afbff08","Customer Service & Support","Help desk and support ticketing system","Customer Support Team","2025-08-01T10:00:00Z","icon-headset","risk-compliance","customer-service-support"
+"019e0488-9a54-707f-977f-2605e27f3587","Marketing & Compliance","Marketing campaigns and regulatory compliance tracking","Marketing & Legal Teams","2025-09-15T10:00:00Z","icon-megaphone","treasury","marketing-compliance"

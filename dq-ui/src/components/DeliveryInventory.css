@@ -1,0 +1,383 @@
+.delivery-inventory-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  background: var(--app-surface-primary);
+  color: var(--app-text-primary);
+  --delivery-inventory-surface: var(--app-surface-primary);
+  --delivery-inventory-surface-2: var(--app-surface-secondary);
+  --delivery-inventory-border: var(--app-border-subtle);
+  --delivery-inventory-text: var(--app-text-primary);
+  --delivery-inventory-muted: var(--app-text-secondary);
+  --delivery-inventory-brand: var(--app-brand-primary);
+  --delivery-inventory-success-bg: var(--app-status-success-bg);
+  --delivery-inventory-success-text: var(--app-status-success-text);
+  --delivery-inventory-danger-bg: var(--app-status-error-bg);
+  --delivery-inventory-danger-text: var(--app-status-error-text);
+  --delivery-inventory-warning-bg: var(--app-status-warning-bg);
+  --delivery-inventory-warning-border: var(--app-status-warning-border);
+  --delivery-inventory-warning-text: var(--app-status-warning-text);
+  --delivery-inventory-hover: var(--app-hover-bg);
+  --delivery-inventory-hover-soft: var(--app-surface-secondary);
+}
+
+.delivery-inventory-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px 22px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 18px;
+  background: var(--delivery-inventory-surface);
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--delivery-inventory-text) 8%, transparent);
+}
+
+.delivery-inventory-kicker {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--delivery-inventory-brand);
+}
+
+.delivery-inventory-header h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--delivery-inventory-text);
+  font-family: var(--app-font-family);
+  font-weight: 600;
+}
+
+.delivery-inventory-subtitle {
+  margin: 8px 0 0;
+  max-width: 70ch;
+  color: var(--delivery-inventory-muted);
+}
+
+.delivery-inventory-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delivery-inventory-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.delivery-inventory-summary-card {
+  padding: 14px 16px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 14px;
+  background: var(--delivery-inventory-surface);
+}
+
+.summary-label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--delivery-inventory-muted);
+}
+
+.summary-value {
+  display: block;
+  margin-top: 6px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.delivery-inventory-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 14px;
+  background: var(--delivery-inventory-surface-2);
+}
+
+.delivery-inventory-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 280px;
+  flex: 1 1 360px;
+}
+
+.delivery-inventory-search span {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--delivery-inventory-muted);
+}
+
+.delivery-inventory-search input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 12px;
+  background: var(--delivery-inventory-surface);
+  color: var(--delivery-inventory-text);
+}
+
+.delivery-inventory-search input:focus {
+  outline: 2px solid color-mix(in srgb, var(--delivery-inventory-brand) 30%, transparent 70%);
+  border-color: var(--delivery-inventory-brand);
+}
+
+.delivery-inventory-table-card {
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--delivery-inventory-surface);
+}
+
+.delivery-inventory-body {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.delivery-inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.delivery-inventory-table thead {
+  background: var(--delivery-inventory-surface-2);
+}
+
+.delivery-inventory-table th,
+.delivery-inventory-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--delivery-inventory-border);
+  vertical-align: top;
+}
+
+.delivery-inventory-table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--delivery-inventory-muted);
+}
+
+.delivery-inventory-table tbody tr:hover {
+  background: var(--delivery-inventory-hover-soft);
+}
+
+.delivery-inventory-table tbody tr.selected {
+  background: var(--delivery-inventory-hover);
+}
+
+.delivery-id-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.delivery-id-cell strong {
+  font-size: 14px;
+}
+
+.delivery-id-cell span,
+.delivery-location-cell {
+  color: var(--delivery-inventory-muted);
+  word-break: break-word;
+}
+
+.delivery-storage-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.delivery-storage-badge.present {
+  background: var(--delivery-inventory-success-bg);
+  color: var(--delivery-inventory-success-text);
+}
+
+.delivery-storage-badge.missing {
+  background: var(--delivery-inventory-danger-bg);
+  color: var(--delivery-inventory-danger-text);
+}
+
+.delivery-inventory-detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 16px;
+  background: var(--delivery-inventory-surface);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--delivery-inventory-text) 6%, transparent);
+}
+
+.delivery-inventory-warning {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--delivery-inventory-warning-border);
+  background: var(--delivery-inventory-warning-bg);
+  color: var(--delivery-inventory-warning-text);
+  font-weight: 600;
+}
+
+.delivery-inventory-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.delivery-inventory-detail-header h3 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  color: var(--delivery-inventory-text);
+  font-family: var(--app-font-family);
+  font-weight: 600;
+}
+
+.delivery-inventory-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.delivery-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.storage-details-grid {
+  margin-top: 2px;
+}
+
+.delivery-inventory-detail-field,
+.delivery-inventory-detail-section {
+  padding: 12px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 14px;
+  background: var(--delivery-inventory-surface-2);
+}
+
+.delivery-inventory-detail-field span,
+.delivery-inventory-detail-section-header span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--delivery-inventory-muted);
+}
+
+.delivery-inventory-detail-field strong,
+.delivery-inventory-detail-section-header strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--delivery-inventory-text);
+  word-break: break-word;
+}
+
+.delivery-inventory-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delivery-inventory-detail-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.delivery-inventory-json {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--delivery-inventory-surface-2);
+  color: var(--delivery-inventory-text);
+  overflow: auto;
+  max-height: 240px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.delivery-inventory-empty-note {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--delivery-inventory-surface-2);
+  color: var(--delivery-inventory-muted);
+}
+
+.delivery-inventory-state,
+.delivery-inventory-empty-state {
+  padding: 24px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 16px;
+  background: var(--delivery-inventory-surface);
+  color: var(--delivery-inventory-muted);
+}
+
+.delivery-inventory-state {
+  font-weight: 600;
+}
+
+.delivery-inventory-error {
+  border-color: var(--delivery-inventory-danger-text);
+  background: var(--delivery-inventory-danger-bg);
+  color: var(--delivery-inventory-danger-text);
+}
+
+.delivery-inventory-empty-state {
+  text-align: center;
+}
+
+.delivery-inventory-empty-state.compact {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+}
+
+.delivery-inventory-empty-state h2,
+.delivery-inventory-empty-state h3 {
+  margin: 0 0 8px;
+  color: var(--delivery-inventory-text);
+}
+
+.delivery-inventory-empty-state p {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .delivery-inventory-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .delivery-inventory-body,
+  .delivery-inventory-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .delivery-inventory-header,
+  .delivery-inventory-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .delivery-inventory-actions {
+    justify-content: flex-start;
+  }
+}

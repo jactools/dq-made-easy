@@ -1,0 +1,2 @@
+name,expression,filterExpression,description,workspace,workspaceId,active
+  Active Users  ,,status = 'ACTIVE',  ,,  team-a  ,false

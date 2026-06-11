@@ -1,0 +1,224 @@
+.icon-gallery {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.icon-gallery-header {
+  margin-bottom: 24px;
+}
+
+.icon-gallery-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.icon-gallery-subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: var(--app-text-secondary);
+}
+
+.icon-gallery-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.icon-gallery-search {
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+}
+
+.icon-gallery-provider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+}
+
+.icon-gallery-provider-label {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.icon-gallery-provider-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.icon-gallery-count {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--app-text-secondary);
+  font-weight: 500;
+}
+
+.icon-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.icon-gallery-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px;
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.icon-gallery-item:hover {
+  background: var(--app-surface-secondary);
+  border-color: var(--app-border-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.icon-gallery-item.copied {
+  background: var(--app-status-success-bg);
+  border-color: var(--app-status-success-text);
+}
+
+.icon-gallery-copied-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--app-status-success-text);
+  background: var(--app-surface-primary);
+  padding: 2px 6px;
+  border-radius: 3px;
+  animation: fadeOut 0.6s ease;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.icon-gallery-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.icon-gallery-icon-wrapper .app-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-gallery-icon-wrapper .app-icon svg {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+  color: var(--app-text-primary);
+}
+
+.icon-gallery-icon-name {
+  font-size: 11px;
+  color: var(--app-text-secondary);
+  text-align: center;
+  word-break: break-word;
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.icon-gallery-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  color: var(--app-text-secondary);
+  text-align: center;
+}
+
+.icon-gallery-empty .app-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.icon-gallery-empty .app-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.icon-gallery-empty p {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .icon-gallery {
+    padding: 16px;
+  }
+
+  .icon-gallery-header h1 {
+    font-size: 24px;
+  }
+
+  .icon-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+
+  .icon-gallery-item {
+    padding: 12px 8px;
+  }
+
+  .icon-gallery-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .icon-gallery-icon-wrapper .app-icon,
+  .icon-gallery-icon-wrapper .app-icon svg {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+  }
+
+  .icon-gallery-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .icon-gallery-search {
+    max-width: none;
+  }
+}

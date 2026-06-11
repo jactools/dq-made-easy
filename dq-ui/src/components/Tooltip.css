@@ -1,0 +1,55 @@
+.app-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.app-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 30;
+
+  background: var(--app-surface-tertiary);
+  color: var(--app-text-inverse);
+  border: 1px solid var(--app-border-strong);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.app-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--app-surface-tertiary) transparent transparent transparent;
+}
+
+.app-tooltip-wrapper:hover .app-tooltip,
+.app-tooltip-wrapper:focus-within .app-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+[data-theme="dark"] .app-tooltip,
+:root[class*="dark"] .app-tooltip {
+  background: var(--app-surface-primary);
+  color: var(--app-text-primary);
+  border-color: var(--app-border-subtle);
+}
+
+[data-theme="dark"] .app-tooltip::after,
+:root[class*="dark"] .app-tooltip::after {
+  border-color: var(--app-surface-primary) transparent transparent transparent;
+}

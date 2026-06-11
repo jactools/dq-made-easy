@@ -1,0 +1,13 @@
+expression,expected_error
+,Filter expression is required
+status = 'A'; DROP TABLE,Do not use semicolons in filter expressions
+status = 'A' -- comment,Comments are not allowed in filter expressions
+status = 'A' /* comment */,Comments are not allowed in filter expressions
+)status = 'A',Unbalanced parentheses: found a closing parenthesis without matching opening parenthesis
+status = 'A,Unclosed single quote in filter expression
+"status = ""A",Unclosed double quote in filter expression
+(status = 'A',Unbalanced parentheses in filter expression
+AND status = 'A',Expression cannot start with AND/OR
+status = 'A' OR,Expression cannot end with AND/OR
+status = 'A' AND AND active = true,Consecutive logical operators detected
+status = 'A' OR AND active = true,Consecutive logical operators detected

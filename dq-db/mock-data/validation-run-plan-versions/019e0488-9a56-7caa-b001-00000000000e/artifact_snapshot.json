@@ -1,0 +1,65 @@
+{
+  "suiteId": "gx_customer_email_format_high_invalid_rows",
+  "suiteVersion": 1,
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-7c72-af10-87d726eef784",
+    "datasetId": "019e0488-9a54-7678-a935-3e65933617ae",
+    "dataProductId": "019e0488-9a54-7ccd-8b26-ac440ebc2f3c"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "019e0488-9a56-7caa-b001-00000000000c"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "gx_customer_email_format_high_invalid_rows_v1",
+    "expectations": [
+      {
+        "expectation_type": "expect_column_values_to_match_regex",
+        "kwargs": {
+          "column": "email",
+          "regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        },
+        "meta": {
+          "dq.artifact_key": "019e0488-9a55-739c-82db-0b6cba193285",
+          "dq.rule_id": "019e0488-9a55-739c-82db-0b6cba193285"
+        }
+      }
+    ],
+    "meta": {
+      "dq.artifact_key": "019e0488-9a55-739c-82db-0b6cba193285",
+      "dq.rule_id": "019e0488-9a55-739c-82db-0b6cba193285",
+      "dq.rule_kind": "row_assertion",
+      "dq.schema_version": "2.0.0"
+    }
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a55-739c-82db-0b6cba193285"
+    ],
+    "compilerVersion": "seed-v1",
+    "generatedAt": "2026-05-19T09:25:00Z"
+  },
+  "compilerVersion": "seed-v1",
+  "generatedAt": "2026-05-19T09:25:00Z",
+  "executionHints": {
+    "recommendedEngine": "pyspark",
+    "primaryKeyFields": [
+      "customer_id"
+    ]
+  },
+  "executionContract": {
+    "engineType": "gx",
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "traceability": {
+      "ruleId": "019e0488-9a55-739c-82db-0b6cba193285",
+      "ruleVersionId": "019e0488-9a55-74d5-b4af-3114a46953ec",
+      "gxSuiteId": "gx_customer_email_format_high_invalid_rows",
+      "gxSuiteVersion": 1,
+      "dataObjectVersionId": "019e0488-9a56-7caa-b001-00000000000c"
+    }
+  },
+  "savedBy": "data-steward-user",
+  "sourcePipeline": "rule-dsl-v2-gx-lowerer"
+}

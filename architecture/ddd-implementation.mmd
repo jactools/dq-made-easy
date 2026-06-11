@@ -1,0 +1,62 @@
+graph LR
+  subgraph Presentation_Application
+    API[dq-api - REST / Endpoint Adapters]
+    UI[dq-ui - Presentation]
+  end
+
+  subgraph Application
+    APPUC[Application Use Cases]
+    APPSVC[Application Services]
+  end
+
+  subgraph RuleBuilder
+    RULES[Rule Aggregate]
+    GXRUN[GXRun Aggregate]
+    MATERIAL[Materialization Aggregate]
+  end
+
+  subgraph DataCatalog
+    DOV[DataObjectVersion Aggregate]
+    ATTR[Attribute - ValueObject]
+  end
+
+  subgraph Profiling
+    PROF[ProfilingRequest Aggregate]
+  end
+
+  subgraph Execution
+    ENGINE[dq-engine - Execution Domain Services]
+    WORKERS[Background Workers]
+  end
+
+  subgraph Identity
+    KEYCLOAK[Keycloak]
+  end
+
+  subgraph Infra
+    PG[(Postgres)]
+    AISTOR[(AIStor)]
+    REDIS[(Redis)]
+    KONG[Kong Gateway]
+  end
+
+  API -->|commands/queries| APPUC
+  API -->|runtime composition| APPSVC
+  APPUC --> RULES
+  APPUC --> GXRUN
+  APPUC --> MATERIAL
+  APPUC --> DOV
+  APPUC --> PROF
+  APPSVC --> GXRUN
+  APPSVC --> MATERIAL
+  RULES -->|enqueues| ENGINE
+  GXRUN --> WORKERS
+  MATERIAL --> AISTOR
+  RULES --> PG
+  DOV --> PG
+  PROF --> PG
+  ENGINE --> PG
+  ENGINE --> AISTOR
+  API --> KEYCLOAK
+  KONG --> API
+  KONG --> KEYCLOAK

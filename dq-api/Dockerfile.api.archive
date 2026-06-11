@@ -1,0 +1,27 @@
+ARG DQ_BASE_REGISTRY
+ARG DQ_BASE_NAMESPACE
+ARG DQ_BASE_IMAGE
+ARG DQ_BASE_TAG
+
+FROM ${DQ_BASE_REGISTRY}${DQ_BASE_NAMESPACE}${DQ_BASE_IMAGE}:${DQ_BASE_TAG}
+
+LABEL version="0.3.0"
+LABEL description="Data Quality API server (NestJS)"
+
+WORKDIR /app
+
+# install dependencies including devDependencies (needed for ts-node)
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --include=dev --no-audit --no-fund && npm cache clean --force
+
+# copy server code
+COPY ./server ./server
+
+EXPOSE 4001
+
+# health check for container orchestration
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:4001/health || exit 1
+
+# Run with npx which will use node_modules/.bin/ts-node
+CMD ["npx", "ts-node", "--transpile-only", "--compiler-options", "{\"module\":\"commonjs\"}", "server/main.ts"]

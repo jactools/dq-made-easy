@@ -1,0 +1,13 @@
+{
+  "app_version": "0.11.3",
+  "proof_id": "api-1.7-s3-blob-connector-2026-06-06",
+  "proof_type": "api",
+  "command": "cd /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-api/fastapi && PYTHONPATH=/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-utils/src:/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-domain-validation/src /Users/jacbeekers/gitrepos/dq-rulebuilder/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest -o addopts='' tests/domain/test_connector_registry.py tests/application/services/test_s3_blob_connector.py -q",
+  "status": "passed",
+  "test_files": [
+    "tests/domain/test_connector_registry.py",
+    "tests/application/services/test_s3_blob_connector.py"
+  ],
+  "test_count": 8,
+  "executed_at_utc": "2026-06-06T00:02:00Z"
+}

@@ -1,0 +1,83 @@
+flowchart TB
+  subgraph Edge
+    KONG[Kong Gateway]
+  end
+
+  subgraph App
+    API[dq-api FastAPI endpoints]
+    UI[dq-ui]
+  end
+
+  subgraph API_Adapters
+    RULEAPI[rules.py and suggestions.py transport]
+    GXAPI[gx_*_api adapters]
+    TESTAPI[testing_*_api adapters]
+    MATAPI[test_data_materialization_api]
+    CFGAPI[app_config.py rollout gate]
+  end
+
+  subgraph Application
+    USECASES[Application use cases]
+    SERVICES[Application services]
+  end
+
+  subgraph DSL_Pipeline
+    DSLCONTRACT[Rule DSL v1 and v2 contracts]
+    DSLIR[Rule DSL semantic model and IR]
+    DSLLOWER[DSL-to-GX lowering and capability checks]
+  end
+
+  subgraph Services
+    ENGINE[dq-engine]
+    PROFILING[dq-profiling]
+    DATACAT[data-catalog]
+    WORKERS[Workers]
+  end
+
+  subgraph Auth
+    KEYCLOAK[Keycloak]
+  end
+
+  subgraph Persistence
+    POSTGRES[(Postgres)]
+    AISTOR[(AIStor)]
+    REDIS[(Redis)]
+  end
+
+  subgraph Observability
+    OTEL[OTel Collector]
+    GRAFANA[Grafana]
+  end
+
+  KONG --> API
+  KONG --> UI
+  UI --> KONG
+  API --> RULEAPI
+  API --> GXAPI
+  API --> TESTAPI
+  API --> MATAPI
+  API --> CFGAPI
+  RULEAPI --> DSLCONTRACT
+  CFGAPI --> RULEAPI
+  DSLCONTRACT --> USECASES
+  USECASES --> DSLIR
+  DSLIR --> DSLLOWER
+  DSLLOWER --> SERVICES
+  GXAPI --> USECASES
+  TESTAPI --> USECASES
+  MATAPI --> SERVICES
+  USECASES --> SERVICES
+  SERVICES --> ENGINE
+  SERVICES --> PROFILING
+  SERVICES --> DATACAT
+  ENGINE --> POSTGRES
+  ENGINE --> AISTOR
+  SERVICES --> POSTGRES
+  SERVICES --> REDIS
+  API --> KEYCLOAK
+  KONG --> KEYCLOAK
+  API --> OTEL
+  ENGINE --> OTEL
+  KONG --> OTEL
+  API --> GRAFANA
+  KEYCLOAK --> POSTGRES

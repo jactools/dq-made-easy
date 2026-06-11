@@ -1,0 +1,2 @@
+joinType,conditions
+inner,"[{""leftDataObjectId"":""orders"",""leftAttributeId"":""customer_id"",""rightDataObjectId"":""customers"",""rightAttributeId"":""id"",""operator"":""=""}]"

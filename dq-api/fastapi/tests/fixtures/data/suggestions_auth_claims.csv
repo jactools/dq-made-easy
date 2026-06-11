@@ -1,0 +1,2 @@
+sub,preferred_username,iss,aud,scope
+user-123,analyst,http://keycloak.local:8080/realms/jaccloud,"[""dq-rules-ui""]",dq:rules:read

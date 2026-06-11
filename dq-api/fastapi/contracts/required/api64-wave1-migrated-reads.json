@@ -1,0 +1,16 @@
+{
+  "operations": [
+    "GET /v1/data-products",
+    "GET /v1/data-sets",
+    "GET /v1/data-objects-catalog",
+    "GET /v1/data-object-versions",
+    "GET /v1/attributes-catalog",
+    "GET /v1/data-deliveries",
+    "GET /v1/rule-attributes",
+    "GET /v1/attribute-rule-counts",
+    "GET /v1/system-info",
+    "GET /v1/app-config",
+    "GET /v1/batch-test-requests",
+    "GET /v1/batch-test-requests/{request_id}"
+  ]
+}

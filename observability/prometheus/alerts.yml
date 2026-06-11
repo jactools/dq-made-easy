@@ -1,0 +1,460 @@
+groups:
+  # ========================================================================
+  # Application SLO Alerts
+  # ========================================================================
+  - name: application_slos
+    interval: 30s
+    rules:
+      - alert: HighHTTPErrorRate
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])))
+          /
+          (sum(rate(http_requests_total[5m]))) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High HTTP error rate (5xx) detected"
+          description: "Error rate is {{ $value | humanizePercentage }} over last 5 minutes"
+
+      - alert: HighAuthFailureRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"401|403"}[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total[5m])), 0.001)
+          ) > 0.03
+          and
+          sum(rate(http_requests_total{status=~"401|403"}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: auth
+        annotations:
+          summary: "High authentication/authorization failure rate detected"
+          description: "Auth failure rate is {{ $value | humanizePercentage }} over last 5 minutes"
+
+      - alert: RuleExecutionP95Latency
+        expr: |
+          histogram_quantile(0.95, rate(rule_execution_duration_ms[5m])) > 30000
+        for: 10m
+        labels:
+          severity: warning
+          component: engine
+        annotations:
+          summary: "Rule execution p95 latency exceeds 30 seconds"
+          description: "95th percentile latency is {{ $value | humanizeDuration }}"
+
+      - alert: RuleExecutionP99Latency
+        expr: |
+          histogram_quantile(0.99, rate(rule_execution_duration_ms[5m])) > 60000
+        for: 5m
+        labels:
+          severity: critical
+          component: engine
+        annotations:
+          summary: "Rule execution p99 latency exceeds 60 seconds"
+          description: "99th percentile latency is {{ $value | humanizeDuration }}"
+
+  # ========================================================================
+  # Database Alerts
+  # ========================================================================
+  - name: database_health
+    interval: 30s
+    rules:
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          connections_used / connections_max > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "PostgreSQL connection pool >80% exhausted"
+          description: "Active connections: {{ $value | humanizePercentage }}"
+
+      - alert: DatabaseSlowQueries
+        expr: |
+          slow_queries_total > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High number of slow database queries"
+          description: "{{ $value }} slow queries in last 5 minutes"
+
+  # ========================================================================
+  # Data Quality Rule Execution Alerts
+  # ========================================================================
+  - name: dq_rule_execution
+    interval: 1m
+    rules:
+      - alert: RuleExceptionStoreWriteFailure
+        expr: |
+          increase(exception_store_write_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: exception-store
+        annotations:
+          summary: "Exception store write failures detected"
+          description: "{{ $value }} write errors in last 5 minutes"
+
+      - alert: RuleCompilationFailure
+        expr: |
+          increase(rule_compilation_failures_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          component: compiler
+        annotations:
+          summary: "Rule compilation failures detected"
+          description: "{{ $value }} compilation errors in last 5 minutes"
+
+      - alert: HighRuleFailureRate
+        expr: |
+          (sum(increase(rule_results_failed_total[5m])))
+          /
+          (sum(increase(rule_results_total[5m]))) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: engine
+        annotations:
+          summary: "High data quality rule failure rate"
+          description: "{{ $value | humanizePercentage }} of rules failed in last 5 minutes"
+
+  # ========================================================================
+  # GX Execution Alerts
+  # ========================================================================
+  - name: gx_execution
+    interval: 1m
+    rules:
+      - alert: GXExecutionFailureEvents
+        expr: |
+          increase(dq_gx_failure_events_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          component: gx
+        annotations:
+          summary: "GX execution failures detected"
+          description: "{{ $value }} GX failure events occurred in the last 5 minutes"
+
+      - alert: GXDispatchQueueFailures
+        expr: |
+          increase(dq_execution_dispatch_events_total{executor="gx",engine_type="gx",operation="schedule_run",result="failed"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          component: gx
+        annotations:
+          summary: "GX dispatch queue failures detected"
+          description: "GX scheduling failures were recorded in the last 5 minutes"
+
+      - alert: GXSourceMappingFailures
+        expr: |
+          increase(dq_gx_failure_events_total{surface="source_data_resolver"}[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: gx
+        annotations:
+          summary: "GX source mapping failures detected"
+          description: "Source-data resolution failures were recorded in the last 10 minutes"
+
+      - alert: GXExecutorDependencyUnavailable
+        expr: |
+          increase(dq_gx_failure_events_total{surface="pyspark_executor",operation="create_spark_session"}[10m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          component: gx
+        annotations:
+          summary: "GX executor dependency unavailable"
+          description: "pyspark Spark session creation failed (dependency missing/unavailable)"
+
+      - alert: GXSuiteSaveFailures
+        expr: |
+          increase(dq_execution_compile_events_total{engine_type="gx",operation="compile_artifact",result="failed"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          component: gx-api
+        annotations:
+          summary: "GX suite save failures detected"
+          description: "GX suite save/compile failures were recorded in the last 5 minutes"
+
+      - alert: GXSuiteFetchFailures
+        expr: |
+          increase(dq_gx_failure_events_total{surface="gx_api",operation="fetch_suite"}[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          component: gx-api
+        annotations:
+          summary: "GX suite retrieval failures detected"
+          description: "GX suite fetch/retrieval failures were recorded in the last 5 minutes"
+
+      - alert: GXWorkerExecutionLatencyHigh
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(dq_execution_latency_ms_milliseconds_bucket{executor="gx",phase="execution"}[5m]))) > 60000
+        for: 10m
+        labels:
+          severity: warning
+          component: gx-worker
+        annotations:
+          summary: "GX worker execution latency is high"
+          description: "Worker dispatch p95 exceeded 60 seconds in the last 5 minutes"
+
+      - alert: GXWorkerSourceReadLatencyHigh
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(dq_execution_latency_ms_milliseconds_bucket{executor="gx",phase="source_read"}[5m]))) > 30000
+        for: 10m
+        labels:
+          severity: warning
+          component: gx-worker
+        annotations:
+          summary: "GX worker source-read latency is high"
+          description: "Source read p95 exceeded 30 seconds in the last 5 minutes"
+
+      - alert: GXWorkerFailureSpike
+        expr: |
+          increase(dq_gx_worker_failure_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          component: gx-worker
+        annotations:
+          summary: "GX worker failures detected"
+          description: "GX worker failures were recorded in the last 5 minutes"
+
+      - alert: GXExecutorWorkerHeartbeatMissing
+        expr: |
+          (
+            time() - dq_executor_heartbeat_timestamp_seconds{executor="gx",queue_key="dq-gx:execution-dispatch"}
+          ) > (2 * dq_executor_heartbeat_ttl_seconds{executor="gx",queue_key="dq-gx:execution-dispatch"})
+        for: 2m
+        labels:
+          severity: critical
+          component: gx-worker
+        annotations:
+          summary: "GX executor worker heartbeat missing"
+          description: "GX executor worker heartbeat is stale for queue dq-gx:execution-dispatch"
+
+      - alert: GXExceptionFactContractDrift
+        expr: |
+          sum(dq_exception_noncanonical_facts) > 0
+        for: 10m
+        labels:
+          severity: warning
+          component: exception-store
+        annotations:
+          summary: "Non-canonical GX exception facts detected"
+          description: "{{ $value }} persisted GX exception facts are missing canonical lineage or reason fields"
+
+      - alert: GXExceptionAnalyticsFreshnessLag
+        expr: |
+          max(dq_exception_oldest_noncanonical_age_seconds) > 900
+        for: 10m
+        labels:
+          severity: warning
+          component: exception-analytics
+        annotations:
+          summary: "GX exception analytics freshness is lagging"
+          description: "The oldest non-canonical GX exception fact has remained unresolved for more than 15 minutes"
+
+  # ========================================================================
+  # Infrastructure Alerts
+  # ========================================================================
+  - name: infrastructure_health
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: |
+          up{job=~"dq-api|dq-engine|redis|postgres"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "Service {{ $labels.instance }} has been unavailable for 2 minutes"
+
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: HighCPUUsage
+        expr: |
+          (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanizePercentage }}"
+
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Disk space running low"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+
+  # ========================================================================
+  # Observability Stack Health
+  # ========================================================================
+  - name: observability_health
+    interval: 30s
+    rules:
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: observability
+        annotations:
+          summary: "Loki (log aggregation) is down"
+
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: observability
+        annotations:
+          summary: "Prometheus is down"
+
+      - alert: TempoDown
+        expr: up{job="tempo"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: observability
+        annotations:
+          summary: "Tempo (distributed tracing) is down"
+
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          component: observability
+        annotations:
+          summary: "Grafana is down or unreachable"
+
+      - alert: PrometheusHighChurnRate
+        expr: |
+          rate(prometheus_tsdb_symbol_table_size_bytes[5m]) > 1000000
+        for: 5m
+        labels:
+          severity: warning
+          component: observability
+        annotations:
+          summary: "High metric churn rate detected"
+          description: "Prometheus metric database growing rapidly"
+
+      - alert: PrometheusStorageFull
+        expr: |
+          prometheus_tsdb_symbol_table_size_bytes > 1073741824
+        for: 10m
+        labels:
+          severity: warning
+          component: observability
+        annotations:
+          summary: "Prometheus storage growing large"
+          description: "Consider reducing retention or cardinality"
+
+  # ========================================================================
+  # Recording Rules (optional: pre-compute common queries)
+  # ========================================================================
+  - name: recording_rules
+    interval: 15s
+    rules:
+      - record: dq_execution_runs
+        expr: |
+          label_replace(
+            label_replace(gx_execution_runs_total, "executor", "gx", "__name__", ".*"),
+            "engine_type", "gx", "__name__", ".*"
+          )
+
+      - record: dq_execution_run_transitions_total
+        expr: |
+          label_replace(
+            label_replace(gx_execution_run_transitions_last_24h_total, "executor", "gx", "__name__", ".*"),
+            "engine_type", "gx", "__name__", ".*"
+          )
+
+      - record: dq_execution_stale_running_runs
+        expr: |
+          label_replace(
+            label_replace(gx_execution_runs_stale_running_total, "executor", "gx", "__name__", ".*"),
+            "engine_type", "gx", "__name__", ".*"
+          )
+
+      - record: dq_execution_oldest_running_age_seconds
+        expr: |
+          label_replace(
+            label_replace(gx_execution_runs_oldest_running_age_seconds, "executor", "gx", "__name__", ".*"),
+            "engine_type", "gx", "__name__", ".*"
+          )
+
+      - record: dq_data_definition_tasks
+        expr: data_definition_tasks_total
+
+      - record: dq_data_definition_stale_started_tasks
+        expr: data_definition_tasks_stale_started_total
+
+      - record: dq_data_definition_oldest_started_age_seconds
+        expr: data_definition_tasks_oldest_started_age_seconds
+
+      - record: dq_exception_noncanonical_facts
+        expr: |
+          label_replace(
+            label_replace(gx_exception_facts_noncanonical_total, "executor", "gx", "__name__", ".*"),
+            "engine_type", "gx", "__name__", ".*"
+          )
+
+      - record: dq_exception_oldest_noncanonical_age_seconds
+        expr: |
+          label_replace(
+            label_replace(gx_exception_facts_oldest_noncanonical_age_seconds, "executor", "gx", "__name__", ".*"),
+            "engine_type", "gx", "__name__", ".*"
+          )
+
+      - record: dq_exception_latest_canonical_detected_age_seconds
+        expr: |
+          label_replace(
+            label_replace(gx_exception_facts_latest_canonical_detected_age_seconds, "executor", "gx", "__name__", ".*"),
+            "engine_type", "gx", "__name__", ".*"
+          )
+
+      # HTTP request rate by status
+      - record: rate:http_requests:5m
+        expr: sum(rate(http_requests_total[5m])) by (status, job)
+
+      # Request latency p95
+      - record: histogram:http_request_duration_p95:5m
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket[5m])) by (le, job))
+
+      # Error rate percentage
+      - record: rate:http_errors_percent:5m
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])) by (job))
+          /
+          (sum(rate(http_requests_total[5m])) by (job))

@@ -1,0 +1,20 @@
+{
+  "operations": [
+    "GET /v1/rules/{rule_id}/versions",
+    "GET /v1/rules/{rule_id}/versions/{version_id}",
+    "POST /v1/rules/{rule_id}/rollback",
+    "PATCH /v1/rules/{rule_id}/versions/{version_id}/tags",
+    "GET /v1/rules/{rule_id}/versions/rollback-history",
+    "GET /v1/rules/{rule_id}/versions/{version_1}/compare/{version_2}",
+    "GET /v1/rules/{rule_id}/versions/stats",
+    "PATCH /v1/rules/{rule_id}/versions/{version_id}/mark-for-rollback",
+    "GET /v1/data-objects",
+    "GET /v1/test-proofs/{rule_id}",
+    "POST /v1/batch-test-requests",
+    "POST /v1/batch-test-requests/{request_id}/run",
+    "POST /v1/data-object-versions/{version_id}/generate-test-data",
+    "POST /v1/rules/{rule_id}/test-with-data",
+    "POST /v1/rules/{rule_id}/test",
+    "POST /v1/rules/{rule_id}/test-with-generated-data"
+  ]
+}

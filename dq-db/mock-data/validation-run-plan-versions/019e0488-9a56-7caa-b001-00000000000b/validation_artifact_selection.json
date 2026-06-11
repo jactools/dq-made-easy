@@ -1,0 +1,9 @@
+{
+  "selectionMode": "single_suite",
+  "artifactRefs": [
+    {
+      "artifactId": "gx_customer_filtered_row_count_condition",
+      "artifactVersion": 1
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+
+> dq-ui@0.11.3 test
+> NODE_ENV=test vitest run src/components/PolicyDocumentsPage.test.tsx
+
+
+ RUN  v2.1.9 /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-ui
+
+ ✓ src/components/PolicyDocumentsPage.test.tsx (3 tests) 2433ms
+   ✓ PolicyDocumentsPage > renders a policy document preview and supports review acknowledgement 829ms
+   ✓ PolicyDocumentsPage > supports submitting policy changes for approval and reviewer decisions 1054ms
+   ✓ PolicyDocumentsPage > lets governance editors draft changes but not approve them 549ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  23:28:36
+   Duration  3.41s (transform 135ms, setup 31ms, collect 171ms, tests 2.43s, environment 383ms, prepare 58ms)
+

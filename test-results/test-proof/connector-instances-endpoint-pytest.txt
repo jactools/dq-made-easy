@@ -1,0 +1,4 @@
+Command: APP_CONFIG_ENCRYPTION_KEY='i0aU2BE0dzqEVAWxfEsvffw5zw93FjFZrr24RPVyo8c=' PYTHONPATH=/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-utils/src:/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-domain-validation/src /Users/jacbeekers/gitrepos/dq-rulebuilder/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-api/fastapi/tests/api/test_connector_endpoints.py -o addopts='' -q
+
+Result: 7 passed, 2 warnings in 1.86s.
+Notes: Connector audit linkage, action routes, and instance create/list coverage all passed in one focused endpoint slice.

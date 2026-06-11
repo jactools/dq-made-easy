@@ -1,0 +1,31 @@
+{
+  "app_version": "0.11.3",
+  "proof_id": "api-1.6-azure-adls-connector-2026-06-06",
+  "proof_type": "api",
+  "feature": "API-1.6",
+  "summary": "The Azure ADLS connector now discovers filesystems, directories, and files from configured roots, redacts secret values from the public configuration, and registers the azure_adls provider in the connector catalog.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-06T00:01:00Z",
+  "command": "cd /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-api/fastapi && PYTHONPATH=/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-utils/src:/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-domain-validation/src /Users/jacbeekers/gitrepos/dq-rulebuilder/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest -o addopts='' tests/domain/test_connector_registry.py tests/application/services/test_azure_adls_connector.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.3/api/20260606T000100Z-api-1.6-azure-adls-connector",
+  "test_files": [
+    "tests/domain/test_connector_registry.py",
+    "tests/application/services/test_azure_adls_connector.py"
+  ],
+  "test_file_count": 2,
+  "test_count": 8,
+  "assertions": [
+    "The connector registry exposes the azure_adls provider and loads the AzureAdlsConnector implementation path.",
+    "The connector returns a redacted public configuration without a credentials field.",
+    "Discovery returns filesystem, directory, and file items for the configured ADLS roots.",
+    "Sync invokes the sink with the public configuration and discovery result.",
+    "The configuration model rejects missing account_url values."
+  ],
+  "proof_data": {
+    "provider": "azure_adls",
+    "filesystem_count": 1,
+    "directory_count": 1,
+    "file_count": 1,
+    "warnings": 2
+  }
+}

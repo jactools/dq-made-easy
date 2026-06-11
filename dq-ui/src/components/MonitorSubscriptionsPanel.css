@@ -1,0 +1,122 @@
+.monitor-subs-panel {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--app-border-subtle);
+}
+
+.monitor-subs-heading {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.monitor-subs-subtitle {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.monitor-subs-error {
+  color: var(--app-status-error-text);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.monitor-subs-empty {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.monitor-subs-loading {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.monitor-subs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.monitor-subs-row {
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  padding: 12px 16px;
+  background: var(--app-surface-primary);
+}
+
+.monitor-subs-row-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.monitor-subs-ws-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--app-text-primary);
+  cursor: pointer;
+}
+
+.monitor-subs-row-detail {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--app-border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.monitor-subs-categories,
+.monitor-subs-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.monitor-subs-group-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-text-secondary);
+  margin-bottom: 2px;
+}
+
+.monitor-subs-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--app-text-primary);
+  cursor: pointer;
+}
+
+.monitor-subs-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.monitor-subs-save-btn {
+  background: var(--app-brand-primary);
+  color: var(--app-text-inverse);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.monitor-subs-save-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.monitor-subs-saved-msg {
+  font-size: 13px;
+  color: var(--app-status-success-text);
+}

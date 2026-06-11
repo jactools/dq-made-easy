@@ -1,0 +1,1 @@
+Kong 3.4 API Gateway pre-configured for Data Quality Made Easy platform

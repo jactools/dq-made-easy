@@ -1,0 +1,4 @@
+"id","name","description","join_definition","workspace","created_by","active","created_at","updated_at"
+"retail-banking_customer_orders","Customer Orders Join","Join customers to their orders on customer_id","reusable_joins/retail-banking_customer_orders/join_definition.json","retail-banking","data-steward-user","true","2024-01-01T00:00:00Z","2024-01-01T00:00:00Z"
+"retail-banking_orders_transactions","Orders to Transactions Join","Left join orders to transactions for complete order history","reusable_joins/retail-banking_orders_transactions/join_definition.json","retail-banking","data-steward-user","true","2024-01-01T00:00:00Z","2024-01-01T00:00:00Z"
+"retail-banking_customer_accounts","Customer Accounts Join","Join customers to their accounts on customer_id","reusable_joins/retail-banking_customer_accounts/join_definition.json","retail-banking","data-steward-user","true","2024-01-01T00:00:00Z","2024-01-01T00:00:00Z"

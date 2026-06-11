@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: dq-cli
+Version: 0.6.3
+Summary: Standalone CLI for listing, initiating, and replaying DQ run plans
+Requires-Python: >=3.11
+Requires-Dist: httpx==0.28.1
+Requires-Dist: PyYAML>=6.0.2

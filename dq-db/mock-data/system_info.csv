@@ -1,0 +1,4 @@
+info_key,info_value,description,updated_at
+db_schema_version,1.4.0,Database schema version,2026-05-02 20:40:00+00
+db_schema_updated,2026-05-02 20:40:00+00,Last schema update timestamp,2026-05-02 20:40:00+00
+db_git_commit,38520aeb,Git commit hash of schema change,2026-05-02 20:40:00+00

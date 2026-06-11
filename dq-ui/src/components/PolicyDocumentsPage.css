@@ -1,0 +1,477 @@
+.policy-documents-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.policy-documents-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 16px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--app-brand-primary) 10%, transparent), color-mix(in srgb, var(--app-brand-primary) 3%, transparent));
+}
+
+.policy-documents-eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-brand-primary);
+}
+
+.policy-documents-hero h1,
+.policy-documents-detail h2,
+.policy-document-preview-header h3 {
+  margin: 0;
+}
+
+.policy-documents-subtitle {
+  margin: 8px 0 0;
+  max-width: 64ch;
+  color: var(--app-text-secondary);
+}
+
+.policy-documents-kind-switch {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.policy-kind-btn {
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 999px;
+  background: var(--app-surface-primary);
+  color: var(--app-text-secondary);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.policy-kind-btn.active {
+  background: var(--app-brand-primary);
+  border-color: var(--app-brand-primary);
+  color: var(--app-text-inverse);
+}
+
+.policy-documents-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.policy-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 14px;
+  border: 1px solid var(--app-border-subtle);
+  padding: 16px;
+  background: var(--app-surface-primary);
+}
+
+.policy-summary-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--app-text-primary);
+}
+
+.policy-summary-label {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.policy-documents-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.policy-documents-list,
+.policy-documents-detail,
+.policy-document-preview-panel {
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 16px;
+  background: var(--app-surface-primary);
+}
+
+.policy-documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  max-height: 760px;
+  overflow: auto;
+}
+
+.policy-document-card {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--app-surface-secondary);
+  cursor: pointer;
+}
+
+.policy-document-card.selected {
+  border-color: var(--app-brand-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-brand-primary) 12%, transparent);
+}
+
+.policy-document-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.policy-document-card p {
+  margin: 0;
+  color: var(--app-text-secondary);
+  font-size: 13px;
+}
+
+.policy-document-card-meta {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--app-text-secondary);
+  text-transform: uppercase;
+}
+
+.policy-status-badge,
+.policy-status-banner {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.policy-status-badge {
+  padding: 4px 8px;
+}
+
+.policy-status-banner {
+  padding: 8px 12px;
+}
+
+.policy-documents-status-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.policy-approval-draft {
+  color: var(--app-status-neutral-text);
+  background: var(--app-status-neutral-bg);
+}
+
+.policy-approval-pending_review {
+  color: var(--app-status-warning-text);
+  background: var(--app-status-warning-bg);
+}
+
+.policy-approval-approved {
+  color: var(--app-status-success-text);
+  background: var(--app-status-success-bg);
+}
+
+.policy-approval-rejected {
+  color: var(--app-status-error-text);
+  background: var(--app-status-error-bg);
+}
+
+.policy-status-draft {
+  color: var(--app-status-neutral-text);
+  background: var(--app-status-neutral-bg);
+}
+
+.policy-status-reviewed {
+  color: var(--app-status-success-text);
+  background: var(--app-status-success-bg);
+}
+
+.policy-status-acknowledged {
+  color: var(--app-status-info-text);
+  background: var(--app-status-info-bg);
+}
+
+.policy-documents-detail {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.policy-documents-detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.policy-documents-detail-header p {
+  margin: 6px 0 0;
+  color: var(--app-text-secondary);
+}
+
+.policy-documents-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.policy-reuse-panel,
+.policy-library-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--app-border-subtle);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--app-brand-primary) 5%, transparent), color-mix(in srgb, var(--app-brand-primary) 1%, transparent));
+}
+
+.policy-library-panel {
+  background: var(--app-status-neutral-bg);
+  border-color: var(--app-status-neutral-border);
+}
+
+.policy-review-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--app-status-success-border);
+  background: var(--app-status-success-bg);
+}
+
+.policy-reuse-panel-header h3 {
+  margin: 0;
+}
+
+.policy-reuse-panel-header p {
+  margin: 6px 0 0;
+  color: var(--app-text-secondary);
+}
+
+.policy-reuse-scope-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.policy-reuse-scope-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 12px;
+  background: var(--app-surface-primary);
+  color: var(--app-text-primary);
+  cursor: pointer;
+}
+
+.policy-reuse-scope-btn.active {
+  border-color: var(--app-brand-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-brand-primary) 12%, transparent);
+}
+
+.policy-reuse-scope-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.policy-reuse-scope-description {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.policy-reuse-workspaces,
+.policy-reuse-assets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.policy-reuse-workspace-option,
+.policy-reuse-asset-option {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 12px;
+  background: var(--app-surface-primary);
+}
+
+.policy-reuse-workspace-option span,
+.policy-reuse-asset-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.policy-reuse-asset-option strong {
+  font-size: 13px;
+}
+
+.policy-reuse-asset-option small {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.policy-reuse-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.policy-review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.policy-review-field span {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-text-secondary);
+}
+
+.policy-review-field textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 96px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--app-border-subtle);
+  background: var(--app-surface-primary);
+  color: var(--app-text-primary);
+  font: inherit;
+}
+
+.policy-review-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.policy-review-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.policy-reuse-empty {
+  margin: 0;
+  color: var(--app-text-secondary);
+}
+
+.policy-documents-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--app-surface-secondary);
+}
+
+.policy-timeline-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-text-secondary);
+  margin-bottom: 4px;
+}
+
+.policy-timeline-value {
+  display: block;
+  color: var(--app-text-primary);
+  font-size: 13px;
+}
+
+.policy-document-preview-panel {
+  padding: 16px;
+}
+
+.policy-document-preview-header p {
+  margin: 4px 0 0;
+  color: var(--app-text-secondary);
+}
+
+.policy-document-preview-body {
+  margin: 12px 0 0;
+  padding: 14px;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 12px;
+  background: var(--app-surface-primary);
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: 420px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+@media (max-width: 1080px) {
+  .policy-documents-summary,
+  .policy-documents-timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .policy-documents-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .policy-documents-page {
+    padding: 16px;
+  }
+
+  .policy-documents-hero,
+  .policy-documents-detail-header {
+    flex-direction: column;
+  }
+
+  .policy-documents-summary,
+  .policy-documents-timeline {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1080px) {
+  .policy-reuse-scope-grid,
+  .policy-reuse-workspaces,
+  .policy-reuse-assets,
+  .policy-review-summary,
+  .policy-documents-summary {
+    grid-template-columns: 1fr;
+  }
+}

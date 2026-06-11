@@ -1,0 +1,1401 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "HealthScorecardDimensionRollupView": {
+      "properties": {
+        "dimension": {
+          "title": "Dimension",
+          "type": "string"
+        },
+        "failed_record_total": {
+          "title": "Failed Record Total",
+          "type": "integer"
+        },
+        "failed_run_count": {
+          "title": "Failed Run Count",
+          "type": "integer"
+        },
+        "rule_count": {
+          "title": "Rule Count",
+          "type": "integer"
+        },
+        "score": {
+          "title": "Score",
+          "type": "integer"
+        },
+        "status_label": {
+          "title": "Status Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dimension",
+        "rule_count",
+        "failed_record_total",
+        "failed_run_count",
+        "score",
+        "status_label"
+      ],
+      "title": "HealthScorecardDimensionRollupView",
+      "type": "object"
+    },
+    "HealthScorecardIncidentView": {
+      "properties": {
+        "assigned_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assigned To"
+        },
+        "incident_id": {
+          "title": "Incident Id",
+          "type": "string"
+        },
+        "incident_kind": {
+          "title": "Incident Kind",
+          "type": "string"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Id"
+        },
+        "run_plan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Plan Id"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Severity"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "incident_id",
+        "title",
+        "status",
+        "incident_kind"
+      ],
+      "title": "HealthScorecardIncidentView",
+      "type": "object"
+    },
+    "HealthScorecardOwnershipRollupView": {
+      "properties": {
+        "asset_count": {
+          "title": "Asset Count",
+          "type": "integer"
+        },
+        "cancelled_runs": {
+          "title": "Cancelled Runs",
+          "type": "integer"
+        },
+        "failed_runs": {
+          "title": "Failed Runs",
+          "type": "integer"
+        },
+        "health_label": {
+          "title": "Health Label",
+          "type": "string"
+        },
+        "overall_score": {
+          "title": "Overall Score",
+          "type": "integer"
+        },
+        "pending_runs": {
+          "title": "Pending Runs",
+          "type": "integer"
+        },
+        "running_runs": {
+          "title": "Running Runs",
+          "type": "integer"
+        },
+        "runs_with_failures": {
+          "title": "Runs With Failures",
+          "type": "integer"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_kind": {
+          "title": "Scope Kind",
+          "type": "string"
+        },
+        "scope_name": {
+          "title": "Scope Name",
+          "type": "string"
+        },
+        "succeeded_runs": {
+          "title": "Succeeded Runs",
+          "type": "integer"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "total_failed_records": {
+          "title": "Total Failed Records",
+          "type": "integer"
+        },
+        "total_runs": {
+          "title": "Total Runs",
+          "type": "integer"
+        },
+        "tracked_data_object_version_count": {
+          "title": "Tracked Data Object Version Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scope_kind",
+        "scope_id",
+        "scope_name",
+        "asset_count",
+        "tracked_data_object_version_count",
+        "total_runs",
+        "pending_runs",
+        "running_runs",
+        "succeeded_runs",
+        "failed_runs",
+        "cancelled_runs",
+        "total_failed_records",
+        "runs_with_failures",
+        "overall_score",
+        "health_label",
+        "summary"
+      ],
+      "title": "HealthScorecardOwnershipRollupView",
+      "type": "object"
+    },
+    "HealthScorecardPageView": {
+      "properties": {
+        "data_asset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Asset Id"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "lookback_amount": {
+          "title": "Lookback Amount",
+          "type": "integer"
+        },
+        "lookback_unit": {
+          "title": "Lookback Unit",
+          "type": "string"
+        },
+        "scorecards": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardView"
+          },
+          "title": "Scorecards",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "workspace_summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HealthScorecardWorkspaceSummaryView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "workspace_id",
+        "lookback_amount",
+        "lookback_unit",
+        "generated_at"
+      ],
+      "title": "HealthScorecardPageView",
+      "type": "object"
+    },
+    "HealthScorecardReasonTrendBucketView": {
+      "properties": {
+        "bucket_start": {
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "reason_code",
+        "reason_text",
+        "total"
+      ],
+      "title": "HealthScorecardReasonTrendBucketView",
+      "type": "object"
+    },
+    "HealthScorecardRegressionView": {
+      "properties": {
+        "bucket_start": {
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "current_total": {
+          "title": "Current Total",
+          "type": "integer"
+        },
+        "delta": {
+          "title": "Delta",
+          "type": "integer"
+        },
+        "previous_bucket_start": {
+          "title": "Previous Bucket Start",
+          "type": "string"
+        },
+        "previous_total": {
+          "title": "Previous Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "previous_bucket_start",
+        "previous_total",
+        "current_total",
+        "delta"
+      ],
+      "title": "HealthScorecardRegressionView",
+      "type": "object"
+    },
+    "HealthScorecardTopReasonView": {
+      "properties": {
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "reason_text": {
+          "title": "Reason Text",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "reason_code",
+        "reason_text",
+        "total"
+      ],
+      "title": "HealthScorecardTopReasonView",
+      "type": "object"
+    },
+    "HealthScorecardTopRuleView": {
+      "properties": {
+        "dimension": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dimension"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_name": {
+          "title": "Rule Name",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "rule_id",
+        "rule_name",
+        "total"
+      ],
+      "title": "HealthScorecardTopRuleView",
+      "type": "object"
+    },
+    "HealthScorecardTrendBucketView": {
+      "properties": {
+        "bucket_start": {
+          "title": "Bucket Start",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bucket_start",
+        "total"
+      ],
+      "title": "HealthScorecardTrendBucketView",
+      "type": "object"
+    },
+    "HealthScorecardView": {
+      "properties": {
+        "cancelled_runs": {
+          "title": "Cancelled Runs",
+          "type": "integer"
+        },
+        "data_asset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Asset Id"
+        },
+        "data_asset_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Asset Name"
+        },
+        "data_asset_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Asset Version Id"
+        },
+        "dimension_rollups": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardDimensionRollupView"
+          },
+          "title": "Dimension Rollups",
+          "type": "array"
+        },
+        "failed_runs": {
+          "title": "Failed Runs",
+          "type": "integer"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "health_label": {
+          "title": "Health Label",
+          "type": "string"
+        },
+        "lookback_amount": {
+          "title": "Lookback Amount",
+          "type": "integer"
+        },
+        "lookback_unit": {
+          "title": "Lookback Unit",
+          "type": "string"
+        },
+        "overall_score": {
+          "title": "Overall Score",
+          "type": "integer"
+        },
+        "pending_runs": {
+          "title": "Pending Runs",
+          "type": "integer"
+        },
+        "reason_trend_buckets": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardReasonTrendBucketView"
+          },
+          "title": "Reason Trend Buckets",
+          "type": "array"
+        },
+        "running_runs": {
+          "title": "Running Runs",
+          "type": "integer"
+        },
+        "runs_with_failures": {
+          "title": "Runs With Failures",
+          "type": "integer"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_name": {
+          "title": "Scope Name",
+          "type": "string"
+        },
+        "scope_type": {
+          "title": "Scope Type",
+          "type": "string"
+        },
+        "succeeded_runs": {
+          "title": "Succeeded Runs",
+          "type": "integer"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "top_reasons": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardTopReasonView"
+          },
+          "title": "Top Reasons",
+          "type": "array"
+        },
+        "top_rules": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardTopRuleView"
+          },
+          "title": "Top Rules",
+          "type": "array"
+        },
+        "total_failed_records": {
+          "title": "Total Failed Records",
+          "type": "integer"
+        },
+        "total_runs": {
+          "title": "Total Runs",
+          "type": "integer"
+        },
+        "tracked_data_object_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tracked Data Object Version Ids",
+          "type": "array"
+        },
+        "trend_buckets": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardTrendBucketView"
+          },
+          "title": "Trend Buckets",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope_type",
+        "scope_id",
+        "scope_name",
+        "workspace_id",
+        "lookback_amount",
+        "lookback_unit",
+        "generated_at",
+        "overall_score",
+        "health_label",
+        "summary",
+        "total_runs",
+        "pending_runs",
+        "running_runs",
+        "succeeded_runs",
+        "failed_runs",
+        "cancelled_runs",
+        "total_failed_records",
+        "runs_with_failures"
+      ],
+      "title": "HealthScorecardView",
+      "type": "object"
+    },
+    "HealthScorecardWorkspaceSummaryView": {
+      "properties": {
+        "active_incident_count": {
+          "title": "Active Incident Count",
+          "type": "integer"
+        },
+        "active_incidents": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardIncidentView"
+          },
+          "title": "Active Incidents",
+          "type": "array"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "health_label": {
+          "title": "Health Label",
+          "type": "string"
+        },
+        "overall_score": {
+          "title": "Overall Score",
+          "type": "integer"
+        },
+        "ownership_rollups": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardOwnershipRollupView"
+          },
+          "title": "Ownership Rollups",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "top_regressions": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardRegressionView"
+          },
+          "title": "Top Regressions",
+          "type": "array"
+        },
+        "top_rules": {
+          "items": {
+            "$ref": "#/$defs/HealthScorecardTopRuleView"
+          },
+          "title": "Top Rules",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "generated_at",
+        "overall_score",
+        "health_label",
+        "summary",
+        "active_incident_count"
+      ],
+      "title": "HealthScorecardWorkspaceSummaryView",
+      "type": "object"
+    },
+    "SlaSloAdherenceView": {
+      "properties": {
+        "compliance_rate_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Compliance Rate Pct"
+        },
+        "compliant_event_count": {
+          "default": 0,
+          "title": "Compliant Event Count",
+          "type": "integer"
+        },
+        "current_observed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Observed At"
+        },
+        "current_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Value"
+        },
+        "latest_observed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Latest Observed At"
+        },
+        "meets_target": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Meets Target"
+        },
+        "metric_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Metric Value"
+        },
+        "non_compliant_event_count": {
+          "default": 0,
+          "title": "Non Compliant Event Count",
+          "type": "integer"
+        },
+        "observed_event_count": {
+          "default": 0,
+          "title": "Observed Event Count",
+          "type": "integer"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Summary"
+        },
+        "threshold_operator": {
+          "default": "gte",
+          "title": "Threshold Operator",
+          "type": "string"
+        },
+        "threshold_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Threshold Value"
+        }
+      },
+      "title": "SlaSloAdherenceView",
+      "type": "object"
+    },
+    "SlaSloBreachView": {
+      "properties": {
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "current_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Value"
+        },
+        "definition_id": {
+          "title": "Definition Id",
+          "type": "string"
+        },
+        "definition_name": {
+          "title": "Definition Name",
+          "type": "string"
+        },
+        "emitted_at": {
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "metric_kind": {
+          "title": "Metric Kind",
+          "type": "string"
+        },
+        "observed_event_count": {
+          "default": 0,
+          "title": "Observed Event Count",
+          "type": "integer"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_kind": {
+          "title": "Scope Kind",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Summary"
+        },
+        "threshold_operator": {
+          "title": "Threshold Operator",
+          "type": "string"
+        },
+        "threshold_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Threshold Value"
+        }
+      },
+      "required": [
+        "definition_id",
+        "definition_name",
+        "scope_kind",
+        "scope_id",
+        "metric_kind",
+        "threshold_value",
+        "threshold_operator",
+        "emitted_at",
+        "correlation_id",
+        "severity"
+      ],
+      "title": "SlaSloBreachView",
+      "type": "object"
+    },
+    "SlaSloDefinitionReviewView": {
+      "properties": {
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comments"
+        }
+      },
+      "title": "SlaSloDefinitionReviewView",
+      "type": "object"
+    },
+    "SlaSloDefinitionUpsertView": {
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "lookback_amount": {
+          "default": 30,
+          "title": "Lookback Amount",
+          "type": "integer"
+        },
+        "lookback_unit": {
+          "default": "day",
+          "title": "Lookback Unit",
+          "type": "string"
+        },
+        "metric_kind": {
+          "title": "Metric Kind",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_kind": {
+          "title": "Scope Kind",
+          "type": "string"
+        },
+        "threshold_operator": {
+          "default": "gte",
+          "title": "Threshold Operator",
+          "type": "string"
+        },
+        "threshold_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Threshold Value"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "name",
+        "scope_kind",
+        "scope_id",
+        "metric_kind",
+        "threshold_value"
+      ],
+      "title": "SlaSloDefinitionUpsertView",
+      "type": "object"
+    },
+    "SlaSloDefinitionView": {
+      "properties": {
+        "adherence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SlaSloAdherenceView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "approval_status": {
+          "default": "draft",
+          "title": "Approval Status",
+          "type": "string"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created At"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "itsm_system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Itsm System"
+        },
+        "itsm_ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Itsm Ticket Id"
+        },
+        "itsm_ticket_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Itsm Ticket Number"
+        },
+        "itsm_ticket_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Itsm Ticket Url"
+        },
+        "lifecycle_status": {
+          "default": "draft",
+          "title": "Lifecycle Status",
+          "type": "string"
+        },
+        "lookback_amount": {
+          "default": 30,
+          "title": "Lookback Amount",
+          "type": "integer"
+        },
+        "lookback_unit": {
+          "default": "day",
+          "title": "Lookback Unit",
+          "type": "string"
+        },
+        "metric_kind": {
+          "title": "Metric Kind",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "requested_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested At"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed At"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewed By"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_kind": {
+          "title": "Scope Kind",
+          "type": "string"
+        },
+        "threshold_operator": {
+          "default": "gte",
+          "title": "Threshold Operator",
+          "type": "string"
+        },
+        "threshold_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Threshold Value"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Updated At"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "name",
+        "scope_kind",
+        "scope_id",
+        "metric_kind",
+        "threshold_value"
+      ],
+      "title": "SlaSloDefinitionView",
+      "type": "object"
+    },
+    "SlaSloEvaluationView": {
+      "properties": {
+        "breach_events_recorded": {
+          "title": "Breach Events Recorded",
+          "type": "integer"
+        },
+        "breached_definitions": {
+          "title": "Breached Definitions",
+          "type": "integer"
+        },
+        "breaches": {
+          "items": {
+            "$ref": "#/$defs/SlaSloBreachView"
+          },
+          "title": "Breaches",
+          "type": "array"
+        },
+        "evaluated_at": {
+          "title": "Evaluated At",
+          "type": "string"
+        },
+        "evaluated_definitions": {
+          "title": "Evaluated Definitions",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "evaluated_at",
+        "evaluated_definitions",
+        "breached_definitions",
+        "breach_events_recorded"
+      ],
+      "title": "SlaSloEvaluationView",
+      "type": "object"
+    },
+    "SlaSloSummaryView": {
+      "properties": {
+        "active_definitions": {
+          "default": 0,
+          "title": "Active Definitions",
+          "type": "integer"
+        },
+        "approved_definitions": {
+          "default": 0,
+          "title": "Approved Definitions",
+          "type": "integer"
+        },
+        "at_risk_definitions": {
+          "default": 0,
+          "title": "At Risk Definitions",
+          "type": "integer"
+        },
+        "compliant_definitions": {
+          "default": 0,
+          "title": "Compliant Definitions",
+          "type": "integer"
+        },
+        "definitions": {
+          "items": {
+            "$ref": "#/$defs/SlaSloDefinitionView"
+          },
+          "title": "Definitions",
+          "type": "array"
+        },
+        "deprecated_definitions": {
+          "default": 0,
+          "title": "Deprecated Definitions",
+          "type": "integer"
+        },
+        "draft_definitions": {
+          "default": 0,
+          "title": "Draft Definitions",
+          "type": "integer"
+        },
+        "total_definitions": {
+          "default": 0,
+          "title": "Total Definitions",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "title": "SlaSloSummaryView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "approve_service_level_api_rulebuilder_v1_service_levels_definition_id_approve_post_param_path_definition_id": {
+      "title": "Definition Id",
+      "type": "string"
+    },
+    "evaluate_service_levels_api_rulebuilder_v1_service_levels_evaluate_post_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_dataAssetId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataassetid"
+    },
+    "list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_lookbackAmount": {
+      "default": 24,
+      "maximum": 720,
+      "minimum": 1,
+      "title": "Lookbackamount",
+      "type": "integer"
+    },
+    "list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_lookbackUnit": {
+      "default": "hours",
+      "title": "Lookbackunit",
+      "type": "string"
+    },
+    "list_health_scorecards_api_rulebuilder_v1_observability_health_scorecards_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_metric_kind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Metric Kind"
+    },
+    "list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_scope_kind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Scope Kind"
+    },
+    "list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_service_levels_api_rulebuilder_v1_service_levels_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "update_service_level_api_rulebuilder_v1_service_levels_definition_id_put_param_path_definition_id": {
+      "title": "Definition Id",
+      "type": "string"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/observability/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/observability v1 schema bundle"
+}

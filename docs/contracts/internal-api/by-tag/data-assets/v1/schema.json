@@ -1,0 +1,1275 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "ContractImportRequestView": {
+      "properties": {
+        "contract_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Contract Format"
+        },
+        "contract_text": {
+          "title": "Contract Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "contract_text"
+      ],
+      "title": "ContractImportRequestView",
+      "type": "object"
+    },
+    "CreateDataAssetRequestView": {
+      "properties": {
+        "business_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataAssetBusinessContextView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "current_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Version Id"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "source_object_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Object Version Ids",
+          "type": "array"
+        },
+        "status": {
+          "default": "draft",
+          "title": "Status",
+          "type": "string"
+        },
+        "workspace_id": {
+          "default": "",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "CreateDataAssetRequestView",
+      "type": "object"
+    },
+    "CreateDataAssetVersionRequestView": {
+      "properties": {
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "derived_fields": {
+          "items": {
+            "$ref": "#/$defs/DataAssetDerivedFieldView"
+          },
+          "title": "Derived Fields",
+          "type": "array"
+        },
+        "filters": {
+          "items": {
+            "$ref": "#/$defs/DataAssetFilterView"
+          },
+          "title": "Filters",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source_bindings": {
+          "items": {
+            "$ref": "#/$defs/DataAssetSourceBindingView"
+          },
+          "title": "Source Bindings",
+          "type": "array"
+        },
+        "upload_preview": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataAssetUploadPreviewView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "CreateDataAssetVersionRequestView",
+      "type": "object"
+    },
+    "DataAssetBusinessContextView": {
+      "properties": {
+        "business_definitions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Business Definitions",
+          "type": "array"
+        },
+        "consumers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Consumers",
+          "type": "array"
+        },
+        "criticality": {
+          "default": "",
+          "title": "Criticality",
+          "type": "string"
+        },
+        "data_product_id": {
+          "default": "",
+          "title": "Data Product Id",
+          "type": "string"
+        },
+        "dataset_id": {
+          "default": "",
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "domain": {
+          "default": "",
+          "title": "Domain",
+          "type": "string"
+        },
+        "lineage_references": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Lineage References",
+          "type": "array"
+        },
+        "owner": {
+          "default": "",
+          "title": "Owner",
+          "type": "string"
+        },
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "steward": {
+          "default": "",
+          "title": "Steward",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "validation_plans": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Validation Plans",
+          "type": "array"
+        },
+        "validation_suites": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Validation Suites",
+          "type": "array"
+        }
+      },
+      "title": "DataAssetBusinessContextView",
+      "type": "object"
+    },
+    "DataAssetDerivedFieldView": {
+      "properties": {
+        "data_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Type"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "nullable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nullable"
+        },
+        "source_field_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Field Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "expression"
+      ],
+      "title": "DataAssetDerivedFieldView",
+      "type": "object"
+    },
+    "DataAssetFilterView": {
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "expression": {
+          "title": "Expression",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expression"
+      ],
+      "title": "DataAssetFilterView",
+      "type": "object"
+    },
+    "DataAssetGovernanceDiscoveryView": {
+      "properties": {
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "captured_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Captured At"
+        },
+        "evidence_classifications": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Classifications",
+          "type": "array"
+        },
+        "latest_delivery_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Latest Delivery At"
+        },
+        "latest_delivery_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Latest Delivery Id"
+        },
+        "object_storage_classifications": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Object Storage Classifications",
+          "type": "array"
+        },
+        "priority": {
+          "default": "low",
+          "title": "Priority",
+          "type": "string"
+        },
+        "signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signals",
+          "type": "array"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Snapshot Id"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id"
+      ],
+      "title": "DataAssetGovernanceDiscoveryView",
+      "type": "object"
+    },
+    "DataAssetLineageAnomalyAnnotationView": {
+      "properties": {
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        },
+        "source": {
+          "default": "",
+          "title": "Source",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "severity",
+        "summary"
+      ],
+      "title": "DataAssetLineageAnomalyAnnotationView",
+      "type": "object"
+    },
+    "DataAssetLineageBusinessContextOverlayView": {
+      "properties": {
+        "consumers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Consumers",
+          "type": "array"
+        },
+        "criticality": {
+          "default": "",
+          "title": "Criticality",
+          "type": "string"
+        },
+        "domain": {
+          "default": "",
+          "title": "Domain",
+          "type": "string"
+        },
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "steward": {
+          "default": "",
+          "title": "Steward",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "title": "DataAssetLineageBusinessContextOverlayView",
+      "type": "object"
+    },
+    "DataAssetLineageClassificationView": {
+      "properties": {
+        "classification": {
+          "default": "public",
+          "title": "Classification",
+          "type": "string"
+        },
+        "rationale": {
+          "default": "",
+          "title": "Rationale",
+          "type": "string"
+        },
+        "signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signals",
+          "type": "array"
+        }
+      },
+      "title": "DataAssetLineageClassificationView",
+      "type": "object"
+    },
+    "DataAssetLineageImpactSummaryView": {
+      "properties": {
+        "contract_change_count": {
+          "default": 0,
+          "title": "Contract Change Count",
+          "type": "integer"
+        },
+        "impacted_incident_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Incident Ids",
+          "type": "array"
+        },
+        "impacted_monitor_scope_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Monitor Scope Ids",
+          "type": "array"
+        },
+        "impacted_rule_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Rule Ids",
+          "type": "array"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "title": "DataAssetLineageImpactSummaryView",
+      "type": "object"
+    },
+    "DataAssetLineageNodeView": {
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "navigation_target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Navigation Target"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "name"
+      ],
+      "title": "DataAssetLineageNodeView",
+      "type": "object"
+    },
+    "DataAssetLineageView": {
+      "properties": {
+        "anomaly_annotations": {
+          "items": {
+            "$ref": "#/$defs/DataAssetLineageAnomalyAnnotationView"
+          },
+          "title": "Anomaly Annotations",
+          "type": "array"
+        },
+        "business_context_overlay": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataAssetLineageBusinessContextOverlayView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "captured_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Captured At"
+        },
+        "classification_view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataAssetLineageClassificationView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "data_asset": {
+          "$ref": "#/$defs/DataAssetView"
+        },
+        "downstream_nodes": {
+          "items": {
+            "$ref": "#/$defs/DataAssetLineageNodeView"
+          },
+          "title": "Downstream Nodes",
+          "type": "array"
+        },
+        "impact_summary": {
+          "$ref": "#/$defs/DataAssetLineageImpactSummaryView"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Snapshot Id"
+        },
+        "upstream_nodes": {
+          "items": {
+            "$ref": "#/$defs/DataAssetLineageNodeView"
+          },
+          "title": "Upstream Nodes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "data_asset",
+        "impact_summary"
+      ],
+      "title": "DataAssetLineageView",
+      "type": "object"
+    },
+    "DataAssetSourceBindingView": {
+      "properties": {
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "source_data_object_version_id": {
+          "title": "Source Data Object Version Id",
+          "type": "string"
+        },
+        "source_field_id": {
+          "title": "Source Field Id",
+          "type": "string"
+        },
+        "source_field_name": {
+          "default": "",
+          "title": "Source Field Name",
+          "type": "string"
+        },
+        "source_field_type": {
+          "default": "",
+          "title": "Source Field Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_data_object_version_id",
+        "source_field_id"
+      ],
+      "title": "DataAssetSourceBindingView",
+      "type": "object"
+    },
+    "DataAssetUploadPreviewColumnView": {
+      "properties": {
+        "data_type": {
+          "title": "Data Type",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "data_type"
+      ],
+      "title": "DataAssetUploadPreviewColumnView",
+      "type": "object"
+    },
+    "DataAssetUploadPreviewView": {
+      "properties": {
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/DataAssetUploadPreviewColumnView"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "file_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "File Format"
+        },
+        "file_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "File Name"
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Uri"
+        }
+      },
+      "title": "DataAssetUploadPreviewView",
+      "type": "object"
+    },
+    "DataAssetValidationView": {
+      "properties": {
+        "asset": {
+          "$ref": "#/$defs/DataAssetView"
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "ok": {
+          "default": true,
+          "title": "Ok",
+          "type": "boolean"
+        },
+        "version": {
+          "$ref": "#/$defs/DataAssetVersionView"
+        }
+      },
+      "required": [
+        "asset",
+        "version"
+      ],
+      "title": "DataAssetValidationView",
+      "type": "object"
+    },
+    "DataAssetVersionView": {
+      "properties": {
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_asset_id": {
+          "default": "",
+          "title": "Data Asset Id",
+          "type": "string"
+        },
+        "data_contract_download_url": {
+          "default": "",
+          "title": "Data Contract Download Url",
+          "type": "string"
+        },
+        "derived_fields": {
+          "items": {
+            "$ref": "#/$defs/DataAssetDerivedFieldView"
+          },
+          "title": "Derived Fields",
+          "type": "array"
+        },
+        "filters": {
+          "items": {
+            "$ref": "#/$defs/DataAssetFilterView"
+          },
+          "title": "Filters",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source_bindings": {
+          "items": {
+            "$ref": "#/$defs/DataAssetSourceBindingView"
+          },
+          "title": "Source Bindings",
+          "type": "array"
+        },
+        "upload_preview": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataAssetUploadPreviewView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataAssetVersionView",
+      "type": "object"
+    },
+    "DataAssetView": {
+      "properties": {
+        "business_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataAssetBusinessContextView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "current_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Version Id"
+        },
+        "data_contract_download_url": {
+          "default": "",
+          "title": "Data Contract Download Url",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "source_object_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Object Version Ids",
+          "type": "array"
+        },
+        "status": {
+          "default": "draft",
+          "title": "Status",
+          "type": "string"
+        },
+        "workspace_id": {
+          "default": "",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataAssetView",
+      "type": "object"
+    },
+    "GenerateDataAssetTestDataRequestView": {
+      "properties": {
+        "sample_count": {
+          "default": 10,
+          "maximum": 1000.0,
+          "minimum": 1.0,
+          "title": "Sample Count",
+          "type": "integer"
+        }
+      },
+      "title": "GenerateDataAssetTestDataRequestView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "OkResponseView": {
+      "properties": {
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "title": "OkResponseView",
+      "type": "object"
+    },
+    "TestDataPayloadView": {
+      "properties": {
+        "attribute_count": {
+          "default": 0,
+          "title": "Attribute Count",
+          "type": "integer"
+        },
+        "attributes": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Attributes",
+          "type": "array"
+        },
+        "data_object_id": {
+          "title": "Data Object Id"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "sample_count": {
+          "default": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "samples": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Samples",
+          "type": "array"
+        },
+        "version_id": {
+          "title": "Version Id",
+          "type": "string"
+        },
+        "version_name": {
+          "title": "Version Name"
+        }
+      },
+      "required": [
+        "version_id",
+        "generated_at"
+      ],
+      "title": "TestDataPayloadView",
+      "type": "object"
+    },
+    "UpdateDataAssetRequestView": {
+      "properties": {
+        "business_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataAssetBusinessContextView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "current_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Version Id"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "source_object_version_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Object Version Ids"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "title": "UpdateDataAssetRequestView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "analyze_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_analysis_get_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "analyze_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_analysis_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Analyze Data Asset Contract Api Rulebuilder V1 Data Assets  Asset Id  Contract Analysis Get",
+      "type": "object"
+    },
+    "create_data_asset_version_api_rulebuilder_v1_data_assets_asset_id_versions_post_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "delete_data_asset_api_rulebuilder_v1_data_assets_asset_id_delete_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "download_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_get_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "download_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_get_param_query_format": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "yaml",
+      "title": "Format"
+    },
+    "download_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_get_response_200_application_json": {},
+    "generate_test_data_for_data_asset_api_rulebuilder_v1_data_assets_asset_id_generate_test_data_post_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "get_data_asset_api_rulebuilder_v1_data_assets_asset_id_get_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "get_data_asset_governance_discovery_api_rulebuilder_v1_data_assets_asset_id_governance_discovery_get_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "get_data_asset_lineage_api_rulebuilder_v1_data_assets_asset_id_lineage_get_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "get_data_asset_version_api_rulebuilder_v1_data_assets_asset_id_versions_version_id_get_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "get_data_asset_version_api_rulebuilder_v1_data_assets_asset_id_versions_version_id_get_param_path_version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "import_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_import_post_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "list_data_asset_versions_api_rulebuilder_v1_data_assets_asset_id_versions_get_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "list_data_asset_versions_api_rulebuilder_v1_data_assets_asset_id_versions_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/DataAssetVersionView"
+      },
+      "title": "Response List Data Asset Versions Api Rulebuilder V1 Data Assets  Asset Id  Versions Get",
+      "type": "array"
+    },
+    "list_data_assets_api_rulebuilder_v1_data_assets_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_data_assets_api_rulebuilder_v1_data_assets_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/DataAssetView"
+      },
+      "title": "Response List Data Assets Api Rulebuilder V1 Data Assets Get",
+      "type": "array"
+    },
+    "review_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_review_post_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "review_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_review_post_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Review Payload",
+      "type": "object"
+    },
+    "review_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_review_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Review Data Asset Contract Api Rulebuilder V1 Data Assets  Asset Id  Contract Review Post",
+      "type": "object"
+    },
+    "update_data_asset_api_rulebuilder_v1_data_assets_asset_id_put_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "validate_data_asset_api_rulebuilder_v1_data_assets_asset_id_validate_post_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "validate_data_asset_contract_conformance_api_rulebuilder_v1_data_assets_asset_id_contract_conformance_post_param_path_asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "validate_data_asset_contract_conformance_api_rulebuilder_v1_data_assets_asset_id_contract_conformance_post_request_body_application_json": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Validation Payload"
+    },
+    "validate_data_asset_contract_conformance_api_rulebuilder_v1_data_assets_asset_id_contract_conformance_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Validate Data Asset Contract Conformance Api Rulebuilder V1 Data Assets  Asset Id  Contract Conformance Post",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/data-assets/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/data-assets v1 schema bundle"
+}

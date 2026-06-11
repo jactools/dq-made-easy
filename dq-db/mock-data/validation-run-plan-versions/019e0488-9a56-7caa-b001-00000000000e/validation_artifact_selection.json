@@ -1,0 +1,9 @@
+{
+  "selectionMode": "single_suite",
+  "artifactRefs": [
+    {
+      "artifactId": "gx_customer_email_format_high_invalid_rows",
+      "artifactVersion": 1
+    }
+  ]
+}

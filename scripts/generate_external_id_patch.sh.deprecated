@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT_DIR"
+
+source "$ROOT_DIR/.env"
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+
+source "$ROOT_DIR/scripts/supporting/logging.sh"
+my_name="generate_external_id_patch.sh"
+
+PY_SCRIPT="${ROOT_DIR}/scripts/generate_external_id_patch.py"
+
+if [ ! -f "$PY_SCRIPT" ]; then
+  log_message ERROR "$my_name" "Missing generator script: $PY_SCRIPT"
+  exit 1
+fi
+
+log_message INFO "$my_name" "Generating external ID patch files from CSV"
+log_message INFO "$my_name" "Using Python script: $PY_SCRIPT"
+log_message INFO "$my_name" "Ensure your .env has KEYCLOAK_INTERNAL_URL and KEYCLOAK_TOKEN_REALM set for Keycloak connectivity"
+log_message INFO "$my_name" "KEYCLOAK_INTERNAL_URL=${KEYCLOAK_INTERNAL_URL} and KEYCLOAK_TOKEN_REALM=${KEYCLOAK_TOKEN_REALM}"
+# KEYCLOAK_SYSTEM_ADMIN_USERNAME=admin
+# KEYCLOAK_SYSTEM_ADMIN_PASSWORD=admin
+# KEYCLOAK_CLIENT_ID=admin-cli
+# export KEYCLOAK_SYSTEM_ADMIN_USERNAME KEYCLOAK_SYSTEM_ADMIN_PASSWORD KEYCLOAK_CLIENT_ID
+
+python3 "$PY_SCRIPT" --unmatched-file unmatched.txt || {
+  log_message ERROR "$my_name" "Patch generation failed. Check the error output above."
+  exit 1
+}
+
+log_message INFO "$my_name" "Done."

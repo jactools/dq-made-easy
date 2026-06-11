@@ -1,0 +1,7 @@
+{
+  "name": "Unique Transaction ID",
+  "description": "Enforce unique transaction identifiers",
+  "expression": "transaction_id IS UNIQUE",
+  "ruleType": "UNIQUE",
+  "dimension": "Uniqueness"
+}

@@ -1,0 +1,520 @@
+.definition-mappings-page {
+  --mapping-page-bg: var(--app-page-bg);
+  --mapping-panel-border: var(--app-border-subtle);
+  --mapping-panel-bg: var(--app-surface-primary);
+  --mapping-panel-bg-subtle: var(--app-surface-secondary);
+  --mapping-panel-shadow: var(--app-shadow-md, 0 8px 24px rgba(15, 23, 42, 0.08));
+  --mapping-row-selected-bg: var(--app-selected-bg);
+  --mapping-row-hover-bg: var(--app-hover-bg);
+  --mapping-chip-explicit-bg: var(--app-status-info-bg);
+  --mapping-chip-explicit-border: var(--app-status-info-border);
+  --mapping-chip-inherited-bg: var(--app-status-success-bg);
+  --mapping-chip-inherited-border: var(--app-status-success-border);
+  --mapping-chip-neutral-bg: var(--app-status-neutral-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  min-height: 100%;
+  background: var(--mapping-page-bg);
+  color: var(--app-text-primary);
+}
+
+.definition-mappings-hero {
+  display: grid;
+  grid-template-columns: 1.6fr minmax(240px, 360px);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.definition-mappings-tabs {
+  display: inline-flex;
+  gap: 10px;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid var(--mapping-panel-border);
+  background: var(--mapping-panel-bg-subtle);
+  color: var(--app-text-primary);
+}
+
+.definition-mappings-tab {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--app-text-secondary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.definition-mappings-tab.active {
+  background: var(--mapping-panel-bg);
+  color: var(--app-text-primary);
+  box-shadow: var(--mapping-panel-shadow);
+}
+
+.definition-mappings-eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-hero h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+.definition-mappings-subtitle {
+  margin: 12px 0 0;
+  max-width: 72ch;
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-status-card,
+.definition-mappings-attributes-panel,
+.definition-mappings-workbench-panel,
+.definition-mappings-selectors,
+.definition-mappings-banner {
+  border: 1px solid var(--mapping-panel-border);
+  border-radius: 12px;
+  background: var(--mapping-panel-bg);
+  box-shadow: var(--mapping-panel-shadow);
+}
+
+.definition-mappings-status-card {
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.definition-mappings-status-card span,
+.definition-mappings-card-label,
+.definition-mappings-search-controls span,
+.definition-mappings-selectors span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-status-card strong {
+  font-size: 18px;
+}
+
+.definition-mappings-selectors {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 18px;
+}
+
+.definition-mappings-selectors .app-field,
+.definition-mappings-search-controls .app-field {
+  width: 100%;
+}
+
+.definition-mappings-selectors .app-select,
+.definition-mappings-search-controls .app-input {
+  --app-input-background: var(--mapping-panel-bg);
+  --app-input-text: var(--app-text-primary);
+  --app-input-border: var(--mapping-panel-border);
+  --app-input-placeholder: var(--app-text-secondary);
+  --app-input-label: var(--app-text-secondary);
+  --app-select-background: var(--mapping-panel-bg);
+  --app-select-text: var(--app-text-primary);
+  --app-select-border: var(--mapping-panel-border);
+  width: 100%;
+}
+
+.definition-mappings-banner {
+  padding: 0;
+}
+
+.definition-mappings-layout {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.05fr) minmax(420px, 1.25fr);
+  gap: 24px;
+  min-height: 0;
+}
+
+.definition-mappings-attributes-panel,
+.definition-mappings-workbench-panel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+}
+
+.definition-mappings-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.definition-mappings-panel-header h2,
+.definition-mappings-results-header h3,
+.definition-mappings-current-definition h3 {
+  margin: 0;
+}
+
+.definition-mappings-panel-header p,
+.definition-mappings-attribute-card p,
+.definition-mappings-definition-card p,
+.definition-mappings-empty-card,
+.definition-mappings-empty-state {
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-meta {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-attributes-table {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--mapping-panel-border);
+  background: var(--mapping-panel-bg);
+}
+
+.definition-mappings-table-head,
+.definition-mappings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(150px, 0.9fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.definition-mappings-table-head {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--mapping-panel-bg-subtle);
+}
+
+.definition-mappings-row {
+  border: 0;
+  border-top: 1px solid var(--mapping-panel-border);
+  padding: 16px;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+  color: var(--app-text-primary);
+}
+
+.definition-mappings-row.selected {
+  background: var(--mapping-row-selected-bg);
+}
+
+.definition-mappings-row:hover {
+  background: var(--mapping-row-hover-bg);
+}
+
+.definition-mappings-row strong,
+.definition-mappings-definition-card strong {
+  display: block;
+  font-size: 15px;
+}
+
+.definition-mappings-row small {
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.status-explicit {
+  background: var(--mapping-chip-explicit-bg);
+  color: var(--app-brand-primary);
+  border-color: var(--mapping-chip-explicit-border);
+}
+
+.status-inherited {
+  background: var(--mapping-chip-inherited-bg);
+  color: var(--app-status-success-text);
+  border-color: var(--mapping-chip-inherited-border);
+}
+
+.status-explicit_unmapped,
+.status-inherited_unmapped,
+.status-unmapped {
+  background: var(--mapping-chip-neutral-bg);
+  color: var(--app-text-secondary);
+  border-color: var(--mapping-panel-border);
+}
+
+.definition-mappings-attribute-card,
+.definition-mappings-definition-card,
+.definition-mappings-empty-card {
+  border-radius: 12px;
+  border: 1px solid var(--mapping-panel-border);
+  background: var(--mapping-panel-bg);
+}
+
+.definition-mappings-attribute-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+}
+
+.definition-mappings-attribute-card h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.definition-mappings-card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.definition-mappings-current-definition,
+.definition-mappings-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.definition-mappings-definition-card {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.definition-mappings-definition-card.current {
+  border-color: color-mix(in srgb, var(--app-brand-primary) 30%, var(--mapping-panel-border));
+}
+
+.definition-mappings-task-card {
+  gap: 18px;
+}
+
+.definition-mappings-task-summary,
+.definition-mappings-task-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.definition-mappings-task-chip-list,
+.definition-mappings-task-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.definition-mappings-task-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--mapping-chip-explicit-bg);
+  border: 1px solid var(--mapping-chip-explicit-border);
+  color: var(--app-brand-primary);
+  font-weight: 700;
+}
+
+.definition-mappings-task-chip button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.definition-mappings-task-scope-actions,
+.definition-mappings-task-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.definition-mappings-task-form,
+.definition-mappings-task-review-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.definition-mappings-task-review-grid {
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.definition-mappings-task-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.definition-mappings-task-field span {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--mapping-panel-border);
+  background: var(--mapping-panel-bg);
+  color: var(--app-text-primary);
+  padding: 12px 14px;
+  font: inherit;
+  resize: vertical;
+  min-height: 88px;
+}
+
+.definition-mappings-textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--app-brand-primary) 24%, transparent);
+  outline-offset: 1px;
+}
+
+.definition-mappings-task-list-item {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--mapping-panel-bg-subtle);
+  border: 1px solid var(--mapping-panel-border);
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-definition-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.definition-mappings-definition-card dt {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--app-text-secondary);
+}
+
+.definition-mappings-definition-card dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.definition-mappings-search-controls {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 14px;
+}
+
+.definition-mappings-reference-search {
+  margin-bottom: 4px;
+}
+
+.definition-mappings-reference-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.definition-mappings-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.definition-mappings-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.definition-mappings-actions .app-button,
+.definition-mappings-results .app-button {
+  width: fit-content;
+  --app-button-border-color: var(--mapping-panel-border);
+}
+
+.definition-mappings-value-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.definition-mappings-value-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--mapping-panel-border);
+  background: var(--mapping-panel-bg-subtle);
+  color: var(--app-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.definition-mappings-empty-card,
+.definition-mappings-empty-state {
+  padding: 18px;
+}
+
+.definition-mappings-empty-card.large {
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1180px) {
+  .definition-mappings-hero,
+  .definition-mappings-layout,
+  .definition-mappings-selectors,
+  .definition-mappings-search-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .definition-mappings-task-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .definition-mappings-attribute-card {
+    flex-direction: column;
+  }
+
+  .definition-mappings-card-meta {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .definition-mappings-page {
+    padding: 16px;
+  }
+
+  .definition-mappings-table-head,
+  .definition-mappings-row,
+  .definition-mappings-definition-card dl {
+    grid-template-columns: 1fr;
+  }
+}

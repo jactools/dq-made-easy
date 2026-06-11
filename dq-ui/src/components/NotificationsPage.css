@@ -1,0 +1,267 @@
+.notifications-page {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.notifications-header {
+  margin-bottom: 24px;
+}
+
+.notifications-header .header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.notifications-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.unread-badge {
+  background: var(--app-brand-primary);
+  color: var(--app-text-inverse);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--app-text-secondary);
+}
+
+.notifications-controls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 16px;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.search-box:focus-within {
+  border-color: var(--app-brand-primary);
+}
+
+.search-box i {
+  color: var(--app-text-secondary);
+  font-size: 14px;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  outline: none;
+  padding: 0;
+}
+
+.search-input::placeholder {
+  color: var(--app-text-secondary);
+}
+
+.clear-search-btn {
+  background: none;
+  border: none;
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  transition: color 0.2s ease-in-out;
+}
+
+.clear-search-btn:hover {
+  color: var(--app-text-primary);
+}
+
+.notifications-actions {
+  margin-bottom: 20px;
+}
+
+.mark-all-read-btn {
+  padding: 8px 16px;
+  background: var(--app-surface-tertiary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+  color: var(--app-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.mark-all-read-btn:hover {
+  background: var(--app-surface-secondary);
+  border-color: var(--app-border-strong);
+}
+
+.notifications-container {
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.empty-notifications {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--app-text-secondary);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: var(--app-border-subtle);
+  margin-bottom: 16px;
+}
+
+.empty-icon .app-icon {
+  display: inline-block;
+}
+
+.empty-notifications p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--app-border-subtle);
+}
+
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--app-border-subtle);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  position: relative;
+}
+
+.notification-item:hover {
+  background-color: var(--app-surface-secondary);
+}
+
+.notification-item.unread {
+  background-color: color-mix(in srgb, var(--app-brand-primary) 6%, var(--app-surface-primary));
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-icon {
+  flex: 0 0 24px;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  font-size: 18px;
+}
+
+.notification-icon .app-icon {
+  display: inline-block;
+}
+
+.notification-item.notification-success .notification-icon {
+  color: var(--app-status-success-text);
+}
+
+.notification-item.notification-error .notification-icon {
+  color: var(--app-status-error-text);
+}
+
+.notification-item.notification-warning .notification-icon {
+  color: var(--app-status-warning-text);
+}
+
+.notification-item.notification-info .notification-icon {
+  color: var(--app-status-info-text);
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.notification-status-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.notification-status-badge-activated {
+  background: var(--app-status-success-bg);
+  color: var(--app-status-success-text);
+}
+
+.notification-status-badge-deactivated {
+  background: var(--app-status-error-bg);
+  color: var(--app-status-error-text);
+}
+
+.notification-message {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  line-height: 1.4;
+}
+
+.notification-time {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--app-text-secondary);
+  margin-top: 2px;
+}
+
+.notification-dot {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--app-brand-primary);
+  border-radius: 50%;
+}

@@ -1,0 +1,9 @@
+{
+  "selectionMode": "single_suite",
+  "artifactRefs": [
+    {
+      "artifactId": "soda_customer_email_unique",
+      "artifactVersion": 1
+    }
+  ]
+}

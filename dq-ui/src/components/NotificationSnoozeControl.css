@@ -1,0 +1,153 @@
+/* ── Full panel (settings page) ─────────────────────────────────────────── */
+
+.snooze-panel {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--app-border-subtle);
+}
+
+.snooze-panel-heading {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+
+.snooze-panel-subtitle {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.snooze-active-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--app-status-warning-bg);
+  border: 1px solid var(--app-status-warning-border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--app-text-primary);
+}
+
+.snooze-active-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.snooze-clear-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--app-status-warning-border);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--app-text-primary);
+}
+
+.snooze-clear-btn:hover {
+  background: var(--app-status-warning-bg);
+  color: var(--app-text-primary);
+}
+
+.snooze-options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.snooze-option-btn {
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--app-text-primary);
+  transition: background 0.15s ease;
+}
+
+.snooze-option-btn:hover {
+  background: var(--app-surface-secondary);
+}
+
+/* ── Compact mode (header dropdown) ─────────────────────────────────────── */
+
+.snooze-compact {
+  position: relative;
+}
+
+.snooze-compact-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--app-text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.snooze-compact-trigger:hover {
+  background: var(--app-surface-secondary);
+}
+
+.snooze-compact-trigger.snooze-active {
+  color: var(--app-status-warning-text);
+  font-weight: 500;
+}
+
+.snooze-compact-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.snooze-compact-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 200px;
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.snooze-compact-status {
+  margin: 0;
+  padding: 8px 16px 4px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.snooze-compact-option {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 9px 16px;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--app-text-primary);
+}
+
+.snooze-compact-option:hover {
+  background: var(--app-surface-secondary);
+}
+
+.snooze-compact-option.snooze-clear {
+  border-top: 1px solid var(--app-border-subtle);
+  color: var(--app-status-error-text);
+  margin-top: 4px;
+}

@@ -1,0 +1,11 @@
+{
+  "workspace_id": "retail-banking",
+  "product_id": "019e0488-9a54-7541-aae5-74bbd1123584",
+  "data_set_id": "019e0488-9a54-7dbd-bb4b-d20d2d7bf053",
+  "data_object_id": "Inventory",
+  "data_object_version_id": "019e0488-9a53-7f29-af9c-00ceda87d180",
+  "notes": [
+    "inventory snapshot",
+    "iceberg seed"
+  ]
+}

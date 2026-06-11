@@ -1,0 +1,11 @@
+{
+  "workspace_id": "retail-banking",
+  "product_id": "019e0488-9a54-7ccd-8b26-ac440ebc2f3c",
+  "data_set_id": "019e0488-9a54-7653-bd1c-698145dca333",
+  "data_object_id": "Order",
+  "data_object_version_id": "019e0488-9a53-7f31-9445-917a81329425",
+  "notes": [
+    "order batch",
+    "json seed"
+  ]
+}

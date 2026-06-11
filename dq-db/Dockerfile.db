@@ -1,0 +1,13 @@
+FROM postgres:18
+
+# Only extensions go into docker-entrypoint-initdb.d/ — all schema DDL is now
+# managed exclusively by Alembic (run from the API container at startup).
+# Seed data and reseed scripts are kept in /opt/dq-db/ for manual reseeding.
+COPY init/00_extensions.sql /docker-entrypoint-initdb.d/00_extensions.sql
+COPY init/ /opt/dq-db/init/
+COPY mock-data/ /opt/dq-db/mock-data/
+COPY scripts/ /opt/dq-db/scripts/
+ 
+# COPY scripts/reseed_running_db.sh /opt/dq-db/scripts/reseed_running_db.sh
+
+RUN chmod +x /opt/dq-db/scripts/*.sh

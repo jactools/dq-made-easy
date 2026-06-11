@@ -1,0 +1,2 @@
+id,data_source_id,name,source_type,record_count,enabledDataSources
+mock-data-id,mock-data,Mock Data,mock-data,1000,"[\"mock-data\"]"

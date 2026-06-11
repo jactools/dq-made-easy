@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+./dq_cli/__init__.py
+./dq_cli/mcp_server.py
+./dq_cli/onboard.py
+./dq_cli/run_plan.py
+dq_cli/__init__.py
+dq_cli/mcp_server.py
+dq_cli/onboard.py
+dq_cli/run_plan.py
+dq_made_easy_cli.egg-info/PKG-INFO
+dq_made_easy_cli.egg-info/SOURCES.txt
+dq_made_easy_cli.egg-info/dependency_links.txt
+dq_made_easy_cli.egg-info/entry_points.txt
+dq_made_easy_cli.egg-info/requires.txt
+dq_made_easy_cli.egg-info/top_level.txt
+tests/test_mcp_server_integration.py

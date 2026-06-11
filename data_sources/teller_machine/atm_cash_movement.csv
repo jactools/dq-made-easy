@@ -1,0 +1,6 @@
+transaction_id,atm_id,timestamp,transaction_type,eur_5,eur_10,eur_20,eur_50,eur_100,eur_200,total_amount,status
+ATM_20260418_001,ATM_NL_AMS_001,2026-04-18 14:30:45,withdrawal,0,0,1,2,0,0,120.00,success
+ATM_20260418_002,ATM_NL_AMS_001,2026-04-18 14:35:12,deposit,5,0,0,0,0,0,25.00,success
+ATM_20260418_003,ATM_NL_AMS_002,2026-04-18 15:00:00,withdrawal,0,0,0,1,0,1,250.00,success
+ATM_20260418_004,ATM_NL_AMS_002,2026-04-18 15:05:33,withdrawal,0,0,0,2,0,0,100.00,partial
+ATM_20260418_005,ATM_NL_AMS_003,2026-04-18 16:10:22,deposit,0,0,1,0,0,0,20.00,success

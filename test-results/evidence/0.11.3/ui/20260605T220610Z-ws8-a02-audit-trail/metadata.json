@@ -1,0 +1,9 @@
+{
+  "app_version": "0.11.3",
+  "mode": "ui",
+  "label": "ws8-a02-audit-trail",
+  "timestamp_utc": "20260605T220610Z",
+  "cwd": "/Users/jacbeekers/gitrepos/dq-rulebuilder",
+  "evidence_directory": "test-results/evidence/0.11.3/ui/20260605T220610Z-ws8-a02-audit-trail",
+  "status": 0
+}

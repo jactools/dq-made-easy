@@ -1,0 +1,51 @@
+# Multi-stage: pull docker CLI binary from the official slim image.
+# syntax=docker/dockerfile:1.7
+FROM docker:cli AS docker-cli
+
+FROM python:3.14-slim
+
+# docker CLI (needed to restart openmetadata-server and exec into ingestion container)
+COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
+
+ARG PIP_INDEX_URL
+ARG INTERNAL_CORPORATE_ROOT_CA
+
+RUN set -eux; \
+    : "${INTERNAL_CORPORATE_ROOT_CA:?INTERNAL_CORPORATE_ROOT_CA is required}"; \
+    printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+    update-ca-certificates; \
+    for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
+        [ -e "$apt_sources" ] || continue; \
+        sed -i 's|http://|https://|g' "$apt_sources"; \
+    done; \
+    apt-get update && apt-get install -y --no-install-recommends \
+    curl postgresql-client \
+    && rm -f /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt \
+    && update-ca-certificates --fresh \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir openpyxl
+
+# Mirror the repository's relative directory structure under /opt so that
+# sync_dq_db_with_openmetadata.sh's ROOT_DIR calculation
+#   (two levels up from  /opt/dq-metadata/scripts/) = /opt
+# produces correct paths for all sibling references:
+#   $ROOT_DIR/dq-metadata/scripts/  →  /opt/dq-metadata/scripts/
+#   $ROOT_DIR/scripts/python_arm64.sh → /opt/scripts/python_arm64.sh
+#   $ROOT_DIR/dq-db/mock-data/      →  /opt/dq-db/mock-data/
+# Build context must be the repository root (set in docker-compose.yml).
+COPY dq-metadata/scripts/ /opt/dq-metadata/scripts/
+COPY scripts/python_arm64.sh /opt/scripts/python_arm64.sh
+COPY scripts/supporting/logging.sh /opt/scripts/supporting/logging.sh
+COPY scripts/supporting/logging/core.sh /opt/scripts/supporting/logging/core.sh
+COPY dq-db/mock-data/     /opt/dq-db/mock-data/
+
+# Provide a venv-style python shim so sync_dq_db_with_openmetadata.sh can call
+# $ROOT_DIR/venv/bin/python without modification.
+RUN mkdir -p /opt/venv/bin /opt/tmp \
+    && ln -sf "$(which python3)" /opt/venv/bin/python \
+    && chmod +x /opt/scripts/python_arm64.sh \
+    && chmod +x /opt/dq-metadata/scripts/configure_openmetadata_container.sh \
+    && chmod +x /opt/dq-metadata/scripts/sync_dq_db_with_openmetadata.sh
+
+ENTRYPOINT ["/opt/dq-metadata/scripts/configure_openmetadata_container.sh"]

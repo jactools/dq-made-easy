@@ -1,0 +1,11 @@
+{
+  "workspace_id": "treasury",
+  "product_id": "019e0488-9a54-707f-977f-2605e27f3587",
+  "data_set_id": "019e0488-9a54-7d57-9a70-4f88c596f718",
+  "data_object_id": "Campaign",
+  "data_object_version_id": "019e0488-9a53-7d56-bb46-0c8c98d2b7d2",
+  "notes": [
+    "campaign data",
+    "iceberg seed"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "dq-api",
+  "version": "0.11.0",
+  "private": true,
+  "packageManager": "npm@11.14.1",
+  "scripts": {
+    "start": "npm run start:fastapi",
+    "start:fastapi": "uvicorn app.main:app --app-dir fastapi --host 0.0.0.0 --port 4010 --reload",
+    "start:fastapi:prod": "uvicorn app.main:app --app-dir fastapi --host 0.0.0.0 --port 4010",
+    "test:fastapi:pytest": "./scripts/testing/run_fastapi_pytest.sh",
+    "test:fastapi:pytest:q": "npm run test:fastapi:pytest -- -q",
+    "lint:fastapi:unit": "cd fastapi && PYTHON_BIN=${PYTHON_BIN:-../../venv/bin/python}; if [ ! -x \"$PYTHON_BIN\" ]; then PYTHON_BIN=python3; fi; run_py() { if command -v arch >/dev/null 2>&1 && [ \"$(uname -m)\" = \"arm64\" ]; then arch -arm64 \"$PYTHON_BIN\" \"$@\"; else \"$PYTHON_BIN\" \"$@\"; fi; }; UNIT_TEST_PATHS='tests/api tests/application tests/core tests/domain tests/infrastructure tests/middleware'; UNIT_FILES=$(find $UNIT_TEST_PATHS -name '*.py' -print); run_py -m pylint app $UNIT_FILES --disable=all --enable=E,F --disable=E1102,E1136 --score=n",
+    "test:fastapi:unit": "cd fastapi && ./scripts/testing/run_unit_with_pylint.sh",
+    "test:fastapi:smoke": "npm run test:fastapi:pytest -- -q -o addopts='' tests/smoke",
+    "contract:baseline:capture": "python3 fastapi/scripts/contracts/capture_openapi_baseline.py --source url --url http://localhost:4001/v1/openapi.json --output fastapi/contracts/baseline/openapi-legacy-v1.json",
+    "contract:parity:check": "python3 fastapi/scripts/contracts/check_openapi_parity.py --baseline fastapi/contracts/baseline/openapi-legacy-v1.json --current-source app --current fastapi/contracts/current/openapi-fastapi-v1.json --strip-prefix /api",
+    "contract:behavior:diff": "python3 fastapi/scripts/contracts/run_behavior_dual_run.py --legacy-base-url http://localhost:4001 --fastapi-base-url http://localhost:4010 --scenarios fastapi/contracts/verification/api69-dual-run-smoke.json --output fastapi/contracts/current/api69-behavior-diff-report.json --markdown-output fastapi/contracts/current/api69-behavior-diff-report.md",
+    "contract:behavior:diff:with-services": "python3 fastapi/scripts/contracts/run_behavior_dual_run_with_services.py --scenarios contracts/verification/api69-dual-run-smoke.json --output contracts/current/api69-behavior-diff-report.json --markdown-output contracts/current/api69-behavior-diff-report.md",
+    "build": "echo 'FastAPI runtime does not require a TypeScript server build'",
+    "test": "vitest",
+    "test:regression:apply-flow": "node scripts/regression/apply_flow_test.js",
+    "lint": "eslint --ext .ts src",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "bull": "^4.11.5",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "ioredis": "^5.3.2",
+    "js-yaml": "^4.1.0",
+    "pg": "^8.20.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^20.19.37",
+    "@types/uuid": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "jsdom": "^29.0.2",
+    "prettier": "^3.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^1.0.0"
+  }
+}

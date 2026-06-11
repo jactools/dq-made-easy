@@ -1,0 +1,62 @@
+{
+  "template_id": "DQ7-SEED-002-TPL-007",
+  "rule_kind": "freshness_assertion",
+  "status": "drafted",
+  "gx_class": "partial",
+  "notes": "Whole-day freshness template using a trailing time window.",
+  "payload": {
+    "name": "Customer recency",
+    "description": "Customer records must remain fresh within three days.",
+    "dimension": "timeliness",
+    "active": true,
+    "workspace": "default",
+    "generated": false,
+    "dsl": {
+      "schema_version": "2.0.0",
+      "rule": {
+        "kind": "freshness_assertion",
+        "scope": {
+          "dataset": {
+            "data_object_id": "do-customer",
+            "data_object_version_id": "dov-customer-v5"
+          },
+          "time_window": {
+            "anchor_column": "updated_at",
+            "trailing_duration": "P3D"
+          }
+        },
+        "measure": {
+          "type": "metric",
+          "metric": "freshness_age",
+          "subject": {
+            "column": "updated_at"
+          }
+        },
+        "expectation": {
+          "type": "threshold",
+          "operator": "lte",
+          "value": "P3D",
+          "unit": "duration"
+        },
+        "evidence": {
+          "failed_rows": {
+            "mode": "sample",
+            "limit": 100,
+            "include_row_identifier": true,
+            "include_primary_key": true
+          },
+          "emit_compiled_artifact": true,
+          "emit_generated_sql": false
+        },
+        "operations": {
+          "severity": "warning",
+          "preferred_engines": [
+            "gx",
+            "sql"
+          ],
+          "fail_if_not_native": false
+        }
+      }
+    }
+  }
+}

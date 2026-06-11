@@ -1,0 +1,16 @@
+cwd=/Users/jacbeekers/gitrepos/dq-rulebuilder
+mode=ui
+label=ws8-a02-audit-trail
+command_parts:
+npm
+--prefix
+/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-ui
+test
+--
+src/components/AuditTrail.test.tsx
+--reporter=dot
+--no-isolate
+--no-file-parallelism
+--maxWorkers=1
+--minWorkers=1
+--pool=forks

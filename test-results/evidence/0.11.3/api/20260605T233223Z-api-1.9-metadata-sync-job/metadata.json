@@ -1,0 +1,13 @@
+{
+  "app_version": "0.11.3",
+  "proof_id": "api-1.9-metadata-sync-job-2026-06-06",
+  "proof_type": "api",
+  "command": "cd /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-api/fastapi && APP_CONFIG_ENCRYPTION_KEY='i0aU2BE0dzqEVAWxfEsvffw5zw93FjFZrr24RPVyo8c=' PYTHONPATH=/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-utils/src:/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-domain-validation/src /Users/jacbeekers/gitrepos/dq-rulebuilder/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest -o addopts='' tests/api/test_connector_endpoints.py tests/api/test_status_governance_endpoint.py -q",
+  "status": "passed",
+  "test_files": [
+    "tests/api/test_connector_endpoints.py",
+    "tests/api/test_status_governance_endpoint.py"
+  ],
+  "test_count": 10,
+  "executed_at_utc": "2026-06-05T23:32:23Z"
+}

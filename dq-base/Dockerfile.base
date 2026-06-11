@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1.5
+
+ARG NODE_REGISTRY=""
+ARG NODE_NAMESPACE=""
+# Default to a Debian-based Node image
+ARG NODE_IMAGE="node"
+ARG NODE_TAG="22-bullseye-slim"
+
+# Optional: space-separated or newline-separated list of apk repositories
+# (only used when the base image is Alpine).
+ARG APK_REPOSITORIES=""
+
+FROM ${NODE_REGISTRY}${NODE_NAMESPACE}${NODE_IMAGE}:${NODE_TAG}
+
+LABEL version="0.3.0"
+LABEL description="Base image for DQ applications with Node.js and build tools"
+
+# Install all dependencies (build and runtime) once
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+  --mount=type=cache,target=/var/cache/apk,sharing=locked \
+  set -eux; \
+  if command -v apt-get >/dev/null 2>&1; then \
+    if [ -e /etc/ssl/certs/ca-certificates.crt ]; then \
+      for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
+        [ -e "$apt_sources" ] || continue; \
+        sed -i 's|http://|https://|g' "$apt_sources"; \
+      done; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      curl \
+      ca-certificates; \
+    npm install -g npm@11.14.1; \
+    npm --version; \
+    rm -rf /var/lib/apt/lists/*; \
+  elif command -v apk >/dev/null 2>&1; then \
+    if [ -n "$APK_REPOSITORIES" ]; then \
+      printf '%s\n' "$APK_REPOSITORIES" | tr ' ' '\n' > /etc/apk/repositories; \
+    fi; \
+    apk add --no-cache \
+      build-base \
+      curl \
+      ca-certificates; \
+    npm install -g npm@11.14.1; \
+    npm --version; \
+  else \
+    echo "Unsupported base image (no apt-get or apk found)" >&2; \
+    exit 1; \
+  fi

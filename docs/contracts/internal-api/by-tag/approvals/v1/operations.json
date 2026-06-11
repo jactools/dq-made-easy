@@ -1,0 +1,566 @@
+{
+  "group": "by-tag/approvals",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_approvals_api_rulebuilder_v1_approvals_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "request_type",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_request_type"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "requester_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_requester_id"
+        },
+        {
+          "in": "query",
+          "name": "exclude_requester_id",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_exclude_requester_id"
+        },
+        {
+          "in": "query",
+          "name": "query",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_query"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_approvals_api_rulebuilder_v1_approvals_get_param_query_limit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalsPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Approvals",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_approval_api_rulebuilder_v1_approvals_post",
+      "path": "/api/rulebuilder/v1/approvals",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/create_approval_api_rulebuilder_v1_approvals_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Approval",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_approvals_audit_api_rulebuilder_v1_approvals_audit_get",
+      "path": "/api/rulebuilder/v1/approvals/audit",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_approvals_audit_api_rulebuilder_v1_approvals_audit_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Approvals Audit",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_approval_api_rulebuilder_v1_approvals__approval_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_approval_api_rulebuilder_v1_approvals_approval_id_delete_param_path_approval_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Approval",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_approval_api_rulebuilder_v1_approvals__approval_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_approval_api_rulebuilder_v1_approvals_approval_id_put_param_path_approval_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_approval_api_rulebuilder_v1_approvals_approval_id_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Approval",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "append_approval_comment_api_rulebuilder_v1_approvals__approval_id__comments_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/append_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_post_param_path_approval_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ApprovalCommentRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Append Approval Comment",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "update_approval_comments_lock_api_rulebuilder_v1_approvals__approval_id__comments_lock_patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_approval_comments_lock_api_rulebuilder_v1_approvals_approval_id_comments_lock_patch_param_path_approval_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments-lock",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ApprovalCommentLockRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Approval Comments Lock",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_approval_comment_api_rulebuilder_v1_approvals__approval_id__comments__comment_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_delete_param_path_approval_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_delete_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments/{comment_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Approval Comment",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "operation_id": "update_approval_comment_api_rulebuilder_v1_approvals__approval_id__comments__comment_id__patch",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_patch_param_path_approval_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_patch_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments/{comment_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ApprovalCommentEditRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Approval Comment",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "acknowledge_approval_comment_api_rulebuilder_v1_approvals__approval_id__comments__comment_id__acknowledge_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/acknowledge_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_acknowledge_post_param_path_approval_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/acknowledge_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_acknowledge_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments/{comment_id}/acknowledge",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Acknowledge Approval Comment",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "reopen_approval_comment_api_rulebuilder_v1_approvals__approval_id__comments__comment_id__reopen_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/reopen_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_reopen_post_param_path_approval_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/reopen_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_reopen_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments/{comment_id}/reopen",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Reopen Approval Comment",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "resolve_approval_comment_api_rulebuilder_v1_approvals__approval_id__comments__comment_id__resolve_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/resolve_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_resolve_post_param_path_approval_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/resolve_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_resolve_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments/{comment_id}/resolve",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Resolve Approval Comment",
+      "tags": [
+        "approvals"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "vote_up_approval_comment_api_rulebuilder_v1_approvals__approval_id__comments__comment_id__vote_up_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "approval_id",
+          "required": true,
+          "schema_ref": "#/$defs/vote_up_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_vote_up_post_param_path_approval_id"
+        },
+        {
+          "in": "path",
+          "name": "comment_id",
+          "required": true,
+          "schema_ref": "#/$defs/vote_up_approval_comment_api_rulebuilder_v1_approvals_approval_id_comments_comment_id_vote_up_post_param_path_comment_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/approvals/{approval_id}/comments/{comment_id}/vote-up",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ApprovalView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Vote Up Approval Comment",
+      "tags": [
+        "approvals"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

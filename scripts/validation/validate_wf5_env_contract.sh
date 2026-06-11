@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Purpose: Exercise the WF-5 env validator across dev/test/prod stages and prod hardening failures.
+# What it does:
+# - Creates temporary env files that satisfy the canonical dev/test/prod contract.
+# - Verifies the helper validator passes for valid dev/test/prod inputs.
+# - Verifies production hardening checks fail when a repo image tag uses `latest`.
+# validate: groups=repo
+# Version: 1.0
+# Last modified: 2026-05-13
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$ROOT_DIR/scripts/supporting/logging.sh"
+
+my_name="validate_wf5_env_contract.sh"
+VALIDATOR="$ROOT_DIR/scripts/validate_env_file.sh"
+TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/dq-wf5-env-contract.XXXXXX")"
+
+cleanup() {
+  rm -rf "$TMP_DIR"
+}
+
+trap cleanup EXIT
+
+cat > "$TMP_DIR/dev.env" <<'EOF'
+ENVIRONMENT=dev
+EDGE_MODE=local
+KONG_PUBLIC_URL=https://kong.dev.example
+DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
+DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq
+DQ_LLM_REGISTRY=dq
+DQ_LLM_NAMESPACE=local
+DQ_LLM_IMAGE=dq-llm
+DQ_LLM_TAG=dev
+DQ_LLM_HOST_BIND=0.0.0.0
+DQ_LLM_HOST_PORT=18480
+DQ_LLM_MODEL_ID=tiny-local-model
+DQ_LLM_DEVICE_MAP=cpu
+DQ_LLM_MAX_NEW_TOKENS=128
+EDGE_SSL_CERTS_DIR=./tmp/certs
+EDGE_SSL_CERT_FILE_NAME=dq-made-easy.jac.dot+3.pem
+EDGE_SSL_KEY_FILE_NAME=dq-made-easy.jac.dot+3-key.pem
+EOF
+
+cat > "$TMP_DIR/test.env" <<'EOF'
+ENVIRONMENT=test
+COMPOSE_PROJECT_NAME=dq-rulebuilder-test
+EDGE_MODE=local
+KONG_PUBLIC_URL=https://kong.test.example:19443
+DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
+DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:15432/dq
+DQ_LLM_REGISTRY=dq
+DQ_LLM_NAMESPACE=local
+DQ_LLM_IMAGE=dq-llm
+DQ_LLM_TAG=test
+DQ_LLM_HOST_BIND=127.0.0.1
+DQ_LLM_HOST_PORT=28480
+DQ_LLM_MODEL_ID=tiny-local-model
+DQ_LLM_DEVICE_MAP=cpu
+DQ_LLM_MAX_NEW_TOKENS=128
+DB_HOST_PORT=15432
+REDIS_HOST_PORT=16379
+API_HOST_PORT=14010
+FRONTEND_HTTPS_HOST_PORT=15173
+VITE_PORT=15174
+KEYCLOAK_HTTP_HOST_PORT=18080
+KEYCLOAK_HTTPS_HOST_PORT=19444
+KONG_PROXY_HOST_PORT=19443
+KONG_ADMIN_HOST_PORT=18001
+KONG_MANAGER_HOST_PORT=18002
+EDGE_SSL_CERTS_DIR=./tmp/certs
+EDGE_SSL_CERT_FILE_NAME=dq_made_easy_nl.crt
+EDGE_SSL_KEY_FILE_NAME=dq-made-easy.nl.key
+EOF
+
+cat > "$TMP_DIR/prod.env" <<'EOF'
+ENVIRONMENT=production
+COMPOSE_PROJECT_NAME=dq-made-easy-prod
+EDGE_MODE=public
+KONG_PUBLIC_URL=https://prod.example
+DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
+DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq
+DQ_LLM_REGISTRY=dq
+DQ_LLM_NAMESPACE=local
+DQ_LLM_IMAGE=dq-llm
+DQ_LLM_TAG=0.9-9999999
+DQ_LLM_HOST_BIND=127.0.0.1
+DQ_LLM_HOST_PORT=38480
+DQ_LLM_MODEL_ID=tiny-local-model
+DQ_LLM_DEVICE_MAP=cpu
+DQ_LLM_MAX_NEW_TOKENS=128
+EDGE_SSL_CERTS_DIR=./tmp/certs
+EDGE_SSL_CERT_FILE_NAME=fullchain.pem
+EDGE_SSL_KEY_FILE_NAME=privkey.pem
+DQ_BASE_TAG=0.9-1111111
+DQ_API_TAG=0.9-2222222
+DQ_ENGINE_TAG=0.9-3333333
+DQ_PROFILING_TAG=0.9-4444444
+DQ_FRONTEND_TAG=0.9-5555555
+DQ_KONG_TAG=0.9-6666666
+DQ_DB_TAG=0.9-7777777
+DQ_KEYCLOAK_TAG=0.9-8888888
+DB_HOST_BIND=127.0.0.1
+REDIS_HOST_BIND=127.0.0.1
+API_HOST_BIND=127.0.0.1
+FRONTEND_HOST_BIND=127.0.0.1
+KEYCLOAK_HTTP_HOST_BIND=127.0.0.1
+KEYCLOAK_HTTPS_HOST_BIND=127.0.0.1
+KONG_PROXY_HOST_BIND=127.0.0.1
+KONG_ADMIN_HOST_BIND=127.0.0.1
+KONG_MANAGER_HOST_BIND=127.0.0.1
+OPENMETADATA_HOST_BIND=127.0.0.1
+GRAFANA_HOST_BIND=127.0.0.1
+OPENMETADATA_DB_HOST_BIND=127.0.0.1
+OPENMETADATA_SEARCH_HOST_BIND=127.0.0.1
+OPENMETADATA_INGESTION_HOST_BIND=127.0.0.1
+LOKI_HOST_BIND=127.0.0.1
+PROMETHEUS_HOST_BIND=127.0.0.1
+TEMPO_HOST_BIND=127.0.0.1
+CONTAINER_METRICS_HOST_BIND=127.0.0.1
+PUSHGATEWAY_HOST_BIND=127.0.0.1
+OTEL_GRPC_HOST_BIND=127.0.0.1
+OTEL_HTTP_HOST_BIND=127.0.0.1
+OTEL_JAEGER_HOST_BIND=127.0.0.1
+OTEL_ZIPKIN_HOST_BIND=127.0.0.1
+AISTOR_API_HOST_BIND=127.0.0.1
+AISTOR_CONSOLE_HOST_BIND=127.0.0.1
+ZAMMAD_HOST_BIND=127.0.0.1
+EOF
+
+cat > "$TMP_DIR/prod-invalid.env" <<'EOF'
+ENVIRONMENT=production
+COMPOSE_PROJECT_NAME=dq-made-easy-prod
+EDGE_MODE=public
+KONG_PUBLIC_URL=https://prod.example
+DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
+DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq
+DQ_LLM_REGISTRY=dq
+DQ_LLM_NAMESPACE=local
+DQ_LLM_IMAGE=dq-llm
+DQ_LLM_TAG=0.9-9999999
+DQ_LLM_HOST_BIND=127.0.0.1
+DQ_LLM_HOST_PORT=38480
+DQ_LLM_MODEL_ID=tiny-local-model
+DQ_LLM_DEVICE_MAP=cpu
+DQ_LLM_MAX_NEW_TOKENS=128
+EDGE_SSL_CERTS_DIR=./tmp/certs
+EDGE_SSL_CERT_FILE_NAME=fullchain.pem
+EDGE_SSL_KEY_FILE_NAME=privkey.pem
+DQ_BASE_TAG=0.9-1111111
+DQ_API_TAG=0.9-2222222
+DQ_ENGINE_TAG=0.9-3333333
+DQ_PROFILING_TAG=0.9-4444444
+DQ_FRONTEND_TAG=latest
+DQ_KONG_TAG=0.9-6666666
+DQ_DB_TAG=0.9-7777777
+DQ_KEYCLOAK_TAG=0.9-8888888
+DB_HOST_BIND=127.0.0.1
+REDIS_HOST_BIND=127.0.0.1
+API_HOST_BIND=127.0.0.1
+FRONTEND_HOST_BIND=127.0.0.1
+KEYCLOAK_HTTP_HOST_BIND=127.0.0.1
+KEYCLOAK_HTTPS_HOST_BIND=127.0.0.1
+KONG_PROXY_HOST_BIND=127.0.0.1
+KONG_ADMIN_HOST_BIND=127.0.0.1
+KONG_MANAGER_HOST_BIND=127.0.0.1
+OPENMETADATA_HOST_BIND=127.0.0.1
+GRAFANA_HOST_BIND=127.0.0.1
+OPENMETADATA_DB_HOST_BIND=127.0.0.1
+OPENMETADATA_SEARCH_HOST_BIND=127.0.0.1
+OPENMETADATA_INGESTION_HOST_BIND=127.0.0.1
+LOKI_HOST_BIND=127.0.0.1
+PROMETHEUS_HOST_BIND=127.0.0.1
+TEMPO_HOST_BIND=127.0.0.1
+CONTAINER_METRICS_HOST_BIND=127.0.0.1
+PUSHGATEWAY_HOST_BIND=127.0.0.1
+OTEL_GRPC_HOST_BIND=127.0.0.1
+OTEL_HTTP_HOST_BIND=127.0.0.1
+OTEL_JAEGER_HOST_BIND=127.0.0.1
+OTEL_ZIPKIN_HOST_BIND=127.0.0.1
+AISTOR_API_HOST_BIND=127.0.0.1
+AISTOR_CONSOLE_HOST_BIND=127.0.0.1
+ZAMMAD_HOST_BIND=127.0.0.1
+EOF
+
+"$VALIDATOR" --env-file "$TMP_DIR/dev.env" --quiet
+"$VALIDATOR" --env-file "$TMP_DIR/test.env" --quiet
+"$VALIDATOR" --env-file "$TMP_DIR/prod.env" --quiet
+
+if "$VALIDATOR" --env-file "$TMP_DIR/prod-invalid.env" --quiet >/dev/null 2>&1; then
+  error "$my_name" "expected prod hardening validation to reject latest-tag env file"
+  exit 1
+fi
+
+success "$my_name" "WF-5 env validator covers dev/test/prod selection rules and prod hardening failures"

@@ -1,0 +1,108 @@
+{
+  "group": "by-tag/validation-run-plans",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_validation_run_plans_api_rulebuilder_v1_validation_run_plans_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_validation_run_plans_api_rulebuilder_v1_validation_run_plans_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/list_validation_run_plans_api_rulebuilder_v1_validation_run_plans_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/list_validation_run_plans_api_rulebuilder_v1_validation_run_plans_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_validation_run_plans_api_rulebuilder_v1_validation_run_plans_get_param_query_status"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/validation-run-plans",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_validation_run_plans_api_rulebuilder_v1_validation_run_plans_get_response_200_application_json"
+            }
+          },
+          "description": "Validation plans."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Validation Run Plans",
+      "tags": [
+        "validation-run-plans"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "replay_validation_run_plan_api_rulebuilder_v1_validation_run_plans__run_plan_id__replay_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "run_plan_id",
+          "required": true,
+          "schema_ref": "#/$defs/replay_validation_run_plan_api_rulebuilder_v1_validation_run_plans_run_plan_id_replay_post_param_path_run_plan_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/validation-run-plans/{run_plan_id}/replay",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/replay_validation_run_plan_api_rulebuilder_v1_validation_run_plans_run_plan_id_replay_post_request_body_application_json"
+          }
+        },
+        "required": false
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ValidationRunPlanReplayView"
+            }
+          },
+          "description": "Validation plan replay accepted and enqueued."
+        },
+        "404": {
+          "description": "Validation run plan not found or has no active version to replay."
+        },
+        "422": {
+          "description": "Validation run plan replay payload is not runnable."
+        },
+        "503": {
+          "description": "Dispatch queue is unavailable."
+        }
+      },
+      "summary": "Replay Validation Run Plan",
+      "tags": [
+        "validation-run-plans"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

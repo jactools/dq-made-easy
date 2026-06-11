@@ -1,0 +1,86 @@
+parameters:
+  - name: validationGroup
+    type: string
+    default: repo
+  - name: pythonVersion
+    type: string
+    default: '3.13'
+  - name: nodeVersion
+    type: string
+    default: '22.x'
+  - name: installUiDependencies
+    type: boolean
+    default: false
+  - name: dockerRequired
+    type: boolean
+    default: false
+  - name: envName
+    type: string
+    default: ''
+  - name: artifactName
+    type: string
+    default: validation-test-results
+
+steps:
+  - checkout: self
+
+  - task: UsePythonVersion@0
+    displayName: Set up Python
+    inputs:
+      versionSpec: ${{ parameters.pythonVersion }}
+
+  - task: NodeTool@0
+    displayName: Set up Node
+    inputs:
+      versionSpec: ${{ parameters.nodeVersion }}
+
+  - script: |
+      set -euo pipefail
+      corepack enable
+      corepack prepare npm@11.14.1 --activate
+    displayName: Activate pinned npm
+
+  - script: |
+      set -euo pipefail
+      python -m venv "$(Build.SourcesDirectory)/venv"
+      source "$(Build.SourcesDirectory)/venv/bin/activate"
+      python -m pip install --upgrade pip
+      python -m pip install -r requirements-dev.txt
+    workingDirectory: $(Build.SourcesDirectory)/dq-api/fastapi
+    displayName: Create repo virtual environment
+
+  - ${{ if eq(parameters.installUiDependencies, true) }}:
+    - script: |
+        set -euo pipefail
+        npm install
+      workingDirectory: $(Build.SourcesDirectory)/dq-ui
+      displayName: Install dq-ui dependencies
+
+  - ${{ if eq(parameters.dockerRequired, true) }}:
+    - script: |
+        set -euo pipefail
+        docker version
+      displayName: Verify Docker availability
+
+  - script: |
+      set -euo pipefail
+      source "$(Build.SourcesDirectory)/venv/bin/activate"
+      args=()
+      if [[ -n "$VALIDATION_ENV_NAME" ]]; then
+        args+=(--env "$VALIDATION_ENV_NAME")
+      fi
+      args+=("$VALIDATION_GROUP")
+      bash scripts/validate.sh "${args[@]}"
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Run validation group
+    env:
+      VALIDATION_GROUP: ${{ parameters.validationGroup }}
+      VALIDATION_ENV_NAME: ${{ parameters.envName }}
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish validation evidence
+    condition: always()
+    inputs:
+      targetPath: $(Build.SourcesDirectory)/test-results
+      artifact: ${{ parameters.artifactName }}
+      publishLocation: pipeline

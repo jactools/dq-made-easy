@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/execution-engine-capabilities/v1/schema.json",
+  "title": "Execution Engine Capabilities v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "execution_engine_capabilities_contract_version",
+    "engines"
+  ],
+  "properties": {
+    "execution_engine_capabilities_contract_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "engines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/engineCapability"
+      }
+    }
+  },
+  "$defs": {
+    "engineType": {
+      "type": "string",
+      "enum": ["gx", "soda", "pyspark_native"]
+    },
+    "executionShape": {
+      "type": "string",
+      "enum": ["single_object", "join_pair"]
+    },
+    "identifierType": {
+      "type": "string",
+      "enum": ["primary_key", "business_key"]
+    },
+    "engineCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine_type",
+        "supported_execution_shapes",
+        "row_level_exception_facts_supported",
+        "record_identifier_resolution_supported",
+        "normalized_reason_codes_supported",
+        "supported_record_identifier_types",
+        "required_exception_fact_behavior"
+      ],
+      "properties": {
+        "engine_type": {
+          "$ref": "#/$defs/engineType"
+        },
+        "supported_execution_shapes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/executionShape"
+          }
+        },
+        "row_level_exception_facts_supported": {
+          "type": "boolean"
+        },
+        "record_identifier_resolution_supported": {
+          "type": "boolean"
+        },
+        "normalized_reason_codes_supported": {
+          "type": "boolean"
+        },
+        "supported_record_identifier_types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifierType"
+          }
+        },
+        "required_exception_fact_behavior": {
+          "type": "string",
+          "enum": ["fail_fast"]
+        },
+        "reason_code_strategy": {
+          "type": "string",
+          "enum": ["mapped_taxonomy", "native_passthrough"]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

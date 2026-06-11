@@ -1,0 +1,6 @@
+"id","approvalId","action","actorId","timestamp","details"
+"019e0488-9a53-7997-bf23-04f547c0f02c","a1","created","u2","2026-02-10T09:16:00Z","Approval requested for rule 1"
+"019e0488-9a53-741f-bd7a-9a4067b3b696","a2","approved","u1","2026-02-09T14:35:00Z","Approved by manager"
+"019e0488-9a53-725a-87f1-7edc10b492be","a3","declined","u3","2026-02-11T10:05:00Z","Missing required attribute value"
+"019e0488-9a53-787a-851e-c0fb9aee89a8","a6","approved","u1","2026-02-14T16:10:00Z","Auto-approved after checks"
+"019e0488-9a53-7ff6-845c-ce74d52f802e","a7","cancelled","u4","2026-02-14T09:35:00Z","Requester cancelled before review"

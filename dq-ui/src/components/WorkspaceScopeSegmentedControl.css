@@ -1,0 +1,44 @@
+.workspace-scope-segmented-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.workspace-scope-segmented-control__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--app-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 0 0 auto;
+}
+
+.workspace-scope-segmented-control__control {
+  --app-segmented-control-color-background: var(--app-surface-secondary);
+  --app-segmented-control-border-radius: 999px;
+  --app-segmented-control-padding: 2px;
+  --app-segmented-control-button-padding: 5px 10px;
+  --app-segmented-control-button-border-radius: 999px;
+  --app-segmented-control-button-font-size: 12px;
+  --app-segmented-control-button-font-weight-default: 600;
+  --app-segmented-control-button-font-weight-selected: 600;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.workspace-scope-segmented-control__button {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 768px) {
+  .workspace-scope-segmented-control {
+    width: 100%;
+  }
+
+  .workspace-scope-segmented-control__control {
+    flex: 1 1 auto;
+  }
+}

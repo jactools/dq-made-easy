@@ -1,0 +1,2 @@
+name,expression,filterExpression,description,active
+  Updated Active Users  ,null,status = 'VERIFIED',  updated description  ,false

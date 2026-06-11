@@ -1,0 +1,52 @@
+{
+  "glossary": {
+    "name": "retail_banking_product_specs",
+    "display_name": "Retail Banking Product Specs",
+    "description": "Governed ODPS-aligned demo product specifications for the retail banking stakeholder slice."
+  },
+  "product_specs": [
+    {
+      "product_spec_id": "ps.retail_banking_customer_360",
+      "term_name": "ps.retail_banking_customer_360",
+      "display_name": "Retail Banking Customer 360",
+      "product_name": "Retail Banking Customer 360",
+      "product_version": "1.0.0",
+      "product_lifecycle_state": "active",
+      "product_owner": "customer-domain-owner",
+      "product_objective": "Provide governed customer intelligence for onboarding, servicing, support, and customer-risk workflows across the retail banking domain.",
+      "product_scope": {
+        "domains": [
+          "retail_banking"
+        ],
+        "included_entities": [
+          "customer",
+          "account",
+          "interaction"
+        ],
+        "excluded_entities": [
+          "investment_portfolio"
+        ]
+      },
+      "business_definition": "Governed product boundary for the retail banking customer 360 view, linking customer profile, account servicing, and interaction signals into one business-facing product specification.",
+      "registry_definition_ids": [
+        "def.data_product.retail_banking",
+        "def.data_object.customer",
+        "def.attribute.customer_id"
+      ],
+      "odcs_contract_refs": [
+        {
+          "odcs_contract_id": "urn:dq:contract:retail-banking-customer-360-delivery",
+          "odcs_contract_name": "retail_banking_customer_360_delivery",
+          "odcs_contract_version": "1.0.0"
+        }
+      ],
+      "provenance": {
+        "created_by": "platform",
+        "approved_by": "customer-domain-owner",
+        "created_at": "2026-05-31T00:00:00Z",
+        "approved_at": "2026-05-31T00:00:00Z",
+        "change_reason": "Initial ODPS retail-banking product-spec demo slice"
+      }
+    }
+  ]
+}

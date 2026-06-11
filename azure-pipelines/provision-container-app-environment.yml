@@ -1,0 +1,372 @@
+# Purpose: Provision an Azure Container Apps environment for dq-made-easy with OpenTofu.
+# What it does:
+# - Loads the env-specific dq-made-easy parameters.
+# - Uses OpenTofu to create the target resource group, Log Analytics workspace, and Container Apps environment.
+# - Fails fast if the environment already exists or required inputs are missing.
+# Version: 2.1
+# Last modified: 2026-06-11
+
+trigger: none
+pr: none
+name: dq-made-easy-provision-aca-environment_$(Date:yyyyMMdd)$(Rev:.r)
+
+parameters:
+  - name: targetEnvironment
+    displayName: Target environment
+    type: string
+    default: all
+    values:
+      - all
+      - dev
+      - test
+      - prod
+  - name: openTofuVersion
+    displayName: OpenTofu version
+    type: string
+    default: 1.9.0
+
+stages:
+  - stage: ProvisionDev
+    displayName: dq-made-easy - Provision ACA environment (dev)
+    condition: and(succeeded(), or(eq('${{ parameters.targetEnvironment }}', 'all'), eq('${{ parameters.targetEnvironment }}', 'dev')))
+    variables:
+      - template: parameters/dq-made-easy-dev.yml
+    jobs:
+      - job: CreateContainerAppsEnvironment
+        displayName: dq-made-easy - Create dev Container Apps environment
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: dq-made-easy - Create dev Azure Container Apps environment
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              addSpnToEnvironment: true
+              inlineScript: |
+                set -euo pipefail
+                resource_group='$(resourceGroupName)'
+                region='$(region)'
+                environment_name='$(containerAppEnvironmentName)'
+                workspace_name='$(logAnalyticsWorkspaceName)'
+                if ! command -v tofu >/dev/null 2>&1; then
+                  install_dir="$AGENT_TEMPDIRECTORY/opentofu"
+                  if [[ ! -x "$install_dir/tofu" ]]; then
+                    echo "OpenTofu binary not found for dev stage smoke test" >&2
+                    exit 1
+                  fi
+                  export PATH="$install_dir:$PATH"
+                fi
+                state_resource_group='$(stateResourceGroupName)'
+                state_storage_account='$(stateStorageAccountName)'
+                state_storage_container='$(stateStorageContainerName)'
+                state_key='$(stateKeyPrefix)/environment.tfstate'
+                tofu_version='${{ parameters.openTofuVersion }}'
+                if [[ -z "$resource_group" || -z "$region" || -z "$environment_name" || -z "$workspace_name" || -z "$state_resource_group" || -z "$state_storage_account" || -z "$state_storage_container" ]]; then
+                  echo "Required dq-made-easy pipeline variables are missing" >&2
+                  exit 1
+                fi
+                az config set extension.use_dynamic_install=yes_without_prompt >/dev/null
+                az extension add --name containerapp --upgrade --only-show-errors >/dev/null
+                az provider register --namespace Microsoft.App --wait >/dev/null
+                az provider register --namespace Microsoft.OperationalInsights --wait >/dev/null
+                az provider register --namespace Microsoft.Storage --wait >/dev/null
+                if ! command -v tofu >/dev/null 2>&1; then
+                  install_dir="$AGENT_TEMPDIRECTORY/opentofu"
+                  mkdir -p "$install_dir"
+                  archive="$install_dir/opentofu_${tofu_version}_linux_amd64.zip"
+                  curl -fsSL -o "$archive" "https://github.com/opentofu/opentofu/releases/download/v${tofu_version}/tofu_${tofu_version}_linux_amd64.zip"
+                  unzip -oq "$archive" -d "$install_dir"
+                  export PATH="$install_dir:$PATH"
+                fi
+                state_container_exists="$(az storage container exists \
+                  --account-name "$state_storage_account" \
+                  --name "$state_storage_container" \
+                  --auth-mode login \
+                  --query exists \
+                  --output tsv 2>/dev/null || echo false)"
+                if [[ "$state_container_exists" != "true" ]]; then
+                  az group create \
+                    --name "$state_resource_group" \
+                    --location "$region" \
+                    --output none
+                  az storage account show \
+                    --resource-group "$state_resource_group" \
+                    --name "$state_storage_account" \
+                    --output none >/dev/null 2>&1 || az storage account create \
+                      --resource-group "$state_resource_group" \
+                      --name "$state_storage_account" \
+                      --location "$region" \
+                      --sku Standard_LRS \
+                      --kind StorageV2 \
+                      --min-tls-version TLS1_2 \
+                      --allow-blob-public-access false \
+                      --output none
+                  az storage container create \
+                    --account-name "$state_storage_account" \
+                    --name "$state_storage_container" \
+                    --auth-mode login \
+                    --output none
+                fi
+                export ARM_CLIENT_ID="$servicePrincipalId"
+                export ARM_CLIENT_SECRET="$servicePrincipalKey"
+                export ARM_TENANT_ID="$tenantId"
+                export ARM_SUBSCRIPTION_ID="$subscriptionId"
+                tofu -chdir=infra/opentofu/container-app-environment init \
+                  -backend-config="resource_group_name=$state_resource_group" \
+                  -backend-config="storage_account_name=$state_storage_account" \
+                  -backend-config="container_name=$state_storage_container" \
+                  -backend-config="key=$state_key" \
+                  -backend-config="use_azuread_auth=true"
+                tofu -chdir=infra/opentofu/container-app-environment apply \
+                  -auto-approve \
+                  -var="resource_group_name=$resource_group" \
+                  -var="location=$region" \
+                  -var="container_app_environment_name=$environment_name" \
+                  -var="log_analytics_workspace_name=$workspace_name"
+                container_app_environment_id="$(tofu -chdir=infra/opentofu/container-app-environment output -raw container_app_environment_id)"
+
+                if [[ -z "$container_app_environment_id" ]]; then
+                  echo "Container Apps environment ID was not produced by OpenTofu" >&2
+                  exit 1
+                fi
+
+                az group show --name "$resource_group" --query name -o tsv >/dev/null
+                az monitor log-analytics workspace show \
+                  --resource-group "$resource_group" \
+                  --workspace-name "$workspace_name" \
+                  --query customerId \
+                  --output tsv >/dev/null
+                test "$(az resource show --ids "$container_app_environment_id" --query name -o tsv)" = "$environment_name"
+
+  - stage: ProvisionTest
+    displayName: dq-made-easy - Provision ACA environment (test)
+    condition: and(succeeded(), or(eq('${{ parameters.targetEnvironment }}', 'all'), eq('${{ parameters.targetEnvironment }}', 'test')))
+    variables:
+      - template: parameters/dq-made-easy-test.yml
+    jobs:
+      - job: CreateContainerAppsEnvironment
+        displayName: dq-made-easy - Create test Container Apps environment
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: dq-made-easy - Create test Azure Container Apps environment
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              addSpnToEnvironment: true
+              inlineScript: |
+                set -euo pipefail
+                resource_group='$(resourceGroupName)'
+                region='$(region)'
+                environment_name='$(containerAppEnvironmentName)'
+                workspace_name='$(logAnalyticsWorkspaceName)'
+                if ! command -v tofu >/dev/null 2>&1; then
+                  install_dir="$AGENT_TEMPDIRECTORY/opentofu"
+                  if [[ ! -x "$install_dir/tofu" ]]; then
+                    echo "OpenTofu binary not found for test stage smoke test" >&2
+                    exit 1
+                  fi
+                  export PATH="$install_dir:$PATH"
+                fi
+                state_resource_group='$(stateResourceGroupName)'
+                state_storage_account='$(stateStorageAccountName)'
+                state_storage_container='$(stateStorageContainerName)'
+                state_key='$(stateKeyPrefix)/environment.tfstate'
+                tofu_version='${{ parameters.openTofuVersion }}'
+                if [[ -z "$resource_group" || -z "$region" || -z "$environment_name" || -z "$workspace_name" || -z "$state_resource_group" || -z "$state_storage_account" || -z "$state_storage_container" ]]; then
+                  echo "Required dq-made-easy pipeline variables are missing" >&2
+                  exit 1
+                fi
+                az config set extension.use_dynamic_install=yes_without_prompt >/dev/null
+                az extension add --name containerapp --upgrade --only-show-errors >/dev/null
+                az provider register --namespace Microsoft.App --wait >/dev/null
+                az provider register --namespace Microsoft.OperationalInsights --wait >/dev/null
+                az provider register --namespace Microsoft.Storage --wait >/dev/null
+                if ! command -v tofu >/dev/null 2>&1; then
+                  install_dir="$AGENT_TEMPDIRECTORY/opentofu"
+                  mkdir -p "$install_dir"
+                  archive="$install_dir/opentofu_${tofu_version}_linux_amd64.zip"
+                  curl -fsSL -o "$archive" "https://github.com/opentofu/opentofu/releases/download/v${tofu_version}/tofu_${tofu_version}_linux_amd64.zip"
+                  unzip -oq "$archive" -d "$install_dir"
+                  export PATH="$install_dir:$PATH"
+                fi
+                state_container_exists="$(az storage container exists \
+                  --account-name "$state_storage_account" \
+                  --name "$state_storage_container" \
+                  --auth-mode login \
+                  --query exists \
+                  --output tsv 2>/dev/null || echo false)"
+                if [[ "$state_container_exists" != "true" ]]; then
+                  az group create \
+                    --name "$state_resource_group" \
+                    --location "$region" \
+                    --output none
+                  az storage account show \
+                    --resource-group "$state_resource_group" \
+                    --name "$state_storage_account" \
+                    --output none >/dev/null 2>&1 || az storage account create \
+                      --resource-group "$state_resource_group" \
+                      --name "$state_storage_account" \
+                      --location "$region" \
+                      --sku Standard_LRS \
+                      --kind StorageV2 \
+                      --min-tls-version TLS1_2 \
+                      --allow-blob-public-access false \
+                      --output none
+                  az storage container create \
+                    --account-name "$state_storage_account" \
+                    --name "$state_storage_container" \
+                    --auth-mode login \
+                    --output none
+                fi
+                export ARM_CLIENT_ID="$servicePrincipalId"
+                export ARM_CLIENT_SECRET="$servicePrincipalKey"
+                export ARM_TENANT_ID="$tenantId"
+                export ARM_SUBSCRIPTION_ID="$subscriptionId"
+                tofu -chdir=infra/opentofu/container-app-environment init \
+                  -backend-config="resource_group_name=$state_resource_group" \
+                  -backend-config="storage_account_name=$state_storage_account" \
+                  -backend-config="container_name=$state_storage_container" \
+                  -backend-config="key=$state_key" \
+                  -backend-config="use_azuread_auth=true"
+                tofu -chdir=infra/opentofu/container-app-environment apply \
+                  -auto-approve \
+                  -var="resource_group_name=$resource_group" \
+                  -var="location=$region" \
+                  -var="container_app_environment_name=$environment_name" \
+                  -var="log_analytics_workspace_name=$workspace_name"
+                container_app_environment_id="$(tofu -chdir=infra/opentofu/container-app-environment output -raw container_app_environment_id)"
+
+                if [[ -z "$container_app_environment_id" ]]; then
+                  echo "Container Apps environment ID was not produced by OpenTofu" >&2
+                  exit 1
+                fi
+
+                az group show --name "$resource_group" --query name -o tsv >/dev/null
+                az monitor log-analytics workspace show \
+                  --resource-group "$resource_group" \
+                  --workspace-name "$workspace_name" \
+                  --query customerId \
+                  --output tsv >/dev/null
+                test "$(az resource show --ids "$container_app_environment_id" --query name -o tsv)" = "$environment_name"
+
+  - stage: ProvisionProd
+    displayName: dq-made-easy - Provision ACA environment (prod)
+    condition: and(succeeded(), or(eq('${{ parameters.targetEnvironment }}', 'all'), eq('${{ parameters.targetEnvironment }}', 'prod')))
+    variables:
+      - template: parameters/dq-made-easy-prod.yml
+    jobs:
+      - job: CreateContainerAppsEnvironment
+        displayName: dq-made-easy - Create prod Container Apps environment
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: dq-made-easy - Create prod Azure Container Apps environment
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              addSpnToEnvironment: true
+              inlineScript: |
+                set -euo pipefail
+                resource_group='$(resourceGroupName)'
+                region='$(region)'
+                environment_name='$(containerAppEnvironmentName)'
+                workspace_name='$(logAnalyticsWorkspaceName)'
+                if ! command -v tofu >/dev/null 2>&1; then
+                  install_dir="$AGENT_TEMPDIRECTORY/opentofu"
+                  if [[ ! -x "$install_dir/tofu" ]]; then
+                    echo "OpenTofu binary not found for prod stage smoke test" >&2
+                    exit 1
+                  fi
+                  export PATH="$install_dir:$PATH"
+                fi
+                state_resource_group='$(stateResourceGroupName)'
+                state_storage_account='$(stateStorageAccountName)'
+                state_storage_container='$(stateStorageContainerName)'
+                state_key='$(stateKeyPrefix)/environment.tfstate'
+                tofu_version='${{ parameters.openTofuVersion }}'
+                if [[ -z "$resource_group" || -z "$region" || -z "$environment_name" || -z "$workspace_name" || -z "$state_resource_group" || -z "$state_storage_account" || -z "$state_storage_container" ]]; then
+                  echo "Required dq-made-easy pipeline variables are missing" >&2
+                  exit 1
+                fi
+                az config set extension.use_dynamic_install=yes_without_prompt >/dev/null
+                az extension add --name containerapp --upgrade --only-show-errors >/dev/null
+                az provider register --namespace Microsoft.App --wait >/dev/null
+                az provider register --namespace Microsoft.OperationalInsights --wait >/dev/null
+                az provider register --namespace Microsoft.Storage --wait >/dev/null
+                if ! command -v tofu >/dev/null 2>&1; then
+                  install_dir="$AGENT_TEMPDIRECTORY/opentofu"
+                  mkdir -p "$install_dir"
+                  archive="$install_dir/opentofu_${tofu_version}_linux_amd64.zip"
+                  curl -fsSL -o "$archive" "https://github.com/opentofu/opentofu/releases/download/v${tofu_version}/tofu_${tofu_version}_linux_amd64.zip"
+                  unzip -oq "$archive" -d "$install_dir"
+                  export PATH="$install_dir:$PATH"
+                fi
+                state_container_exists="$(az storage container exists \
+                  --account-name "$state_storage_account" \
+                  --name "$state_storage_container" \
+                  --auth-mode login \
+                  --query exists \
+                  --output tsv 2>/dev/null || echo false)"
+                if [[ "$state_container_exists" != "true" ]]; then
+                  az group create \
+                    --name "$state_resource_group" \
+                    --location "$region" \
+                    --output none
+                  az storage account show \
+                    --resource-group "$state_resource_group" \
+                    --name "$state_storage_account" \
+                    --output none >/dev/null 2>&1 || az storage account create \
+                      --resource-group "$state_resource_group" \
+                      --name "$state_storage_account" \
+                      --location "$region" \
+                      --sku Standard_LRS \
+                      --kind StorageV2 \
+                      --min-tls-version TLS1_2 \
+                      --allow-blob-public-access false \
+                      --output none
+                  az storage container create \
+                    --account-name "$state_storage_account" \
+                    --name "$state_storage_container" \
+                    --auth-mode login \
+                    --output none
+                fi
+                export ARM_CLIENT_ID="$servicePrincipalId"
+                export ARM_CLIENT_SECRET="$servicePrincipalKey"
+                export ARM_TENANT_ID="$tenantId"
+                export ARM_SUBSCRIPTION_ID="$subscriptionId"
+                tofu -chdir=infra/opentofu/container-app-environment init \
+                  -backend-config="resource_group_name=$state_resource_group" \
+                  -backend-config="storage_account_name=$state_storage_account" \
+                  -backend-config="container_name=$state_storage_container" \
+                  -backend-config="key=$state_key" \
+                  -backend-config="use_azuread_auth=true"
+                tofu -chdir=infra/opentofu/container-app-environment apply \
+                  -auto-approve \
+                  -var="resource_group_name=$resource_group" \
+                  -var="location=$region" \
+                  -var="container_app_environment_name=$environment_name" \
+                  -var="log_analytics_workspace_name=$workspace_name"
+                container_app_environment_id="$(tofu -chdir=infra/opentofu/container-app-environment output -raw container_app_environment_id)"
+
+                if [[ -z "$container_app_environment_id" ]]; then
+                  echo "Container Apps environment ID was not produced by OpenTofu" >&2
+                  exit 1
+                fi
+
+                az group show --name "$resource_group" --query name -o tsv >/dev/null
+                az monitor log-analytics workspace show \
+                  --resource-group "$resource_group" \
+                  --workspace-name "$workspace_name" \
+                  --query customerId \
+                  --output tsv >/dev/null
+                test "$(az resource show --ids "$container_app_environment_id" --query name -o tsv)" = "$environment_name"

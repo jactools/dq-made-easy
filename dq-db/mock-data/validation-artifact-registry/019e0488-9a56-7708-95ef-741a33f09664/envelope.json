@@ -1,0 +1,69 @@
+{
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-7203-b971-1ca3f76a4c1f",
+    "datasetId": "019e0488-9a54-7678-a935-3e65933617ae",
+    "dataProductId": "019e0488-9a54-7ccd-8b26-ac440ebc2f3c"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": [
+      "019e0488-9a53-7825-811b-761e3e99314c"
+    ]
+  },
+  "gxSuite": {
+    "expectation_suite_name": "gx_contact_delivery_32",
+    "expectations": [
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "contact_id"
+        }
+      },
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "email_address"
+        }
+      },
+      {
+        "expectation_type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "column": "phone_number"
+        }
+      }
+    ],
+    "meta": {
+      "delivery_id": "019e0488-9a53-7d9d-b003-e64dcd2ad8be",
+      "delivery_location": "s3a://analytics/do-2/v3/LOAD_DTS=20260222T103000000Z",
+      "workspace_id": "retail-banking"
+    }
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a55-739c-82db-0b6cba193285",
+      "019e0488-9a55-7773-aaae-6b7c159526ef"
+    ],
+    "compilerVersion": "dq-compiler-7.3",
+    "generatedAt": "2026-04-12T09:05:00Z"
+  },
+  "executionHints": {
+    "recommendedEngine": "pyspark",
+    "primaryKeyFields": [
+      "contact_id"
+    ],
+    "businessKeyFields": [
+      "contact_id"
+    ]
+  },
+  "executionContract": {
+    "engineType": "gx",
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "traceability": {
+      "ruleId": "019e0488-9a55-739c-82db-0b6cba193285",
+      "ruleVersionId": "019e0488-9a55-74d5-b4af-3114a46953ec",
+      "gxSuiteId": "019e0488-9a54-7c46-bff4-e0b4abb2bb83",
+      "gxSuiteVersion": 1,
+      "dataObjectVersionId": "019e0488-9a53-7825-811b-761e3e99314c"
+    }
+  }
+}

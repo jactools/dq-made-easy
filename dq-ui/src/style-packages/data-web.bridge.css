@@ -1,0 +1,63 @@
+/* --app-* token bridge for the Data Web CSS (Carbon Design System) style package.
+ * Maps the Carbon IBM Blue palette to the app's canonical --app-* semantic tokens
+ *
+ */
+:root[data-style-package='data-web-css'] {
+  color-scheme: light;
+  --app-page-bg: #f4f4f4;
+  --app-surface-primary: #ffffff;
+  --app-surface-secondary: #f4f4f4;
+  --app-surface-tertiary: #e0e0e0;
+  --app-surface-elevated: #ffffff;
+  --app-border-subtle: #e0e0e0;
+  --app-border-strong: #8d8d8d;
+  --app-text-primary: #161616;
+  --app-text-secondary: #525252;
+  --app-hover-bg: #e8e8e8;
+  --app-selected-bg: #d0e2ff;
+  --app-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.12);
+  --app-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --app-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.20);
+  --app-brand-primary: #0f62fe;
+  --app-brand-primary-strong: #0043ce;
+  --app-brand-primary-soft: #d0e2ff;
+  --app-text-inverse: #ffffff;
+  --app-focus-ring: #0f62fe;
+  --app-input-background: #ffffff;
+  --app-input-text: #161616;
+  --app-input-border: #8d8d8d;
+  --app-input-placeholder: #a8a8a8;
+  --app-input-label: #525252;
+  --app-select-background: #ffffff;
+  --app-select-text: #161616;
+  --app-select-border: #8d8d8d;
+  --app-shell-bg: #f4f4f4;
+  --app-header-bg: #161616;
+  --app-header-text: #ffffff;
+  --app-sidebar-bg: #ffffff;
+  --app-sidebar-border: #e0e0e0;
+  --app-sidebar-submenu-bg: #f4f4f4;
+  --app-nav-text: #161616;
+  --app-nav-hover-bg: #e8e8e8;
+  --app-nav-active-bg: #d0e2ff;
+  --app-nav-active-text: #0f62fe;
+  --app-nav-active-border: #0f62fe;
+  --app-control-bg: #ffffff;
+  --app-control-hover-bg: #e8e8e8;
+  --app-control-border: #e0e0e0;
+  --app-control-focus-border: #0f62fe;
+  --app-control-focus-text: #161616;
+  --app-warning-bg: #fff8e1;
+  --app-warning-bg-strong: #ffefc2;
+  --app-warning-text: #3e2400;
+  --app-warning-text-muted: #6f4700;
+  --app-warning-border: rgba(240, 166, 0, 0.30);
+  --app-warning-accent: #f0a600;
+  --app-warning-icon-bg: rgba(240, 166, 0, 0.18);
+  --app-runtime-dev-text: #161616;
+  --app-runtime-dev-bg: rgba(208, 226, 255, 0.85);
+  --app-runtime-dev-border: rgba(15, 98, 254, 0.40);
+  --app-runtime-prod-text: #161616;
+  --app-runtime-prod-bg: rgba(224, 224, 224, 0.90);
+  --app-runtime-prod-border: rgba(141, 141, 141, 0.46);
+}

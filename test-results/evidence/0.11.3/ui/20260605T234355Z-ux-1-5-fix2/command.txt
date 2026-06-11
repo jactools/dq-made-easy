@@ -1,0 +1,11 @@
+cwd=/Users/jacbeekers/gitrepos/dq-rulebuilder
+mode=ui
+label=ux-1-5-fix2
+command_parts:
+npm
+--prefix
+/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-ui
+test
+--
+src/components/ConnectorWorkbench.test.tsx
+src/components/Sidebar.test.tsx

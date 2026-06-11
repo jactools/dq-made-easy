@@ -1,0 +1,4 @@
+"id","suggestion_id","user_id","action","rule_created_from_suggestion_id","created_at"
+"019e0488-9a55-7730-908e-c67fb47c5298","019e0488-9a55-76d8-bf52-1b93f0bf5dc9","019e0488-9a54-7f95-8b19-df83e6b355a4","viewed","","2026-03-01T10:35:00Z"
+"019e0488-9a55-7024-bada-b9991cd41b0e","019e0488-9a55-7e37-a2ac-883fc98f05f8","019e0488-9a54-7f95-8b19-df83e6b355a4","accepted","019e0488-9a55-7a2c-81b9-faf01d4736c3","2026-03-01T10:36:00Z"
+"019e0488-9a55-7ac2-bc8e-226d5bf6018c","019e0488-9a55-7ab4-9f75-59987f417072","019e0488-9a54-7fc4-ba3c-7f34580f9e93","dismissed","","2026-03-01T10:37:00Z"

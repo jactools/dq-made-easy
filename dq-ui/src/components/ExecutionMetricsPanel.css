@@ -1,0 +1,105 @@
+/* ExecutionMetricsPanel  */
+
+.execution-metrics-panel {
+  background: var(--app-surface-primary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.metrics-title {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  background: var(--app-surface-secondary);
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.2s ease;
+}
+
+.metric-card:hover {
+  border-color: var(--app-brand-primary);
+}
+
+.metric-card.primary {
+  border-width: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--app-text-secondary);
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--app-text-primary);
+  line-height: 1.2;
+}
+
+.metric-value.metric-success {
+  color: var(--app-status-success-text);
+}
+
+.metric-value.metric-warning {
+  color: var(--app-status-warning-text);
+}
+
+.metric-value.metric-danger {
+  color: var(--app-status-error-text);
+}
+
+.metric-description {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  line-height: 1.4;
+}
+
+.metric-card.metrics-success {
+  background: var(--app-status-success-bg);
+  border-color: var(--app-status-success-border);
+}
+
+.metric-card.metrics-success .metric-value {
+  color: var(--app-status-success-text);
+}
+
+.metric-card.metrics-warning {
+  background: var(--app-status-warning-bg);
+  border-color: var(--app-status-warning-border);
+}
+
+.metric-card.metrics-warning .metric-value {
+  color: var(--app-status-warning-text);
+}
+
+.metric-card.metrics-danger {
+  background: var(--app-status-error-bg);
+  border-color: var(--app-status-error-border);
+}
+
+.metric-card.metrics-danger .metric-value {
+  color: var(--app-status-error-text);
+}
