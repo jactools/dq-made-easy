@@ -1,0 +1,23 @@
+HTTP/1.1 302 Found
+vary: Origin
+content-length: 0
+connection: close
+x-ratelimit-remaining-minute: 997
+x-ratelimit-remaining-hour: 49991
+x-ratelimit-limit-hour: 50000
+ratelimit-reset: 33
+ratelimit-remaining: 997
+ratelimit-limit: 1000
+x-ratelimit-limit-minute: 1000
+date: Sat, 11 Apr 2026 17:09:26 GMT
+server: uvicorn
+location: https://keycloak.jac.dot:9444/realms/jaccloud/protocol/openid-connect/auth?client_id=dq-rules-ui&redirect_uri=https%3A%2F%2Fdq-made-easy.jac.dot%3A5174%2Fapi%2Fauth%2Fv1%2Fcallback&response_type=code&scope=openid+profile+email&state=eyJuIjogIjE3NzU5MjczNjcxMjYtMC4zMDUwNDAxMTg0NDU0NTciLCAiZiI6ICJodHRwczovL2RxLW1hZGUtZWFzeS5qYWMuZG90OjUxNzQifQ
+x-correlation-id: 4cb2e665-2a29-4196-8214-999b49418b75
+x-trace-id: 37be2d9debb6d0efcd88fdfecdff9099
+x-process-time-ms: 6.79
+access-control-allow-credentials: true
+access-control-expose-headers: X-Kong-Response-Latency,X-Kong-Upstream-Latency,X-Correlation-ID,X-Trace-ID
+x-kong-upstream-latency: 8
+x-kong-proxy-latency: 3
+via: kong/3.4.2
+
