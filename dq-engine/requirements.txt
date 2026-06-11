@@ -2,6 +2,7 @@ fastapi==0.129.0
 uvicorn[standard]==0.41.0
 requests==2.32.5
 great-expectations==1.16.1
+spark-expectations
 boto3==1.43.10
 python-dotenv==1.2.2
 redis==5.2.1

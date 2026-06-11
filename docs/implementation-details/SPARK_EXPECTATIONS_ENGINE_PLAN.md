@@ -46,8 +46,8 @@ Objective: prove that Spark Expectations can run in the current dq-engine contai
 
 Deliverables:
 
-[ ] [SE-PLAN-001] Add `spark-expectations` to the dq-engine dependency set.
-[ ] [SE-PLAN-002] Create a small POC using one row-level rule and one aggregate rule against sample Spark data.
+[x] [SE-PLAN-001] Add `spark-expectations` to the dq-engine dependency set.
+[x] [SE-PLAN-002] Create a small POC using one row-level rule and one aggregate rule against the data_sources/teller_machine data that is seeded onto AIStor.
 [ ] [SE-PLAN-003] Validate the happy path and the quarantine/error-table path.
 [ ] [SE-PLAN-004] Capture the baseline runtime and packaging requirements for local and container runs.
 
