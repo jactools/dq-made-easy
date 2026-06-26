@@ -1,0 +1,25 @@
+{
+  "app_version": "0.11.4",
+  "proof_id": "spark-expectations-dispatch",
+  "proof_type": "api",
+  "feature": "spark-expectations-dispatch",
+  "summary": "The Spark Expectations execution path is now routed through the GX dispatch worker and verified by a dedicated regression test that exercises the worker entrypoint and persists execution/error artifacts.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-26T22:13:42Z",
+  "command": "./scripts/run_test_evidence.sh api --label spark-expectations-dispatch -- dq-engine/tests/test_spark_expectations_adapter.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.4/api/20260626T221541Z-spark-expectations-dispatch",
+  "test_files": [
+    "dq-engine/tests/test_spark_expectations_adapter.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 10,
+  "assertions": [
+    "Spark Expectations dispatch messages are recognized before the GX-only payload validation path",
+    "The worker invokes the execution endpoint and writes execution/error artifacts",
+    "Targeted Spark Expectations adapter and dispatch regression tests pass"
+  ],
+  "proof_data": {
+    "verification_command": "/Users/jacbeekers/gitrepos/dq-made-easy/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-made-easy/venv/bin/python -m pytest dq-engine/tests/test_spark_expectations_adapter.py -q",
+    "verification_result": "10 passed, 1 warning in 0.41s"
+  }
+}

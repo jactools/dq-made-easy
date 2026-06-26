@@ -1,0 +1,9 @@
+{
+  "app_version": "0.11.4",
+  "mode": "api",
+  "label": "spark-expectations-large-errors",
+  "timestamp_utc": "20260626T215936Z",
+  "cwd": "/Users/jacbeekers/gitrepos/dq-made-easy/dq-api/fastapi",
+  "evidence_directory": "test-results/evidence/0.11.0/api/20260626T215936Z-spark-expectations-large-errors",
+  "status": 4
+}

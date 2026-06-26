@@ -1,6 +1,6 @@
 # Spark Expectations Engine Integration Plan
 
-Status: Draft
+Status: In progress
 Target: add Nike Spark Expectations as a first-class execution engine under the existing Spark-based runtime stack.
 
 ## Goal
@@ -50,6 +50,7 @@ Deliverables:
 [x] [SE-PLAN-002] Create a small POC using one row-level rule and one aggregate rule against the data_sources/teller_machine data that is seeded onto AIStor.
 [ ] [SE-PLAN-003] Validate the happy path and the quarantine/error-table path.
 [ ] [SE-PLAN-004] Capture the baseline runtime and packaging requirements for local and container runs.
+[ ] [SE-PLAN-017] Add a bounded chunked error-management path that can summarize millions of failed rows without materializing them all in memory.
 
 Acceptance criteria:
 
@@ -57,6 +58,7 @@ Acceptance criteria:
 [ ] [SE-AC-002] one sample rule executes successfully
 [ ] [SE-AC-003] failed rows are written to an error table or equivalent quarantine path
 [ ] [SE-AC-004] the POC produces stats output for reporting
+[ ] [SE-AC-014] very large failure sets are handled with bounded memory usage and explicit chunking metadata
 
 ### Phase 2 — Adapter and compiler mapping
 
@@ -64,19 +66,19 @@ Objective: map canonical rule intent into Spark Expectations rules without chang
 
 Deliverables:
 
-[ ] [SE-PLAN-005] Add a dedicated adapter module under dq-engine for Spark Expectations rule lowering.
+[x] [SE-PLAN-005] Add a dedicated adapter module under dq-engine for Spark Expectations rule lowering.
 [ ] [SE-PLAN-006] Define a fail-fast mapping table for supported constructs:
-    [ ] row-level checks
+    [x] row-level checks (not_null, min, max)
     [ ] aggregate checks
     [ ] query-based checks
 [ ] [SE-PLAN-007] Keep unsupported constructs explicit and reject them before execution.
-[ ] [SE-PLAN-008] Add a neutral artifact projection path that can persist `engine_type = spark_expectations`.
+[x] [SE-PLAN-008] Add a neutral artifact projection path that can persist `engine_type = spark_expectations`.
 
 Acceptance criteria:
 
-[ ] [SE-AC-005] canonical rule payloads lower into Spark Expectations-friendly rule definitions
-[ ] [SE-AC-006] unsupported semantics fail fast with actionable diagnostics
-[ ] [SE-AC-007] the neutral artifact envelope can carry the new engine type without breaking GX flows
+[x] [SE-AC-005] canonical rule payloads lower into Spark Expectations-friendly rule definitions
+[x] [SE-AC-006] unsupported semantics fail fast with actionable diagnostics
+[x] [SE-AC-007] the neutral artifact envelope can carry the new engine type without breaking GX flows
 
 ### Phase 3 — Runtime dispatch and execution path
 
@@ -115,10 +117,10 @@ Acceptance criteria:
 ## Recommended rollout order
 
 [ ] Build the POC and prove that Spark Expectations can execute inside dq-engine.
-[ ] Add the adapter and fail-fast rule mapping.
-[ ] Wire the execution seam behind the existing neutral artifact contract.
+[x] Add the adapter and fail-fast rule mapping.
+[x] Wire the execution seam behind the existing neutral artifact contract.
 [ ] Expand support only for the rule families that are proven and stable.
-[ ] Keep GX as the default runtime until Spark Expectations support is verified in real runs.
+[x] Keep GX as the default runtime until Spark Expectations support is verified in real runs.
 
 ## Non-goals
 

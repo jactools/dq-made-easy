@@ -14,6 +14,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
 proof_root="$repo_root/test-results/test-proof"
 schema_path="$repo_root/docs/contracts/test-proof/v1/schema.json"
+python_runner="$repo_root/scripts/python_arm64.sh"
 python_bin="$repo_root/venv/bin/python"
 
 if [[ ! -x "$python_bin" ]]; then
@@ -21,7 +22,7 @@ if [[ ! -x "$python_bin" ]]; then
   exit 1
 fi
 
-"$python_bin" - "$repo_root" "$proof_root" "$schema_path" <<'PY'
+"$python_runner" --python-bin "$python_bin" - "$repo_root" "$proof_root" "$schema_path" <<'PY'
 from __future__ import annotations
 
 import json
