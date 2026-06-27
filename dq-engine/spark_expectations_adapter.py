@@ -8,7 +8,33 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SUPPORTED_RULE_TYPES = {"not_null", "min", "max", "equals", "not_equal", "between", "in", "count", "sum", "query"}
+SUPPORTED_RULE_TYPES = {
+    "not_null",
+    "min",
+    "max",
+    "equals",
+    "not_equal",
+    "between",
+    "in",
+    "not_in",
+    "is_null",
+    "contains",
+    "starts_with",
+    "ends_with",
+    "min_length",
+    "unique",
+    "max_length",
+    "regex",
+    "count",
+    "sum",
+    "avg",
+    "stddev",
+    "row_count",
+    "missing_count",
+    "duplicate_count",
+    "distinct_count",
+    "query",
+}
 
 
 def _build_spark_session(app_name: str = "dq-engine-spark-expectations") -> Any:
@@ -400,11 +426,11 @@ def build_error_management_plan(
 
 
 def lower_rule_to_spark_expectations(rule: dict[str, Any]) -> dict[str, Any]:
-    """Lower simple canonical row-level checks into a Spark Expectations-friendly payload.
+    """Lower canonical row and metric checks into a Spark Expectations-friendly payload.
 
-    The current adapter intentionally stays narrow and fail-fast: it supports the
-    row-level checks that are straightforward to compile today and rejects aggregate
-    or query-based semantics explicitly so the execution path stays predictable.
+    The adapter now supports the richer row-level and metric-style constructs that
+    align with the GX and Soda lowerers, while still rejecting unsupported
+    expression, SQL, window, multi-column, and complex-query semantics explicitly.
     """
 
     rule_type = str(rule.get("type") or "").strip()
@@ -438,6 +464,35 @@ def lower_rule_to_spark_expectations(rule: dict[str, Any]) -> dict[str, Any]:
             "engine_target": "pyspark",
             "rule_type": "row_dq",
             "expectation": f"{column} IS NOT NULL",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "unique":
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"duplicate_count({column}) == 0",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "max_length":
+        max_length = params.get("max")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"length({column}) <= {max_length}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "regex":
+        pattern = params.get("pattern")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"{column} RLIKE {_format_expectation_literal(pattern)}",
             "action_if_failed": "quarantine",
         }
 
@@ -503,6 +558,66 @@ def lower_rule_to_spark_expectations(rule: dict[str, Any]) -> dict[str, Any]:
             "action_if_failed": "quarantine",
         }
 
+    if rule_type == "not_in":
+        values = params.get("values") or []
+        formatted_values = ", ".join(_format_expectation_literal(value) for value in values)
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"{column} NOT IN ({formatted_values})",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "is_null":
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"{column} IS NULL",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "contains":
+        expected_value = params.get("value")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"{column} CONTAINS {_format_expectation_literal(expected_value)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "starts_with":
+        expected_value = params.get("value")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"{column} STARTS WITH {_format_expectation_literal(expected_value)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "ends_with":
+        expected_value = params.get("value")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"{column} ENDS WITH {_format_expectation_literal(expected_value)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "min_length":
+        minimum_length = params.get("min")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "row_dq",
+            "expectation": f"{column} LENGTH >= {minimum_length}",
+            "action_if_failed": "quarantine",
+        }
+
     if rule_type == "count":
         expected_count = params.get("expected_count")
         return {
@@ -520,6 +635,66 @@ def lower_rule_to_spark_expectations(rule: dict[str, Any]) -> dict[str, Any]:
             "engine_target": "pyspark",
             "rule_type": "aggregate_dq",
             "expectation": f"SUM({column}) == {_format_expectation_literal(expected_value)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "avg":
+        expected_value = params.get("expected_value")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "aggregate_dq",
+            "expectation": f"AVG({column}) == {_format_expectation_literal(expected_value)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "stddev":
+        expected_value = params.get("expected_value")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "aggregate_dq",
+            "expectation": f"STDDEV({column}) == {_format_expectation_literal(expected_value)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "row_count":
+        expected_count = params.get("expected_count")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "aggregate_dq",
+            "expectation": f"COUNT(*) == {_format_expectation_literal(expected_count)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "missing_count":
+        expected_count = params.get("expected_count")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "aggregate_dq",
+            "expectation": f"missing_count({column}) == {_format_expectation_literal(expected_count)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "duplicate_count":
+        expected_count = params.get("expected_count")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "aggregate_dq",
+            "expectation": f"duplicate_count({column}) == {_format_expectation_literal(expected_count)}",
+            "action_if_failed": "quarantine",
+        }
+
+    if rule_type == "distinct_count":
+        expected_count = params.get("expected_count")
+        return {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_type": "aggregate_dq",
+            "expectation": f"COUNT(DISTINCT {column}) == {_format_expectation_literal(expected_count)}",
             "action_if_failed": "quarantine",
         }
 

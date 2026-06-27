@@ -127,6 +127,70 @@ def test_lower_rule_to_spark_expectations_supports_aggregate_and_query_checks(
     assert lowered["action_if_failed"] == "quarantine"
 
 
+@pytest.mark.parametrize(
+    ("rule_type", "params", "expected_expectation"),
+    [
+        ("unique", {}, "duplicate_count(customer_id) == 0"),
+        ("max_length", {"max": 10}, "length(customer_id) <= 10"),
+        ("regex", {"pattern": "^A.*"}, "customer_id RLIKE '^A.*'"),
+        ("row_count", {"expected_count": 5}, "COUNT(*) == 5"),
+        ("avg", {"expected_value": 2.5}, "AVG(amount) == 2.5"),
+        ("stddev", {"expected_value": 1.2}, "STDDEV(amount) == 1.2"),
+        ("missing_count", {"expected_count": 1}, "missing_count(amount) == 1"),
+        ("duplicate_count", {"expected_count": 2}, "duplicate_count(amount) == 2"),
+        ("distinct_count", {"expected_count": 3}, "COUNT(DISTINCT amount) == 3"),
+    ],
+)
+def test_lower_rule_to_spark_expectations_supports_extended_constructs(
+    rule_type: str, params: dict[str, object], expected_expectation: str
+) -> None:
+    rule = {
+        "id": 47,
+        "table": "customers",
+        "column": "customer_id" if rule_type in {"unique", "max_length", "regex", "row_count"} else "amount",
+        "type": rule_type,
+        "params": params,
+    }
+
+    lowered = lower_rule_to_spark_expectations(rule)
+
+    assert lowered["engine_type"] == "spark_expectations"
+    assert lowered["engine_target"] == "pyspark"
+    assert lowered["action_if_failed"] == "quarantine"
+    assert lowered["expectation"] == expected_expectation
+
+
+@pytest.mark.parametrize(
+    ("rule_type", "params", "expected_expectation"),
+    [
+        ("is_null", {}, "customer_id IS NULL"),
+        ("not_in", {"values": ["a", "b"]}, "status NOT IN ('a', 'b')"),
+        ("contains", {"value": "foo"}, "status CONTAINS 'foo'"),
+        ("starts_with", {"value": "foo"}, "status STARTS WITH 'foo'"),
+        ("ends_with", {"value": "foo"}, "status ENDS WITH 'foo'"),
+        ("min_length", {"min": 3}, "status LENGTH >= 3"),
+    ],
+)
+def test_lower_rule_to_spark_expectations_supports_additional_text_and_null_checks(
+    rule_type: str, params: dict[str, object], expected_expectation: str
+) -> None:
+    rule = {
+        "id": 48,
+        "table": "customers",
+        "column": "customer_id" if rule_type == "is_null" else "status",
+        "type": rule_type,
+        "params": params,
+    }
+
+    lowered = lower_rule_to_spark_expectations(rule)
+
+    assert lowered["engine_type"] == "spark_expectations"
+    assert lowered["engine_target"] == "pyspark"
+    assert lowered["rule_type"] == "row_dq"
+    assert lowered["expectation"] == expected_expectation
+    assert lowered["action_if_failed"] == "quarantine"
+
+
 def test_lower_rule_to_spark_expectations_rejects_unsupported_rule() -> None:
     rule = {
         "id": 43,
