@@ -169,53 +169,6 @@ services:
     labels:
       - "monitoring=true"
 
-  spark-master:
-    profiles: ["spark"]
-    image: bitnami/spark:3.5.1
-    environment:
-      SPARK_MODE: master
-      SPARK_MASTER_PORT: 7077
-      SPARK_MASTER_WEBUI_PORT: 8080
-    ports:
-      - "7077:7077"
-      - "8085:8080"
-    restart: unless-stopped
-    networks:
-      - default
-      - dq-network
-
-  spark-worker-1:
-    profiles: ["spark"]
-    image: bitnami/spark:3.5.1
-    depends_on:
-      spark-master:
-        condition: service_started
-    environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_WORKER_CORES: 2
-      SPARK_WORKER_MEMORY: 2g
-    restart: unless-stopped
-    networks:
-      - default
-      - dq-network
-
-  spark-worker-2:
-    profiles: ["spark"]
-    image: bitnami/spark:3.5.1
-    depends_on:
-      spark-master:
-        condition: service_started
-    environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_WORKER_CORES: 2
-      SPARK_WORKER_MEMORY: 2g
-    restart: unless-stopped
-    networks:
-      - default
-      - dq-network
-
   # Zammad support stack (optional)
   zammad-postgresql:
     profiles: ["support"]

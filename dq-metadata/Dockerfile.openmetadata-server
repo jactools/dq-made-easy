@@ -8,14 +8,16 @@ ARG OTEL_JAVAAGENT_VERSION
 USER root
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 	--mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
-	--mount=type=secret,id=internal_corporate_root_ca \
+	--mount=type=secret,id=internal_corporate_root_ca,required=false \
 	set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		ca-certificates \
 		curl; \
 	cp /etc/ssl/certs/ca-certificates.crt /tmp/ca-bundle.crt; \
-	cat /run/secrets/internal_corporate_root_ca >> /tmp/ca-bundle.crt; \
+	if [ -f /run/secrets/internal_corporate_root_ca ]; then \
+		cat /run/secrets/internal_corporate_root_ca >> /tmp/ca-bundle.crt; \
+	fi; \
 	curl --cacert /tmp/ca-bundle.crt -fsSL "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar" \
 		-o /tmp/opentelemetry-javaagent.jar; \
 	rm -f /tmp/ca-bundle.crt; \

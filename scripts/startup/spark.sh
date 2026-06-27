@@ -1,7 +1,7 @@
-# Purpose: Dedicated startup block for the Spark cluster profile.
+# Purpose: Legacy Spark cluster startup hook retained as a no-op.
 #
-# Version: 1.0
-# Last modified: 2026-06-02
+# The repository now defaults to local Spark execution and no longer relies on
+# the optional master/worker containers defined in docker-compose.yml.
 
 start_stack_block_spark() {
   case "$START_PHASE" in
@@ -10,11 +10,7 @@ start_stack_block_spark() {
         return 0
       fi
 
-      PROFILE_ARGS+=(--profile spark)
-      DQ_SPARK_MASTER="${DQ_SPARK_MASTER:-spark://spark-master:7077}"
-      export DQ_SPARK_MASTER
-      info "$my_name" "Spark profile enabled"
-      info "$my_name" "Spark master set to ${DQ_SPARK_MASTER}"
+      info "$my_name" "Spark cluster profile is disabled; using local Spark by default"
       ;;
     post)
       if [ "$START_SPARK" != "true" ]; then
@@ -22,7 +18,7 @@ start_stack_block_spark() {
         return 0
       fi
 
-      info "$my_name" "Spark cluster requested; waiting is handled by the Spark services themselves"
+      info "$my_name" "Spark cluster profile is disabled; local Spark remains the default runtime"
       ;;
   esac
 }

@@ -8,9 +8,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from dq_utils.logging_utils import configure_logging
-from spark_expectations_adapter import build_error_management_plan
+from runtime_lowerers import build_compiled_artifact_for_engine
 from spark_expectations_adapter import execute_spark_expectations_rule
-from spark_expectations_adapter import lower_rule_to_spark_expectations
 
 LOG_LEVEL = os.getenv("DQ_LOG_LEVEL", "INFO")
 
@@ -42,28 +41,8 @@ class ExecuteRequest(BaseModel):
 def compile_rule_payload(rule: dict[str, Any], *, engine_type: str | None = None) -> dict[str, Any]:
     resolved_engine_type = (engine_type or "gx").strip().lower()
 
-    if resolved_engine_type == "spark_expectations":
-        lowered_rule = lower_rule_to_spark_expectations(rule)
-        error_plan = build_error_management_plan(
-            (
-                {"row_id": row_id, "reason": f"synthetic-failure-{row_id}"}
-                for row_id in range(int(rule.get("params", {}).get("synthetic_error_count", 0)))
-            ),
-            chunk_size=int(rule.get("params", {}).get("error_chunk_size", 10_000)),
-            max_samples=int(rule.get("params", {}).get("error_sample_size", 20)),
-        )
-        return {
-            "ok": True,
-            "rule_id": rule.get("id"),
-            "engine_type": "spark_expectations",
-            "lowered_rule": lowered_rule,
-            "compiled_artifact": {
-                "engine_type": "spark_expectations",
-                "engine_target": "pyspark",
-                "rule": lowered_rule,
-                "error_management": error_plan,
-            },
-        }
+    if resolved_engine_type in {"gx", "soda", "spark_expectations", "trino"}:
+        return build_compiled_artifact_for_engine(rule, engine_type=resolved_engine_type)
 
     from rule_translator import translate
 

@@ -10,9 +10,11 @@ FROM kong:3.9.1
 # Example: RUN luarocks install kong-plugin-myplugin
 
 USER root
-RUN --mount=type=secret,id=internal_corporate_root_ca \
+RUN --mount=type=secret,id=internal_corporate_root_ca,required=false \
 	set -eux; \
-	cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+	if [ -f /run/secrets/internal_corporate_root_ca ]; then \
+		cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+	fi; \
 	update-ca-certificates; \
     for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
         [ -e "$apt_sources" ] || continue; \
