@@ -530,6 +530,69 @@ const toScheduledAtIso = (value: string): string => {
   return parsed.toISOString()
 }
 
+const getObservabilitySummary = (value: unknown): Record<string, unknown> | null => {
+  const candidate = (value as Record<string, unknown> | null | undefined)?.observability_summary as Record<string, unknown> | null | undefined
+  return isRecord(candidate) ? candidate : null
+}
+
+const getExecutionMetadata = (value: unknown): Record<string, unknown> | null => {
+  const candidate = (value as Record<string, unknown> | null | undefined)?.execution_metadata as Record<string, unknown> | null | undefined
+  return isRecord(candidate) ? candidate : null
+}
+
+const getEvaluationDetails = (value: unknown): Record<string, unknown> | null => {
+  const candidate = (getExecutionMetadata(value) as Record<string, unknown> | null | undefined)?.evaluation as Record<string, unknown> | null | undefined
+  return isRecord(candidate) ? candidate : null
+}
+
+const formatEvaluationValue = (value: unknown): string => {
+  if (typeof value === 'number') {
+    return String(value)
+  }
+  if (typeof value === 'string') {
+    return value
+  }
+  if (value === null || value === undefined) {
+    return 'n/a'
+  }
+  return String(value)
+}
+
+const getObservabilityBadgeMeta = (item: GxExecutionRunSummaryView): { label: string; variant: string } | null => {
+  const observabilitySummary = getObservabilitySummary((item as Record<string, unknown>).resultSummary)
+  if (!observabilitySummary) {
+    return null
+  }
+
+  const engineType = String(observabilitySummary.engine_type || 'unknown')
+  const result = String(observabilitySummary.result || 'unknown')
+  const passedCount = Number(observabilitySummary.passed_count ?? 0)
+  const failedCount = Number(observabilitySummary.failed_count ?? 0)
+  const storageKind = String(observabilitySummary.storage_kind || '').trim()
+  const storageUri = String(observabilitySummary.storage_uri || '').trim()
+  const hasQuarantine = Boolean(storageKind || storageUri)
+
+  const normalizedResult = result.toLowerCase()
+  let variant = 'neutral'
+  if (normalizedResult === 'failed' || failedCount > 0 || item.status === 'failed') {
+    variant = 'danger'
+  } else if (normalizedResult === 'passed' || item.status === 'succeeded' || (passedCount > 0 && failedCount === 0)) {
+    variant = 'success'
+  } else if (normalizedResult === 'warning' || normalizedResult === 'partial' || normalizedResult === 'quarantine' || item.status === 'running' || item.status === 'pending') {
+    variant = 'warning'
+  }
+
+  const parts = [engineType, result, `${passedCount}/${failedCount}`]
+  if (hasQuarantine) {
+    parts.push('quarantine')
+  }
+
+  return {
+    label: parts.join(' • '),
+    variant,
+  }
+}
+
 /**
  * RuleExecutionMonitoring Component
  *
@@ -1621,6 +1684,34 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
                         {item.resolvedDataDeliveryId && (
                           <div className="gx-monitor-table-subtext gx-monitor-mono">Delivery {item.resolvedDataDeliveryId}</div>
                         )}
+                        {(() => {
+                          const observabilityBadge = getObservabilityBadgeMeta(item)
+                          const evaluationDetails = getEvaluationDetails((item as Record<string, unknown>).resultSummary)
+                          const detailParts: string[] = []
+                          if (evaluationDetails?.rule_family) {
+                            detailParts.push(String(evaluationDetails.rule_family))
+                          }
+                          if (evaluationDetails?.actual_value !== undefined) {
+                            detailParts.push(`actual ${formatEvaluationValue(evaluationDetails.actual_value)}`)
+                          }
+                          if (evaluationDetails?.expected_value !== undefined) {
+                            detailParts.push(`expected ${formatEvaluationValue(evaluationDetails.expected_value)}`)
+                          }
+                          return (
+                            <div className="gx-monitor-badges">
+                              {observabilityBadge ? (
+                                <span className={`gx-monitor-badge gx-monitor-badge-${observabilityBadge.variant}`}>
+                                  {observabilityBadge.label}
+                                </span>
+                              ) : null}
+                              {detailParts.length > 0 ? (
+                                <span className="gx-monitor-badge gx-monitor-badge-neutral">
+                                  {detailParts.join(' • ')}
+                                </span>
+                              ) : null}
+                            </div>
+                          )
+                        })()}
                       </td>
                       <td>
                         <button className="gx-secondary-button gx-monitor-row-button" type="button" onClick={() => void loadRun(item.id)}>
@@ -2069,6 +2160,60 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
                       <dt>Result summary</dt>
                       <dd><pre className="gx-monitor-json">{formatJson(run.resultSummary)}</pre></dd>
                     </div>
+                    {(() => {
+                      const observabilitySummary = getObservabilitySummary(run.resultSummary)
+                      const executionMetadata = getExecutionMetadata(run.resultSummary)
+                      const evaluationDetails = getEvaluationDetails(run.resultSummary)
+                      if (!observabilitySummary && !executionMetadata) {
+                        return null
+                      }
+                      return (
+                        <>
+                          {observabilitySummary ? (
+                            <>
+                              <div>
+                                <dt>Engine</dt>
+                                <dd>{String(observabilitySummary.engine_type || 'unknown')}</dd>
+                              </div>
+                              <div>
+                                <dt>Result</dt>
+                                <dd>{String(observabilitySummary.result || 'unknown')}</dd>
+                              </div>
+                              <div>
+                                <dt>Passed / failed</dt>
+                                <dd>{`${observabilitySummary.passed_count ?? 0} / ${observabilitySummary.failed_count ?? 0}`}</dd>
+                              </div>
+                              <div>
+                                <dt>Quarantine</dt>
+                                <dd className="gx-monitor-mono">{String(observabilitySummary.storage_uri || observabilitySummary.storage_kind || 'n/a')}</dd>
+                              </div>
+                            </>
+                          ) : null}
+                          {executionMetadata ? (
+                            <div>
+                              <dt>Runtime metadata</dt>
+                              <dd className="gx-monitor-mono">{String(executionMetadata.runtime || 'n/a')} • {String(executionMetadata.spark_app_name || 'n/a')}</dd>
+                            </div>
+                          ) : null}
+                          {evaluationDetails ? (
+                            <>
+                              <div>
+                                <dt>Evaluation rule family</dt>
+                                <dd>{String(evaluationDetails.rule_family || 'n/a')}</dd>
+                              </div>
+                              <div>
+                                <dt>Actual value</dt>
+                                <dd>{formatEvaluationValue(evaluationDetails.actual_value)}</dd>
+                              </div>
+                              <div>
+                                <dt>Expected value</dt>
+                                <dd>{formatEvaluationValue(evaluationDetails.expected_value)}</dd>
+                              </div>
+                            </>
+                          ) : null}
+                        </>
+                      )
+                    })()}
                   </dl>
                 </div>
 

@@ -1,6 +1,6 @@
 # Spark Expectations Engine Integration Plan
 
-Status: In progress
+Status: In progress (runtime dispatch and quarantine persistence validated)
 Target: add Nike Spark Expectations as a first-class execution engine under the existing Spark-based runtime stack.
 
 ## Goal
@@ -67,11 +67,17 @@ Objective: map canonical rule intent into Spark Expectations rules without chang
 Deliverables:
 
 [x] [SE-PLAN-005] Add a dedicated adapter module under dq-engine for Spark Expectations rule lowering.
-[ ] [SE-PLAN-006] Define a fail-fast mapping table for supported constructs:
-    [x] row-level checks (not_null, min, max)
-    [ ] aggregate checks
-    [ ] query-based checks
+[x] [SE-PLAN-006] Define a fail-fast mapping table for supported constructs:
+    [x] row-level checks (not_null, min, max, equals, not_equal, between, in)
+    [x] aggregate checks (count, sum)
+    [x] query-based checks (count-based query expectations)
 [ ] [SE-PLAN-007] Keep unsupported constructs explicit and reject them before execution.
+    - Unsupported constructs for the initial rollout:
+      - Arbitrary custom expressions and SQL predicates. Reason: they require expression translation and evaluation semantics that are not yet modeled in the neutral rule envelope.
+      - Window and analytic operations such as rank, dense_rank, lag, lead, or other `OVER (...)` patterns. Reason: they depend on ordering and partition context that is not part of the current lowering contract.
+      - Complex query expectations that return rows or multiple values instead of a scalar count. Reason: the adapter currently targets count-based scalar query expectations and cannot safely lower richer result-set semantics.
+      - Aggregates beyond count and sum, such as avg, distinct count, percentiles, or variance. Reason: they need additional observability and metric contracts before they can be emitted reliably.
+      - Cross-field or multi-column predicates. Reason: the initial mapping is intentionally single-column and fail-fast to avoid ambiguous lowering and hard-to-audit behavior.
 [x] [SE-PLAN-008] Add a neutral artifact projection path that can persist `engine_type = spark_expectations`.
 
 Acceptance criteria:
@@ -86,16 +92,22 @@ Objective: route supported validations through a Spark Expectations execution pa
 
 Deliverables:
 
-[ ] [SE-PLAN-009] Add a Spark Expectations execution worker or adapter seam inside dq-engine.
-[ ] [SE-PLAN-010] Reuse the existing grouped execution and source-binding concepts where possible.
-[ ] [SE-PLAN-011] Persist results through the current execution-monitoring and exception-store seams.
-[ ] [SE-PLAN-012] Keep a clear separation between aggregate outcomes and failed-row evidence.
+[x] [SE-PLAN-009] Add a Spark Expectations execution worker or adapter seam inside dq-engine.
+[x] [SE-PLAN-010] Reuse the existing grouped execution and source-binding concepts where possible.
+[x] [SE-PLAN-011] Persist results through the current execution-monitoring and exception-store seams.
+[x] [SE-PLAN-012] Keep a clear separation between aggregate outcomes and failed-row evidence.
 
 Acceptance criteria:
 
-[ ] [SE-AC-008] a supported validation plan can execute through the Spark Expectations path
-[ ] [SE-AC-009] failed rows and aggregate metrics are persisted through the existing runtime contract
-[ ] [SE-AC-010] the current GX worker path remains unchanged for GX-based runs
+[x] [SE-AC-008] a supported validation plan can execute through the Spark Expectations path
+[x] [SE-AC-009] failed rows and aggregate metrics are persisted through the existing runtime contract
+[x] [SE-AC-010] the current GX worker path remains unchanged for GX-based runs
+
+Validation evidence:
+
+- Verified in a containerized Spark runtime with the focused regression suite: 13 tests passed in 9.50s.
+- Verified the quarantine artifact path end to end against the real AIStor-backed S3-compatible service from inside the containerized test runtime.
+- Validation uses the dedicated dq-engine container and never relies on the host Java environment.
 
 ### Phase 4 — Observability, notifications, and hardening
 

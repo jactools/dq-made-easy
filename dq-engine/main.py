@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from dq_utils.logging_utils import configure_logging
 from spark_expectations_adapter import build_error_management_plan
+from spark_expectations_adapter import execute_spark_expectations_rule
 from spark_expectations_adapter import lower_rule_to_spark_expectations
 
 LOG_LEVEL = os.getenv("DQ_LOG_LEVEL", "INFO")
@@ -128,21 +129,28 @@ def execute_rule(req: ExecuteRequest):
         if not compiled.get("ok"):
             raise RuntimeError(compiled.get("error", "compilation failed"))
 
-        params = req.params or {}
-        synthetic_error_count = int(params.get("synthetic_error_count", 0))
-        synthetic_row_count = int(params.get("synthetic_row_count", synthetic_error_count))
-        passed_count = max(0, synthetic_row_count - synthetic_error_count)
-        failed_count = synthetic_error_count
-        error_management = compiled["compiled_artifact"]["error_management"]
+        adapter_summary = execute_spark_expectations_rule(req)
+        error_management = adapter_summary.get("error_management", {})
 
         summary = {
             "ok": True,
             "engine_type": "spark_expectations",
             "rule_id": req.id,
-            "result": "failed" if failed_count > 0 else "passed",
-            "passed_count": passed_count,
-            "failed_count": failed_count,
+            "result": adapter_summary.get("result", "passed"),
+            "passed_count": adapter_summary.get("passed_count", 0),
+            "failed_count": adapter_summary.get("failed_count", 0),
             "error_management": error_management,
+            "execution_metadata": adapter_summary.get("execution_metadata", {}),
+            "quarantine_artifact": adapter_summary.get("quarantine_artifact", {}),
+            "compiled_artifact": compiled.get("compiled_artifact", {}),
+            "observability_summary": {
+                "engine_type": "spark_expectations",
+                "result": adapter_summary.get("result", "passed"),
+                "passed_count": adapter_summary.get("passed_count", 0),
+                "failed_count": adapter_summary.get("failed_count", 0),
+                "storage_kind": (adapter_summary.get("quarantine_artifact") or {}).get("storage_kind"),
+                "storage_uri": (adapter_summary.get("quarantine_artifact") or {}).get("storage_uri"),
+            },
         }
 
         target_dir = Path(req.output_dir) if req.output_dir else None
@@ -154,9 +162,12 @@ def execute_rule(req: ExecuteRequest):
             errors_payload = {
                 "engine_type": "spark_expectations",
                 "rule_id": req.id,
-                "error_count": failed_count,
+                "error_count": summary.get("failed_count", 0),
                 "storage_strategy": error_management.get("storage_strategy", "chunked"),
                 "sampled_error_rows": error_management.get("sampled_error_rows", []),
+                "execution_metadata": summary.get("execution_metadata", {}),
+                "quarantine_artifact": summary.get("quarantine_artifact", {}),
+                "observability_summary": summary.get("observability_summary", {}),
             }
             errors_path.write_text(json.dumps(errors_payload, indent=2, sort_keys=True), encoding="utf-8")
 

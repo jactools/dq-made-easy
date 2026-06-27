@@ -2492,6 +2492,21 @@ def _process_grouped_dispatch_message(
         )
 
 
+def _build_spark_expectations_report_summary(response_payload: dict[str, Any], *, output_dir: Any) -> dict[str, Any]:
+    return {
+        "engine_type": "spark_expectations",
+        "rule_id": response_payload.get("rule_id"),
+        "result": response_payload.get("result", "passed"),
+        "passed_count": response_payload.get("passed_count", 0),
+        "failed_count": response_payload.get("failed_count", 0),
+        "summary": response_payload,
+        "output_dir": output_dir,
+        "execution_metadata": response_payload.get("execution_metadata", {}),
+        "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
+        "error_management": response_payload.get("error_management", {}),
+    }
+
+
 def _process_spark_expectations_dispatch_message(
     config: GxWorkerConfig,
     *,
@@ -2553,6 +2568,19 @@ def _process_spark_expectations_dispatch_message(
             failure_code="GX_WORKER_EXECUTION_ERROR",
         )
 
+    report_details = {
+        "source": "dq-engine-gx-worker",
+        "engine_type": "spark_expectations",
+        "rule_id": rule_id,
+        "result": response_payload.get("result", "passed"),
+        "passed_count": response_payload.get("passed_count", 0),
+        "failed_count": response_payload.get("failed_count", 0),
+        "execution_metadata": response_payload.get("execution_metadata", {}),
+        "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
+        "error_management": response_payload.get("error_management", {}),
+        "output_dir": payload.get("output_dir"),
+    }
+
     _api_report_execution_progress(
         config,
         token_provider,
@@ -2560,7 +2588,7 @@ def _process_spark_expectations_dispatch_message(
         correlation_id=correlation_id,
         changed_by=requested_by,
         reason="GX worker completed Spark Expectations execution",
-        details={"source": "dq-engine-gx-worker", "engine_type": "spark_expectations"},
+        details=report_details,
         completed_steps=2,
         total_steps=2,
         label="Spark Expectations execution completed",
@@ -2574,19 +2602,14 @@ def _process_spark_expectations_dispatch_message(
         new_status="succeeded",
         changed_by=requested_by,
         reason="GX worker completed Spark Expectations execution",
-        details={"source": "dq-engine-gx-worker", "engine_type": "spark_expectations"},
+        details=report_details,
         execution_progress=_build_execution_progress(
             completed_steps=2,
             total_steps=2,
             label="Spark Expectations execution completed",
         ),
         completed_at=_utc_now_iso(),
-        result_summary={
-            "engine_type": "spark_expectations",
-            "rule_id": rule_id,
-            "summary": response_payload,
-            "output_dir": payload.get("output_dir"),
-        },
+        result_summary=_build_spark_expectations_report_summary(response_payload, output_dir=payload.get("output_dir")),
         diagnostics=[],
         failure_code=None,
         failure_message=None,
