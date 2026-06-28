@@ -1,0 +1,121 @@
+{
+  "validationArtifactId": "spark_expectations_transaction_aggregate_comparison",
+  "validationArtifactVersion": 1,
+  "artifactContractVersion": "v1",
+  "engineType": "spark_expectations",
+  "assignmentScope": {
+    "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
+    "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
+    "dataProductId": "019e0488-9a54-7bb4-a49e-98434c26d7a7"
+  },
+  "resolvedExecutionScope": {
+    "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
+  },
+  "compiledFrom": {
+    "ruleIds": [
+      "019e0488-9a56-7caa-b001-000000000020",
+      "019e0488-9a56-7caa-b001-000000000022",
+      "019e0488-9a56-7caa-b001-000000000024",
+      "019e0488-9a56-7caa-b001-000000000026"
+    ],
+    "compilerVersion": "seed-v1",
+    "generatedAt": "2026-06-28T10:00:00Z"
+  },
+  "executionHints": {
+    "recommendedEngineTarget": "pyspark",
+    "primaryKeyFields": ["transaction_id"],
+    "businessKeyFields": ["transaction_id"],
+    "supportedExecutionShapes": ["single_object"],
+    "evidence": {
+      "failedRows": {
+        "mode": "sample",
+        "limit": 25,
+        "includeRowIdentifier": true,
+        "includePrimaryKey": true
+      },
+      "emitCompiledArtifact": true,
+      "emitGeneratedSql": true
+    }
+  },
+  "runPlanning": {
+    "engineTarget": "pyspark",
+    "executionShape": "single_object",
+    "groupingKey": "data_object_version_id",
+    "groupingValues": ["019e0488-9a53-77fa-9a22-cff40798361e"],
+    "traceability": {
+      "ruleId": "019e0488-9a56-7caa-b001-000000000020",
+      "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
+      "validationArtifactId": "spark_expectations_transaction_aggregate_comparison",
+      "validationArtifactVersion": 1,
+      "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
+    }
+  },
+  "engineArtifact": {
+    "engineType": "spark_expectations",
+    "artifactKind": "spark_expectations_plan",
+    "artifactSchemaVersion": "seed-v1",
+    "payload": {
+      "suiteId": "spark_expectations_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "sparkExpectationsPlan": {
+        "name": "spark_expectations_transaction_aggregate_comparison_v1",
+        "expectations": [
+          {
+            "type": "row_count",
+            "operator": "equals",
+            "threshold": 5
+          },
+          {
+            "type": "sum",
+            "subject": "total_amount",
+            "operator": "equals",
+            "threshold": 515
+          },
+          {
+            "type": "min",
+            "subject": "total_amount",
+            "operator": "equals",
+            "threshold": 20
+          },
+          {
+            "type": "max",
+            "subject": "total_amount",
+            "operator": "equals",
+            "threshold": 250
+          }
+        ],
+        "engine_target": "pyspark"
+      },
+      "compiledFrom": {
+        "ruleIds": [
+          "019e0488-9a56-7caa-b001-000000000020",
+          "019e0488-9a56-7caa-b001-000000000022",
+          "019e0488-9a56-7caa-b001-000000000024",
+          "019e0488-9a56-7caa-b001-000000000026"
+        ],
+        "compilerVersion": "seed-v1",
+        "generatedAt": "2026-06-28T10:00:00Z"
+      },
+      "executionHints": {
+        "recommendedEngine": "pyspark",
+        "primaryKeyFields": ["transaction_id"],
+        "businessKeyFields": ["transaction_id"]
+      },
+      "executionContract": {
+        "engineType": "spark_expectations",
+        "engineTarget": "pyspark",
+        "executionShape": "single_object",
+        "traceability": {
+          "ruleId": "019e0488-9a56-7caa-b001-000000000020",
+          "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
+          "validationArtifactId": "spark_expectations_transaction_aggregate_comparison",
+          "validationArtifactVersion": 1,
+          "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
+        }
+      }
+    }
+  },
+  "savedBy": "data-steward-user",
+  "sourcePipeline": "seed_csv",
+  "status": "active"
+}

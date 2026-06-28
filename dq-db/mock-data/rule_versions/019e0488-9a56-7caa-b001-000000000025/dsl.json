@@ -1,0 +1,40 @@
+{
+  "schema_version": "2.0.0",
+  "rule": {
+    "kind": "metric_threshold",
+    "scope": {
+      "dataset": {
+        "data_object_id": "do_transaction"
+      }
+    },
+    "measure": {
+      "type": "metric",
+      "metric": "min",
+      "subject": {
+        "column": "total_amount"
+      }
+    },
+    "expectation": {
+      "type": "threshold",
+      "operator": "between",
+      "min_value": 20,
+      "max_value": 20,
+      "unit": "raw"
+    },
+    "evidence": {
+      "failed_rows": {
+        "mode": "sample",
+        "limit": 25,
+        "include_row_identifier": true,
+        "include_primary_key": true
+      },
+      "emit_compiled_artifact": true,
+      "emit_generated_sql": false
+    },
+    "operations": {
+      "severity": "critical",
+      "preferred_engines": ["gx", "sodacl", "pyspark_native", "trino", "spark_expectations"],
+      "fail_if_not_native": false
+    }
+  }
+}
