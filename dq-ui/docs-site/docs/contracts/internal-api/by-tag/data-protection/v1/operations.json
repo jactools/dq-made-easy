@@ -1,0 +1,87 @@
+{
+  "group": "by-tag/data-protection",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_encryption_keys_api_system_v1_encryption_keys_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_encryption_keys_api_system_v1_encryption_keys_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "scope",
+          "required": false,
+          "schema_ref": "#/$defs/list_encryption_keys_api_system_v1_encryption_keys_get_param_query_scope"
+        }
+      ],
+      "path": "/api/system/v1/encryption-keys",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_encryption_keys_api_system_v1_encryption_keys_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Encryption Keys",
+      "tags": [
+        "data-protection"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_encryption_key_api_system_v1_encryption_keys_post",
+      "path": "/api/system/v1/encryption-keys",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/DataEncryptionKeyCreateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataEncryptionKeyView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Encryption Key",
+      "tags": [
+        "data-protection"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

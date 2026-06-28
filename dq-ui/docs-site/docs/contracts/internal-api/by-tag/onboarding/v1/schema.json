@@ -1,0 +1,242 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "CreateBatchRequestSchema": {
+      "description": "Request schema for create-batch endpoint.",
+      "properties": {
+        "accepted_proposal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Accepted Proposal Ids",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "accepted_proposal_ids"
+      ],
+      "title": "CreateBatchRequestSchema",
+      "type": "object"
+    },
+    "CreateBatchResponseSchema": {
+      "description": "Response schema for create-batch endpoint.",
+      "properties": {
+        "batch_id": {
+          "title": "Batch Id",
+          "type": "string"
+        },
+        "created": {
+          "title": "Created",
+          "type": "integer"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "failed": {
+          "title": "Failed",
+          "type": "integer"
+        },
+        "outcomes": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "skipped": {
+          "title": "Skipped",
+          "type": "integer"
+        },
+        "total_accepted": {
+          "title": "Total Accepted",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "batch_id",
+        "workspace_id",
+        "total_accepted",
+        "created",
+        "skipped",
+        "failed",
+        "outcomes",
+        "created_at"
+      ],
+      "title": "CreateBatchResponseSchema",
+      "type": "object"
+    },
+    "GenerateProposalsRequestSchema": {
+      "description": "Request schema for generate-proposals endpoint.",
+      "properties": {
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_type": {
+          "title": "Scope Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope_type",
+        "scope_id",
+        "workspace_id"
+      ],
+      "title": "GenerateProposalsRequestSchema",
+      "type": "object"
+    },
+    "GenerateProposalsResponseSchema": {
+      "description": "Response schema for generate-proposals endpoint.",
+      "properties": {
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "proposals": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Proposals",
+          "type": "array"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_type": {
+          "title": "Scope Type",
+          "type": "string"
+        },
+        "total_attributes": {
+          "title": "Total Attributes",
+          "type": "integer"
+        },
+        "total_proposals": {
+          "title": "Total Proposals",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scope_type",
+        "scope_id",
+        "total_attributes",
+        "total_proposals",
+        "proposals",
+        "generated_at"
+      ],
+      "title": "GenerateProposalsResponseSchema",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ScopeSummaryResponseSchema": {
+      "description": "Response schema for scope-summary endpoint.",
+      "properties": {
+        "attribute_count": {
+          "title": "Attribute Count",
+          "type": "integer"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "object_count": {
+          "title": "Object Count",
+          "type": "integer"
+        },
+        "scope_id": {
+          "title": "Scope Id",
+          "type": "string"
+        },
+        "scope_type": {
+          "title": "Scope Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope_type",
+        "scope_id",
+        "workspace_id",
+        "object_count",
+        "attribute_count",
+        "generated_at"
+      ],
+      "title": "ScopeSummaryResponseSchema",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/onboarding/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/onboarding v1 schema bundle"
+}

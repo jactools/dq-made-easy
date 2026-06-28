@@ -1,0 +1,38 @@
+execution_engine_capabilities_contract_version: v1
+engines:
+  - engine_type: gx
+    supported_execution_shapes:
+      - single_object
+      - join_pair
+    row_level_exception_facts_supported: true
+    record_identifier_resolution_supported: true
+    normalized_reason_codes_supported: true
+    supported_record_identifier_types:
+      - primary_key
+      - business_key
+    required_exception_fact_behavior: fail_fast
+    reason_code_strategy: mapped_taxonomy
+    notes: GX requires adapter-side extraction and normalization before exception facts are persisted.
+  - engine_type: soda
+    supported_execution_shapes:
+      - single_object
+    row_level_exception_facts_supported: false
+    record_identifier_resolution_supported: false
+    normalized_reason_codes_supported: true
+    supported_record_identifier_types: []
+    required_exception_fact_behavior: fail_fast
+    reason_code_strategy: mapped_taxonomy
+    notes: Until Soda exposes record-level failed-row evidence in the required execution mode, exception-fact-required paths must reject explicitly.
+  - engine_type: pyspark_native
+    supported_execution_shapes:
+      - single_object
+      - join_pair
+    row_level_exception_facts_supported: true
+    record_identifier_resolution_supported: true
+    normalized_reason_codes_supported: true
+    supported_record_identifier_types:
+      - primary_key
+      - business_key
+    required_exception_fact_behavior: fail_fast
+    reason_code_strategy: mapped_taxonomy
+    notes: Native PySpark execution is expected to emit record-level exception facts directly through the neutral adapter seam.

@@ -1,0 +1,151 @@
+{
+  "components": {
+    "schemas": {
+      "HealthView": {
+        "properties": {
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "timestamp"
+        ],
+        "title": "HealthView",
+        "type": "object"
+      },
+      "ReadinessChecksView": {
+        "properties": {
+          "api": {
+            "title": "Api",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api"
+        ],
+        "title": "ReadinessChecksView",
+        "type": "object"
+      },
+      "ReadinessView": {
+        "properties": {
+          "checks": {
+            "$ref": "#/components/schemas/ReadinessChecksView"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "checks",
+          "timestamp"
+        ],
+        "title": "ReadinessView",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/health' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/system/v1/health": {
+      "get": {
+        "operationId": "health_api_system_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/system/v1/live": {
+      "get": {
+        "operationId": "live_api_system_v1_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Live",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/system/v1/readiness": {
+      "get": {
+        "operationId": "readiness_api_system_v1_readiness_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readiness",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/system/v1/ready": {
+      "get": {
+        "operationId": "ready_api_system_v1_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ready",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}

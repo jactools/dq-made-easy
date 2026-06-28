@@ -83,7 +83,7 @@ KONG_CLIENT=$(curl -s -X POST "${KEYCLOAK_PUBLIC_BASE}/admin/realms/${KEYCLOAK_R
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d "{
-    \"clientId\": \"kong-gateway\",
+    \"clientId\": \"dq-made-easy-kong\",
     \"name\": \"Kong Gateway\",
     \"description\": \"Kong Gateway OIDC Client\",
     \"enabled\": true,
@@ -132,7 +132,7 @@ if [ "$client_status" = "new" ] || [ "$client_status" = "existing" ]; then
   # Save credentials to file
   cat > /tmp/kong-client-credentials.txt << EOF
 Kong OIDC Client Credentials:
-Client ID: kong-gateway
+Client ID: dq-made-easy-kong
 Client Secret: ${CLIENT_SECRET}
 Token Endpoint: ${KEYCLOAK_PUBLIC_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token
 Issuer: ${KEYCLOAK_PUBLIC_URL}/realms/${KEYCLOAK_REALM}

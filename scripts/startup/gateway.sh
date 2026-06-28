@@ -17,7 +17,7 @@ refresh_existing_kong_after_keycloak_seed_if_needed() {
     return 0
   fi
 
-  kong_container_id="$(docker ps -q -f name=^kong-gateway$ 2>/dev/null | tr -d '[:space:]' || true)"
+  kong_container_id="$(docker ps -q -f name=^dq-made-easy-kong$ 2>/dev/null | tr -d '[:space:]' || true)"
   if [ -z "$kong_container_id" ]; then
     warning "$my_name" "Keycloak reseed detected, but Kong is not running; skipping Kong refresh"
     return 0
@@ -66,8 +66,8 @@ start_stack_block_gateway() {
 
       info "$my_name" "Kong Admin API responded with HTTP 200"
       info "$my_name" "Running Kong bootstrap to configure routes/plugins/JWT credentials..."
-      if docker cp "$ROOT_DIR/dq-kong/scripts/bootstrap_kong.sh" kong-gateway:/tmp/dq-bootstrap_kong.sh >/dev/null 2>&1 \
-        && docker exec kong-gateway bash -lc "bash /tmp/dq-bootstrap_kong.sh"; then
+      if docker cp "$ROOT_DIR/dq-kong/scripts/bootstrap_kong.sh" dq-made-easy-kong:/tmp/dq-bootstrap_kong.sh >/dev/null 2>&1 \
+        && docker exec dq-made-easy-kong bash -lc "bash /tmp/dq-bootstrap_kong.sh"; then
         info "$my_name" "Kong bootstrap completed"
       else
         error "$my_name" "Kong bootstrap failed; refusing to continue with stale Kong state"
@@ -80,8 +80,8 @@ start_stack_block_gateway() {
         warning "$my_name" "Kong upstream not healthy yet. Restarting Kong and re-running bootstrap..."
         docker_compose restart kong >/dev/null || true
         sleep 3
-        if docker cp "$ROOT_DIR/dq-kong/scripts/bootstrap_kong.sh" kong-gateway:/tmp/dq-bootstrap_kong.sh >/dev/null 2>&1 \
-          && docker exec kong-gateway bash -lc "bash /tmp/dq-bootstrap_kong.sh"; then
+        if docker cp "$ROOT_DIR/dq-kong/scripts/bootstrap_kong.sh" dq-made-easy-kong:/tmp/dq-bootstrap_kong.sh >/dev/null 2>&1 \
+          && docker exec dq-made-easy-kong bash -lc "bash /tmp/dq-bootstrap_kong.sh"; then
           info "$my_name" "Kong bootstrap completed after restart"
         else
           error "$my_name" "Kong bootstrap failed after restart"

@@ -1,0 +1,9 @@
+{
+  "app_version": "0.11.4",
+  "mode": "command",
+  "label": "spark-expectations-real-aistor",
+  "timestamp_utc": "20260627T203941Z",
+  "cwd": "/Users/jacbeekers/gitrepos/dq-made-easy",
+  "evidence_directory": "test-results/evidence/0.11.4/command/20260627T203941Z-spark-expectations-real-aistor",
+  "status": 0
+}

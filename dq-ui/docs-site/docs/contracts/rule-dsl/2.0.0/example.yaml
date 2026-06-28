@@ -1,0 +1,43 @@
+name: Customer email completeness
+description: Business-critical active customer records must include an email address.
+dimension: completeness
+active: true
+workspace: default
+generated: false
+dsl:
+  schema_version: 2.0.0
+  rule:
+    kind: metric_threshold
+    scope:
+      dataset:
+        data_object_id: do-customer
+        data_object_version_id: dov-customer-v5
+      row_filter:
+        kind: row_predicate
+        language: dq_predicate
+        expression: status = 'ACTIVE'
+    measure:
+      type: metric
+      metric: missing_percent
+      subject:
+        column: email
+    expectation:
+      type: threshold
+      operator: lte
+      value: 0.1
+      unit: percent
+    evidence:
+      failed_rows:
+        mode: sample
+        limit: 100
+        include_row_identifier: true
+        include_primary_key: true
+      emit_compiled_artifact: true
+      emit_generated_sql: false
+    operations:
+      severity: critical
+      preferred_engines:
+        - gx
+        - sodacl
+        - sql
+      fail_if_not_native: false

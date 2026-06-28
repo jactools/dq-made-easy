@@ -1,0 +1,165 @@
+{
+  "group": "by-tag/workspaces",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_workspaces_api_rulebuilder_v1_workspaces_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_workspaces_api_rulebuilder_v1_workspaces_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_workspaces_api_rulebuilder_v1_workspaces_get_param_query_limit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/workspaces",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/WorkspacesPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Workspaces",
+      "tags": [
+        "workspaces"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_workspace_api_rulebuilder_v1_workspaces_post",
+      "path": "/api/rulebuilder/v1/workspaces",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/create_workspace_api_rulebuilder_v1_workspaces_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/OkResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Workspace",
+      "tags": [
+        "workspaces"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_workspace_api_rulebuilder_v1_workspaces__workspace_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "workspace_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_workspace_api_rulebuilder_v1_workspaces_workspace_id_delete_param_path_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/workspaces/{workspace_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/OkResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Workspace",
+      "tags": [
+        "workspaces"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_workspace_api_rulebuilder_v1_workspaces__workspace_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "workspace_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_workspace_api_rulebuilder_v1_workspaces_workspace_id_put_param_path_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/workspaces/{workspace_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_workspace_api_rulebuilder_v1_workspaces_workspace_id_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/WorkspaceView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Workspace",
+      "tags": [
+        "workspaces"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

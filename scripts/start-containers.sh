@@ -519,9 +519,9 @@ ensure_kong_seed_reconciliation() {
     return 1
   fi
 
-  kong_container_id="$(docker ps -q -f name=^kong-gateway$ 2>/dev/null | tr -d '[:space:]' || true)"
+  kong_container_id="$(docker ps -q -f name=^dq-made-easy-kong$ 2>/dev/null | tr -d '[:space:]' || true)"
   if [ -z "$kong_container_id" ]; then
-    warning "$my_name" "Kong reconciliation skipped: kong-gateway is not running"
+    warning "$my_name" "Kong reconciliation skipped: dq-made-easy-kong is not running"
     return 0
   fi
 
@@ -972,7 +972,7 @@ if [ "$START_OBSERVABILITY" = true ]; then
   fi
 
   if [ -z "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" ]; then
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://dq-otel-collector:4317"
+    OTEL_EXPORTER_OTLP_ENDPOINT="http://dq-made-easy-otel-collector:4317"
     export OTEL_EXPORTER_OTLP_ENDPOINT
   fi
 

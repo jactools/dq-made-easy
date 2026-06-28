@@ -1,0 +1,13 @@
+cwd=/Users/jacbeekers/gitrepos/dq-made-easy/dq-api/fastapi
+mode=api
+label=spark-expectations-dispatch
+command_parts:
+/Users/jacbeekers/gitrepos/dq-made-easy/scripts/python_arm64.sh
+--python-bin
+/Users/jacbeekers/gitrepos/dq-made-easy/venv/bin/python
+-m
+pytest
+dq-engine/tests/test_spark_expectations_adapter.py
+-q
+--junitxml
+/Users/jacbeekers/gitrepos/dq-made-easy/test-results/evidence/0.11.4/api/20260626T221541Z-spark-expectations-dispatch/junit.xml

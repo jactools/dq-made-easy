@@ -1,0 +1,289 @@
+{
+  "components": {
+    "schemas": {
+      "DataEncryptionKeyCreateRequestView": {
+        "properties": {
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "key_algorithm": {
+            "default": "fernet",
+            "title": "Key Algorithm",
+            "type": "string"
+          },
+          "key_material": {
+            "title": "Key Material",
+            "type": "string"
+          },
+          "key_name": {
+            "title": "Key Name",
+            "type": "string"
+          },
+          "key_scope": {
+            "default": "app",
+            "title": "Key Scope",
+            "type": "string"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "required": [
+          "key_name",
+          "key_material"
+        ],
+        "title": "DataEncryptionKeyCreateRequestView",
+        "type": "object"
+      },
+      "DataEncryptionKeyView": {
+        "properties": {
+          "created_at": {
+            "default": "",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "key_algorithm": {
+            "default": "fernet",
+            "title": "Key Algorithm",
+            "type": "string"
+          },
+          "key_fingerprint": {
+            "default": "",
+            "title": "Key Fingerprint",
+            "type": "string"
+          },
+          "key_name": {
+            "default": "",
+            "title": "Key Name",
+            "type": "string"
+          },
+          "key_scope": {
+            "default": "app",
+            "title": "Key Scope",
+            "type": "string"
+          },
+          "updated_at": {
+            "default": "",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DataEncryptionKeyView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/data-protection' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/system/v1/encryption-keys": {
+      "get": {
+        "operationId": "list_encryption_keys_api_system_v1_encryption_keys_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspaceid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scope"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DataEncryptionKeyView"
+                  },
+                  "title": "Response List Encryption Keys Api System V1 Encryption Keys Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Encryption Keys",
+        "tags": [
+          "data-protection"
+        ]
+      },
+      "post": {
+        "operationId": "create_encryption_key_api_system_v1_encryption_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataEncryptionKeyCreateRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataEncryptionKeyView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Encryption Key",
+        "tags": [
+          "data-protection"
+        ]
+      }
+    }
+  }
+}

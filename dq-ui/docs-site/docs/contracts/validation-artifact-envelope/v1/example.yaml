@@ -1,0 +1,88 @@
+validation_artifact_id: va_sales_order_customer_join
+validation_artifact_version: 3
+artifact_contract_version: v1
+engine_type: gx
+assignment_scope:
+  data_object_id: do_sales_order
+  dataset_id: ds_sales
+  data_product_id: odcs.dp.sales-001
+resolved_execution_scope:
+  data_object_version_ids:
+    - lzv_sales_order_customer_join_v1
+compiled_from:
+  rule_ids:
+    - rule_1
+    - rule_2
+  compiler_version: dq-compiler-7.3
+  generated_at: 2026-04-26T10:30:00Z
+execution_hints:
+  recommended_engine_target: pyspark
+  primary_key_fields:
+    - order_id
+  business_key_fields:
+    - sales_order_number
+  supported_execution_shapes:
+    - join_pair
+run_planning:
+  engine_target: pyspark
+  execution_shape: join_pair
+  grouping_key: data_object_version_id
+  grouping_values:
+    - lzv_sales_order_customer_join_v1
+  traceability:
+    rule_id: rule_1
+    rule_version_id: rv_1
+    validation_artifact_id: va_sales_order_customer_join
+    validation_artifact_version: 3
+    data_object_version_id: lzv_sales_order_customer_join_v1
+  source_materialization:
+    landing_zone_artifact_id: lz_sales_order_customer_join
+    landing_zone_version_id: lzv_sales_order_customer_join_v1
+    output_location: s3://dq-landing-zone/sales/order_customer_join/v1
+    join_type: inner
+    join_keys:
+      - customer_id
+    left_source:
+      data_object_id: do_sales_order
+      data_object_version_id: dov_sales_order_v3
+      dataset_id: ds_sales
+      data_product_id: odcs.dp.sales-001
+    right_source:
+      data_object_id: do_customer
+      data_object_version_id: dov_customer_v7
+      dataset_id: ds_crm
+      data_product_id: odcs.dp.crm-001
+engine_artifact:
+  engine_type: gx
+  artifact_kind: gx_expectation_suite
+  artifact_schema_version: gx-artifact-envelope/v1
+  payload:
+    suiteId: gx_suite_8f40b9ea
+    suiteVersion: 3
+    artifactVersion: v1
+    assignmentScope:
+      dataObjectId: do_sales_order
+      datasetId: ds_sales
+      dataProductId: odcs.dp.sales-001
+    resolvedExecutionScope:
+      dataObjectVersionIds:
+        - lzv_sales_order_customer_join_v1
+    gxSuite:
+      expectation_suite_name: dq_sales_orders_v3
+      expectations: []
+      meta:
+        source: dq-made-easy
+    compiledFrom:
+      ruleIds:
+        - rule_1
+        - rule_2
+      compilerVersion: dq-compiler-7.3
+      generatedAt: 2026-04-26T10:30:00Z
+    executionHints:
+      recommendedEngine: pyspark
+      primaryKeyFields:
+        - order_id
+saved_by: rule-compiler
+source_pipeline: rule-compiler
+status: active
+artifact_hash: sha256:9c2f0da2

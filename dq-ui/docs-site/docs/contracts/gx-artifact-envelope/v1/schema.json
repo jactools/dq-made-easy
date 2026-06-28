@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/gx-artifact-envelope/v1/schema.json",
+  "title": "GX Artifact Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "suiteId",
+    "suiteVersion",
+    "artifactVersion",
+    "assignmentScope",
+    "resolvedExecutionScope",
+    "gxSuite",
+    "compiledFrom",
+    "executionHints"
+  ],
+  "properties": {
+    "suiteId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suiteVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "artifactVersion": {
+      "type": "string",
+      "const": "v1"
+    },
+    "assignmentScope": {
+      "$ref": "#/$defs/assignmentScope"
+    },
+    "resolvedExecutionScope": {
+      "$ref": "#/$defs/resolvedExecutionScope"
+    },
+    "gxSuite": {
+      "type": "object",
+      "description": "GX-native suite JSON stored without lossy transformation."
+    },
+    "compiledFrom": {
+      "$ref": "#/$defs/compiledFrom"
+    },
+    "executionHints": {
+      "$ref": "#/$defs/executionHints"
+    },
+    "executionContract": {
+      "$ref": "#/$defs/executionContract"
+    }
+  },
+  "$defs": {
+    "assignmentScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dataObjectId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Steward-facing Data Object identifier."
+        },
+        "datasetId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataProductId": {
+          "type": "string",
+          "pattern": "^odcs\\..+$",
+          "description": "Canonical ODCS Data Product identifier."
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "dataObjectId"
+          ]
+        },
+        {
+          "required": [
+            "datasetId"
+          ]
+        },
+        {
+          "required": [
+            "dataProductId"
+          ]
+        }
+      ]
+    },
+    "resolvedExecutionScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataObjectVersionIds"
+      ],
+      "properties": {
+        "dataObjectVersionIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "compiledFrom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleIds",
+        "compilerVersion",
+        "generatedAt"
+      ],
+      "properties": {
+        "ruleIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "compilerVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "executionHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recommendedEngine",
+        "primaryKeyFields"
+      ],
+      "properties": {
+        "recommendedEngine": {
+          "type": "string",
+          "const": "pyspark"
+        },
+        "primaryKeyFields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "businessKeyFields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "executionContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engineTarget",
+        "executionShape",
+        "traceability"
+      ],
+      "properties": {
+        "engineTarget": {
+          "type": "string",
+          "const": "pyspark"
+        },
+        "executionShape": {
+          "type": "string",
+          "enum": [
+            "single_object",
+            "join_pair"
+          ]
+        },
+        "traceability": {
+          "$ref": "#/$defs/executionContractTraceability"
+        },
+        "sourceMaterialization": {
+          "$ref": "#/$defs/sourceMaterialization"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "executionShape": {
+                "const": "single_object"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "sourceMaterialization"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "executionShape": {
+                "const": "join_pair"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "sourceMaterialization"
+            ]
+          }
+        }
+      ]
+    },
+    "executionContractTraceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "ruleVersionId",
+        "gxSuiteId",
+        "gxSuiteVersion"
+      ],
+      "properties": {
+        "ruleId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ruleVersionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gxSuiteId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gxSuiteVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dataObjectVersionId": {
+          "type": ["string", "null"],
+          "minLength": 1
+        }
+      }
+    },
+    "sourceMaterialization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "landingZoneArtifactId",
+        "landingZoneVersionId",
+        "outputLocation",
+        "leftSource",
+        "rightSource"
+      ],
+      "properties": {
+        "landingZoneArtifactId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "landingZoneVersionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outputLocation": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Landing-zone output URI or table name consumed by dq-engine."
+        },
+        "joinType": {
+          "type": "string",
+          "enum": [
+            "inner",
+            "left",
+            "right",
+            "full"
+          ]
+        },
+        "joinKeys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "leftSource": {
+          "$ref": "#/$defs/sourceTarget"
+        },
+        "rightSource": {
+          "$ref": "#/$defs/sourceTarget"
+        }
+      }
+    },
+    "sourceTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataObjectId",
+        "dataObjectVersionId"
+      ],
+      "properties": {
+        "dataObjectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataObjectVersionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "datasetId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataProductId": {
+          "type": "string",
+          "pattern": "^odcs\\..+$"
+        }
+      }
+    }
+  }
+}

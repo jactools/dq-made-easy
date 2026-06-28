@@ -1,0 +1,319 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "CompilerDiagnosticView": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "scope": {
+          "default": "rule",
+          "title": "Scope",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string",
+          "x-dq-domain-allowed-values-set": "rule_compiler.severity"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "CompilerDiagnosticView",
+      "type": "object"
+    },
+    "ConflictDiagnosticView": {
+      "properties": {
+        "conflict_type": {
+          "title": "Conflict Type",
+          "type": "string"
+        },
+        "conflicts_with": {
+          "title": "Conflicts With",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "conflicts_with",
+        "conflict_type",
+        "message"
+      ],
+      "title": "ConflictDiagnosticView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "ValidationRunItemView": {
+      "properties": {
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/ConflictDiagnosticView"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "diagnostics": {
+          "items": {
+            "$ref": "#/$defs/CompilerDiagnosticView"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "rule_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Name"
+        },
+        "rule_version_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rule Version Number"
+        },
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        },
+        "warnings": {
+          "title": "Warnings",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "rule_id",
+        "valid",
+        "errors",
+        "warnings"
+      ],
+      "title": "ValidationRunItemView",
+      "type": "object"
+    },
+    "ValidationRunView": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "invalid_count": {
+          "title": "Invalid Count",
+          "type": "integer"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ValidationRunItemView"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "run_at": {
+          "title": "Run At",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "triggered_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Triggered By"
+        },
+        "valid_count": {
+          "title": "Valid Count",
+          "type": "integer"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        }
+      },
+      "required": [
+        "id",
+        "run_at",
+        "total",
+        "valid_count",
+        "invalid_count",
+        "status"
+      ],
+      "title": "ValidationRunView",
+      "type": "object"
+    },
+    "ValidationRunsPageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/ValidationRunView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "additionalProperties": true,
+          "title": "Pagination",
+          "type": "object"
+        }
+      },
+      "required": [
+        "pagination"
+      ],
+      "title": "ValidationRunsPageView",
+      "type": "object"
+    },
+    "export_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_export_get_param_path_run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "export_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_export_get_param_query_format": {
+      "default": "json",
+      "pattern": "^(json|csv)$",
+      "title": "Format",
+      "type": "string"
+    },
+    "export_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_export_get_response_200_application_json": {},
+    "get_validation_run_api_rulebuilder_v1_rules_validation_runs_run_id_get_param_path_run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "list_validation_runs_api_rulebuilder_v1_rules_validation_runs_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_validation_runs_api_rulebuilder_v1_rules_validation_runs_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "list_validation_runs_api_rulebuilder_v1_rules_validation_runs_get_param_query_workspace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/validation-runs/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/validation-runs v1 schema bundle"
+}

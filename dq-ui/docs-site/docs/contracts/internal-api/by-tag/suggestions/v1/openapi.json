@@ -1,0 +1,2684 @@
+{
+  "components": {
+    "schemas": {
+      "Dq7DslAssistantPreviewResponseView": {
+        "properties": {
+          "capability_summary": {
+            "title": "Capability Summary",
+            "type": "string"
+          },
+          "check_type": {
+            "$ref": "#/components/schemas/RuleCheckType"
+          },
+          "compiler_hint": {
+            "title": "Compiler Hint",
+            "type": "string"
+          },
+          "construct_family": {
+            "enum": [
+              "row_assertion",
+              "metric_threshold",
+              "metric_comparison",
+              "schema_assertion",
+              "reference_assertion",
+              "reconciliation_assertion",
+              "freshness_assertion",
+              "distribution_assertion",
+              "anomaly_assertion",
+              "custom_query_assertion",
+              "failed_rows_evidence_policy",
+              "operational_metadata"
+            ],
+            "title": "Construct Family",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          },
+          "support": {
+            "items": {
+              "$ref": "#/components/schemas/Dq7DslAssistantSupportView"
+            },
+            "title": "Support",
+            "type": "array"
+          }
+        },
+        "required": [
+          "check_type",
+          "construct_family",
+          "capability_summary",
+          "compiler_hint",
+          "support"
+        ],
+        "title": "Dq7DslAssistantPreviewResponseView",
+        "type": "object"
+      },
+      "Dq7DslAssistantSupportView": {
+        "properties": {
+          "compiler_behavior": {
+            "title": "Compiler Behavior",
+            "type": "string"
+          },
+          "engine": {
+            "title": "Engine",
+            "type": "string"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "support": {
+            "enum": [
+              "native",
+              "partial",
+              "sql",
+              "custom",
+              "no"
+            ],
+            "title": "Support",
+            "type": "string"
+          },
+          "supported_subsets": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Subsets",
+            "type": "array"
+          }
+        },
+        "required": [
+          "engine",
+          "support",
+          "compiler_behavior",
+          "notes"
+        ],
+        "title": "Dq7DslAssistantSupportView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "NaturalLanguageDraftRequestHistoryResponseView": {
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/NaturalLanguageDraftRequestStatusView"
+            },
+            "title": "Requests",
+            "type": "array"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "title": "NaturalLanguageDraftRequestHistoryResponseView",
+        "type": "object"
+      },
+      "NaturalLanguageDraftRequestStatusResponseView": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/NaturalLanguageDraftRequestStatusView"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "title": "NaturalLanguageDraftRequestStatusResponseView",
+        "type": "object"
+      },
+      "NaturalLanguageDraftRequestStatusView": {
+        "properties": {
+          "analysis_provider": {
+            "enum": [
+              "rapidfuzz",
+              "llm"
+            ],
+            "title": "Analysis Provider",
+            "type": "string"
+          },
+          "analysis_type": {
+            "enum": [
+              "preview",
+              "draft",
+              "steward"
+            ],
+            "title": "Analysis Type",
+            "type": "string"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "current_workspace_id": {
+            "title": "Current Workspace Id",
+            "type": "string"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "requested_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested At"
+          },
+          "requested_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By User Id"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "search_scope": {
+            "enum": [
+              "current",
+              "all",
+              "all_across_workspaces"
+            ],
+            "title": "Search Scope",
+            "type": "string"
+          },
+          "selected_attribute_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Selected Attribute Ids",
+            "type": "array"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "started",
+              "completed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "suggestion_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion Id"
+          }
+        },
+        "required": [
+          "request_id",
+          "current_workspace_id",
+          "search_scope",
+          "analysis_provider",
+          "analysis_type",
+          "prompt",
+          "status"
+        ],
+        "title": "NaturalLanguageDraftRequestStatusView",
+        "type": "object"
+      },
+      "NaturalLanguageDraftRulePreviewView": {
+        "properties": {
+          "dimension": {
+            "title": "Dimension",
+            "type": "string"
+          },
+          "dsl": {
+            "$ref": "#/components/schemas/RuleDslV2Document"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "workspace_id",
+          "dimension",
+          "summary",
+          "dsl"
+        ],
+        "title": "NaturalLanguageDraftRulePreviewView",
+        "type": "object"
+      },
+      "NaturalLanguageDraftSuggestionResponseView": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "queued": {
+            "default": false,
+            "title": "Queued",
+            "type": "boolean"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          },
+          "suggestion": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "NaturalLanguageDraftSuggestionResponseView",
+        "type": "object"
+      },
+      "NaturalLanguageParsedConditionView": {
+        "properties": {
+          "attribute_term": {
+            "title": "Attribute Term",
+            "type": "string"
+          },
+          "operator": {
+            "title": "Operator",
+            "type": "string"
+          },
+          "same_version_required": {
+            "default": true,
+            "title": "Same Version Required",
+            "type": "boolean"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attribute_term",
+          "operator",
+          "value"
+        ],
+        "title": "NaturalLanguageParsedConditionView",
+        "type": "object"
+      },
+      "NaturalLanguagePreviewCandidateView": {
+        "properties": {
+          "attribute_id": {
+            "title": "Attribute Id",
+            "type": "string"
+          },
+          "attribute_name": {
+            "title": "Attribute Name",
+            "type": "string"
+          },
+          "confidence_score": {
+            "title": "Confidence Score",
+            "type": "number"
+          },
+          "current_context": {
+            "default": false,
+            "title": "Current Context",
+            "type": "boolean"
+          },
+          "data_object_id": {
+            "title": "Data Object Id",
+            "type": "string"
+          },
+          "data_object_name": {
+            "title": "Data Object Name",
+            "type": "string"
+          },
+          "data_product_id": {
+            "title": "Data Product Id",
+            "type": "string"
+          },
+          "data_product_name": {
+            "title": "Data Product Name",
+            "type": "string"
+          },
+          "data_set_id": {
+            "title": "Data Set Id",
+            "type": "string"
+          },
+          "data_set_name": {
+            "title": "Data Set Name",
+            "type": "string"
+          },
+          "match_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Match Reasons",
+            "type": "array"
+          },
+          "match_roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Match Roles",
+            "type": "array"
+          },
+          "parent_path": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Parent Path",
+            "type": "array"
+          },
+          "version_id": {
+            "title": "Version Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attribute_id",
+          "attribute_name",
+          "version_id",
+          "data_object_id",
+          "data_object_name",
+          "data_set_id",
+          "data_set_name",
+          "data_product_id",
+          "data_product_name",
+          "workspace_id",
+          "parent_path",
+          "confidence_score"
+        ],
+        "title": "NaturalLanguagePreviewCandidateView",
+        "type": "object"
+      },
+      "NaturalLanguageRulePreviewCreateSuggestionRequestView": {
+        "properties": {
+          "analysis_provider": {
+            "default": "rapidfuzz",
+            "enum": [
+              "rapidfuzz",
+              "llm"
+            ],
+            "title": "Analysis Provider",
+            "type": "string"
+          },
+          "assistant_mode": {
+            "default": "preview",
+            "enum": [
+              "preview",
+              "steward"
+            ],
+            "title": "Assistant Mode",
+            "type": "string"
+          },
+          "current_workspace_id": {
+            "minLength": 1,
+            "title": "Current Workspace Id",
+            "type": "string"
+          },
+          "prompt": {
+            "minLength": 1,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "search_scope": {
+            "default": "current",
+            "enum": [
+              "current",
+              "all",
+              "all_across_workspaces"
+            ],
+            "title": "Search Scope",
+            "type": "string"
+          },
+          "selected_attribute_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Selected Attribute Ids",
+            "type": "array"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "target_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "data_object_version",
+                  "glossary_term"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Type"
+          }
+        },
+        "required": [
+          "prompt",
+          "current_workspace_id"
+        ],
+        "title": "NaturalLanguageRulePreviewCreateSuggestionRequestView",
+        "type": "object"
+      },
+      "NaturalLanguageRulePreviewRequestView": {
+        "properties": {
+          "analysis_provider": {
+            "default": "rapidfuzz",
+            "enum": [
+              "rapidfuzz",
+              "llm"
+            ],
+            "title": "Analysis Provider",
+            "type": "string"
+          },
+          "assistant_mode": {
+            "default": "preview",
+            "enum": [
+              "preview",
+              "steward"
+            ],
+            "title": "Assistant Mode",
+            "type": "string"
+          },
+          "current_workspace_id": {
+            "minLength": 1,
+            "title": "Current Workspace Id",
+            "type": "string"
+          },
+          "prompt": {
+            "minLength": 1,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "search_scope": {
+            "default": "current",
+            "enum": [
+              "current",
+              "all",
+              "all_across_workspaces"
+            ],
+            "title": "Search Scope",
+            "type": "string"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "target_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "data_object_version",
+                  "glossary_term"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Type"
+          }
+        },
+        "required": [
+          "prompt",
+          "current_workspace_id"
+        ],
+        "title": "NaturalLanguageRulePreviewRequestView",
+        "type": "object"
+      },
+      "NaturalLanguageRulePreviewResponseView": {
+        "properties": {
+          "assistant_mode": {
+            "default": "preview",
+            "enum": [
+              "preview",
+              "steward"
+            ],
+            "title": "Assistant Mode",
+            "type": "string"
+          },
+          "candidate_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/NaturalLanguagePreviewCandidateView"
+            },
+            "title": "Candidate Attributes",
+            "type": "array"
+          },
+          "draft_rule_preview": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NaturalLanguageDraftRulePreviewView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "metadata_facts": {
+            "additionalProperties": true,
+            "title": "Metadata Facts",
+            "type": "object"
+          },
+          "metadata_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata Summary"
+          },
+          "parsed_condition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NaturalLanguageParsedConditionView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "queued": {
+            "default": false,
+            "title": "Queued",
+            "type": "boolean"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "requires_steward_confirmation": {
+            "default": true,
+            "title": "Requires Steward Confirmation",
+            "type": "boolean"
+          },
+          "search_scope": {
+            "enum": [
+              "current",
+              "all",
+              "all_across_workspaces"
+            ],
+            "title": "Search Scope",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          },
+          "suggested_fixes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suggested Fixes",
+            "type": "array"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "target_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Label"
+          },
+          "target_terms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Terms",
+            "type": "array"
+          },
+          "target_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "data_object_version",
+                  "glossary_term"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Type"
+          }
+        },
+        "required": [
+          "search_scope"
+        ],
+        "title": "NaturalLanguageRulePreviewResponseView",
+        "type": "object"
+      },
+      "NaturalLanguageRulePreviewTelemetryRequest": {
+        "properties": {
+          "action": {
+            "enum": [
+              "attributes_selected",
+              "preview_cancelled"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "current_workspace_id": {
+            "minLength": 1,
+            "title": "Current Workspace Id",
+            "type": "string"
+          },
+          "selected_attribute_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Attribute Count"
+          }
+        },
+        "required": [
+          "action",
+          "current_workspace_id"
+        ],
+        "title": "NaturalLanguageRulePreviewTelemetryRequest",
+        "type": "object"
+      },
+      "RuleCheckType": {
+        "description": "Enumeration of supported parameterised rule check-types.\n\nEach check-type maps a well-known data quality concern to a set of\nstructured parameters from which a compiler-ready expression can be\nderived automatically (DQ-4.10).",
+        "enum": [
+          "THRESHOLD",
+          "ROW_COUNT",
+          "REGEX",
+          "RANGE",
+          "ALLOWLIST",
+          "BLOCKLIST",
+          "UNIQUENESS",
+          "REFERENTIAL_INTEGRITY",
+          "FRESHNESS",
+          "LAG",
+          "FUTURE_DATE",
+          "CORRECT",
+          "PRESENT",
+          "RECONCILE",
+          "PLAUSIBLE",
+          "TRANSFER_MATCH",
+          "JOIN_CONSISTENCY"
+        ],
+        "title": "RuleCheckType",
+        "type": "string"
+      },
+      "RuleDslV2BaselineExpectation": {
+        "additionalProperties": false,
+        "properties": {
+          "lookback_runs": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lookback Runs"
+          },
+          "sensitivity": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sensitivity"
+          },
+          "strategy": {
+            "enum": [
+              "dynamic_parameters",
+              "forecast",
+              "historical_band"
+            ],
+            "title": "Strategy",
+            "type": "string"
+          },
+          "type": {
+            "const": "baseline",
+            "default": "baseline",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "strategy"
+        ],
+        "title": "RuleDslV2BaselineExpectation",
+        "type": "object"
+      },
+      "RuleDslV2ComparisonScope": {
+        "additionalProperties": false,
+        "properties": {
+          "join_keys": {
+            "items": {
+              "$ref": "#/components/schemas/RuleDslV2JoinKey"
+            },
+            "title": "Join Keys",
+            "type": "array"
+          },
+          "left": {
+            "$ref": "#/components/schemas/RuleDslV2DatasetScope"
+          },
+          "right": {
+            "$ref": "#/components/schemas/RuleDslV2DatasetScope"
+          }
+        },
+        "required": [
+          "left",
+          "right"
+        ],
+        "title": "RuleDslV2ComparisonScope",
+        "type": "object"
+      },
+      "RuleDslV2DatasetScope": {
+        "additionalProperties": false,
+        "properties": {
+          "data_object_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Id"
+          },
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          }
+        },
+        "title": "RuleDslV2DatasetScope",
+        "type": "object"
+      },
+      "RuleDslV2Document": {
+        "additionalProperties": false,
+        "properties": {
+          "rule": {
+            "$ref": "#/components/schemas/RuleDslV2Rule"
+          },
+          "schema_version": {
+            "const": "2.0.0",
+            "default": "2.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule"
+        ],
+        "title": "RuleDslV2Document",
+        "type": "object"
+      },
+      "RuleDslV2EqualityExpectation": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "enum": [
+              "exact",
+              "case_insensitive",
+              "numeric_tolerance"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "tolerance": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance"
+          },
+          "type": {
+            "const": "equality",
+            "default": "equality",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "title": "RuleDslV2EqualityExpectation",
+        "type": "object"
+      },
+      "RuleDslV2Evidence": {
+        "additionalProperties": false,
+        "properties": {
+          "emit_compiled_artifact": {
+            "title": "Emit Compiled Artifact",
+            "type": "boolean"
+          },
+          "emit_generated_sql": {
+            "title": "Emit Generated Sql",
+            "type": "boolean"
+          },
+          "failed_rows": {
+            "$ref": "#/components/schemas/RuleDslV2FailedRowsPolicy"
+          }
+        },
+        "required": [
+          "failed_rows",
+          "emit_compiled_artifact",
+          "emit_generated_sql"
+        ],
+        "title": "RuleDslV2Evidence",
+        "type": "object"
+      },
+      "RuleDslV2FailedRowsPolicy": {
+        "additionalProperties": false,
+        "properties": {
+          "include_primary_key": {
+            "title": "Include Primary Key",
+            "type": "boolean"
+          },
+          "include_row_identifier": {
+            "title": "Include Row Identifier",
+            "type": "boolean"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Limit"
+          },
+          "mode": {
+            "enum": [
+              "none",
+              "sample",
+              "all_with_limit"
+            ],
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "include_row_identifier",
+          "include_primary_key"
+        ],
+        "title": "RuleDslV2FailedRowsPolicy",
+        "type": "object"
+      },
+      "RuleDslV2GroupingScope": {
+        "additionalProperties": false,
+        "properties": {
+          "keys": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "keys"
+        ],
+        "title": "RuleDslV2GroupingScope",
+        "type": "object"
+      },
+      "RuleDslV2JoinCondition": {
+        "additionalProperties": false,
+        "properties": {
+          "left_column": {
+            "minLength": 1,
+            "title": "Left Column",
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "=",
+              "!=",
+              ">",
+              ">=",
+              "<",
+              "<="
+            ],
+            "title": "Operator",
+            "type": "string"
+          },
+          "right_column": {
+            "minLength": 1,
+            "title": "Right Column",
+            "type": "string"
+          }
+        },
+        "required": [
+          "left_column",
+          "operator",
+          "right_column"
+        ],
+        "title": "RuleDslV2JoinCondition",
+        "type": "object"
+      },
+      "RuleDslV2JoinKey": {
+        "additionalProperties": false,
+        "properties": {
+          "left_column": {
+            "minLength": 1,
+            "title": "Left Column",
+            "type": "string"
+          },
+          "right_column": {
+            "minLength": 1,
+            "title": "Right Column",
+            "type": "string"
+          }
+        },
+        "required": [
+          "left_column",
+          "right_column"
+        ],
+        "title": "RuleDslV2JoinKey",
+        "type": "object"
+      },
+      "RuleDslV2JoinScope": {
+        "additionalProperties": false,
+        "properties": {
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/RuleDslV2JoinCondition"
+            },
+            "minItems": 1,
+            "title": "Conditions",
+            "type": "array"
+          },
+          "join_type": {
+            "enum": [
+              "inner",
+              "left",
+              "right",
+              "full"
+            ],
+            "title": "Join Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "join_type",
+          "conditions"
+        ],
+        "title": "RuleDslV2JoinScope",
+        "type": "object"
+      },
+      "RuleDslV2MetricMeasure": {
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "enum": [
+              "row_count",
+              "missing_count",
+              "missing_percent",
+              "duplicate_count",
+              "duplicate_percent",
+              "distinct_count",
+              "min",
+              "max",
+              "avg",
+              "sum",
+              "stddev",
+              "quantile",
+              "freshness_age",
+              "match_percent"
+            ],
+            "title": "Metric",
+            "type": "string"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2Subject"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "const": "metric",
+            "default": "metric",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "metric"
+        ],
+        "title": "RuleDslV2MetricMeasure",
+        "type": "object"
+      },
+      "RuleDslV2Operations": {
+        "additionalProperties": false,
+        "properties": {
+          "fail_if_not_native": {
+            "title": "Fail If Not Native",
+            "type": "boolean"
+          },
+          "preferred_engines": {
+            "items": {
+              "enum": [
+                "gx",
+                "sodacl",
+                "sql",
+                "pyspark_native",
+                "custom_worker"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Preferred Engines",
+            "type": "array"
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "warning",
+              "info"
+            ],
+            "title": "Severity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "severity",
+          "preferred_engines",
+          "fail_if_not_native"
+        ],
+        "title": "RuleDslV2Operations",
+        "type": "object"
+      },
+      "RuleDslV2QueryMeasure": {
+        "additionalProperties": false,
+        "properties": {
+          "comparison_data_source_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comparison Data Source Name"
+          },
+          "comparison_query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comparison Query"
+          },
+          "query": {
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "query_language": {
+            "const": "sql",
+            "default": "sql",
+            "title": "Query Language",
+            "type": "string"
+          },
+          "type": {
+            "const": "query",
+            "default": "query",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "RuleDslV2QueryMeasure",
+        "type": "object"
+      },
+      "RuleDslV2RowPredicate": {
+        "additionalProperties": false,
+        "properties": {
+          "expression": {
+            "minLength": 1,
+            "title": "Expression",
+            "type": "string"
+          },
+          "kind": {
+            "const": "row_predicate",
+            "default": "row_predicate",
+            "title": "Kind",
+            "type": "string"
+          },
+          "language": {
+            "enum": [
+              "dq_predicate",
+              "sql"
+            ],
+            "title": "Language",
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "expression"
+        ],
+        "title": "RuleDslV2RowPredicate",
+        "type": "object"
+      },
+      "RuleDslV2RowPredicateMeasure": {
+        "additionalProperties": false,
+        "properties": {
+          "predicate": {
+            "$ref": "#/components/schemas/RuleDslV2RowPredicate"
+          },
+          "type": {
+            "const": "row_predicate",
+            "default": "row_predicate",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "predicate"
+        ],
+        "title": "RuleDslV2RowPredicateMeasure",
+        "type": "object"
+      },
+      "RuleDslV2Rule": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence": {
+            "$ref": "#/components/schemas/RuleDslV2Evidence"
+          },
+          "expectation": {
+            "discriminator": {
+              "mapping": {
+                "baseline": "#/components/schemas/RuleDslV2BaselineExpectation",
+                "equality": "#/components/schemas/RuleDslV2EqualityExpectation",
+                "schema_contract": "#/components/schemas/RuleDslV2SchemaContractExpectation",
+                "set_membership": "#/components/schemas/RuleDslV2SetMembershipExpectation",
+                "threshold": "#/components/schemas/RuleDslV2ThresholdExpectation"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2ThresholdExpectation"
+              },
+              {
+                "$ref": "#/components/schemas/RuleDslV2EqualityExpectation"
+              },
+              {
+                "$ref": "#/components/schemas/RuleDslV2SetMembershipExpectation"
+              },
+              {
+                "$ref": "#/components/schemas/RuleDslV2SchemaContractExpectation"
+              },
+              {
+                "$ref": "#/components/schemas/RuleDslV2BaselineExpectation"
+              }
+            ],
+            "title": "Expectation"
+          },
+          "kind": {
+            "enum": [
+              "row_assertion",
+              "metric_threshold",
+              "metric_comparison",
+              "schema_assertion",
+              "reference_assertion",
+              "reconciliation_assertion",
+              "freshness_assertion",
+              "distribution_assertion",
+              "anomaly_assertion",
+              "custom_query_assertion"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "measure": {
+            "discriminator": {
+              "mapping": {
+                "metric": "#/components/schemas/RuleDslV2MetricMeasure",
+                "query": "#/components/schemas/RuleDslV2QueryMeasure",
+                "row_predicate": "#/components/schemas/RuleDslV2RowPredicateMeasure",
+                "schema": "#/components/schemas/RuleDslV2SchemaMeasure"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2RowPredicateMeasure"
+              },
+              {
+                "$ref": "#/components/schemas/RuleDslV2MetricMeasure"
+              },
+              {
+                "$ref": "#/components/schemas/RuleDslV2SchemaMeasure"
+              },
+              {
+                "$ref": "#/components/schemas/RuleDslV2QueryMeasure"
+              }
+            ],
+            "title": "Measure"
+          },
+          "operations": {
+            "$ref": "#/components/schemas/RuleDslV2Operations"
+          },
+          "reusable_filter_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reusable Filter Ids",
+            "type": "array"
+          },
+          "reusable_join_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reusable Join Id"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/RuleDslV2Scope"
+          }
+        },
+        "required": [
+          "kind",
+          "scope",
+          "measure",
+          "expectation",
+          "evidence",
+          "operations"
+        ],
+        "title": "RuleDslV2Rule",
+        "type": "object"
+      },
+      "RuleDslV2SchemaContractExpectation": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_types": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Types"
+          },
+          "forbidden_columns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forbidden Columns"
+          },
+          "max_column_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Column Count"
+          },
+          "min_column_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Column Count"
+          },
+          "ordered_columns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ordered Columns"
+          },
+          "required_columns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Columns"
+          },
+          "type": {
+            "const": "schema_contract",
+            "default": "schema_contract",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "RuleDslV2SchemaContractExpectation",
+        "type": "object"
+      },
+      "RuleDslV2SchemaMeasure": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_assertion": {
+            "enum": [
+              "required_columns_present",
+              "forbidden_columns_absent",
+              "column_types_match",
+              "column_count_between",
+              "column_order_matches"
+            ],
+            "title": "Schema Assertion",
+            "type": "string"
+          },
+          "type": {
+            "const": "schema",
+            "default": "schema",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_assertion"
+        ],
+        "title": "RuleDslV2SchemaMeasure",
+        "type": "object"
+      },
+      "RuleDslV2Scope": {
+        "additionalProperties": false,
+        "properties": {
+          "comparison": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2ComparisonScope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2DatasetScope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grouping": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2GroupingScope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "join": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2JoinScope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "row_filter": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2RowPredicate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "time_window": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RuleDslV2TimeWindow"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "RuleDslV2Scope",
+        "type": "object"
+      },
+      "RuleDslV2SetMembershipExpectation": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_values": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Values"
+          },
+          "blocked_values": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked Values"
+          },
+          "type": {
+            "const": "set_membership",
+            "default": "set_membership",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "RuleDslV2SetMembershipExpectation",
+        "type": "object"
+      },
+      "RuleDslV2Subject": {
+        "additionalProperties": false,
+        "properties": {
+          "column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Column"
+          },
+          "columns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Columns"
+          }
+        },
+        "title": "RuleDslV2Subject",
+        "type": "object"
+      },
+      "RuleDslV2ThresholdExpectation": {
+        "additionalProperties": false,
+        "properties": {
+          "max_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Value"
+          },
+          "min_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Value"
+          },
+          "operator": {
+            "enum": [
+              "gt",
+              "gte",
+              "lt",
+              "lte",
+              "between"
+            ],
+            "title": "Operator",
+            "type": "string"
+          },
+          "type": {
+            "const": "threshold",
+            "default": "threshold",
+            "title": "Type",
+            "type": "string"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "count",
+                  "percent",
+                  "duration",
+                  "raw"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "operator"
+        ],
+        "title": "RuleDslV2ThresholdExpectation",
+        "type": "object"
+      },
+      "RuleDslV2TimeWindow": {
+        "additionalProperties": false,
+        "properties": {
+          "anchor_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor Column"
+          },
+          "leading_duration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leading Duration"
+          },
+          "trailing_duration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trailing Duration"
+          }
+        },
+        "title": "RuleDslV2TimeWindow",
+        "type": "object"
+      },
+      "SuggestionRuleActionRequestView": {
+        "properties": {
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "title": "SuggestionRuleActionRequestView",
+        "type": "object"
+      },
+      "TagSuggestionView": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "source_count": {
+            "title": "Source Count",
+            "type": "integer"
+          },
+          "usage_count": {
+            "title": "Usage Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "usage_count",
+          "source_count"
+        ],
+        "title": "TagSuggestionView",
+        "type": "object"
+      },
+      "TagSuggestionsResponseView": {
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagSuggestionView"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "title": "TagSuggestionsResponseView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/suggestions' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/data-catalog/v1/suggestions": {
+      "get": {
+        "operationId": "get_suggestions_api_data_catalog_v1_suggestions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "data_source_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Data Source Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "pending",
+              "title": "Status",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Suggestions Api Data Catalog V1 Suggestions Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Suggestions",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/data-sources": {
+      "get": {
+        "operationId": "get_data_sources_api_data_catalog_v1_suggestions_data_sources_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Data Sources Api Data Catalog V1 Suggestions Data Sources Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Data Sources",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/dq7-dsl-assistant": {
+      "get": {
+        "operationId": "get_dq7_dsl_assistant_preview_api_data_catalog_v1_suggestions_dq7_dsl_assistant_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "check_type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RuleCheckType"
+            }
+          },
+          {
+            "in": "query",
+            "name": "current_workspace_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "Current Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dq7DslAssistantPreviewResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Dq7 Dsl Assistant Preview",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/metrics/clear": {
+      "post": {
+        "operationId": "clear_suggestions_metrics_api_data_catalog_v1_suggestions_metrics_clear_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Clear Suggestions Metrics Api Data Catalog V1 Suggestions Metrics Clear Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Clear Suggestions Metrics",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/natural-language-rule-previews": {
+      "post": {
+        "operationId": "create_natural_language_rule_preview_api_data_catalog_v1_suggestions_natural_language_rule_previews_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NaturalLanguageRulePreviewRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NaturalLanguageRulePreviewResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Natural Language Rule Preview",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/natural-language-rule-previews/create-suggestion": {
+      "post": {
+        "operationId": "create_natural_language_rule_draft_suggestion_api_data_catalog_v1_suggestions_natural_language_rule_previews_create_suggestion_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NaturalLanguageRulePreviewCreateSuggestionRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NaturalLanguageDraftSuggestionResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Natural Language Rule Draft Suggestion",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/natural-language-rule-previews/requests": {
+      "get": {
+        "operationId": "list_natural_language_rule_draft_requests_api_data_catalog_v1_suggestions_natural_language_rule_previews_requests_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspace_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspace Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NaturalLanguageDraftRequestHistoryResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Natural Language Rule Draft Requests",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/natural-language-rule-previews/requests/{request_id}/status": {
+      "get": {
+        "operationId": "get_natural_language_rule_draft_request_status_api_data_catalog_v1_suggestions_natural_language_rule_previews_requests__request_id__status_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NaturalLanguageDraftRequestStatusResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Natural Language Rule Draft Request Status",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/natural-language-rule-previews/telemetry": {
+      "post": {
+        "operationId": "record_natural_language_rule_preview_telemetry_api_data_catalog_v1_suggestions_natural_language_rule_previews_telemetry_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NaturalLanguageRulePreviewTelemetryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Natural Language Rule Preview Telemetry",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/tags": {
+      "get": {
+        "operationId": "get_tag_suggestions_api_data_catalog_v1_suggestions_tags_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Query"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagSuggestionsResponseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Tag Suggestions",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/{suggestion_id}/accept": {
+      "post": {
+        "operationId": "accept_suggestion_api_data_catalog_v1_suggestions__suggestion_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SuggestionRuleActionRequestView"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Accept Suggestion",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/{suggestion_id}/apply": {
+      "post": {
+        "operationId": "apply_suggestion_api_data_catalog_v1_suggestions__suggestion_id__apply_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SuggestionRuleActionRequestView"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Apply Suggestion",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/suggestions/{suggestion_id}/dismiss": {
+      "post": {
+        "operationId": "dismiss_suggestion_api_data_catalog_v1_suggestions__suggestion_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SuggestionRuleActionRequestView"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss Suggestion",
+        "tags": [
+          "suggestions"
+        ]
+      }
+    }
+  }
+}

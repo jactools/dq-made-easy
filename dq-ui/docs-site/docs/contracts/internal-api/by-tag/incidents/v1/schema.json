@@ -1,0 +1,693 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "CreateIncidentCommentRequest": {
+      "properties": {
+        "comment": {
+          "title": "Comment",
+          "type": "string"
+        },
+        "comment_type": {
+          "default": "general",
+          "title": "Comment Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "comment"
+      ],
+      "title": "CreateIncidentCommentRequest",
+      "type": "object"
+    },
+    "CreateIncidentRequest": {
+      "properties": {
+        "assigned_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assigned To"
+        },
+        "create_itsm_ticket": {
+          "default": false,
+          "title": "Create Itsm Ticket",
+          "type": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Code"
+        },
+        "failure_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Message"
+        },
+        "incident_kind": {
+          "description": "Either 'technical_run_error' or 'functional_violation'.",
+          "title": "Incident Kind",
+          "type": "string"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Id"
+        },
+        "run_plan_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Plan Id"
+        },
+        "scope_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope Id"
+        },
+        "scope_kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scope Kind"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Severity"
+        },
+        "source_correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Correlation Id"
+        },
+        "source_parent_correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Parent Correlation Id"
+        },
+        "source_queue_message_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Queue Message Id"
+        },
+        "source_request_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Request Id"
+        },
+        "source_system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source System"
+        },
+        "source_trace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Trace Id"
+        },
+        "title": {
+          "description": "Short human-readable summary.",
+          "title": "Title",
+          "type": "string"
+        },
+        "violated_rule_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Violated Rule Ids"
+        },
+        "violation_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Violation Count"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "incident_kind",
+        "title"
+      ],
+      "title": "CreateIncidentRequest",
+      "type": "object"
+    },
+    "CreateIncidentRootCauseSuggestionRequest": {
+      "properties": {
+        "incident_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Incident Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "incident_ids"
+      ],
+      "title": "CreateIncidentRootCauseSuggestionRequest",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "IncidentCommentLockRequest": {
+      "properties": {
+        "locked": {
+          "title": "Locked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "locked"
+      ],
+      "title": "IncidentCommentLockRequest",
+      "type": "object"
+    },
+    "PatchIncidentRequest": {
+      "properties": {
+        "assigned_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assigned To"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comment"
+        },
+        "itsm_ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Itsm Ticket Id"
+        },
+        "itsm_ticket_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Itsm Ticket Number"
+        },
+        "resolved_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resolved At"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status"
+        }
+      },
+      "title": "PatchIncidentRequest",
+      "type": "object"
+    },
+    "UpdateIncidentCommentRequest": {
+      "properties": {
+        "comment": {
+          "title": "Comment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "comment"
+      ],
+      "title": "UpdateIncidentCommentRequest",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "accept_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_accept_post_param_path_suggestion_id": {
+      "title": "Suggestion Id",
+      "type": "string"
+    },
+    "accept_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_accept_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Accept Root Cause Suggestion Api Rulebuilder V1 Incidents Root Cause Suggestions  Suggestion Id  Accept Post",
+      "type": "object"
+    },
+    "acknowledge_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_acknowledge_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "acknowledge_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_acknowledge_post_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "acknowledge_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_acknowledge_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Acknowledge Incident Comment Api Rulebuilder V1 Incidents  Incident Id  Comments  Comment Id  Acknowledge Post",
+      "type": "object"
+    },
+    "create_incident_api_rulebuilder_v1_incidents_post_response_201_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Incident Api Rulebuilder V1 Incidents Post",
+      "type": "object"
+    },
+    "create_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_post_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "create_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Incident Comment Api Rulebuilder V1 Incidents  Incident Id  Comments Post",
+      "type": "object"
+    },
+    "create_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_post_response_201_application_json": {
+      "additionalProperties": true,
+      "title": "Response Create Root Cause Suggestion Api Rulebuilder V1 Incidents Root Cause Suggestions Post",
+      "type": "object"
+    },
+    "delete_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_delete_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "delete_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_delete_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "delete_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_delete_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Delete Incident Comment Api Rulebuilder V1 Incidents  Incident Id  Comments  Comment Id  Delete",
+      "type": "object"
+    },
+    "get_incident_api_rulebuilder_v1_incidents_incident_id_get_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "get_incident_api_rulebuilder_v1_incidents_incident_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Incident Api Rulebuilder V1 Incidents  Incident Id  Get",
+      "type": "object"
+    },
+    "get_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_get_param_path_suggestion_id": {
+      "title": "Suggestion Id",
+      "type": "string"
+    },
+    "get_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Root Cause Suggestion Api Rulebuilder V1 Incidents Root Cause Suggestions  Suggestion Id  Get",
+      "type": "object"
+    },
+    "list_incidents_api_rulebuilder_v1_incidents_get_param_query_incident_kind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Incident Kind"
+    },
+    "list_incidents_api_rulebuilder_v1_incidents_get_param_query_limit": {
+      "default": 50,
+      "maximum": 200,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_incidents_api_rulebuilder_v1_incidents_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "list_incidents_api_rulebuilder_v1_incidents_get_param_query_run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Run Id"
+    },
+    "list_incidents_api_rulebuilder_v1_incidents_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_incidents_api_rulebuilder_v1_incidents_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_incidents_api_rulebuilder_v1_incidents_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Incidents Api Rulebuilder V1 Incidents Get",
+      "type": "object"
+    },
+    "list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_incident_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Incident Id"
+    },
+    "list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_limit": {
+      "default": 50,
+      "maximum": 200,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_root_cause_suggestions_api_rulebuilder_v1_incidents_root_cause_suggestions_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response List Root Cause Suggestions Api Rulebuilder V1 Incidents Root Cause Suggestions Get",
+      "type": "object"
+    },
+    "patch_incident_api_rulebuilder_v1_incidents_incident_id_patch_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "patch_incident_api_rulebuilder_v1_incidents_incident_id_patch_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Patch Incident Api Rulebuilder V1 Incidents  Incident Id  Patch",
+      "type": "object"
+    },
+    "reject_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_reject_post_param_path_suggestion_id": {
+      "title": "Suggestion Id",
+      "type": "string"
+    },
+    "reject_root_cause_suggestion_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_reject_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Reject Root Cause Suggestion Api Rulebuilder V1 Incidents Root Cause Suggestions  Suggestion Id  Reject Post",
+      "type": "object"
+    },
+    "reopen_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_reopen_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "reopen_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_reopen_post_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "reopen_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_reopen_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Reopen Incident Comment Api Rulebuilder V1 Incidents  Incident Id  Comments  Comment Id  Reopen Post",
+      "type": "object"
+    },
+    "request_root_cause_assistance_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_assistance_request_post_param_path_suggestion_id": {
+      "title": "Suggestion Id",
+      "type": "string"
+    },
+    "request_root_cause_assistance_api_rulebuilder_v1_incidents_root_cause_suggestions_suggestion_id_assistance_request_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Request Root Cause Assistance Api Rulebuilder V1 Incidents Root Cause Suggestions  Suggestion Id  Assistance Request Post",
+      "type": "object"
+    },
+    "resolve_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_resolve_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "resolve_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_resolve_post_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "resolve_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_resolve_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Resolve Incident Comment Api Rulebuilder V1 Incidents  Incident Id  Comments  Comment Id  Resolve Post",
+      "type": "object"
+    },
+    "set_incident_comments_lock_api_rulebuilder_v1_incidents_incident_id_comments_lock_patch_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "set_incident_comments_lock_api_rulebuilder_v1_incidents_incident_id_comments_lock_patch_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Set Incident Comments Lock Api Rulebuilder V1 Incidents  Incident Id  Comments Lock Patch",
+      "type": "object"
+    },
+    "update_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_patch_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "update_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_patch_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "update_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_patch_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Update Incident Comment Api Rulebuilder V1 Incidents  Incident Id  Comments  Comment Id  Patch",
+      "type": "object"
+    },
+    "vote_up_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_vote_up_post_param_path_comment_id": {
+      "title": "Comment Id",
+      "type": "string"
+    },
+    "vote_up_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_vote_up_post_param_path_incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "vote_up_incident_comment_api_rulebuilder_v1_incidents_incident_id_comments_comment_id_vote_up_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Vote Up Incident Comment Api Rulebuilder V1 Incidents  Incident Id  Comments  Comment Id  Vote Up Post",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/incidents/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/incidents v1 schema bundle"
+}

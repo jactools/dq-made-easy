@@ -1,0 +1,64 @@
+{
+  "group": "by-tag/run-plan",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_run_plans_api_rulebuilder_v1_run_plan_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "suiteId",
+          "required": false,
+          "schema_ref": "#/$defs/list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_suiteId"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_status"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/run-plan",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ValidationPlanCatalogView"
+            }
+          },
+          "description": "DQ run plan and execution plan catalog."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Run Plans",
+      "tags": [
+        "run-plan"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

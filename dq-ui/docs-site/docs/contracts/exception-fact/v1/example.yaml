@@ -1,0 +1,37 @@
+exception_fact_id: ef_sales_orders_20260506_0001
+exception_fact_contract_version: v1
+engine_type: gx
+execution_scope:
+  delivery_id: del_sales_orders_2026_05_06
+  execution_plan_id: ep_sales_orders_quality
+  execution_plan_version_id: epv_12
+  execution_run_id: run_sales_orders_20260506_102541
+  data_object_version_id: dov_sales_orders_v2026_05_06
+  dataset_id: ds_sales
+  data_product_id: odcs.dp.sales-001
+artifact_scope:
+  validation_artifact_id: va_sales_orders_completeness
+  validation_artifact_version: 7
+  native_artifact_id: gx_suite_sales_orders_completeness
+  native_artifact_version: "7"
+rule_scope:
+  rule_id: rule_sales_order_customer_required
+  rule_version_id: rv_42
+record_reference:
+  identifier_type: business_key
+  identifier_value: sales_order_number=SO-1048821
+  identifier_fields:
+    - sales_order_number
+  identifier_hash: sha256:3d8e9f6d2c8b0d9dd1f6b731f0b7f9a5c7a34b0cb3f2ed32de7e23eb4ab4d5df
+failure:
+  reason_code: completeness_not_null_violation
+  reason_text: customer_id must not be null
+  failure_class: data_quality_assertion_failed
+  detected_at: 2026-05-06T10:25:41Z
+correlation_id: corr_5c3763ab9f8b4a25b0146d4df0c9d7a3
+engine_metadata:
+  checkpoint_name: dq_sales_orders_checkpoint
+  expectation_type: expect_column_values_to_not_be_null
+ops_metadata:
+  workspace_id: ws_default
+  source_materialization_id: sm_sales_orders_20260506

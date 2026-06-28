@@ -1,0 +1,1042 @@
+{
+  "components": {
+    "schemas": {
+      "CanonicalOntologyView": {
+        "properties": {
+          "entity_types": {
+            "items": {
+              "$ref": "#/components/schemas/OntologyEntityTypeView"
+            },
+            "title": "Entity Types",
+            "type": "array"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/OntologyGraphView"
+          },
+          "ontology_id": {
+            "title": "Ontology Id",
+            "type": "string"
+          },
+          "ontology_name": {
+            "title": "Ontology Name",
+            "type": "string"
+          },
+          "relation_types": {
+            "items": {
+              "$ref": "#/components/schemas/OntologyRelationTypeView"
+            },
+            "title": "Relation Types",
+            "type": "array"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/OntologyScopeView"
+          },
+          "standard_alignments": {
+            "items": {
+              "$ref": "#/components/schemas/OntologyStandardAlignmentView"
+            },
+            "title": "Standard Alignments",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ontology_id",
+          "ontology_name",
+          "version",
+          "scope"
+        ],
+        "title": "CanonicalOntologyView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "OntologyEntityTypeView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "entity_type": {
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "standard_mappings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Standard Mappings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "entity_type",
+          "label",
+          "description"
+        ],
+        "title": "OntologyEntityTypeView",
+        "type": "object"
+      },
+      "OntologyGraphEdgeView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "edge_type": {
+            "title": "Edge Type",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "source_node_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Node Types",
+            "type": "array"
+          },
+          "standard_mappings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Standard Mappings",
+            "type": "array"
+          },
+          "target_node_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Node Types",
+            "type": "array"
+          }
+        },
+        "required": [
+          "edge_type",
+          "label",
+          "description"
+        ],
+        "title": "OntologyGraphEdgeView",
+        "type": "object"
+      },
+      "OntologyGraphNodeView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "node_id": {
+            "title": "Node Id",
+            "type": "string"
+          },
+          "node_type": {
+            "title": "Node Type",
+            "type": "string"
+          },
+          "standard_mappings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Standard Mappings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "node_id",
+          "node_type",
+          "label",
+          "description"
+        ],
+        "title": "OntologyGraphNodeView",
+        "type": "object"
+      },
+      "OntologyGraphProjectionEdgeView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "edge_id": {
+            "title": "Edge Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "relation_type": {
+            "title": "Relation Type",
+            "type": "string"
+          },
+          "source_node_id": {
+            "title": "Source Node Id",
+            "type": "string"
+          },
+          "source_node_type": {
+            "title": "Source Node Type",
+            "type": "string"
+          },
+          "standard_mappings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Standard Mappings",
+            "type": "array"
+          },
+          "target_node_id": {
+            "title": "Target Node Id",
+            "type": "string"
+          },
+          "target_node_type": {
+            "title": "Target Node Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "edge_id",
+          "relation_type",
+          "source_node_id",
+          "target_node_id",
+          "source_node_type",
+          "target_node_type",
+          "label",
+          "description"
+        ],
+        "title": "OntologyGraphProjectionEdgeView",
+        "type": "object"
+      },
+      "OntologyGraphProjectionGraphView": {
+        "properties": {
+          "edge_count": {
+            "default": 0,
+            "title": "Edge Count",
+            "type": "integer"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/OntologyGraphProjectionEdgeView"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "graph_description": {
+            "title": "Graph Description",
+            "type": "string"
+          },
+          "graph_id": {
+            "title": "Graph Id",
+            "type": "string"
+          },
+          "graph_name": {
+            "title": "Graph Name",
+            "type": "string"
+          },
+          "node_count": {
+            "default": 0,
+            "title": "Node Count",
+            "type": "integer"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/OntologyGraphProjectionNodeView"
+            },
+            "title": "Nodes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "graph_id",
+          "graph_name",
+          "graph_description"
+        ],
+        "title": "OntologyGraphProjectionGraphView",
+        "type": "object"
+      },
+      "OntologyGraphProjectionNodeView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "node_id": {
+            "title": "Node Id",
+            "type": "string"
+          },
+          "node_type": {
+            "title": "Node Type",
+            "type": "string"
+          },
+          "standard_mappings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Standard Mappings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "node_id",
+          "node_type",
+          "label",
+          "description"
+        ],
+        "title": "OntologyGraphProjectionNodeView",
+        "type": "object"
+      },
+      "OntologyGraphProjectionRequestView": {
+        "properties": {
+          "captured_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captured By"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "title": "OntologyGraphProjectionRequestView",
+        "type": "object"
+      },
+      "OntologyGraphProjectionView": {
+        "properties": {
+          "graph": {
+            "$ref": "#/components/schemas/OntologyGraphProjectionGraphView"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/OntologyGraphSnapshotView"
+          },
+          "source_summary": {
+            "additionalProperties": true,
+            "title": "Source Summary",
+            "type": "object"
+          }
+        },
+        "required": [
+          "snapshot",
+          "graph"
+        ],
+        "title": "OntologyGraphProjectionView",
+        "type": "object"
+      },
+      "OntologyGraphQueryRequestView": {
+        "properties": {
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "label_contains": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label Contains"
+          },
+          "limit": {
+            "default": 100,
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Node Ids",
+            "type": "array"
+          },
+          "node_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Node Types",
+            "type": "array"
+          },
+          "offset": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "relation_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Relation Types",
+            "type": "array"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "title": "OntologyGraphQueryRequestView",
+        "type": "object"
+      },
+      "OntologyGraphQueryResultView": {
+        "properties": {
+          "graph": {
+            "$ref": "#/components/schemas/OntologyGraphProjectionGraphView"
+          },
+          "matched_edge_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Matched Edge Ids",
+            "type": "array"
+          },
+          "matched_node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Matched Node Ids",
+            "type": "array"
+          },
+          "query_summary": {
+            "additionalProperties": true,
+            "title": "Query Summary",
+            "type": "object"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/OntologyGraphSnapshotView"
+          }
+        },
+        "required": [
+          "snapshot",
+          "graph"
+        ],
+        "title": "OntologyGraphQueryResultView",
+        "type": "object"
+      },
+      "OntologyGraphSnapshotView": {
+        "properties": {
+          "captured_at": {
+            "title": "Captured At",
+            "type": "string"
+          },
+          "captured_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captured By"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "edge_count": {
+            "default": 0,
+            "title": "Edge Count",
+            "type": "integer"
+          },
+          "graph_id": {
+            "title": "Graph Id",
+            "type": "string"
+          },
+          "graph_name": {
+            "title": "Graph Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "node_count": {
+            "default": 0,
+            "title": "Node Count",
+            "type": "integer"
+          },
+          "source_summary": {
+            "additionalProperties": true,
+            "title": "Source Summary",
+            "type": "object"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "required": [
+          "id",
+          "graph_id",
+          "graph_name",
+          "captured_at"
+        ],
+        "title": "OntologyGraphSnapshotView",
+        "type": "object"
+      },
+      "OntologyGraphTraversalRequestView": {
+        "properties": {
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "direction": {
+            "default": "outbound",
+            "enum": [
+              "outbound",
+              "inbound",
+              "both"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "limit": {
+            "default": 200,
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "max_depth": {
+            "default": 2,
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Max Depth",
+            "type": "integer"
+          },
+          "relation_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Relation Types",
+            "type": "array"
+          },
+          "start_node_id": {
+            "title": "Start Node Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "required": [
+          "start_node_id"
+        ],
+        "title": "OntologyGraphTraversalRequestView",
+        "type": "object"
+      },
+      "OntologyGraphTraversalResultView": {
+        "properties": {
+          "graph": {
+            "$ref": "#/components/schemas/OntologyGraphProjectionGraphView"
+          },
+          "node_depths": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Node Depths",
+            "type": "object"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/OntologyGraphSnapshotView"
+          },
+          "start_node_id": {
+            "title": "Start Node Id",
+            "type": "string"
+          },
+          "traversal_summary": {
+            "additionalProperties": true,
+            "title": "Traversal Summary",
+            "type": "object"
+          },
+          "visited_edge_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Visited Edge Ids",
+            "type": "array"
+          },
+          "visited_node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Visited Node Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "snapshot",
+          "graph",
+          "start_node_id"
+        ],
+        "title": "OntologyGraphTraversalResultView",
+        "type": "object"
+      },
+      "OntologyGraphView": {
+        "properties": {
+          "edge_count": {
+            "default": 0,
+            "title": "Edge Count",
+            "type": "integer"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/OntologyGraphEdgeView"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "graph_description": {
+            "title": "Graph Description",
+            "type": "string"
+          },
+          "graph_id": {
+            "title": "Graph Id",
+            "type": "string"
+          },
+          "graph_name": {
+            "title": "Graph Name",
+            "type": "string"
+          },
+          "node_count": {
+            "default": 0,
+            "title": "Node Count",
+            "type": "integer"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/OntologyGraphNodeView"
+            },
+            "title": "Nodes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "graph_id",
+          "graph_name",
+          "graph_description"
+        ],
+        "title": "OntologyGraphView",
+        "type": "object"
+      },
+      "OntologyRelationTypeView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "relation_type": {
+            "title": "Relation Type",
+            "type": "string"
+          },
+          "source_entity_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Entity Types",
+            "type": "array"
+          },
+          "standard_mappings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Standard Mappings",
+            "type": "array"
+          },
+          "target_entity_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Entity Types",
+            "type": "array"
+          }
+        },
+        "required": [
+          "relation_type",
+          "label",
+          "description"
+        ],
+        "title": "OntologyRelationTypeView",
+        "type": "object"
+      },
+      "OntologyScopeView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "in_scope_entities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "In Scope Entities",
+            "type": "array"
+          },
+          "out_of_scope_entities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Out Of Scope Entities",
+            "type": "array"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "OntologyScopeView",
+        "type": "object"
+      },
+      "OntologyStandardAlignmentView": {
+        "properties": {
+          "alignment_scope": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Alignment Scope",
+            "type": "array"
+          },
+          "standard_name": {
+            "title": "Standard Name",
+            "type": "string"
+          },
+          "standard_uri": {
+            "title": "Standard Uri",
+            "type": "string"
+          },
+          "usage": {
+            "title": "Usage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "standard_name",
+          "standard_uri",
+          "usage"
+        ],
+        "title": "OntologyStandardAlignmentView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/ontology' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/data-catalog/v1/ontology/canonical": {
+      "get": {
+        "operationId": "get_canonical_ontology_api_data_catalog_v1_ontology_canonical_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanonicalOntologyView"
+                }
+              }
+            },
+            "description": "Canonical ontology scope and vocabulary for the metadata graph foundation."
+          }
+        },
+        "summary": "Get Canonical Ontology",
+        "tags": [
+          "ontology"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/ontology/canonical/json-ld": {
+      "get": {
+        "operationId": "get_canonical_ontology_jsonld_api_data_catalog_v1_ontology_canonical_json_ld_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Canonical Ontology Jsonld Api Data Catalog V1 Ontology Canonical Json Ld Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Canonical ontology exported as JSON-LD for open standards interoperability."
+          }
+        },
+        "summary": "Get Canonical Ontology Jsonld",
+        "tags": [
+          "ontology"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/ontology/graph/project": {
+      "post": {
+        "operationId": "project_ontology_graph_api_data_catalog_v1_ontology_graph_project_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OntologyGraphProjectionRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphProjectionView"
+                }
+              }
+            },
+            "description": "Project and persist the current ontology graph from metadata, governance, and execution seams."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Project Ontology Graph",
+        "tags": [
+          "ontology"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/ontology/graph/query": {
+      "post": {
+        "operationId": "query_graph_api_data_catalog_v1_ontology_graph_query_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OntologyGraphQueryRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphQueryResultView"
+                }
+              }
+            },
+            "description": "Query the latest persisted ontology graph snapshot with backend-owned filters."
+          },
+          "404": {
+            "description": "No ontology graph snapshot exists for the requested scope."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Query Graph",
+        "tags": [
+          "ontology"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/ontology/graph/traverse": {
+      "post": {
+        "operationId": "traverse_graph_api_data_catalog_v1_ontology_graph_traverse_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OntologyGraphTraversalRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OntologyGraphTraversalResultView"
+                }
+              }
+            },
+            "description": "Traverse the latest persisted ontology graph snapshot from a seed node."
+          },
+          "404": {
+            "description": "No ontology graph snapshot or seed node exists for the requested scope."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Traverse Graph",
+        "tags": [
+          "ontology"
+        ]
+      }
+    }
+  }
+}

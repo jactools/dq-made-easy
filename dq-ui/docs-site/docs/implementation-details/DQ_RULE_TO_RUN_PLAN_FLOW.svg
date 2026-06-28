@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600" role="img" aria-labelledby="title desc">
+  <title id="title">DQ Rule to Run Plan Flow</title>
+  <desc id="desc">Flow from rule creation in the UI through PostgreSQL persistence, run-plan activation, and dq-engine execution.</desc>
+  <defs>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#eef2ff" />
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+    <style>
+      .frame { fill: url(#pageBg); }
+      .panel { fill: rgba(255,255,255,0.82); stroke: #dbe4ee; stroke-width: 1.5; }
+      .title { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 34px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; fill: #475569; }
+      .section-label { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; fill: #64748b; }
+      .cat { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; fill: #0f172a; }
+      .main { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 22px; font-weight: 650; fill: #0f172a; }
+      .main-small { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 20px; font-weight: 650; fill: #0f172a; }
+      .note { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; fill: #334155; }
+      .arrow { stroke: #334155; stroke-width: 2.3; fill: none; marker-end: url(#arrow); }
+      .ui { fill: #dbeafe; stroke: #2563eb; }
+      .ui-stripe { fill: #1d4ed8; }
+      .api { fill: #ede9fe; stroke: #7c3aed; }
+      .api-stripe { fill: #6d28d9; }
+      .pg { fill: #ccfbf1; stroke: #0f766e; }
+      .pg-stripe { fill: #0f766e; }
+      .rt { fill: #fef3c7; stroke: #b45309; }
+      .rt-stripe { fill: #d97706; }
+    </style>
+  </defs>
+
+  <rect class="frame" x="0" y="0" width="1600" height="1600" />
+  <rect class="panel" x="36" y="36" width="1528" height="1528" rx="28" />
+
+  <text class="title" x="800" y="90" text-anchor="middle">DQ Rule to Run Plan Flow</text>
+  <text class="subtitle" x="800" y="124" text-anchor="middle">Rule creation in dq-made-easy, PostgreSQL persistence, run-plan activation, and dq-engine execution</text>
+
+  <text class="section-label" x="120" y="176">UI</text>
+  <text class="section-label" x="120" y="272">API</text>
+  <text class="section-label" x="120" y="368">API</text>
+  <text class="section-label" x="120" y="464">PostgreSQL</text>
+  <text class="section-label" x="120" y="560">API</text>
+  <text class="section-label" x="120" y="656">API</text>
+  <text class="section-label" x="120" y="752">UI</text>
+  <text class="section-label" x="120" y="848">API</text>
+  <text class="section-label" x="120" y="944">API</text>
+  <text class="section-label" x="120" y="1040">Runtime</text>
+  <text class="section-label" x="120" y="1136">Runtime</text>
+  <text class="section-label" x="120" y="1232">Runtime</text>
+  <text class="section-label" x="120" y="1328">Runtime</text>
+  <text class="section-label" x="120" y="1424">PostgreSQL</text>
+  <text class="section-label" x="120" y="1520">PostgreSQL</text>
+
+  <g>
+    <rect class="ui" x="180" y="150" width="1240" height="74" rx="18" />
+    <rect class="ui-stripe" x="180" y="150" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="175">UI</text>
+    <text class="main" x="800" y="195" text-anchor="middle">Rules screen / New Rule Wizard</text>
+  </g>
+
+  <g>
+    <rect class="api" x="180" y="246" width="1240" height="74" rx="18" />
+    <rect class="api-stripe" x="180" y="246" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="271">API</text>
+    <text class="main" x="800" y="291" text-anchor="middle">POST /api/v1/rules</text>
+  </g>
+
+  <g>
+    <rect class="api" x="180" y="342" width="1240" height="74" rx="18" />
+    <rect class="api-stripe" x="180" y="342" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="367">API</text>
+    <text class="main" x="800" y="387" text-anchor="middle">create_rule use case</text>
+  </g>
+
+  <g>
+    <rect class="pg" x="180" y="438" width="1240" height="74" rx="18" />
+    <rect class="pg-stripe" x="180" y="438" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="463">PostgreSQL</text>
+    <text class="main-small" x="800" y="482" text-anchor="middle">rules / rule_versions /</text>
+    <text class="main-small" x="800" y="506" text-anchor="middle">rule_current_version</text>
+  </g>
+
+  <g>
+    <rect class="api" x="180" y="534" width="1240" height="74" rx="18" />
+    <rect class="api-stripe" x="180" y="534" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="559">API</text>
+    <text class="main" x="800" y="579" text-anchor="middle">validate rule use case / compiler / GX lowering</text>
+  </g>
+
+  <g>
+    <rect class="api" x="180" y="630" width="1240" height="74" rx="18" />
+    <rect class="api-stripe" x="180" y="630" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="655">API</text>
+    <text class="main" x="800" y="675" text-anchor="middle">GX run plan seed resolver / grouped execution planner</text>
+  </g>
+
+  <g>
+    <rect class="ui" x="180" y="726" width="1240" height="74" rx="18" />
+    <rect class="ui-stripe" x="180" y="726" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="751">UI</text>
+    <text class="main-small" x="800" y="770" text-anchor="middle">GX Run Plans Admin</text>
+    <text class="main-small" x="800" y="794" text-anchor="middle">creates draft plan from validated GX artifact</text>
+  </g>
+
+  <g>
+    <rect class="api" x="180" y="822" width="1240" height="74" rx="18" />
+    <rect class="api-stripe" x="180" y="822" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="847">API</text>
+    <text class="main-small" x="800" y="866" text-anchor="middle">POST /api/v1/gx/run-plans ...</text>
+    <text class="main-small" x="800" y="890" text-anchor="middle">versions / validate / activate selected version</text>
+  </g>
+
+  <g>
+    <rect class="api" x="180" y="918" width="1240" height="74" rx="18" />
+    <rect class="api-stripe" x="180" y="918" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="943">API</text>
+    <text class="main" x="800" y="963" text-anchor="middle">Activation dispatcher</text>
+  </g>
+
+  <g>
+    <rect class="rt" x="180" y="1014" width="1240" height="74" rx="18" />
+    <rect class="rt-stripe" x="180" y="1014" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="1039">Runtime</text>
+    <text class="main" x="800" y="1059" text-anchor="middle">Redis dispatch queue</text>
+  </g>
+
+  <g>
+    <rect class="rt" x="180" y="1110" width="1240" height="74" rx="18" />
+    <rect class="rt-stripe" x="180" y="1110" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="1135">Runtime</text>
+    <text class="main" x="800" y="1155" text-anchor="middle">dq-engine / gx worker</text>
+  </g>
+
+  <g>
+    <rect class="rt" x="180" y="1206" width="1240" height="74" rx="18" />
+    <rect class="rt-stripe" x="180" y="1206" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="1231">Runtime</text>
+    <text class="main" x="800" y="1251" text-anchor="middle">PySpark executor</text>
+  </g>
+
+  <g>
+    <rect class="rt" x="180" y="1302" width="1240" height="74" rx="18" />
+    <rect class="rt-stripe" x="180" y="1302" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="1327">Runtime</text>
+    <text class="main-small" x="800" y="1346" text-anchor="middle">Resolved dataObjectVersionId</text>
+    <text class="main-small" x="800" y="1370" text-anchor="middle">targets</text>
+  </g>
+
+  <g>
+    <rect class="pg" x="180" y="1398" width="1240" height="74" rx="18" />
+    <rect class="pg-stripe" x="180" y="1398" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="1423">PostgreSQL</text>
+    <text class="main-small" x="800" y="1442" text-anchor="middle">gx_execution_runs /</text>
+    <text class="main-small" x="800" y="1466" text-anchor="middle">gx_execution_run_status_history</text>
+  </g>
+
+  <g>
+    <rect class="pg" x="180" y="1494" width="1240" height="74" rx="18" />
+    <rect class="pg-stripe" x="180" y="1494" width="12" height="74" rx="6" />
+    <text class="cat" x="210" y="1519">PostgreSQL</text>
+    <text class="main-small" x="800" y="1538" text-anchor="middle">gx_execution_violations /</text>
+    <text class="main-small" x="800" y="1562" text-anchor="middle">separate exception store</text>
+  </g>
+
+  <line class="arrow" x1="800" y1="224" x2="800" y2="246" />
+  <line class="arrow" x1="800" y1="320" x2="800" y2="342" />
+  <line class="arrow" x1="800" y1="416" x2="800" y2="438" />
+  <line class="arrow" x1="800" y1="512" x2="800" y2="534" />
+  <line class="arrow" x1="800" y1="608" x2="800" y2="630" />
+  <line class="arrow" x1="800" y1="704" x2="800" y2="726" />
+  <line class="arrow" x1="800" y1="800" x2="800" y2="822" />
+  <line class="arrow" x1="800" y1="896" x2="800" y2="918" />
+  <line class="arrow" x1="800" y1="992" x2="800" y2="1014" />
+  <line class="arrow" x1="800" y1="1088" x2="800" y2="1110" />
+  <line class="arrow" x1="800" y1="1184" x2="800" y2="1206" />
+  <line class="arrow" x1="800" y1="1280" x2="800" y2="1302" />
+  <line class="arrow" x1="800" y1="1376" x2="800" y2="1398" />
+  <line class="arrow" x1="800" y1="1472" x2="800" y2="1494" />
+
+  <text class="note" x="800" y="1578" text-anchor="middle">Rule creation does not trigger execution by itself; run-plan activation is the explicit handoff into scheduling and runtime dispatch.</text>
+</svg>

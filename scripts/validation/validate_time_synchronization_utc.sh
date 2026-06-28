@@ -23,22 +23,30 @@
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo '.')"
-source "$ROOT_DIR/scripts/supporting/logging.sh"
+source "$REPO_ROOT/scripts/supporting/logging.sh"
 
 my_name="validate_time_synchronization_utc.sh"
 
-CRITICAL_SERVICES=("api" "dq-engine" "db")
+CRITICAL_SERVICES=("api" "dq-made-easy-engine" "db")
 FAILED=0
 
 # Check docker-compose.yml for TZ=UTC in each critical service
 info "$my_name" "Checking docker-compose.yml for UTC timezone configuration..."
 
 for service in "${CRITICAL_SERVICES[@]}"; do
-  if ! grep -A 20 "^  $service:" "$REPO_ROOT/docker-compose.yml" | grep -q "TZ: UTC"; then
+  if awk -v service="$service" '
+    $0 ~ ("^  " service ":$") { in_service = 1; next }
+    in_service && $0 ~ /^  [A-Za-z0-9_.-]+:/ { exit 1 }
+    in_service && ($0 ~ /(^|[[:space:]])TZ:[[:space:]]*UTC([[:space:]]|$)/ || $0 ~ /(^|[[:space:]])-TZ=[[:space:]]*UTC([[:space:]]|$)/) {
+      found = 1
+      exit 0
+    }
+    END { exit found ? 0 : 1 }
+  ' "$REPO_ROOT/docker-compose.yml"; then
+    success "$my_name" "Service '$service' has TZ: UTC"
+  else
     error "$my_name" "Service '$service' does not have TZ: UTC in docker-compose.yml"
     FAILED=1
-  else
-    success "$my_name" "Service '$service' has TZ: UTC"
   fi
 done
 

@@ -1,0 +1,191 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "OkResponseView": {
+      "properties": {
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "title": "OkResponseView",
+      "type": "object"
+    },
+    "PaginationView": {
+      "properties": {
+        "has_next": {
+          "title": "Has Next",
+          "type": "boolean"
+        },
+        "has_previous": {
+          "title": "Has Previous",
+          "type": "boolean"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total Pages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "total_pages",
+        "has_next",
+        "has_previous"
+      ],
+      "title": "PaginationView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "WorkspaceView": {
+      "properties": {
+        "alert_routing_policy": {
+          "additionalProperties": true,
+          "title": "Alert Routing Policy",
+          "type": "object"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "WorkspaceView",
+      "type": "object"
+    },
+    "WorkspacesPageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationView"
+        }
+      },
+      "required": [
+        "data",
+        "pagination"
+      ],
+      "title": "WorkspacesPageView",
+      "type": "object"
+    },
+    "create_workspace_api_rulebuilder_v1_workspaces_post_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "delete_workspace_api_rulebuilder_v1_workspaces_workspace_id_delete_param_path_workspace_id": {
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "get_workspaces_api_rulebuilder_v1_workspaces_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_workspaces_api_rulebuilder_v1_workspaces_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "update_workspace_api_rulebuilder_v1_workspaces_workspace_id_put_param_path_workspace_id": {
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "update_workspace_api_rulebuilder_v1_workspaces_workspace_id_put_request_body_application_json": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/workspaces/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/workspaces v1 schema bundle"
+}

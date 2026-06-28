@@ -1,0 +1,204 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "DataEncryptionKeyCreateRequestView": {
+      "properties": {
+        "is_active": {
+          "default": true,
+          "title": "Is Active",
+          "type": "boolean"
+        },
+        "key_algorithm": {
+          "default": "fernet",
+          "title": "Key Algorithm",
+          "type": "string"
+        },
+        "key_material": {
+          "title": "Key Material",
+          "type": "string"
+        },
+        "key_name": {
+          "title": "Key Name",
+          "type": "string"
+        },
+        "key_scope": {
+          "default": "app",
+          "title": "Key Scope",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "key_name",
+        "key_material"
+      ],
+      "title": "DataEncryptionKeyCreateRequestView",
+      "type": "object"
+    },
+    "DataEncryptionKeyView": {
+      "properties": {
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_active": {
+          "default": true,
+          "title": "Is Active",
+          "type": "boolean"
+        },
+        "key_algorithm": {
+          "default": "fernet",
+          "title": "Key Algorithm",
+          "type": "string"
+        },
+        "key_fingerprint": {
+          "default": "",
+          "title": "Key Fingerprint",
+          "type": "string"
+        },
+        "key_name": {
+          "default": "",
+          "title": "Key Name",
+          "type": "string"
+        },
+        "key_scope": {
+          "default": "app",
+          "title": "Key Scope",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataEncryptionKeyView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "list_encryption_keys_api_system_v1_encryption_keys_get_param_query_scope": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Scope"
+    },
+    "list_encryption_keys_api_system_v1_encryption_keys_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    },
+    "list_encryption_keys_api_system_v1_encryption_keys_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/DataEncryptionKeyView"
+      },
+      "title": "Response List Encryption Keys Api System V1 Encryption Keys Get",
+      "type": "array"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/data-protection/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/data-protection v1 schema bundle"
+}

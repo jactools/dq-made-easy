@@ -1,0 +1,6 @@
+cwd=/Users/jacbeekers/gitrepos/dq-made-easy
+mode=command
+label=spark-expectations-real-aistor
+command_parts:
+bash
+scripts/validation/validate_spark_expectations_real_aistor.sh

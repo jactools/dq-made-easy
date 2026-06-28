@@ -1,0 +1,431 @@
+{
+  "components": {
+    "schemas": {
+      "ApiInfoView": {
+        "properties": {
+          "build_date": {
+            "title": "Build Date",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "build_date"
+        ],
+        "title": "ApiInfoView",
+        "type": "object"
+      },
+      "DatabaseInfoView": {
+        "properties": {
+          "schema_git_commit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Git Commit"
+          },
+          "schema_updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Updated"
+          },
+          "schema_version": {
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version"
+        ],
+        "title": "DatabaseInfoView",
+        "type": "object"
+      },
+      "DeploymentInfoView": {
+        "properties": {
+          "deployment_verification_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployment Verification Date"
+          },
+          "deployment_verified_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployment Verified By"
+          }
+        },
+        "title": "DeploymentInfoView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "SystemInfoView": {
+        "properties": {
+          "api": {
+            "$ref": "#/components/schemas/ApiInfoView"
+          },
+          "database": {
+            "$ref": "#/components/schemas/DatabaseInfoView"
+          },
+          "deployment": {
+            "$ref": "#/components/schemas/DeploymentInfoView"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/VersionCatalogView"
+          }
+        },
+        "required": [
+          "api",
+          "database",
+          "deployment",
+          "versions"
+        ],
+        "title": "SystemInfoView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VersionCatalogAppView": {
+        "properties": {
+          "api": {
+            "title": "Api",
+            "type": "string"
+          },
+          "ui": {
+            "title": "Ui",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ui",
+          "api"
+        ],
+        "title": "VersionCatalogAppView",
+        "type": "object"
+      },
+      "VersionCatalogView": {
+        "properties": {
+          "apps": {
+            "$ref": "#/components/schemas/VersionCatalogAppView"
+          },
+          "components": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Components",
+            "type": "object"
+          }
+        },
+        "required": [
+          "apps"
+        ],
+        "title": "VersionCatalogView",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/system' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/system/v1/api-metrics": {
+      "get": {
+        "description": "Return API request metrics aggregated from the in-process store.\n\nFiltering is applied based on the Application Settings:\n- ``logLevel``              \u2014 controls which error statuses appear in\n                              *recentErrors* (error\u21925xx, warn/info\u21924xx+5xx,\n                              debug\u2192all)\n- ``auditLogRetentionDays`` \u2014 only include requests recorded within this\n                              many days",
+        "operationId": "get_api_metrics_api_system_v1_api_metrics_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "apiEndpointFilter",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Apiendpointfilter"
+            }
+          },
+          {
+            "in": "query",
+            "name": "apiMethodFilter",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "title": "Apimethodfilter",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "apiMinRequests",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Apiminrequests",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recentErrorStatusFilter",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "title": "Recenterrorstatusfilter",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "recentErrorPathFilter",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Recenterrorpathfilter"
+            }
+          },
+          {
+            "in": "query",
+            "name": "excludeHealthEndpoints",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Excludehealthendpoints",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Api Metrics Api System V1 Api Metrics Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Api Metrics",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/system/v1/api-metrics/ping": {
+      "post": {
+        "description": "Seed a tracked API metric event so trend charts can initialize quickly.",
+        "operationId": "ping_api_metrics_api_system_v1_api_metrics_ping_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Ping Api Metrics Api System V1 Api Metrics Ping Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ping Api Metrics",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/system/v1/auth-login-metrics": {
+      "get": {
+        "operationId": "get_auth_login_metrics_api_system_v1_auth_login_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Auth Login Metrics Api System V1 Auth Login Metrics Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Auth Login Metrics",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/system/v1/suggestions/metrics": {
+      "get": {
+        "operationId": "get_suggestions_metrics_api_system_v1_suggestions_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Suggestions Metrics Api System V1 Suggestions Metrics Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Suggestions Metrics",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/system/v1/system-info": {
+      "get": {
+        "operationId": "get_system_info_api_system_v1_system_info_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfoView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get System Info",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/system/v1/version-catalog": {
+      "get": {
+        "operationId": "get_version_catalog_api_system_v1_version_catalog_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionCatalogView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Version Catalog",
+        "tags": [
+          "system"
+        ]
+      }
+    }
+  }
+}

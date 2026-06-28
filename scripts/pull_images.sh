@@ -41,16 +41,16 @@ Options:
   -h, --help               Show this help message
 
 Core images:
-  dq-base dq-api dq-engine dq-profiling dq-frontend dq-kong dq-db dq-keycloak
+  dq-made-easy-base dq-made-easy-api dq-made-easy-engine dq-made-easy-profiling dq-made-easy-frontend dq-made-easy-kong dq-made-easy-db dq-made-easy-keycloak
 
 Auxiliary repo images:
-  dq-db-seed dq-keycloak-seed-artifacts dq-openmetadata-db dq-openmetadata-server
-  dq-metadata-configure dq-container-metrics dq-zammad-seed dq-llm
+  dq-made-easy-db-seed dq-made-easy-keycloak-seed-artifacts dq-made-easy-openmetadata-db dq-made-easy-openmetadata-server
+  dq-made-easy-metadata-configure dq-made-easy-container-metrics dq-made-easy-zammad-seed dq-made-easy-llm
 
 Examples:
   $(basename "$0")
   $(basename "$0") --scope repo
-  $(basename "$0") --image dq-api --image dq-frontend
+  $(basename "$0") --image dq-made-easy-api --image dq-made-easy-frontend
   $(basename "$0") --env prod --scope repo --version 0.9.0
 EOF
 }
@@ -71,35 +71,35 @@ append_unique_image() {
 set_aux_image_defaults() {
   DQ_DB_SEED_REGISTRY="${DQ_DB_SEED_REGISTRY:-${DQ_DB_REGISTRY:-docker.io/}}"
   DQ_DB_SEED_NAMESPACE="${DQ_DB_SEED_NAMESPACE:-${DQ_DB_NAMESPACE:-jacbeekers/}}"
-  DQ_DB_SEED_IMAGE="${DQ_DB_SEED_IMAGE:-dq-db-seed}"
+  DQ_DB_SEED_IMAGE="${DQ_DB_SEED_IMAGE:-dq-made-easy-db-seed}"
 
   DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-docker.io/}}"
   DQ_KEYCLOAK_SEED_NAMESPACE="${DQ_KEYCLOAK_SEED_NAMESPACE:-${DQ_KEYCLOAK_NAMESPACE:-jacbeekers/}}"
-  DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-keycloak-seed-artifacts}"
+  DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-made-easy-keycloak-seed-artifacts}"
 
   DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker.io/}"
   DQ_OPENMETADATA_DB_NAMESPACE="${DQ_OPENMETADATA_DB_NAMESPACE:-jacbeekers/}"
-  DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-openmetadata-db}"
+  DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}"
 
   DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker.io/}"
   DQ_OPENMETADATA_SERVER_NAMESPACE="${DQ_OPENMETADATA_SERVER_NAMESPACE:-jacbeekers/}"
-  DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-openmetadata}"
+  DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata}"
 
   DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker.io/}"
   DQ_METADATA_CONFIGURE_NAMESPACE="${DQ_METADATA_CONFIGURE_NAMESPACE:-jacbeekers/}"
-  DQ_METADATA_CONFIGURE_IMAGE="${DQ_METADATA_CONFIGURE_IMAGE:-dq-metadata-configure}"
+  DQ_METADATA_CONFIGURE_IMAGE="${DQ_METADATA_CONFIGURE_IMAGE:-dq-made-easy-metadata-configure}"
 
   DQ_CONTAINER_METRICS_REGISTRY="${DQ_CONTAINER_METRICS_REGISTRY:-docker.io/}"
   DQ_CONTAINER_METRICS_NAMESPACE="${DQ_CONTAINER_METRICS_NAMESPACE:-jacbeekers/}"
-  DQ_CONTAINER_METRICS_IMAGE="${DQ_CONTAINER_METRICS_IMAGE:-dq-container-metrics}"
+  DQ_CONTAINER_METRICS_IMAGE="${DQ_CONTAINER_METRICS_IMAGE:-dq-made-easy-container-metrics}"
 
   DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker.io/}"
   DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
-  DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-zammad-seed}"
+  DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
   DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker.io/}"
   DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
-  DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-llm}"
+  DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
 }
 
 set_override_tags() {

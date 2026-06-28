@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+./app/__init__.py
+./app/airflow_operator.py
+./app/airflow_sdk.py
+./app/main.py
+dq_made_easy_run_plan_cli.egg-info/PKG-INFO
+dq_made_easy_run_plan_cli.egg-info/SOURCES.txt
+dq_made_easy_run_plan_cli.egg-info/dependency_links.txt
+dq_made_easy_run_plan_cli.egg-info/requires.txt
+dq_made_easy_run_plan_cli.egg-info/top_level.txt
+tests/test_onboarding_proposals.py

@@ -1,0 +1,537 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "ValidationPlanCatalogSuiteView": {
+      "properties": {
+        "artifact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Artifact Id"
+        },
+        "artifact_snapshot": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Artifact Snapshot"
+        },
+        "artifact_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Artifact Version"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "engine_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Engine Type"
+        },
+        "governance_state": {
+          "title": "Governance State",
+          "type": "string"
+        },
+        "run_plan_id": {
+          "title": "Run Plan Id",
+          "type": "string"
+        },
+        "run_plan_version_id": {
+          "title": "Run Plan Version Id",
+          "type": "string"
+        },
+        "schedule_definition": {
+          "$ref": "#/$defs/ValidationRunPlanScheduleDefinitionView"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "run_plan_id",
+        "run_plan_version_id",
+        "governance_state",
+        "created_at"
+      ],
+      "title": "ValidationPlanCatalogSuiteView",
+      "type": "object"
+    },
+    "ValidationPlanCatalogSummaryView": {
+      "properties": {
+        "engine_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Engine Types",
+          "type": "array"
+        },
+        "run_plan_count": {
+          "default": 0,
+          "title": "Run Plan Count",
+          "type": "integer"
+        },
+        "suite_count": {
+          "default": 0,
+          "title": "Suite Count",
+          "type": "integer"
+        }
+      },
+      "title": "ValidationPlanCatalogSummaryView",
+      "type": "object"
+    },
+    "ValidationPlanCatalogView": {
+      "properties": {
+        "validation_run_plans": {
+          "items": {
+            "$ref": "#/$defs/ValidationRunPlanView"
+          },
+          "title": "Validation Run Plans",
+          "type": "array"
+        },
+        "validation_suites": {
+          "items": {
+            "$ref": "#/$defs/ValidationPlanCatalogSuiteView"
+          },
+          "title": "Validation Suites",
+          "type": "array"
+        },
+        "validation_summary": {
+          "$ref": "#/$defs/ValidationPlanCatalogSummaryView"
+        }
+      },
+      "title": "ValidationPlanCatalogView",
+      "type": "object"
+    },
+    "ValidationRunPlanAssignmentScopeView": {
+      "properties": {
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        }
+      },
+      "title": "ValidationRunPlanAssignmentScopeView",
+      "type": "object"
+    },
+    "ValidationRunPlanScheduleDefinitionView": {
+      "properties": {
+        "scheduled_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled At"
+        }
+      },
+      "title": "ValidationRunPlanScheduleDefinitionView",
+      "type": "object"
+    },
+    "ValidationRunPlanScopeSelectorView": {
+      "properties": {
+        "assignment_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ValidationRunPlanAssignmentScopeView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "data_object_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Id"
+        },
+        "data_object_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Object Version Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "tag_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tag Ids",
+          "type": "array"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "title": "ValidationRunPlanScopeSelectorView",
+      "type": "object"
+    },
+    "ValidationRunPlanVersionView": {
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "governance_state": {
+          "title": "Governance State",
+          "type": "string"
+        },
+        "run_plan_version_id": {
+          "title": "Run Plan Version Id",
+          "type": "string"
+        },
+        "schedule_definition": {
+          "$ref": "#/$defs/ValidationRunPlanScheduleDefinitionView"
+        }
+      },
+      "required": [
+        "run_plan_version_id",
+        "governance_state",
+        "created_at"
+      ],
+      "title": "ValidationRunPlanVersionView",
+      "type": "object"
+    },
+    "ValidationRunPlanView": {
+      "properties": {
+        "activated_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Activated At"
+        },
+        "activated_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Activated By"
+        },
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Business Key"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        },
+        "current_active_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Active Version Id"
+        },
+        "last_dispatched_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Dispatched Run Id"
+        },
+        "pending_version_governance_state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pending Version Governance State"
+        },
+        "pending_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pending Version Id"
+        },
+        "planning_mode": {
+          "title": "Planning Mode",
+          "type": "string"
+        },
+        "run_plan_id": {
+          "title": "Run Plan Id",
+          "type": "string"
+        },
+        "scope_selector": {
+          "$ref": "#/$defs/ValidationRunPlanScopeSelectorView"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/ValidationRunPlanVersionView"
+          },
+          "title": "Versions",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_plan_id",
+        "workspace_id",
+        "planning_mode",
+        "status",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "ValidationRunPlanView",
+      "type": "object"
+    },
+    "list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_businessKey": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Businesskey"
+    },
+    "list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Status"
+    },
+    "list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_suiteId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Suiteid"
+    },
+    "list_run_plans_api_rulebuilder_v1_run_plan_get_param_query_workspaceId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspaceid"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/run-plan/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/run-plan v1 schema bundle"
+}

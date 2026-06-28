@@ -1,0 +1,252 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "MasterRecordView": {
+      "properties": {
+        "business_key": {
+          "default": "",
+          "title": "Business Key",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "display_name": {
+          "default": "",
+          "title": "Display Name",
+          "type": "string"
+        },
+        "domain": {
+          "default": "",
+          "title": "Domain",
+          "type": "string"
+        },
+        "golden_record_id": {
+          "default": "",
+          "title": "Golden Record Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "match_rule": {
+          "default": "",
+          "title": "Match Rule",
+          "type": "string"
+        },
+        "merged_from_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Merged From Ids",
+          "type": "array"
+        },
+        "owner": {
+          "default": "",
+          "title": "Owner",
+          "type": "string"
+        },
+        "resolution_status": {
+          "default": "golden",
+          "title": "Resolution Status",
+          "type": "string"
+        },
+        "source_count": {
+          "default": 0,
+          "title": "Source Count",
+          "type": "integer"
+        },
+        "source_systems": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Systems",
+          "type": "array"
+        },
+        "survivorship_rule": {
+          "default": "",
+          "title": "Survivorship Rule",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "workspace_id": {
+          "default": "",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "MasterRecordView",
+      "type": "object"
+    },
+    "MasterRecordsPageView": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/MasterRecordView"
+          },
+          "title": "Data",
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/$defs/PaginationView"
+        }
+      },
+      "required": [
+        "data",
+        "pagination"
+      ],
+      "title": "MasterRecordsPageView",
+      "type": "object"
+    },
+    "PaginationView": {
+      "properties": {
+        "has_next": {
+          "title": "Has Next",
+          "type": "boolean"
+        },
+        "has_previous": {
+          "title": "Has Previous",
+          "type": "boolean"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total Pages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "total_pages",
+        "has_next",
+        "has_previous"
+      ],
+      "title": "PaginationView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "get_master_records_api_master_data_v1_master_records_get_param_query_business_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Business Key"
+    },
+    "get_master_records_api_master_data_v1_master_records_get_param_query_domain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Domain"
+    },
+    "get_master_records_api_master_data_v1_master_records_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "get_master_records_api_master_data_v1_master_records_get_param_query_page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "get_master_records_api_master_data_v1_master_records_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/master-data/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/master-data v1 schema bundle"
+}

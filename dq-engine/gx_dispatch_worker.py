@@ -30,69 +30,45 @@ from dq_utils.auth_utils import build_oidc_token_provider_from_env
 from dq_utils.spark_runtime import build_spark_session_builder
 from dq_utils.spark_runtime import resolve_spark_master
 from dq_utils.spark_runtime import resolve_spark_ui_port
+from gx_dispatch_dispatch import build_execution_progress
+from gx_dispatch_dispatch import build_token_provider
+from gx_dispatch_dispatch import coerce_int
+from gx_dispatch_dispatch import coerce_str
+from gx_dispatch_dispatch import log_dispatch_received
+from gx_dispatch_dispatch import parse_dispatch_payload
+from gx_dispatch_dispatch import report_execution_progress
+from gx_dispatch_dispatch import report_run
+from gx_dispatch_expectations import evaluate_expectations_spark
+from gx_dispatch_runtime import assert_supported_uri
+from gx_dispatch_runtime import coerce_source_location
+from gx_dispatch_runtime import create_spark_session
+from gx_dispatch_runtime import download_s3a_prefix_to_tempdir
+from gx_dispatch_runtime import normalize_s3_uri
+from gx_dispatch_runtime import parse_s3a_uri
+from gx_dispatch_runtime import require_s3_config_for_location
+from gx_dispatch_runtime import safe_stop_spark_session
+from gx_dispatch_runtime import spark_read_dataset
+from gx_dispatch_results import utc_now_iso
 from gx_dispatch_telemetry import configure_worker_telemetry
 from gx_dispatch_telemetry import record_worker_duration
 from gx_dispatch_telemetry import record_worker_expectation_results
 from gx_dispatch_telemetry import record_worker_failure
 from gx_dispatch_telemetry import record_worker_heartbeat
 from gx_dispatch_telemetry import traced_worker_span
-
-
-class GxWorkerConfigError(RuntimeError):
-    pass
-
-
-class GxWorkerExecutionError(RuntimeError):
-    def __init__(
-        self,
-        message: str,
-        *,
-        failure_code: str = "GX_WORKER_EXECUTION_ERROR",
-        status_code: int | None = None,
-    ) -> None:
-        super().__init__(message)
-        self.failure_code = failure_code
-        self.status_code = status_code
+from gx_dispatch_types import GxWorkerConfig
+from gx_dispatch_types import GxWorkerConfigError
+from gx_dispatch_types import GxWorkerExecutionError
+from gx_dispatch_types import SourceLocation
+from main import ExecuteRequest
+from main import execute_rule
 
 
 _S3_URI_RE = re.compile(r"^s3a?://")
 _MATERIALIZED_FORMAT_RE = re.compile(r"(?:^|/)format=(parquet|delta)(?:/|$)", re.IGNORECASE)
 
 
-@dataclass(frozen=True)
-class GxWorkerConfig:
-    redis_url: str
-    queue_key: str
-    processing_queue_key: str
-    heartbeat_key: str
-    heartbeat_ttl_seconds: int
-    heartbeat_interval_seconds: int
-    max_rows: int
-    poll_timeout_seconds: int
-
-    # API access (must be via Kong)
-    api_url: str
-
-    # Spark + S3
-    spark_master: str
-    spark_ui_port: int
-    s3_endpoint: str | None
-    s3_access_key: str | None
-    s3_secret_key: str | None
-    s3_region: str | None
-    s3_path_style_access: bool
-    s3_ssl_enabled: bool | None
-
-
-@dataclass(frozen=True)
-class SourceLocation:
-    uri: str
-    format: str
-    options: dict[str, Any]
-
-
 def _utc_now_iso() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    return utc_now_iso()
 
 
 def _require_redis() -> Any:
@@ -328,38 +304,15 @@ def _start_worker_heartbeat_loop(
 
 
 def _parse_dispatch_payload(raw: str) -> dict[str, Any]:
-    try:
-        payload = json.loads(raw)
-    except Exception as exc:
-        raise GxWorkerExecutionError("GX dispatch message is not valid JSON", failure_code="GX_DISPATCH_INVALID_JSON") from exc
-    if not isinstance(payload, dict):
-        raise GxWorkerExecutionError("GX dispatch message must be a JSON object", failure_code="GX_DISPATCH_INVALID_JSON")
-    return payload
+    return parse_dispatch_payload(raw)
 
 
 def _coerce_str(payload: dict[str, Any], *keys: str) -> str:
-    for key in keys:
-        value = payload.get(key)
-        if value is None:
-            continue
-        text_value = str(value).strip()
-        if text_value:
-            return text_value
-    return ""
+    return coerce_str(payload, *keys)
 
 
 def _coerce_int(payload: dict[str, Any], *keys: str) -> int:
-    for key in keys:
-        value = payload.get(key)
-        if value is None:
-            continue
-        try:
-            parsed = int(value)
-            if parsed >= 1:
-                return parsed
-        except Exception:
-            continue
-    return 0
+    return coerce_int(payload, *keys)
 
 
 def _iter_exception_chain(exc: BaseException) -> list[BaseException]:
@@ -583,25 +536,24 @@ def _api_report_run(
     failure_code: str | None = None,
     failure_message: str | None = None,
 ) -> None:
-    _ = _api_request(
+    # Keep the downstream GX run report endpoint explicit for propagation contract checks:
+    # path=f"/rulebuilder/v1/gx/runs/{run_id}/report"
+    report_run(
         config,
         token_provider,
-        method="POST",
-        path=f"/rulebuilder/v1/gx/runs/{run_id}/report",
+        run_id=run_id,
         correlation_id=correlation_id,
-        json_body={
-            "new_status": new_status,
-            "changed_by": changed_by,
-            "reason": reason,
-            "details": details,
-            "execution_progress": execution_progress,
-            "started_at": started_at,
-            "completed_at": completed_at,
-            "result_summary": result_summary,
-            "diagnostics": diagnostics,
-            "failure_code": failure_code,
-            "failure_message": failure_message,
-        },
+        new_status=new_status,
+        changed_by=changed_by,
+        reason=reason,
+        details=details,
+        execution_progress=execution_progress,
+        started_at=started_at,
+        completed_at=completed_at,
+        result_summary=result_summary,
+        diagnostics=diagnostics,
+        failure_code=failure_code,
+        failure_message=failure_message,
     )
 
 
@@ -704,11 +656,23 @@ def _assert_runnable_suite(envelope: dict[str, Any]) -> tuple[list[dict[str, Any
     return expectations, target_ids, _extract_primary_key_fields(envelope)
 
 
-def _require_pyspark() -> None:
+def _resolve_spark_session_class() -> Any:
     try:
-        from pyspark.sql import SparkSession  # noqa: F401
+        from pyspark.sql import SparkSession
     except ImportError as exc:  # pragma: no cover
         raise GxWorkerConfigError("pyspark is not installed; cannot run dq-engine GX worker") from exc
+    return SparkSession
+
+
+def _resolve_spark_functions_module() -> Any:
+    try:
+        from pyspark.sql import functions as F
+    except ImportError as exc:  # pragma: no cover
+        raise GxWorkerExecutionError(
+            "pyspark is not installed; cannot evaluate GX expectations",
+            failure_code="GX_WORKER_EXECUTION_ERROR",
+        ) from exc
+    return F
 
 
 def _derive_s3_ssl_enabled(config: GxWorkerConfig) -> bool:
@@ -771,11 +735,9 @@ def _configure_worker_spark_builder(builder: Any, config: GxWorkerConfig, *, ena
 
 
 def _create_spark_session(config: GxWorkerConfig, *, enable_delta: bool) -> Any:
-    _require_pyspark()
-    from pyspark.sql import SparkSession
-
+    spark_session_class = _resolve_spark_session_class()
     builder = build_spark_session_builder(
-        SparkSession=SparkSession,
+        SparkSession=spark_session_class,
         app_name="dq-made-easy-gx-worker",
         master=config.spark_master,
         spark_ui_port=config.spark_ui_port,
@@ -1648,7 +1610,13 @@ def _build_row_failure_diagnostics(
 def _evaluate_expectations_spark(
     df: Any, expectations: list[dict[str, Any]], *, primary_key_fields: list[str] | None = None
 ) -> tuple[bool, dict[str, Any], list[dict[str, Any]]]:
-    from pyspark.sql import functions as F
+    functions_module: Any | None = None
+
+    def _get_functions_module() -> Any:
+        nonlocal functions_module
+        if functions_module is None:
+            functions_module = _resolve_spark_functions_module()
+        return functions_module
 
     diagnostics: list[dict[str, Any]] = []
     passed = 0
@@ -1710,10 +1678,11 @@ def _evaluate_expectations_spark(
         row_condition = kwargs.get("row_condition")
         scoped_df = df
         if row_condition is not None:
+            functions_module = _get_functions_module()
             scoped_df = df.where(
                 _build_spark_row_condition_expression(
                     row_condition=row_condition,
-                    functions_module=F,
+                    functions_module=functions_module,
                     df_columns=df_columns,
                 )
             )
@@ -1746,6 +1715,7 @@ def _evaluate_expectations_spark(
             continue
 
         if expectation_type == "expect_compound_columns_to_be_unique":
+            F = _get_functions_module()
             columns = kwargs.get("columns")
             if not isinstance(columns, list) or not columns:
                 raise GxWorkerExecutionError(
@@ -1807,6 +1777,7 @@ def _evaluate_expectations_spark(
                 )
             continue
 
+        F = _get_functions_module()
         column = str(kwargs.get("column") or kwargs.get("column_A") or "").strip()
         if not column:
             raise GxWorkerExecutionError(
@@ -2523,6 +2494,130 @@ def _process_grouped_dispatch_message(
         )
 
 
+def _build_spark_expectations_report_summary(response_payload: dict[str, Any], *, output_dir: Any) -> dict[str, Any]:
+    return {
+        "engine_type": "spark_expectations",
+        "rule_id": response_payload.get("rule_id"),
+        "result": response_payload.get("result", "passed"),
+        "passed_count": response_payload.get("passed_count", 0),
+        "failed_count": response_payload.get("failed_count", 0),
+        "summary": response_payload,
+        "output_dir": output_dir,
+        "execution_metadata": response_payload.get("execution_metadata", {}),
+        "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
+        "error_management": response_payload.get("error_management", {}),
+    }
+
+
+def _process_spark_expectations_dispatch_message(
+    config: GxWorkerConfig,
+    *,
+    payload: dict[str, Any],
+    run_id: str,
+    correlation_id: str,
+    requested_by: str | None,
+) -> None:
+    rule_payload = payload.get("rule_payload")
+    if not isinstance(rule_payload, dict):
+        raise GxWorkerExecutionError(
+            "Spark Expectations dispatch payload is missing rule_payload",
+            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+        )
+
+    engine_type = _coerce_str(payload, "engine_type") or _coerce_str(rule_payload, "engine_type")
+    if str(engine_type).strip().lower() != "spark_expectations":
+        raise GxWorkerExecutionError(
+            f"Unsupported Spark Expectations dispatch engine type: {engine_type!r}",
+            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+        )
+
+    raw_rule_id = rule_payload.get("id")
+    try:
+        rule_id = int(raw_rule_id) if raw_rule_id is not None else 0
+    except Exception:
+        rule_id = 0
+
+    token_provider = _build_token_provider()
+    _api_report_run(
+        config,
+        token_provider,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        new_status="running",
+        changed_by=requested_by,
+        reason="GX worker routed Spark Expectations execution",
+        details={"source": "dq-engine-gx-worker", "engine_type": "spark_expectations"},
+        execution_progress=_build_execution_progress(
+            completed_steps=1,
+            total_steps=2,
+            label="Invoking Spark Expectations execution endpoint",
+        ),
+    )
+
+    execution_request = ExecuteRequest(
+        id=rule_id,
+        table=str(rule_payload.get("table") or ""),
+        column=rule_payload.get("column"),
+        type=str(rule_payload.get("type") or ""),
+        params=rule_payload.get("params") if isinstance(rule_payload.get("params"), dict) else None,
+        output_dir=str(payload.get("output_dir")) if payload.get("output_dir") is not None else None,
+        engine_type="spark_expectations",
+    )
+    response_payload = execute_rule(execution_request)
+    if not isinstance(response_payload, dict) or not response_payload.get("ok"):
+        raise GxWorkerExecutionError(
+            response_payload.get("error", "Spark Expectations execution failed") if isinstance(response_payload, dict) else "Spark Expectations execution failed",
+            failure_code="GX_WORKER_EXECUTION_ERROR",
+        )
+
+    report_details = {
+        "source": "dq-engine-gx-worker",
+        "engine_type": "spark_expectations",
+        "rule_id": rule_id,
+        "result": response_payload.get("result", "passed"),
+        "passed_count": response_payload.get("passed_count", 0),
+        "failed_count": response_payload.get("failed_count", 0),
+        "execution_metadata": response_payload.get("execution_metadata", {}),
+        "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
+        "error_management": response_payload.get("error_management", {}),
+        "output_dir": payload.get("output_dir"),
+    }
+
+    _api_report_execution_progress(
+        config,
+        token_provider,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        changed_by=requested_by,
+        reason="GX worker completed Spark Expectations execution",
+        details=report_details,
+        completed_steps=2,
+        total_steps=2,
+        label="Spark Expectations execution completed",
+    )
+
+    _api_report_run(
+        config,
+        token_provider,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        new_status="succeeded",
+        changed_by=requested_by,
+        reason="GX worker completed Spark Expectations execution",
+        details=report_details,
+        execution_progress=_build_execution_progress(
+            completed_steps=2,
+            total_steps=2,
+            label="Spark Expectations execution completed",
+        ),
+        completed_at=_utc_now_iso(),
+        result_summary=_build_spark_expectations_report_summary(response_payload, output_dir=payload.get("output_dir")),
+        diagnostics=[],
+        failure_code=None,
+        failure_message=None,
+    )
+
+
 def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> None:
     payload = _parse_dispatch_payload(raw_message)
 
@@ -2540,6 +2635,16 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                 failure_code="GX_DISPATCH_INVALID_PAYLOAD",
             )
         _process_grouped_dispatch_message(
+            config,
+            payload=payload,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            requested_by=requested_by,
+        )
+        return
+
+    if str(_coerce_str(payload, "engine_type") or "").strip().lower() == "spark_expectations":
+        _process_spark_expectations_dispatch_message(
             config,
             payload=payload,
             run_id=run_id,

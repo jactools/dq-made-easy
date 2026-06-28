@@ -81,7 +81,7 @@ require_cmd docker
 refresh_kong_bootstrap() {
   local bootstrap_src="${ROOT_DIR}/dq-kong/scripts/bootstrap_kong.sh"
   local kong_container_id
-  kong_container_id="$(docker ps -q -f name=^kong-gateway$ | tr -d '[:space:]' || true)"
+  kong_container_id="$(docker ps -q -f name=^dq-made-easy-kong$ | tr -d '[:space:]' || true)"
 
   if [ -z "$kong_container_id" ]; then
     error "validate_user_login_end_to_end.sh" "Kong gateway container is not running; cannot refresh Kong bootstrap"

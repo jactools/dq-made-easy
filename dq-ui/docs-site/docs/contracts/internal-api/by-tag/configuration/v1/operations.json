@@ -1,0 +1,65 @@
+{
+  "group": "by-tag/configuration",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_app_config_api_system_v1_app_config_get",
+      "path": "/api/system/v1/app-config",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AppConfigView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get App Config",
+      "tags": [
+        "configuration"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "put_app_config_api_system_v1_app_config_put",
+      "path": "/api/system/v1/app-config",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/put_app_config_api_system_v1_app_config_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AppConfigView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Put App Config",
+      "tags": [
+        "configuration"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

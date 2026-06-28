@@ -1,0 +1,1030 @@
+{
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "PaginationView": {
+        "properties": {
+          "has_next": {
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "has_previous": {
+            "title": "Has Previous",
+            "type": "boolean"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_pages": {
+            "title": "Total Pages",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "page",
+          "limit",
+          "total_pages",
+          "has_next",
+          "has_previous"
+        ],
+        "title": "PaginationView",
+        "type": "object"
+      },
+      "ProductSpecContractReferenceView": {
+        "properties": {
+          "odcs_contract_id": {
+            "default": "",
+            "title": "Odcs Contract Id",
+            "type": "string"
+          },
+          "odcs_contract_name": {
+            "default": "",
+            "title": "Odcs Contract Name",
+            "type": "string"
+          },
+          "odcs_contract_version": {
+            "default": "",
+            "title": "Odcs Contract Version",
+            "type": "string"
+          },
+          "openmetadata_entity_id": {
+            "default": "",
+            "title": "Openmetadata Entity Id",
+            "type": "string"
+          },
+          "openmetadata_entity_type": {
+            "default": "data_contract",
+            "title": "Openmetadata Entity Type",
+            "type": "string"
+          },
+          "source_system": {
+            "default": "openmetadata",
+            "title": "Source System",
+            "type": "string"
+          }
+        },
+        "title": "ProductSpecContractReferenceView",
+        "type": "object"
+      },
+      "ProductSpecGlossaryView": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "display_name",
+          "description"
+        ],
+        "title": "ProductSpecGlossaryView",
+        "type": "object"
+      },
+      "ProductSpecImportEntryView": {
+        "properties": {
+          "business_definition": {
+            "default": "",
+            "title": "Business Definition",
+            "type": "string"
+          },
+          "migration": {
+            "additionalProperties": true,
+            "title": "Migration",
+            "type": "object"
+          },
+          "odcs_contract_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ProductSpecContractReferenceView"
+            },
+            "title": "Odcs Contract Refs",
+            "type": "array"
+          },
+          "product_lifecycle_state": {
+            "default": "",
+            "title": "Product Lifecycle State",
+            "type": "string"
+          },
+          "product_name": {
+            "default": "",
+            "title": "Product Name",
+            "type": "string"
+          },
+          "product_objective": {
+            "default": "",
+            "title": "Product Objective",
+            "type": "string"
+          },
+          "product_owner": {
+            "default": "",
+            "title": "Product Owner",
+            "type": "string"
+          },
+          "product_scope": {
+            "additionalProperties": true,
+            "title": "Product Scope",
+            "type": "object"
+          },
+          "product_spec_id": {
+            "title": "Product Spec Id",
+            "type": "string"
+          },
+          "product_version": {
+            "default": "",
+            "title": "Product Version",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ProductSpecProvenanceView"
+          },
+          "registry_definition_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Registry Definition Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "product_spec_id"
+        ],
+        "title": "ProductSpecImportEntryView",
+        "type": "object"
+      },
+      "ProductSpecImportItemView": {
+        "properties": {
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "product_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductSpecView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "product_spec_id": {
+            "title": "Product Spec Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "product_spec_id",
+          "outcome"
+        ],
+        "title": "ProductSpecImportItemView",
+        "type": "object"
+      },
+      "ProductSpecImportReportView": {
+        "properties": {
+          "created": {
+            "default": 0,
+            "title": "Created",
+            "type": "integer"
+          },
+          "dry_run": {
+            "default": false,
+            "title": "Dry Run",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProductSpecImportItemView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          },
+          "updated": {
+            "default": 0,
+            "title": "Updated",
+            "type": "integer"
+          },
+          "validated": {
+            "default": 0,
+            "title": "Validated",
+            "type": "integer"
+          }
+        },
+        "title": "ProductSpecImportReportView",
+        "type": "object"
+      },
+      "ProductSpecImportRequestView": {
+        "properties": {
+          "glossary": {
+            "$ref": "#/components/schemas/ProductSpecGlossaryView"
+          },
+          "product_specs": {
+            "items": {
+              "$ref": "#/components/schemas/ProductSpecImportEntryView"
+            },
+            "title": "Product Specs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "glossary"
+        ],
+        "title": "ProductSpecImportRequestView",
+        "type": "object"
+      },
+      "ProductSpecProvenanceView": {
+        "properties": {
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "change_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Reason"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          }
+        },
+        "title": "ProductSpecProvenanceView",
+        "type": "object"
+      },
+      "ProductSpecStewardshipActionRequestView": {
+        "properties": {
+          "action": {
+            "enum": [
+              "submit_for_approval",
+              "approve",
+              "request_changes",
+              "deprecate",
+              "retire"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "change_reason": {
+            "title": "Change Reason",
+            "type": "string"
+          },
+          "glossary": {
+            "$ref": "#/components/schemas/ProductSpecGlossaryView"
+          }
+        },
+        "required": [
+          "glossary",
+          "action",
+          "actor",
+          "change_reason"
+        ],
+        "title": "ProductSpecStewardshipActionRequestView",
+        "type": "object"
+      },
+      "ProductSpecSummaryView": {
+        "properties": {
+          "by_lifecycle_state": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Lifecycle State",
+            "type": "object"
+          },
+          "by_owner": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Owner",
+            "type": "object"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "title": "ProductSpecSummaryView",
+        "type": "object"
+      },
+      "ProductSpecUpsertRequestView": {
+        "properties": {
+          "business_definition": {
+            "default": "",
+            "title": "Business Definition",
+            "type": "string"
+          },
+          "glossary": {
+            "$ref": "#/components/schemas/ProductSpecGlossaryView"
+          },
+          "migration": {
+            "additionalProperties": true,
+            "title": "Migration",
+            "type": "object"
+          },
+          "odcs_contract_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ProductSpecContractReferenceView"
+            },
+            "title": "Odcs Contract Refs",
+            "type": "array"
+          },
+          "product_lifecycle_state": {
+            "default": "",
+            "title": "Product Lifecycle State",
+            "type": "string"
+          },
+          "product_name": {
+            "default": "",
+            "title": "Product Name",
+            "type": "string"
+          },
+          "product_objective": {
+            "default": "",
+            "title": "Product Objective",
+            "type": "string"
+          },
+          "product_owner": {
+            "default": "",
+            "title": "Product Owner",
+            "type": "string"
+          },
+          "product_scope": {
+            "additionalProperties": true,
+            "title": "Product Scope",
+            "type": "object"
+          },
+          "product_spec_id": {
+            "title": "Product Spec Id",
+            "type": "string"
+          },
+          "product_version": {
+            "default": "",
+            "title": "Product Version",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ProductSpecProvenanceView"
+          },
+          "registry_definition_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Registry Definition Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "glossary",
+          "product_spec_id"
+        ],
+        "title": "ProductSpecUpsertRequestView",
+        "type": "object"
+      },
+      "ProductSpecView": {
+        "properties": {
+          "business_definition": {
+            "default": "",
+            "title": "Business Definition",
+            "type": "string"
+          },
+          "migration": {
+            "additionalProperties": true,
+            "title": "Migration",
+            "type": "object"
+          },
+          "odcs_contract_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ProductSpecContractReferenceView"
+            },
+            "title": "Odcs Contract Refs",
+            "type": "array"
+          },
+          "openmetadata_entity_id": {
+            "default": "",
+            "title": "Openmetadata Entity Id",
+            "type": "string"
+          },
+          "openmetadata_entity_type": {
+            "default": "glossary_term",
+            "title": "Openmetadata Entity Type",
+            "type": "string"
+          },
+          "product_lifecycle_state": {
+            "default": "",
+            "title": "Product Lifecycle State",
+            "type": "string"
+          },
+          "product_name": {
+            "default": "",
+            "title": "Product Name",
+            "type": "string"
+          },
+          "product_objective": {
+            "default": "",
+            "title": "Product Objective",
+            "type": "string"
+          },
+          "product_owner": {
+            "default": "",
+            "title": "Product Owner",
+            "type": "string"
+          },
+          "product_scope": {
+            "additionalProperties": true,
+            "title": "Product Scope",
+            "type": "object"
+          },
+          "product_spec_id": {
+            "title": "Product Spec Id",
+            "type": "string"
+          },
+          "product_version": {
+            "default": "",
+            "title": "Product Version",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ProductSpecProvenanceView"
+          },
+          "registry_definition_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Registry Definition Ids",
+            "type": "array"
+          },
+          "source_system": {
+            "default": "openmetadata",
+            "title": "Source System",
+            "type": "string"
+          }
+        },
+        "required": [
+          "product_spec_id"
+        ],
+        "title": "ProductSpecView",
+        "type": "object"
+      },
+      "ProductSpecsPageView": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ProductSpecView"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationView"
+          }
+        },
+        "required": [
+          "pagination"
+        ],
+        "title": "ProductSpecsPageView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/product-specs' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/data-catalog/v1/product-specs": {
+      "get": {
+        "operationId": "list_product_specs_api_data_catalog_v1_product_specs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "owner",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Owner"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lifecycle_state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lifecycle State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "registry_definition_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Registry Definition Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "linked_contract_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Linked Contract Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSpecsPageView"
+                }
+              }
+            },
+            "description": "Product specification registry inventory."
+          },
+          "409": {
+            "description": "Product specification inventory contains conflicting stable identifiers."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "OpenMetadata is unavailable or misconfigured."
+          }
+        },
+        "summary": "List Product Specs",
+        "tags": [
+          "product-specs"
+        ]
+      },
+      "post": {
+        "operationId": "create_product_spec_api_data_catalog_v1_product_specs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductSpecUpsertRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSpecView"
+                }
+              }
+            },
+            "description": "Created and synchronized product specification."
+          },
+          "409": {
+            "description": "Product specification already exists or conflicts with registry state."
+          },
+          "422": {
+            "description": "The product-spec request payload is invalid."
+          },
+          "503": {
+            "description": "OpenMetadata is unavailable or misconfigured."
+          }
+        },
+        "summary": "Create Product Spec",
+        "tags": [
+          "product-specs"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/product-specs/import": {
+      "post": {
+        "operationId": "import_product_specs_api_data_catalog_v1_product_specs_import_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dry_run",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Dry Run",
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductSpecImportRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSpecImportReportView"
+                }
+              }
+            },
+            "description": "Imported product-spec manifest and synchronized all entries."
+          },
+          "409": {
+            "description": "Product-spec import payload conflicts with registry state."
+          },
+          "422": {
+            "description": "The product-spec import payload is invalid."
+          },
+          "503": {
+            "description": "OpenMetadata is unavailable or misconfigured."
+          }
+        },
+        "summary": "Import Product Specs",
+        "tags": [
+          "product-specs"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/product-specs/summary": {
+      "get": {
+        "operationId": "summarize_product_specs_api_data_catalog_v1_product_specs_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSpecSummaryView"
+                }
+              }
+            },
+            "description": "Product-spec registry summary grouped by lifecycle state and owner."
+          },
+          "503": {
+            "description": "OpenMetadata is unavailable or misconfigured."
+          }
+        },
+        "summary": "Summarize Product Specs",
+        "tags": [
+          "product-specs"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/product-specs/{product_spec_id}": {
+      "get": {
+        "operationId": "get_product_spec_api_data_catalog_v1_product_specs__product_spec_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product_spec_id",
+            "required": true,
+            "schema": {
+              "title": "Product Spec Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSpecView"
+                }
+              }
+            },
+            "description": "Resolved product specification."
+          },
+          "404": {
+            "description": "Product specification not found."
+          },
+          "409": {
+            "description": "Product specification identifier is ambiguous."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "OpenMetadata is unavailable or misconfigured."
+          }
+        },
+        "summary": "Get Product Spec",
+        "tags": [
+          "product-specs"
+        ]
+      },
+      "put": {
+        "operationId": "update_product_spec_api_data_catalog_v1_product_specs__product_spec_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product_spec_id",
+            "required": true,
+            "schema": {
+              "title": "Product Spec Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductSpecUpsertRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSpecView"
+                }
+              }
+            },
+            "description": "Updated and synchronized product specification."
+          },
+          "404": {
+            "description": "Product specification not found."
+          },
+          "409": {
+            "description": "Product specification conflicts with registry state."
+          },
+          "422": {
+            "description": "The product-spec request payload is invalid."
+          },
+          "503": {
+            "description": "OpenMetadata is unavailable or misconfigured."
+          }
+        },
+        "summary": "Update Product Spec",
+        "tags": [
+          "product-specs"
+        ]
+      }
+    },
+    "/api/data-catalog/v1/product-specs/{product_spec_id}/stewardship-actions": {
+      "post": {
+        "operationId": "apply_product_spec_stewardship_action_api_data_catalog_v1_product_specs__product_spec_id__stewardship_actions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product_spec_id",
+            "required": true,
+            "schema": {
+              "title": "Product Spec Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductSpecStewardshipActionRequestView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSpecView"
+                }
+              }
+            },
+            "description": "Applied stewardship action and synchronized lifecycle state."
+          },
+          "404": {
+            "description": "Product specification not found."
+          },
+          "409": {
+            "description": "Product specification conflicts with registry state."
+          },
+          "422": {
+            "description": "The product-spec stewardship request payload is invalid."
+          },
+          "503": {
+            "description": "OpenMetadata is unavailable or misconfigured."
+          }
+        },
+        "summary": "Apply Product Spec Stewardship Action",
+        "tags": [
+          "product-specs"
+        ]
+      }
+    }
+  }
+}

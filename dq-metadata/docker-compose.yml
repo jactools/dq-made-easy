@@ -1,12 +1,12 @@
 services:
   openmetadata-db:
-    image: ${DQ_OPENMETADATA_DB_REGISTRY:-}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:-dq-openmetadata-db}:${DQ_OPENMETADATA_DB_TAG:-18}
+    image: ${DQ_OPENMETADATA_DB_REGISTRY:-}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}:${DQ_OPENMETADATA_DB_TAG:-18}
+    container_name: dq-made-easy-openmetadata-db
     build:
       context: ..
       dockerfile: dq-metadata/Dockerfile.openmetadata-db
       args:
         OPENMETADATA_DB_BASE_IMAGE: ${OPENMETADATA_DB_BASE_IMAGE?OPENMETADATA_DB_BASE_IMAGE is required}
-    container_name: openmetadata-db
     command:
       - postgres
       - -c
@@ -30,7 +30,7 @@ services:
 
   openmetadata-search:
     image: ${OPENMETADATA_SEARCH_IMAGE:-docker.io/library/elasticsearch}:${OPENMETADATA_SEARCH_TAG:-8.11.4}
-    container_name: openmetadata-search
+    container_name: dq-made-easy-openmetadata-search
     environment:
       discovery.type: single-node
       xpack.security.enabled: "false"
@@ -48,7 +48,7 @@ services:
 
   openmetadata-migrate:
     image: openmetadata/server:${OPENMETADATA_VERSION:-latest}
-    container_name: openmetadata-migrate
+    container_name: dq-made-easy-openmetadata-migrate
     depends_on:
       openmetadata-db:
         condition: service_healthy
@@ -72,14 +72,14 @@ services:
     restart: "no"
 
   openmetadata-server:
-    image: ${DQ_OPENMETADATA_SERVER_REGISTRY:-}${DQ_OPENMETADATA_SERVER_NAMESPACE:-}${DQ_OPENMETADATA_SERVER_IMAGE:-dq-openmetadata}:${DQ_OPENMETADATA_SERVER_TAG:-latest}
+    image: ${DQ_OPENMETADATA_SERVER_REGISTRY:-}${DQ_OPENMETADATA_SERVER_NAMESPACE:-}${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata}:${DQ_OPENMETADATA_SERVER_TAG:-latest}
+    container_name: dq-made-easy-openmetadata-server
     build:
       context: ..
       dockerfile: dq-metadata/Dockerfile.openmetadata-server
       args:
         OPENMETADATA_BASE_IMAGE: openmetadata/server:${OPENMETADATA_VERSION:-latest}
         OTEL_JAVAAGENT_HELPER_IMAGE: ${OTEL_JAVAAGENT_HELPER_IMAGE?OTEL_JAVAAGENT_HELPER_IMAGE is required}
-    container_name: openmetadata-server
     depends_on:
       openmetadata-db:
         condition: service_healthy
@@ -121,7 +121,7 @@ services:
   openmetadata-ingestion:
     profiles: ["metadata-ingestion"]
     image: openmetadata/ingestion:${OPENMETADATA_VERSION:-latest}
-    container_name: openmetadata-ingestion
+    container_name: dq-made-easy-openmetadata-ingestion
     depends_on:
       openmetadata-server:
         condition: service_healthy

@@ -15,6 +15,12 @@ DIRECT_SPARK_PACKAGE_ARTIFACTS = (
     "iceberg-spark-runtime-4.0_2.13",
 )
 
+REQUIRED_LARGE_SPARK_JARS = (
+    "software.amazon.awssdk_bundle",
+    "software.amazon.awssdk_",
+    "aws-java-sdk",
+)
+
 
 def _artifact_versions(jar_paths: list[Path], artifact_name: str) -> dict[str, list[str]]:
     versions: dict[str, list[str]] = {}
@@ -72,7 +78,12 @@ def spark_jar_paths() -> list[Path]:
             size_mb = p.stat().st_size / (1024 * 1024)
         except Exception:
             size_mb = 0.0
-        if size_mb > max_mb and not include_large:
+
+        keep_large = include_large or any(
+            p.name.startswith(prefix) or p.name.endswith(prefix) or prefix in p.name
+            for prefix in REQUIRED_LARGE_SPARK_JARS
+        )
+        if size_mb > max_mb and not keep_large:
             excluded.append((p.name, size_mb))
             continue
         filtered.append(p)

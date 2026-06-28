@@ -117,12 +117,13 @@ case "$mode" in
     ;;
   api)
     cwd="$repo_root/dq-api/fastapi"
+    python_runner="$repo_root/scripts/python_arm64.sh"
     venv_python="$repo_root/venv/bin/python"
     if [[ ! -x "$venv_python" ]]; then
       echo "Required repo-root venv Python is missing: venv/bin/python" >&2
       exit 1
     fi
-    cmd=("$venv_python" -m pytest "$@" --junitxml "$run_dir/junit.xml")
+    cmd=("$python_runner" --python-bin "$venv_python" -m pytest "$@" --junitxml "$run_dir/junit.xml")
     ;;
   command)
     if [[ $# -eq 0 ]]; then

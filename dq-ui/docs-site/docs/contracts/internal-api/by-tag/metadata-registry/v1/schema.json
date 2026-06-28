@@ -1,0 +1,1493 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "AttributeCatalogView": {
+      "properties": {
+        "data_object_id": {
+          "default": "",
+          "title": "Data Object Id",
+          "type": "string"
+        },
+        "definition_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Definition Id"
+        },
+        "definition_mapping_attribute_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Definition Mapping Attribute Id"
+        },
+        "definition_mapping_created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Definition Mapping Created At"
+        },
+        "definition_mapping_mapped_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Definition Mapping Mapped By"
+        },
+        "definition_mapping_status": {
+          "default": "unmapped",
+          "title": "Definition Mapping Status",
+          "type": "string"
+        },
+        "definition_mapping_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Definition Mapping Version Id"
+        },
+        "encryption_key_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Encryption Key Id"
+        },
+        "encryption_required": {
+          "default": false,
+          "title": "Encryption Required",
+          "type": "boolean"
+        },
+        "format": {
+          "default": "",
+          "title": "Format",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_business_key": {
+          "default": false,
+          "title": "Is Business Key",
+          "type": "boolean"
+        },
+        "is_cde": {
+          "default": false,
+          "title": "Is Cde",
+          "type": "boolean"
+        },
+        "is_primary_key": {
+          "default": false,
+          "title": "Is Primary Key",
+          "type": "boolean"
+        },
+        "masking_method": {
+          "default": "none",
+          "title": "Masking Method",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "protection_configured_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Protection Configured By"
+        },
+        "protection_updated_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Protection Updated At"
+        },
+        "source_kind": {
+          "default": "data_object",
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "source_name": {
+          "default": "",
+          "title": "Source Name",
+          "type": "string"
+        },
+        "source_version_label": {
+          "default": "",
+          "title": "Source Version Label",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "type": {
+          "default": "",
+          "title": "Type",
+          "type": "string"
+        },
+        "version_id": {
+          "default": "",
+          "title": "Version Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "default": "",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "AttributeCatalogView",
+      "type": "object"
+    },
+    "DataObjectCatalogView": {
+      "properties": {
+        "business_key": {
+          "default": "",
+          "title": "Business Key",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "dataset_id": {
+          "default": "",
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "icon": {
+          "default": "",
+          "title": "Icon",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "latest_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Latest Version Id"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataObjectCatalogView",
+      "type": "object"
+    },
+    "DataObjectVersionView": {
+      "properties": {
+        "attribute_count": {
+          "default": 0,
+          "title": "Attribute Count",
+          "type": "integer"
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_object_id": {
+          "default": "",
+          "title": "Data Object Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_hash": {
+          "default": "",
+          "title": "Schema Hash",
+          "type": "string"
+        },
+        "storage_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Storage Format"
+        },
+        "storage_options_json": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Storage Options Json"
+        },
+        "storage_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Storage Uri"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "version": {
+          "default": 0,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataObjectVersionView",
+      "type": "object"
+    },
+    "DataProductView": {
+      "properties": {
+        "business_key": {
+          "default": "",
+          "title": "Business Key",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "icon": {
+          "default": "",
+          "title": "Icon",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "odcs_data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Odcs Data Product Id"
+        },
+        "owner": {
+          "default": "",
+          "title": "Owner",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "workspace_id": {
+          "default": "",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataProductView",
+      "type": "object"
+    },
+    "DataSetView": {
+      "properties": {
+        "business_key": {
+          "default": "",
+          "title": "Business Key",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_contract_download_url": {
+          "default": "",
+          "title": "Data Contract Download Url",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "owner": {
+          "default": "",
+          "title": "Owner",
+          "type": "string"
+        },
+        "product_id": {
+          "default": "",
+          "title": "Product Id",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "workspace_id": {
+          "default": "",
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataSetView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryAccessGrantRequestView": {
+      "properties": {
+        "can_pull": {
+          "default": false,
+          "title": "Can Pull",
+          "type": "boolean"
+        },
+        "can_push": {
+          "default": false,
+          "title": "Can Push",
+          "type": "boolean"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "subscribed": {
+          "default": true,
+          "title": "Subscribed",
+          "type": "boolean"
+        },
+        "target_id": {
+          "title": "Target Id",
+          "type": "string"
+        },
+        "target_kind": {
+          "title": "Target Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_kind",
+        "target_id"
+      ],
+      "title": "FederatedMetadataRegistryAccessGrantRequestView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryAccessGrantView": {
+      "properties": {
+        "can_pull": {
+          "default": false,
+          "title": "Can Pull",
+          "type": "boolean"
+        },
+        "can_push": {
+          "default": false,
+          "title": "Can Push",
+          "type": "boolean"
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "external_party_id": {
+          "title": "External Party Id",
+          "type": "string"
+        },
+        "granted_at": {
+          "title": "Granted At",
+          "type": "string"
+        },
+        "granted_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Granted By"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "subscribed": {
+          "default": true,
+          "title": "Subscribed",
+          "type": "boolean"
+        },
+        "target_id": {
+          "title": "Target Id",
+          "type": "string"
+        },
+        "target_kind": {
+          "title": "Target Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "external_party_id",
+        "target_kind",
+        "target_id",
+        "granted_at"
+      ],
+      "title": "FederatedMetadataRegistryAccessGrantView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryExchangeSnapshotView": {
+      "properties": {
+        "accepted": {
+          "default": true,
+          "title": "Accepted",
+          "type": "boolean"
+        },
+        "captured_at": {
+          "title": "Captured At",
+          "type": "string"
+        },
+        "captured_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Captured By"
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "exchange_kind": {
+          "title": "Exchange Kind",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "manifest": {
+          "$ref": "#/$defs/FederatedMetadataRegistryManifestView"
+        },
+        "package": {
+          "$ref": "#/$defs/FederatedMetadataRegistryPackageView"
+        },
+        "package_id": {
+          "title": "Package Id",
+          "type": "string"
+        },
+        "package_kind": {
+          "default": "federated_metadata_package",
+          "title": "Package Kind",
+          "type": "string"
+        },
+        "validation_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Validation Error"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "package_id",
+        "exchange_kind",
+        "workspace_id",
+        "captured_at",
+        "package"
+      ],
+      "title": "FederatedMetadataRegistryExchangeSnapshotView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryExternalPartyApprovalRequestView": {
+      "properties": {
+        "approval_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approval Notes"
+        }
+      },
+      "title": "FederatedMetadataRegistryExternalPartyApprovalRequestView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryExternalPartyRegistrationRequestView": {
+      "properties": {
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Display Name"
+        },
+        "governing_scope": {
+          "$ref": "#/$defs/FederatedMetadataRegistryGoverningScopeView"
+        },
+        "tenant_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tenant Id"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "title": "FederatedMetadataRegistryExternalPartyRegistrationRequestView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryExternalPartyView": {
+      "properties": {
+        "approval_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approval Notes"
+        },
+        "approval_status": {
+          "default": "pending",
+          "title": "Approval Status",
+          "type": "string"
+        },
+        "approved_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved At"
+        },
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved By"
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Display Name"
+        },
+        "governing_scope": {
+          "$ref": "#/$defs/FederatedMetadataRegistryGoverningScopeView"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "registered_at": {
+          "title": "Registered At",
+          "type": "string"
+        },
+        "registered_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registered By"
+        },
+        "tenant_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tenant Id"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "id",
+        "registered_at"
+      ],
+      "title": "FederatedMetadataRegistryExternalPartyView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryGoverningScopeView": {
+      "properties": {
+        "data_product_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Product Ids",
+          "type": "array"
+        },
+        "metadata_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Metadata Item Ids",
+          "type": "array"
+        },
+        "metadata_structure_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Metadata Structure Ids",
+          "type": "array"
+        }
+      },
+      "title": "FederatedMetadataRegistryGoverningScopeView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryManifestView": {
+      "properties": {
+        "attribute_count": {
+          "default": 0,
+          "title": "Attribute Count",
+          "type": "integer"
+        },
+        "data_object_count": {
+          "default": 0,
+          "title": "Data Object Count",
+          "type": "integer"
+        },
+        "data_object_version_count": {
+          "default": 0,
+          "title": "Data Object Version Count",
+          "type": "integer"
+        },
+        "data_product_count": {
+          "default": 0,
+          "title": "Data Product Count",
+          "type": "integer"
+        },
+        "data_set_count": {
+          "default": 0,
+          "title": "Data Set Count",
+          "type": "integer"
+        },
+        "registry_definition_count": {
+          "default": 0,
+          "title": "Registry Definition Count",
+          "type": "integer"
+        }
+      },
+      "title": "FederatedMetadataRegistryManifestView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryPackageView": {
+      "properties": {
+        "attributes": {
+          "items": {
+            "$ref": "#/$defs/AttributeCatalogView"
+          },
+          "title": "Attributes",
+          "type": "array"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_object_versions": {
+          "items": {
+            "$ref": "#/$defs/DataObjectVersionView"
+          },
+          "title": "Data Object Versions",
+          "type": "array"
+        },
+        "data_objects": {
+          "items": {
+            "$ref": "#/$defs/DataObjectCatalogView"
+          },
+          "title": "Data Objects",
+          "type": "array"
+        },
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "data_products": {
+          "items": {
+            "$ref": "#/$defs/DataProductView"
+          },
+          "title": "Data Products",
+          "type": "array"
+        },
+        "data_sets": {
+          "items": {
+            "$ref": "#/$defs/DataSetView"
+          },
+          "title": "Data Sets",
+          "type": "array"
+        },
+        "manifest": {
+          "$ref": "#/$defs/FederatedMetadataRegistryManifestView"
+        },
+        "package_id": {
+          "title": "Package Id",
+          "type": "string"
+        },
+        "package_kind": {
+          "default": "federated_metadata_package",
+          "title": "Package Kind",
+          "type": "string"
+        },
+        "registry_definitions": {
+          "items": {
+            "$ref": "#/$defs/RegistryDefinitionView"
+          },
+          "title": "Registry Definitions",
+          "type": "array"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "package_id",
+        "workspace_id",
+        "created_at"
+      ],
+      "title": "FederatedMetadataRegistryPackageView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryPullResultView": {
+      "properties": {
+        "accepted": {
+          "default": true,
+          "title": "Accepted",
+          "type": "boolean"
+        },
+        "package": {
+          "$ref": "#/$defs/FederatedMetadataRegistryPackageView"
+        },
+        "validated_at": {
+          "title": "Validated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "validated_at",
+        "package"
+      ],
+      "title": "FederatedMetadataRegistryPullResultView",
+      "type": "object"
+    },
+    "FederatedMetadataRegistryPushRequestView": {
+      "properties": {
+        "data_product_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data Product Id"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id"
+      ],
+      "title": "FederatedMetadataRegistryPushRequestView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "RegistryDefinitionProvenanceView": {
+      "properties": {
+        "approved_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved At"
+        },
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved By"
+        },
+        "change_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Change Reason"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created At"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        }
+      },
+      "title": "RegistryDefinitionProvenanceView",
+      "type": "object"
+    },
+    "RegistryDefinitionValueDomainView": {
+      "properties": {
+        "allowed_values": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Values",
+          "type": "array"
+        },
+        "constraints": {
+          "additionalProperties": true,
+          "title": "Constraints",
+          "type": "object"
+        },
+        "format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Format"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        }
+      },
+      "title": "RegistryDefinitionValueDomainView",
+      "type": "object"
+    },
+    "RegistryDefinitionView": {
+      "properties": {
+        "applies_to": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Applies To",
+          "type": "array"
+        },
+        "business_definition": {
+          "title": "Business Definition",
+          "type": "string"
+        },
+        "child_definition_count": {
+          "default": 0,
+          "title": "Child Definition Count",
+          "type": "integer"
+        },
+        "child_definition_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Child Definition Ids",
+          "type": "array"
+        },
+        "child_definition_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Child Definition Names",
+          "type": "array"
+        },
+        "definition_id": {
+          "title": "Definition Id",
+          "type": "string"
+        },
+        "definition_name": {
+          "title": "Definition Name",
+          "type": "string"
+        },
+        "definition_type": {
+          "title": "Definition Type",
+          "type": "string"
+        },
+        "glossary_id": {
+          "default": "",
+          "title": "Glossary Id",
+          "type": "string"
+        },
+        "glossary_name": {
+          "default": "",
+          "title": "Glossary Name",
+          "type": "string"
+        },
+        "object_class": {
+          "default": "",
+          "title": "Object Class",
+          "type": "string"
+        },
+        "openmetadata_entity_id": {
+          "default": "",
+          "title": "Openmetadata Entity Id",
+          "type": "string"
+        },
+        "openmetadata_entity_type": {
+          "default": "glossary_term",
+          "title": "Openmetadata Entity Type",
+          "type": "string"
+        },
+        "owner": {
+          "default": "",
+          "title": "Owner",
+          "type": "string"
+        },
+        "parent_definition_id": {
+          "default": "",
+          "title": "Parent Definition Id",
+          "type": "string"
+        },
+        "parent_definition_name": {
+          "default": "",
+          "title": "Parent Definition Name",
+          "type": "string"
+        },
+        "property": {
+          "default": "",
+          "title": "Property",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/RegistryDefinitionProvenanceView"
+        },
+        "representation_term": {
+          "default": "",
+          "title": "Representation Term",
+          "type": "string"
+        },
+        "source_system": {
+          "default": "openmetadata",
+          "title": "Source System",
+          "type": "string"
+        },
+        "status": {
+          "default": "",
+          "title": "Status",
+          "type": "string"
+        },
+        "synonyms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Synonyms",
+          "type": "array"
+        },
+        "value_domain": {
+          "$ref": "#/$defs/RegistryDefinitionValueDomainView"
+        },
+        "version": {
+          "default": "",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "definition_id",
+        "definition_type",
+        "definition_name",
+        "business_definition"
+      ],
+      "title": "RegistryDefinitionView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "approve_metadata_registry_external_party_api_data_catalog_v1_metadata_registry_external_parties_party_id_approve_post_param_path_party_id": {
+      "title": "Party Id",
+      "type": "string"
+    },
+    "list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_limit": {
+      "default": 50,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_party_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Party Id"
+    },
+    "list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_target_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Target Id"
+    },
+    "list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_param_query_target_kind": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Target Kind"
+    },
+    "list_metadata_registry_access_grants_api_data_catalog_v1_metadata_registry_access_grants_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/FederatedMetadataRegistryAccessGrantView"
+      },
+      "title": "Response List Metadata Registry Access Grants Api Data Catalog V1 Metadata Registry Access Grants Get",
+      "type": "array"
+    },
+    "list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_param_query_data_product_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Data Product Id"
+    },
+    "list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_metadata_registry_exchanges_api_data_catalog_v1_metadata_registry_exchanges_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/FederatedMetadataRegistryExchangeSnapshotView"
+      },
+      "title": "Response List Metadata Registry Exchanges Api Data Catalog V1 Metadata Registry Exchanges Get",
+      "type": "array"
+    },
+    "list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_approval_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Approval Status"
+    },
+    "list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_limit": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_party_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Party Id"
+    },
+    "list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_tenant_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Tenant Id"
+    },
+    "list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_metadata_registry_external_parties_api_data_catalog_v1_metadata_registry_external_parties_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/FederatedMetadataRegistryExternalPartyView"
+      },
+      "title": "Response List Metadata Registry External Parties Api Data Catalog V1 Metadata Registry External Parties Get",
+      "type": "array"
+    },
+    "upsert_metadata_registry_access_grant_api_data_catalog_v1_metadata_registry_external_parties_party_id_access_grants_post_param_path_party_id": {
+      "title": "Party Id",
+      "type": "string"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/metadata-registry/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/metadata-registry v1 schema bundle"
+}

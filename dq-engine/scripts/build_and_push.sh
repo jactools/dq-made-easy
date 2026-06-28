@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # Name: build_and_push.sh
-# Description: Build and push dq-engine image to Docker Hub
+# Description: Build and push dq-made-easy-engine image to Docker Hub
 # Usage: ./build_and_push.sh [--no-cache] [--no-push]
 ###
 
@@ -43,7 +43,7 @@ while [[ $# -gt 0 ]]; do
             cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
-Build and push the dq-engine Docker image.
+Build and push the dq-made-easy-engine Docker image.
 
 Options:
     --no-cache    Build without using Docker cache
@@ -85,7 +85,7 @@ IMAGE_NAME="${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_E
 LATEST_NAME="${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:latest"
 
 echo "========================================"
-echo "Building dq-engine Docker image"
+echo "Building dq-made-easy-engine Docker image"
 echo "========================================"
 echo "Image: $IMAGE_NAME"
 echo "Latest: $LATEST_NAME"

@@ -57,9 +57,31 @@
   color: var(--app-status-info-text, #075985);
 }
 
+.gx-monitor-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
 .gx-monitor-badge-info {
   background: var(--app-status-warning-bg, #fffbeb);
   color: var(--app-status-warning-text, #92400e);
+}
+
+.gx-monitor-badge-success {
+  background: var(--app-status-success-bg, #dcfce7);
+  color: var(--app-status-success-text, #166534);
+}
+
+.gx-monitor-badge-warning {
+  background: var(--app-status-warning-bg, #fffbeb);
+  color: var(--app-status-warning-text, #92400e);
+}
+
+.gx-monitor-badge-danger {
+  background: var(--app-status-error-bg, #fee2e2);
+  color: var(--app-status-error-text, #991b1b);
 }
 
 .gx-monitor-badge-status {

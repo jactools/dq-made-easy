@@ -1,0 +1,57 @@
+openapi: 3.1.0
+info:
+  title: DQ Rule DSL Contract
+  version: 2.0.0
+  description: Canonical OpenAPI fragment for rule write requests using the semantic, engine-independent DSL.
+paths:
+  /api/rulebuilder/v1/rules:
+    post:
+      operationId: createRuleWithDslV200
+      summary: Create a rule with the 2.0.0 canonical DSL
+      description: |
+        Clients submit snake_case rule metadata plus the canonical `dsl` envelope.
+        The backend validates the request contract, normalizes the semantic rule,
+        and fails fast if no selected lowering target can preserve the rule semantics.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schema.json
+      responses:
+        '201':
+          description: Rule was validated, persisted, and compiled successfully.
+        '400':
+          description: Request payload was invalid or semantically inconsistent.
+        '422':
+          description: The payload matched the schema but could not be lowered without semantic loss.
+  /api/rulebuilder/v1/rules/{rule_id}:
+    put:
+      operationId: updateRuleWithDslV200
+      summary: Update a rule with the 2.0.0 canonical DSL
+      description: |
+        The update contract matches the create contract. The backend must reject unsupported
+        schema versions, invalid semantic combinations, and engine selections that cannot preserve meaning.
+      parameters:
+        - name: rule_id
+          in: path
+          required: true
+          description: Rule identifier to update.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schema.json
+      responses:
+        '200':
+          description: Rule was updated successfully.
+        '400':
+          description: Request payload was invalid or semantically inconsistent.
+        '404':
+          description: Rule identifier was not found.
+        '422':
+          description: The payload matched the schema but could not be lowered without semantic loss.

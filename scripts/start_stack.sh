@@ -190,6 +190,7 @@ if [ "$START_ALL" = "true" ]; then
   START_CORE=true
   START_GATEWAY=true
   START_AUTH=true
+  START_EDGE=true
   START_ENGINE=true
   START_WORKERS=true
   START_PROFILING=true

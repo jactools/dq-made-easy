@@ -1,0 +1,28 @@
+{
+  "app_version": "0.11.4",
+  "proof_id": "spark-expectations-large-errors",
+  "proof_type": "api",
+  "feature": "spark-expectations-large-errors",
+  "summary": "The standard API evidence run was executed for dq-engine/tests/test_spark_expectations_adapter.py, but the local environment failed during pytest collection because pydantic_core is built for incompatible architecture (arm64 vs x86_64). The underlying adapter functionality was still verified separately with a direct pytest run that passed 8 tests.",
+  "status": "failed",
+  "executed_at_utc": "2026-06-27T00:00:00Z",
+  "command": "./scripts/run_test_evidence.sh api --label spark-expectations-large-errors -- dq-engine/tests/test_spark_expectations_adapter.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.4/api/20260626T215936Z-spark-expectations-large-errors",
+  "test_files": [
+    "dq-engine/tests/test_spark_expectations_adapter.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 8,
+  "assertions": [
+    "Spark Expectations adapter lowerer supports not_null/min/max rules",
+    "Chunked error management handles large batches",
+    "Compile path exposes neutral artifact envelope"
+  ],
+  "diagnostics": {
+    "error": "ImportError: pydantic_core incompatible architecture (arm64 vs x86_64) during pytest collection"
+  },
+  "proof_data": {
+    "direct_verification_command": "/Users/jacbeekers/gitrepos/dq-made-easy/venv/bin/python -m pytest dq-engine/tests/test_spark_expectations_adapter.py -q",
+    "direct_verification_result": "8 passed, 14 warnings in 0.19s"
+  }
+}

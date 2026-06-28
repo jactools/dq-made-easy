@@ -224,7 +224,9 @@ class GxDispatchWorkerSparkBuilderTests(unittest.TestCase):
     def test_create_spark_session_retries_transient_gateway_failure(self) -> None:
         builder = _TransientGatewaySparkBuilder()
 
-        with patch("gx_dispatch_worker.build_spark_session_builder", return_value=builder), patch(
+        with patch("gx_dispatch_worker._resolve_spark_session_class", return_value=object), patch(
+            "gx_dispatch_worker.build_spark_session_builder", return_value=builder
+        ), patch(
             "dq_utils.spark_jars.configure_spark_builder_with_local_jars",
             side_effect=lambda candidate: candidate,
         ), patch("gx_dispatch_worker.time.sleep", return_value=None) as sleep_mock:

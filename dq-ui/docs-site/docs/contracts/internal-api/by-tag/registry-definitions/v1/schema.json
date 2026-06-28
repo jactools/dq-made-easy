@@ -1,0 +1,370 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "RegistryDefinitionProvenanceView": {
+      "properties": {
+        "approved_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved At"
+        },
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approved By"
+        },
+        "change_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Change Reason"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created At"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        }
+      },
+      "title": "RegistryDefinitionProvenanceView",
+      "type": "object"
+    },
+    "RegistryDefinitionValueDomainView": {
+      "properties": {
+        "allowed_values": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Values",
+          "type": "array"
+        },
+        "constraints": {
+          "additionalProperties": true,
+          "title": "Constraints",
+          "type": "object"
+        },
+        "format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Format"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        }
+      },
+      "title": "RegistryDefinitionValueDomainView",
+      "type": "object"
+    },
+    "RegistryDefinitionView": {
+      "properties": {
+        "applies_to": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Applies To",
+          "type": "array"
+        },
+        "business_definition": {
+          "title": "Business Definition",
+          "type": "string"
+        },
+        "child_definition_count": {
+          "default": 0,
+          "title": "Child Definition Count",
+          "type": "integer"
+        },
+        "child_definition_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Child Definition Ids",
+          "type": "array"
+        },
+        "child_definition_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Child Definition Names",
+          "type": "array"
+        },
+        "definition_id": {
+          "title": "Definition Id",
+          "type": "string"
+        },
+        "definition_name": {
+          "title": "Definition Name",
+          "type": "string"
+        },
+        "definition_type": {
+          "title": "Definition Type",
+          "type": "string"
+        },
+        "glossary_id": {
+          "default": "",
+          "title": "Glossary Id",
+          "type": "string"
+        },
+        "glossary_name": {
+          "default": "",
+          "title": "Glossary Name",
+          "type": "string"
+        },
+        "object_class": {
+          "default": "",
+          "title": "Object Class",
+          "type": "string"
+        },
+        "openmetadata_entity_id": {
+          "default": "",
+          "title": "Openmetadata Entity Id",
+          "type": "string"
+        },
+        "openmetadata_entity_type": {
+          "default": "glossary_term",
+          "title": "Openmetadata Entity Type",
+          "type": "string"
+        },
+        "owner": {
+          "default": "",
+          "title": "Owner",
+          "type": "string"
+        },
+        "parent_definition_id": {
+          "default": "",
+          "title": "Parent Definition Id",
+          "type": "string"
+        },
+        "parent_definition_name": {
+          "default": "",
+          "title": "Parent Definition Name",
+          "type": "string"
+        },
+        "property": {
+          "default": "",
+          "title": "Property",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/RegistryDefinitionProvenanceView"
+        },
+        "representation_term": {
+          "default": "",
+          "title": "Representation Term",
+          "type": "string"
+        },
+        "source_system": {
+          "default": "openmetadata",
+          "title": "Source System",
+          "type": "string"
+        },
+        "status": {
+          "default": "",
+          "title": "Status",
+          "type": "string"
+        },
+        "synonyms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Synonyms",
+          "type": "array"
+        },
+        "value_domain": {
+          "$ref": "#/$defs/RegistryDefinitionValueDomainView"
+        },
+        "version": {
+          "default": "",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "definition_id",
+        "definition_type",
+        "definition_name",
+        "business_definition"
+      ],
+      "title": "RegistryDefinitionView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "get_registry_definition_api_data_catalog_v1_registry_definitions_definition_id_get_param_path_definition_id": {
+      "title": "Definition Id",
+      "type": "string"
+    },
+    "list_reference_domains_api_data_catalog_v1_registry_reference_domains_get_param_query_limit": {
+      "default": 50,
+      "maximum": 200,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_reference_domains_api_data_catalog_v1_registry_reference_domains_get_param_query_query": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Query"
+    },
+    "list_reference_domains_api_data_catalog_v1_registry_reference_domains_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/RegistryDefinitionView"
+      },
+      "title": "Response List Reference Domains Api Data Catalog V1 Registry Reference Domains Get",
+      "type": "array"
+    },
+    "list_registry_definitions_api_data_catalog_v1_registry_definitions_get_param_query_definition_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Definition Type"
+    },
+    "list_registry_definitions_api_data_catalog_v1_registry_definitions_get_param_query_limit": {
+      "default": 50,
+      "maximum": 200,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_registry_definitions_api_data_catalog_v1_registry_definitions_get_param_query_query": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Query"
+    },
+    "list_registry_definitions_api_data_catalog_v1_registry_definitions_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/RegistryDefinitionView"
+      },
+      "title": "Response List Registry Definitions Api Data Catalog V1 Registry Definitions Get",
+      "type": "array"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/registry-definitions/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/registry-definitions v1 schema bundle"
+}

@@ -26,6 +26,7 @@ from scripts.seed_delivery_objects import _seed_plans
 from scripts.seed_delivery_objects import _spark_runtime_settings
 from scripts.seed_delivery_objects import normalize_identifier
 from dq_utils.spark_jars import configure_spark_builder_with_local_jars
+from dq_utils.spark_jars import spark_jar_paths
 
 
 class _StubSparkBuilder:
@@ -134,6 +135,35 @@ class SeedDeliveryRuntimeSettingsTests(unittest.TestCase):
                     os.environ.pop("DQ_SPARK_JAR_DIR", None)
                 else:
                     os.environ["DQ_SPARK_JAR_DIR"] = previous
+
+    def test_spark_jar_paths_keep_s3a_bundle_even_when_large(self) -> None:
+        with TemporaryDirectory() as jar_dir:
+            jar_dir_path = Path(jar_dir)
+            (jar_dir_path / "hadoop-aws-3.4.2.jar").write_text("hadoop", encoding="utf-8")
+            (jar_dir_path / "software.amazon.awssdk_bundle-2.29.52.jar").write_text("bundle", encoding="utf-8")
+
+            previous_dir = os.environ.get("DQ_SPARK_JAR_DIR")
+            previous_max = os.environ.get("DQ_SPARK_MAX_JAR_SIZE_MB")
+            previous_include = os.environ.get("DQ_SPARK_INCLUDE_LARGE_JARS")
+            try:
+                os.environ["DQ_SPARK_JAR_DIR"] = jar_dir
+                os.environ["DQ_SPARK_MAX_JAR_SIZE_MB"] = "1"
+                os.environ.pop("DQ_SPARK_INCLUDE_LARGE_JARS", None)
+                jar_paths = spark_jar_paths()
+                self.assertEqual([path.name for path in jar_paths], ["hadoop-aws-3.4.2.jar", "software.amazon.awssdk_bundle-2.29.52.jar"])
+            finally:
+                if previous_dir is None:
+                    os.environ.pop("DQ_SPARK_JAR_DIR", None)
+                else:
+                    os.environ["DQ_SPARK_JAR_DIR"] = previous_dir
+                if previous_max is None:
+                    os.environ.pop("DQ_SPARK_MAX_JAR_SIZE_MB", None)
+                else:
+                    os.environ["DQ_SPARK_MAX_JAR_SIZE_MB"] = previous_max
+                if previous_include is None:
+                    os.environ.pop("DQ_SPARK_INCLUDE_LARGE_JARS", None)
+                else:
+                    os.environ["DQ_SPARK_INCLUDE_LARGE_JARS"] = previous_include
 
     def test_seed_plans_reuses_shared_sessions_per_non_iceberg_format(self) -> None:
         csv_session = _StubSession()

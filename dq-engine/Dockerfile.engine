@@ -20,10 +20,10 @@ ENV MAVEN_REPOSITORIES=${MAVEN_REPOSITORIES:-}
 # Install system deps (cached unless this line changes)
 # - Java runtime is required for PySpark.
 # - Use default-jre-headless to stay compatible across Debian releases.
-RUN --mount=type=secret,id=internal_corporate_root_ca \
-	set -eux; \
-	cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
-	update-ca-certificates; \
+RUN set -eux; \
+	if [ -f /run/secrets/internal_corporate_root_ca ]; then \
+		cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+	fi; \
 	for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
 		[ -e "$apt_sources" ] || continue; \
 		sed -i 's|http://|https://|g' "$apt_sources"; \

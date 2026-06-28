@@ -7,6 +7,8 @@ from prometheus_client import generate_latest
 from profiling_metrics import REGISTRY, record_failure, record_redis_failure, record_redis_request, record_request
 from queue_worker import ProfilingRequestStatusReporter
 from queue_worker import _handle_job
+from queue_worker import _next_queue_item
+from redis.exceptions import TimeoutError as RedisTimeoutError
 
 
 class FakeStatusStore:
@@ -91,6 +93,14 @@ class FakeRedis:
 
     def set(self, key: str, value: str, ex: int | None = None) -> None:
         self.values[key] = value
+
+
+def test_next_queue_item_returns_none_on_timeout() -> None:
+    class _TimeoutRedis:
+        def brpop(self, *args, **kwargs):
+            raise RedisTimeoutError("timed out")
+
+    assert _next_queue_item(_TimeoutRedis(), "queue", timeout=1) is None
 
 
 def test_handle_job_dispatches_test_data_generation() -> None:

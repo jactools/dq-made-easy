@@ -1,0 +1,703 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "ConnectorAuditEntity": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actor Id"
+        },
+        "connector_instance_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Connector Instance Id"
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Id"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "endpoint": {
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "response_type": {
+          "title": "Response Type",
+          "type": "string"
+        },
+        "status_code": {
+          "title": "Status Code",
+          "type": "integer"
+        },
+        "success": {
+          "title": "Success",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "request_id",
+        "timestamp",
+        "action",
+        "provider",
+        "endpoint",
+        "method",
+        "response_type",
+        "status_code",
+        "success"
+      ],
+      "title": "ConnectorAuditEntity",
+      "type": "object"
+    },
+    "ConnectorCapabilityEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "can_configure": {
+          "default": true,
+          "title": "Can Configure",
+          "type": "boolean"
+        },
+        "can_discover": {
+          "default": true,
+          "title": "Can Discover",
+          "type": "boolean"
+        },
+        "can_health": {
+          "default": true,
+          "title": "Can Health",
+          "type": "boolean"
+        },
+        "can_sync": {
+          "default": true,
+          "title": "Can Sync",
+          "type": "boolean"
+        },
+        "can_validate": {
+          "default": true,
+          "title": "Can Validate",
+          "type": "boolean"
+        },
+        "supports_incremental_sync": {
+          "default": false,
+          "title": "Supports Incremental Sync",
+          "type": "boolean"
+        },
+        "supports_secret_refs": {
+          "default": true,
+          "title": "Supports Secret Refs",
+          "type": "boolean"
+        }
+      },
+      "title": "ConnectorCapabilityEntity",
+      "type": "object"
+    },
+    "ConnectorDiscoveryItemEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "identifier",
+        "kind"
+      ],
+      "title": "ConnectorDiscoveryItemEntity",
+      "type": "object"
+    },
+    "ConnectorDiscoveryResultEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/ConnectorErrorEntity"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ConnectorDiscoveryItemEntity"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "title": "ConnectorDiscoveryResultEntity",
+      "type": "object"
+    },
+    "ConnectorErrorEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Code"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Field"
+        },
+        "kind": {
+          "enum": [
+            "connection",
+            "authentication",
+            "schema",
+            "configuration",
+            "discovery",
+            "sync",
+            "health",
+            "validation",
+            "unsupported"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "default": false,
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "message"
+      ],
+      "title": "ConnectorErrorEntity",
+      "type": "object"
+    },
+    "ConnectorHealthResultEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/ConnectorErrorEntity"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "healthy",
+            "degraded",
+            "unhealthy",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "title": "ConnectorHealthResultEntity",
+      "type": "object"
+    },
+    "ConnectorInstanceCreateRequestView": {
+      "properties": {
+        "configuration": {
+          "additionalProperties": true,
+          "title": "Configuration",
+          "type": "object"
+        }
+      },
+      "title": "ConnectorInstanceCreateRequestView",
+      "type": "object"
+    },
+    "ConnectorInstanceEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "configuration": {
+          "additionalProperties": true,
+          "title": "Configuration",
+          "type": "object"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "tenant_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tenant Id"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "id",
+        "provider",
+        "display_name",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "ConnectorInstanceEntity",
+      "type": "object"
+    },
+    "ConnectorOperationRequestView": {
+      "properties": {
+        "configuration": {
+          "additionalProperties": true,
+          "title": "Configuration",
+          "type": "object"
+        },
+        "connector_instance_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Connector Instance Id"
+        }
+      },
+      "title": "ConnectorOperationRequestView",
+      "type": "object"
+    },
+    "ConnectorRegistryEntryEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "$ref": "#/$defs/ConnectorCapabilityEntity"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "implementation_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Implementation Path"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "supported_asset_kinds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Asset Kinds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "provider",
+        "display_name"
+      ],
+      "title": "ConnectorRegistryEntryEntity",
+      "type": "object"
+    },
+    "ConnectorSyncJobView": {
+      "properties": {
+        "completed_at": {
+          "title": "Completed At",
+          "type": "string"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "job_id": {
+          "title": "Job Id",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "requested_at": {
+          "title": "Requested At",
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/$defs/ConnectorSyncResultEntity"
+        },
+        "started_at": {
+          "title": "Started At",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "synced_count": {
+          "title": "Synced Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "job_id",
+        "provider",
+        "status",
+        "requested_at",
+        "started_at",
+        "completed_at",
+        "synced_count",
+        "result",
+        "correlation_id"
+      ],
+      "title": "ConnectorSyncJobView",
+      "type": "object"
+    },
+    "ConnectorSyncResultEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/ConnectorErrorEntity"
+          },
+          "title": "Errors",
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ConnectorDiscoveryItemEntity"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "synced_count": {
+          "default": 0,
+          "title": "Synced Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "title": "ConnectorSyncResultEntity",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "discover_connector_assets_api_rulebuilder_v1_connectors_provider_discover_assets_post_param_path_provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_param_query_limit": {
+      "default": 100,
+      "minimum": 0,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_param_query_provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Provider"
+    },
+    "list_connector_audit_events_api_rulebuilder_v1_connectors_audit_events_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/ConnectorAuditEntity"
+      },
+      "title": "Response List Connector Audit Events Api Rulebuilder V1 Connectors Audit Events Get",
+      "type": "array"
+    },
+    "list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_limit": {
+      "default": 100,
+      "minimum": 0,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_offset": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+    },
+    "list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Provider"
+    },
+    "list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_tenant_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Tenant Id"
+    },
+    "list_connector_instances_api_rulebuilder_v1_connectors_instances_get_param_query_workspace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Workspace Id"
+    },
+    "list_connector_instances_api_rulebuilder_v1_connectors_instances_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/ConnectorInstanceEntity"
+      },
+      "title": "Response List Connector Instances Api Rulebuilder V1 Connectors Instances Get",
+      "type": "array"
+    },
+    "list_connector_registry_entries_api_rulebuilder_v1_connectors_registry_get_response_200_application_json": {
+      "items": {
+        "$ref": "#/$defs/ConnectorRegistryEntryEntity"
+      },
+      "title": "Response List Connector Registry Entries Api Rulebuilder V1 Connectors Registry Get",
+      "type": "array"
+    },
+    "sync_connector_assets_api_rulebuilder_v1_connectors_provider_sync_post_param_path_provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "test_connector_connection_api_rulebuilder_v1_connectors_provider_test_connection_post_param_path_provider": {
+      "title": "Provider",
+      "type": "string"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/connectors/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/connectors v1 schema bundle"
+}

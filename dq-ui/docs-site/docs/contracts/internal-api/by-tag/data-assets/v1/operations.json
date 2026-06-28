@@ -1,0 +1,666 @@
+{
+  "group": "by-tag/data-assets",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_data_assets_api_rulebuilder_v1_data_assets_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_data_assets_api_rulebuilder_v1_data_assets_get_param_query_workspace_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_data_assets_api_rulebuilder_v1_data_assets_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Data Assets",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_data_asset_api_rulebuilder_v1_data_assets_post",
+      "path": "/api/rulebuilder/v1/data-assets",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateDataAssetRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Data Asset",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "delete_data_asset_api_rulebuilder_v1_data_assets__asset_id__delete",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/delete_data_asset_api_rulebuilder_v1_data_assets_asset_id_delete_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/OkResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Delete Data Asset",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_asset_api_rulebuilder_v1_data_assets__asset_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_asset_api_rulebuilder_v1_data_assets_asset_id_get_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Asset",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_data_asset_api_rulebuilder_v1_data_assets__asset_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_data_asset_api_rulebuilder_v1_data_assets_asset_id_put_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/UpdateDataAssetRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Data Asset",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "download_data_asset_contract_api_rulebuilder_v1_data_assets__asset_id__contract_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/download_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_get_param_path_asset_id"
+        },
+        {
+          "in": "query",
+          "name": "format",
+          "required": false,
+          "schema_ref": "#/$defs/download_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_get_param_query_format"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/contract",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/download_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Download Data Asset Contract",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "analyze_data_asset_contract_api_rulebuilder_v1_data_assets__asset_id__contract_analysis_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/analyze_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_analysis_get_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/contract/analysis",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/analyze_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_analysis_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Analyze Data Asset Contract",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "validate_data_asset_contract_conformance_api_rulebuilder_v1_data_assets__asset_id__contract_conformance_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/validate_data_asset_contract_conformance_api_rulebuilder_v1_data_assets_asset_id_contract_conformance_post_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/contract/conformance",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/validate_data_asset_contract_conformance_api_rulebuilder_v1_data_assets_asset_id_contract_conformance_post_request_body_application_json"
+          }
+        },
+        "required": false
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/validate_data_asset_contract_conformance_api_rulebuilder_v1_data_assets_asset_id_contract_conformance_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Validate Data Asset Contract Conformance",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "import_data_asset_contract_api_rulebuilder_v1_data_assets__asset_id__contract_import_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/import_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_import_post_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/contract/import",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ContractImportRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Import Data Asset Contract",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "review_data_asset_contract_api_rulebuilder_v1_data_assets__asset_id__contract_review_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/review_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_review_post_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/contract/review",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/review_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_review_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/review_data_asset_contract_api_rulebuilder_v1_data_assets_asset_id_contract_review_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Review Data Asset Contract",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "generate_test_data_for_data_asset_api_rulebuilder_v1_data_assets__asset_id__generate_test_data_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/generate_test_data_for_data_asset_api_rulebuilder_v1_data_assets_asset_id_generate_test_data_post_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/generate-test-data",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GenerateDataAssetTestDataRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestDataPayloadView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Generate Test Data For Data Asset",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_asset_governance_discovery_api_rulebuilder_v1_data_assets__asset_id__governance_discovery_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_asset_governance_discovery_api_rulebuilder_v1_data_assets_asset_id_governance_discovery_get_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/governance-discovery",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetGovernanceDiscoveryView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Asset Governance Discovery",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_asset_lineage_api_rulebuilder_v1_data_assets__asset_id__lineage_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_asset_lineage_api_rulebuilder_v1_data_assets_asset_id_lineage_get_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/lineage",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetLineageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Asset Lineage",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "validate_data_asset_api_rulebuilder_v1_data_assets__asset_id__validate_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/validate_data_asset_api_rulebuilder_v1_data_assets_asset_id_validate_post_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/validate",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetValidationView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Validate Data Asset",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_data_asset_versions_api_rulebuilder_v1_data_assets__asset_id__versions_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/list_data_asset_versions_api_rulebuilder_v1_data_assets_asset_id_versions_get_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/versions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_data_asset_versions_api_rulebuilder_v1_data_assets_asset_id_versions_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Data Asset Versions",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_data_asset_version_api_rulebuilder_v1_data_assets__asset_id__versions_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/create_data_asset_version_api_rulebuilder_v1_data_assets_asset_id_versions_post_param_path_asset_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/versions",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateDataAssetVersionRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetVersionView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Data Asset Version",
+      "tags": [
+        "data-assets"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_asset_version_api_rulebuilder_v1_data_assets__asset_id__versions__version_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "asset_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_asset_version_api_rulebuilder_v1_data_assets_asset_id_versions_version_id_get_param_path_asset_id"
+        },
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_asset_version_api_rulebuilder_v1_data_assets_asset_id_versions_version_id_get_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-assets/{asset_id}/versions/{version_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataAssetVersionView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Asset Version",
+      "tags": [
+        "data-assets"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

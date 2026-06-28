@@ -1,0 +1,65 @@
+{
+  "group": "by-tag/user",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_me_api_user_v1_me_get",
+      "path": "/api/user/v1/me",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUserView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Me",
+      "tags": [
+        "user"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_me_api_user_v1_me_put",
+      "path": "/api/user/v1/me",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_me_api_user_v1_me_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUserView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Me",
+      "tags": [
+        "user"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

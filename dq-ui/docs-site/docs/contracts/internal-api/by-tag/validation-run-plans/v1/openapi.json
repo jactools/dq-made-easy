@@ -1,0 +1,722 @@
+{
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "ValidationRunPlanAssignmentScopeView": {
+        "properties": {
+          "data_object_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Id"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "tag_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tag Ids",
+            "type": "array"
+          }
+        },
+        "title": "ValidationRunPlanAssignmentScopeView",
+        "type": "object"
+      },
+      "ValidationRunPlanReplayRequestView": {
+        "properties": {
+          "scheduled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled At"
+          },
+          "source_pipeline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Pipeline"
+          },
+          "trigger_type": {
+            "default": "manual",
+            "enum": [
+              "manual",
+              "pipeline_run",
+              "schedule"
+            ],
+            "title": "Trigger Type",
+            "type": "string"
+          }
+        },
+        "title": "ValidationRunPlanReplayRequestView",
+        "type": "object"
+      },
+      "ValidationRunPlanReplayView": {
+        "properties": {
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "dispatch_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dispatch Mode"
+          },
+          "engine_target": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine Target"
+          },
+          "engine_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engine Type"
+          },
+          "execution_shape": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Shape"
+          },
+          "queue_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Queue Key"
+          },
+          "queue_message_id": {
+            "title": "Queue Message Id",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "run_plan_id": {
+            "title": "Run Plan Id",
+            "type": "string"
+          },
+          "run_plan_version_id": {
+            "title": "Run Plan Version Id",
+            "type": "string"
+          },
+          "scheduled_at": {
+            "title": "Scheduled At",
+            "type": "string"
+          },
+          "selection_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection Mode"
+          },
+          "source_pipeline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Pipeline"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Version"
+          },
+          "trigger_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trigger Type"
+          }
+        },
+        "required": [
+          "run_id",
+          "queue_message_id",
+          "run_plan_id",
+          "run_plan_version_id",
+          "scheduled_at"
+        ],
+        "title": "ValidationRunPlanReplayView",
+        "type": "object"
+      },
+      "ValidationRunPlanScheduleDefinitionView": {
+        "properties": {
+          "scheduled_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled At"
+          }
+        },
+        "title": "ValidationRunPlanScheduleDefinitionView",
+        "type": "object"
+      },
+      "ValidationRunPlanScopeSelectorView": {
+        "properties": {
+          "assignment_scope": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValidationRunPlanAssignmentScopeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "data_object_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Id"
+          },
+          "data_object_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Object Version Id"
+          },
+          "data_product_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Product Id"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "tag_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tag Ids",
+            "type": "array"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "title": "ValidationRunPlanScopeSelectorView",
+        "type": "object"
+      },
+      "ValidationRunPlanVersionView": {
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "governance_state": {
+            "title": "Governance State",
+            "type": "string"
+          },
+          "run_plan_version_id": {
+            "title": "Run Plan Version Id",
+            "type": "string"
+          },
+          "schedule_definition": {
+            "$ref": "#/components/schemas/ValidationRunPlanScheduleDefinitionView"
+          }
+        },
+        "required": [
+          "run_plan_version_id",
+          "governance_state",
+          "created_at"
+        ],
+        "title": "ValidationRunPlanVersionView",
+        "type": "object"
+      },
+      "ValidationRunPlanView": {
+        "properties": {
+          "activated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated At"
+          },
+          "activated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated By"
+          },
+          "business_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Business Key"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "current_active_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Active Version Id"
+          },
+          "last_dispatched_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Dispatched Run Id"
+          },
+          "pending_version_governance_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Version Governance State"
+          },
+          "pending_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Version Id"
+          },
+          "planning_mode": {
+            "title": "Planning Mode",
+            "type": "string"
+          },
+          "run_plan_id": {
+            "title": "Run Plan Id",
+            "type": "string"
+          },
+          "scope_selector": {
+            "$ref": "#/components/schemas/ValidationRunPlanScopeSelectorView"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationRunPlanVersionView"
+            },
+            "title": "Versions",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_plan_id",
+          "workspace_id",
+          "planning_mode",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ValidationRunPlanView",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Filtered OpenAPI fragment for API group 'by-tag/validation-run-plans' (v1).",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/rulebuilder/v1/validation-run-plans": {
+      "get": {
+        "operationId": "list_validation_run_plans_api_rulebuilder_v1_validation_run_plans_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Workspaceid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "businessKey",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Businesskey"
+            }
+          },
+          {
+            "in": "query",
+            "name": "suiteId",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suiteid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ValidationRunPlanView"
+                  },
+                  "title": "Response List Validation Run Plans Api Rulebuilder V1 Validation Run Plans Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Validation plans."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Validation Run Plans",
+        "tags": [
+          "validation-run-plans"
+        ]
+      }
+    },
+    "/api/rulebuilder/v1/validation-run-plans/{run_plan_id}/replay": {
+      "post": {
+        "operationId": "replay_validation_run_plan_api_rulebuilder_v1_validation_run_plans__run_plan_id__replay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_plan_id",
+            "required": true,
+            "schema": {
+              "title": "Run Plan Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ValidationRunPlanReplayRequestView"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRunPlanReplayView"
+                }
+              }
+            },
+            "description": "Validation plan replay accepted and enqueued."
+          },
+          "404": {
+            "description": "Validation run plan not found or has no active version to replay."
+          },
+          "422": {
+            "description": "Validation run plan replay payload is not runnable."
+          },
+          "503": {
+            "description": "Dispatch queue is unavailable."
+          }
+        },
+        "summary": "Replay Validation Run Plan",
+        "tags": [
+          "validation-run-plans"
+        ]
+      }
+    }
+  }
+}

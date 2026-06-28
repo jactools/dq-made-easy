@@ -1,0 +1,160 @@
+{
+  "group": "by-tag/ontology",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_canonical_ontology_api_data_catalog_v1_ontology_canonical_get",
+      "path": "/api/data-catalog/v1/ontology/canonical",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/CanonicalOntologyView"
+            }
+          },
+          "description": "Canonical ontology scope and vocabulary for the metadata graph foundation."
+        }
+      },
+      "summary": "Get Canonical Ontology",
+      "tags": [
+        "ontology"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_canonical_ontology_jsonld_api_data_catalog_v1_ontology_canonical_json_ld_get",
+      "path": "/api/data-catalog/v1/ontology/canonical/json-ld",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_canonical_ontology_jsonld_api_data_catalog_v1_ontology_canonical_json_ld_get_response_200_application_json"
+            }
+          },
+          "description": "Canonical ontology exported as JSON-LD for open standards interoperability."
+        }
+      },
+      "summary": "Get Canonical Ontology Jsonld",
+      "tags": [
+        "ontology"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "project_ontology_graph_api_data_catalog_v1_ontology_graph_project_post",
+      "path": "/api/data-catalog/v1/ontology/graph/project",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/OntologyGraphProjectionRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/OntologyGraphProjectionView"
+            }
+          },
+          "description": "Project and persist the current ontology graph from metadata, governance, and execution seams."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Project Ontology Graph",
+      "tags": [
+        "ontology"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "query_graph_api_data_catalog_v1_ontology_graph_query_post",
+      "path": "/api/data-catalog/v1/ontology/graph/query",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/OntologyGraphQueryRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/OntologyGraphQueryResultView"
+            }
+          },
+          "description": "Query the latest persisted ontology graph snapshot with backend-owned filters."
+        },
+        "404": {
+          "description": "No ontology graph snapshot exists for the requested scope."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Query Graph",
+      "tags": [
+        "ontology"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "traverse_graph_api_data_catalog_v1_ontology_graph_traverse_post",
+      "path": "/api/data-catalog/v1/ontology/graph/traverse",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/OntologyGraphTraversalRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/OntologyGraphTraversalResultView"
+            }
+          },
+          "description": "Traverse the latest persisted ontology graph snapshot from a seed node."
+        },
+        "404": {
+          "description": "No ontology graph snapshot or seed node exists for the requested scope."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Traverse Graph",
+      "tags": [
+        "ontology"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

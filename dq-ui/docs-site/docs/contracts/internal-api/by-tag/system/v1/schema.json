@@ -1,0 +1,267 @@
+{
+  "$comment": "Use the definitions in $defs together with operations.json to resolve request, response, and parameter contracts.",
+  "$defs": {
+    "ApiInfoView": {
+      "properties": {
+        "build_date": {
+          "title": "Build Date",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "build_date"
+      ],
+      "title": "ApiInfoView",
+      "type": "object"
+    },
+    "DatabaseInfoView": {
+      "properties": {
+        "schema_git_commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Schema Git Commit"
+        },
+        "schema_updated": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Schema Updated"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version"
+      ],
+      "title": "DatabaseInfoView",
+      "type": "object"
+    },
+    "DeploymentInfoView": {
+      "properties": {
+        "deployment_verification_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deployment Verification Date"
+        },
+        "deployment_verified_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deployment Verified By"
+        }
+      },
+      "title": "DeploymentInfoView",
+      "type": "object"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ValidationError"
+          },
+          "title": "Detail",
+          "type": "array"
+        }
+      },
+      "title": "HTTPValidationError",
+      "type": "object"
+    },
+    "SystemInfoView": {
+      "properties": {
+        "api": {
+          "$ref": "#/$defs/ApiInfoView"
+        },
+        "database": {
+          "$ref": "#/$defs/DatabaseInfoView"
+        },
+        "deployment": {
+          "$ref": "#/$defs/DeploymentInfoView"
+        },
+        "versions": {
+          "$ref": "#/$defs/VersionCatalogView"
+        }
+      },
+      "required": [
+        "api",
+        "database",
+        "deployment",
+        "versions"
+      ],
+      "title": "SystemInfoView",
+      "type": "object"
+    },
+    "ValidationError": {
+      "properties": {
+        "ctx": {
+          "title": "Context",
+          "type": "object"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "title": "Location",
+          "type": "array"
+        },
+        "msg": {
+          "title": "Message",
+          "type": "string"
+        },
+        "type": {
+          "title": "Error Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError",
+      "type": "object"
+    },
+    "VersionCatalogAppView": {
+      "properties": {
+        "api": {
+          "title": "Api",
+          "type": "string"
+        },
+        "ui": {
+          "title": "Ui",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ui",
+        "api"
+      ],
+      "title": "VersionCatalogAppView",
+      "type": "object"
+    },
+    "VersionCatalogView": {
+      "properties": {
+        "apps": {
+          "$ref": "#/$defs/VersionCatalogAppView"
+        },
+        "components": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "title": "Components",
+          "type": "object"
+        }
+      },
+      "required": [
+        "apps"
+      ],
+      "title": "VersionCatalogView",
+      "type": "object"
+    },
+    "get_api_metrics_api_system_v1_api_metrics_get_param_query_apiEndpointFilter": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Apiendpointfilter"
+    },
+    "get_api_metrics_api_system_v1_api_metrics_get_param_query_apiMethodFilter": {
+      "default": "all",
+      "title": "Apimethodfilter",
+      "type": "string"
+    },
+    "get_api_metrics_api_system_v1_api_metrics_get_param_query_apiMinRequests": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Apiminrequests",
+      "type": "integer"
+    },
+    "get_api_metrics_api_system_v1_api_metrics_get_param_query_excludeHealthEndpoints": {
+      "default": false,
+      "title": "Excludehealthendpoints",
+      "type": "boolean"
+    },
+    "get_api_metrics_api_system_v1_api_metrics_get_param_query_recentErrorPathFilter": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Recenterrorpathfilter"
+    },
+    "get_api_metrics_api_system_v1_api_metrics_get_param_query_recentErrorStatusFilter": {
+      "default": "all",
+      "title": "Recenterrorstatusfilter",
+      "type": "string"
+    },
+    "get_api_metrics_api_system_v1_api_metrics_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Api Metrics Api System V1 Api Metrics Get",
+      "type": "object"
+    },
+    "get_auth_login_metrics_api_system_v1_auth_login_metrics_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Auth Login Metrics Api System V1 Auth Login Metrics Get",
+      "type": "object"
+    },
+    "get_suggestions_metrics_api_system_v1_suggestions_metrics_get_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Get Suggestions Metrics Api System V1 Suggestions Metrics Get",
+      "type": "object"
+    },
+    "ping_api_metrics_api_system_v1_api_metrics_ping_post_response_200_application_json": {
+      "additionalProperties": true,
+      "title": "Response Ping Api Metrics Api System V1 Api Metrics Ping Post",
+      "type": "object"
+    }
+  },
+  "$id": "https://dq-made-easy/contracts/internal-api/by-tag/system/v1/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DQ API by-tag/system v1 schema bundle"
+}

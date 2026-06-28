@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/validation-artifact-envelope/v1/schema.json",
+  "title": "Validation Artifact Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "validation_artifact_id",
+    "validation_artifact_version",
+    "artifact_contract_version",
+    "engine_type",
+    "assignment_scope",
+    "resolved_execution_scope",
+    "compiled_from",
+    "execution_hints",
+    "run_planning",
+    "engine_artifact"
+  ],
+  "properties": {
+    "validation_artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validation_artifact_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "artifact_contract_version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "engine_type": {
+      "type": "string",
+      "enum": ["gx", "soda", "pyspark_native"]
+    },
+    "assignment_scope": {
+      "$ref": "#/$defs/assignmentScope"
+    },
+    "resolved_execution_scope": {
+      "$ref": "#/$defs/resolvedExecutionScope"
+    },
+    "compiled_from": {
+      "$ref": "#/$defs/compiledFrom"
+    },
+    "execution_hints": {
+      "$ref": "#/$defs/executionHints"
+    },
+    "run_planning": {
+      "$ref": "#/$defs/runPlanning"
+    },
+    "engine_artifact": {
+      "$ref": "#/$defs/engineArtifact"
+    },
+    "saved_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_pipeline": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "assignmentScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "data_object_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_product_id": {
+          "type": "string",
+          "pattern": "^odcs\\..+$"
+        }
+      },
+      "anyOf": [
+        {"required": ["data_object_id"]},
+        {"required": ["dataset_id"]},
+        {"required": ["data_product_id"]}
+      ]
+    },
+    "resolvedExecutionScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data_object_version_ids"],
+      "properties": {
+        "data_object_version_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "compiledFrom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_ids", "compiler_version", "generated_at"],
+      "properties": {
+        "rule_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "compiler_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "executionHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recommended_engine_target", "primary_key_fields"],
+      "properties": {
+        "recommended_engine_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_key_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "business_key_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "supported_execution_shapes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["single_object", "join_pair"]
+          }
+        }
+      }
+    },
+    "runPlanning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine_target", "execution_shape", "grouping_key", "traceability"],
+      "properties": {
+        "engine_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "execution_shape": {
+          "type": "string",
+          "enum": ["single_object", "join_pair"]
+        },
+        "grouping_key": {
+          "type": "string",
+          "enum": ["data_object_version_id"]
+        },
+        "grouping_values": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "traceability": {
+          "$ref": "#/$defs/runPlanningTraceability"
+        },
+        "source_materialization": {
+          "$ref": "#/$defs/sourceMaterialization"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "execution_shape": {"const": "single_object"}
+            }
+          },
+          "then": {
+            "not": {
+              "required": ["source_materialization"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "execution_shape": {"const": "join_pair"}
+            }
+          },
+          "then": {
+            "required": ["source_materialization"]
+          }
+        }
+      ]
+    },
+    "runPlanningTraceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "rule_version_id",
+        "validation_artifact_id",
+        "validation_artifact_version"
+      ],
+      "properties": {
+        "rule_id": {"type": "string", "minLength": 1},
+        "rule_version_id": {"type": "string", "minLength": 1},
+        "validation_artifact_id": {"type": "string", "minLength": 1},
+        "validation_artifact_version": {"type": "integer", "minimum": 1},
+        "data_object_version_id": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "sourceMaterialization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "landing_zone_artifact_id",
+        "landing_zone_version_id",
+        "output_location",
+        "left_source",
+        "right_source"
+      ],
+      "properties": {
+        "landing_zone_artifact_id": {"type": "string", "minLength": 1},
+        "landing_zone_version_id": {"type": "string", "minLength": 1},
+        "output_location": {"type": "string", "minLength": 1},
+        "join_type": {
+          "type": "string",
+          "enum": ["inner", "left", "right", "full"]
+        },
+        "join_keys": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "left_source": {"$ref": "#/$defs/sourceTarget"},
+        "right_source": {"$ref": "#/$defs/sourceTarget"}
+      }
+    },
+    "sourceTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data_object_id", "data_object_version_id"],
+      "properties": {
+        "data_object_id": {"type": "string", "minLength": 1},
+        "data_object_version_id": {"type": "string", "minLength": 1},
+        "dataset_id": {"type": "string", "minLength": 1},
+        "data_product_id": {
+          "type": "string",
+          "pattern": "^odcs\\..+$"
+        }
+      }
+    },
+    "engineArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine_type", "artifact_kind", "artifact_schema_version", "payload"],
+      "properties": {
+        "engine_type": {
+          "type": "string",
+          "enum": ["gx", "soda", "pyspark_native"]
+        },
+        "artifact_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload": {
+          "type": "object",
+          "description": "Engine-native artifact payload stored without lossy transformation."
+        }
+      }
+    }
+  }
+}

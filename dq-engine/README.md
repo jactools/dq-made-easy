@@ -60,3 +60,22 @@ Notes
 -----
 - This is a minimal, opinionated implementation intended as a starting point. The `rule_translator.py` contains simple mapping from rule types to Great Expectations expectations and can be extended.
 - Spark execution, dispatch, and result reporting live in the GX worker path rather than this FastAPI service.
+
+Spark Expectations POC (SE-PLAN-002)
+------------------------------------
+- A small runnable POC is available at `dq-engine/scripts/spark_expectations_teller_machine_poc.py`.
+- The POC reads teller_machine parquet staged in AIStor, validates one `row_dq` rule and one `agg_dq` rule through Spark Expectations validation utilities, and prints a JSON summary including quarantined-row samples.
+
+Example run (from repository root):
+
+```bash
+export DQ_S3_ENDPOINT=http://localhost:9222
+export DQ_S3_ACCESS_KEY=aistoradmin
+export DQ_S3_SECRET_KEY=aistoradmin
+
+python dq-engine/scripts/spark_expectations_teller_machine_poc.py \
+  --input-uri "s3a://dq-landing-zone-retail-banking/gx/join-pairs/local-csv-staging/case_id=correct_atm_cash_movement_matches_customer_transaction_total/role=left/version_id=dov-9/format=parquet" \
+  --row-expectation "transaction_id IS NOT NULL AND amount > 0" \
+  --agg-expectation "count(*) > 0" \
+  --fail-on-agg-failure
+```

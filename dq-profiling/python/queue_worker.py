@@ -20,6 +20,10 @@ try:
 except Exception:
     redis = None
 try:
+    from redis.exceptions import TimeoutError as RedisTimeoutError
+except Exception:
+    RedisTimeoutError = TimeoutError
+try:
     import fakeredis
 except Exception:
     fakeredis = None
@@ -59,6 +63,14 @@ def _failure_type_from_exception(exc: Exception) -> str:
 
 def _request_type_from_data(data: dict[str, Any]) -> str:
     return str(data.get("type") or "profiling").strip().lower() or "profiling"
+
+
+def _next_queue_item(redis_client: Any, queue_key: str, *, timeout: int = 5) -> Any | None:
+    try:
+        return redis_client.brpop(queue_key, timeout=timeout)
+    except RedisTimeoutError:
+        LOG.warning("Redis BRPOP timed out while waiting for queue items; continuing")
+        return None
 
 
 class _InstrumentedRedisClient:
@@ -371,7 +383,15 @@ def run_worker():
         LOG.info("Using fakeredis in-memory instance for testing")
     else:
         try:
-            r = _InstrumentedRedisClient(redis.from_url(redis_url, decode_responses=True))
+            r = _InstrumentedRedisClient(
+                redis.from_url(
+                    redis_url,
+                    decode_responses=True,
+                    socket_timeout=5,
+                    socket_connect_timeout=5,
+                    retry_on_timeout=True,
+                )
+            )
             r.ping()
         except Exception as exc:
             record_redis_failure("connect", _failure_type_from_exception(exc))
@@ -382,7 +402,7 @@ def run_worker():
     try:
         while True:
             # BRPOP returns (key, value) or None
-            item = r.brpop(queue_key, timeout=5)
+            item = _next_queue_item(r, queue_key, timeout=5)
             if not item:
                 continue
             _, payload = item

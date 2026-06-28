@@ -5,15 +5,17 @@ set -euo pipefail
 #
 # What it does:
 # - Detects Rosetta usage on Apple Silicon.
-# - Scans site-packages for single-arch x86_64 native extensions.
+# - Scans site-packages for native extensions with unsupported architecture layouts.
 #
 # validate: groups=repo
 
-# Version: 1.1
-# Last modified: 2026-04-07
+# Version: 1.4
+# Last modified: 2026-06-28
 
-# Verify that a Python virtual environment does not contain single-arch x86_64
-# native extensions that will fail on Apple Silicon arm64 runtime.
+# Verify that a Python virtual environment does not contain native extensions with
+# single-arch x86_64 layouts that are incompatible with the intended Apple
+# Silicon arm64 runtime. Universal macOS binaries that include arm64 are
+# considered compatible.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
@@ -46,6 +48,11 @@ else
   PYTHON_ARCH="${HOST_ARCH}"
 fi
 
+PYTHON_IS_UNIVERSAL_BINARY=false
+if [[ "${PYTHON_BIN_DESC}" == *"universal binary"* && "${PYTHON_BIN_DESC}" == *"x86_64"* && "${PYTHON_BIN_DESC}" == *"arm64"* ]]; then
+  PYTHON_IS_UNIVERSAL_BINARY=true
+fi
+
 info "$my_name" "Checking virtualenv: ${VENV_DIR}"
 info "$my_name" "Host arch: ${HOST_ARCH}"
 info "$my_name" "Apple Silicon capable: ${APPLE_ARM_CAPABLE}"
@@ -53,13 +60,13 @@ info "$my_name" "Rosetta translated process: ${PROC_TRANSLATED}"
 info "$my_name" "Python runtime arch: ${PYTHON_ARCH}"
 info "$my_name" "Python binary: ${PYTHON_BIN_DESC}"
 
-if [[ "${APPLE_ARM_CAPABLE}" == "1" && "${PROC_TRANSLATED}" == "1" ]]; then
+if [[ "${APPLE_ARM_CAPABLE}" == "1" && "${PROC_TRANSLATED}" == "1" && "${PYTHON_IS_UNIVERSAL_BINARY}" != "true" ]]; then
   error "$my_name" "Current shell is running under Rosetta translation on Apple Silicon."
   info "$my_name" "Run this validation from a native arm64 terminal session."
   exit 1
 fi
 
-if [[ "${APPLE_ARM_CAPABLE}" == "1" && "${PYTHON_ARCH}" == "x86_64" ]]; then
+if [[ "${APPLE_ARM_CAPABLE}" == "1" && "${PYTHON_ARCH}" == "x86_64" && "${PYTHON_IS_UNIVERSAL_BINARY}" != "true" ]]; then
   error "$my_name" "Python runtime is x86_64 on an arm64 host (likely Rosetta shell)."
   info "$my_name" "Open a native arm64 terminal/session and recreate the venv if needed."
   exit 1
@@ -73,22 +80,32 @@ if [[ -z "${PY_VERSION_DIR}" || ! -d "${SITE_PACKAGES_DIR}" ]]; then
   exit 2
 fi
 
-# Collect all single-arch x86_64 extensions (allow universal binaries containing arm64).
+# Collect native extensions with unsupported architecture layouts.
 # Note: macOS ships bash 3.2 by default, so avoid bash-4-only `mapfile`.
 BAD_EXTENSIONS=()
 while IFS= read -r -d '' ext; do
   desc="$(file "$ext")"
-  if [[ "$desc" == *"x86_64"* && "$desc" != *"arm64"* ]]; then
+  has_x86_64=false
+  has_arm64=false
+
+  if [[ "$desc" == *"x86_64"* ]]; then
+    has_x86_64=true
+  fi
+  if [[ "$desc" == *"arm64"* ]]; then
+    has_arm64=true
+  fi
+
+  if [[ "$has_x86_64" == true && "$has_arm64" != true ]]; then
     BAD_EXTENSIONS+=("$desc")
   fi
 done < <(find "${SITE_PACKAGES_DIR}" -name "*.so" -print0)
 
 if [[ ${#BAD_EXTENSIONS[@]} -eq 0 ]]; then
-  success "$my_name" "No single-arch x86_64 native extensions found."
+  success "$my_name" "No unsupported native extensions with mixed or x86_64-only architecture layouts found."
   exit 0
 fi
 
-error "$my_name" "Found ${#BAD_EXTENSIONS[@]} single-arch x86_64 native extension(s):"
+error "$my_name" "Found ${#BAD_EXTENSIONS[@]} unsupported native extension(s):"
 printf '%s
 ' "${BAD_EXTENSIONS[@]}"
 

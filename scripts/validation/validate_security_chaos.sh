@@ -24,7 +24,7 @@ main() {
 
   cd "$ROOT_DIR/dq-api/fastapi"
   PYTHONPATH="$ROOT_DIR/dq-utils/src:$ROOT_DIR/dq-domain-validation/src" \
-    "${PYTHON_CMD[@]}" -m pytest tests/api/test_auth_endpoints.py -k 'fails_fast_when_oidc_discovery_raises' -q --no-cov
+    "${PYTHON_CMD[@]}" -m pytest tests/api/test_auth_endpoints.py -k 'fails_fast_when_oidc_discovery_raises or fails_fast_when_sso_is_not_configured' -q --no-cov
 
   success "$my_name" "Security chaos-engineering regression tests passed."
 }

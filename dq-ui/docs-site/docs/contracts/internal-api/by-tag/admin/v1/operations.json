@@ -1,0 +1,494 @@
+{
+  "group": "by-tag/admin",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspaceId",
+          "required": false,
+          "schema_ref": "#/$defs/list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_param_query_workspaceId"
+        },
+        {
+          "in": "query",
+          "name": "requesterId",
+          "required": false,
+          "schema_ref": "#/$defs/list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_param_query_requesterId"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_param_query_status"
+        }
+      ],
+      "path": "/api/admin/v1/exception-fact-access-requests",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/list_exception_fact_access_requests_api_admin_v1_exception_fact_access_requests_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Exception Fact Access Requests",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_exception_fact_access_request_api_admin_v1_exception_fact_access_requests_post",
+      "path": "/api/admin/v1/exception-fact-access-requests",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/create_exception_fact_access_request_api_admin_v1_exception_fact_access_requests_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactAccessRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Exception Fact Access Request",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_exception_fact_access_request_api_admin_v1_exception_fact_access_requests__request_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_exception_fact_access_request_api_admin_v1_exception_fact_access_requests_request_id_put_param_path_request_id"
+        }
+      ],
+      "path": "/api/admin/v1/exception-fact-access-requests/{request_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_exception_fact_access_request_api_admin_v1_exception_fact_access_requests_request_id_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/ExceptionFactAccessRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Exception Fact Access Request",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_me_api_admin_v1_me_get",
+      "path": "/api/admin/v1/me",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUserView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Me",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_me_api_admin_v1_me_put",
+      "path": "/api/admin/v1/me",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_me_api_admin_v1_me_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUserView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Me",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_roles_api_admin_v1_roles_get",
+      "path": "/api/admin/v1/roles",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_roles_api_admin_v1_roles_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Roles",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_role_api_admin_v1_roles_post",
+      "path": "/api/admin/v1/roles",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/create_role_api_admin_v1_roles_post_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminRoleView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Role",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_role_api_admin_v1_roles__role_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "role_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_role_api_admin_v1_roles_role_id_put_param_path_role_id"
+        }
+      ],
+      "path": "/api/admin/v1/roles/{role_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_role_api_admin_v1_roles_role_id_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminRoleView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Role",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "recover_removed_rule_api_admin_v1_rules__rule_id__recover_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/recover_removed_rule_api_admin_v1_rules_rule_id_recover_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/admin/v1/rules/{rule_id}/recover",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/recover_removed_rule_api_admin_v1_rules_rule_id_recover_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Recover Removed Rule",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_users_api_admin_v1_users_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_users_api_admin_v1_users_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_users_api_admin_v1_users_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "q",
+          "required": false,
+          "schema_ref": "#/$defs/get_users_api_admin_v1_users_get_param_query_q"
+        },
+        {
+          "in": "query",
+          "name": "sort",
+          "required": false,
+          "schema_ref": "#/$defs/get_users_api_admin_v1_users_get_param_query_sort"
+        },
+        {
+          "in": "query",
+          "name": "order",
+          "required": false,
+          "schema_ref": "#/$defs/get_users_api_admin_v1_users_get_param_query_order"
+        }
+      ],
+      "path": "/api/admin/v1/users",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUsersPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Users",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_user_api_admin_v1_users__user_id__put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "user_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_user_api_admin_v1_users_user_id_put_param_path_user_id"
+        }
+      ],
+      "path": "/api/admin/v1/users/{user_id}",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_user_api_admin_v1_users_user_id_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUserView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update User",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "reset_user_profile_api_admin_v1_users__user_id__reset_profile_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "user_id",
+          "required": true,
+          "schema_ref": "#/$defs/reset_user_profile_api_admin_v1_users_user_id_reset_profile_post_param_path_user_id"
+        }
+      ],
+      "path": "/api/admin/v1/users/{user_id}/reset-profile",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/IdResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Reset User Profile",
+      "tags": [
+        "admin"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "reset_user_settings_api_admin_v1_users__user_id__reset_settings_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "user_id",
+          "required": true,
+          "schema_ref": "#/$defs/reset_user_settings_api_admin_v1_users_user_id_reset_settings_post_param_path_user_id"
+        }
+      ],
+      "path": "/api/admin/v1/users/{user_id}/reset-settings",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/IdResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Reset User Settings",
+      "tags": [
+        "admin"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

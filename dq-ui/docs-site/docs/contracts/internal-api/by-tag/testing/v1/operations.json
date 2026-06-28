@@ -1,0 +1,719 @@
+{
+  "group": "by-tag/testing",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_batch_test_requests_api_rulebuilder_v1_batch_test_requests_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/get_batch_test_requests_api_rulebuilder_v1_batch_test_requests_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "status",
+          "required": false,
+          "schema_ref": "#/$defs/get_batch_test_requests_api_rulebuilder_v1_batch_test_requests_get_param_query_status"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_batch_test_requests_api_rulebuilder_v1_batch_test_requests_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_batch_test_requests_api_rulebuilder_v1_batch_test_requests_get_param_query_limit"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/batch-test-requests",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/BatchTestRequestsPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Batch Test Requests",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_batch_test_request_api_rulebuilder_v1_batch_test_requests_post",
+      "path": "/api/rulebuilder/v1/batch-test-requests",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateBatchTestRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/create_batch_test_request_api_rulebuilder_v1_batch_test_requests_post_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Batch Test Request",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_batch_test_request_api_rulebuilder_v1_batch_test_requests__request_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_batch_test_request_api_rulebuilder_v1_batch_test_requests_request_id_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/batch-test-requests/{request_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_batch_test_request_api_rulebuilder_v1_batch_test_requests_request_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Batch Test Request",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "run_batch_test_request_api_rulebuilder_v1_batch_test_requests__request_id__run_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/run_batch_test_request_api_rulebuilder_v1_batch_test_requests_request_id_run_post_param_path_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/batch-test-requests/{request_id}/run",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/BatchTestRunResultView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Run Batch Test Request",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "generate_test_data_for_version_api_rulebuilder_v1_data_object_versions__version_id__generate_test_data_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/generate_test_data_for_version_api_rulebuilder_v1_data_object_versions_version_id_generate_test_data_post_param_path_version_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/data-object-versions/{version_id}/generate-test-data",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/GenerateTestDataRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestDataPayloadView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Generate Test Data For Version",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "log_test_action_api_rulebuilder_v1_rules__rule_id__test_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/log_test_action_api_rulebuilder_v1_rules_rule_id_test_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/test",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/LogTestActionRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/StoreTestProofResultView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Log Test Action",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "start_rule_test_with_generated_data_api_rulebuilder_v1_rules__rule_id__test_runs_start_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/start_rule_test_with_generated_data_api_rulebuilder_v1_rules_rule_id_test_runs_start_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/test-runs/start",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/TestRuleWithGeneratedDataRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestProofView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Start Rule Test With Generated Data",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "test_rule_with_data_api_rulebuilder_v1_rules__rule_id__test_with_data_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/test_rule_with_data_api_rulebuilder_v1_rules_rule_id_test_with_data_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/test-with-data",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/TestRuleWithDataRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestRunResultView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Test Rule With Data",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "test_rule_with_generated_data_api_rulebuilder_v1_rules__rule_id__test_with_generated_data_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/test_rule_with_generated_data_api_rulebuilder_v1_rules_rule_id_test_with_generated_data_post_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/rules/{rule_id}/test-with-generated-data",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/TestRuleWithGeneratedDataRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestRunResultView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Test Rule With Generated Data",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_test_data_materialization_api_rulebuilder_v1_test_data_materializations_post",
+      "path": "/api/rulebuilder/v1/test-data/materializations",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateTestDataMaterializationRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestDataMaterializationRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Test Data Materialization",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_test_data_materialization_api_rulebuilder_v1_test_data_materializations__request_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_test_data_materialization_api_rulebuilder_v1_test_data_materializations_request_id_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/test-data/materializations/{request_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestDataMaterializationRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Test Data Materialization",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "report_test_data_materialization_completion_api_rulebuilder_v1_test_data_materializations__request_id__complete_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/report_test_data_materialization_completion_api_rulebuilder_v1_test_data_materializations_request_id_complete_post_param_path_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/test-data/materializations/{request_id}/complete",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ReportTestDataMaterializationCompletionRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestDataMaterializationCompletionView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Report Test Data Materialization Completion",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "stream_test_data_materialization_events_api_rulebuilder_v1_test_data_materializations__request_id__events_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/stream_test_data_materialization_events_api_rulebuilder_v1_test_data_materializations_request_id_events_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/test-data/materializations/{request_id}/events",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/stream_test_data_materialization_events_api_rulebuilder_v1_test_data_materializations_request_id_events_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Stream Test Data Materialization Events",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_test_data_request_api_rulebuilder_v1_test_data_requests_post",
+      "path": "/api/rulebuilder/v1/test-data/requests",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateQueuedTestDataRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/QueuedTestDataRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Test Data Request",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_test_data_request_api_rulebuilder_v1_test_data_requests__request_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_test_data_request_api_rulebuilder_v1_test_data_requests_request_id_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/test-data/requests/{request_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/QueuedTestDataRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Test Data Request",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "stream_test_data_request_events_api_rulebuilder_v1_test_data_requests__request_id__events_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/stream_test_data_request_events_api_rulebuilder_v1_test_data_requests_request_id_events_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/test-data/requests/{request_id}/events",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/stream_test_data_request_events_api_rulebuilder_v1_test_data_requests_request_id_events_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Stream Test Data Request Events",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_test_proofs_api_rulebuilder_v1_test_proofs__rule_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_test_proofs_api_rulebuilder_v1_test_proofs_rule_id_get_param_path_rule_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/test-proofs/{rule_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_test_proofs_api_rulebuilder_v1_test_proofs_rule_id_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Test Proofs",
+      "tags": [
+        "testing"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "export_test_proof_report_api_rulebuilder_v1_test_proofs__rule_id__report_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "rule_id",
+          "required": true,
+          "schema_ref": "#/$defs/export_test_proof_report_api_rulebuilder_v1_test_proofs_rule_id_report_get_param_path_rule_id"
+        },
+        {
+          "in": "query",
+          "name": "format",
+          "required": false,
+          "schema_ref": "#/$defs/export_test_proof_report_api_rulebuilder_v1_test_proofs_rule_id_report_get_param_query_format"
+        },
+        {
+          "in": "query",
+          "name": "proof_id",
+          "required": false,
+          "schema_ref": "#/$defs/export_test_proof_report_api_rulebuilder_v1_test_proofs_rule_id_report_get_param_query_proof_id"
+        }
+      ],
+      "path": "/api/rulebuilder/v1/test-proofs/{rule_id}/report",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/export_test_proof_report_api_rulebuilder_v1_test_proofs_rule_id_report_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Export Test Proof Report",
+      "tags": [
+        "testing"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

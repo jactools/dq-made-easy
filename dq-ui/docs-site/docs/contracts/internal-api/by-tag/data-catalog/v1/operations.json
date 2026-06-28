@@ -1,0 +1,1302 @@
+{
+  "group": "by-tag/data-catalog",
+  "operations": [
+    {
+      "method": "GET",
+      "operation_id": "get_attribute_definition_mappings_api_data_catalog_v1_attribute_definition_mappings_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "versionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_attribute_definition_mappings_api_data_catalog_v1_attribute_definition_mappings_get_param_query_versionId"
+        },
+        {
+          "in": "query",
+          "name": "attributeId",
+          "required": false,
+          "schema_ref": "#/$defs/get_attribute_definition_mappings_api_data_catalog_v1_attribute_definition_mappings_get_param_query_attributeId"
+        }
+      ],
+      "path": "/api/data-catalog/v1/attribute-definition-mappings",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_attribute_definition_mappings_api_data_catalog_v1_attribute_definition_mappings_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Attribute Definition Mappings",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "post_attribute_definition_mapping_api_data_catalog_v1_attribute_definition_mappings_post",
+      "path": "/api/data-catalog/v1/attribute-definition-mappings",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/AttributeDefinitionMappingUpsertRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AttributeDefinitionMappingUpsertResultView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Post Attribute Definition Mapping",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_attribute_rule_counts_api_data_catalog_v1_attribute_rule_counts_get",
+      "path": "/api/data-catalog/v1/attribute-rule-counts",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_attribute_rule_counts_api_data_catalog_v1_attribute_rule_counts_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Attribute Rule Counts",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_attributes_catalog_api_data_catalog_v1_attributes_catalog_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "versionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_attributes_catalog_api_data_catalog_v1_attributes_catalog_get_param_query_versionId"
+        },
+        {
+          "in": "query",
+          "name": "businessKeyOnly",
+          "required": false,
+          "schema_ref": "#/$defs/get_attributes_catalog_api_data_catalog_v1_attributes_catalog_get_param_query_businessKeyOnly"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_attributes_catalog_api_data_catalog_v1_attributes_catalog_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_attributes_catalog_api_data_catalog_v1_attributes_catalog_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/attributes-catalog",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AttributeCatalogPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Attributes Catalog",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_attribute_protection_api_data_catalog_v1_attributes_catalog__attribute_id__protection_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "attribute_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_attribute_protection_api_data_catalog_v1_attributes_catalog_attribute_id_protection_get_param_path_attribute_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/attributes-catalog/{attribute_id}/protection",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AttributeCatalogView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Attribute Protection",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "put_attribute_protection_api_data_catalog_v1_attributes_catalog__attribute_id__protection_put",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "attribute_id",
+          "required": true,
+          "schema_ref": "#/$defs/put_attribute_protection_api_data_catalog_v1_attributes_catalog_attribute_id_protection_put_param_path_attribute_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/attributes-catalog/{attribute_id}/protection",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/put_attribute_protection_api_data_catalog_v1_attributes_catalog_attribute_id_protection_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AttributeCatalogView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Put Attribute Protection",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_data_definition_task_api_data_catalog_v1_data_definition_tasks_post",
+      "path": "/api/data-catalog/v1/data-definition-tasks",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/DataDefinitionTaskCreateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDefinitionTaskCreateResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Data Definition Task",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_data_definition_tasks_api_data_catalog_v1_data_definition_tasks_requests_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace_id",
+          "required": false,
+          "schema_ref": "#/$defs/list_data_definition_tasks_api_data_catalog_v1_data_definition_tasks_requests_get_param_query_workspace_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_data_definition_tasks_api_data_catalog_v1_data_definition_tasks_requests_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-definition-tasks/requests",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDefinitionTaskHistoryResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Data Definition Tasks",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "update_data_definition_task_approval_api_data_catalog_v1_data_definition_tasks_requests__request_id__approval_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/update_data_definition_task_approval_api_data_catalog_v1_data_definition_tasks_requests_request_id_approval_post_param_path_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/approval",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/DataDefinitionTaskApprovalUpdateRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDefinitionTaskStatusResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Data Definition Task Approval",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "stream_data_definition_task_events_api_data_catalog_v1_data_definition_tasks_requests__request_id__events_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/stream_data_definition_task_events_api_data_catalog_v1_data_definition_tasks_requests_request_id_events_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/events",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/stream_data_definition_task_events_api_data_catalog_v1_data_definition_tasks_requests_request_id_events_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Stream Data Definition Task Events",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "list_data_definition_task_history_api_data_catalog_v1_data_definition_tasks_requests__request_id__history_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/list_data_definition_task_history_api_data_catalog_v1_data_definition_tasks_requests_request_id_history_get_param_path_request_id"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/list_data_definition_task_history_api_data_catalog_v1_data_definition_tasks_requests_request_id_history_get_param_query_limit"
+        },
+        {
+          "in": "query",
+          "name": "offset",
+          "required": false,
+          "schema_ref": "#/$defs/list_data_definition_task_history_api_data_catalog_v1_data_definition_tasks_requests_request_id_history_get_param_query_offset"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/history",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDefinitionTaskAuditHistoryResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "List Data Definition Task History",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "import_data_definition_task_to_openmetadata_api_data_catalog_v1_data_definition_tasks_requests__request_id__openmetadata_sync_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/import_data_definition_task_to_openmetadata_api_data_catalog_v1_data_definition_tasks_requests_request_id_openmetadata_sync_post_param_path_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/openmetadata-sync",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDefinitionTaskImportResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Import Data Definition Task To Openmetadata",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_definition_task_status_api_data_catalog_v1_data_definition_tasks_requests__request_id__status_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_definition_task_status_api_data_catalog_v1_data_definition_tasks_requests_request_id_status_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-definition-tasks/requests/{request_id}/status",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDefinitionTaskStatusResponseView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Definition Task Status",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_deliveries_api_data_catalog_v1_data_deliveries_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_deliveries_api_data_catalog_v1_data_deliveries_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "versionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_deliveries_api_data_catalog_v1_data_deliveries_get_param_query_versionId"
+        },
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_deliveries_api_data_catalog_v1_data_deliveries_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_deliveries_api_data_catalog_v1_data_deliveries_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_deliveries_api_data_catalog_v1_data_deliveries_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_deliveries_api_data_catalog_v1_data_deliveries_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-deliveries",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDeliveriesPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Deliveries",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "post_data_delivery_execution_request_api_data_catalog_v1_data_deliveries__data_delivery_id__executions_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "data_delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/post_data_delivery_execution_request_api_data_catalog_v1_data_deliveries_data_delivery_id_executions_post_param_path_data_delivery_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-deliveries/{data_delivery_id}/executions",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/post_data_delivery_execution_request_api_data_catalog_v1_data_deliveries_data_delivery_id_executions_post_request_body_application_json"
+          }
+        },
+        "required": false
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDeliveryExecutionReceiptView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Post Data Delivery Execution Request",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_delivery_execution_status_api_data_catalog_v1_data_deliveries__data_delivery_id__executions__execution_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "data_delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_delivery_execution_status_api_data_catalog_v1_data_deliveries_data_delivery_id_executions_execution_id_get_param_path_data_delivery_id"
+        },
+        {
+          "in": "path",
+          "name": "execution_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_delivery_execution_status_api_data_catalog_v1_data_deliveries_data_delivery_id_executions_execution_id_get_param_path_execution_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-deliveries/{data_delivery_id}/executions/{execution_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/GxExecutionRunView"
+            }
+          },
+          "description": "Delivery-linked GX execution run metadata and lifecycle state."
+        },
+        "404": {
+          "description": "Delivery or execution run not found."
+        },
+        "409": {
+          "description": "Execution run does not belong to the requested delivery."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Delivery Execution Status",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_delivery_note_api_data_catalog_v1_data_deliveries__delivery_id__note_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_delivery_note_api_data_catalog_v1_data_deliveries_delivery_id_note_get_param_path_delivery_id"
+        },
+        {
+          "in": "query",
+          "name": "include_storage_details",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_delivery_note_api_data_catalog_v1_data_deliveries_delivery_id_note_get_param_query_include_storage_details"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-deliveries/{delivery_id}/note",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDeliveryNoteView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Delivery Note",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_object_versions_api_data_catalog_v1_data_object_versions_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "objectId",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_object_versions_api_data_catalog_v1_data_object_versions_get_param_query_objectId"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_object_versions_api_data_catalog_v1_data_object_versions_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_object_versions_api_data_catalog_v1_data_object_versions_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-object-versions",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataObjectVersionsPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Object Versions",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_object_version_api_data_catalog_v1_data_object_versions__version_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "version_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_data_object_version_api_data_catalog_v1_data_object_versions_version_id_get_param_path_version_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-object-versions/{version_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataObjectVersionView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Object Version",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_objects_api_data_catalog_v1_data_objects_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_objects_api_data_catalog_v1_data_objects_get_param_query_businessKey"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-objects",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_data_objects_api_data_catalog_v1_data_objects_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Objects",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_objects_catalog_api_data_catalog_v1_data_objects_catalog_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "dataSetId",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_objects_catalog_api_data_catalog_v1_data_objects_catalog_get_param_query_dataSetId"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_objects_catalog_api_data_catalog_v1_data_objects_catalog_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_objects_catalog_api_data_catalog_v1_data_objects_catalog_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_objects_catalog_api_data_catalog_v1_data_objects_catalog_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-objects-catalog",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataObjectCatalogPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Objects Catalog",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_products_api_data_catalog_v1_data_products_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_products_api_data_catalog_v1_data_products_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_products_api_data_catalog_v1_data_products_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_products_api_data_catalog_v1_data_products_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_products_api_data_catalog_v1_data_products_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-products",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataProductsPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Products",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_data_sets_api_data_catalog_v1_data_sets_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "productId",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_sets_api_data_catalog_v1_data_sets_get_param_query_productId"
+        },
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_sets_api_data_catalog_v1_data_sets_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "standalone",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_sets_api_data_catalog_v1_data_sets_get_param_query_standalone"
+        },
+        {
+          "in": "query",
+          "name": "businessKey",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_sets_api_data_catalog_v1_data_sets_get_param_query_businessKey"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_sets_api_data_catalog_v1_data_sets_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_data_sets_api_data_catalog_v1_data_sets_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-sets",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataSetsPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Data Sets",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "download_data_set_contract_api_data_catalog_v1_data_sets__data_set_id__contract_get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "data_set_id",
+          "required": true,
+          "schema_ref": "#/$defs/download_data_set_contract_api_data_catalog_v1_data_sets_data_set_id_contract_get_param_path_data_set_id"
+        },
+        {
+          "in": "query",
+          "name": "format",
+          "required": false,
+          "schema_ref": "#/$defs/download_data_set_contract_api_data_catalog_v1_data_sets_data_set_id_contract_get_param_query_format"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-sets/{data_set_id}/contract",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/download_data_set_contract_api_data_catalog_v1_data_sets_data_set_id_contract_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Download Data Set Contract",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "import_data_set_contract_api_data_catalog_v1_data_sets__data_set_id__contract_import_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "data_set_id",
+          "required": true,
+          "schema_ref": "#/$defs/import_data_set_contract_api_data_catalog_v1_data_sets_data_set_id_contract_import_post_param_path_data_set_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/data-sets/{data_set_id}/contract/import",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ContractImportRequestView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataSetView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Import Data Set Contract",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_delivery_inventory_api_data_catalog_v1_delivery_inventory_get",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "dataObjectVersionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_inventory_api_data_catalog_v1_delivery_inventory_get_param_query_dataObjectVersionId"
+        },
+        {
+          "in": "query",
+          "name": "versionId",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_inventory_api_data_catalog_v1_delivery_inventory_get_param_query_versionId"
+        },
+        {
+          "in": "query",
+          "name": "workspace",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_inventory_api_data_catalog_v1_delivery_inventory_get_param_query_workspace"
+        },
+        {
+          "in": "query",
+          "name": "page",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_inventory_api_data_catalog_v1_delivery_inventory_get_param_query_page"
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema_ref": "#/$defs/get_delivery_inventory_api_data_catalog_v1_delivery_inventory_get_param_query_limit"
+        }
+      ],
+      "path": "/api/data-catalog/v1/delivery-inventory",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/DataDeliveryInventoryPageView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Delivery Inventory",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_materialization_request_api_data_catalog_v1_materialization_requests_post",
+      "path": "/api/data-catalog/v1/materialization-requests",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/CreateCatalogMaterializationRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "202": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestDataMaterializationRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Create Materialization Request",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_materialization_request_api_data_catalog_v1_materialization_requests__request_id__get",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/get_materialization_request_api_data_catalog_v1_materialization_requests_request_id_get_param_path_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/materialization-requests/{request_id}",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/TestDataMaterializationRequestView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Get Materialization Request",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "report_materialization_request_completion_api_data_catalog_v1_materialization_requests__request_id__complete_post",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "request_id",
+          "required": true,
+          "schema_ref": "#/$defs/report_materialization_request_completion_api_data_catalog_v1_materialization_requests_request_id_complete_post_param_path_request_id"
+        }
+      ],
+      "path": "/api/data-catalog/v1/materialization-requests/{request_id}/complete",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/ReportCatalogMaterializationCompletionRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/MaterializationCompletionBatchView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Report Materialization Request Completion",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_rule_attributes_api_data_catalog_v1_rule_attributes_get",
+      "path": "/api/data-catalog/v1/rule-attributes",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/get_rule_attributes_api_data_catalog_v1_rule_attributes_get_response_200_application_json"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Rule Attributes",
+      "tags": [
+        "data-catalog"
+      ]
+    },
+    {
+      "method": "POST",
+      "operation_id": "post_rule_attributes_api_data_catalog_v1_rule_attributes_post",
+      "path": "/api/data-catalog/v1/rule-attributes",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/RuleAttributesUpsertRequest"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AddRuleAttributesResultView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Post Rule Attributes",
+      "tags": [
+        "data-catalog"
+      ]
+    }
+  ],
+  "source": {
+    "openapi": "3.1.0",
+    "title": "DQ API (FastAPI)",
+    "version": "0.6.2"
+  },
+  "version": "v1"
+}

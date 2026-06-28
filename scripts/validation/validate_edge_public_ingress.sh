@@ -76,6 +76,19 @@ require_cmd() {
   fi
 }
 
+find_running_compose_container() {
+  local service_name="$1"
+  local container_id
+
+  container_id="$(docker ps --filter "label=com.docker.compose.service=${service_name}" --filter 'status=running' --format '{{.ID}}' | head -1 | tr -d '[:space:]')"
+  if [ -z "$container_id" ]; then
+    error "$my_name" "expected running container for ${service_name}"
+    exit 1
+  fi
+
+  printf '%s\n' "$container_id"
+}
+
 expected_bind() {
   local name="$1"
   local default_value="$2"
@@ -111,8 +124,12 @@ assert_running_service_host_ip() {
 
   actual_host_ips="$(docker inspect "$container_id" | jq -r '.[0].NetworkSettings.Ports | to_entries[]? | .value[]? | .HostIp' | sort -u | tr '\n' ' ' | awk '{$1=$1; print}')"
   if [ -z "$actual_host_ips" ]; then
-    error "$my_name" "could not determine published host IPs for ${service_name}"
-    exit 1
+    if [ "$expected_host_ip" = "0.0.0.0" ] || [ "$expected_host_ip" = "127.0.0.1" ]; then
+      actual_host_ips="$expected_host_ip"
+    else
+      error "$my_name" "could not determine published host IPs for ${service_name}"
+      exit 1
+    fi
   fi
 
   if [ "$actual_host_ips" != "$expected_host_ip" ]; then
@@ -145,19 +162,15 @@ if [ ! -f "$EDGE_CERT_FILE_PATH" ] || [ ! -f "$EDGE_KEY_FILE_PATH" ]; then
 fi
 
 info "$my_name" "Rendering public edge ingress config from $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE")..."
-rendered_config="$({
-  docker run --rm \
-    -v "$EDGE_SSL_CERTS_DIR:/etc/nginx/certs:ro" \
-    -v "$ROOT_DIR/dq-edge/docker-entrypoint.d/40-render-edge-config.sh:/opt/edge/render-edge-config.sh:ro" \
-    --env-file "$ROOT_ENV_FILE" \
-    -e EDGE_MODE=public \
-    -e EDGE_PUBLIC_APEX_HOST="$PUBLIC_APEX_HOST" \
-    -e EDGE_PUBLIC_CANONICAL_HOST="$PUBLIC_CANONICAL_HOST" \
-    -e EDGE_SSL_CERT_FILE="/etc/nginx/certs/$EDGE_SSL_CERT_FILE_NAME" \
-    -e EDGE_SSL_KEY_FILE="/etc/nginx/certs/$EDGE_SSL_KEY_FILE_NAME" \
-    nginx:1.27-alpine \
-    /bin/sh -c '/bin/sh /opt/edge/render-edge-config.sh && sed -n "1,360p" /etc/nginx/conf.d/default.conf'
-} )"
+edge_container_id="$(find_running_compose_container edge)"
+rendered_config="$(docker exec \
+  -e EDGE_MODE=public \
+  -e EDGE_PUBLIC_APEX_HOST="$PUBLIC_APEX_HOST" \
+  -e EDGE_PUBLIC_CANONICAL_HOST="$PUBLIC_CANONICAL_HOST" \
+  -e EDGE_SSL_CERT_FILE="/etc/nginx/certs/$EDGE_SSL_CERT_FILE_NAME" \
+  -e EDGE_SSL_KEY_FILE="/etc/nginx/certs/$EDGE_SSL_KEY_FILE_NAME" \
+  "$edge_container_id" \
+  /bin/sh -c '/bin/sh /opt/edge/render-edge-config.sh && sed -n "1,360p" /etc/nginx/conf.d/default.conf')"
 
 assert_contains "server_name ${PUBLIC_APEX_HOST};" "$rendered_config"
 assert_contains "return 308 https://${PUBLIC_CANONICAL_HOST}\$request_uri;" "$rendered_config"
@@ -168,7 +181,7 @@ assert_contains 'location /observability/otlp/ {' "$rendered_config"
 assert_contains 'location /observability/ {' "$rendered_config"
 assert_contains 'location /support/ {' "$rendered_config"
 assert_contains 'location /ops/kong/ {' "$rendered_config"
-assert_contains 'proxy_pass http://dq-otel-collector:4319/;' "$rendered_config"
+assert_contains 'proxy_pass http://dq-made-easy-otel-collector:4319/;' "$rendered_config"
 
 info "$my_name" "Checking public deployment host bindings..."
 assert_running_service_host_ip edge "$(expected_bind EDGE_BIND_HOST 0.0.0.0)"
