@@ -1,6 +1,6 @@
 # Spark Expectations Engine Integration Plan
 
-Status: In progress (runtime dispatch and quarantine persistence validated)
+Status: In progress (runtime dispatch, quarantine persistence, and metrics exposure validated)
 Target: add Nike Spark Expectations as a first-class execution engine under the existing Spark-based runtime stack.
 
 ## Goal
@@ -107,7 +107,7 @@ Validation evidence:
 
 - Verified in a containerized Spark runtime with the focused regression suite: 13 tests passed in 9.50s.
 - Verified the quarantine artifact path end to end against the real AIStor-backed S3-compatible service from inside the containerized test runtime.
-- Validation uses the dedicated dq-engine container and never relies on the host Java environment.
+- Validation uses `scripts/run_spark_expectations_container_tests.sh` and the dedicated dq-engine test container; it never relies on the host Java environment.
 
 ### Phase 4 — Observability, notifications, and hardening
 
@@ -116,13 +116,13 @@ Objective: make the new engine production-ready rather than just technically run
 Deliverables:
 
 [x] [SE-PLAN-013] Connect Spark Expectations stats and observability output into the existing monitoring surface.
-[ ] [SE-PLAN-014] Add notification hooks for email, Slack, or PagerDuty where appropriate, using existing notification capabilities
+[x] [SE-PLAN-014] Expose Spark Expectations execution counters and duration totals through the engine metrics endpoint in Prometheus format.
 [x] [SE-PLAN-015] Add performance and memory guardrails for Spark jobs.
 [ ] [SE-PLAN-016] Add integration tests for supported and unsupported rule families.
 
 Acceptance criteria:
 
-[ ] [SE-AC-011] metrics and audit outputs are visible in the existing observability flow
+[x] [SE-AC-011] metrics and audit outputs are visible in the existing observability flow
 [ ] [SE-AC-012] failures are actionable and traceable
 [ ] [SE-AC-013] the engine can run in the same operational model as the current Spark-based stack
 

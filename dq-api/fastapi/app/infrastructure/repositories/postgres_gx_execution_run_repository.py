@@ -77,6 +77,7 @@ class PostgresGxExecutionRunRepository(GxExecutionRunRepository):
                     if run.resultSummary is not None
                     else {}
                 ),
+                metrics_json=(dict(run.metrics or run.performanceSummary or {}) or None),
                 diagnostics_json=[
                     item.model_dump(by_alias=True, exclude_none=True) for item in run.diagnostics or []
                 ],
@@ -178,6 +179,10 @@ class PostgresGxExecutionRunRepository(GxExecutionRunRepository):
 
             if transition.resultSummary is not None:
                 run_row.result_summary_json = transition.resultSummary.model_dump(by_alias=True, exclude_none=True)
+            if transition.metrics is not None:
+                run_row.metrics_json = dict(transition.metrics)
+            elif transition.performanceSummary is not None:
+                run_row.metrics_json = dict(transition.performanceSummary)
             if transition.diagnostics is not None:
                 run_row.diagnostics_json = [
                     item.model_dump(by_alias=True, exclude_none=True) for item in transition.diagnostics
@@ -258,9 +263,11 @@ class PostgresGxExecutionRunRepository(GxExecutionRunRepository):
             "executionContract": dict(row.execution_contract_json or {}),
             "handoffPayload": dict(row.handoff_payload_json or {}) if row.handoff_payload_json is not None else None,
             "resultSummary": dict(row.result_summary_json or {}),
+            "metrics": dict(getattr(row, "metrics_json", None) or {}) if getattr(row, "metrics_json", None) is not None else None,
+            "performanceSummary": dict(getattr(row, "metrics_json", None) or {}) if getattr(row, "metrics_json", None) is not None else None,
             "diagnostics": list(row.diagnostics_json or []),
             "failureCode": row.failure_code,
             "failureMessage": row.failure_message,
-            "comments": row.comments,
+            "comments": getattr(row, "comments", None),
             "statusHistory": [self._serialize_history(history_row) for history_row in history_rows],
         }

@@ -178,6 +178,47 @@ async def test_record_run_status_transition_preserves_custom_result_summary_fiel
 
 
 @pytest.mark.anyio
+async def test_record_run_status_transition_persists_metrics() -> None:
+    repo = InMemoryGxExecutionRunRepository()
+
+    await repo.create_run(
+        build_gx_execution_run_create_entity(
+            {
+                "run_id": "run-4b",
+                "suite_id": "gx_suite_1",
+                "suite_version": 1,
+                "rule_id": "rule_1",
+                "rule_version_id": "rule_version_1",
+                "correlation_id": "corr-4b",
+                "requested_by": "user-1",
+                "engine_type": "gx",
+                "engine_target": "pyspark",
+                "execution_shape": "single_object",
+                "status": "pending",
+                "submitted_at": "2026-04-06T12:00:00+00:00",
+                "execution_contract": {"engineType": "gx", "engineTarget": "pyspark", "executionShape": "single_object", "traceability": {"ruleId": "rule_1", "ruleVersionId": "rule_version_1", "gxSuiteId": "gx_suite_1", "gxSuiteVersion": 1}},
+            }
+        )
+    )
+
+    out = await repo.record_run_status_transition(
+        build_gx_execution_run_status_transition_entity(
+            {
+                "run_id": "run-4b",
+                "new_status": "succeeded",
+                "changed_by": "worker-1",
+                "reason": "completed",
+                "metrics": {"engine_type": "spark_expectations", "duration_ms": 24.0},
+            }
+        )
+    )
+
+    assert out.metrics is not None
+    assert out.metrics["engine_type"] == "spark_expectations"
+    assert out.metrics["duration_ms"] == 24.0
+
+
+@pytest.mark.anyio
 async def test_record_run_status_transition_rejects_missing_run() -> None:
     repo = InMemoryGxExecutionRunRepository()
 

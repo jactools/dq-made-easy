@@ -58,6 +58,7 @@ class InMemoryGxExecutionRunRepository(GxExecutionRunRepository):
                 if run.resultSummary is not None
                 else {}
             ),
+            "metrics": dict(run.metrics or run.performanceSummary or {}) or None,
             "diagnostics": [item.model_dump(by_alias=True, exclude_none=True) for item in run.diagnostics or []],
             "failureCode": run.failureCode,
             "failureMessage": run.failureMessage,
@@ -149,6 +150,10 @@ class InMemoryGxExecutionRunRepository(GxExecutionRunRepository):
 
         if transition.resultSummary is not None:
             run["resultSummary"] = transition.resultSummary.model_dump(by_alias=True, exclude_none=True)
+        if transition.metrics is not None:
+            run["metrics"] = deepcopy(transition.metrics)
+        elif transition.performanceSummary is not None:
+            run["metrics"] = deepcopy(transition.performanceSummary)
         if transition.diagnostics is not None:
             run["diagnostics"] = [
                 item.model_dump(by_alias=True, exclude_none=True) for item in transition.diagnostics

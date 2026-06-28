@@ -8,6 +8,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from spark_expectations_metrics import build_metrics_summary
+from spark_expectations_metrics import spark_expectations_metrics
+
 SUPPORTED_RULE_TYPES = {
     "not_null",
     "min",
@@ -172,16 +175,12 @@ def _determine_rule_family(rule_type: str) -> str:
 
 
 def _build_observability_summary(*, rule_type: str, result: dict[str, Any], execution_metadata: dict[str, Any], quarantine_artifact: dict[str, Any] | None) -> dict[str, Any]:
-    return {
-        "engine_type": "spark_expectations",
-        "result": result.get("result", "passed"),
-        "passed_count": result.get("passed_count", 0),
-        "failed_count": result.get("failed_count", 0),
-        "rule_family": _determine_rule_family(rule_type),
-        "duration_ms": execution_metadata.get("duration_ms"),
-        "storage_kind": (quarantine_artifact or {}).get("storage_kind"),
-        "storage_uri": (quarantine_artifact or {}).get("storage_uri"),
-    }
+    return build_metrics_summary(
+        result=result,
+        execution_metadata=execution_metadata,
+        quarantine_artifact=quarantine_artifact,
+        rule_type=rule_type,
+    )
 
 
 def _coerce_optional_int(value: Any, *, default: int | None = None) -> int | None:
@@ -498,6 +497,18 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 "error_management": error_management,
                 "execution_metadata": execution_metadata,
             }
+            result["metrics"] = build_metrics_summary(
+                result=result,
+                execution_metadata=execution_metadata,
+                quarantine_artifact=None,
+                rule_type=rule_type,
+            )
+            spark_expectations_metrics.record_execution(
+                result=result["result"],
+                duration_ms=execution_metadata.get("duration_ms"),
+                failed_count=result.get("failed_count", 0),
+                quarantine_artifact_written=quarantine_artifact is not None,
+            )
             if rule_type in {"count", "sum", "avg", "stddev", "unique", "missing_count", "duplicate_count", "row_count", "distinct_count", "query"}:
                 actual_value = None
                 expected_value = None
@@ -598,6 +609,18 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
         "error_management": error_management,
         "execution_metadata": execution_metadata,
     }
+    result["metrics"] = build_metrics_summary(
+        result=result,
+        execution_metadata=execution_metadata,
+        quarantine_artifact=None,
+        rule_type=str(getattr(req, "type", "") or "").strip(),
+    )
+    spark_expectations_metrics.record_execution(
+        result=result["result"],
+        duration_ms=execution_metadata.get("duration_ms"),
+        failed_count=result.get("failed_count", 0),
+        quarantine_artifact_written=quarantine_artifact is not None,
+    )
     if quarantine_artifact is not None:
         result["quarantine_artifact"] = {
             **quarantine_artifact,

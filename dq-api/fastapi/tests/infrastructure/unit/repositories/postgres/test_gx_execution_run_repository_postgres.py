@@ -216,6 +216,56 @@ def test_record_run_status_transition_updates_progress_without_history(monkeypat
     assert len(session.added) == 0
 
 
+def test_record_run_status_transition_persists_metrics_json(monkeypatch):
+    run_row = SimpleNamespace(
+        id="run-3b",
+        suite_id="gx_suite_1",
+        suite_version=1,
+        rule_id="rule_1",
+        rule_version_id="rule_version_1",
+        correlation_id="corr-3b",
+        requested_by="user-1",
+        engine_type="gx",
+        engine_target="pyspark",
+        execution_shape="single_object",
+        status="running",
+        submitted_at=datetime(2026, 4, 6, 12, 0, tzinfo=UTC),
+        started_at=datetime(2026, 4, 6, 12, 1, tzinfo=UTC),
+        completed_at=None,
+        execution_progress_json=None,
+        execution_contract_json={"engineType": "gx", "engineTarget": "pyspark", "executionShape": "single_object", "traceability": {"ruleId": "rule_1", "ruleVersionId": "rule_version_1", "gxSuiteId": "gx_suite_1", "gxSuiteVersion": 1}},
+        handoff_payload_json={"runId": "run-3b", "engineType": "gx"},
+        result_summary_json={},
+        metrics_json=None,
+        diagnostics_json=[],
+        failure_code=None,
+        failure_message=None,
+        created_at=datetime(2026, 4, 6, 12, 0, tzinfo=UTC),
+        updated_at=datetime(2026, 4, 6, 12, 1, tzinfo=UTC),
+    )
+    session = _Session(get_map={("GxExecutionRunRow", "run-3b"): run_row}, scalar_values=[])
+    monkeypatch.setattr(gx_run_mod, "session_scope", lambda db_url: _Ctx(session))
+
+    repo = PostgresGxExecutionRunRepository("postgresql://example")
+    out = asyncio.run(
+        repo.record_run_status_transition(
+            build_gx_execution_run_status_transition_entity(
+                {
+                    "run_id": "run-3b",
+                    "new_status": "succeeded",
+                    "changed_by": "worker-1",
+                    "reason": "completed",
+                    "metrics": {"engine_type": "spark_expectations", "duration_ms": 42.5},
+                }
+            )
+        )
+    )
+
+    assert out.metrics is not None
+    assert out.metrics["engine_type"] == "spark_expectations"
+    assert out.metrics["duration_ms"] == 42.5
+
+
 def test_list_runs_normalizes_artifact_alias_queries_at_repository_boundary(monkeypatch):
     run_row = SimpleNamespace(
         id="run-4",

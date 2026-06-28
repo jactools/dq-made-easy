@@ -783,6 +783,7 @@ class GxExecutionRunRow(Base):
     execution_contract_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
     handoff_payload_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     result_summary_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    metrics_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     diagnostics_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
     failure_code: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     failure_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

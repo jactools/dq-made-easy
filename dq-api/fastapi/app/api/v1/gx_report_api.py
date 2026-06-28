@@ -105,6 +105,7 @@ async def report_execution_run(
                     "started_at": body.startedAt,
                     "completed_at": body.completedAt,
                     "result_summary": body.resultSummary,
+                    "metrics": body.metrics,
                     "performance_summary": body.performanceSummary,
                     "diagnostics": body.diagnostics,
                     "failure_code": body.failureCode,

@@ -533,6 +533,7 @@ def _api_report_run(
     started_at: str | None = None,
     completed_at: str | None = None,
     result_summary: dict[str, Any] | None = None,
+    metrics: dict[str, Any] | None = None,
     diagnostics: list[dict[str, Any]] | None = None,
     failure_code: str | None = None,
     failure_message: str | None = None,
@@ -552,6 +553,7 @@ def _api_report_run(
         started_at=started_at,
         completed_at=completed_at,
         result_summary=result_summary,
+        metrics=metrics,
         diagnostics=diagnostics,
         failure_code=failure_code,
         failure_message=failure_message,
@@ -2496,6 +2498,7 @@ def _process_grouped_dispatch_message(
 
 
 def _build_spark_expectations_report_summary(response_payload: dict[str, Any], *, output_dir: Any) -> dict[str, Any]:
+    metrics = response_payload.get("metrics")
     return {
         "engine_type": "spark_expectations",
         "rule_id": response_payload.get("rule_id"),
@@ -2508,6 +2511,7 @@ def _build_spark_expectations_report_summary(response_payload: dict[str, Any], *
         "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
         "error_management": response_payload.get("error_management", {}),
         "observability_summary": response_payload.get("observability_summary", {}),
+        "metrics": metrics if isinstance(metrics, dict) else response_payload.get("observability_summary", {}),
     }
 
 
@@ -2554,6 +2558,7 @@ def _process_spark_expectations_dispatch_message(
             total_steps=2,
             label="Invoking Spark Expectations execution endpoint",
         ),
+        metrics={"engine_type": "spark_expectations", "stage": "started"},
     )
 
     execution_request = ExecuteRequest(
@@ -2619,6 +2624,7 @@ def _process_spark_expectations_dispatch_message(
         ),
         completed_at=_utc_now_iso(),
         result_summary=_build_spark_expectations_report_summary(response_payload, output_dir=payload.get("output_dir")),
+        metrics=response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {}),
         diagnostics=[],
         failure_code=None,
         failure_message=None,

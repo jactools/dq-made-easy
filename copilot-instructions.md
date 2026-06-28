@@ -82,6 +82,11 @@ if ! ./required-script.sh; then
 fi
 ```
 
+Spark Expectations and pySpark test execution
+- When running Spark Expectations tests, always use `scripts/run_spark_expectations_container_tests.sh` and the dedicated dq-engine test container.
+- When running pySpark tests, use the same containerized dq-engine test environment; do not rely on the host Java runtime or host PySpark installation.
+- If the containerized test path is unavailable, fail fast and report the blocker instead of falling back to host execution.
+
 Background workers / queues
 - Mark the job as failed in the status store, record the cause and correlation id, emit a metric/alert; do not silently drop or mark succeeded with a substituted payload.
 

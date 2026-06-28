@@ -279,6 +279,24 @@ def test_build_error_management_plan_handles_large_error_batches() -> None:
     assert plan["sampled_error_rows"][-1]["row_id"] == 19
 
 
+def test_render_prometheus_metrics_includes_spark_expectations_counters() -> None:
+    from spark_expectations_metrics import SparkExpectationsMetrics
+    from spark_expectations_metrics import render_prometheus_metrics
+
+    metrics = SparkExpectationsMetrics()
+    metrics.record_execution(result="passed", duration_ms=12.5, failed_count=0, quarantine_artifact_written=False)
+    metrics.record_execution(result="failed", duration_ms=34.0, failed_count=3, quarantine_artifact_written=True)
+
+    output = render_prometheus_metrics(metrics)
+
+    assert "dq_spark_expectations_executions_total 2" in output
+    assert "dq_spark_expectations_passed_total 1" in output
+    assert "dq_spark_expectations_failed_total 1" in output
+    assert "dq_spark_expectations_failed_rows_total 3" in output
+    assert "dq_spark_expectations_quarantine_artifacts_total 1" in output
+    assert "dq_spark_expectations_execution_duration_ms_sum 46.5" in output
+
+
 def test_compile_rule_payload_supports_spark_expectations_engine() -> None:
     rule = {
         "id": 99,
@@ -396,6 +414,35 @@ def test_execute_spark_expectations_rule_emits_execution_metadata() -> None:
     assert payload["observability_summary"]["duration_ms"] >= 0
     assert payload["observability_summary"]["passed_count"] == 1
     assert payload["observability_summary"]["failed_count"] == 1
+
+
+def test_execute_spark_expectations_rule_exposes_lowerer_metrics_summary() -> None:
+    req = SimpleNamespace(
+        id=1071,
+        table="customers",
+        column="customer_id",
+        type="not_null",
+        params={
+            "rows": [
+                {"customer_id": 1},
+                {"customer_id": None},
+            ],
+            "error_chunk_size": 2,
+            "error_sample_size": 2,
+        },
+        output_dir=None,
+        engine_type="spark_expectations",
+    )
+
+    payload = execute_spark_expectations_rule(req)
+
+    metrics = payload["metrics"]
+    assert metrics["engine_type"] == "spark_expectations"
+    assert metrics["rule_family"] == "row"
+    assert metrics["result"] == payload["result"]
+    assert metrics["duration_ms"] == payload["execution_metadata"]["duration_ms"]
+    assert metrics["passed_count"] == payload["passed_count"]
+    assert metrics["failed_count"] == payload["failed_count"]
 
 
 def test_execute_spark_expectations_rule_enforces_row_count_guardrails() -> None:
@@ -871,6 +918,8 @@ def test_process_dispatch_message_routes_spark_expectations_payload(monkeypatch:
     assert result_summary.get("observability_summary", {}).get("rule_family") == "row"
     assert result_summary.get("observability_summary", {}).get("duration_ms") >= 0
     assert result_summary.get("observability_summary", {}).get("storage_kind") in {"local_file", "s3", None}
+    assert succeeded_report.get("metrics", {}).get("engine_type") == "spark_expectations"
+    assert succeeded_report.get("metrics", {}).get("rule_family") == "row"
 
     details = succeeded_report.get("details", {})
     assert details.get("engine_type") == "spark_expectations"

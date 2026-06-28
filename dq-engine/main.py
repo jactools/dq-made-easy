@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from dq_utils.logging_utils import configure_logging
 from runtime_lowerers import build_compiled_artifact_for_engine
 from spark_expectations_adapter import execute_spark_expectations_rule
+from spark_expectations_metrics import render_prometheus_metrics
 
 LOG_LEVEL = os.getenv("DQ_LOG_LEVEL", "INFO")
 
@@ -63,6 +64,11 @@ def healthcheck() -> dict[str, str]:
 @app.get("/readiness")
 def readiness() -> dict[str, str]:
     return {"status": "ready"}
+
+
+@app.get("/metrics")
+def metrics() -> str:
+    return render_prometheus_metrics()
 
 
 @app.post("/compile")
@@ -142,6 +148,7 @@ def execute_rule(req: ExecuteRequest):
             "execution_metadata": adapter_summary.get("execution_metadata", {}),
             "quarantine_artifact": adapter_summary.get("quarantine_artifact", {}),
             "compiled_artifact": compiled.get("compiled_artifact", {}),
+            "metrics": adapter_summary.get("metrics", adapter_observability),
             "observability_summary": adapter_observability,
         }
 
