@@ -84,7 +84,6 @@ Current profile groups in `docker-compose.yml`:
 - `core`: `db`, `redis`, `api`, `frontend`
 - `auth`: `keycloak`
 - `engine`: `dq-engine`
-- `spark`: `spark-master`, `spark-worker-1`, `spark-worker-2`
 - `workers`: `profiling-worker`
 - `profiling`: `profiling-worker`
 - `observability`: `db`, `redis`, `api`, `grafana`, `loki`, `prometheus`, `tempo`, `otel-collector`, `pushgateway`, `profiling-worker`, `redis-exporter`
