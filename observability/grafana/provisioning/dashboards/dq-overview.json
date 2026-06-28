@@ -122,6 +122,17 @@
       "includeVars": false,
       "keepTime": true,
       "targetBlank": false,
+      "title": "Container Resources",
+      "tooltip": "Open per-container CPU and memory metrics",
+      "type": "link",
+      "url": "/d/dq-container-resources"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
       "title": "Storage",
       "tooltip": "Open AIStor storage capacity and drive metrics",
       "type": "link",
