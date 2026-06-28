@@ -101,20 +101,27 @@ def test_lower_rule_to_spark_expectations_supports_extended_row_level_checks(
 
 
 @pytest.mark.parametrize(
-    ("rule_type", "params", "expected_rule_type", "expected_expectation"),
+    ("rule_type", "column", "params", "expected_rule_type", "expected_expectation"),
     [
-        ("count", {"expected_count": 3}, "aggregate_dq", "COUNT(*) == 3"),
-        ("sum", {"expected_value": 10}, "aggregate_dq", "SUM(amount) == 10"),
-        ("query", {"query": "SELECT COUNT(*) AS c FROM source", "expected_count": 2}, "query_dq", "query result count == 2"),
+        ("count", "amount", {"expected_count": 3}, "aggregate_dq", "COUNT(*) == 3"),
+        ("sum", "amount", {"expected_value": 10}, "aggregate_dq", "SUM(amount) == 10"),
+        ("avg", "amount", {"expected_value": 2.5}, "aggregate_dq", "AVG(amount) == 2.5"),
+        ("stddev", "amount", {"expected_value": 1.5}, "aggregate_dq", "STDDEV(amount) == 1.5"),
+        ("unique", "customer_id", {"expected_count": 0}, "row_dq", "duplicate_count(customer_id) == 0"),
+        ("missing_count", "customer_id", {"expected_count": 2}, "aggregate_dq", "missing_count(customer_id) == 2"),
+        ("duplicate_count", "customer_id", {"expected_count": 1}, "aggregate_dq", "duplicate_count(customer_id) == 1"),
+        ("distinct_count", "customer_id", {"expected_count": 3}, "aggregate_dq", "COUNT(DISTINCT customer_id) == 3"),
+        ("row_count", "amount", {"expected_count": 3}, "aggregate_dq", "COUNT(*) == 3"),
+        ("query", "amount", {"query": "SELECT COUNT(*) AS c FROM source", "expected_count": 2}, "query_dq", "query result count == 2"),
     ],
 )
 def test_lower_rule_to_spark_expectations_supports_aggregate_and_query_checks(
-    rule_type: str, params: dict[str, object], expected_rule_type: str, expected_expectation: str
+    rule_type: str, column: str, params: dict[str, object], expected_rule_type: str, expected_expectation: str
 ) -> None:
     rule = {
         "id": 46,
         "table": "customers",
-        "column": "amount",
+        "column": column,
         "type": rule_type,
         "params": params,
     }
@@ -126,39 +133,6 @@ def test_lower_rule_to_spark_expectations_supports_aggregate_and_query_checks(
     assert lowered["rule_type"] == expected_rule_type
     assert lowered["expectation"] == expected_expectation
     assert lowered["action_if_failed"] == "quarantine"
-
-
-@pytest.mark.parametrize(
-    ("rule_type", "params", "expected_expectation"),
-    [
-        ("unique", {}, "duplicate_count(customer_id) == 0"),
-        ("max_length", {"max": 10}, "length(customer_id) <= 10"),
-        ("regex", {"pattern": "^A.*"}, "customer_id RLIKE '^A.*'"),
-        ("row_count", {"expected_count": 5}, "COUNT(*) == 5"),
-        ("avg", {"expected_value": 2.5}, "AVG(amount) == 2.5"),
-        ("stddev", {"expected_value": 1.2}, "STDDEV(amount) == 1.2"),
-        ("missing_count", {"expected_count": 1}, "missing_count(amount) == 1"),
-        ("duplicate_count", {"expected_count": 2}, "duplicate_count(amount) == 2"),
-        ("distinct_count", {"expected_count": 3}, "COUNT(DISTINCT amount) == 3"),
-    ],
-)
-def test_lower_rule_to_spark_expectations_supports_extended_constructs(
-    rule_type: str, params: dict[str, object], expected_expectation: str
-) -> None:
-    rule = {
-        "id": 47,
-        "table": "customers",
-        "column": "customer_id" if rule_type in {"unique", "max_length", "regex", "row_count"} else "amount",
-        "type": rule_type,
-        "params": params,
-    }
-
-    lowered = lower_rule_to_spark_expectations(rule)
-
-    assert lowered["engine_type"] == "spark_expectations"
-    assert lowered["engine_target"] == "pyspark"
-    assert lowered["action_if_failed"] == "quarantine"
-    assert lowered["expectation"] == expected_expectation
 
 
 @pytest.mark.parametrize(
@@ -266,12 +240,12 @@ def test_lower_rule_to_spark_expectations_rejects_unsupported_constructs(rule: d
 
 
 def test_build_error_management_plan_handles_large_error_batches() -> None:
-    failed_rows = ({"row_id": row_id, "reason": f"bad-{row_id}"} for row_id in range(250_000))
+    failed_rows = ({"row_id": row_id, "reason": f"bad-{row_id}"} for row_id in range(250_001))
 
     plan = build_error_management_plan(failed_rows, chunk_size=10_000, max_samples=20)
 
-    assert plan["total_error_count"] == 250_000
-    assert plan["chunk_count"] == 25
+    assert plan["total_error_count"] == 250_001
+    assert plan["chunk_count"] == 26
     assert plan["storage_strategy"] == "chunked"
     assert plan["overflowed"] is True
     assert len(plan["sampled_error_rows"]) == 20
@@ -533,20 +507,33 @@ def test_execute_spark_expectations_rule_supports_additional_row_level_checks(
     assert payload["failed_count"] == expected_failed
 
 
-def test_execute_spark_expectations_rule_evaluates_avg_checks() -> None:
+@pytest.mark.parametrize(
+    ("rule_type", "column", "rows", "params"),
+    [
+        ("avg", "amount", [{"amount": 2}, {"amount": 2}], {"expected_value": 2.0}),
+        ("stddev", "amount", [{"amount": 2}, {"amount": 2}], {"expected_value": 0.0}),
+        ("unique", "customer_id", [{"customer_id": 1}, {"customer_id": 2}], {"expected_count": 0}),
+        ("missing_count", "customer_id", [{"customer_id": 1}, {"customer_id": None}], {"expected_count": 1}),
+        ("duplicate_count", "customer_id", [{"customer_id": 1}, {"customer_id": 1}, {"customer_id": 2}], {"expected_count": 1}),
+        ("distinct_count", "customer_id", [{"customer_id": 1}, {"customer_id": 1}, {"customer_id": 2}], {"expected_count": 2}),
+    ],
+)
+def test_execute_spark_expectations_rule_supports_additional_aggregate_checks(
+    rule_type: str,
+    column: str,
+    rows: list[dict[str, object]],
+    params: dict[str, object],
+) -> None:
     req = SimpleNamespace(
         id=110,
         table="customers",
-        column="amount",
-        type="avg",
+        column=column,
+        type=rule_type,
         params={
-            "rows": [
-                {"amount": 1},
-                {"amount": 4},
-            ],
-            "expected_value": 2.5,
+            "rows": rows,
             "error_chunk_size": 2,
             "error_sample_size": 2,
+            **params,
         },
         output_dir=None,
         engine_type="spark_expectations",
@@ -562,14 +549,11 @@ def test_execute_spark_expectations_rule_evaluates_avg_checks() -> None:
 @pytest.mark.parametrize(
     ("rule_type", "column", "params", "rows", "expected_passed", "expected_failed"),
     [
-        ("unique", "customer_id", {}, [{"customer_id": 1}, {"customer_id": 1}], 0, 1),
-        ("missing_count", "customer_id", {"expected_count": 1}, [{"customer_id": 1}, {"customer_id": None}], 1, 0),
-        ("duplicate_count", "customer_id", {"expected_count": 1}, [{"customer_id": 1}, {"customer_id": 1}], 1, 0),
+        ("count", "customer_id", {"expected_count": 2}, [{"customer_id": 1}, {"customer_id": 2}], 1, 0),
         ("row_count", "customer_id", {"expected_count": 2}, [{"customer_id": 1}, {"customer_id": 2}], 1, 0),
-        ("distinct_count", "customer_id", {"expected_count": 2}, [{"customer_id": 1}, {"customer_id": 2}], 1, 0),
     ],
 )
-def test_execute_spark_expectations_rule_supports_extended_aggregate_checks(
+def test_execute_spark_expectations_rule_supports_count_based_aggregate_checks(
     rule_type: str,
     column: str,
     params: dict[str, object],
@@ -694,6 +678,43 @@ def test_execute_spark_expectations_rule_persists_execution_metadata_with_quaran
     assert len(persisted_payload["failed_rows"]) == 1
 
 
+def test_execute_spark_expectations_rule_writes_large_quarantine_artifact(tmp_path: Path) -> None:
+    quarantine_path = tmp_path / "quarantine-rule-112.json"
+    req = SimpleNamespace(
+        id=112,
+        table="customers",
+        column="customer_id",
+        type="is_null",
+        params={
+            "rows": [{"customer_id": customer_id} for customer_id in range(25_001)],
+            "error_chunk_size": 5_000,
+            "error_sample_size": 10,
+            "quarantine_uri": str(quarantine_path),
+        },
+        output_dir=None,
+        engine_type="spark_expectations",
+    )
+
+    payload = execute_spark_expectations_rule(req)
+
+    assert payload["ok"] is True
+    assert payload["passed_count"] == 0
+    assert payload["failed_count"] == 25_001
+    assert payload["error_management"]["total_error_count"] == 25_001
+    assert payload["error_management"]["chunk_count"] == 6
+    assert payload["error_management"]["overflowed"] is True
+    assert payload["quarantine_artifact"]["storage_kind"] == "local_file"
+    assert payload["metrics"]["failed_count"] == 25_001
+    assert payload["observability_summary"]["failed_count"] == 25_001
+    assert payload["observability_summary"]["storage_kind"] == "local_file"
+
+    persisted_payload = json.loads(quarantine_path.read_text(encoding="utf-8"))
+    assert persisted_payload["execution_metadata"]["rule_id"] == 112
+    assert len(persisted_payload["failed_rows"]) == 25_001
+    assert persisted_payload["failed_rows"][0]["customer_id"] == 0
+    assert persisted_payload["failed_rows"][-1]["customer_id"] == 25_000
+
+
 def test_execute_spark_expectations_rule_publishes_quarantine_artifact_to_aistor(monkeypatch: pytest.MonkeyPatch) -> None:
     endpoint_url = os.getenv("DQ_S3_ENDPOINT") or os.getenv("AWS_ENDPOINT_URL") or "http://aistor:9000"
     if endpoint_url.startswith("http://dq-aistor:9000"):
@@ -807,6 +828,49 @@ def test_execute_endpoint_persists_artifacts(tmp_path: Path) -> None:
     persisted_errors = json.loads((tmp_path / "spark_expectations_errors.json").read_text(encoding="utf-8"))
     assert persisted_execution["observability_summary"]["failed_count"] == 8
     assert persisted_errors["observability_summary"]["failed_count"] == 8
+
+
+def test_execute_endpoint_persists_structured_failure_payload(tmp_path: Path) -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/execute",
+        json={
+            "id": 105,
+            "table": "customers",
+            "column": "customer_id",
+            "type": "not_null",
+            "params": {},
+            "output_dir": str(tmp_path),
+            "engine_type": "gx",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is False
+    assert payload["engine_type"] == "gx"
+    assert payload["rule_id"] == 105
+    assert payload["failure_code"] == "DQ_EXECUTION_UNSUPPORTED_ENGINE"
+    assert payload["failed_check"]["check_name"] == "not_null"
+    assert payload["failed_check"]["reason"] == "unsupported engine type for execution: 'gx'"
+    assert payload["failure_metrics"]["failure_stage"] == "execute"
+    assert payload["trace"]["exception_type"] == "ValueError"
+    assert "unsupported engine type" in payload["trace"]["message"]
+    assert "Traceback" in payload["trace"]["traceback"]
+    assert payload["compiled_artifact"] == {}
+    assert payload["observability_summary"]["result"] == "failed"
+    assert (tmp_path / "spark_expectations_execution.json").exists()
+    assert (tmp_path / "spark_expectations_errors.json").exists()
+
+    persisted_execution = json.loads((tmp_path / "spark_expectations_execution.json").read_text(encoding="utf-8"))
+    persisted_errors = json.loads((tmp_path / "spark_expectations_errors.json").read_text(encoding="utf-8"))
+    assert persisted_execution["failure_code"] == "DQ_EXECUTION_UNSUPPORTED_ENGINE"
+    assert persisted_execution["failed_check"]["check_name"] == "not_null"
+    assert persisted_execution["trace"]["exception_type"] == "ValueError"
+    assert persisted_errors["failure_code"] == "DQ_EXECUTION_UNSUPPORTED_ENGINE"
+    assert persisted_errors["failed_check"]["check_name"] == "not_null"
+    assert persisted_errors["trace"]["exception_type"] == "ValueError"
 
 
 def test_execute_endpoint_evaluates_rows_with_pyspark(tmp_path: Path) -> None:
@@ -926,3 +990,145 @@ def test_process_dispatch_message_routes_spark_expectations_payload(monkeypatch:
     assert details.get("quarantine_artifact", {}).get("storage_kind") in {"local_file", "s3"}
     assert details.get("observability_summary", {}).get("rule_family") == "row"
     assert details.get("observability_summary", {}).get("duration_ms") >= 0
+
+
+def test_process_dispatch_message_reports_structured_spark_expectations_failure(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    config = GxWorkerConfig(
+        redis_url="redis://localhost:6379/0",
+        queue_key="dq-gx:execution-dispatch",
+        processing_queue_key="dq-gx:execution-dispatch:processing",
+        heartbeat_key="dq-gx:execution-dispatch:heartbeat",
+        heartbeat_ttl_seconds=30,
+        heartbeat_interval_seconds=10,
+        max_rows=1000,
+        poll_timeout_seconds=5,
+        api_url="http://localhost",
+        spark_master="local[1]",
+        spark_ui_port=4044,
+        s3_endpoint=None,
+        s3_access_key=None,
+        s3_secret_key=None,
+        s3_region=None,
+        s3_path_style_access=False,
+        s3_ssl_enabled=None,
+    )
+
+    created_reports: list[dict[str, object]] = []
+
+    def fake_report_run(*args: object, **kwargs: object) -> None:
+        created_reports.append({"action": "report_run", **kwargs})
+
+    def fake_report_progress(*args: object, **kwargs: object) -> None:
+        created_reports.append({"action": "report_progress", **kwargs})
+
+    class DummyTokenProvider:
+        def get_token(self, *, correlation_id: str | None = None) -> str:
+            return "token"
+
+    failure_payload = {
+        "ok": False,
+        "engine_type": "spark_expectations",
+        "rule_id": 105,
+        "result": "failed",
+        "passed_count": 0,
+        "failed_count": 1,
+        "failure_code": "DQ_EXECUTION_ERROR",
+        "failure_message": "row-level expectation failed",
+        "failed_check": {
+            "rule_id": 105,
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "check_name": "not_null",
+            "rule_type": "not_null",
+            "rule_family": "row",
+            "table": "customers",
+            "column": "customer_id",
+            "params": {},
+            "reason": "row-level expectation failed",
+            "failure_stage": "execute",
+        },
+        "failure_metrics": {
+            "engine_type": "spark_expectations",
+            "engine_target": "pyspark",
+            "rule_id": 105,
+            "rule_type": "not_null",
+            "rule_family": "row",
+            "failure_stage": "execute",
+            "result": "failed",
+            "passed_count": 0,
+            "failed_count": 0,
+            "duration_ms": 12,
+            "storage_kind": "local_file",
+            "storage_uri": str(tmp_path / "spark_expectations_errors.json"),
+            "failure_count": 1,
+            "failed_check_count": 1,
+            "failed_row_count": 1,
+            "failed_rule_count": 1,
+        },
+        "metrics": {
+            "engine_type": "spark_expectations",
+            "rule_family": "row",
+            "result": "failed",
+            "passed_count": 0,
+            "failed_count": 1,
+            "duration_ms": 12,
+            "storage_kind": "local_file",
+            "storage_uri": str(tmp_path / "spark_expectations_errors.json"),
+        },
+        "observability_summary": {
+            "engine_type": "spark_expectations",
+            "rule_family": "row",
+            "result": "failed",
+            "passed_count": 0,
+            "failed_count": 1,
+            "duration_ms": 12,
+            "storage_kind": "local_file",
+            "storage_uri": str(tmp_path / "spark_expectations_errors.json"),
+        },
+        "execution_metadata": {},
+        "quarantine_artifact": {},
+        "error_management": {},
+        "trace": {
+            "exception_type": "ValueError",
+            "message": "row-level expectation failed",
+            "traceback": "Traceback...",
+        },
+    }
+
+    monkeypatch.setattr("gx_dispatch_worker._api_report_run", fake_report_run)
+    monkeypatch.setattr("gx_dispatch_worker._api_report_execution_progress", fake_report_progress)
+    monkeypatch.setattr("gx_dispatch_worker._build_token_provider", lambda: DummyTokenProvider())
+    monkeypatch.setattr("gx_dispatch_worker.execute_rule", lambda req: failure_payload)
+
+    payload = {
+        "run_id": "run-105",
+        "correlation_id": "corr-105",
+        "requested_by": "tester",
+        "engine_type": "spark_expectations",
+        "rule_payload": {
+            "id": 105,
+            "table": "customers",
+            "column": "customer_id",
+            "type": "not_null",
+            "params": {},
+        },
+        "output_dir": str(tmp_path),
+    }
+
+    process_dispatch_message(config, raw_message=json.dumps(payload))
+
+    assert any(item.get("new_status") == "failed" for item in created_reports)
+    failed_report = next(item for item in created_reports if item.get("new_status") == "failed")
+    assert failed_report["failure_code"] == "DQ_EXECUTION_ERROR"
+    assert failed_report["failure_message"] == "row-level expectation failed"
+
+    result_summary = failed_report.get("result_summary", {})
+    assert result_summary.get("failure_code") == "DQ_EXECUTION_ERROR"
+    assert result_summary.get("failed_check", {}).get("check_name") == "not_null"
+    assert result_summary.get("failure_metrics", {}).get("failure_stage") == "execute"
+    assert result_summary.get("trace", {}).get("exception_type") == "ValueError"
+
+    details = failed_report.get("details", {})
+    assert details.get("failure_code") == "DQ_EXECUTION_ERROR"
+    assert details.get("failed_check", {}).get("check_name") == "not_null"
+    assert details.get("failure_metrics", {}).get("failure_stage") == "execute"

@@ -1,11 +1,21 @@
 from __future__ import annotations
 
 import os
+import sys
+from pathlib import Path
 from typing import Any
 
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+DQ_UTILS_ROOT = ROOT.parent / "dq-utils" / "src"
+if str(DQ_UTILS_ROOT) not in sys.path:
+    sys.path.insert(0, str(DQ_UTILS_ROOT))
 
 from spark_expectations_adapter import lower_rule_to_spark_expectations
 
@@ -27,6 +37,10 @@ def _resolve_s3_ssl_enabled(endpoint: str | None) -> bool:
 def _build_spark_session() -> SparkSession:
     from dq_utils.spark_runtime import build_spark_session_builder
     from dq_utils.spark_jars import configure_spark_builder_with_local_jars
+
+    active_session = SparkSession.getActiveSession()
+    if active_session is not None:
+        active_session.stop()
 
     builder = build_spark_session_builder(
         SparkSession=SparkSession,
@@ -312,17 +326,17 @@ def _evaluate_rule(df, spark: SparkSession, rule_payload: dict[str, Any]) -> boo
         "starts_with",
         "ends_with",
         "min_length",
-        "unique",
         "max_length",
         "regex",
         "count",
         "sum",
         "avg",
         "stddev",
-        "row_count",
+        "unique",
         "missing_count",
         "duplicate_count",
         "distinct_count",
+        "row_count",
         "query",
     ],
 )
@@ -344,3 +358,69 @@ def test_supported_spark_expectations_constructs_against_aistor_parquet(
     assert lowered["action_if_failed"] == "quarantine"
 
     assert _evaluate_rule(df, spark_session, rule_payload) is True, f"Rule {rule_type} did not evaluate successfully against AIStor parquet"
+
+
+@pytest.mark.parametrize(
+    ("rule", "expected_fragment"),
+    [
+        (
+            {
+                "id": 26,
+                "table": "currency",
+                "column": "currency_code",
+                "type": "not_null",
+                "params": {"expression": "currency_code IS NOT NULL"},
+            },
+            "custom expression",
+        ),
+        (
+            {
+                "id": 27,
+                "table": "currency",
+                "column": "currency_code",
+                "type": "not_null",
+                "params": {"sql_predicate": "currency_code IS NOT NULL"},
+            },
+            "SQL predicate",
+        ),
+        (
+            {
+                "id": 28,
+                "table": "currency",
+                "column": "currency_code",
+                "type": "not_null",
+                "params": {"window": "row_number() over (partition by currency_code)"},
+            },
+            "window",
+        ),
+        (
+            {
+                "id": 29,
+                "table": "currency",
+                "column": "currency_code",
+                "type": "query",
+                "params": {"query": "SELECT currency_code, decimal_places FROM source", "expected_count": 1},
+            },
+            "complex query",
+        ),
+        (
+            {
+                "id": 30,
+                "table": "currency",
+                "column": "currency_code",
+                "type": "equals",
+                "params": {"expected": "USD", "columns": ["currency_code", "decimal_places"]},
+            },
+            "multi-column",
+        ),
+    ],
+)
+def test_unsupported_spark_expectations_constructs_fail_fast_against_aistor_parquet(
+    source_df,
+    rule: dict[str, Any],
+    expected_fragment: str,
+) -> None:
+    with pytest.raises(ValueError, match=expected_fragment):
+        lower_rule_to_spark_expectations(rule)
+
+

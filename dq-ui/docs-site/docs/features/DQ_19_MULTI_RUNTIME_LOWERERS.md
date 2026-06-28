@@ -106,4 +106,3 @@ This feature should build on the existing execution abstraction rather than crea
 
 - [ABS_1_EXECUTION_ABSTRACTION.md](/docs/features/ABS_1_EXECUTION_ABSTRACTION/)
 - [SPARK_EXPECTATIONS_ENGINE_PLAN.md](/docs/implementation-details/SPARK_EXPECTATIONS_ENGINE_PLAN/)
-- [DQ_19_MULTI_RUNTIME_LOWERERS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/DQ_19_MULTI_RUNTIME_LOWERERS_IMPLEMENTATION_PLAN/)

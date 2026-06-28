@@ -5,6 +5,7 @@ import os
 import tempfile
 import time
 from datetime import datetime, timezone
+from itertools import islice
 from pathlib import Path
 from typing import Any
 
@@ -72,7 +73,7 @@ def _parse_s3a_uri(uri: str) -> tuple[str, str]:
 
 
 def _write_quarantine_artifact(
-    failed_rows: list[dict[str, Any]],
+    failed_rows: Any,
     *,
     quarantine_uri: str | None,
     execution_metadata: dict[str, Any] | None = None,
@@ -83,21 +84,36 @@ def _write_quarantine_artifact(
     if not str(quarantine_uri or "").strip():
         return None
 
-    payload = {
-        "execution_metadata": execution_metadata or {},
-        "failed_rows": failed_rows,
-    }
+    execution_metadata_payload = execution_metadata or {}
+
+    def _write_payload(handle: Any) -> None:
+        handle.write("{\n")
+        handle.write('  "execution_metadata": ')
+        json.dump(execution_metadata_payload, handle, indent=2, sort_keys=True)
+        handle.write(",\n")
+        handle.write('  "failed_rows": [\n')
+        first_row = True
+        for row in failed_rows:
+            if first_row:
+                first_row = False
+            else:
+                handle.write(",\n")
+            handle.write("    ")
+            json.dump(row, handle, sort_keys=True)
+        handle.write("\n  ]\n")
+        handle.write("}\n")
 
     normalized_uri = _normalize_s3_uri(str(quarantine_uri))
     if not normalized_uri.startswith("s3a://"):
         local_path = Path(str(quarantine_uri)).expanduser()
         local_path.parent.mkdir(parents=True, exist_ok=True)
-        local_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+        with local_path.open("w", encoding="utf-8") as handle:
+            _write_payload(handle)
         return {
             "storage_uri": str(local_path),
             "storage_format": "json",
             "storage_kind": "local_file",
-            "execution_metadata": execution_metadata or {},
+            "execution_metadata": execution_metadata_payload,
         }
 
     bucket, key = _parse_s3a_uri(normalized_uri)
@@ -113,7 +129,7 @@ def _write_quarantine_artifact(
     )
 
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
-        json.dump(payload, handle, indent=2, sort_keys=True)
+        _write_payload(handle)
         temp_path = handle.name
 
     try:
@@ -128,7 +144,7 @@ def _write_quarantine_artifact(
         "storage_uri": normalized_uri,
         "storage_format": "json",
         "storage_kind": "s3",
-        "execution_metadata": execution_metadata or {},
+        "execution_metadata": execution_metadata_payload,
     }
 
 
@@ -349,15 +365,16 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 failed_df = df.where(~predicate)
                 passed_count = int(passed_df.count())
                 failed_count = int(failed_df.count())
-                failed_rows = [row.asDict(recursive=True) for row in failed_df.collect()]
-                max_error_rows = guardrails.get("max_error_rows")
-                if max_error_rows is not None and len(failed_rows) > max_error_rows:
-                    failed_rows = failed_rows[:max_error_rows]
+                failed_rows_for_plan = (row.asDict(recursive=True) for row in failed_df.toLocalIterator())
                 error_management = build_error_management_plan(
-                    failed_rows,
+                    failed_rows_for_plan,
                     chunk_size=int(params.get("error_chunk_size", 10_000)),
                     max_samples=int(params.get("error_sample_size", 20)),
                 )
+                quarantine_rows = (row.asDict(recursive=True) for row in failed_df.toLocalIterator())
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None:
+                    quarantine_rows = islice(quarantine_rows, max_error_rows)
             elif rule_type == "count":
                 expected_count = params.get("expected_count")
                 actual_count = int(df.count())
@@ -461,7 +478,7 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
             else:
                 raise ValueError(f"unsupported spark expectations rule type: {rule_type!r}")
             quarantine_artifact = _write_quarantine_artifact(
-                failed_rows,
+                quarantine_rows if rule_type in {"not_null", "is_null", "min", "max", "equals", "not_equal", "between", "in", "not_in", "contains", "starts_with", "ends_with", "min_length", "max_length", "regex"} else failed_rows,
                 quarantine_uri=params.get("quarantine_uri"),
                 execution_metadata=_build_execution_metadata(
                     rule_id=getattr(req, "id", None),
@@ -548,7 +565,7 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                         actual_value = query_row[0] if query_row is not None else None
                     expected_value = params.get("expected_count")
                 result["execution_metadata"]["evaluation"] = {
-                    "rule_family": "aggregate" if rule_type in {"count", "sum", "avg", "stddev", "unique", "missing_count", "duplicate_count", "row_count", "distinct_count"} else "query",
+                    "rule_family": "aggregate" if rule_type in {"count", "sum", "row_count"} else "query",
                     "actual_value": actual_value,
                     "expected_value": expected_value,
                 }
@@ -660,9 +677,8 @@ def build_error_management_plan(
 
     iterator = iter(failed_rows)
     while True:
-        try:
-            batch = [next(iterator) for _ in range(chunk_size)]
-        except StopIteration:
+        batch = list(islice(iterator, chunk_size))
+        if not batch:
             break
 
         chunk_count += 1
@@ -709,8 +725,10 @@ def lower_rule_to_spark_expectations(rule: dict[str, Any]) -> dict[str, Any]:
     if params.get("window") is not None:
         raise ValueError("unsupported spark expectations construct: window/analytic operation")
 
-    if rule_type == "query" and isinstance(params.get("query"), str):
-        query_text = params.get("query", "").strip()
+    if rule_type == "query":
+        query_text = str(params.get("query") or "").strip()
+        if not query_text:
+            raise ValueError("unsupported spark expectations construct: query without text")
         if query_text.upper().startswith("SELECT") and ("FROM" in query_text.upper() or "WHERE" in query_text.upper()):
             if "," in query_text or "SELECT COUNT" not in query_text.upper():
                 raise ValueError("unsupported spark expectations construct: complex query")
@@ -959,11 +977,12 @@ def lower_rule_to_spark_expectations(rule: dict[str, Any]) -> dict[str, Any]:
         }
 
     if rule_type == "query":
+        expected_count = params.get("expected_count")
         return {
             "engine_type": "spark_expectations",
             "engine_target": "pyspark",
             "rule_type": "query_dq",
-            "expectation": "query result count == 2",
+            "expectation": f"query result count == {_format_expectation_literal(expected_count)}",
             "action_if_failed": "quarantine",
         }
 

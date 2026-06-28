@@ -2505,6 +2505,11 @@ def _build_spark_expectations_report_summary(response_payload: dict[str, Any], *
         "result": response_payload.get("result", "passed"),
         "passed_count": response_payload.get("passed_count", 0),
         "failed_count": response_payload.get("failed_count", 0),
+        "failure_code": response_payload.get("failure_code"),
+        "failure_message": response_payload.get("failure_message"),
+        "failed_check": response_payload.get("failed_check", {}),
+        "failure_metrics": response_payload.get("failure_metrics", {}),
+        "trace": response_payload.get("trace", {}),
         "summary": response_payload,
         "output_dir": output_dir,
         "execution_metadata": response_payload.get("execution_metadata", {}),
@@ -2544,6 +2549,7 @@ def _process_spark_expectations_dispatch_message(
         rule_id = 0
 
     token_provider = _build_token_provider()
+    spark_expectations_started = time.perf_counter()
     _api_report_run(
         config,
         token_provider,
@@ -2571,12 +2577,13 @@ def _process_spark_expectations_dispatch_message(
         engine_type="spark_expectations",
     )
     response_payload = execute_rule(execution_request)
-    if not isinstance(response_payload, dict) or not response_payload.get("ok"):
+    if not isinstance(response_payload, dict):
         raise GxWorkerExecutionError(
-            response_payload.get("error", "Spark Expectations execution failed") if isinstance(response_payload, dict) else "Spark Expectations execution failed",
+            "Spark Expectations execution failed",
             failure_code="GX_WORKER_EXECUTION_ERROR",
         )
 
+    report_summary = _build_spark_expectations_report_summary(response_payload, output_dir=payload.get("output_dir"))
     report_details = {
         "source": "dq-engine-gx-worker",
         "engine_type": "spark_expectations",
@@ -2590,6 +2597,66 @@ def _process_spark_expectations_dispatch_message(
         "observability_summary": response_payload.get("observability_summary", {}),
         "output_dir": payload.get("output_dir"),
     }
+    if not response_payload.get("ok"):
+        failure_code = response_payload.get("failure_code") or "GX_WORKER_EXECUTION_ERROR"
+        failure_message = response_payload.get("failure_message") or response_payload.get("error") or "Spark Expectations execution failed"
+        report_details.update(
+            {
+                "failure_code": failure_code,
+                "failure_message": failure_message,
+                "failed_check": response_payload.get("failed_check", {}),
+                "failure_metrics": response_payload.get("failure_metrics", {}),
+                "trace": response_payload.get("trace", {}),
+            }
+        )
+        record_spark_expectations_observability(
+            observability_summary=response_payload.get("observability_summary"),
+            result=response_payload.get("result", "failed"),
+        )
+        _api_report_execution_progress(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            changed_by=requested_by,
+            reason="GX worker completed Spark Expectations execution with failures",
+            details=report_details,
+            completed_steps=2,
+            total_steps=2,
+            label="Spark Expectations execution completed with failures",
+        )
+        _api_report_run(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            new_status="failed",
+            changed_by=requested_by,
+            reason="GX worker completed Spark Expectations execution with failures",
+            details=report_details,
+            execution_progress=_build_execution_progress(
+                completed_steps=2,
+                total_steps=2,
+                label="Spark Expectations execution completed with failures",
+            ),
+            completed_at=_utc_now_iso(),
+            result_summary=report_summary,
+            metrics=response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {}),
+            diagnostics=[],
+            failure_code=failure_code,
+            failure_message=failure_message,
+        )
+        record_worker_duration(
+            stage="dispatch",
+            execution_shape="spark_expectations",
+            duration_ms=(time.perf_counter() - spark_expectations_started) * 1000.0,
+            result="failure",
+            batch_count=1,
+            suite_count=1,
+            target_count=1,
+        )
+        return
+
     record_spark_expectations_observability(
         observability_summary=response_payload.get("observability_summary"),
         result=response_payload.get("result"),
@@ -2623,7 +2690,7 @@ def _process_spark_expectations_dispatch_message(
             label="Spark Expectations execution completed",
         ),
         completed_at=_utc_now_iso(),
-        result_summary=_build_spark_expectations_report_summary(response_payload, output_dir=payload.get("output_dir")),
+        result_summary=report_summary,
         metrics=response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {}),
         diagnostics=[],
         failure_code=None,

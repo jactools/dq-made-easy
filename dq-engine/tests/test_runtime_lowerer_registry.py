@@ -41,6 +41,30 @@ def test_compile_rule_payload_supports_trino_engine() -> None:
     assert compiled["compiled_artifact"]["engine_target"] == "trino_sql"
 
 
+def test_compile_rule_payload_returns_structured_failure_envelope_for_unsupported_construct() -> None:
+    rule = {
+        "id": 203,
+        "table": "customers",
+        "column": "amount",
+        "type": "equals",
+        "params": {"expression": "amount > 10"},
+    }
+
+    compiled = compile_rule_payload(rule, engine_type="trino")
+
+    assert compiled["ok"] is False
+    assert compiled["engine_type"] == "trino"
+    assert compiled["engine_target"] == "trino_sql"
+    assert compiled["failure_code"] == "DQ_LOWERER_UNSUPPORTED_CONSTRUCT"
+    assert compiled["failed_check"]["check_name"] == "equals"
+    assert compiled["failed_check"]["reason"] == "unsupported trino construct: custom expression"
+    assert compiled["failure_metrics"]["failed_check_count"] == 1
+    assert compiled["failure_metrics"]["failure_stage"] == "compile"
+    assert compiled["metrics"] == compiled["failure_metrics"]
+    assert compiled["observability_summary"] == compiled["failure_metrics"]
+    assert compiled["trace"]["exception_type"] == "ValueError"
+
+
 def test_lower_rule_to_trino_supports_basic_row_and_aggregate_checks() -> None:
     rule = {
         "id": 201,

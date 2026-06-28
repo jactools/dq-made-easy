@@ -51,7 +51,7 @@ A user or external system can request a canonical validation plan for a given sc
 
 ## Runtime positioning
 
-ABS-1 is not only a canonical abstraction exercise. The first concrete runtime path is GX backed by grouped PySpark execution, but the abstraction is also meant to support self-built PySpark integrations where a team wants to keep its own executor, Spark job packaging, or operational model while still reusing the rule compiler, scope resolution, shared runtime metadata, and the neutral validation-plan contract.
+ABS-1 is not only a canonical abstraction exercise. The first concrete runtime path is GX backed by grouped PySpark execution, but the abstraction is also meant to support self-built PySpark integrations as a preview path where a team wants to keep its own executor, Spark job packaging, or operational model while still reusing the rule compiler, scope resolution, shared runtime metadata, and the neutral validation-plan contract.
 
 Soda remains a separate follow-on expansion path, but it is not the only intended next step. The execution seam should be able to support both custom PySpark integrations and later non-PySpark engines without changing rule authoring semantics.
 
@@ -61,17 +61,17 @@ Soda remains a separate follow-on expansion path, but it is not the only intende
 - [ABS-3 definition](../status/current/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
 - [DQ_7_4 GX suite orchestration](../implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS.md)
 
-## Follow-on Track: Multi-Runtime Expansion (Self-Built PySpark + Soda)
+## Preview Track: Multi-Runtime Expansion (Self-Built PySpark + Soda)
 
-Goal: extend the execution abstraction so the canonical DSL compiler can support self-built PySpark solutions beside the platform GX runtime, and later target Soda as an additional engine, without changing rule authoring semantics or introducing silent runtime fallback.
+Goal: extend the execution abstraction so the canonical DSL compiler can support self-built PySpark solutions beside the platform GX runtime as a preview capability, and later target Soda as an additional engine, without changing rule authoring semantics or introducing silent runtime fallback.
 
-This is a follow-on track to ABS-1, not a change to the completed ABS-1 acceptance scope. ABS-1 established the stable compiler-to-runtime seam and the first runtime implementation. This track broadens that seam so multiple runtime implementations can coexist behind the same compiler contract, including teams' own PySpark executors.
+This is a preview track to ABS-1, not a change to the completed ABS-1 acceptance scope. ABS-1 established the stable compiler-to-runtime seam and the first runtime implementation. This track broadens that seam so multiple runtime implementations can coexist behind the same compiler contract, including teams' own PySpark executors.
 
 ### In scope
 
 - Introduce the minimum runtime-neutral artifact and run-planning contract needed for a second engine
 - Add `engine_type` through artifact persistence, run planning, and dispatch
-- Add a self-built PySpark integration path that can consume canonical compiler output or the neutral artifact envelope without forcing the current GX worker path
+- Add a preview self-built PySpark integration path that can consume canonical compiler output or the neutral artifact envelope without forcing the current GX worker path
 - Add a Soda adapter path parallel to the current GX adapter path
 - Reuse shared source resolution, grouped planning, queueing, provenance, and result normalization where engine-neutral
 - Keep the top-level queueing and execution-monitoring semantics generic so multiple executors can aggregate into one operational dashboard, with runtime-specific drilldowns added separately
@@ -100,7 +100,7 @@ This is a follow-on track to ABS-1, not a change to the completed ABS-1 acceptan
 ### Acceptance Criteria
 
 - [ ] Canonical compiler output remains the single source of truth for GX, self-built PySpark, and Soda targets
-- [ ] A supported rule can be executed through a self-built PySpark integration without changing the stored rule model
+- [ ] A supported rule can be executed through a preview self-built PySpark integration without changing the stored rule model
 - [ ] A supported rule can be compiled and executed through Soda without changing the stored rule model
 - [x] Runtime selection is explicit in persistence and dispatch contracts
 - [ ] Unsupported self-built PySpark and Soda mappings fail fast with actionable diagnostics

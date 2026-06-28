@@ -225,6 +225,15 @@ class DqApiClient:
             path="/rulebuilder/v1/observability/health-scorecards",
         )
 
+    def get_execution_run(self, *, run_id: str) -> dict[str, Any]:
+        if not run_id.strip():
+            raise McpServerError("run_id is required")
+
+        return self._request(
+            method="GET",
+            path=f"/rulebuilder/v1/gx/runs/{run_id}",
+        )
+
     def get_rule_library_registry(self, *, page: int = 1, limit: int = 100) -> dict[str, Any]:
         return self._request(
             method="GET",
@@ -389,6 +398,21 @@ def _tool_definitions() -> list[dict[str, Any]]:
                     "create_itsm_ticket": {"type": "boolean", "default": False},
                 },
                 "required": ["incident_kind", "title"],
+                "additionalProperties": False,
+            },
+        },
+        {
+            "name": "get_execution_run",
+            "description": "Fetch a persisted validation run with execution metrics and failure details.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "run_id": {
+                        "type": "string",
+                        "description": "Validation run id.",
+                    },
+                },
+                "required": ["run_id"],
                 "additionalProperties": False,
             },
         },
@@ -639,6 +663,8 @@ def _handle_request(client: DqApiClient, request: dict[str, Any]) -> tuple[dict[
                     failure_message=_optional_string(arguments.get("failure_message")),
                     create_itsm_ticket=bool(arguments.get("create_itsm_ticket", False)),
                 )
+            elif tool_name == "get_execution_run":
+                payload = client.get_execution_run(run_id=str(arguments.get("run_id") or ""))
             else:
                 raise McpServerError(f"Unknown tool '{tool_name}'")
         except (TypeError, ValueError) as exc:

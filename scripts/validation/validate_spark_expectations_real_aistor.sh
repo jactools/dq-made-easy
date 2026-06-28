@@ -37,3 +37,6 @@ bash "$ROOT_DIR/scripts/run_spark_expectations_container_tests.sh" \
 echo "Validating the full Spark Expectations construct matrix against AIStor parquet..."
 bash "$ROOT_DIR/scripts/run_spark_expectations_container_tests.sh" \
   "dq-engine/tests/test_spark_expectations_real_aistor_validation.py"
+
+echo "Validating the large quarantine/error-table path for Spark Expectations..."
+bash "$ROOT_DIR/scripts/validate_spark_expectations_large_quarantine.sh"

@@ -10,6 +10,7 @@ import {
 import { normalizeValidationUiText } from '../../utils/validationTerminology'
 import { AppIcon, AppPageHeader, AppPageShell, AppSelect } from '../app-primitives'
 import { GxSuiteScopePickerModal, type GxSuiteScopeSelection } from '../GxSuiteScopePickerModal'
+import { SparkExpectationsMetricsPanel } from './SparkExpectationsMetricsPanel'
 import './features.css'
 import './RuleExecutionMonitoring.css'
 
@@ -2211,6 +2212,7 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
                               </div>
                             </>
                           ) : null}
+                          <SparkExpectationsMetricsPanel resultSummary={run.resultSummary} />
                         </>
                       )
                     })()}

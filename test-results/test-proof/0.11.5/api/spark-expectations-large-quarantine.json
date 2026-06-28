@@ -1,0 +1,25 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "spark-expectations-large-quarantine",
+  "proof_type": "api",
+  "feature": "spark-expectations-large-quarantine",
+  "summary": "The Spark Expectations happy path and large quarantine/error-table validation passed end to end in the latest 0.11.5 run.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-28T20:26:16Z",
+  "command": "bash scripts/validation/validate_spark_expectations_large_quarantine.sh",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/20260628T202616Z-spark-expectations-large-quarantine",
+  "test_files": [
+    "dq-engine/tests/test_spark_expectations_adapter.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 4,
+  "assertions": [
+    "The Spark Expectations adapter executes the happy path in the containerized dq-engine runtime",
+    "The large quarantine/error-table path writes and re-reads a 25,001-row payload",
+    "The returned metrics and observability summary preserve the failed_count for the large batch"
+  ],
+  "proof_data": {
+    "verification_command": "bash scripts/validation/validate_spark_expectations_large_quarantine.sh",
+    "verification_result": "4 passed, 55 deselected in 13.94s"
+  }
+}

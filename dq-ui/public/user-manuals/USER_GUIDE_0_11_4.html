@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Workflow Guide</title>
+  <title>0.11.4 User Guide</title>
   <script>
     (() => {
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -405,28 +405,19 @@
       </section>
       
       <article>
-<h1 id="admin-workflow-guide">Admin Workflow Guide</h1>
-<p><strong>Role:</strong> Platform administrator responsible for workspace configuration, user management, alert routing, and application settings. <strong>Time to read:</strong> 8 minutes <strong>Last updated:</strong> 2026-05-31</p>
-<h2 id="responsibilities-in-scope">Responsibilities in scope</h2>
-<ul><li>Managing workspaces and workspace-level settings.</li><li>Configuring alert-routing targets for Teams, Slack, email, and PagerDuty.</li><li>Managing role assignments and SSO configuration.</li><li>Reviewing application configuration for secrets and connectivity values.</li><li>Seeding or resetting reference data for a workspace.</li></ul>
-<h2 id="core-workflows">Core workflows</h2>
-<h3 id="1-create-and-configure-a-workspace">1. Create and configure a workspace</h3>
-<ol><li>Open <strong>Admin</strong> → <strong>Workspaces</strong>.</li><li>Select <strong>New Workspace</strong>.</li><li>Provide the workspace name, domain scope, and ownership metadata.</li><li>Save the workspace and verify it appears in the workspace selector.</li></ol>
-<h3 id="2-configure-alert-routing-targets">2. Configure alert-routing targets</h3>
-<ol><li>Open <strong>Admin</strong> → <strong>App Settings</strong>.</li><li>Navigate to the <strong>Alert Routing</strong> section.</li><li>Add or update a target for Teams, Slack, email, or PagerDuty.</li><li>Enter the connectivity values (webhook URL, channel, or email address).</li><li>Save. Secrets and tokens entered here are stored encrypted and are not readable back through the UI.</li></ol>
-<p>&gt; If you need to rotate a webhook URL, re-enter the new value and save. The old value is replaced and not retained.</p>
-<h3 id="3-assign-roles-to-a-user">3. Assign roles to a user</h3>
-<p>Role assignments are managed through the identity provider (Keycloak) in the default configuration. For local dev:</p>
-<ol><li>Open the Keycloak admin console.</li><li>Navigate to the realm and find the user.</li><li>Assign the appropriate composite role: <code>dq:users:manage</code>, <code>dq:rules:approve</code>, or other scoped roles.</li><li>The user&#x27;s scope is enforced at the API layer on every request.</li></ol>
-<p>For production, manage roles through your organisation&#x27;s SSO provider and the configured OIDC realm.</p>
-<h3 id="4-review-or-reset-application-configuration">4. Review or reset application configuration</h3>
-<ol><li>Open <strong>Admin</strong> → <strong>App Settings</strong>.</li><li>Review the current connectivity settings for external systems such as OpenMetadata, observability endpoints, and ITSM connectors.</li><li>Redacted secrets display as masked values. Re-enter a value to replace it.</li><li>Use <strong>Validate</strong> actions where available to smoke-test a saved connectivity value without leaving the settings page.</li></ol>
-<h3 id="5-manage-notification-routing-per-workspace">5. Manage notification routing per workspace</h3>
-<ol><li>Open <strong>Admin</strong> → <strong>Workspaces</strong> → select the workspace.</li><li>Open <strong>Notification Routing</strong> for that workspace.</li><li>Map alert policy triggers to routing targets.</li><li>Save routing rules. The API enforces routing at event-publication time.</li></ol>
-<h2 id="what-to-check-when-users-cannot-log-in">What to check when users cannot log in</h2>
-<ol><li>Is the Keycloak container running and healthy?</li><li>Is the OIDC redirect URI registered for the environment&#x27;s public URL?</li><li>Is the user assigned the correct composite role in the realm?</li><li>Did a recent configuration change modify <code>SSO_ENABLED</code>, <code>SSO_PUBLIC_ISSUER_URL</code>, or <code>SSO_CLIENT_ID</code>?</li></ol>
-<h2 id="related-guides">Related guides</h2>
-<ul><li><a href="/user-manuals/governance-terminology.html">Governance Terminology Reference Card</a></li><li><a href="/user-manuals/workflow-operator.html">Operator Workflow Guide</a></li><li><a href="/user-manuals/index.html">User Manuals index</a></li></ul>
+<h1 id="0-11-4-user-guide">0.11.4 User Guide</h1>
+<p>This guide summarizes the user-facing changes in the 0.11.4 release line and points readers to the right documentation for day-to-day use.</p>
+<h2 id="what-changed-in-0-11-4">What changed in 0.11.4</h2>
+<h3 id="documentation-and-release-alignment">Documentation and release alignment</h3>
+<ul><li>The public documentation portal and release pointers now consistently reference the 0.11.4 release line.</li><li>The release notes and release indexes have been refreshed so current release information is easier to find.</li><li>The docs build has been verified so the published docs remain navigable and link-safe.</li></ul>
+<h3 id="validation-evidence-and-proof-artifacts">Validation evidence and proof artifacts</h3>
+<ul><li>The test-proof section now includes the latest Spark Expectations execution evidence.</li><li>Users and operators can inspect proof pages for dispatching, error handling, and real-data validation outcomes.</li><li>The implementation and feature docs now reference the new proof artifacts and runtime plans.</li></ul>
+<h3 id="pipeline-integration-guidance">Pipeline integration guidance</h3>
+<ul><li>A new DQ CLI pipeline integration guide explains how to trigger validation runs from orchestration systems such as Databricks, Kubernetes jobs, and Azure Container Apps jobs.</li><li>The guide focuses on the intended flow: the orchestrator triggers the CLI, the CLI invokes the DQ run plan, and the engine executes the validation workload.</li></ul>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul><li>Review the release notes in <a href="../releases/RELEASE_0_11_4_VERSION_ALIGNMENT_AND_DOC_REFRESH.md">docs/releases/RELEASE_0_11_4_VERSION_ALIGNMENT_AND_DOC_REFRESH.md</a>.</li><li>Browse the latest proof pages in <a href="../test-proof/index.md">docs/test-proof/index.md</a>.</li><li>Follow the DQ CLI integration workflow in <a href="/user-manuals/USER_GUIDE_DQ_CLI_PIPELINE_INTEGRATION.html">docs/user-manuals/USER_GUIDE_DQ_CLI_PIPELINE_INTEGRATION.md</a>.</li><li>Read the broader implementation summary in <a href="../implementation-details/SPARK_EXPECTATIONS_ENGINE_PLAN.md">docs/implementation-details/SPARK_EXPECTATIONS_ENGINE_PLAN.md</a>.</li></ul>
+<h2 id="recommended-audience">Recommended audience</h2>
+<ul><li>Platform operators who need to understand the latest validation evidence and release surface</li><li>Developers who want to trigger DQ validations from pipelines and CI/CD workflows</li><li>Admins and product owners who want a concise summary of the 0.11.4 documentation refresh</li></ul>
       </article>
       <footer class="manuals-footer" aria-label="Publication details">
         <p>Generated on 2026-06-28 19:26 UTC by the dq-ui manuals publisher.</p>
