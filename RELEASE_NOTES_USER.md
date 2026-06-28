@@ -2,12 +2,12 @@
 
 > **For developers and admins:** See [TECHNICAL.md](./TECHNICAL.md) for API reference, architecture, and deployment details.
 
-## v0.11.4 - Version Alignment and Documentation Refresh (June 6, 2026)
+## v0.11.5 - Version Alignment and Documentation Refresh (June 28, 2026)
 
 ### ✅ What's Updated
 
-- UI package version bumped to `0.11.4`
-- Docs-site package version bumped to `0.11.4`
+- UI package version bumped to `0.11.5`
+- Docs-site package version bumped to `0.11.5`
 - API app marker remains `0.11.0` because this release changes the documentation publishing surface rather than API runtime code
 - Version manifest markers updated for the changed tracked component: `Documentation`
 
@@ -15,7 +15,7 @@
 
 - The Definition Mappings user manual now explains the AI-assisted data-definition workflow end to end
 - The manual covers draft generation, steward review, board approval, validation, and OpenMetadata import
-- Release, deployment, and versioning docs now point at the `v0.11.4` release line
+- Release, deployment, and versioning docs now point at the `v0.11.5` release line
 
 ## v0.10.5 - Public Documentation Portal (May 22, 2026)
 
