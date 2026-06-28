@@ -1,0 +1,37 @@
+{
+  "engineType": "gx",
+  "engineTarget": "pyspark",
+  "executionShape": "grouped_scope",
+  "selectionMode": "grouped_scope",
+  "suiteRefs": [
+    {
+      "suiteId": "gx_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "engineType": "gx"
+    },
+    {
+      "suiteId": "soda_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "engineType": "soda"
+    },
+    {
+      "suiteId": "pyspark_native_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "engineType": "pyspark_native"
+    },
+    {
+      "suiteId": "trino_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "engineType": "trino"
+    },
+    {
+      "suiteId": "spark_expectations_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "engineType": "spark_expectations"
+    }
+  ],
+  "groupedExecutionPlan": {
+    "suiteCount": 5,
+    "batchCount": 1
+  }
+}

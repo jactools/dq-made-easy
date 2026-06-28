@@ -3,12 +3,11 @@
     "suiteCount": 5,
     "batchCount": 1
   },
-  "artifactEnvelopes": [
+  "suiteEnvelopes": [
     {
-      "validationArtifactId": "gx_transaction_aggregate_comparison",
-      "validationArtifactVersion": 1,
-      "artifactContractVersion": "v1",
-      "engineType": "gx",
+      "suiteId": "gx_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "artifactVersion": "v1",
       "assignmentScope": {
         "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
         "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
@@ -16,6 +15,19 @@
       },
       "resolvedExecutionScope": {
         "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
+      },
+      "gxSuite": {
+        "expectation_suite_name": "gx_transaction_aggregate_comparison_v1",
+        "expectations": [
+          {"expectation_type": "expect_table_row_count_to_equal", "kwargs": {"value": 5}},
+          {"expectation_type": "expect_column_sum_to_equal", "kwargs": {"column": "total_amount", "value": 515}},
+          {"expectation_type": "expect_column_min_to_equal", "kwargs": {"column": "total_amount", "value": 20}},
+          {"expectation_type": "expect_column_max_to_equal", "kwargs": {"column": "total_amount", "value": 250}}
+        ],
+        "meta": {
+          "workspace_id": "retail-banking",
+          "data_object_id": "019e0488-9a53-785b-990e-2f4738a0f9eb"
+        }
       },
       "compiledFrom": {
         "ruleIds": [
@@ -28,123 +40,30 @@
         "generatedAt": "2026-06-28T10:00:00Z"
       },
       "executionHints": {
-        "recommendedEngineTarget": "pyspark",
+        "recommendedEngine": "pyspark",
         "primaryKeyFields": ["transaction_id"],
         "businessKeyFields": ["transaction_id"],
-        "supportedExecutionShapes": ["single_object"],
-        "evidence": {
-          "failedRows": {
-            "mode": "sample",
-            "limit": 25,
-            "includeRowIdentifier": true,
-            "includePrimaryKey": true
-          },
-          "emitCompiledArtifact": true,
-          "emitGeneratedSql": true
-        }
+        "supportedExecutionShapes": ["single_object"]
       },
-      "runPlanning": {
+      "executionContract": {
+        "engineType": "gx",
         "engineTarget": "pyspark",
         "executionShape": "single_object",
-        "groupingKey": "data_object_version_id",
-        "groupingValues": ["019e0488-9a53-77fa-9a22-cff40798361e"],
         "traceability": {
           "ruleId": "019e0488-9a56-7caa-b001-000000000020",
           "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
-          "validationArtifactId": "gx_transaction_aggregate_comparison",
-          "validationArtifactVersion": 1,
+          "gxSuiteId": "gx_transaction_aggregate_comparison",
+          "gxSuiteVersion": 1,
           "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
         }
       },
-      "engineArtifact": {
-        "engineType": "gx",
-        "artifactKind": "gx_expectation_suite",
-        "artifactSchemaVersion": "seed-v1",
-        "payload": {
-          "suiteId": "gx_transaction_aggregate_comparison",
-          "suiteVersion": 1,
-          "assignmentScope": {
-            "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
-            "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
-            "dataProductId": "019e0488-9a54-7bb4-a49e-98434c26d7a7"
-          },
-          "resolvedExecutionScope": {
-            "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
-          },
-          "gxSuite": {
-            "expectation_suite_name": "gx_transaction_aggregate_comparison_v1",
-            "expectations": [
-              {
-                "expectation_type": "expect_table_row_count_to_equal",
-                "kwargs": {
-                  "value": 5
-                }
-              },
-              {
-                "expectation_type": "expect_column_sum_to_equal",
-                "kwargs": {
-                  "column": "total_amount",
-                  "value": 515
-                }
-              },
-              {
-                "expectation_type": "expect_column_min_to_equal",
-                "kwargs": {
-                  "column": "total_amount",
-                  "value": 20
-                }
-              },
-              {
-                "expectation_type": "expect_column_max_to_equal",
-                "kwargs": {
-                  "column": "total_amount",
-                  "value": 250
-                }
-              }
-            ],
-            "meta": {
-              "workspace_id": "retail-banking",
-              "data_object_id": "019e0488-9a53-785b-990e-2f4738a0f9eb"
-            }
-          },
-          "compiledFrom": {
-            "ruleIds": [
-              "019e0488-9a56-7caa-b001-000000000020",
-              "019e0488-9a56-7caa-b001-000000000022",
-              "019e0488-9a56-7caa-b001-000000000024",
-              "019e0488-9a56-7caa-b001-000000000026"
-            ],
-            "compilerVersion": "seed-v1",
-            "generatedAt": "2026-06-28T10:00:00Z"
-          },
-          "executionHints": {
-            "recommendedEngine": "pyspark",
-            "primaryKeyFields": ["transaction_id"],
-            "businessKeyFields": ["transaction_id"]
-          },
-          "executionContract": {
-            "engineType": "gx",
-            "engineTarget": "pyspark",
-            "executionShape": "single_object",
-            "traceability": {
-              "ruleId": "019e0488-9a56-7caa-b001-000000000020",
-              "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
-              "validationArtifactId": "gx_transaction_aggregate_comparison",
-              "validationArtifactVersion": 1,
-              "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
-            }
-          }
-        }
-      },
       "savedBy": "data-steward-user",
-      "sourcePipeline": "seed_csv",
-      "status": "active"
+      "sourcePipeline": "seed_csv"
     },
     {
-      "validationArtifactId": "soda_transaction_aggregate_comparison",
-      "validationArtifactVersion": 1,
-      "artifactContractVersion": "v1",
-      "engineType": "soda",
+      "suiteId": "soda_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "artifactVersion": "v1",
       "assignmentScope": {
         "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
         "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
@@ -152,6 +71,19 @@
       },
       "resolvedExecutionScope": {
         "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
+      },
+      "gxSuite": {
+        "expectation_suite_name": "soda_transaction_aggregate_comparison_v1",
+        "expectations": [
+          {"expectation_type": "row_count", "kwargs": {"value": 5}},
+          {"expectation_type": "sum", "kwargs": {"column": "total_amount", "value": 515}},
+          {"expectation_type": "min", "kwargs": {"column": "total_amount", "value": 20}},
+          {"expectation_type": "max", "kwargs": {"column": "total_amount", "value": 250}}
+        ],
+        "meta": {
+          "workspace_id": "retail-banking",
+          "data_object_id": "019e0488-9a53-785b-990e-2f4738a0f9eb"
+        }
       },
       "compiledFrom": {
         "ruleIds": [
@@ -164,26 +96,15 @@
         "generatedAt": "2026-06-28T10:00:00Z"
       },
       "executionHints": {
-        "recommendedEngineTarget": "soda",
+        "recommendedEngine": "soda",
         "primaryKeyFields": ["transaction_id"],
         "businessKeyFields": ["transaction_id"],
-        "supportedExecutionShapes": ["single_object"],
-        "evidence": {
-          "failedRows": {
-            "mode": "sample",
-            "limit": 25,
-            "includeRowIdentifier": true,
-            "includePrimaryKey": true
-          },
-          "emitCompiledArtifact": true,
-          "emitGeneratedSql": true
-        }
+        "supportedExecutionShapes": ["single_object"]
       },
-      "runPlanning": {
+      "executionContract": {
+        "engineType": "soda",
         "engineTarget": "soda",
         "executionShape": "single_object",
-        "groupingKey": "data_object_version_id",
-        "groupingValues": ["019e0488-9a53-77fa-9a22-cff40798361e"],
         "traceability": {
           "ruleId": "019e0488-9a56-7caa-b001-000000000020",
           "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
@@ -192,99 +113,13 @@
           "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
         }
       },
-      "engineArtifact": {
-        "engineType": "soda",
-        "artifactKind": "soda_scan",
-        "artifactSchemaVersion": "seed-v1",
-        "payload": {
-          "suiteId": "soda_transaction_aggregate_comparison",
-          "suiteVersion": 1,
-          "assignmentScope": {
-            "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
-            "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
-            "dataProductId": "019e0488-9a54-7bb4-a49e-98434c26d7a7"
-          },
-          "resolvedExecutionScope": {
-            "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
-          },
-          "sodaScan": {
-            "name": "soda_transaction_aggregate_comparison_v1",
-            "checks": [
-              {
-                "type": "row_count",
-                "operator": "equals",
-                "threshold": 5,
-                "text": "row_count == 5",
-                "ruleId": "019e0488-9a56-7caa-b001-000000000020"
-              },
-              {
-                "type": "sum",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 515,
-                "text": "sum(total_amount) == 515",
-                "ruleId": "019e0488-9a56-7caa-b001-000000000022"
-              },
-              {
-                "type": "min",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 20,
-                "text": "min(total_amount) == 20",
-                "ruleId": "019e0488-9a56-7caa-b001-000000000024"
-              },
-              {
-                "type": "max",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 250,
-                "text": "max(total_amount) == 250",
-                "ruleId": "019e0488-9a56-7caa-b001-000000000026"
-              }
-            ],
-            "meta": {
-              "workspace_id": "retail-banking",
-              "data_object_id": "019e0488-9a53-785b-990e-2f4738a0f9eb"
-            }
-          },
-          "compiledFrom": {
-            "ruleIds": [
-              "019e0488-9a56-7caa-b001-000000000020",
-              "019e0488-9a56-7caa-b001-000000000022",
-              "019e0488-9a56-7caa-b001-000000000024",
-              "019e0488-9a56-7caa-b001-000000000026"
-            ],
-            "compilerVersion": "seed-v1",
-            "generatedAt": "2026-06-28T10:00:00Z"
-          },
-          "executionHints": {
-            "recommendedEngine": "soda",
-            "primaryKeyFields": ["transaction_id"],
-            "businessKeyFields": ["transaction_id"]
-          },
-          "executionContract": {
-            "engineType": "soda",
-            "engineTarget": "soda",
-            "executionShape": "single_object",
-            "traceability": {
-              "ruleId": "019e0488-9a56-7caa-b001-000000000020",
-              "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
-              "validationArtifactId": "soda_transaction_aggregate_comparison",
-              "validationArtifactVersion": 1,
-              "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
-            }
-          }
-        }
-      },
       "savedBy": "data-steward-user",
-      "sourcePipeline": "seed_csv",
-      "status": "active"
+      "sourcePipeline": "seed_csv"
     },
     {
-      "validationArtifactId": "pyspark_native_transaction_aggregate_comparison",
-      "validationArtifactVersion": 1,
-      "artifactContractVersion": "v1",
-      "engineType": "pyspark_native",
+      "suiteId": "pyspark_native_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "artifactVersion": "v1",
       "assignmentScope": {
         "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
         "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
@@ -292,6 +127,19 @@
       },
       "resolvedExecutionScope": {
         "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
+      },
+      "gxSuite": {
+        "expectation_suite_name": "pyspark_native_transaction_aggregate_comparison_v1",
+        "expectations": [
+          {"expectation_type": "row_count", "kwargs": {"value": 5}},
+          {"expectation_type": "sum", "kwargs": {"column": "total_amount", "value": 515}},
+          {"expectation_type": "min", "kwargs": {"column": "total_amount", "value": 20}},
+          {"expectation_type": "max", "kwargs": {"column": "total_amount", "value": 250}}
+        ],
+        "meta": {
+          "workspace_id": "retail-banking",
+          "data_object_id": "019e0488-9a53-785b-990e-2f4738a0f9eb"
+        }
       },
       "compiledFrom": {
         "ruleIds": [
@@ -304,26 +152,15 @@
         "generatedAt": "2026-06-28T10:00:00Z"
       },
       "executionHints": {
-        "recommendedEngineTarget": "pyspark",
+        "recommendedEngine": "pyspark",
         "primaryKeyFields": ["transaction_id"],
         "businessKeyFields": ["transaction_id"],
-        "supportedExecutionShapes": ["single_object"],
-        "evidence": {
-          "failedRows": {
-            "mode": "sample",
-            "limit": 25,
-            "includeRowIdentifier": true,
-            "includePrimaryKey": true
-          },
-          "emitCompiledArtifact": true,
-          "emitGeneratedSql": true
-        }
+        "supportedExecutionShapes": ["single_object"]
       },
-      "runPlanning": {
+      "executionContract": {
+        "engineType": "pyspark_native",
         "engineTarget": "pyspark",
         "executionShape": "single_object",
-        "groupingKey": "data_object_version_id",
-        "groupingValues": ["019e0488-9a53-77fa-9a22-cff40798361e"],
         "traceability": {
           "ruleId": "019e0488-9a56-7caa-b001-000000000020",
           "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
@@ -332,80 +169,13 @@
           "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
         }
       },
-      "engineArtifact": {
-        "engineType": "pyspark_native",
-        "artifactKind": "pyspark_plan",
-        "artifactSchemaVersion": "seed-v1",
-        "payload": {
-          "suiteId": "pyspark_native_transaction_aggregate_comparison",
-          "suiteVersion": 1,
-          "pysparkPlan": {
-            "name": "pyspark_native_transaction_aggregate_comparison_v1",
-            "checks": [
-              {
-                "type": "row_count",
-                "operator": "equals",
-                "threshold": 5
-              },
-              {
-                "type": "sum",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 515
-              },
-              {
-                "type": "min",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 20
-              },
-              {
-                "type": "max",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 250
-              }
-            ],
-            "engine_target": "pyspark"
-          },
-          "compiledFrom": {
-            "ruleIds": [
-              "019e0488-9a56-7caa-b001-000000000020",
-              "019e0488-9a56-7caa-b001-000000000022",
-              "019e0488-9a56-7caa-b001-000000000024",
-              "019e0488-9a56-7caa-b001-000000000026"
-            ],
-            "compilerVersion": "seed-v1",
-            "generatedAt": "2026-06-28T10:00:00Z"
-          },
-          "executionHints": {
-            "recommendedEngine": "pyspark",
-            "primaryKeyFields": ["transaction_id"],
-            "businessKeyFields": ["transaction_id"]
-          },
-          "executionContract": {
-            "engineType": "pyspark_native",
-            "engineTarget": "pyspark",
-            "executionShape": "single_object",
-            "traceability": {
-              "ruleId": "019e0488-9a56-7caa-b001-000000000020",
-              "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
-              "validationArtifactId": "pyspark_native_transaction_aggregate_comparison",
-              "validationArtifactVersion": 1,
-              "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
-            }
-          }
-        }
-      },
       "savedBy": "data-steward-user",
-      "sourcePipeline": "seed_csv",
-      "status": "active"
+      "sourcePipeline": "seed_csv"
     },
     {
-      "validationArtifactId": "trino_transaction_aggregate_comparison",
-      "validationArtifactVersion": 1,
-      "artifactContractVersion": "v1",
-      "engineType": "trino",
+      "suiteId": "trino_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "artifactVersion": "v1",
       "assignmentScope": {
         "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
         "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
@@ -413,6 +183,19 @@
       },
       "resolvedExecutionScope": {
         "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
+      },
+      "gxSuite": {
+        "expectation_suite_name": "trino_transaction_aggregate_comparison_v1",
+        "expectations": [
+          {"expectation_type": "row_count", "kwargs": {"value": 5}},
+          {"expectation_type": "sum", "kwargs": {"column": "total_amount", "value": 515}},
+          {"expectation_type": "min", "kwargs": {"column": "total_amount", "value": 20}},
+          {"expectation_type": "max", "kwargs": {"column": "total_amount", "value": 250}}
+        ],
+        "meta": {
+          "workspace_id": "retail-banking",
+          "data_object_id": "019e0488-9a53-785b-990e-2f4738a0f9eb"
+        }
       },
       "compiledFrom": {
         "ruleIds": [
@@ -425,26 +208,15 @@
         "generatedAt": "2026-06-28T10:00:00Z"
       },
       "executionHints": {
-        "recommendedEngineTarget": "trino_sql",
+        "recommendedEngine": "trino_sql",
         "primaryKeyFields": ["transaction_id"],
         "businessKeyFields": ["transaction_id"],
-        "supportedExecutionShapes": ["single_object"],
-        "evidence": {
-          "failedRows": {
-            "mode": "sample",
-            "limit": 25,
-            "includeRowIdentifier": true,
-            "includePrimaryKey": true
-          },
-          "emitCompiledArtifact": true,
-          "emitGeneratedSql": true
-        }
+        "supportedExecutionShapes": ["single_object"]
       },
-      "runPlanning": {
+      "executionContract": {
+        "engineType": "trino",
         "engineTarget": "trino_sql",
         "executionShape": "single_object",
-        "groupingKey": "data_object_version_id",
-        "groupingValues": ["019e0488-9a53-77fa-9a22-cff40798361e"],
         "traceability": {
           "ruleId": "019e0488-9a56-7caa-b001-000000000020",
           "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
@@ -453,76 +225,13 @@
           "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
         }
       },
-      "engineArtifact": {
-        "engineType": "trino",
-        "artifactKind": "trino_sql_plan",
-        "artifactSchemaVersion": "seed-v1",
-        "payload": {
-          "suiteId": "trino_transaction_aggregate_comparison",
-          "suiteVersion": 1,
-          "trinoSqlPlan": {
-            "name": "trino_transaction_aggregate_comparison_v1",
-            "queries": [
-              {
-                "metric": "row_count",
-                "sql": "SELECT COUNT(*) AS value FROM transactions"
-              },
-              {
-                "metric": "sum",
-                "subject": "total_amount",
-                "sql": "SELECT SUM(total_amount) AS value FROM transactions"
-              },
-              {
-                "metric": "min",
-                "subject": "total_amount",
-                "sql": "SELECT MIN(total_amount) AS value FROM transactions"
-              },
-              {
-                "metric": "max",
-                "subject": "total_amount",
-                "sql": "SELECT MAX(total_amount) AS value FROM transactions"
-              }
-            ],
-            "engine_target": "trino_sql"
-          },
-          "compiledFrom": {
-            "ruleIds": [
-              "019e0488-9a56-7caa-b001-000000000020",
-              "019e0488-9a56-7caa-b001-000000000022",
-              "019e0488-9a56-7caa-b001-000000000024",
-              "019e0488-9a56-7caa-b001-000000000026"
-            ],
-            "compilerVersion": "seed-v1",
-            "generatedAt": "2026-06-28T10:00:00Z"
-          },
-          "executionHints": {
-            "recommendedEngine": "trino_sql",
-            "primaryKeyFields": ["transaction_id"],
-            "businessKeyFields": ["transaction_id"]
-          },
-          "executionContract": {
-            "engineType": "trino",
-            "engineTarget": "trino_sql",
-            "executionShape": "single_object",
-            "traceability": {
-              "ruleId": "019e0488-9a56-7caa-b001-000000000020",
-              "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
-              "validationArtifactId": "trino_transaction_aggregate_comparison",
-              "validationArtifactVersion": 1,
-              "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
-            }
-          }
-        }
-      },
       "savedBy": "data-steward-user",
-      "sourcePipeline": "seed_csv",
-      "status": "active"
+      "sourcePipeline": "seed_csv"
     },
     {
-      "validationArtifactId": "spark_expectations_transaction_aggregate_comparison",
-      "validationArtifactVersion": 1,
-      "artifactContractVersion": "v1",
-      "engineType": "spark_expectations",
+      "suiteId": "spark_expectations_transaction_aggregate_comparison",
+      "suiteVersion": 1,
+      "artifactVersion": "v1",
       "assignmentScope": {
         "dataObjectId": "019e0488-9a53-785b-990e-2f4738a0f9eb",
         "datasetId": "019e0488-9a54-7cb2-8ca2-9088abc47f92",
@@ -530,6 +239,19 @@
       },
       "resolvedExecutionScope": {
         "dataObjectVersionIds": ["019e0488-9a53-77fa-9a22-cff40798361e"]
+      },
+      "gxSuite": {
+        "expectation_suite_name": "spark_expectations_transaction_aggregate_comparison_v1",
+        "expectations": [
+          {"expectation_type": "row_count", "kwargs": {"value": 5}},
+          {"expectation_type": "sum", "kwargs": {"column": "total_amount", "value": 515}},
+          {"expectation_type": "min", "kwargs": {"column": "total_amount", "value": 20}},
+          {"expectation_type": "max", "kwargs": {"column": "total_amount", "value": 250}}
+        ],
+        "meta": {
+          "workspace_id": "retail-banking",
+          "data_object_id": "019e0488-9a53-785b-990e-2f4738a0f9eb"
+        }
       },
       "compiledFrom": {
         "ruleIds": [
@@ -542,26 +264,15 @@
         "generatedAt": "2026-06-28T10:00:00Z"
       },
       "executionHints": {
-        "recommendedEngineTarget": "pyspark",
+        "recommendedEngine": "pyspark",
         "primaryKeyFields": ["transaction_id"],
         "businessKeyFields": ["transaction_id"],
-        "supportedExecutionShapes": ["single_object"],
-        "evidence": {
-          "failedRows": {
-            "mode": "sample",
-            "limit": 25,
-            "includeRowIdentifier": true,
-            "includePrimaryKey": true
-          },
-          "emitCompiledArtifact": true,
-          "emitGeneratedSql": true
-        }
+        "supportedExecutionShapes": ["single_object"]
       },
-      "runPlanning": {
+      "executionContract": {
+        "engineType": "spark_expectations",
         "engineTarget": "pyspark",
         "executionShape": "single_object",
-        "groupingKey": "data_object_version_id",
-        "groupingValues": ["019e0488-9a53-77fa-9a22-cff40798361e"],
         "traceability": {
           "ruleId": "019e0488-9a56-7caa-b001-000000000020",
           "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
@@ -570,74 +281,8 @@
           "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
         }
       },
-      "engineArtifact": {
-        "engineType": "spark_expectations",
-        "artifactKind": "spark_expectations_plan",
-        "artifactSchemaVersion": "seed-v1",
-        "payload": {
-          "suiteId": "spark_expectations_transaction_aggregate_comparison",
-          "suiteVersion": 1,
-          "sparkExpectationsPlan": {
-            "name": "spark_expectations_transaction_aggregate_comparison_v1",
-            "expectations": [
-              {
-                "type": "row_count",
-                "operator": "equals",
-                "threshold": 5
-              },
-              {
-                "type": "sum",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 515
-              },
-              {
-                "type": "min",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 20
-              },
-              {
-                "type": "max",
-                "subject": "total_amount",
-                "operator": "equals",
-                "threshold": 250
-              }
-            ],
-            "engine_target": "pyspark"
-          },
-          "compiledFrom": {
-            "ruleIds": [
-              "019e0488-9a56-7caa-b001-000000000020",
-              "019e0488-9a56-7caa-b001-000000000022",
-              "019e0488-9a56-7caa-b001-000000000024",
-              "019e0488-9a56-7caa-b001-000000000026"
-            ],
-            "compilerVersion": "seed-v1",
-            "generatedAt": "2026-06-28T10:00:00Z"
-          },
-          "executionHints": {
-            "recommendedEngine": "pyspark",
-            "primaryKeyFields": ["transaction_id"],
-            "businessKeyFields": ["transaction_id"]
-          },
-          "executionContract": {
-            "engineType": "spark_expectations",
-            "engineTarget": "pyspark",
-            "executionShape": "single_object",
-            "traceability": {
-              "ruleId": "019e0488-9a56-7caa-b001-000000000020",
-              "ruleVersionId": "019e0488-9a56-7caa-b001-000000000021",
-              "validationArtifactId": "spark_expectations_transaction_aggregate_comparison",
-              "validationArtifactVersion": 1,
-              "dataObjectVersionId": "019e0488-9a53-77fa-9a22-cff40798361e"
-            }
-          }
-        }
-      },
       "savedBy": "data-steward-user",
-      "sourcePipeline": "seed_csv",
-      "status": "active"
+      "sourcePipeline": "seed_csv"
     }
   ]
 }
