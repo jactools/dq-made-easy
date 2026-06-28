@@ -108,6 +108,8 @@ Validation evidence:
 - Verified in a containerized Spark runtime with the focused regression suite: 13 tests passed in 9.50s.
 - Verified the quarantine artifact path end to end against the real AIStor-backed S3-compatible service from inside the containerized test runtime.
 - Validation uses `scripts/run_spark_expectations_container_tests.sh` and the dedicated dq-engine test container; it never relies on the host Java environment.
+- Spark Expectations follows the shared engine seams already used by the generic runtime paths: `normalize_engine_type()` maps PySpark aliases to `spark_expectations`, `build_compiled_artifact_for_engine()` emits the same canonical envelope shape, and worker reporting persists `metrics` through the existing GX report transport.
+- Custom PySpark already uses the same run-result contract shape for `performanceSummary` and execution metrics, so Spark Expectations can reuse the generic metrics/reporting seam rather than inventing a separate persistence model.
 
 ### Phase 4 — Observability, notifications, and hardening
 
