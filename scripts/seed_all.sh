@@ -66,7 +66,7 @@ else
     exit 1
 fi
 
-kong_container_id="$(docker ps -q -f name=^kong-gateway$ 2>/dev/null | tr -d '[:space:]' || true)"
+kong_container_id="$(docker ps -q -f name=^dq-made-easy-kong$ 2>/dev/null | tr -d '[:space:]' || true)"
 bootstrap_script="./dq-kong/scripts/bootstrap_kong.sh"
 KONG_HEALTHCHECK_URL="${KONG_LOCAL_PROBE_BASE_URL:-${KONG_LOCAL_URL%/}}/system/v1/health"
 

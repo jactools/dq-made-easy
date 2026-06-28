@@ -72,6 +72,12 @@ Deliverables:
     [x] aggregate checks (count, sum)
     [x] query-based checks (count-based query expectations)
 [ ] [SE-PLAN-007] Keep unsupported constructs explicit and reject them before execution.
+    - Unsupported constructs for the initial rollout:
+      - Arbitrary custom expressions and SQL predicates. Reason: they require expression translation and evaluation semantics that are not yet modeled in the neutral rule envelope.
+      - Window and analytic operations such as rank, dense_rank, lag, lead, or other `OVER (...)` patterns. Reason: they depend on ordering and partition context that is not part of the current lowering contract.
+      - Complex query expectations that return rows or multiple values instead of a scalar count. Reason: the adapter currently targets count-based scalar query expectations and cannot safely lower richer result-set semantics.
+      - Aggregates beyond count and sum, such as avg, distinct count, percentiles, or variance. Reason: they need additional observability and metric contracts before they can be emitted reliably.
+      - Cross-field or multi-column predicates. Reason: the initial mapping is intentionally single-column and fail-fast to avoid ambiguous lowering and hard-to-audit behavior.
 [x] [SE-PLAN-008] Add a neutral artifact projection path that can persist `engine_type = spark_expectations`.
 
 Acceptance criteria:

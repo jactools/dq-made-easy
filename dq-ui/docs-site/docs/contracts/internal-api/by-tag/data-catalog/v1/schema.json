@@ -2817,8 +2817,6 @@
           "enum": [
             "single_object",
             "join_pair",
-            "streaming",
-            "micro_batch",
             "grouped_scope"
           ],
           "title": "Execution Shape",

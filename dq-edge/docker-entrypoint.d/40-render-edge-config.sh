@@ -173,7 +173,7 @@ EOF
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   location /otlp/ {
 EOF
-  append_http_proxy_with_uri "http://dq-otel-collector:4319/"
+  append_http_proxy_with_uri "http://dq-made-easy-otel-collector:4319/"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 
@@ -299,7 +299,7 @@ EOF
 
   location /observability/otlp/ {
 EOF
-  append_http_proxy_with_uri "http://dq-otel-collector:4319/"
+  append_http_proxy_with_uri "http://dq-made-easy-otel-collector:4319/"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 

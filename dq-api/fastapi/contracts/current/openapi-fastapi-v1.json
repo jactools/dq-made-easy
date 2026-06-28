@@ -160,6 +160,137 @@
         "title": "AdminWorkspaceRoleView",
         "type": "object"
       },
+      "AgentAuditEventCreateView": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Id"
+          },
+          "agent_instance_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Instance Id"
+          },
+          "agent_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Source"
+          },
+          "agent_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Type"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "endpoint": {
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "request_origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Origin"
+          },
+          "response_type": {
+            "title": "Response Type",
+            "type": "string"
+          },
+          "status_code": {
+            "title": "Status Code",
+            "type": "integer"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          },
+          "user_agent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Agent"
+          }
+        },
+        "required": [
+          "action",
+          "endpoint",
+          "method",
+          "response_type",
+          "status_code",
+          "success"
+        ],
+        "title": "AgentAuditEventCreateView",
+        "type": "object"
+      },
       "AgentAuditEventListView": {
         "properties": {
           "events": {
@@ -673,6 +804,18 @@
             "title": "Agent Platform Allowlist",
             "type": "array"
           },
+          "agent_session_timeout_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 60,
+            "title": "Agent Session Timeout Minutes"
+          },
           "alert_routing_policy": {
             "anyOf": [
               {
@@ -1029,6 +1172,18 @@
             "default": 100,
             "title": "Max Templates Per Workspace",
             "type": "integer"
+          },
+          "max_tool_calls_per_session": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "title": "Max Tool Calls Per Session"
           },
           "max_users_per_workspace": {
             "default": 100,
@@ -10603,8 +10758,6 @@
             "enum": [
               "single_object",
               "join_pair",
-              "streaming",
-              "micro_batch",
               "grouped_scope"
             ],
             "title": "Execution Shape",
@@ -11643,8 +11796,6 @@
             "enum": [
               "single_object",
               "join_pair",
-              "streaming",
-              "micro_batch",
               "grouped_scope"
             ],
             "title": "Execution Shape",
@@ -11880,8 +12031,6 @@
             "enum": [
               "single_object",
               "join_pair",
-              "streaming",
-              "micro_batch",
               "grouped_scope"
             ],
             "title": "Execution Shape",
@@ -13546,8 +13695,6 @@
             "enum": [
               "single_object",
               "join_pair",
-              "streaming",
-              "micro_batch",
               "grouped_scope"
             ],
             "title": "Execution Shape",
@@ -13673,8 +13820,6 @@
             "enum": [
               "single_object",
               "join_pair",
-              "streaming",
-              "micro_batch",
               "grouped_scope"
             ],
             "title": "Execution Shape",
@@ -24295,6 +24440,48 @@
           }
         },
         "summary": "List Agent Audit Events",
+        "tags": [
+          "agent"
+        ]
+      },
+      "post": {
+        "operationId": "record_agent_audit_event_api_agent_v1_audit_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentAuditEventCreateView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentAuditEventView"
+                }
+              }
+            },
+            "description": "Record an agent request audit event."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "The agent request audit repository is unavailable."
+          }
+        },
+        "summary": "Record Agent Audit Event",
         "tags": [
           "agent"
         ]
@@ -43431,6 +43618,68 @@
         "summary": "Get Version Catalog",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/user/v1/me": {
+      "get": {
+        "operationId": "get_me_api_user_v1_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Me",
+        "tags": [
+          "user"
+        ]
+      },
+      "put": {
+        "operationId": "update_me_api_user_v1_me_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Payload",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Me",
+        "tags": [
+          "user"
         ]
       }
     }

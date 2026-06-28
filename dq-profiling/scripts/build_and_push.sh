@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # Name: build_and_push.sh
-# Description: Build and push dq-profiling image to Docker Hub
+# Description: Build and push dq-made-easy-profiling image to Docker Hub
 # Usage: ./build_and_push.sh [--no-cache] [--no-push]
 ###
 
@@ -47,7 +47,7 @@ while [[ $# -gt 0 ]]; do
             cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
-Build and push the dq-profiling Docker image.
+Build and push the dq-made-easy-profiling Docker image.
 
 Options:
     --no-cache    Build without using Docker cache
@@ -86,7 +86,7 @@ if [ -z "${DQ_PROFILING_REGISTRY:-}" ] || [ -z "${DQ_PROFILING_NAMESPACE:-}" ] |
 fi
 
 if [ -z "${DQ_BASE_REGISTRY:-}" ] || [ -z "${DQ_BASE_NAMESPACE:-}" ] || [ -z "${DQ_BASE_IMAGE:-}" ] || [ -z "${DQ_BASE_TAG:-}" ]; then
-    echo "ERROR: Missing base image environment variables required for dq-profiling build"
+    echo "ERROR: Missing base image environment variables required for dq-made-easy-profiling build"
     echo "  DQ_BASE_REGISTRY: ${DQ_BASE_REGISTRY:-not set}"
     echo "  DQ_BASE_NAMESPACE: ${DQ_BASE_NAMESPACE:-not set}"
     echo "  DQ_BASE_IMAGE: ${DQ_BASE_IMAGE:-not set}"
@@ -98,7 +98,7 @@ IMAGE_NAME="${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAG
 LATEST_NAME="${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:latest"
 
 echo "========================================"
-echo "Building dq-profiling Docker image"
+echo "Building dq-made-easy-profiling Docker image"
 echo "========================================"
 echo "Image: $IMAGE_NAME"
 echo "Latest: $LATEST_NAME"

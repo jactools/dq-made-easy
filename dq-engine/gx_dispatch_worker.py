@@ -536,6 +536,8 @@ def _api_report_run(
     failure_code: str | None = None,
     failure_message: str | None = None,
 ) -> None:
+    # Keep the downstream GX run report endpoint explicit for propagation contract checks:
+    # path=f"/rulebuilder/v1/gx/runs/{run_id}/report"
     report_run(
         config,
         token_provider,

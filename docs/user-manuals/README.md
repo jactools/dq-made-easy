@@ -33,3 +33,5 @@ Start here if you need to understand the end-to-end task flow for your role.
 - [Data Asset Lineage Guide](./data-asset-lineage-guide.md)
 - [DQ-17 Reconciliation Workflow Guide](./DQ_17_RECONCILIATION_WORKFLOW_GUIDE.md)
 - [Data Observability Triage Guide](./data-observability-triage-guide.md)
+- [DQ CLI Pipeline Integration Guide](./USER_GUIDE_DQ_CLI_PIPELINE_INTEGRATION.md)
+- [0.11.4 User Guide](./USER_GUIDE_0_11_4.md)

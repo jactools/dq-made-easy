@@ -68,9 +68,9 @@ for i in 1 2 3; do
 done
 
 info "$my_name" "== Last 200 lines: otel collector logs =="
-docker logs --tail 200 dq-otel-collector || true
+docker logs --tail 200 dq-made-easy-otel-collector || true
 
 info "$my_name" "== Last 200 lines: tempo logs =="
-docker logs --tail 200 dq-tempo || true
+docker logs --tail 200 dq-made-easy-tempo || true
 
 success "$my_name" "Done."

@@ -23,7 +23,7 @@ esac
 export CONTAINER_TEST_TARGET
 export TEST_TARGET="$CONTAINER_TEST_TARGET"
 
-NETWORK_NAME="${NETWORK_NAME:-$(docker inspect -f '{{range $name, $conf := .NetworkSettings.Networks}}{{$name}}{{println}}{{end}}' dq-aistor 2>/dev/null | head -1)}"
+NETWORK_NAME="${NETWORK_NAME:-$(docker inspect -f '{{range $name, $conf := .NetworkSettings.Networks}}{{$name}}{{println}}{{end}}' dq-made-easy-aistor 2>/dev/null | head -1)}"
 NETWORK_ARGS=()
 if [[ -n "$NETWORK_NAME" ]]; then
   NETWORK_ARGS+=(--network "$NETWORK_NAME")

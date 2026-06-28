@@ -27,11 +27,11 @@ RUN_CONFIGURE=true
 RUN_SEED_ALL="${SEED_ALL:-false}"
 
 # Internal Docker-network addresses (never the host-facing localhost/keycloak.local).
+# Compose resolves these service names on the shared Docker network.
 OM_DB_HOST="${OM_DB_HOST:-openmetadata-db}"
 OM_SERVER_HOST="${OM_SERVER_HOST:-openmetadata-server}"
 OM_SERVER_PORT="${OM_SERVER_PORT:-8585}"
 OM_BASE_PATH="${OPENMETADATA_BASE_PATH:-/}"
-KC_INTERNAL_URL="${KEYCLOAK_INTERNAL_URL:-http://keycloak:8080}"
 
 openmetadata_base_path_prefix() {
   if [ "$OM_BASE_PATH" = "/" ]; then
@@ -43,8 +43,10 @@ openmetadata_base_path_prefix() {
 }
 
 resolve_openmetadata_login_email() {
-  if [ -n "${OPENMETADATA_OIDC_SEED_USERNAME:-}" ]; then
-    printf '%s\n' "$OPENMETADATA_OIDC_SEED_USERNAME"
+  local seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
+
+  if [ -n "$seed_username" ]; then
+    printf '%s\n' "$seed_username"
     return 0
   fi
 
@@ -52,13 +54,53 @@ resolve_openmetadata_login_email() {
   return 1
 }
 
-resolve_openmetadata_password_b64() {
-  if [ -z "${OPENMETADATA_OIDC_SEED_PASSWORD:-}" ]; then
-    echo "ERROR: OPENMETADATA_OIDC_SEED_PASSWORD is required" >&2
+resolve_openmetadata_seed_password() {
+  local seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
+
+  if [ -n "$seed_password" ]; then
+    printf '%s' "$seed_password"
+    return 0
+  fi
+
+  echo "ERROR: OPENMETADATA_OIDC_SEED_PASSWORD is required" >&2
+  return 1
+}
+
+resolve_openmetadata_oidc_issuer() {
+  local issuer="${SSO_INTERNAL_ISSUER_URL:-${SSO_INTERNAL_ISSUER:-${KEYCLOAK_INTERNAL_URL:-}}}"
+  if [ -z "$issuer" ]; then
+    issuer="${OM_AUTHENTICATION_AUTHORITY:-${OM_AUTHENTICATION_DISCOVERY_URI:-}}"
+  fi
+
+  if [ -z "$issuer" ]; then
+    echo "ERROR: Unable to resolve the OpenMetadata OIDC issuer; set SSO_INTERNAL_ISSUER_URL or OM_AUTHENTICATION_AUTHORITY" >&2
     return 1
   fi
 
-  printf '%s' "$OPENMETADATA_OIDC_SEED_PASSWORD" | base64 | tr -d '\n'
+  issuer="${issuer%/}"
+  case "$issuer" in
+    */.well-known/openid-configuration)
+      issuer="${issuer%/.well-known/openid-configuration}"
+      ;;
+    */protocol/openid-connect/token)
+      issuer="${issuer%/protocol/openid-connect/token}"
+      ;;
+    */protocol/openid-connect/certs)
+      issuer="${issuer%/protocol/openid-connect/certs}"
+      ;;
+  esac
+
+  if [ "$issuer" = "http://keycloak:8080" ] || [ "$issuer" = "https://keycloak.jac.dot:9444" ]; then
+    issuer="${issuer}/realms/jaccloud"
+  fi
+
+  printf '%s\n' "$issuer"
+}
+
+resolve_openmetadata_password_b64() {
+  local seed_password
+  seed_password="$(resolve_openmetadata_seed_password)" || return 1
+  printf '%s' "$seed_password" | base64 | tr -d '\n'
 }
 
 normalize_pg_sslmode() {
@@ -122,13 +164,21 @@ configure_openmetadata_auth_settings() {
 
   local om_provider="${OM_AUTHENTICATION_PROVIDER:-custom-oidc}"
   local om_provider_name="${OM_OIDC_PROVIDER_NAME:-Keycloak}"
-  local om_authority="${OM_AUTHENTICATION_AUTHORITY:-https://keycloak.jac.dot:9444/realms/jaccloud}"
+  local om_authority
   local om_client_id="${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}"
   local om_callback_url="${OM_AUTHENTICATION_CALLBACK_URL:-https://openmetadata.jac.dot:8585/callback}"
-  local om_discovery_uri="${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}"
-  local om_public_keys="${OM_AUTHENTICATION_PUBLIC_KEYS:-[http://keycloak:8080/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585$(openmetadata_base_path_prefix)/api/v1/system/config/jwks]}"
+  local om_discovery_uri="${OM_AUTHENTICATION_DISCOVERY_URI:-}"
+  local om_public_keys="${OM_AUTHENTICATION_PUBLIC_KEYS:-}"
   local om_enable_auto_redirect="${OM_ENABLE_AUTO_REDIRECT:-false}"
   local om_server_url="${OM_AUTHENTICATION_SERVER_URL:-${om_callback_url%/callback}}"
+
+  om_authority="$(resolve_openmetadata_oidc_issuer)" || return 1
+  if [ -z "$om_discovery_uri" ]; then
+    om_discovery_uri="${om_authority}/.well-known/openid-configuration"
+  fi
+  if [ -z "$om_public_keys" ]; then
+    om_public_keys="[${om_authority}/protocol/openid-connect/certs,https://openmetadata-server:8585$(openmetadata_base_path_prefix)/api/v1/system/config/jwks]"
+  fi
 
   om_db_ssl_mode="$(normalize_pg_sslmode "$om_db_ssl_mode")"
   keys_sql="$(build_sql_string_list "$om_public_keys")"
@@ -182,7 +232,7 @@ WHERE isBot IS NOT TRUE
   AND json->>'email' LIKE '%@dqprototype.com';
 SQL
 
-  echo "OpenMetadata authentication settings updated. Restarting openmetadata-server to apply changes..."
+  echo "OpenMetadata authentication settings updated. Restarting dq-made-easy-openmetadata-server to apply changes..."
 
   # Restart the server container via the Docker socket.  The filter uses the
   # compose service label so it works regardless of the project name prefix.
@@ -213,11 +263,12 @@ SQL
 prepare_openmetadata_access_token() {
   local om_provider="${OM_AUTHENTICATION_PROVIDER:-custom-oidc}"
   local om_client_id="${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}"
-  local seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
-  local seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
+  local seed_username
+  local seed_password
   local python_runner="$ROOT_DIR/scripts/python_arm64.sh"
   local token_endpoint
   local om_probe_code
+  local kc_realm_url
 
   if [ -n "${OM_TOKEN:-}" ]; then
     echo "Using preconfigured OM_TOKEN for OpenMetadata automation."
@@ -228,18 +279,10 @@ prepare_openmetadata_access_token() {
     return 0
   fi
 
-  if [ -z "$seed_username" ]; then
-    echo "ERROR: OPENMETADATA_OIDC_SEED_USERNAME is required" >&2
-    return 1
-  fi
+  seed_username="$(resolve_openmetadata_login_email)" || return 1
+  seed_password="$(resolve_openmetadata_seed_password)" || return 1
 
-  if [ -z "$seed_password" ]; then
-    echo "ERROR: OPENMETADATA_OIDC_SEED_PASSWORD is required" >&2
-    return 1
-  fi
-
-  # Inside the Docker network, Keycloak is reachable via its service name.
-  local kc_realm_url="${KC_INTERNAL_URL%/}/realms/jaccloud"
+  kc_realm_url="$(resolve_openmetadata_oidc_issuer)" || return 1
   token_endpoint="${kc_realm_url}/protocol/openid-connect/token"
 
   local realm_probe_code

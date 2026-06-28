@@ -8,8 +8,8 @@
       },
       "group": "aggregate",
       "kind": "aggregate",
-      "operation_count": 319,
-      "path_count": 274,
+      "operation_count": 322,
+      "path_count": 275,
       "version": "v1"
     },
     {
@@ -32,7 +32,7 @@
       },
       "group": "by-tag/agent",
       "kind": "tag",
-      "operation_count": 9,
+      "operation_count": 10,
       "path_count": 9,
       "version": "v1"
     },
@@ -382,6 +382,18 @@
       "kind": "tag",
       "operation_count": 18,
       "path_count": 17,
+      "version": "v1"
+    },
+    {
+      "files": {
+        "openapi": "by-tag/user/v1/openapi.json",
+        "operations": "by-tag/user/v1/operations.json",
+        "schema": "by-tag/user/v1/schema.json"
+      },
+      "group": "by-tag/user",
+      "kind": "tag",
+      "operation_count": 2,
+      "path_count": 1,
       "version": "v1"
     },
     {

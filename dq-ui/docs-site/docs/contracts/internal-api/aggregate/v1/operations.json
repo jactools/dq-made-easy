@@ -633,6 +633,44 @@
       ]
     },
     {
+      "method": "POST",
+      "operation_id": "record_agent_audit_event_api_agent_v1_audit_events_post",
+      "path": "/api/agent/v1/audit/events",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/AgentAuditEventCreateView"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AgentAuditEventView"
+            }
+          },
+          "description": "Record an agent request audit event."
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        },
+        "503": {
+          "description": "The agent request audit repository is unavailable."
+        }
+      },
+      "summary": "Record Agent Audit Event",
+      "tags": [
+        "agent"
+      ]
+    },
+    {
       "method": "GET",
       "operation_id": "get_agent_decision_context_api_agent_v1_context_decisions__rule_id__get",
       "parameters": [
@@ -13824,6 +13862,60 @@
       "summary": "Get Version Catalog",
       "tags": [
         "system"
+      ]
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_me_api_user_v1_me_get",
+      "path": "/api/user/v1/me",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUserView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get Me",
+      "tags": [
+        "user"
+      ]
+    },
+    {
+      "method": "PUT",
+      "operation_id": "update_me_api_user_v1_me_put",
+      "path": "/api/user/v1/me",
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema_ref": "#/$defs/update_me_api_user_v1_me_put_request_body_application_json"
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/AdminUserView"
+            }
+          },
+          "description": "Successful Response"
+        },
+        "422": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/HTTPValidationError"
+            }
+          },
+          "description": "Validation Error"
+        }
+      },
+      "summary": "Update Me",
+      "tags": [
+        "user"
       ]
     }
   ],

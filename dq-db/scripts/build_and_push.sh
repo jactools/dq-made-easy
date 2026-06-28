@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # Name: build_and_push.sh
-# Description: Build and push dq-db image to Docker Hub
+# Description: Build and push dq-made-easy-db image to Docker Hub
 # Usage: ./build_and_push.sh [--no-cache] [--no-push]
 ###
 
@@ -26,10 +26,10 @@ if [ -n "$SAVED_DQ_DB_TAG" ]; then
     DQ_DB_TAG="$SAVED_DQ_DB_TAG"
 fi
 
-# Sensible defaults for environments that haven't added dq-db vars yet.
+# Sensible defaults for environments that haven't added dq-made-easy-db vars yet.
 DQ_DB_REGISTRY="${DQ_DB_REGISTRY:-docker.io/}"
 DQ_DB_NAMESPACE="${DQ_DB_NAMESPACE:-jacbeekers/}"
-DQ_DB_IMAGE="${DQ_DB_IMAGE:-dq-db}"
+DQ_DB_IMAGE="${DQ_DB_IMAGE:-dq-made-easy-db}"
 DQ_DB_TAG="${DQ_DB_TAG:-latest}"
 
 NO_CACHE=""
@@ -49,7 +49,7 @@ while [[ $# -gt 0 ]]; do
             cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
-Build and push the dq-db Docker image.
+Build and push the dq-made-easy-db Docker image.
 
 Options:
     --no-cache    Build without using Docker cache
@@ -91,7 +91,7 @@ IMAGE_NAME="${DQ_DB_REGISTRY}${DQ_DB_NAMESPACE}${DQ_DB_IMAGE}:${DQ_DB_TAG}"
 LATEST_NAME="${DQ_DB_REGISTRY}${DQ_DB_NAMESPACE}${DQ_DB_IMAGE}:latest"
 
 echo "========================================"
-echo "Building dq-db Docker image"
+echo "Building dq-made-easy-db Docker image"
 echo "========================================"
 echo "Image: $IMAGE_NAME"
 echo "Latest: $LATEST_NAME"

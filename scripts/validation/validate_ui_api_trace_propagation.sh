@@ -51,7 +51,7 @@ fi
 export KEYCLOAK_PUBLIC_HOSTNAME
 
 if [ -z "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" ]; then
-  OTEL_EXPORTER_OTLP_ENDPOINT="http://dq-otel-collector:4317"
+  OTEL_EXPORTER_OTLP_ENDPOINT="http://dq-made-easy-otel-collector:4317"
 fi
 export OTEL_EXPORTER_OTLP_ENDPOINT
 

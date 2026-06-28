@@ -45,24 +45,24 @@ Canonical env options:
   --env-file PATH          Use an explicit env file
 
 Default scope (core):
-  1) dq-base
-  2) dq-api
-  3) dq-engine
-  4) dq-profiling
-  5) dq-frontend
-  6) dq-kong
-  7) dq-db
-  8) dq-keycloak
+  1) dq-made-easy-base
+  2) dq-made-easy-api
+  3) dq-made-easy-engine
+  4) dq-made-easy-profiling
+  5) dq-made-easy-frontend
+  6) dq-made-easy-kong
+  7) dq-made-easy-db
+  8) dq-made-easy-keycloak
 
 Repo scope (repo) builds the core set plus auxiliary repo-managed images:
-  9) dq-db-seed
- 10) dq-keycloak-seed-artifacts
- 11) dq-openmetadata-db
- 12) dq-openmetadata-server
- 13) dq-metadata-configure
- 14) dq-container-metrics
- 15) dq-zammad-seed
- 16) dq-llm
+  9) dq-made-easy-db-seed
+ 10) dq-made-easy-keycloak-seed-artifacts
+ 11) dq-made-easy-openmetadata-db
+ 12) dq-made-easy-openmetadata-server
+ 13) dq-made-easy-metadata-configure
+ 14) dq-made-easy-container-metrics
+ 15) dq-made-easy-zammad-seed
+ 16) dq-made-easy-llm
 
 Options:
   --scope <core|repo>  Select image scope (default: core)
@@ -126,8 +126,8 @@ expand_selected_image_dependencies() {
 
   for image in "${requested_images[@]}"; do
     case "$image" in
-      dq-api|dq-profiling)
-        append_unique_selected_image "dq-base"
+      dq-made-easy-api|dq-made-easy-profiling)
+        append_unique_selected_image "dq-made-easy-base"
         ;;
     esac
     append_unique_selected_image "$image"
@@ -310,7 +310,7 @@ run_script_step() {
   local tag_var
   tag_var="$(printf '%s' "$step_name" | tr '[:lower:]-' '[:upper:]_')_TAG"
 
-  if [ "$step_name" = "dq-frontend" ]; then
+  if [ "$step_name" = "dq-made-easy-frontend" ]; then
     tag_var="DQ_FRONTEND_TAG"
   fi
 
@@ -380,35 +380,35 @@ docker_login
 
 DQ_DB_SEED_REGISTRY="${DQ_DB_SEED_REGISTRY:-${DQ_DB_REGISTRY:-docker.io/}}"
 DQ_DB_SEED_NAMESPACE="${DQ_DB_SEED_NAMESPACE:-${DQ_DB_NAMESPACE:-jacbeekers/}}"
-DQ_DB_SEED_IMAGE="${DQ_DB_SEED_IMAGE:-dq-db-seed}"
+DQ_DB_SEED_IMAGE="${DQ_DB_SEED_IMAGE:-dq-made-easy-db-seed}"
 
 DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-docker.io/}}"
 DQ_KEYCLOAK_SEED_NAMESPACE="${DQ_KEYCLOAK_SEED_NAMESPACE:-${DQ_KEYCLOAK_NAMESPACE:-jacbeekers/}}"
-DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-keycloak-seed-artifacts}"
+DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-made-easy-keycloak-seed-artifacts}"
 
 DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker.io/}"
 DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
-DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-llm}"
+DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
 
 DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker.io/}"
 DQ_OPENMETADATA_DB_NAMESPACE="${DQ_OPENMETADATA_DB_NAMESPACE:-jacbeekers/}"
-DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-openmetadata-db}"
+DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}"
 
 DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker.io/}"
 DQ_OPENMETADATA_SERVER_NAMESPACE="${DQ_OPENMETADATA_SERVER_NAMESPACE:-jacbeekers/}"
-DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-openmetadata}"
+DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata}"
 
 DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker.io/}"
 DQ_METADATA_CONFIGURE_NAMESPACE="${DQ_METADATA_CONFIGURE_NAMESPACE:-jacbeekers/}"
-DQ_METADATA_CONFIGURE_IMAGE="${DQ_METADATA_CONFIGURE_IMAGE:-dq-metadata-configure}"
+DQ_METADATA_CONFIGURE_IMAGE="${DQ_METADATA_CONFIGURE_IMAGE:-dq-made-easy-metadata-configure}"
 
 DQ_CONTAINER_METRICS_REGISTRY="${DQ_CONTAINER_METRICS_REGISTRY:-docker.io/}"
 DQ_CONTAINER_METRICS_NAMESPACE="${DQ_CONTAINER_METRICS_NAMESPACE:-jacbeekers/}"
-DQ_CONTAINER_METRICS_IMAGE="${DQ_CONTAINER_METRICS_IMAGE:-dq-container-metrics}"
+DQ_CONTAINER_METRICS_IMAGE="${DQ_CONTAINER_METRICS_IMAGE:-dq-made-easy-container-metrics}"
 
 DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker.io/}"
 DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
-DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-zammad-seed}"
+DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
 export DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE
 export DQ_KEYCLOAK_SEED_REGISTRY DQ_KEYCLOAK_SEED_NAMESPACE DQ_KEYCLOAK_SEED_IMAGE
@@ -485,37 +485,37 @@ if [ ! -d "$ROOT_DIR/dq-ui/dist" ]; then
   warning "$my_name" "Frontend build may fail. Build UI assets first if needed."
 fi
 
-if image_selected "dq-base"; then
-  run_script_step "dq-base" "$ROOT_DIR/dq-base/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-base"; then
+  run_script_step "dq-made-easy-base" "$ROOT_DIR/dq-base/scripts/build_and_push.sh"
 fi
-if image_selected "dq-api"; then
-  run_script_step "dq-api" "$ROOT_DIR/dq-api/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-api"; then
+  run_script_step "dq-made-easy-api" "$ROOT_DIR/dq-api/scripts/build_and_push.sh"
 fi
-if image_selected "dq-engine"; then
-  run_script_step "dq-engine" "$ROOT_DIR/dq-engine/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-engine"; then
+  run_script_step "dq-made-easy-engine" "$ROOT_DIR/dq-engine/scripts/build_and_push.sh"
 fi
-if image_selected "dq-profiling"; then
-  run_script_step "dq-profiling" "$ROOT_DIR/dq-profiling/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-profiling"; then
+  run_script_step "dq-made-easy-profiling" "$ROOT_DIR/dq-profiling/scripts/build_and_push.sh"
 fi
-if image_selected "dq-frontend"; then
-  run_script_step "dq-frontend" "$ROOT_DIR/dq-ui/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-frontend"; then
+  run_script_step "dq-made-easy-frontend" "$ROOT_DIR/dq-ui/scripts/build_and_push.sh"
 fi
-if image_selected "dq-kong"; then
-  run_script_step "dq-kong" "$ROOT_DIR/dq-kong/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-kong"; then
+  run_script_step "dq-made-easy-kong" "$ROOT_DIR/dq-kong/scripts/build_and_push.sh"
 fi
-if image_selected "dq-db"; then
-  run_script_step "dq-db" "$ROOT_DIR/dq-db/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-db"; then
+  run_script_step "dq-made-easy-db" "$ROOT_DIR/dq-db/scripts/build_and_push.sh"
 fi
-if image_selected "dq-keycloak"; then
-  run_script_step "dq-keycloak" "$ROOT_DIR/dq-keycloak/scripts/build_and_push.sh"
+if image_selected "dq-made-easy-keycloak"; then
+  run_script_step "dq-made-easy-keycloak" "$ROOT_DIR/dq-keycloak/scripts/build_and_push.sh"
 fi
 
 if [ "$BUILD_SCOPE" = "repo" ]; then
   ensure_buildx_builder
 
-  if image_selected "dq-db-seed"; then
+  if image_selected "dq-made-easy-db-seed"; then
     run_direct_build_step \
-      "dq-db-seed" \
+      "dq-made-easy-db-seed" \
       "DQ_DB_SEED_TAG" \
       "${DQ_DB_SEED_REGISTRY}${DQ_DB_SEED_NAMESPACE}${DQ_DB_SEED_IMAGE}" \
       "$ROOT_DIR/dq-db/Dockerfile.dq-db.seed" \
@@ -523,18 +523,18 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
   fi
 
-  if image_selected "dq-keycloak-seed-artifacts"; then
+  if image_selected "dq-made-easy-keycloak-seed-artifacts"; then
     run_direct_build_step \
-      "dq-keycloak-seed-artifacts" \
+      "dq-made-easy-keycloak-seed-artifacts" \
       "DQ_KEYCLOAK_SEED_TAG" \
       "${DQ_KEYCLOAK_SEED_REGISTRY}${DQ_KEYCLOAK_SEED_NAMESPACE}${DQ_KEYCLOAK_SEED_IMAGE}" \
       "$ROOT_DIR/dq-keycloak/Dockerfile.keycloak.seed" \
       "$ROOT_DIR"
   fi
 
-  if image_selected "dq-openmetadata-db"; then
+  if image_selected "dq-made-easy-openmetadata-db"; then
     run_direct_build_step \
-      "dq-openmetadata-db" \
+      "dq-made-easy-openmetadata-db" \
       "DQ_OPENMETADATA_DB_TAG" \
       "${DQ_OPENMETADATA_DB_REGISTRY}${DQ_OPENMETADATA_DB_NAMESPACE}${DQ_OPENMETADATA_DB_IMAGE}" \
       "$ROOT_DIR/dq-metadata/Dockerfile.openmetadata-db" \
@@ -542,9 +542,9 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "OPENMETADATA_DB_BASE_IMAGE=${OPENMETADATA_DB_BASE_IMAGE?OPENMETADATA_DB_BASE_IMAGE is required}"
   fi
 
-  if image_selected "dq-openmetadata-server"; then
+  if image_selected "dq-made-easy-openmetadata-server"; then
     run_direct_build_step \
-      "dq-openmetadata-server" \
+      "dq-made-easy-openmetadata-server" \
       "DQ_OPENMETADATA_SERVER_TAG" \
       "${DQ_OPENMETADATA_SERVER_REGISTRY}${DQ_OPENMETADATA_SERVER_NAMESPACE}${DQ_OPENMETADATA_SERVER_IMAGE}" \
       "$ROOT_DIR/dq-metadata/Dockerfile.openmetadata-server" \
@@ -554,18 +554,18 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "OTEL_JAVAAGENT_VERSION=${OTEL_JAVAAGENT_VERSION:-2.16.0}"
   fi
 
-  if image_selected "dq-metadata-configure"; then
+  if image_selected "dq-made-easy-metadata-configure"; then
     run_direct_build_step \
-      "dq-metadata-configure" \
+      "dq-made-easy-metadata-configure" \
       "DQ_METADATA_CONFIGURE_TAG" \
       "${DQ_METADATA_CONFIGURE_REGISTRY}${DQ_METADATA_CONFIGURE_NAMESPACE}${DQ_METADATA_CONFIGURE_IMAGE}" \
       "$ROOT_DIR/dq-metadata/Dockerfile.configure" \
       "$ROOT_DIR"
   fi
 
-  if image_selected "dq-container-metrics"; then
+  if image_selected "dq-made-easy-container-metrics"; then
     run_direct_build_step \
-      "dq-container-metrics" \
+      "dq-made-easy-container-metrics" \
       "DQ_CONTAINER_METRICS_TAG" \
       "${DQ_CONTAINER_METRICS_REGISTRY}${DQ_CONTAINER_METRICS_NAMESPACE}${DQ_CONTAINER_METRICS_IMAGE}" \
       "$ROOT_DIR/observability/container-metrics/Dockerfile.container-metrics" \
@@ -573,9 +573,9 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
   fi
 
-  if image_selected "dq-zammad-seed"; then
+  if image_selected "dq-made-easy-zammad-seed"; then
     run_direct_build_step \
-      "dq-zammad-seed" \
+      "dq-made-easy-zammad-seed" \
       "DQ_ZAMMAD_SEED_TAG" \
       "${DQ_ZAMMAD_SEED_REGISTRY}${DQ_ZAMMAD_SEED_NAMESPACE}${DQ_ZAMMAD_SEED_IMAGE}" \
       "$ROOT_DIR/docker/Dockerfile.zammad.seed" \
@@ -583,13 +583,13 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
   fi
 
-  if image_selected "dq-llm"; then
+  if image_selected "dq-made-easy-llm"; then
     run_direct_build_step \
-      "dq-llm" \
+      "dq-made-easy-llm" \
       "DQ_LLM_TAG" \
       "${DQ_LLM_REGISTRY}${DQ_LLM_NAMESPACE}${DQ_LLM_IMAGE}" \
       "$ROOT_DIR/dq-llm/Dockerfile.llm" \
-      "$ROOT_DIR/dq-llm" \
+      "$ROOT_DIR/dq-made-easy-llm" \
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
   fi
 fi

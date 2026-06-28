@@ -10,10 +10,11 @@ set -euo pipefail
 #
 # validate: groups=repo,api
 #
-# Version: 1.0
-# Last modified: 2026-04-25
+# Version: 1.1
+# Last modified: 2026-06-28
 # Changelog:
 # - 1.1 (2026-05-14): Updated the allowlist for the renamed execution monitoring endpoint test file.
+# - 1.2 (2026-06-28): Added the GX endpoint, validation run plan adapter, and focused testing adapter test imports to the allowlist.
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
@@ -26,7 +27,7 @@ GX_RUNTIME_API_IMPORT_REGEX='^[[:space:]]*(from[[:space:]]+app\.api\.v1([[:space
 is_allowed_testing_api_importer() {
   local rel="$1"
   case "$rel" in
-    dq-api/fastapi/app/api/v1/endpoints/testing.py|dq-api/fastapi/tests/api/test_endpoint_focus.py|dq-api/fastapi/tests/api/test_testing_generated_proof_persistence.py)
+    dq-api/fastapi/app/api/v1/endpoints/testing.py|dq-api/fastapi/tests/api/test_endpoint_focus.py|dq-api/fastapi/tests/api/test_testing_api_focus.py|dq-api/fastapi/tests/api/test_testing_generated_proof_persistence.py)
       return 0
       ;;
   esac
@@ -36,7 +37,7 @@ is_allowed_testing_api_importer() {
 is_allowed_gx_runtime_api_importer() {
   local rel="$1"
   case "$rel" in
-    dq-api/fastapi/app/api/v1/endpoints/execution_monitoring.py|dq-api/fastapi/app/api/v1/endpoints/data_catalog.py|dq-api/fastapi/app/api/v1/gx_execution_api.py|dq-api/fastapi/tests/api/test_execution_monitoring_payload_building.py|dq-api/fastapi/tests/api/test_gx_queue_status.py)
+    dq-api/fastapi/app/api/v1/endpoints/execution_monitoring.py|dq-api/fastapi/app/api/v1/endpoints/data_catalog.py|dq-api/fastapi/app/api/v1/endpoints/gx.py|dq-api/fastapi/app/api/v1/gx_execution_api.py|dq-api/fastapi/app/api/v1/validation_run_plan_api.py|dq-api/fastapi/tests/api/test_execution_monitoring_payload_building.py|dq-api/fastapi/tests/api/test_gx_endpoint_payload_building.py|dq-api/fastapi/tests/api/test_gx_queue_status.py)
       return 0
       ;;
   esac

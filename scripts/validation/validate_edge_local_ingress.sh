@@ -88,6 +88,19 @@ require_cmd() {
   fi
 }
 
+find_running_compose_container() {
+  local service_name="$1"
+  local container_id
+
+  container_id="$(docker ps --filter "label=com.docker.compose.service=${service_name}" --filter 'status=running' --format '{{.ID}}' | head -1 | tr -d '[:space:]')"
+  if [ -z "$container_id" ]; then
+    error "$my_name" "expected running container for ${service_name}"
+    exit 1
+  fi
+
+  printf '%s\n' "$container_id"
+}
+
 assert_contains() {
   local needle="$1"
   local haystack="$2"
@@ -116,25 +129,22 @@ if [ ! -f "$EDGE_CERT_FILE_PATH" ] || [ ! -f "$EDGE_KEY_FILE_PATH" ]; then
 fi
 
 info "$my_name" "Rendering local edge ingress config..."
-rendered_config="$({
-  docker run --rm \
-    -v "$EDGE_SSL_CERTS_DIR:/etc/nginx/certs:ro" \
-    -v "$ROOT_DIR/dq-edge/docker-entrypoint.d/40-render-edge-config.sh:/opt/edge/render-edge-config.sh:ro" \
-    -e EDGE_MODE="$EDGE_MODE" \
-    -e EDGE_LOCAL_APP_HOST="$EDGE_LOCAL_APP_HOST" \
-    -e EDGE_LOCAL_KONG_HOST="$EDGE_LOCAL_KONG_HOST" \
-    -e EDGE_LOCAL_KEYCLOAK_HOST="$EDGE_LOCAL_KEYCLOAK_HOST" \
-    -e EDGE_LOCAL_OPENMETADATA_HOST="$EDGE_LOCAL_OPENMETADATA_HOST" \
-    -e EDGE_LOCAL_OBSERVABILITY_HOST="$EDGE_LOCAL_OBSERVABILITY_HOST" \
-    -e EDGE_LOCAL_SUPPORT_HOST="$EDGE_LOCAL_SUPPORT_HOST" \
-    -e EDGE_LOCAL_AIRFLOW_HOST="$EDGE_LOCAL_AIRFLOW_HOST" \
-    -e EDGE_PUBLIC_APEX_HOST="$EDGE_PUBLIC_APEX_HOST" \
-    -e EDGE_PUBLIC_CANONICAL_HOST="$EDGE_PUBLIC_CANONICAL_HOST" \
-    -e EDGE_SSL_CERT_FILE="/etc/nginx/certs/$EDGE_SSL_CERT_FILE_NAME" \
-    -e EDGE_SSL_KEY_FILE="/etc/nginx/certs/$EDGE_SSL_KEY_FILE_NAME" \
-    nginx:1.27-alpine \
-    /bin/sh -c '/bin/sh /opt/edge/render-edge-config.sh && sed -n "1,360p" /etc/nginx/conf.d/default.conf'
-} )"
+edge_container_id="$(find_running_compose_container edge)"
+rendered_config="$(docker exec \
+  -e EDGE_MODE="$EDGE_MODE" \
+  -e EDGE_LOCAL_APP_HOST="$EDGE_LOCAL_APP_HOST" \
+  -e EDGE_LOCAL_KONG_HOST="$EDGE_LOCAL_KONG_HOST" \
+  -e EDGE_LOCAL_KEYCLOAK_HOST="$EDGE_LOCAL_KEYCLOAK_HOST" \
+  -e EDGE_LOCAL_OPENMETADATA_HOST="$EDGE_LOCAL_OPENMETADATA_HOST" \
+  -e EDGE_LOCAL_OBSERVABILITY_HOST="$EDGE_LOCAL_OBSERVABILITY_HOST" \
+  -e EDGE_LOCAL_SUPPORT_HOST="$EDGE_LOCAL_SUPPORT_HOST" \
+  -e EDGE_LOCAL_AIRFLOW_HOST="$EDGE_LOCAL_AIRFLOW_HOST" \
+  -e EDGE_PUBLIC_APEX_HOST="$EDGE_PUBLIC_APEX_HOST" \
+  -e EDGE_PUBLIC_CANONICAL_HOST="$EDGE_PUBLIC_CANONICAL_HOST" \
+  -e EDGE_SSL_CERT_FILE="/etc/nginx/certs/$EDGE_SSL_CERT_FILE_NAME" \
+  -e EDGE_SSL_KEY_FILE="/etc/nginx/certs/$EDGE_SSL_KEY_FILE_NAME" \
+  "$edge_container_id" \
+  /bin/sh -c '/bin/sh /opt/edge/render-edge-config.sh && sed -n "1,360p" /etc/nginx/conf.d/default.conf')"
 
 if [[ "$EDGE_MODE" == "public" ]]; then
   assert_contains "server_name ${EDGE_PUBLIC_APEX_HOST};" "$rendered_config"
@@ -158,7 +168,7 @@ else
   assert_contains 'set $upstream http://kong:8000;' "$rendered_config"
   assert_contains 'set $upstream http://keycloak:8080;' "$rendered_config"
   assert_contains 'set $upstream https://openmetadata-server:8585;' "$rendered_config"
-  assert_contains 'proxy_pass http://dq-otel-collector:4319/;' "$rendered_config"
+  assert_contains 'proxy_pass http://dq-made-easy-otel-collector:4319/;' "$rendered_config"
   assert_contains 'set $upstream http://grafana:3000;' "$rendered_config"
   assert_contains 'set $upstream http://zammad-nginx:8080;' "$rendered_config"
   if [[ -n "$EDGE_LOCAL_AIRFLOW_HOST" ]]; then

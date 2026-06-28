@@ -26,6 +26,18 @@
             "title": "Agent Platform Allowlist",
             "type": "array"
           },
+          "agent_session_timeout_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 60,
+            "title": "Agent Session Timeout Minutes"
+          },
           "alert_routing_policy": {
             "anyOf": [
               {
@@ -382,6 +394,18 @@
             "default": 100,
             "title": "Max Templates Per Workspace",
             "type": "integer"
+          },
+          "max_tool_calls_per_session": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 100,
+            "title": "Max Tool Calls Per Session"
           },
           "max_users_per_workspace": {
             "default": 100,

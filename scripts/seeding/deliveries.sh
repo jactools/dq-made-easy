@@ -10,7 +10,7 @@ prepare_delivery_seed_runtime() {
   fi
 
   info "$my_name" "Warming Spark jars for delivery seeding..."
-  docker_compose --profile core --profile engine run --rm --no-deps dq-engine-warmup || {
+  docker_compose --profile core --profile engine run --rm --no-deps -e DQ_SPARK_DRIVER_HOST=127.0.0.1 -e DQ_SPARK_DRIVER_BIND_ADDRESS=0.0.0.0 dq-made-easy-engine python scripts/warmup_spark_jars.py --ivy-dir /home/appuser/.ivy2 --jar-dir /home/appuser/.dq-spark-jars || {
     error "$my_name" "Spark jar warm-up failed before delivery seeding"
     exit 36
   }
@@ -38,12 +38,12 @@ seed_delivery_objects_in_docker() {
   prepare_delivery_seed_runtime
 
   if [ "${#delivery_args[@]}" -gt 0 ]; then
-    docker_compose --profile seed --profile core --profile engine run --rm --no-deps delivery-seed "${delivery_args[@]}" || {
+    docker_compose --profile seed --profile core --profile engine run --rm --no-deps -e DQ_SPARK_DRIVER_HOST=127.0.0.1 -e DQ_SPARK_DRIVER_BIND_ADDRESS=0.0.0.0 delivery-seed "${delivery_args[@]}" || {
       error "$my_name" "Delivery Docker seed container failed"
       exit 36
     }
   else
-    docker_compose --profile seed --profile core --profile engine run --rm --no-deps delivery-seed || {
+    docker_compose --profile seed --profile core --profile engine run --rm --no-deps -e DQ_SPARK_DRIVER_HOST=127.0.0.1 -e DQ_SPARK_DRIVER_BIND_ADDRESS=0.0.0.0 delivery-seed || {
       error "$my_name" "Delivery Docker seed container failed"
       exit 36
     }

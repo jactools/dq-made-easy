@@ -49,14 +49,15 @@ services:
       context: ./dq-base
       dockerfile: Dockerfile.base
       args:
-        NODE_REGISTRY: ${DQ_BASE_REGISTRY}
-        NODE_NAMESPACE: ${DQ_BASE_NAMESPACE}
-        NODE_IMAGE: "${DQ_BASE_IMAGE}"
-        NODE_TAG: ${DQ_BASE_TAG}
+        NODE_REGISTRY: ${NODE_REGISTRY}
+        NODE_NAMESPACE: ${NODE_NAMESPACE}
+        NODE_IMAGE: "${NODE_IMAGE}"
+        NODE_TAG: ${NODE_TAG}
 
   db:
     profiles: ["core","gateway","engine","profiling","observability"]
-    image: ${DQ_DB_REGISTRY:-}${DQ_DB_NAMESPACE:-}${DQ_DB_IMAGE:-dq-db}:${DQ_DB_TAG:-latest}
+    image: ${DQ_DB_REGISTRY:-}${DQ_DB_NAMESPACE:-}${DQ_DB_IMAGE:-dq-made-easy-db}:${DQ_DB_TAG:-latest}
+    container_name: dq-made-easy-db
     build:
       context: ./dq-db
       dockerfile: Dockerfile.db
@@ -119,10 +120,10 @@ services:
       - ./data_sources/contracts:/workspace/dq-api/fastapi/data_sources/contracts:ro
     restart: "no"
 
-  dq-db-postgres-exporter:
+  dq-made-easy-db-postgres-exporter:
     profiles: ["observability"]
     image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
-    container_name: dq-db-postgres-exporter
+    container_name: dq-made-easy-db-postgres-exporter
     depends_on:
       db:
         condition: service_healthy
@@ -141,6 +142,7 @@ services:
   redis:
     profiles: ["redis","core","gateway","observability","support"]
     image: ${REDIS_REGISTRY}${REDIS_NAMESPACE}${REDIS_IMAGE}:${REDIS_TAG}
+    container_name: dq-made-easy-redis
     ports:
       - "${REDIS_HOST_BIND}:${REDIS_HOST_PORT}:6379"
     command: redis-server --appendonly yes
@@ -388,7 +390,7 @@ services:
 
   keycloak:
     profiles: ["auth", "gateway"]
-    image: ${DQ_KEYCLOAK_REGISTRY:-}${DQ_KEYCLOAK_NAMESPACE:-}${DQ_KEYCLOAK_IMAGE:-dq-keycloak}:${DQ_KEYCLOAK_TAG:-latest}
+    image: ${DQ_KEYCLOAK_REGISTRY:-}${DQ_KEYCLOAK_NAMESPACE:-}${DQ_KEYCLOAK_IMAGE:-dq-made-easy-keycloak}:${DQ_KEYCLOAK_TAG:-latest}
     build:
       context: ./dq-keycloak
       dockerfile: Dockerfile.keycloak
@@ -435,7 +437,7 @@ services:
       retries: 5
       start_period: 5s
 
-  dq-engine:
+  dq-made-easy-engine:
     profiles: ["engine"]
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
     build:
@@ -461,7 +463,7 @@ services:
       ENVIRONMENT: ${ENVIRONMENT}
       TZ: UTC
       # OpenTelemetry
-      OTEL_SERVICE_NAME: dq-engine
+      OTEL_SERVICE_NAME: dq-made-easy-engine
       OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
       OTEL_CONSOLE_EXPORT: "1"
@@ -469,7 +471,7 @@ services:
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: "1.0"
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
-      DQ_SPARK_DRIVER_HOST: dq-engine
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
       DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
       DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
@@ -513,7 +515,9 @@ services:
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
       DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
-      DQ_SPARK_DRIVER_HOST: delivery-seed
+      # One-shot delivery seeding runs via `docker compose run`, so Spark should use loopback
+      # rather than rely on the service DNS alias being resolvable inside the container.
+      DQ_SPARK_DRIVER_HOST: 127.0.0.1
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
       DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
       DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
@@ -526,19 +530,9 @@ services:
       - dq-network
     restart: "no"
 
-  dq-engine-warmup:
+  dq-made-easy-engine-warmup:
     profiles: ["engine"]
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: dq-engine/Dockerfile.engine
-      args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
-        MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
-        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
-        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
-      secrets:
-        - internal_corporate_root_ca
     env_file:
       - ${ROOT_ENV_FILE:-.env}
     command: ["python", "scripts/warmup_spark_jars.py", "--ivy-dir", "/home/appuser/.ivy2", "--jar-dir", "/home/appuser/.dq-spark-jars"]
@@ -552,7 +546,7 @@ services:
       - dq-network
     restart: "no"
 
-  dq-engine-gx-worker:
+  dq-made-easy-engine-gx-worker:
     profiles: ["workers"]
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
     depends_on:
@@ -567,9 +561,9 @@ services:
     environment:
       TZ: UTC
       # OpenTelemetry
-      OTEL_SERVICE_NAME: dq-engine-gx-worker
+      OTEL_SERVICE_NAME: dq-made-easy-engine-gx-worker
       OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-otel-collector:4317}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-made-easy-otel-collector:4317}
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: "1.0"
@@ -578,7 +572,7 @@ services:
       # Spark + S3-compatible object storage execution config.
       # The worker resolves dataObjectVersionId -> storage_uri/storage_format from the data catalog DB.
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
-      DQ_SPARK_DRIVER_HOST: dq-engine-gx-worker
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-gx-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
       DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
       DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
@@ -601,7 +595,7 @@ services:
       - dq-network
     restart: unless-stopped
 
-  dq-engine-join-pair-etl-worker:
+  dq-made-easy-engine-join-pair-etl-worker:
     profiles: ["workers"]
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
     depends_on:
@@ -616,7 +610,7 @@ services:
       GX_JOIN_PAIR_MATERIALIZATION_REDIS_URL: redis://redis:6379/0
       GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
-      DQ_SPARK_DRIVER_HOST: dq-engine-join-pair-etl-worker
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-join-pair-etl-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
       DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
       DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
@@ -638,7 +632,7 @@ services:
       - dq-network
     restart: unless-stopped
 
-  dq-engine-test-data-worker:
+  dq-made-easy-engine-test-data-worker:
     profiles: ["workers"]
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
     depends_on:
@@ -652,7 +646,7 @@ services:
       TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS}
       # Spark + S3-compatible object storage materialization config.
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
-      DQ_SPARK_DRIVER_HOST: dq-engine-test-data-worker
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-test-data-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
       DQ_TEST_DATA_OUTPUT_PREFIX: ${DQ_TEST_DATA_OUTPUT_PREFIX:-}
       DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
@@ -711,14 +705,14 @@ services:
       PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
       GX_EXECUTION_QUEUE_KEY: "${GX_EXECUTION_QUEUE_KEY}"
       GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: "${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}"
-      DQ_PROFILING_LOCAL_QUEUE: dq-profiling:local-queue
+      DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
       SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
       KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME}
       KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}
       SSO_PROVIDER: ${SSO_PROVIDER}
       SSO_ISSUER: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
       SSO_CLIENT_ID: ${SSO_CLIENT_ID}
-      SSO_ALLOWED_CLIENT_IDS: ${SSO_ALLOWED_CLIENT_IDS:-dq-rules-ui,dq-engine-gx-worker}
+      SSO_ALLOWED_CLIENT_IDS: ${SSO_ALLOWED_CLIENT_IDS:-dq-rules-ui,dq-made-easy-engine-gx-worker}
       SSO_ENABLED: ${SSO_ENABLED:-true}
       ALLOW_LOCAL_AUTH: ${ALLOW_LOCAL_AUTH}
       CATALOG_PROVIDER: ${CATALOG_PROVIDER:-openmetadata}
@@ -749,7 +743,7 @@ services:
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
       OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:-}
       # OpenTelemetry
-      OTEL_SERVICE_NAME: dq-api
+      OTEL_SERVICE_NAME: dq-made-easy-api
       OTEL_SERVICE_VERSION: ${DQ_API_TAG:-dev}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
       OTEL_CONSOLE_EXPORT: "1"
@@ -790,7 +784,7 @@ services:
       retries: 5
       start_period: 10s
 
-  dq-llm:
+  dq-made-easy-llm:
     profiles: ["llm"]
     image: ${DQ_LLM_REGISTRY}${DQ_LLM_NAMESPACE}${DQ_LLM_IMAGE}:${DQ_LLM_TAG}
     build:
@@ -802,7 +796,7 @@ services:
     ports:
       - "${DQ_LLM_HOST_BIND:-127.0.0.1}:${DQ_LLM_HOST_PORT:-8123}:8000"
     volumes:
-      - dq-llm-hf-cache:/cache/huggingface
+      - dq-made-easy-llm-hf-cache:/cache/huggingface
     networks:
       - default
       - dq-network
@@ -840,13 +834,13 @@ services:
       REDIS_PORT: 6379
       REDIS_URL: redis://redis:6379/0
       PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
-      DQ_PROFILING_LOCAL_QUEUE: dq-profiling:local-queue
+      DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
       ENVIRONMENT: ${ENVIRONMENT}
       TZ: UTC
       PROFILING_WORKER_CONCURRENCY: 2
       PROFILING_METRICS_PORT: 8001
       # OpenTelemetry
-      OTEL_SERVICE_NAME: dq-profiling
+      OTEL_SERVICE_NAME: dq-made-easy-profiling
       OTEL_SERVICE_VERSION: ${DQ_PROFILING_TAG:-dev}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
       OTEL_EXPORTER_OTLP_FORCE: "1"
@@ -910,7 +904,7 @@ services:
   kong-db:
     profiles: ["gateway", "observability"]
     image: postgres:17-bookworm
-    container_name: kong-database
+    container_name: dq-made-easy-kong-db
     environment:
       POSTGRES_DB: kong
       POSTGRES_USER: kong
@@ -927,7 +921,7 @@ services:
   kong-postgres-exporter:
     profiles: ["observability"]
     image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
-    container_name: kong-postgres-exporter
+    container_name: dq-made-easy-kong-postgres-exporter
     depends_on:
       kong-db:
         condition: service_healthy
@@ -946,7 +940,7 @@ services:
   kong-migrations:
     profiles: ["gateway"]
     image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
-    container_name: kong-migrations
+    container_name: dq-made-easy-kong-migrations
     entrypoint: ["kong"]
     command: ["migrations", "bootstrap"]
     depends_on:
@@ -968,7 +962,7 @@ services:
       dockerfile: Dockerfile.kong
       secrets:
         - internal_corporate_root_ca
-    container_name: kong-gateway
+    container_name: dq-made-easy-kong
     depends_on:
       kong-db:
         condition: service_healthy
@@ -1009,7 +1003,7 @@ services:
       # OpenTelemetry — Kong 3.x native tracing (plugin configured via bootstrap_kong.sh)
       KONG_TRACING_INSTRUMENTATIONS: ${KONG_TRACING_INSTRUMENTATIONS?KONG_TRACING_INSTRUMENTATIONS is required}
       KONG_TRACING_SAMPLING_RATE: ${KONG_TRACING_SAMPLING_RATE?KONG_TRACING_SAMPLING_RATE is required}
-      KONG_OTEL_ENDPOINT: http://dq-otel-collector:4319/v1/traces
+      KONG_OTEL_ENDPOINT: http://dq-made-easy-otel-collector:4319/v1/traces
       KONG_SSL_CERT: /etc/kong/certs/kong.jac.dot+3.pem
       KONG_SSL_CERT_KEY: /etc/kong/certs/kong.jac.dot+3-key.pem
     networks:
@@ -1064,7 +1058,7 @@ services:
   # OpenMetadata stack (optional)
   openmetadata-db:
     profiles: ["metadata"]
-    image: ${DQ_OPENMETADATA_DB_REGISTRY:-}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:-dq-openmetadata-db}:${DQ_OPENMETADATA_DB_TAG:-18}
+    image: ${DQ_OPENMETADATA_DB_REGISTRY:-}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}:${DQ_OPENMETADATA_DB_TAG:-18}
     build:
       context: .
       dockerfile: dq-metadata/Dockerfile.openmetadata-db
@@ -1100,7 +1094,7 @@ services:
   openmetadata-db-postgres-exporter:
     profiles: ["metadata"]
     image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
-    container_name: openmetadata-db-postgres-exporter
+    container_name: dq-made-easy-openmetadata-db-postgres-exporter
     depends_on:
       openmetadata-db:
         condition: service_healthy
@@ -1181,7 +1175,7 @@ services:
 
   openmetadata-server:
     profiles: ["metadata"]
-    image: ${DQ_OPENMETADATA_SERVER_REGISTRY:-}${DQ_OPENMETADATA_SERVER_NAMESPACE:-}${DQ_OPENMETADATA_SERVER_IMAGE:-dq-openmetadata}:${DQ_OPENMETADATA_SERVER_TAG:-latest}
+    image: ${DQ_OPENMETADATA_SERVER_REGISTRY:-}${DQ_OPENMETADATA_SERVER_NAMESPACE:-}${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata}:${DQ_OPENMETADATA_SERVER_TAG:-latest}
     build:
       context: .
       dockerfile: dq-metadata/Dockerfile.openmetadata-server
@@ -1230,13 +1224,13 @@ services:
       PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
       SECRET_MANAGER: db
       # OpenTelemetry (enabled when the image/runtime supports OTEL env wiring)
-      OTEL_SERVICE_NAME: dq-openmetadata
+      OTEL_SERVICE_NAME: dq-made-easy-openmetadata
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-otel-collector:4317}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-made-easy-otel-collector:4317}
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
-      OTEL_RESOURCE_ATTRIBUTES: service.name=dq-openmetadata,deployment.environment=${ENVIRONMENT}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT}
       OTEL_LOGS_EXPORTER: none
       JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
       ENVIRONMENT: ${ENVIRONMENT}
@@ -1271,11 +1265,13 @@ services:
       args:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
-    image: ${DQ_METADATA_CONFIGURE_REGISTRY:-}${DQ_METADATA_CONFIGURE_NAMESPACE:-}${DQ_METADATA_CONFIGURE_IMAGE:-dq-metadata-configure}:${DQ_METADATA_CONFIGURE_TAG:-latest}
+    image: ${DQ_METADATA_CONFIGURE_REGISTRY:-}${DQ_METADATA_CONFIGURE_NAMESPACE:-}${DQ_METADATA_CONFIGURE_IMAGE:-dq-made-easy-metadata-configure}:${DQ_METADATA_CONFIGURE_TAG:-latest}
     depends_on:
       openmetadata-server:
         condition: service_healthy
     environment:
+      OM_DB_HOST: ${OM_DB_HOST:-openmetadata-db}
+      OM_SERVER_HOST: ${OM_SERVER_HOST:-openmetadata-server}
       OM_DB_USER: ${OM_DB_USER:-openmetadata_user}
       OM_DB_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
       OM_DB_NAME: ${OM_DB_NAME:-openmetadata_db}
@@ -1290,6 +1286,7 @@ services:
       OM_AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[http://keycloak:8080/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
       OM_ENABLE_AUTO_REDIRECT: ${OM_ENABLE_AUTO_REDIRECT:-false}
       OM_TOKEN: ${OM_TOKEN:-}
+      SSO_INTERNAL_ISSUER_URL: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
       SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
       KEYCLOAK_USER_PASSWORD: ${KEYCLOAK_USER_PASSWORD:-password}
       OPENMETADATA_OIDC_SEED_USERNAME: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME is required}
@@ -1318,14 +1315,14 @@ services:
       OPENMETADATA_VERIFY_SSL: "true"
       OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
       # OpenTelemetry (for Python/Airflow instrumentation when enabled)
-      OTEL_SERVICE_NAME: dq-openmetadata-ingestion
+      OTEL_SERVICE_NAME: dq-made-easy-openmetadata-ingestion
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-otel-collector:4317}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-made-easy-otel-collector:4317}
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
       ENVIRONMENT: ${ENVIRONMENT}
-      OPENMETADATA_AIRFLOW_ADMIN_EMAIL: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME is required}
-      OPENMETADATA_AIRFLOW_ADMIN_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD is required}
+      OPENMETADATA_AIRFLOW_ADMIN_EMAIL: ${OPENMETADATA_OIDC_SEED_USERNAME:-${KEYCLOAK_JACCLOUD_USERNAME:-${SMOKE_LOGIN_EMAIL:-dq-admin@jaccloud.nl}}}
+      OPENMETADATA_AIRFLOW_ADMIN_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD:-${KEYCLOAK_JACCLOUD_PASSWORD:-${SMOKE_LOGIN_PASSWORD:-${KEYCLOAK_USER_PASSWORD:-password}}}}
     entrypoint: ["/bin/bash"]
     command: ["-c", "airflow db migrate && airflow users create --username admin --firstname Open --lastname Metadata --role Admin --email \"$${OPENMETADATA_AIRFLOW_ADMIN_EMAIL}\" --password \"$${OPENMETADATA_AIRFLOW_ADMIN_PASSWORD}\" || true && airflow api-server -p 8080"]
     ports:
@@ -1343,7 +1340,7 @@ services:
   loki:
     profiles: ["observability"]
     image: grafana/loki:3.6.4
-    container_name: dq-loki
+    container_name: dq-made-easy-loki
     ports:
       - "${LOKI_HOST_BIND:-0.0.0.0}:${LOKI_HOST_PORT:-3100}:3100"
     environment:
@@ -1370,7 +1367,7 @@ services:
   prometheus:
     profiles: ["observability"]
     image: prom/prometheus:v3
-    container_name: dq-prometheus
+    container_name: dq-made-easy-prometheus
     user: "0:0"
     ports:
       - "${PROMETHEUS_HOST_BIND:-0.0.0.0}:${PROMETHEUS_HOST_PORT:-9090}:9090"
@@ -1408,7 +1405,7 @@ services:
   tempo:
     profiles: ["observability"]
     image: grafana/tempo:2.6.1
-    container_name: dq-tempo
+    container_name: dq-made-easy-tempo
     user: "0:0"
     ports:
       - "${TEMPO_HOST_BIND:-0.0.0.0}:${TEMPO_HOST_PORT:-3200}:3200"   # HTTP API
@@ -1439,7 +1436,7 @@ services:
   grafana:
     profiles: ["observability"]
     image: grafana/grafana:12.3
-    container_name: dq-grafana
+    container_name: dq-made-easy-grafana
     ports:
       - "${GRAFANA_HOST_BIND:-0.0.0.0}:${GRAFANA_HOST_PORT:-3000}:3000"
     environment:
@@ -1521,6 +1518,7 @@ services:
     build:
       context: ./dq-edge
       dockerfile: Dockerfile.edge
+    container_name: dq-made-easy-edge
     entrypoint:
       - /bin/sh
       - -c
@@ -1559,7 +1557,7 @@ services:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
       secrets:
         - internal_corporate_root_ca
-    container_name: dq-container-metrics
+    container_name: dq-made-easy-container-metrics
     environment:
       COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME?COMPOSE_PROJECT_NAME is required}
       LOG_LEVEL: INFO
@@ -1585,7 +1583,7 @@ services:
   pushgateway:
     profiles: ["observability", "pushgateway"]
     image: prom/pushgateway:v1.11.2
-    container_name: dq-pushgateway
+    container_name: dq-made-easy-pushgateway
     ports:
       - "${PUSHGATEWAY_HOST_BIND:-0.0.0.0}:${PUSHGATEWAY_HOST_PORT:-9091}:9091"
     restart: unless-stopped
@@ -1606,7 +1604,7 @@ services:
   otel-collector:
     profiles: ["observability", "otel"]
     image: otel/opentelemetry-collector-contrib:0.148.0
-    container_name: dq-otel-collector
+    container_name: dq-made-easy-otel-collector
     command: ["--config=/etc/otel-collector-config.yml"]
     ports:
       - "${OTEL_GRPC_HOST_BIND:-0.0.0.0}:${OTEL_GRPC_HOST_PORT:-4317}:4317"   # OTLP gRPC ingress for apps and local tooling
@@ -1632,7 +1630,7 @@ services:
   aistor:
     profiles: ["observability", "aistor"]
     image: quay.io/minio/aistor/minio:latest
-    container_name: dq-aistor
+    container_name: dq-made-easy-aistor
     ports:
       - "${AISTOR_API_HOST_BIND:-0.0.0.0}:${AISTOR_API_HOST_PORT:-9222}:9000"   # API
       - "${AISTOR_CONSOLE_HOST_BIND:-0.0.0.0}:${AISTOR_CONSOLE_HOST_PORT:-9001}:9001"   # Console
@@ -1662,7 +1660,7 @@ services:
   grafana-init:
     profiles: ["observability"]
     image: curlimages/curl:latest
-    container_name: dq-grafana-init
+    container_name: dq-made-easy-grafana-init
     entrypoint: sh -c
     command:
       - |
@@ -1789,7 +1787,7 @@ volumes:
   openmetadata_search_v9_data:
   spark-jars:
   ivy2_cache:
-  dq-llm-hf-cache:
+  dq-made-easy-llm-hf-cache:
 
 secrets:
   internal_mkcert_root_ca:

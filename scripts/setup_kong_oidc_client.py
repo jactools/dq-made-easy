@@ -39,7 +39,7 @@ try:
     # Check if Kong client exists
     headers = {"Authorization": f"Bearer {token}"}
     existing_response = requests.get(
-        f"{KEYCLOAK_LOCAL_URL}/admin/realms/{REALM}/clients?clientId=kong-gateway",
+        f"{KEYCLOAK_LOCAL_URL}/admin/realms/{REALM}/clients?clientId=dq-made-easy-kong",
         headers=headers,
         timeout=5
     )
@@ -51,7 +51,7 @@ try:
     else:
         print("Creating Kong OIDC client...")
         client_data = {
-            "clientId": "kong-gateway",
+            "clientId": "dq-made-easy-kong",
             "name": "Kong Gateway",
             "enabled": True,
             "clientAuthenticatorType": "client-secret",
@@ -86,14 +86,14 @@ try:
     print("Keycloak OIDC Configuration for Kong")
     print("="*50)
     print(f"Discovery URL: {KEYCLOAK_LOCAL_URL}/realms/{REALM}/.well-known/openid-configuration")
-    print(f"Client ID: kong-gateway")
+    print(f"Client ID: dq-made-easy-kong")
     print(f"Client Secret: {client_secret}")
     print(f"Token Endpoint: {KEYCLOAK_LOCAL_URL}/realms/{REALM}/protocol/openid-connect/token")
     print(f"Issuer: {KEYCLOAK_LOCAL_URL}/realms/{REALM}")
 
     # Save to file
     config_data = {
-        "client_id": "kong-gateway",
+        "client_id": "dq-made-easy-kong",
         "client_secret": client_secret,
         "discovery_url": f"{KEYCLOAK_LOCAL_URL}/realms/{REALM}/.well-known/openid-configuration",
         "token_endpoint": f"{KEYCLOAK_LOCAL_URL}/realms/{REALM}/protocol/openid-connect/token",
