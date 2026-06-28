@@ -26,7 +26,7 @@ scrape_configs:
   # Prometheus self-monitoring
   - job_name: "prometheus"
     static_configs:
-      - targets: ["observability.jac.dot:9090"]
+      - targets: ["prometheus:9090"]
 
   # ========================================================================
   # OpenTelemetry Collector Prometheus Exporter
@@ -45,7 +45,7 @@ scrape_configs:
   # ========================================================================
   - job_name: "dq-engine"
     static_configs:
-      - targets: ["dq-engine:8000"]
+      - targets: ["dq-made-easy-engine:8000"]
         labels:
           service: dq-engine
           component: execution-engine
@@ -85,7 +85,7 @@ scrape_configs:
   # ========================================================================
   - job_name: "dq-llm"
     static_configs:
-      - targets: ["dq-llm:8000"]
+      - targets: ["dq-made-easy-llm:8000"]
         labels:
           service: dq-llm
           component: llm

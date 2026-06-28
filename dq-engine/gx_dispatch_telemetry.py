@@ -383,6 +383,40 @@ def record_worker_failure(*, stage: str, execution_shape: str, reason: str) -> N
     )
 
 
+def record_spark_expectations_observability(*, observability_summary: dict[str, Any] | None, result: str | None = None) -> None:
+    summary = dict(observability_summary or {})
+    if not summary:
+        return
+
+    attributes = {
+        "executor": "spark_expectations",
+        "engine_type": "spark_expectations",
+        "rule_family": str(summary.get("rule_family") or "unknown").strip().lower() or "unknown",
+        "result": str(result or summary.get("result") or "unknown").strip().lower() or "unknown",
+    }
+    if summary.get("storage_kind") is not None:
+        attributes["storage_kind"] = str(summary.get("storage_kind") or "unknown").strip().lower() or "unknown"
+    if summary.get("storage_uri") is not None:
+        attributes["storage_uri"] = str(summary.get("storage_uri") or "")
+
+    passed_count = int(summary.get("passed_count") or 0)
+    failed_count = int(summary.get("failed_count") or 0)
+    if passed_count > 0:
+        _EXECUTION_RESULTS.add(
+            passed_count,
+            attributes={**attributes, "result": "passed"},
+        )
+    if failed_count > 0:
+        _EXECUTION_RESULTS.add(
+            failed_count,
+            attributes={**attributes, "result": "failed"},
+        )
+    _EXECUTION_LATENCY.record(
+        float(summary.get("duration_ms") or 0.0),
+        attributes={**attributes, "phase": "execution", "execution_shape": "single_object"},
+    )
+
+
 def record_worker_heartbeat(*, queue_key: str, heartbeat_ttl_seconds: int) -> None:
     normalized_queue_key = str(queue_key or "unknown").strip() or "unknown"
     try:

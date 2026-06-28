@@ -129,8 +129,8 @@ def _write_quarantine_artifact(
     }
 
 
-def _build_execution_metadata(*, rule_id: Any, runtime: str, started_at: str, completed_at: str, duration_ms: float, source_row_count: int, spark_app_name: str) -> dict[str, Any]:
-    return {
+def _build_execution_metadata(*, rule_id: Any, runtime: str, started_at: str, completed_at: str, duration_ms: float, source_row_count: int, spark_app_name: str, guardrails: dict[str, Any] | None = None) -> dict[str, Any]:
+    metadata = {
         "rule_id": rule_id,
         "engine_type": "spark_expectations",
         "runtime": runtime,
@@ -139,6 +139,75 @@ def _build_execution_metadata(*, rule_id: Any, runtime: str, started_at: str, co
         "started_at": started_at,
         "completed_at": completed_at,
         "duration_ms": round(duration_ms, 3),
+    }
+    metadata["guardrails"] = guardrails or {}
+    return metadata
+
+
+def _determine_rule_family(rule_type: str) -> str:
+    normalized_rule_type = str(rule_type or "").strip().lower()
+    if normalized_rule_type in {
+        "not_null",
+        "min",
+        "max",
+        "equals",
+        "not_equal",
+        "between",
+        "in",
+        "not_in",
+        "is_null",
+        "contains",
+        "starts_with",
+        "ends_with",
+        "min_length",
+        "max_length",
+        "regex",
+    }:
+        return "row"
+    if normalized_rule_type in {"count", "sum", "avg", "stddev", "unique", "missing_count", "duplicate_count", "row_count", "distinct_count"}:
+        return "aggregate"
+    if normalized_rule_type == "query":
+        return "query"
+    return "row"
+
+
+def _build_observability_summary(*, rule_type: str, result: dict[str, Any], execution_metadata: dict[str, Any], quarantine_artifact: dict[str, Any] | None) -> dict[str, Any]:
+    return {
+        "engine_type": "spark_expectations",
+        "result": result.get("result", "passed"),
+        "passed_count": result.get("passed_count", 0),
+        "failed_count": result.get("failed_count", 0),
+        "rule_family": _determine_rule_family(rule_type),
+        "duration_ms": execution_metadata.get("duration_ms"),
+        "storage_kind": (quarantine_artifact or {}).get("storage_kind"),
+        "storage_uri": (quarantine_artifact or {}).get("storage_uri"),
+    }
+
+
+def _coerce_optional_int(value: Any, *, default: int | None = None) -> int | None:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, (int, float)):
+        return int(value)
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped or stripped.lower() in {"none", "null"}:
+            return default
+        return int(stripped)
+    return default
+
+
+def _resolve_guardrails(params: dict[str, Any]) -> dict[str, Any]:
+    env_max_rows = _coerce_optional_int(os.getenv("DQ_SPARK_MAX_ROWS"))
+    env_max_error_rows = _coerce_optional_int(os.getenv("DQ_SPARK_MAX_ERROR_ROWS"))
+    max_rows = _coerce_optional_int(params.get("max_rows"), default=env_max_rows)
+    max_error_rows = _coerce_optional_int(params.get("max_error_rows"), default=env_max_error_rows)
+    return {
+        "max_rows": max_rows,
+        "max_error_rows": max_error_rows,
+        "exceeded": False,
     }
 
 
@@ -155,6 +224,8 @@ def _format_expectation_literal(value: Any) -> str:
 def _build_row_level_predicate(column: str, rule_type: str, params: dict[str, Any], *, F: Any) -> Any:
     if rule_type == "not_null":
         return F.col(column).isNotNull()
+    if rule_type == "is_null":
+        return F.col(column).isNull()
     if rule_type == "min":
         min_value = params.get("min")
         if min_value is None:
@@ -182,6 +253,41 @@ def _build_row_level_predicate(column: str, rule_type: str, params: dict[str, An
         if not values:
             raise ValueError("spark expectations in rule requires values")
         return F.col(column).isin(values)
+    if rule_type == "not_in":
+        values = params.get("values") or []
+        if not values:
+            raise ValueError("spark expectations not_in rule requires values")
+        return ~F.col(column).isin(values)
+    if rule_type == "contains":
+        expected_value = params.get("value")
+        if expected_value is None:
+            raise ValueError("spark expectations contains rule requires value")
+        return F.col(column).contains(F.lit(expected_value))
+    if rule_type == "starts_with":
+        expected_value = params.get("value")
+        if expected_value is None:
+            raise ValueError("spark expectations starts_with rule requires value")
+        return F.col(column).startswith(F.lit(expected_value))
+    if rule_type == "ends_with":
+        expected_value = params.get("value")
+        if expected_value is None:
+            raise ValueError("spark expectations ends_with rule requires value")
+        return F.col(column).endswith(F.lit(expected_value))
+    if rule_type == "min_length":
+        minimum_length = params.get("min")
+        if minimum_length is None:
+            raise ValueError("spark expectations min_length rule requires min")
+        return F.length(F.col(column)) >= F.lit(int(minimum_length))
+    if rule_type == "max_length":
+        maximum_length = params.get("max")
+        if maximum_length is None:
+            raise ValueError("spark expectations max_length rule requires max")
+        return F.length(F.col(column)) <= F.lit(int(maximum_length))
+    if rule_type == "regex":
+        pattern = params.get("pattern")
+        if pattern is None:
+            raise ValueError("spark expectations regex rule requires pattern")
+        return F.col(column).rlike(str(pattern))
     raise ValueError(f"unsupported spark expectations rule type: {rule_type!r}")
 
 
@@ -190,7 +296,40 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
     rows = params.get("rows")
     started_at = datetime.now(timezone.utc).isoformat()
     started_at_monotonic = time.perf_counter()
+    guardrails = _resolve_guardrails(params)
     if isinstance(rows, list):
+        source_row_count = len(rows)
+        max_rows = guardrails.get("max_rows")
+        if max_rows is not None and source_row_count > max_rows:
+            completed_at = datetime.now(timezone.utc).isoformat()
+            duration_ms = (time.perf_counter() - started_at_monotonic) * 1000.0
+            execution_metadata = _build_execution_metadata(
+                rule_id=getattr(req, "id", None),
+                runtime="pyspark",
+                started_at=started_at,
+                completed_at=completed_at,
+                duration_ms=duration_ms,
+                source_row_count=source_row_count,
+                spark_app_name="dq-engine-spark-expectations",
+                guardrails={**guardrails, "exceeded": True},
+            )
+            return {
+                "ok": False,
+                "engine_type": "spark_expectations",
+                "rule_id": getattr(req, "id", None),
+                "error": f"spark expectations execution exceeds configured max_rows ({max_rows})",
+                "execution_metadata": execution_metadata,
+                "observability_summary": {
+                    "engine_type": "spark_expectations",
+                    "result": "failed",
+                    "passed_count": 0,
+                    "failed_count": 0,
+                    "rule_family": _determine_rule_family(str(getattr(req, "type", "") or "")),
+                    "duration_ms": execution_metadata.get("duration_ms"),
+                    "storage_kind": None,
+                    "storage_uri": None,
+                },
+            }
         spark = _build_spark_session()
         try:
             from pyspark.sql import functions as F
@@ -205,13 +344,16 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 raise ValueError("spark expectations execution requires a column")
 
             rule_type = str(getattr(req, "type", "") or "").strip()
-            if rule_type in {"not_null", "min", "max", "equals", "not_equal", "between", "in"}:
+            if rule_type in {"not_null", "is_null", "min", "max", "equals", "not_equal", "between", "in", "not_in", "contains", "starts_with", "ends_with", "min_length", "max_length", "regex"}:
                 predicate = _build_row_level_predicate(column, rule_type, params, F=F)
                 passed_df = df.where(predicate)
                 failed_df = df.where(~predicate)
                 passed_count = int(passed_df.count())
                 failed_count = int(failed_df.count())
                 failed_rows = [row.asDict(recursive=True) for row in failed_df.collect()]
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None and len(failed_rows) > max_error_rows:
+                    failed_rows = failed_rows[:max_error_rows]
                 error_management = build_error_management_plan(
                     failed_rows,
                     chunk_size=int(params.get("error_chunk_size", 10_000)),
@@ -223,6 +365,9 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 passed_count = int(actual_count == expected_count)
                 failed_count = int(not (actual_count == expected_count))
                 failed_rows = [] if failed_count == 0 else [{"count": actual_count, "expected_count": expected_count}]
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None and len(failed_rows) > max_error_rows:
+                    failed_rows = failed_rows[:max_error_rows]
                 error_management = build_error_management_plan(
                     failed_rows,
                     chunk_size=int(params.get("error_chunk_size", 10_000)),
@@ -234,6 +379,60 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 passed_count = int(actual_sum == expected_value)
                 failed_count = int(not (actual_sum == expected_value))
                 failed_rows = [] if failed_count == 0 else [{"sum": actual_sum, "expected_value": expected_value}]
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None and len(failed_rows) > max_error_rows:
+                    failed_rows = failed_rows[:max_error_rows]
+                error_management = build_error_management_plan(
+                    failed_rows,
+                    chunk_size=int(params.get("error_chunk_size", 10_000)),
+                    max_samples=int(params.get("error_sample_size", 20)),
+                )
+            elif rule_type == "avg":
+                expected_value = params.get("expected_value")
+                actual_avg = df.agg({column: "avg"}).collect()[0][0]
+                passed_count = int(actual_avg == expected_value)
+                failed_count = int(not (actual_avg == expected_value))
+                failed_rows = [] if failed_count == 0 else [{"avg": actual_avg, "expected_value": expected_value}]
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None and len(failed_rows) > max_error_rows:
+                    failed_rows = failed_rows[:max_error_rows]
+                error_management = build_error_management_plan(
+                    failed_rows,
+                    chunk_size=int(params.get("error_chunk_size", 10_000)),
+                    max_samples=int(params.get("error_sample_size", 20)),
+                )
+            elif rule_type == "stddev":
+                expected_value = params.get("expected_value")
+                actual_stddev = df.agg({column: "stddev"}).collect()[0][0]
+                passed_count = int(actual_stddev == expected_value)
+                failed_count = int(not (actual_stddev == expected_value))
+                failed_rows = [] if failed_count == 0 else [{"stddev": actual_stddev, "expected_value": expected_value}]
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None and len(failed_rows) > max_error_rows:
+                    failed_rows = failed_rows[:max_error_rows]
+                error_management = build_error_management_plan(
+                    failed_rows,
+                    chunk_size=int(params.get("error_chunk_size", 10_000)),
+                    max_samples=int(params.get("error_sample_size", 20)),
+                )
+            elif rule_type in {"unique", "missing_count", "duplicate_count", "row_count", "distinct_count"}:
+                expected_count = params.get("expected_count")
+                if rule_type == "unique":
+                    actual_value = int(df.groupBy(column).count().filter(F.col("count") > 1).count())
+                elif rule_type == "missing_count":
+                    actual_value = int(df.filter(F.col(column).isNull()).count())
+                elif rule_type == "duplicate_count":
+                    actual_value = int(df.groupBy(column).count().filter(F.col("count") > 1).count())
+                elif rule_type == "row_count":
+                    actual_value = int(df.count())
+                else:
+                    actual_value = int(df.select(F.col(column)).distinct().count())
+                passed_count = int(actual_value == expected_count)
+                failed_count = int(not (actual_value == expected_count))
+                failed_rows = [] if failed_count == 0 else [{"rule_type": rule_type, "actual_value": actual_value, "expected_count": expected_count}]
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None and len(failed_rows) > max_error_rows:
+                    failed_rows = failed_rows[:max_error_rows]
                 error_management = build_error_management_plan(
                     failed_rows,
                     chunk_size=int(params.get("error_chunk_size", 10_000)),
@@ -252,6 +451,9 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 passed_count = int(actual_count == expected_count)
                 failed_count = int(not (actual_count == expected_count))
                 failed_rows = [] if failed_count == 0 else [{"query": query_text, "actual_count": actual_count, "expected_count": expected_count}]
+                max_error_rows = guardrails.get("max_error_rows")
+                if max_error_rows is not None and len(failed_rows) > max_error_rows:
+                    failed_rows = failed_rows[:max_error_rows]
                 error_management = build_error_management_plan(
                     failed_rows,
                     chunk_size=int(params.get("error_chunk_size", 10_000)),
@@ -270,6 +472,7 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                     duration_ms=0.0,
                     source_row_count=len(rows),
                     spark_app_name="dq-engine-spark-expectations",
+                    guardrails={**guardrails, "exceeded": False},
                 ),
             )
 
@@ -283,6 +486,7 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 duration_ms=duration_ms,
                 source_row_count=len(rows),
                 spark_app_name="dq-engine-spark-expectations",
+                guardrails={**guardrails, "exceeded": False},
             )
             result = {
                 "ok": True,
@@ -294,7 +498,7 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 "error_management": error_management,
                 "execution_metadata": execution_metadata,
             }
-            if rule_type in {"count", "sum", "query"}:
+            if rule_type in {"count", "sum", "avg", "stddev", "unique", "missing_count", "duplicate_count", "row_count", "distinct_count", "query"}:
                 actual_value = None
                 expected_value = None
                 if rule_type == "count":
@@ -303,6 +507,27 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                 elif rule_type == "sum":
                     actual_value = df.agg({column: "sum"}).collect()[0][0]
                     expected_value = params.get("expected_value")
+                elif rule_type == "avg":
+                    actual_value = df.agg({column: "avg"}).collect()[0][0]
+                    expected_value = params.get("expected_value")
+                elif rule_type == "stddev":
+                    actual_value = df.agg({column: "stddev"}).collect()[0][0]
+                    expected_value = params.get("expected_value")
+                elif rule_type == "unique":
+                    actual_value = int(df.groupBy(column).count().filter(F.col("count") > 1).count())
+                    expected_value = 0
+                elif rule_type == "missing_count":
+                    actual_value = int(df.filter(F.col(column).isNull()).count())
+                    expected_value = params.get("expected_count")
+                elif rule_type == "duplicate_count":
+                    actual_value = int(df.groupBy(column).count().filter(F.col("count") > 1).count())
+                    expected_value = params.get("expected_count")
+                elif rule_type == "row_count":
+                    actual_value = int(df.count())
+                    expected_value = params.get("expected_count")
+                elif rule_type == "distinct_count":
+                    actual_value = int(df.select(F.col(column)).distinct().count())
+                    expected_value = params.get("expected_count")
                 elif rule_type == "query":
                     query_text = str(params.get("query") or "").strip()
                     if query_text:
@@ -312,7 +537,7 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                         actual_value = query_row[0] if query_row is not None else None
                     expected_value = params.get("expected_count")
                 result["execution_metadata"]["evaluation"] = {
-                    "rule_family": "aggregate" if rule_type in {"count", "sum"} else "query",
+                    "rule_family": "aggregate" if rule_type in {"count", "sum", "avg", "stddev", "unique", "missing_count", "duplicate_count", "row_count", "distinct_count"} else "query",
                     "actual_value": actual_value,
                     "expected_value": expected_value,
                 }
@@ -321,6 +546,12 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
                     **quarantine_artifact,
                     "execution_metadata": execution_metadata,
                 }
+            result["observability_summary"] = _build_observability_summary(
+                rule_type=rule_type,
+                result=result,
+                execution_metadata=execution_metadata,
+                quarantine_artifact=result.get("quarantine_artifact"),
+            )
             return result
         finally:
             spark.stop()
@@ -372,6 +603,12 @@ def execute_spark_expectations_rule(req: Any) -> dict[str, Any]:
             **quarantine_artifact,
             "execution_metadata": execution_metadata,
         }
+    result["observability_summary"] = _build_observability_summary(
+        rule_type=str(getattr(req, "type", "") or "").strip(),
+        result=result,
+        execution_metadata=execution_metadata,
+        quarantine_artifact=result.get("quarantine_artifact"),
+    )
     return result
 
 

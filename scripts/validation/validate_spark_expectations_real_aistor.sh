@@ -28,4 +28,12 @@ export AWS_REGION="${AWS_REGION:-$DQ_S3_REGION}"
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-$DQ_S3_REGION}"
 export SPARK_EXPECTATIONS_VALIDATION_INPUT_URI="${SPARK_EXPECTATIONS_VALIDATION_INPUT_URI:-s3a://retail-banking/standardized/analytics/Currency/v1/LOAD_DTS=20260220T071500000Z}"
 
-bash "$ROOT_DIR/scripts/run_spark_expectations_container_tests.sh" "dq-engine/tests/test_spark_expectations_real_aistor_validation.py"
+echo "Validating the newly added Spark Expectations expression families against AIStor parquet..."
+bash "$ROOT_DIR/scripts/run_spark_expectations_container_tests.sh" \
+  "dq-engine/tests/test_spark_expectations_real_aistor_validation.py" \
+  "-k" \
+  "contains or not_in or min_length or regex or avg or stddev or unique or missing_count or duplicate_count or row_count or distinct_count"
+
+echo "Validating the full Spark Expectations construct matrix against AIStor parquet..."
+bash "$ROOT_DIR/scripts/run_spark_expectations_container_tests.sh" \
+  "dq-engine/tests/test_spark_expectations_real_aistor_validation.py"

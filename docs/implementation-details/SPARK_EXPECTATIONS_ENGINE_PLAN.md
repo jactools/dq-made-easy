@@ -115,9 +115,9 @@ Objective: make the new engine production-ready rather than just technically run
 
 Deliverables:
 
-[ ] [SE-PLAN-013] Connect Spark Expectations stats and observability output into the existing monitoring surface.
-[ ] [SE-PLAN-014] Add notification hooks for email, Slack, or PagerDuty where appropriate.
-[ ] [SE-PLAN-015] Add performance and memory guardrails for Spark jobs.
+[x] [SE-PLAN-013] Connect Spark Expectations stats and observability output into the existing monitoring surface.
+[ ] [SE-PLAN-014] Add notification hooks for email, Slack, or PagerDuty where appropriate, using existing notification capabilities
+[x] [SE-PLAN-015] Add performance and memory guardrails for Spark jobs.
 [ ] [SE-PLAN-016] Add integration tests for supported and unsupported rule families.
 
 Acceptance criteria:

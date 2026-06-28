@@ -110,6 +110,26 @@ def execute_rule(req: ExecuteRequest):
 
         adapter_summary = execute_spark_expectations_rule(req)
         error_management = adapter_summary.get("error_management", {})
+        adapter_observability = dict(adapter_summary.get("observability_summary", {}) or {})
+        if not adapter_observability:
+            adapter_observability = {
+                "engine_type": "spark_expectations",
+                "result": adapter_summary.get("result", "passed"),
+                "passed_count": adapter_summary.get("passed_count", 0),
+                "failed_count": adapter_summary.get("failed_count", 0),
+                "rule_family": "row",
+                "duration_ms": (adapter_summary.get("execution_metadata") or {}).get("duration_ms"),
+                "storage_kind": (adapter_summary.get("quarantine_artifact") or {}).get("storage_kind"),
+                "storage_uri": (adapter_summary.get("quarantine_artifact") or {}).get("storage_uri"),
+            }
+        else:
+            adapter_observability.setdefault("engine_type", "spark_expectations")
+            adapter_observability.setdefault("result", adapter_summary.get("result", "passed"))
+            adapter_observability.setdefault("passed_count", adapter_summary.get("passed_count", 0))
+            adapter_observability.setdefault("failed_count", adapter_summary.get("failed_count", 0))
+            adapter_observability.setdefault("duration_ms", (adapter_summary.get("execution_metadata") or {}).get("duration_ms"))
+            adapter_observability.setdefault("storage_kind", (adapter_summary.get("quarantine_artifact") or {}).get("storage_kind"))
+            adapter_observability.setdefault("storage_uri", (adapter_summary.get("quarantine_artifact") or {}).get("storage_uri"))
 
         summary = {
             "ok": True,
@@ -122,14 +142,7 @@ def execute_rule(req: ExecuteRequest):
             "execution_metadata": adapter_summary.get("execution_metadata", {}),
             "quarantine_artifact": adapter_summary.get("quarantine_artifact", {}),
             "compiled_artifact": compiled.get("compiled_artifact", {}),
-            "observability_summary": {
-                "engine_type": "spark_expectations",
-                "result": adapter_summary.get("result", "passed"),
-                "passed_count": adapter_summary.get("passed_count", 0),
-                "failed_count": adapter_summary.get("failed_count", 0),
-                "storage_kind": (adapter_summary.get("quarantine_artifact") or {}).get("storage_kind"),
-                "storage_uri": (adapter_summary.get("quarantine_artifact") or {}).get("storage_uri"),
-            },
+            "observability_summary": adapter_observability,
         }
 
         target_dir = Path(req.output_dir) if req.output_dir else None

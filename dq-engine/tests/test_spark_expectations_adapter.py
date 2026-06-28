@@ -392,6 +392,164 @@ def test_execute_spark_expectations_rule_emits_execution_metadata() -> None:
     assert metadata["spark_app_name"] == "dq-engine-spark-expectations"
     assert metadata["started_at"].endswith("+00:00") or metadata["started_at"].endswith("Z")
     assert metadata["completed_at"].endswith("+00:00") or metadata["completed_at"].endswith("Z")
+    assert payload["observability_summary"]["rule_family"] == "row"
+    assert payload["observability_summary"]["duration_ms"] >= 0
+    assert payload["observability_summary"]["passed_count"] == 1
+    assert payload["observability_summary"]["failed_count"] == 1
+
+
+def test_execute_spark_expectations_rule_enforces_row_count_guardrails() -> None:
+    req = SimpleNamespace(
+        id=108,
+        table="customers",
+        column="customer_id",
+        type="not_null",
+        params={
+            "rows": [{"customer_id": i} for i in range(2500)],
+            "error_chunk_size": 2,
+            "error_sample_size": 2,
+            "max_rows": 2000,
+        },
+        output_dir=None,
+        engine_type="spark_expectations",
+    )
+
+    payload = execute_spark_expectations_rule(req)
+
+    assert payload["ok"] is False
+    assert payload["error"] == "spark expectations execution exceeds configured max_rows (2000)"
+    assert payload["execution_metadata"]["guardrails"]["exceeded"] is True
+    assert payload["execution_metadata"]["guardrails"]["max_rows"] == 2000
+
+
+def test_execute_spark_expectations_rule_uses_environment_guardrails(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DQ_SPARK_MAX_ROWS", "10")
+    monkeypatch.setenv("DQ_SPARK_MAX_ERROR_ROWS", "3")
+    req = SimpleNamespace(
+        id=109,
+        table="customers",
+        column="customer_id",
+        type="not_null",
+        params={
+            "rows": [{"customer_id": i} for i in range(12)],
+            "error_chunk_size": 2,
+            "error_sample_size": 2,
+        },
+        output_dir=None,
+        engine_type="spark_expectations",
+    )
+
+    payload = execute_spark_expectations_rule(req)
+
+    assert payload["ok"] is False
+    assert payload["execution_metadata"]["guardrails"]["max_rows"] == 10
+    assert payload["execution_metadata"]["guardrails"]["max_error_rows"] == 3
+    assert payload["execution_metadata"]["guardrails"]["exceeded"] is True
+
+
+@pytest.mark.parametrize(
+    ("rule_type", "column", "params", "rows", "expected_passed", "expected_failed"),
+    [
+        ("contains", "status", {"value": "foo"}, [{"status": "foobar"}, {"status": "bar"}], 1, 1),
+        ("not_in", "status", {"values": ["a", "b"]}, [{"status": "c"}, {"status": "a"}], 1, 1),
+        ("min_length", "status", {"min": 3}, [{"status": "abc"}, {"status": "xy"}], 1, 1),
+        ("regex", "status", {"pattern": "^A.*"}, [{"status": "Alpha"}, {"status": "beta"}], 1, 1),
+    ],
+)
+def test_execute_spark_expectations_rule_supports_additional_row_level_checks(
+    rule_type: str,
+    column: str,
+    params: dict[str, object],
+    rows: list[dict[str, object]],
+    expected_passed: int,
+    expected_failed: int,
+) -> None:
+    req = SimpleNamespace(
+        id=109,
+        table="customers",
+        column=column,
+        type=rule_type,
+        params={
+            "rows": rows,
+            "error_chunk_size": 2,
+            "error_sample_size": 2,
+            **params,
+        },
+        output_dir=None,
+        engine_type="spark_expectations",
+    )
+
+    payload = execute_spark_expectations_rule(req)
+
+    assert payload["ok"] is True
+    assert payload["passed_count"] == expected_passed
+    assert payload["failed_count"] == expected_failed
+
+
+def test_execute_spark_expectations_rule_evaluates_avg_checks() -> None:
+    req = SimpleNamespace(
+        id=110,
+        table="customers",
+        column="amount",
+        type="avg",
+        params={
+            "rows": [
+                {"amount": 1},
+                {"amount": 4},
+            ],
+            "expected_value": 2.5,
+            "error_chunk_size": 2,
+            "error_sample_size": 2,
+        },
+        output_dir=None,
+        engine_type="spark_expectations",
+    )
+
+    payload = execute_spark_expectations_rule(req)
+
+    assert payload["ok"] is True
+    assert payload["passed_count"] == 1
+    assert payload["failed_count"] == 0
+
+
+@pytest.mark.parametrize(
+    ("rule_type", "column", "params", "rows", "expected_passed", "expected_failed"),
+    [
+        ("unique", "customer_id", {}, [{"customer_id": 1}, {"customer_id": 1}], 0, 1),
+        ("missing_count", "customer_id", {"expected_count": 1}, [{"customer_id": 1}, {"customer_id": None}], 1, 0),
+        ("duplicate_count", "customer_id", {"expected_count": 1}, [{"customer_id": 1}, {"customer_id": 1}], 1, 0),
+        ("row_count", "customer_id", {"expected_count": 2}, [{"customer_id": 1}, {"customer_id": 2}], 1, 0),
+        ("distinct_count", "customer_id", {"expected_count": 2}, [{"customer_id": 1}, {"customer_id": 2}], 1, 0),
+    ],
+)
+def test_execute_spark_expectations_rule_supports_extended_aggregate_checks(
+    rule_type: str,
+    column: str,
+    params: dict[str, object],
+    rows: list[dict[str, object]],
+    expected_passed: int,
+    expected_failed: int,
+) -> None:
+    req = SimpleNamespace(
+        id=111,
+        table="customers",
+        column=column,
+        type=rule_type,
+        params={
+            "rows": rows,
+            "error_chunk_size": 2,
+            "error_sample_size": 2,
+            **params,
+        },
+        output_dir=None,
+        engine_type="spark_expectations",
+    )
+
+    payload = execute_spark_expectations_rule(req)
+
+    assert payload["ok"] is True
+    assert payload["passed_count"] == expected_passed
+    assert payload["failed_count"] == expected_failed
 
 
 def test_execute_spark_expectations_rule_evaluates_aggregate_checks_with_metadata() -> None:
@@ -592,6 +750,9 @@ def test_execute_endpoint_persists_artifacts(tmp_path: Path) -> None:
     assert payload["observability_summary"]["failed_count"] == 8
     assert payload["observability_summary"]["passed_count"] == 12
     assert payload["observability_summary"]["engine_type"] == "spark_expectations"
+    assert payload["observability_summary"]["rule_family"] == "row"
+    assert payload["observability_summary"]["duration_ms"] >= 0
+    assert payload["observability_summary"]["storage_kind"] in {"local_file", "s3", None}
     assert (tmp_path / "spark_expectations_execution.json").exists()
     assert (tmp_path / "spark_expectations_errors.json").exists()
 
@@ -707,7 +868,12 @@ def test_process_dispatch_message_routes_spark_expectations_payload(monkeypatch:
     assert result_summary.get("execution_metadata", {}).get("engine_type") == "spark_expectations"
     assert result_summary.get("quarantine_artifact", {}).get("storage_kind") in {"local_file", "s3"}
     assert result_summary.get("error_management", {}).get("storage_strategy") in {"chunked", "inline", "none"}
+    assert result_summary.get("observability_summary", {}).get("rule_family") == "row"
+    assert result_summary.get("observability_summary", {}).get("duration_ms") >= 0
+    assert result_summary.get("observability_summary", {}).get("storage_kind") in {"local_file", "s3", None}
 
     details = succeeded_report.get("details", {})
     assert details.get("engine_type") == "spark_expectations"
     assert details.get("quarantine_artifact", {}).get("storage_kind") in {"local_file", "s3"}
+    assert details.get("observability_summary", {}).get("rule_family") == "row"
+    assert details.get("observability_summary", {}).get("duration_ms") >= 0

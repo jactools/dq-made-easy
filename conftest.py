@@ -123,6 +123,9 @@ def pytest_configure(config):
 
     invocation_params = getattr(config, "invocation_params", None)
     args = list(getattr(invocation_params, "args", []) or [])
+    if not args:
+        return
+
     if should_route_spark_tests_to_container(args):
         command = build_container_test_command(args)
         if command:

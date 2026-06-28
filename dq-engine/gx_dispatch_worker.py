@@ -50,6 +50,7 @@ from gx_dispatch_runtime import safe_stop_spark_session
 from gx_dispatch_runtime import spark_read_dataset
 from gx_dispatch_results import utc_now_iso
 from gx_dispatch_telemetry import configure_worker_telemetry
+from gx_dispatch_telemetry import record_spark_expectations_observability
 from gx_dispatch_telemetry import record_worker_duration
 from gx_dispatch_telemetry import record_worker_expectation_results
 from gx_dispatch_telemetry import record_worker_failure
@@ -2506,6 +2507,7 @@ def _build_spark_expectations_report_summary(response_payload: dict[str, Any], *
         "execution_metadata": response_payload.get("execution_metadata", {}),
         "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
         "error_management": response_payload.get("error_management", {}),
+        "observability_summary": response_payload.get("observability_summary", {}),
     }
 
 
@@ -2580,8 +2582,13 @@ def _process_spark_expectations_dispatch_message(
         "execution_metadata": response_payload.get("execution_metadata", {}),
         "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
         "error_management": response_payload.get("error_management", {}),
+        "observability_summary": response_payload.get("observability_summary", {}),
         "output_dir": payload.get("output_dir"),
     }
+    record_spark_expectations_observability(
+        observability_summary=response_payload.get("observability_summary"),
+        result=response_payload.get("result"),
+    )
 
     _api_report_execution_progress(
         config,

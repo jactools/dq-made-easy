@@ -39,24 +39,39 @@ def should_route_spark_tests_to_container(
     running_in_container: bool | None = None,
     docker_available: bool | None = None,
 ) -> bool:
-    if running_in_container is None:
-        running_in_container = _is_running_in_container()
     if docker_available is None:
         docker_available = shutil.which("docker") is not None
 
-    if running_in_container or not docker_available:
+    if not docker_available:
         return False
 
     normalized_targets = _extract_pytest_targets(test_targets)
     if not normalized_targets:
         return False
 
-    spark_targets = {
-        "dq-engine/tests/test_spark_expectations_adapter.py",
-        "dq-engine/tests/test_spark_expectations_real_aistor_validation.py",
-    }
+    return any(_is_spark_target(target) for target in normalized_targets)
 
-    return any(target in spark_targets for target in normalized_targets)
+
+def _is_spark_target(target: str) -> bool:
+    normalized_target = str(target).strip().lower()
+    if not normalized_target:
+        return False
+    if normalized_target.startswith("-"):
+        return False
+
+    candidate = normalized_target
+    if "::" in candidate:
+        candidate = candidate.split("::", 1)[0]
+
+    if not candidate.endswith(".py"):
+        return False
+
+    return "spark" in candidate and (
+        candidate.startswith("dq-engine/")
+        or candidate.startswith("tests/")
+        or candidate.startswith("./dq-engine/")
+        or candidate.startswith("./tests/")
+    )
 
 
 def build_container_test_command(test_targets: Iterable[str]) -> list[str]:
