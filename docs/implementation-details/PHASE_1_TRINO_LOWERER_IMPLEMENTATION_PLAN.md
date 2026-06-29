@@ -1,0 +1,657 @@
+# Phase 1 Implementation Plan: Trino Lowerer
+
+**Status:** In Progress  
+**Owner:** [To Be Assigned]  
+**Estimated Duration:** 2-3 weeks  
+**Priority:** High
+
+---
+
+## Executive Summary
+
+This plan details the implementation of the Trino lowerer to enable distributed SQL execution of Data Quality rules. The Trino lowerer will translate canonical DQ rule payloads into Trino-native SQL for execution against distributed data sources, enabling scalable validation across large datasets.
+
+---
+
+## Current State Analysis
+
+### Existing Implementation
+
+The Trino lowerer is **partially implemented** in `/dq-engine/runtime_lowerers.py`:
+
+✅ **Already Implemented:**
+- Basic row-level checks: `not_null`, `equals`, `not_equal`, `between`, `in`, `not_in`
+- Basic aggregate checks: `count`, `sum`, `min`, `max`
+- Query-based validation patterns (`query` type)
+- Failure envelope generation with proper error codes
+- Engine type normalization and aliasing
+- Integration with `compile_rule_payload`
+
+⚠️ **Limitations:**
+- No Trino connection/execution logic (currently only SQL generation)
+- No error handling for SQL execution failures
+- No performance metrics collection
+- Limited to basic constructs (no window functions, complex joins, etc.)
+- No schema validation
+- No dialect-specific SQL generation
+
+---
+
+## Implementation Goals
+
+### Primary Goal
+Enable end-to-end execution of Trino-backed data quality validations with:
+1. SQL generation from canonical rules
+2. Trino connection management
+3. Query execution and result validation
+4. Failure detection and reporting
+5. Performance metrics collection
+
+### Success Criteria
+| Metric | Target |
+|--------|--------|
+| Supported row-level rules | 8/8 (100%) |
+| Supported aggregate rules | 4/10 (40% - incrementally) |
+| Query DQ support | Yes |
+| Execution success rate (test suite) | ≥ 95% |
+| End-to-end test coverage | ≥ 80% |
+| Performance variance vs Spark | ≤ 20% for equivalent rules |
+
+---
+
+## Detailed Implementation Plan
+
+### Phase 1.1: Trino Adapter Module (Week 1)
+
+#### File: `/dq-engine/trino_adapter.py` (NEW)
+
+**Purpose:** Centralize Trino-specific lowering logic and SQL generation
+
+```python
+# Key functions to implement:
+1. lower_row_rule_to_trino(rule: dict) -> dict[str, Any]
+2. lower_aggregate_rule_to_trino(rule: dict) -> dict[str, Any]
+3. lower_query_rule_to_trino(rule: dict) -> dict[str, Any]
+4. validate_trino_compatibility(rule: dict) -> list[str]
+5. escape_trino_identifier(identifier: str) -> str
+6. format_trino_literal(value: Any) -> str
+```
+
+**Deliverables:**
+- ✅ Row-level rule lowering (already in progress)
+- ⚠️ Aggregate rule lowering with proper Trino syntax
+- ✅ Query rule lowering
+- ✅ Schema validation (table/column existence)
+- ✅ Identifier escaping for special characters
+
+**Implementation Tasks:**
+
+1. **Create `trino_adapter.py`**
+   ```bash
+   # Location: dq-engine/trino_adapter.py
+   # Imports:
+   - re: for identifier validation
+   - typing: for type hints
+   - runtime_lowerers: for shared utilities
+   ```
+
+2. **Implement identifier escaping**
+   - Handle backticks, quotes, and special characters
+   - Validate identifiers match Trino naming conventions
+   ```python
+   def escape_trino_identifier(identifier: str) -> str:
+       # Trino identifiers are case-insensitive, use backticks
+       return f"`{identifier}`"
+   ```
+
+3. **Implement literal formatting**
+   - Support strings, numbers, booleans, NULL
+   - Handle date/time literals
+   ```python
+   def format_trino_literal(value: Any) -> str:
+       if isinstance(value, str):
+           return f"'{value}'"
+       if isinstance(value, bool):
+           return "TRUE" if value else "FALSE"
+       if value is None:
+           return "NULL"
+       # Handle dates
+       if isinstance(value, datetime):
+           return value.isoformat()
+       return str(value)
+   ```
+
+4. **Implement row rule lowering**
+   - `not_null`: `column IS NOT NULL`
+   - `is_null`: `column IS NULL`
+   - `equals`: `column = <literal>`
+   - `not_equal`: `column != <literal>`
+   - `between`: `column BETWEEN <min> AND <max>`
+   - `in`: `column IN (<values>)`
+   - `not_in`: `column NOT IN (<values>)`
+   - `min`: `column >= <min>`
+   - `max`: `column <= <max>`
+
+5. **Implement aggregate rule lowering**
+   - `count`: `SELECT COUNT(*) FROM <table>`
+   - `sum`: `SELECT SUM(column) FROM <table>`
+   - `avg`: `SELECT AVG(column) FROM <table>`
+   - `min`: `SELECT MIN(column) FROM <table>`
+   - `max`: `SELECT MAX(column) FROM <table>`
+   - `distinct_count`: `SELECT COUNT(DISTINCT column) FROM <table>`
+
+6. **Implement compatibility validation**
+   ```python
+   def validate_trino_compatibility(rule: dict) -> list[str]:
+       """Return list of unsupported constructs or empty list if compatible"""
+       unsupported = []
+       
+       # Check for unsupported params
+       if rule.get("params", {}).get("expression"):
+           unsupported.append("custom expression in params")
+       
+       if rule.get("params", {}).get("sql_predicate"):
+           unsupported.append("SQL predicate in params")
+       
+       if rule.get("params", {}).get("window"):
+           unsupported.append("window/analytic functions")
+       
+       if isinstance(rule.get("params", {}).get("columns"), list):
+           unsupported.append("multi-column predicates")
+       
+       return unsupported
+   ```
+
+---
+
+### Phase 1.2: Trino Execution Engine (Week 1-2)
+
+#### File: `/dq-engine/trino_executor.py` (NEW)
+
+**Purpose:** Execute Trino queries and collect results
+
+```python
+# Key functions to implement:
+1. create_trino_connection(config: dict) -> trino.TrinoClient
+2. execute_trino_query(client: TrinoClient, query: str) -> pd.DataFrame
+3. validate_query_result(result: DataFrame, expected: dict) -> dict[str, Any]
+4. collect_query_metrics(client: TrinoClient, query: str) -> dict[str, Any]
+5. handle_execution_error(error: Exception, query: str) -> dict[str, Any]
+```
+
+**Deliverables:**
+- Trino connection pooling
+- Query execution with timeout handling
+- Result validation against expected values
+- Error classification and reporting
+- Metrics collection (execution time, rows processed, etc.)
+
+**Implementation Tasks:**
+
+1. **Create Trino client factory**
+   ```python
+   def create_trino_connection(config: dict[str, Any]) -> TrinoClient:
+       """Create and configure Trino connection with pooling"""
+       return TrinoClient(
+           host=config.get("host", "localhost"),
+           port=config.get("http_port", 8080),
+           user=config.get("user", "user"),
+           catalog=config.get("catalog", "memory"),
+           schema=config.get("schema", "default"),
+           session_properties={
+               "query_max_runtime_ms": str(config.get("timeout_ms", 30000)),
+               "memory_per_task": str(config.get("memory", "1GB")),
+           },
+           extra_credential_headers=config.get("auth_headers", {}),
+       )
+   ```
+
+2. **Implement query execution**
+   ```python
+   def execute_trino_query(client: TrinoClient, query: str) -> pd.DataFrame:
+       """Execute query with timeout and result collection"""
+       try:
+           # Execute with timeout
+           with client.query(query) as query_result:
+               # Handle streaming results for large queries
+               rows = list(query_result.iterrows(timeout=60))
+               return pd.DataFrame(rows)
+       except trino.exceptions.TrinoUserError as e:
+           raise ValueError(f"Trino query error: {e.message}")
+       except trino.exceptions.TrinoQueryException as e:
+           raise ValueError(f"Trino query exception: {e}")
+       except Exception as e:
+           raise RuntimeError(f"Query execution failed: {str(e)}")
+   ```
+
+3. **Implement result validation**
+   ```python
+   def validate_query_result(result: DataFrame, expected: dict) -> dict:
+       """Validate query results against expected values"""
+       validation_result = {
+           "passed": True,
+           "actual_count": len(result),
+           "expected_count": expected.get("expected_count"),
+           "failed_rows": [],
+           "details": {}
+       }
+       
+       # Check count
+       if expected.get("expected_count") is not None:
+           if len(result) != expected["expected_count"]:
+               validation_result["passed"] = False
+               validation_result["details"]["count_mismatch"] = True
+       
+       # Check for failed rows
+       if validation_result["passed"]:
+           validation_result["failed_rows"] = []
+       
+       return validation_result
+   ```
+
+4. **Implement metrics collection**
+   ```python
+   def collect_query_metrics(client: TrinoClient, query: str) -> dict:
+       """Collect query performance metrics"""
+       metrics = {
+           "query_id": None,
+           "start_time": None,
+           "end_time": None,
+           "duration_ms": None,
+           "rows_returned": 0,
+           "plan_nodes": None,
+           "warnings": [],
+       }
+       return metrics
+   ```
+
+---
+
+### Phase 1.3: Configuration and Setup (Week 1)
+
+#### File: `/dq-engine/trino_config.py` (NEW)
+
+**Purpose:** Centralize Trino configuration and defaults
+
+```python
+# Key contents:
+DEFAULT_TRINO_CONFIG = {
+    "host": "localhost",
+    "http_port": 8080,
+    "user": "trino_user",
+    "catalog": "hive",
+    "schema": "default",
+    "timeout_ms": 30000,
+    "memory_per_task": "1GB",
+}
+
+# Environment variable mappings
+TRINO_CONFIG_KEYS = {
+    "DQ_TRINO_HOST": "host",
+    "DQ_TRINO_PORT": "http_port",
+    "DQ_TRINO_USER": "user",
+    "DQ_TRINO_TIMEOUT": "timeout_ms",
+    # ... etc
+}
+```
+
+**Deliverables:**
+- Default configuration
+- Environment variable support
+- Configuration validation
+- Connection pool settings
+
+---
+
+### Phase 1.4: End-to-End Integration (Week 2)
+
+#### File: `/dq-engine/trino_execution_pipeline.py` (NEW)
+
+**Purpose:** Orchestrate the full execution pipeline
+
+```python
+# Key functions to implement:
+1. create_trino_execution_plan(rule: dict, config: dict) -> ExecutionPlan
+2. execute_trino_pipeline(plan: ExecutionPlan) -> ExecutionResult
+3. persist_trino_artifacts(result: ExecutionResult, output_dir: str) -> None
+```
+
+**Deliverables:**
+- Full execution pipeline
+- Artifact persistence
+- Error handling and recovery
+- Result aggregation
+
+---
+
+### Phase 1.5: Testing and Validation (Week 2-3)
+
+#### Test Files to Create/Update
+
+1. **`/dq-engine/tests/test_trino_adapter.py`** (NEW)
+   - Row-level rule lowering tests
+   - Aggregate rule lowering tests
+   - Query rule lowering tests
+   - Identifier escaping tests
+   - Literal formatting tests
+
+2. **`/dq-engine/tests/test_trino_executor.py`** (NEW)
+   - Connection creation tests
+   - Query execution tests (mock)
+   - Result validation tests
+   - Error handling tests
+   - Metrics collection tests
+
+3. **`/dq-engine/tests/test_trino_integration.py`** (NEW)
+   - End-to-end integration tests
+   - Local Trino container tests
+   - Performance benchmarks
+
+4. **Update `/dq-engine/tests/test_runtime_lowerer_registry.py`**
+   - Add Trino-specific test cases
+   - Update existing tests to cover new functionality
+
+**Test Coverage Targets:**
+- Unit tests: 90%+ coverage
+- Integration tests: All public APIs
+- Performance tests: Baseline for each rule type
+
+---
+
+## File Structure
+
+```
+dq-engine/
+├── trino_adapter.py              [NEW] - Core lowering logic
+├── trino_executor.py             [NEW] - Query execution
+├── trino_config.py               [NEW] - Configuration
+├── trino_execution_pipeline.py   [NEW] - Orchestration
+├── tests/
+│   ├── test_trino_adapter.py        [NEW]
+│   ├── test_trino_executor.py       [NEW]
+│   ├── test_trino_integration.py    [NEW]
+│   └── test_trino_performance.py    [NEW]
+└── runtime_lowerers.py           [UPDATE] - Update get_runtime_lowerer
+```
+
+---
+
+## Integration Points
+
+### 1. Update `runtime_lowerers.py`
+
+**Changes needed:**
+- Move Trino-specific logic to `trino_adapter.py`
+- Update `lower_rule_to_trino()` to delegate to new adapter
+- Add configuration loading support
+
+```python
+# Before:
+def lower_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
+    # Direct implementation...
+
+# After:
+def lower_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
+    from trino_adapter import lower_row_rule_to_trino, lower_aggregate_rule_to_trino
+    
+    # Delegate to appropriate lowerer...
+```
+
+### 2. Update `main.py`
+
+**Changes needed:**
+- Add Trino execution endpoint
+- Add configuration loading
+- Add connection management
+
+```python
+# Add to main.py:
+@app.post("/execute-trino")
+def execute_trino_rule(req: TrinoExecuteRequest):
+    """Execute a rule using Trino backend"""
+    # Implementation...
+```
+
+### 3. Update `docker-compose.yml`
+
+**Changes needed:**
+- Add Trino service
+- Add configuration for Trino connection
+- Add health checks
+
+```yaml
+# Add to docker-compose.yml:
+trino:
+  image: trinodb/trino:latest
+  ports:
+    - "8080:8080"
+  environment:
+    - COORDINATOR=true
+    - NODE_TYPE=coordinator
+  # ... etc
+```
+
+---
+
+## Milestones
+
+### Milestone 1: Adapter Foundation (Week 1, Day 1-3)
+- [ ] Create `trino_adapter.py`
+- [ ] Implement identifier escaping
+- [ ] Implement literal formatting
+- [ ] Implement row rule lowering
+- [ ] Write unit tests (row rules)
+- [ ] **Acceptance:** All row-level rules generate correct Trino SQL
+
+### Milestone 2: Aggregate Rules (Week 1, Day 4-6)
+- [ ] Implement aggregate rule lowering
+- [ ] Add DISTINCT support
+- [ ] Add aggregate function aliases
+- [ ] Write unit tests (aggregate rules)
+- [ ] **Acceptance:** All aggregate rules generate correct Trino SQL
+
+### Milestone 3: Execution Engine (Week 2, Day 1-4)
+- [ ] Create `trino_executor.py`
+- [ ] Implement connection factory
+- [ ] Implement query execution
+- [ ] Implement result validation
+- [ ] Write unit tests (executor)
+- [ ] **Acceptance:** Queries execute successfully against Trino
+
+### Milestone 4: Integration (Week 2, Day 5-7)
+- [ ] Create `trino_execution_pipeline.py`
+- [ ] Implement end-to-end flow
+- [ ] Add artifact persistence
+- [ ] Update `runtime_lowerers.py`
+- [ ] Write integration tests
+- [ ] **Acceptance:** Full rule execution works end-to-end
+
+### Milestone 5: Testing & Performance (Week 3)
+- [ ] Complete test coverage
+- [ ] Performance benchmarks
+- [ ] Error handling validation
+- [ ] Documentation
+- [ ] **Acceptance:** All tests pass, performance within bounds
+
+---
+
+## Risks and Mitigations
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Trino connection issues | Medium | Use connection pooling, add retry logic |
+| SQL dialect differences | Medium | Start with simple rules, document unsupported features |
+| Performance overhead | Medium | Benchmark against Spark, optimize hot paths |
+| Large result sets | Medium | Implement streaming, add pagination |
+| Security vulnerabilities | High | Validate SQL injection, use parameterized queries |
+| Configuration complexity | Low | Use sensible defaults, add validation |
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+- Test SQL generation for each rule type
+- Test identifier escaping
+- Test literal formatting
+- Test error cases
+
+### Integration Tests
+- Test with local Trino container
+- Test with different data sources
+- Test with large datasets
+- Test error scenarios
+
+### Performance Tests
+- Benchmark query execution time
+- Test memory usage
+- Test throughput
+- Compare with Spark performance
+
+---
+
+## Acceptance Criteria
+
+### Must Have
+1. ✅ All row-level rules (not_null, equals, not_equal, between, in, not_in, min, max) generate valid Trino SQL
+2. ✅ Basic aggregate rules (count, sum, avg, min, max) generate valid Trino SQL
+3. ✅ Query DQ rules execute correctly
+4. ✅ Connection management works reliably
+5. ✅ Error handling produces meaningful messages
+6. ✅ All tests pass (≥90% coverage)
+
+### Should Have
+1. ✅ Performance metrics collection
+2. ✅ Schema validation
+3. ✅ Query result caching
+4. ✅ Streaming for large results
+5. ✅ Comprehensive documentation
+
+### Nice to Have
+1. ✅ Window function support
+2. ✅ Complex joins
+3. ✅ Subquery support
+4. ✅ CTE support
+5. ✅ Automatic optimization hints
+
+---
+
+## Rollout Plan
+
+### Phase 1: Internal Testing (Week 4)
+- Deploy to staging environment
+- Run internal test suite
+- Validate with sample data
+
+### Phase 2: Pilot (Week 5-6)
+- Enable for internal users
+- Collect feedback
+- Monitor performance
+
+### Phase 3: Production (Week 7+)
+- Gradual rollout
+- Feature flag for Trino backend
+- Full documentation
+
+---
+
+## Dependencies
+
+### External Dependencies
+- Trino server (latest stable version)
+- Python Trino client (`trino` package)
+- Pandas for result handling
+
+### Internal Dependencies
+- Existing `runtime_lowerers.py` infrastructure
+- `compile_rule_payload` API
+- Failure envelope system
+- Configuration management
+
+---
+
+## Timeline
+
+```
+Week 1: Adapter Foundation
+├─ Day 1-2: trino_adapter.py creation
+├─ Day 3-4: Row rule implementation
+├─ Day 5: Aggregate rules
+└─ Day 6-7: Testing
+
+Week 2: Execution Engine
+├─ Day 1-2: trino_executor.py creation
+├─ Day 3-4: Connection management
+├─ Day 5-6: Query execution
+└─ Day 7: Integration
+
+Week 3: Testing & Polish
+├─ Day 1-2: Full test suite
+├─ Day 3-4: Performance testing
+├─ Day 5: Documentation
+└─ Day 6-7: Review and deployment
+```
+
+---
+
+## Appendix A: Supported Rule Types Matrix
+
+| Rule Type | Supported | SQL Example | Notes |
+|-----------|-----------|-------------|-------|
+| `not_null` | ✅ | `column IS NOT NULL` | - |
+| `is_null` | ✅ | `column IS NULL` | - |
+| `equals` | ✅ | `column = 'value'` | - |
+| `not_equal` | ✅ | `column != 'value'` | - |
+| `between` | ✅ | `column BETWEEN a AND b` | - |
+| `in` | ✅ | `column IN ('a', 'b')` | - |
+| `not_in` | ✅ | `column NOT IN ('a', 'b')` | - |
+| `min` | ✅ | `column >= <min>` | Row-level |
+| `max` | ✅ | `column <= <max>` | Row-level |
+| `count` | ✅ | `SELECT COUNT(*)` | Aggregate |
+| `sum` | ✅ | `SELECT SUM(column)` | Aggregate |
+| `avg` | ✅ | `SELECT AVG(column)` | Aggregate |
+| `distinct_count` | ✅ | `SELECT COUNT(DISTINCT column)` | Aggregate |
+
+---
+
+## Appendix B: Unsupported Constructs
+
+The following constructs are **NOT supported** in Phase 1 and must be rejected:
+
+1. Custom expressions in `params.expression`
+2. SQL predicates in `params.sql_predicate`
+3. Window/analytic functions in `params.window`
+4. Multi-column predicates
+5. Nested queries
+6. JOIN operations
+7. UNION/INTERSECT/EXCEPT
+8. Complex subqueries
+9. Stored procedure calls
+
+These should be documented and rejected with clear error messages.
+
+---
+
+## Appendix C: Error Codes Reference
+
+| Code | Description | Trigger |
+|------|-------------|---------|
+| `DQ_TRINO_CONNECTION_FAILED` | Unable to establish Trino connection | Connection error |
+| `DQ_TRINO_QUERY_ERROR` | SQL query execution failed | Trino error |
+| `DQ_TRINO_RESULT_MISMATCH` | Query results don't match expectations | Validation |
+| `DQ_TRINO_UNSUPPORTED_RULE` | Rule type not supported | Compatibility check |
+| `DQ_TRINO_INVALID_IDENTIFIER` | Invalid column/table name | Validation |
+| `DQ_TRINO_INVALID_LITERALS` | Invalid literal values | Validation |
+
+---
+
+## Contact & Support
+
+**Questions:** Contact the implementation team  
+**Documentation:** See `docs/implementation-details/`  
+**Support:** #dq-engine Slack channel  
+
+---
+
+*Last Updated: 2026-06-29*  
+*Version: 1.0*
