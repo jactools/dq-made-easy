@@ -12,6 +12,8 @@ ROW_RULE_TYPES = {"not_null", "is_null", "equals", "not_equal", "between", "in",
 AGGREGATE_RULE_TYPES = {"count", "sum", "avg", "min", "max", "distinct_count"}
 QUERY_RULE_TYPES = {"query"}
 _TRINO_SIMPLE_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_TRINO_COMPARISON_OPERATORS = {"=", "!=", "<>", ">", ">=", "<", "<="}
+_TRINO_SET_OPERATORS = {"IN", "NOT IN"}
 
 
 def escape_trino_identifier(identifier: str) -> str:
@@ -79,6 +81,89 @@ def _escape_rule_identifier(rule: dict[str, Any], key: str, default: str | None 
     return escape_trino_identifier(value)
 
 
+def _normalize_filter_specs(filters: Any, clause_name: str) -> list[dict[str, Any]]:
+    if filters is None:
+        return []
+    if isinstance(filters, dict):
+        return [filters]
+    if isinstance(filters, list) and all(isinstance(item, dict) for item in filters):
+        return filters
+    raise ValueError(f"Trino '{clause_name}' filters must be a dictionary or list of dictionaries")
+
+
+def _format_filter_predicate(
+    filter_spec: dict[str, Any],
+    *,
+    clause_name: str,
+    default_left_operand: str | None = None,
+) -> str:
+    raw_operator = str(filter_spec.get("operator") or "=").strip().upper()
+    operator = "!=" if raw_operator == "<>" else raw_operator
+
+    if default_left_operand is None:
+        column = str(filter_spec.get("column") or "").strip()
+        if not column:
+            raise ValueError(f"Trino '{clause_name}' filter requires 'column'")
+        left_operand = escape_trino_identifier(column)
+    else:
+        left_operand = default_left_operand
+        if filter_spec.get("column") is not None:
+            raise ValueError(f"Trino '{clause_name}' filter cannot specify 'column'")
+
+    if operator in _TRINO_COMPARISON_OPERATORS:
+        if "value" not in filter_spec:
+            raise ValueError(f"Trino '{clause_name}' filter requires 'value'")
+        return f"{left_operand} {operator} {format_trino_literal(filter_spec['value'])}"
+
+    if operator in _TRINO_SET_OPERATORS:
+        values = filter_spec.get("values")
+        if not isinstance(values, list) or not values:
+            raise ValueError(f"Trino '{clause_name}' filter requires non-empty 'values'")
+        return f"{left_operand} {operator} ({', '.join(format_trino_literal(value) for value in values)})"
+
+    if operator == "BETWEEN":
+        if "min" not in filter_spec or "max" not in filter_spec:
+            raise ValueError(f"Trino '{clause_name}' filter requires 'min' and 'max'")
+        return f"{left_operand} BETWEEN {format_trino_literal(filter_spec['min'])} AND {format_trino_literal(filter_spec['max'])}"
+
+    if operator == "IS NULL":
+        return f"{left_operand} IS NULL"
+
+    if operator == "IS NOT NULL":
+        return f"{left_operand} IS NOT NULL"
+
+    raise ValueError(f"Unsupported Trino '{clause_name}' filter operator: {raw_operator}")
+
+
+def _format_where_clause(filters: Any) -> str:
+    predicates = [
+        _format_filter_predicate(filter_spec, clause_name="where")
+        for filter_spec in _normalize_filter_specs(filters, "where")
+    ]
+    return f" WHERE {' AND '.join(predicates)}" if predicates else ""
+
+
+def _combine_where_predicates(filters: Any, expectation: str) -> str:
+    predicates = [
+        _format_filter_predicate(filter_spec, clause_name="where")
+        for filter_spec in _normalize_filter_specs(filters, "where")
+    ]
+    predicates.append(expectation)
+    return " AND ".join(predicates)
+
+
+def _format_having_clause(filters: Any, aggregate_expression: str) -> str:
+    predicates = [
+        _format_filter_predicate(
+            filter_spec,
+            clause_name="having",
+            default_left_operand=aggregate_expression,
+        )
+        for filter_spec in _normalize_filter_specs(filters, "having")
+    ]
+    return f" HAVING {' AND '.join(predicates)}" if predicates else ""
+
+
 def lower_row_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
     """Lower a row-level rule to Trino SQL."""
     _raise_for_unsupported_trino_constructs(rule)
@@ -126,7 +211,7 @@ def lower_row_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
         "rule_type": "row_dq",
         "expectation": expectation,
         "action_if_failed": "quarantine",
-        "query": f"SELECT * FROM {table} WHERE {expectation}",
+        "query": f"SELECT * FROM {table} WHERE {_combine_where_predicates(params.get('where'), expectation)}",
     }
 
 
@@ -142,40 +227,52 @@ def lower_aggregate_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
     if rule_type == "count":
         if "expected_count" not in params:
             raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_count' parameter")
-        expectation = f"COUNT(*) = {format_trino_literal(params['expected_count'])}"
-        query = f"SELECT COUNT(*) AS dq_count FROM {table}"
+        aggregate_expression = "COUNT(*)"
+        expectation = f"{aggregate_expression} = {format_trino_literal(params['expected_count'])}"
+        result_alias = "dq_count"
     elif rule_type == "sum":
         if "expected_value" not in params:
             raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
         escaped_column = escape_trino_identifier(column)
-        expectation = f"SUM({escaped_column}) = {format_trino_literal(params['expected_value'])}"
-        query = f"SELECT SUM({escaped_column}) AS dq_sum FROM {table}"
+        aggregate_expression = f"SUM({escaped_column})"
+        expectation = f"{aggregate_expression} = {format_trino_literal(params['expected_value'])}"
+        result_alias = "dq_sum"
     elif rule_type == "avg":
         if "expected_value" not in params:
             raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
         escaped_column = escape_trino_identifier(column)
-        expectation = f"AVG({escaped_column}) = {format_trino_literal(params['expected_value'])}"
-        query = f"SELECT AVG({escaped_column}) AS dq_avg FROM {table}"
+        aggregate_expression = f"AVG({escaped_column})"
+        expectation = f"{aggregate_expression} = {format_trino_literal(params['expected_value'])}"
+        result_alias = "dq_avg"
     elif rule_type == "min":
         if "expected_value" not in params:
             raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
         escaped_column = escape_trino_identifier(column)
-        expectation = f"MIN({escaped_column}) = {format_trino_literal(params['expected_value'])}"
-        query = f"SELECT MIN({escaped_column}) AS dq_min FROM {table}"
+        aggregate_expression = f"MIN({escaped_column})"
+        expectation = f"{aggregate_expression} = {format_trino_literal(params['expected_value'])}"
+        result_alias = "dq_min"
     elif rule_type == "max":
         if "expected_value" not in params:
             raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
         escaped_column = escape_trino_identifier(column)
-        expectation = f"MAX({escaped_column}) = {format_trino_literal(params['expected_value'])}"
-        query = f"SELECT MAX({escaped_column}) AS dq_max FROM {table}"
+        aggregate_expression = f"MAX({escaped_column})"
+        expectation = f"{aggregate_expression} = {format_trino_literal(params['expected_value'])}"
+        result_alias = "dq_max"
     elif rule_type == "distinct_count":
         if "expected_count" not in params:
             raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_count' parameter")
         escaped_column = escape_trino_identifier(column)
-        expectation = f"COUNT(DISTINCT {escaped_column}) = {format_trino_literal(params['expected_count'])}"
-        query = f"SELECT COUNT(DISTINCT {escaped_column}) AS dq_count FROM {table}"
+        aggregate_expression = f"COUNT(DISTINCT {escaped_column})"
+        expectation = f"{aggregate_expression} = {format_trino_literal(params['expected_count'])}"
+        result_alias = "dq_count"
     else:
         raise ValueError(f"Unsupported aggregate rule type: {rule_type}")
+
+    query = (
+        f"SELECT {aggregate_expression} AS {result_alias} FROM {table}"
+        f"{_format_where_clause(params.get('where'))}"
+        f"{_format_having_clause(params.get('having'), aggregate_expression)}"
+    )
 
     return {
         "engine_type": "trino",

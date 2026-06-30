@@ -131,6 +131,8 @@ Enable end-to-end execution of Trino-backed data quality validations with:
    - `not_in`: `column NOT IN (<values>)`
    - `min`: `column >= <min>`
    - `max`: `column <= <max>`
+    - Structured scalar filters use `params.where` before the scalar expectation
+    - Raw SQL predicates remain unsupported; scalar filters use the same validated filter operators as aggregate filters
 
 5. **Implement aggregate rule lowering**
    - `count`: `SELECT COUNT(*) FROM <table>`
@@ -139,6 +141,9 @@ Enable end-to-end execution of Trino-backed data quality validations with:
    - `min`: `SELECT MIN(column) FROM <table>`
    - `max`: `SELECT MAX(column) FROM <table>`
    - `distinct_count`: `SELECT COUNT(DISTINCT column) FROM <table>`
+    - Structured pre-aggregation filters use `params.where` as a filter dictionary or list of filter dictionaries
+    - Structured post-aggregation filters use `params.having` against the aggregate expression
+    - Raw SQL predicates remain unsupported; filter operators are explicit and validated before SQL generation
 
 6. **Implement compatibility validation**
    ```python
@@ -443,15 +448,17 @@ trino:
 - [x] Write unit tests (row rules)
 - [x] **Acceptance:** All row-level rules generate correct Trino SQL
     - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
+    - Scalar filter proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-scalar-filters-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-scalar-filters-2026-06-30.json)
 
 ### Milestone 2: Aggregate Rules (Week 1, Day 4-6)
-- [ ] Implement aggregate rule lowering
-- [ ] Add DISTINCT support
-- [ ] Add aggregate function aliases
-- [ ] Add WHERE filters before aggregation
-- [ ] Add HAVING filters after aggregation
-- [ ] Write unit tests (aggregate rules)
-- [ ] **Acceptance:** All aggregate rules generate correct Trino SQL
+- [x] Implement aggregate rule lowering
+- [x] Add DISTINCT support
+- [x] Add aggregate function aliases
+- [x] Add WHERE filters before aggregation
+- [x] Add HAVING filters after aggregation
+- [x] Write unit tests (aggregate rules)
+- [x] **Acceptance:** All aggregate rules generate correct Trino SQL
+    - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json)
 
 ### Milestone 3: Execution Engine (Week 2, Day 1-4)
 - [ ] Create `trino_executor.py`
@@ -518,8 +525,10 @@ trino:
 ### Must Have
 - [x] All row-level rules (not_null, equals, not_equal, between, in, not_in, min, max) generate valid Trino SQL
     - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
+    - Scalar filter proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-scalar-filters-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-scalar-filters-2026-06-30.json)
 - [x] Basic aggregate rules (count, sum, avg, min, max) generate valid Trino SQL
     - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
+    - Milestone 2 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json)
 - [x] Query DQ rules execute correctly and results are persisted
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
     - Dispatch evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_spark_expectations_payload tests/test_spark_expectations_adapter.py::test_process_dispatch_message_reports_structured_spark_expectations_failure tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_sql_engine_through_shared_reporting tests/test_trino_execution_pipeline.py::test_query_rule_execution_persists_bounded_results_and_query_artifact -q`
@@ -551,7 +560,14 @@ trino:
 
 ### Milestone 1 Evidence
 - Raw evidence: [test-results/evidence/0.11.5/api/20260630T135805Z-dq-engine-trino-lowerer](../../test-results/evidence/0.11.5/api/20260630T135805Z-dq-engine-trino-lowerer)
+- Scalar filter raw evidence: [test-results/evidence/0.11.5/api/20260630T163000Z-dq-engine-trino-scalar-filters](../../test-results/evidence/0.11.5/api/20260630T163000Z-dq-engine-trino-scalar-filters)
 - Curated proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
+- Scalar filter proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-scalar-filters-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-scalar-filters-2026-06-30.json)
+- Focused test command: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
+
+### Milestone 2 Evidence
+- Raw evidence: [test-results/evidence/0.11.5/api/20260630T161500Z-dq-engine-trino-aggregate-lowerer](../../test-results/evidence/0.11.5/api/20260630T161500Z-dq-engine-trino-aggregate-lowerer)
+- Curated proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json)
 - Focused test command: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
 
 ---

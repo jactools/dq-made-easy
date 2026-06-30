@@ -41,6 +41,45 @@ def test_compile_rule_payload_supports_trino_engine() -> None:
     assert compiled["compiled_artifact"]["engine_target"] == "trino_sql"
 
 
+def test_compile_rule_payload_supports_trino_aggregate_filters() -> None:
+    rule = {
+        "id": 204,
+        "table": "customers",
+        "type": "count",
+        "params": {
+            "expected_count": 10,
+            "where": {"column": "status", "operator": "=", "value": "active"},
+            "having": {"operator": ">=", "value": 1},
+        },
+    }
+
+    compiled = compile_rule_payload(rule, engine_type="trino")
+
+    assert compiled["ok"] is True
+    assert compiled["lowered_rule"]["query"] == (
+        "SELECT COUNT(*) AS dq_count FROM customers "
+        "WHERE status = 'active' HAVING COUNT(*) >= 1"
+    )
+
+
+def test_compile_rule_payload_supports_trino_scalar_filters() -> None:
+    rule = {
+        "id": 205,
+        "table": "customers",
+        "column": "amount",
+        "type": "min",
+        "params": {
+            "min": 10,
+            "where": {"column": "status", "operator": "=", "value": "active"},
+        },
+    }
+
+    compiled = compile_rule_payload(rule, engine_type="trino")
+
+    assert compiled["ok"] is True
+    assert compiled["lowered_rule"]["query"] == "SELECT * FROM customers WHERE status = 'active' AND amount >= 10"
+
+
 def test_compile_rule_payload_returns_structured_failure_envelope_for_unsupported_construct() -> None:
     rule = {
         "id": 203,

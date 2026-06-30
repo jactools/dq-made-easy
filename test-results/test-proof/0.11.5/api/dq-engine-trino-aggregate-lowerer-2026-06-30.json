@@ -1,0 +1,30 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "dq-engine-trino-aggregate-lowerer-2026-06-30",
+  "proof_type": "api",
+  "feature": "trino-aggregate-lowerer-milestone-2",
+  "summary": "Milestone 2 Trino aggregate lowering supports count, sum, avg, min, max, distinct_count, deterministic aggregate result aliases, and structured WHERE/HAVING filters.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-30T16:15:00Z",
+  "command": "cd /Users/Jac.Beekers/gitrepos/dq-made-easy/dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/20260630T161500Z-dq-engine-trino-aggregate-lowerer",
+  "test_files": [
+    "dq-engine/tests/test_trino_adapter.py",
+    "dq-engine/tests/test_runtime_lowerer_registry.py"
+  ],
+  "test_file_count": 2,
+  "test_count": 62,
+  "assertions": [
+    "Aggregate Trino rules cover count, sum, avg, min, max, and distinct_count",
+    "Aggregate queries emit stable result aliases such as dq_count, dq_sum, dq_avg, dq_min, and dq_max",
+    "Structured WHERE filters are emitted before aggregation and reject raw SQL predicates",
+    "Structured HAVING filters are emitted after aggregation against the aggregate expression",
+    "The generic compile_rule_payload path returns the same aggregate filter SQL through the Trino runtime lowerer"
+  ],
+  "proof_data": {
+    "verification_command": "cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q",
+    "verification_result": "62 passed in 0.23s",
+    "coverage_gate": "cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_runtime_lowerer_registry.py --cov=trino_adapter --cov=trino_config --cov=trino_executor --cov=trino_execution_pipeline --cov-report=term-missing --cov-fail-under=90 -q",
+    "coverage_result": "83 passed in 1.38s; Required test coverage of 90% reached. Total coverage: 95.02%"
+  }
+}

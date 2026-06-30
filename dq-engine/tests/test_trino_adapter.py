@@ -102,6 +102,55 @@ def test_lower_row_rule_to_trino_generates_expected_sql(
     assert lowered["query"] == f"SELECT * FROM customers WHERE {expected_expectation}"
 
 
+def test_lower_row_rule_to_trino_applies_where_filters_before_scalar_expectation() -> None:
+    rule = {
+        "id": 14,
+        "table": "customers",
+        "column": "amount",
+        "type": "between",
+        "params": {
+            "min": 10,
+            "max": 20,
+            "where": [
+                {"column": "status", "operator": "=", "value": "active"},
+                {"column": "country", "operator": "not in", "values": ["DE", "FR"]},
+            ],
+        },
+    }
+
+    lowered = lower_row_rule_to_trino(rule)
+
+    assert lowered["expectation"] == "amount BETWEEN 10 AND 20"
+    assert lowered["query"] == (
+        "SELECT * FROM customers WHERE "
+        "status = 'active' AND country NOT IN ('DE', 'FR') AND amount BETWEEN 10 AND 20"
+    )
+
+
+@pytest.mark.parametrize(
+    ("where_filter", "expected_message"),
+    [
+        ("status = 'active'", "filters must be a dictionary or list of dictionaries"),
+        ({"operator": "=", "value": "active"}, "filter requires 'column'"),
+        ({"column": "status", "operator": "LIKE", "value": "A%"}, "Unsupported Trino 'where'"),
+    ],
+)
+def test_lower_row_rule_to_trino_rejects_invalid_structured_where_filters(
+    where_filter: object,
+    expected_message: str,
+) -> None:
+    rule = {
+        "id": 15,
+        "table": "customers",
+        "column": "amount",
+        "type": "min",
+        "params": {"min": 10, "where": where_filter},
+    }
+
+    with pytest.raises(ValueError, match=expected_message):
+        lower_row_rule_to_trino(rule)
+
+
 @pytest.mark.parametrize(
     ("rule_type", "params", "expected_expectation", "expected_query"),
     [
@@ -136,6 +185,70 @@ def test_lower_aggregate_rule_to_trino_generates_expected_sql(
     assert lowered["rule_type"] == "aggregate_dq"
     assert lowered["expectation"] == expected_expectation
     assert lowered["query"] == expected_query
+
+
+def test_lower_aggregate_rule_to_trino_applies_where_filters_before_aggregation() -> None:
+    rule = {
+        "id": 20,
+        "table": "customers",
+        "column": "amount",
+        "type": "sum",
+        "params": {
+            "expected_value": 100,
+            "where": [
+                {"column": "status", "operator": "=", "value": "active"},
+                {"column": "country", "operator": "in", "values": ["NL", "BE"]},
+            ],
+        },
+    }
+
+    lowered = lower_aggregate_rule_to_trino(rule)
+
+    assert lowered["query"] == (
+        "SELECT SUM(amount) AS dq_sum FROM customers "
+        "WHERE status = 'active' AND country IN ('NL', 'BE')"
+    )
+
+
+def test_lower_aggregate_rule_to_trino_applies_having_filters_after_aggregation() -> None:
+    rule = {
+        "id": 21,
+        "table": "customers",
+        "type": "count",
+        "params": {
+            "expected_count": 10,
+            "where": {"column": "active", "operator": "=", "value": True},
+            "having": {"operator": ">=", "value": 1},
+        },
+    }
+
+    lowered = lower_aggregate_rule_to_trino(rule)
+
+    assert lowered["query"] == "SELECT COUNT(*) AS dq_count FROM customers WHERE active = TRUE HAVING COUNT(*) >= 1"
+
+
+@pytest.mark.parametrize(
+    ("filter_params", "expected_message"),
+    [
+        ({"where": "status = 'active'"}, "filters must be a dictionary or list of dictionaries"),
+        ({"where": {"operator": "=", "value": "active"}}, "filter requires 'column'"),
+        ({"where": {"column": "status", "operator": "LIKE", "value": "A%"}}, "Unsupported Trino 'where'"),
+        ({"having": {"column": "dq_count", "operator": ">", "value": 0}}, "filter cannot specify 'column'"),
+    ],
+)
+def test_lower_aggregate_rule_to_trino_rejects_invalid_structured_filters(
+    filter_params: dict[str, object],
+    expected_message: str,
+) -> None:
+    rule = {
+        "id": 22,
+        "table": "customers",
+        "type": "count",
+        "params": {"expected_count": 1, **filter_params},
+    }
+
+    with pytest.raises(ValueError, match=expected_message):
+        lower_aggregate_rule_to_trino(rule)
 
 
 def test_lower_query_rule_to_trino_preserves_query_text() -> None:
