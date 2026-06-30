@@ -26,6 +26,7 @@ ALL_PACKAGES="false"
 PACKAGE_DIR=""
 PACKAGE_LABEL=""
 DIST_DIR=""
+BUILD_DIR=""
 PUBLISH="${PACKAGE_RELEASE_PUBLISH:-false}"
 PRINT_WHEEL_PATH="${PACKAGE_RELEASE_PRINT_WHEEL_PATH:-true}"
 REPOSITORY_NAME="${PACKAGE_RELEASE_REPOSITORY:-}"
@@ -123,6 +124,7 @@ resolve_package() {
   esac
 
   DIST_DIR="${ROOT_DIR}/tmp/${PACKAGE_DIR##*/}-release"
+  BUILD_DIR="${ROOT_DIR}/tmp/${PACKAGE_DIR##*/}-build"
 }
 
 resolve_publish_target() {
@@ -151,10 +153,14 @@ build_package() {
   fi
 
   rm -rf "$DIST_DIR"
+  rm -rf "$BUILD_DIR"
+  mkdir -p "$BUILD_DIR"
   mkdir -p "$DIST_DIR"
 
+  cp -R "$PACKAGE_DIR"/. "$BUILD_DIR"/
+
   info "$my_name" "Building $PACKAGE_LABEL wheel"
-  if ! (cd "$PACKAGE_DIR" && "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m pip wheel --no-deps --no-build-isolation --wheel-dir "$DIST_DIR" . >/dev/null); then
+  if ! (cd "$BUILD_DIR" && "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m pip wheel --no-deps --no-build-isolation --wheel-dir "$DIST_DIR" . >/dev/null); then
     error "$my_name" "Failed to build wheel for $PACKAGE_LABEL"
     exit 1
   fi
@@ -211,6 +217,8 @@ build_package() {
   if truthy "$PRINT_WHEEL_PATH"; then
     printf '%s\n' "$WHEEL_PATH"
   fi
+
+  rm -rf "$BUILD_DIR"
 }
 
 init_root_env_file "$ROOT_DIR"
