@@ -45,8 +45,8 @@ steps:
       python -m venv "$(Build.SourcesDirectory)/venv"
       source "$(Build.SourcesDirectory)/venv/bin/activate"
       python -m pip install --upgrade pip
-      python -m pip install -r requirements-dev.txt
-    workingDirectory: $(Build.SourcesDirectory)/dq-api/fastapi
+      python -m pip install -r dq-api/fastapi/requirements-dev.txt
+    workingDirectory: $(Build.SourcesDirectory)
     displayName: Create repo virtual environment
 
   - ${{ if eq(parameters.installUiDependencies, true) }}:

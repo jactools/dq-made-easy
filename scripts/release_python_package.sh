@@ -27,6 +27,7 @@ PACKAGE_DIR=""
 PACKAGE_LABEL=""
 DIST_DIR=""
 BUILD_DIR=""
+PUBLIC_DIST_DIR=""
 PUBLISH="${PACKAGE_RELEASE_PUBLISH:-false}"
 PRINT_WHEEL_PATH="${PACKAGE_RELEASE_PRINT_WHEEL_PATH:-true}"
 REPOSITORY_NAME="${PACKAGE_RELEASE_REPOSITORY:-}"
@@ -124,6 +125,7 @@ resolve_package() {
   esac
 
   DIST_DIR="${ROOT_DIR}/tmp/${PACKAGE_DIR##*/}-release"
+  PUBLIC_DIST_DIR="${ROOT_DIR}/tmp/${PACKAGE_DIR##*/}-dist"
   BUILD_DIR="${ROOT_DIR}/tmp/${PACKAGE_DIR##*/}-build"
 }
 
@@ -153,6 +155,7 @@ build_package() {
   fi
 
   rm -rf "$DIST_DIR"
+  rm -rf "$PUBLIC_DIST_DIR"
   rm -rf "$BUILD_DIR"
   mkdir -p "$BUILD_DIR"
   mkdir -p "$DIST_DIR"
@@ -172,6 +175,9 @@ build_package() {
   fi
 
   success "$my_name" "Built $(basename "$WHEEL_PATH")"
+
+  mkdir -p "$PUBLIC_DIST_DIR"
+  cp "$WHEEL_PATH" "$PUBLIC_DIST_DIR/"
 
   if [[ "$PUBLISH" != "true" ]]; then
     if truthy "$PRINT_WHEEL_PATH"; then

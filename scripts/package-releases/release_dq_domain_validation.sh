@@ -89,3 +89,5 @@ fi
 
 NEXT_VERSION="$(bump_patch_version "$CURRENT_VERSION")"
 printf 'Bumped dq-domain-validation/pyproject.toml from %s to %s\n' "$CURRENT_VERSION" "$NEXT_VERSION"
+
+"$ROOT_DIR/scripts/package-releases/sync_fastapi_requirements_dev.sh"

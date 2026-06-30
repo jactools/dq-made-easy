@@ -39,13 +39,13 @@ run_fastapi_seeded_list_verification_tests() {
 
   info "$my_name" "Checking FastAPI verification test dependencies..."
   if ! (
-    cd "$fastapi_dir"
+    cd "$ROOT_DIR"
     "$PYTHON_RUNNER" --python-bin "$py_cmd" -c "import reportlab" >/dev/null 2>&1
   ); then
     info "$my_name" "Installing missing FastAPI test dependencies from requirements-dev.txt..."
     (
-      cd "$fastapi_dir"
-      "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pip install --quiet -r requirements-dev.txt
+      cd "$ROOT_DIR"
+      "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pip install --quiet -r dq-api/fastapi/requirements-dev.txt
     ) || {
       error "$my_name" "FastAPI test verification failed: unable to install requirements-dev.txt"
       return 1
