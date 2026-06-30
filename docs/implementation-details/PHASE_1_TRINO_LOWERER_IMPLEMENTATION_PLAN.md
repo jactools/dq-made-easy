@@ -420,12 +420,14 @@ def lower_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
 ```yaml
 # Add to docker-compose.yml:
 trino:
-  image: trinodb/trino:latest
+    image: ${DQ_TRINO_REGISTRY:-}${DQ_TRINO_NAMESPACE:-}${DQ_TRINO_IMAGE:-dq-made-easy-trino}:${DQ_TRINO_TAG:-latest}
+    build:
+        context: ./dq-trino
+        dockerfile: Dockerfile.trino
+        args:
+            TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:-trinodb/trino:477}
   ports:
-    - "8080:8080"
-  environment:
-    - COORDINATOR=true
-    - NODE_TYPE=coordinator
+        - "${TRINO_HOST_BIND:-127.0.0.1}:${TRINO_HOST_PORT:-8084}:8080"
   # ... etc
 ```
 
@@ -521,7 +523,7 @@ trino:
     - Live container evidence: with Trino already running via `./scripts/stack_ctl.sh start --profile trino`, run `scripts/validation/validate_trino_live_container.sh` (`2 passed` live; broader Trino/dispatch suite with live tests: `49 passed`).
 - [x] Connection management works reliably
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py -q`
-- [ ] Error handling produces meaningful messages and is aligned with the existing error reporting structures.
+- [ ] Error handling produces meaningful messages and is aligned with the existing error reporting structures, persisted and available through the reporting APIs
 - [ ] All tests pass (≥90% coverage)
 
 ### Should Have

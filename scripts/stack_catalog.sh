@@ -28,6 +28,7 @@ default_runtime_profile_values() {
     auth \
     engine \
     workers \
+    trino \
     profiling \
     metadata \
     support \

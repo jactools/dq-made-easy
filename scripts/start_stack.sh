@@ -10,8 +10,8 @@ set -euo pipefail
 # - Starts the selected docker compose services.
 # - Can optionally include observability components.
 #
-# Version: 1.10
-# Last modified: 2026-06-02
+# Version: 1.11
+# Last modified: 2026-06-30
 # Changelog:
 # - 1.2 (2026-04-22): Reworked stale container cleanup to avoid GNU-only `xargs -r`.
 # - 1.3 (2026-04-26): Made docker compose operations honor ROOT_ENV_FILE for env-aware startup flows.
@@ -22,6 +22,7 @@ set -euo pipefail
 # - 1.8 (2026-05-10): Added explicit --with-edge support for the edge compose profile.
 # - 1.9 (2026-05-30): Added explicit --with-airflow support for the Airflow compose profile.
 # - 1.10 (2026-06-02): Added explicit --with-spark support for the distributed Spark cluster profile.
+# - 1.11 (2026-06-30): Added Trino to --all startup and explicit --with-trino support.
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
@@ -63,6 +64,7 @@ START_EDGE="${START_EDGE:-false}"
 START_SPARK="${START_SPARK:-false}"
 START_ENGINE="${START_ENGINE:-false}"
 START_WORKERS="${START_WORKERS:-false}"
+START_TRINO="${START_TRINO:-false}"
 START_AIRFLOW="${START_AIRFLOW:-false}"
 START_PROFILING="${START_PROFILING:-false}"
 START_METADATA="${START_METADATA:-false}"
@@ -84,7 +86,7 @@ if [ "$START_CORE" = "true" ] || [ "$START_METADATA" = "true" ]; then
   export CATALOG_OIDC_PASSWORD="$SMOKE_LOGIN_PASSWORD"
 fi
 
-STARTUP_BLOCKS=(base redis spark core gateway auth edge engine workers airflow profiling metadata metadata_ingestion llm support observability)
+STARTUP_BLOCKS=(base redis spark core gateway auth edge engine workers trino airflow profiling metadata metadata_ingestion llm support observability)
 for startup_block in "${STARTUP_BLOCKS[@]}"; do
   source "$ROOT_DIR/scripts/startup/${startup_block}.sh"
 done
@@ -108,6 +110,7 @@ START_EDGE="${START_EDGE:-false}"
 START_SPARK="${START_SPARK:-false}"
 START_ENGINE="${START_ENGINE:-false}"
 START_WORKERS="${START_WORKERS:-false}"
+START_TRINO="${START_TRINO:-false}"
 START_AIRFLOW="${START_AIRFLOW:-false}"
 START_PROFILING="${START_PROFILING:-false}"
 START_METADATA="${START_METADATA:-false}"
@@ -139,6 +142,7 @@ print_usage() {
     "  --with-spark" \
     "  --with-engine" \
     "  --with-workers" \
+    "  --with-trino" \
     "  --with-airflow" \
     "  --with-profiling" \
     "  --with-metadata" \
@@ -170,6 +174,7 @@ while [[ $# -gt 0 ]]; do
     --with-observability) START_OBSERVABILITY=true; shift ;;
     --with-engine) START_ENGINE=true; shift ;;
     --with-workers) START_WORKERS=true; shift ;;
+    --with-trino) START_TRINO=true; shift ;;
     --with-airflow) START_AIRFLOW=true; shift ;;
     --with-profiling) START_PROFILING=true; shift ;;
     --with-metadata) START_METADATA=true; shift ;;
@@ -193,6 +198,7 @@ if [ "$START_ALL" = "true" ]; then
   START_EDGE=true
   START_ENGINE=true
   START_WORKERS=true
+  START_TRINO=true
   START_PROFILING=true
   START_METADATA=true
   START_METADATA_INGESTION=true

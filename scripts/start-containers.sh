@@ -9,8 +9,8 @@ set -euo pipefail
 # - Loads repo env and helper libraries.
 # - Starts the selected docker compose services (and optional seed steps).
 #
-# Version: 1.16
-# Last modified: 2026-06-02
+# Version: 1.17
+# Last modified: 2026-06-30
 # Changelog:
 # - 1.4 (2026-04-26): Added env selectors and env-aware docker compose wrappers for local and deployment startup flows.
 # - 1.5 (2026-04-27): Documents the api-migrate one-shot service and its build/reseed behavior in help text and startup logs.
@@ -24,6 +24,7 @@ set -euo pipefail
 # - 1.13 (2026-05-31): Consolidated Airflow SDK/operator wheel builds behind scripts/package-releases/build_dq_airflow_wheels.sh.
 # - 1.14 (2026-05-31): Switched startup to one wrapper script that builds all required wheel artifacts.
 # - 1.16 (2026-06-02): Added explicit --with-spark startup support for the distributed Spark cluster profile.
+# - 1.17 (2026-06-30): Added Trino to --all startup and explicit --with-trino support.
 # - 1.15 (2026-05-31): Delegated Airflow DAG artifact build calls through scripts/package-releases/build_dq_airflow_dag_artifact.sh.
 
 # Source generic logging function
@@ -348,6 +349,7 @@ START_EDGE=false
 START_SPARK=false
 START_ENGINE=false
 START_WORKERS=false
+START_TRINO=false
 START_AIRFLOW=false
 START_PROFILING=false
 START_METADATA=false
@@ -384,6 +386,7 @@ print_usage() {
     "  --with-spark" \
     "  --with-engine" \
     "  --with-workers" \
+    "  --with-trino" \
     "  --with-airflow" \
     "  --with-profiling" \
     "  --with-metadata            Start OpenMetadata and reconcile Keycloak auth/seeded credentials first" \
@@ -787,6 +790,7 @@ while [[ $# -gt 0 ]]; do
     --with-spark) START_SPARK=true; shift ;;
     --with-engine) START_ENGINE=true; shift ;;
     --with-workers) START_WORKERS=true; shift ;;
+    --with-trino) START_TRINO=true; shift ;;
     --with-airflow) START_AIRFLOW=true; shift ;;
     --with-profiling) START_PROFILING=true; shift ;;
     --with-observability) START_OBSERVABILITY=true; shift ;;
@@ -821,6 +825,7 @@ if [ "$START_ALL" = true ]; then
   START_AUTH=true
   START_ENGINE=true
   START_WORKERS=true
+  START_TRINO=true
   START_PROFILING=true
   START_METADATA=true
   START_METADATA_INGESTION=true
@@ -878,7 +883,7 @@ if [ "$SEED_KEYCLOAK" = true ]; then
 fi
 
 info "$my_name" "start-containers: with_base=$START_BASE with_redis=$START_REDIS with_core=$START_CORE with_gateway=$START_GATEWAY with_auth=$START_AUTH with_observability=$START_OBSERVABILITY"
-info "$my_name" "start-containers: with_edge=$START_EDGE with_spark=$START_SPARK with_engine=$START_ENGINE with_workers=$START_WORKERS with_airflow=$START_AIRFLOW with_profiling=$START_PROFILING"
+info "$my_name" "start-containers: with_edge=$START_EDGE with_spark=$START_SPARK with_engine=$START_ENGINE with_workers=$START_WORKERS with_trino=$START_TRINO with_airflow=$START_AIRFLOW with_profiling=$START_PROFILING"
 info "$my_name" "start-containers: with_metadata=$START_METADATA with_metadata_ingestion=$START_METADATA_INGESTION with_llm=$START_LLM"
 info "$my_name" "start-containers: with_support=$START_SUPPORT"
 info "$my_name" "start-containers: seed_postgres=$SEED_POSTGRES seed_keycloak=$SEED_KEYCLOAK seed_zammad=$SEED_ZAMMAD seed_deliveries=$SEED_DELIVERIES purge_bucket=$PURGE_BUCKET wipe_aistor=$WIPE_AISTOR seed_all=$SEED_ALL"
@@ -956,6 +961,7 @@ if [ "$START_ALL" = false ]; then
   if [ "$START_SPARK" = true ]; then STACK_ARGS+=(--with-spark); fi
   if [ "$START_ENGINE" = true ]; then STACK_ARGS+=(--with-engine); fi
   if [ "$START_WORKERS" = true ]; then STACK_ARGS+=(--with-workers); fi
+  if [ "$START_TRINO" = true ]; then STACK_ARGS+=(--with-trino); fi
   if [ "$START_AIRFLOW" = true ]; then STACK_ARGS+=(--with-airflow); fi
   if [ "$START_PROFILING" = true ]; then STACK_ARGS+=(--with-profiling); fi
   if [ "$START_METADATA" = true ]; then STACK_ARGS+=(--with-metadata); fi

@@ -1,0 +1,5 @@
+ARG TRINO_BASE_IMAGE=trinodb/trino:477
+FROM ${TRINO_BASE_IMAGE}
+
+LABEL version="0.1.0"
+LABEL description="Data Quality Made Easy Trino coordinator service"
