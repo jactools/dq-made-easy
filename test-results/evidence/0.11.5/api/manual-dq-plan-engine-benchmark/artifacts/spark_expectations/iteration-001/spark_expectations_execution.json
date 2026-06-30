@@ -1,0 +1,61 @@
+{
+  "engine_type": "spark_expectations",
+  "error_management": {
+    "chunk_count": 1,
+    "overflowed": false,
+    "sampled_error_rows": [
+      {
+        "customer_id": null,
+        "email": "customer0@example.test",
+        "status": "active"
+      },
+      {
+        "customer_id": null,
+        "email": "customer1@example.test",
+        "status": "active"
+      }
+    ],
+    "storage_strategy": "chunked",
+    "total_error_count": 2
+  },
+  "execution_metadata": {
+    "completed_at": "2026-06-30T17:26:36.079532+00:00",
+    "duration_ms": 8698.785,
+    "engine_type": "spark_expectations",
+    "guardrails": {
+      "exceeded": false,
+      "max_error_rows": null,
+      "max_rows": 11
+    },
+    "rule_id": "benchmark-cross-engine-not-null-rule",
+    "runtime": "pyspark",
+    "source_row_count": 10,
+    "spark_app_name": "dq-engine-spark-expectations",
+    "started_at": "2026-06-30T17:26:27.380755+00:00"
+  },
+  "failed_count": 2,
+  "metrics": {
+    "duration_ms": 8698.785,
+    "engine_type": "spark_expectations",
+    "failed_count": 2,
+    "passed_count": 8,
+    "result": "failed",
+    "rule_family": "row",
+    "storage_kind": null,
+    "storage_uri": null
+  },
+  "observability_summary": {
+    "duration_ms": 8698.785,
+    "engine_type": "spark_expectations",
+    "failed_count": 2,
+    "passed_count": 8,
+    "result": "failed",
+    "rule_family": "row",
+    "storage_kind": null,
+    "storage_uri": null
+  },
+  "ok": true,
+  "passed_count": 8,
+  "result": "failed",
+  "rule_id": "benchmark-cross-engine-not-null-rule"
+}
