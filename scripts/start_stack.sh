@@ -10,7 +10,7 @@ set -euo pipefail
 # - Starts the selected docker compose services.
 # - Can optionally include observability components.
 #
-# Version: 1.11
+# Version: 1.12
 # Last modified: 2026-06-30
 # Changelog:
 # - 1.2 (2026-04-22): Reworked stale container cleanup to avoid GNU-only `xargs -r`.
@@ -23,11 +23,13 @@ set -euo pipefail
 # - 1.9 (2026-05-30): Added explicit --with-airflow support for the Airflow compose profile.
 # - 1.10 (2026-06-02): Added explicit --with-spark support for the distributed Spark cluster profile.
 # - 1.11 (2026-06-30): Added Trino to --all startup and explicit --with-trino support.
+# - 1.12 (2026-06-30): Mint the Prometheus bearer token file from seeded Keycloak credentials before observability startup.
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 my_name="start_stack.sh"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
+source "$ROOT_DIR/scripts/supporting/auth.sh"
 source "$ROOT_DIR/scripts/supporting/env/selection.sh"
 source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
 init_root_env_file "$ROOT_DIR"
@@ -85,6 +87,37 @@ if [ "$START_CORE" = "true" ] || [ "$START_METADATA" = "true" ]; then
   export CATALOG_OIDC_USERNAME="$SMOKE_LOGIN_EMAIL"
   export CATALOG_OIDC_PASSWORD="$SMOKE_LOGIN_PASSWORD"
 fi
+
+write_prometheus_bearer_token_file() {
+  if [ "$START_OBSERVABILITY" != "true" ]; then
+    return 0
+  fi
+
+  local token_url="${SSO_PUBLIC_ISSUER_URL%/}/protocol/openid-connect/token"
+  if [ -z "${SSO_PUBLIC_ISSUER_URL:-}" ]; then
+    token_url="${DQ_ENGINE_OIDC_TOKEN_URL:-${DQ_ENGINE_OIDC_ISSUER%/}/protocol/openid-connect/token}"
+  fi
+  local client_id="${DQ_ENGINE_OIDC_CLIENT_ID:-}"
+  local client_secret="${DQ_ENGINE_OIDC_CLIENT_SECRET:-}"
+  local token_file="$ROOT_DIR/observability/prometheus/tmp/prometheus_bearer_token.txt"
+  local token
+
+  if [ -z "$client_id" ] || [ -z "$client_secret" ]; then
+    error "$my_name" "DQ_ENGINE_OIDC_CLIENT_ID and DQ_ENGINE_OIDC_CLIENT_SECRET are required to prepare the Prometheus bearer token"
+    return 1
+  fi
+
+  mkdir -p "$(dirname "$token_file")"
+  if [ -d "$token_file" ]; then
+    rm -rf "$token_file"
+  fi
+
+  token="$(CURL_CA_BUNDLE= SSL_CERT_FILE= REQUESTS_CA_BUNDLE= dq_keycloak_client_credentials_access_token "$token_url" "$client_id" "$client_secret")" || return 1
+  printf '%s' "$token" > "$token_file"
+  chmod 0644 "$token_file"
+
+  info "$my_name" "Prepared Prometheus bearer token file at $token_file"
+}
 
 STARTUP_BLOCKS=(base redis spark core gateway auth edge engine workers trino airflow profiling metadata metadata_ingestion llm support observability)
 for startup_block in "${STARTUP_BLOCKS[@]}"; do
@@ -208,6 +241,10 @@ fi
 
 if [ "$START_WORKERS" = "true" ] && [ "$START_GATEWAY" != "true" ]; then
   START_GATEWAY=true
+fi
+
+if ! write_prometheus_bearer_token_file; then
+  exit 1
 fi
 
 ensure_edge_cert_assets() {

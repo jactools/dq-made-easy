@@ -1393,7 +1393,7 @@ services:
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml
-      - ./observability/prometheus/tmp/bearer_token:/etc/prometheus/bearer_token:ro
+      - ./observability/prometheus/tmp/prometheus_bearer_token.txt:/etc/prometheus/bearer_token:ro
       - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
