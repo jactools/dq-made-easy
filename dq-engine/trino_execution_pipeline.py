@@ -1,255 +1,287 @@
-"""
-Trino Execution Pipeline Module
-
-Orchestrates the full Trino execution pipeline.
-"""
+"""Trino execution pipeline for rule execution and artifact persistence."""
 
 from __future__ import annotations
 
 import json
 import logging
-import os
+import time
+from datetime import datetime
+from datetime import timezone
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
-from trino_adapter import (
-    lower_aggregate_rule_to_trino,
-    lower_query_rule_to_trino,
-    lower_row_rule_to_trino,
-    validate_trino_compatibility,
-)
-from trino_executor import TrinoExecutionError, TrinoExecutor
+from execution_contract import build_execution_metadata
+from execution_contract import build_observability_summary
+from execution_contract import persist_execution_payload
+from trino_adapter import AGGREGATE_RULE_TYPES
+from trino_adapter import QUERY_RULE_TYPES
+from trino_adapter import ROW_RULE_TYPES
+from trino_adapter import lower_aggregate_rule_to_trino
+from trino_adapter import lower_query_rule_to_trino
+from trino_adapter import lower_row_rule_to_trino
+from trino_adapter import validate_trino_compatibility
+from trino_executor import TrinoExecutionError
+from trino_executor import TrinoQueryResult
+from trino_executor import TrinoExecutor
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass
 class ExecutionPlan:
-    """
-    Represents an execution plan for a Trino rule.
-    """
-    
-    def __init__(
-        self,
-        rule: dict[str, Any],
-        executor: TrinoExecutor,
-        config: dict[str, Any] | None = None,
-    ):
-        """
-        Create an execution plan.
-        
-        Args:
-            rule: The rule to execute
-            executor: TrinoExecutor instance
-            config: Optional Trino config
-        """
-        self.rule = rule
-        self.executor = executor
-        self.config = config or {}
+    rule: dict[str, Any]
+    executor: Any
+    config: dict[str, Any] = field(default_factory=dict)
+    plan: dict[str, Any] = field(init=False)
+
+    def __post_init__(self) -> None:
         self.plan = self._build_plan()
-    
+
     def _build_plan(self) -> dict[str, Any]:
-        """
-        Build the execution plan for the rule.
-        
-        Returns:
-            Execution plan dictionary
-        """
-        rule_type = self.rule.get("type") or ""
-        
-        # Validate compatibility
+        rule_type = str(self.rule.get("type") or "").strip().lower()
         unsupported = validate_trino_compatibility(self.rule)
         if unsupported:
             raise ValueError(f"Trino compatibility issues: {unsupported}")
-        
-        # Lower the rule to Trino SQL
-        if rule_type == "query":
+
+        if rule_type in QUERY_RULE_TYPES:
             lowered = lower_query_rule_to_trino(self.rule)
-        elif rule_type in ("row_dq", "aggregate_dq"):
-            if rule_type == "aggregate_dq":
-                lowered = lower_aggregate_rule_to_trino(self.rule)
-            else:
-                lowered = lower_row_rule_to_trino(self.rule)
+        elif rule_type in ROW_RULE_TYPES:
+            lowered = lower_row_rule_to_trino(self.rule)
+        elif rule_type in AGGREGATE_RULE_TYPES:
+            lowered = lower_aggregate_rule_to_trino(self.rule)
         else:
             raise ValueError(f"Unsupported rule type: {rule_type}")
-        
+
         return {
             "rule_id": self.rule.get("id"),
             "rule_type": rule_type,
+            "params": dict(self.rule.get("params") or {}),
             "lowered_rule": lowered,
             "query": lowered["query"],
             "expectation": lowered["expectation"],
         }
-    
+
     def execute(self) -> dict[str, Any]:
-        """
-        Execute the plan and return results.
-        
-        Returns:
-            Execution result dictionary
-        """
         plan = self.plan
         rule_type = plan["rule_type"]
-        
-        # Execute the query
+        started_at = time.perf_counter()
+        started_at_iso = datetime.now(timezone.utc).isoformat()
+        result_rows: Any = []
+
         try:
-            result_df = self.executor.execute_query(
-                self.executor,
-                plan["query"],
-                timeout=self.config.get("timeout_ms", 30000),
+            client = self.executor.create_connection()
+            timeout_ms = int(self.config.get("timeout_ms", 30000))
+            result_rows = self.executor.execute_query(client, plan["query"], timeout=timeout_ms)
+            validation = self._validate_result(result_rows, plan)
+            row_summary = _summarize_result_rows(result_rows)
+            metrics = self.executor.collect_query_metrics(plan["query"], started_at, row_summary["result_row_count"])
+            completed_at_iso = datetime.now(timezone.utc).isoformat()
+            passed_count = int(bool(validation.get("passed")))
+            failed_count = int(not bool(validation.get("passed")))
+            execution_metadata = build_execution_metadata(
+                rule_id=plan["rule_id"],
+                engine_type="trino",
+                runtime="trino",
+                started_at=started_at_iso,
+                completed_at=completed_at_iso,
+                duration_ms=float(metrics.get("duration_ms", 0)),
+                source_row_count=int(row_summary["result_row_count"]),
+                execution_name="dq-engine-trino",
+                guardrails={"sample_limit": int(getattr(self.executor, "config", {}).get("max_result_sample_size", 1000))},
             )
-            
-            # Validate the result
-            validation = self._validate_result(result_df, plan)
-            
+            observability_summary = build_observability_summary(
+                engine_type="trino",
+                result="passed" if passed_count else "failed",
+                passed_count=passed_count,
+                failed_count=failed_count,
+                rule_family=rule_type,
+                duration_ms=float(metrics.get("duration_ms", 0)),
+                storage_kind=None,
+                storage_uri=None,
+            )
             return {
                 "ok": True,
+                "engine_type": "trino",
                 "rule_id": plan["rule_id"],
                 "rule_type": rule_type,
+                "result_status": "passed" if passed_count else "failed",
+                "passed_count": passed_count,
+                "failed_count": failed_count,
                 "result": validation,
-                "metrics": self._collect_metrics(result_df, plan),
+                "metrics": metrics,
+                "execution_metadata": execution_metadata,
+                "quarantine_artifact": {},
+                "error_management": {},
+                "observability_summary": observability_summary,
+                **row_summary,
+                "lowered_rule": plan["lowered_rule"],
+                "compiled_artifact": {
+                    "engine_type": "trino",
+                    "engine_target": "trino_sql",
+                    "rule": plan["lowered_rule"],
+                    "error_management": {},
+                },
             }
-            
-        except TrinoExecutionError as e:
+        except TrinoExecutionError as exc:
+            metrics = self.executor.collect_query_metrics(plan["query"], started_at, len(result_rows))
+            completed_at_iso = datetime.now(timezone.utc).isoformat()
+            execution_metadata = build_execution_metadata(
+                rule_id=plan["rule_id"],
+                engine_type="trino",
+                runtime="trino",
+                started_at=started_at_iso,
+                completed_at=completed_at_iso,
+                duration_ms=float(metrics.get("duration_ms", 0)),
+                source_row_count=int(len(result_rows)),
+                execution_name="dq-engine-trino",
+                guardrails={"sample_limit": int(getattr(self.executor, "config", {}).get("max_result_sample_size", 1000))},
+            )
+            observability_summary = build_observability_summary(
+                engine_type="trino",
+                result="failed",
+                passed_count=0,
+                failed_count=1,
+                rule_family=rule_type,
+                duration_ms=float(metrics.get("duration_ms", 0)),
+                storage_kind=None,
+                storage_uri=None,
+            )
             return {
                 "ok": False,
+                "engine_type": "trino",
                 "rule_id": plan["rule_id"],
                 "rule_type": rule_type,
+                "result_status": "failed",
+                "passed_count": 0,
+                "failed_count": 1,
                 "result": {
                     "passed": False,
-                    "error": str(e),
-                    "error_code": e.error_code,
-                    "query_id": e.query_id,
+                    "error": str(exc),
+                    "error_code": exc.error_code,
+                    "query_id": exc.query_id,
                 },
-                "metrics": self._collect_metrics(result_df, plan),
+                "metrics": metrics,
+                "execution_metadata": execution_metadata,
+                "quarantine_artifact": {},
+                "error_management": {},
+                "observability_summary": observability_summary,
+                **_summarize_result_rows(result_rows),
+                "lowered_rule": plan["lowered_rule"],
             }
-    
-    def _validate_result(
-        self,
-        result_df: pd.DataFrame,
-        plan: dict[str, Any],
-    ) -> dict[str, Any]:
-        """
-        Validate query result against expectation.
-        
-        Args:
-            result_df: Query result DataFrame
-            plan: Execution plan
-            
-        Returns:
-            Validation result
-        """
+
+    def _validate_result(self, result_rows: Any, plan: dict[str, Any]) -> dict[str, Any]:
         rule_type = plan["rule_type"]
-        lowered_rule = plan["lowered_rule"]
-        
-        if rule_type == "query_dq":
-            # For query DQ, we check the result count
-            expected_count = None
-            if "expected_count" in lowered_rule.get("params", {}):
-                expected_count = lowered_rule["params"]["expected_count"]
-            
-            validation = self.executor.validate_query_result(
-                result_df,
-                {"expected_count": expected_count},
+        params = plan["params"]
+
+        def _treat_as_scalar_result(rows: Any) -> bool:
+            query_text = str(plan.get("query") or "").lower()
+            aggregate_markers = ("count(", "sum(", "avg(", "min(", "max(", "stddev(", "distinct(")
+            query_looks_scalar = any(marker in query_text for marker in aggregate_markers)
+            if not query_looks_scalar:
+                return False
+
+            if isinstance(rows, TrinoQueryResult):
+                return rows.row_count == 1 and len(rows.sample_rows) == 1
+
+            sample_rows = list(rows or [])
+            if len(sample_rows) != 1:
+                return False
+
+            first_row = sample_rows[0]
+            if isinstance(first_row, dict):
+                return len(first_row) == 1
+            if isinstance(first_row, (list, tuple)):
+                return len(first_row) == 1
+            return True
+
+        if rule_type == "query":
+            expected_count = params.get("expected_count")
+            if expected_count is None:
+                raise ValueError("query DQ rule requires expected_count")
+            validation_options = {
+                "expected_count": expected_count,
+                "treat_first_cell_as_count": _treat_as_scalar_result(result_rows),
+            }
+            return self.executor.validate_query_result(
+                result_rows,
+                validation_options,
             )
-            return validation
-            
-        elif rule_type == "aggregate_dq":
-            # For aggregate DQ, we check the aggregated value
-            expectation = lowered_rule["expectation"]
-            
-            # Extract the expected value from the expectation
-            if "==" in expectation:
-                expected_value_str = expectation.split("==")[1].strip()
-                expected_value = float(expected_value_str) if "." in expected_value_str else int(expected_value_str)
-                
-                validation = self.executor.validate_query_result(
-                    result_df,
-                    {"expected_count": expected_value},
-                )
-                return validation
-                
+
+        if rule_type in {"count", "sum", "avg", "min", "max", "distinct_count"}:
+            expected_value = params.get("expected_value", params.get("expected_count"))
+            if expected_value is None:
+                raise ValueError(f"aggregate DQ rule '{plan['rule_id']}' requires an expected value")
+            validation_options = {
+                "expected_count": expected_value,
+                "treat_first_cell_as_count": _treat_as_scalar_result(result_rows),
+            }
+            return self.executor.validate_query_result(
+                result_rows,
+                validation_options,
+            )
+
+        return self.executor.validate_query_result(result_rows, {"expected_count": len(result_rows)})
+
+
+def _summarize_result_rows(result_rows: Any) -> dict[str, Any]:
+    if isinstance(result_rows, TrinoQueryResult):
         return {
-            "passed": True,
-            "actual_count": len(result_df),
-            "details": {},
+            "result_row_count": result_rows.row_count,
+            "result_rows_sample": list(result_rows.sample_rows),
+            "result_rows_truncated": result_rows.truncated,
         }
-    
-    def _collect_metrics(
-        self,
-        result_df: pd.DataFrame,
-        plan: dict[str, Any],
-    ) -> dict[str, Any]:
-        """
-        Collect execution metrics.
-        
-        Args:
-            result_df: Query result DataFrame
-            plan: Execution plan
-            
-        Returns:
-            Metrics dictionary
-        """
-        return self.executor.collect_query_metrics(
-            plan["query"],
-            time.time(),
-            len(result_df),
-        )
+
+    sample_rows = list(result_rows or [])
+    return {
+        "result_row_count": len(sample_rows),
+        "result_rows_sample": sample_rows,
+        "result_rows_truncated": False,
+    }
 
 
-class ExecutionResult:
-    """
-    Represents the result of a Trino execution pipeline.
-    """
-    
-    def __init__(self, result: dict[str, Any], output_dir: str | None = None):
-        """
-        Create an execution result.
-        
-        Args:
-            result: The execution result dictionary
-            output_dir: Directory to persist artifacts
-        """
-        self.result = result
-        self.output_dir = output_dir
-        self.artifacts = self._persist_artifacts(result, output_dir)
-    
-    def _persist_artifacts(
-        self,
-        result: dict[str, Any],
-        output_dir: str | None,
-    ) -> list[str]:
-        """
-        Persist execution artifacts to disk.
-        
-        Args:
-            result: The execution result
-            output_dir: Output directory
-            
-        Returns:
-            List of artifact file paths
-        """
-        artifacts = []
-        
-        if output_dir and self.result.get("ok"):
-            try:
-                os.makedirs(output_dir, exist_ok=True)
-                
-                # Persist rule definition
-                rule_id = self.result.get("rule_id")
-                if rule_id:
-                    artifact_path = os.path.join(output_dir, f"{rule_id}_rule.json")
-                    with open(artifact_path, "w") as f:
-                        json.dump(self.result, f, indent=2)
-                    artifacts.append(artifact_path)
-                
-                # Persist query SQL
-                query = self.result.get("lowered_rule", {}).get("query")
-                if query:
-                    artifact_path = os.path.join(output_dir, f"{rule_id}_query.sql")
-                    with open(artifact_path, "w") as f:
-                        f.write(query)
-                    artifacts.append(artifact_path)
-                
-            except Exception as e:
-                logger.warning(f"Failed to persist artifacts: {e}")
-        
-        return artifacts
+def create_trino_execution_plan(
+    rule: dict[str, Any],
+    *,
+    config: dict[str, Any] | None = None,
+    executor: Any | None = None,
+) -> ExecutionPlan:
+    return ExecutionPlan(rule, executor or TrinoExecutor(config=config), config=config or {})
+
+
+def execute_trino_pipeline(plan: ExecutionPlan, *, output_dir: str | None = None) -> dict[str, Any]:
+    result = plan.execute()
+    if output_dir:
+        persist_trino_artifacts(result, output_dir)
+    return result
+
+
+def persist_trino_artifacts(result: dict[str, Any], output_dir: str) -> list[str]:
+    artifact_paths = persist_execution_payload(output_dir, result, artifact_prefix="trino")
+
+    output_path = Path(output_dir)
+
+    rows_path = output_path / "trino_results.json"
+    rows_payload = {
+        "engine_type": result.get("engine_type", "trino"),
+        "rule_id": result.get("rule_id"),
+        "rule_type": result.get("rule_type"),
+        "ok": result.get("ok"),
+        "result": result.get("result", {}),
+        "metrics": result.get("metrics", {}),
+        "result_row_count": result.get("result_row_count", 0),
+        "result_rows_truncated": result.get("result_rows_truncated", False),
+        "result_rows_sample": result.get("result_rows_sample", []),
+        "query": (result.get("lowered_rule") or {}).get("query"),
+    }
+    rows_path.write_text(json.dumps(rows_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    artifact_paths.append(str(rows_path))
+
+    lowered_rule = result.get("lowered_rule") or {}
+    query = lowered_rule.get("query")
+    if query:
+        query_path = output_path / "trino_query.sql"
+        query_path.write_text(f"{query}\n", encoding="utf-8")
+        artifact_paths.append(str(query_path))
+
+    return artifact_paths

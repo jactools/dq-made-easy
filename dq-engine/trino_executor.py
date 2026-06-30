@@ -8,15 +8,41 @@ from __future__ import annotations
 
 import logging
 import time
+from dataclasses import dataclass
 from typing import Any
 
-import pandas as pd
+from trino.dbapi import Connection
+from trino.dbapi import connect
+from trino.exceptions import OperationalError
+from trino.exceptions import TrinoQueryError
+from trino.exceptions import TrinoUserError
 
-from trino import TrinoClient, TrinoConnectionException
-from trino.exceptions import TrinoUserError, TrinoQueryException
 from trino_config import load_trino_config
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TrinoQueryResult:
+    rows: list[Any]
+    row_count: int
+    truncated: bool = False
+
+    def __len__(self) -> int:
+        return self.row_count
+
+    def __bool__(self) -> bool:
+        return self.row_count > 0
+
+    def __getitem__(self, index: int) -> Any:
+        return self.rows[index]
+
+    def __iter__(self) -> Any:
+        return iter(self.rows)
+
+    @property
+    def sample_rows(self) -> list[Any]:
+        return list(self.rows)
 
 
 class TrinoExecutionError(Exception):
@@ -44,15 +70,15 @@ class TrinoExecutor:
             config = load_trino_config()
         self.config = config
     
-    def create_connection(self) -> TrinoClient:
+    def create_connection(self) -> Connection:
         """
         Create and configure a Trino connection.
         
         Returns:
-            Configured TrinoClient
+            Configured Trino DBAPI connection
         """
         config = self.config
-        return TrinoClient(
+        return connect(
             host=config["host"],
             port=config["http_port"],
             user=config["user"],
@@ -68,12 +94,12 @@ class TrinoExecutor:
     
     def execute_query(
         self,
-        client: TrinoClient,
+        client: Connection,
         query: str,
         timeout: int | None = None,
-    ) -> pd.DataFrame:
+    ) -> TrinoQueryResult:
         """
-        Execute a Trino query and return results as DataFrame.
+        Execute a Trino query and return results as a list of rows.
         
         Args:
             client: Trino client to use
@@ -81,23 +107,39 @@ class TrinoExecutor:
             timeout: Query timeout in milliseconds
             
         Returns:
-            pandas DataFrame with query results
+            TrinoQueryResult containing a bounded sample of rows and the full row count
             
         Raises:
             TrinoExecutionError: If query execution fails
         """
         start_time = time.time()
+        fetch_batch_size = max(int(self.config.get("max_row_fetch_size", 10000)), 1)
+        sample_limit = max(int(self.config.get("max_result_sample_size", 1000)), 0)
+        sampled_rows: list[Any] = []
+        row_count = 0
+        truncated = False
         
         try:
-            # Execute with timeout
-            with client.query(query, max_row_fetch_size=self.config.get("max_row_fetch_size", 10000)) as query_result:
-                # Handle streaming results for large queries
-                rows = list(query_result.iterrows(timeout=timeout or 60))
-                
-                duration_ms = int((time.time() - start_time) * 1000)
-                logger.debug(f"Query executed in {duration_ms}ms, returned {len(rows)} rows")
-                
-                return pd.DataFrame(rows)
+            cursor = client.cursor()
+            cursor.execute(query)
+            while True:
+                batch = cursor.fetchmany(fetch_batch_size)
+                if not batch:
+                    break
+
+                row_count += len(batch)
+                if len(sampled_rows) < sample_limit:
+                    remaining_slots = sample_limit - len(sampled_rows)
+                    sampled_rows.extend(batch[:remaining_slots])
+                    if len(batch) > remaining_slots:
+                        truncated = True
+                else:
+                    truncated = True
+
+            duration_ms = int((time.time() - start_time) * 1000)
+            logger.debug(f"Query executed in {duration_ms}ms, returned {row_count} rows")
+
+            return TrinoQueryResult(rows=sampled_rows, row_count=row_count, truncated=truncated)
                 
         except TrinoUserError as e:
             raise TrinoExecutionError(
@@ -105,13 +147,13 @@ class TrinoExecutor:
                 query_id=None,
                 error_code="DQ_TRINO_QUERY_ERROR"
             )
-        except TrinoQueryException as e:
+        except TrinoQueryError as e:
             raise TrinoExecutionError(
                 f"Trino query exception: {e}",
                 query_id=None,
                 error_code="DQ_TRINO_QUERY_ERROR"
             )
-        except TrinoConnectionException as e:
+        except OperationalError as e:
             raise TrinoExecutionError(
                 f"Trino connection error: {e}",
                 query_id=None,
@@ -126,14 +168,14 @@ class TrinoExecutor:
     
     def validate_query_result(
         self,
-        result: pd.DataFrame,
+        result: Any,
         expected: dict[str, Any],
     ) -> dict[str, Any]:
         """
         Validate query results against expected values.
         
         Args:
-            result: Query result DataFrame
+            result: Query result rows or TrinoQueryResult wrapper
             expected: Dictionary with expected values
             
         Returns:
@@ -146,10 +188,28 @@ class TrinoExecutor:
             "failed_rows": [],
             "details": {},
         }
+
+        def _first_cell(rows: list[Any]) -> Any:
+            if not rows:
+                return None
+            first_row = rows[0]
+            if isinstance(first_row, dict):
+                return next(iter(first_row.values()), None)
+            if isinstance(first_row, (list, tuple)):
+                return first_row[0] if first_row else None
+            return first_row
         
         # Check count
         if expected.get("expected_count") is not None:
-            if len(result) != expected["expected_count"]:
+            if expected.get("treat_first_cell_as_count"):
+                actual_value = _first_cell(result)
+                validation_result["actual_count"] = actual_value
+                if actual_value != expected["expected_count"]:
+                    validation_result["passed"] = False
+                    validation_result["details"]["count_mismatch"] = True
+                    validation_result["details"]["actual_count"] = actual_value
+                    validation_result["details"]["expected_count"] = expected["expected_count"]
+            elif len(result) != expected["expected_count"]:
                 validation_result["passed"] = False
                 validation_result["details"]["count_mismatch"] = True
                 validation_result["details"]["actual_count"] = len(result)

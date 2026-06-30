@@ -202,5 +202,6 @@ def lower_query_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
         "rule_type": "query_dq",
         "expectation": "query result count == expected_count",
         "action_if_failed": "quarantine",
+        "params": params,
         "query": query_text,
     }

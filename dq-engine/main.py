@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from dq_utils.logging_utils import configure_logging
 from runtime_lowerers import build_failure_envelope
 from runtime_lowerers import build_compiled_artifact_for_engine
+from execution_contract import persist_execution_payload
 from spark_expectations_adapter import execute_spark_expectations_rule
 from spark_expectations_metrics import render_prometheus_metrics
 
@@ -83,27 +84,7 @@ def _extract_failure_code(exc: Exception) -> str:
 
 
 def _persist_execute_payload(target_dir: Path, payload: dict[str, Any]) -> None:
-    target_dir.mkdir(parents=True, exist_ok=True)
-    output_path = target_dir / "spark_expectations_execution.json"
-    errors_path = target_dir / "spark_expectations_errors.json"
-
-    output_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
-    errors_payload = {
-        "engine_type": payload.get("engine_type", "spark_expectations"),
-        "rule_id": payload.get("rule_id"),
-        "error_count": payload.get("failed_count", 0),
-        "storage_strategy": (payload.get("error_management") or {}).get("storage_strategy", "chunked"),
-        "sampled_error_rows": (payload.get("error_management") or {}).get("sampled_error_rows", []),
-        "execution_metadata": payload.get("execution_metadata", {}),
-        "quarantine_artifact": payload.get("quarantine_artifact", {}),
-        "observability_summary": payload.get("observability_summary", {}),
-        "failure_code": payload.get("failure_code"),
-        "failure_message": payload.get("failure_message"),
-        "failed_check": payload.get("failed_check", {}),
-        "failure_metrics": payload.get("failure_metrics", {}),
-        "trace": payload.get("trace", {}),
-    }
-    errors_path.write_text(json.dumps(errors_payload, indent=2, sort_keys=True), encoding="utf-8")
+    persist_execution_payload(target_dir, payload, artifact_prefix="spark_expectations")
 
 
 @app.get("/health")

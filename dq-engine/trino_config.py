@@ -18,6 +18,7 @@ DEFAULT_TRINO_CONFIG: dict[str, Any] = {
     "timeout_ms": 30000,
     "memory_per_task": "1GB",
     "max_row_fetch_size": 10000,
+    "max_result_sample_size": 1000,
     "max_row_fetch_size_per_query": 10000,
 }
 
@@ -30,6 +31,7 @@ TRINO_CONFIG_KEYS: dict[str, str] = {
     "DQ_TRINO_TIMEOUT": "timeout_ms",
     "DQ_TRINO_MEMORY": "memory_per_task",
     "DQ_TRINO_MAX_ROW_FETCH_SIZE": "max_row_fetch_size",
+    "DQ_TRINO_MAX_RESULT_SAMPLE_SIZE": "max_result_sample_size",
 }
 
 

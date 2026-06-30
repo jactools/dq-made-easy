@@ -517,7 +517,8 @@ trino:
     - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
 - [x] Basic aggregate rules (count, sum, avg, min, max) generate valid Trino SQL
     - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
-- [ ] Query DQ rules execute correctly
+- [x] Query DQ rules execute correctly and results are persisted
+    - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
 - [ ] Connection management works reliably
 - [ ] Error handling produces meaningful messages
 - [ ] All tests pass (≥90% coverage)
