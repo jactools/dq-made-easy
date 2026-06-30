@@ -14,7 +14,7 @@ import {
   IconSquareArrowRightFilled,
   IconUsers,
   IconX,
-} from '@tabler/icons-react'
+} from '@tabler/icons-react/dist/cjs/tabler-icons-react.cjs'
 import type { AppIconName } from './appIconRegistry'
 
 type ProviderIconComponent = React.ComponentType<React.SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number }>

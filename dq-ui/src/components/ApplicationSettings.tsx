@@ -388,7 +388,6 @@ export const buildAppConfigPayload = (
     exceptionAnalyticsProjectionRetentionDays: applicationData.exceptionAnalyticsProjectionRetentionDays,
     exceptionFactPurgeBatchSize: applicationData.exceptionFactPurgeBatchSize,
     exceptionFactJitRequestTimeoutMinutes: applicationData.exceptionFactJitRequestTimeoutMinutes,
-    sessionTimeoutWarningMinutes: applicationData.sessionTimeoutWarningMinutes,
     siemEnabled:
       typeof applicationData.siemEnabled === 'boolean'
         ? applicationData.siemEnabled

@@ -57,6 +57,9 @@ def test_is_jwt_payload_valid_and_sso_checks(monkeypatch):
     settings = Settings(sso_enabled=True, sso_issuer="https://iss", sso_client_id="client-1", sso_allowed_client_ids="")
     assert auth.is_jwt_payload_valid(good, settings)
 
+    internal_issuer = {"exp": now + 100, "nbf": now - 10, "iss": "http://iss:8080", "aud": "client-1"}
+    assert auth.is_jwt_payload_valid(internal_issuer, settings)
+
     expired = {"exp": now - 1}
     assert not auth.is_jwt_payload_valid(expired, settings)
 

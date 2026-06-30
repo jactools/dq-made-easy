@@ -179,7 +179,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(dq_api_request_count_total[5m]))",
+          "expr": "sum(increase(dq_api_requests_total[5m]))",
           "refId": "A"
         }
       ],
@@ -237,11 +237,11 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(dq_api_auth_failures_total[5m])))",
+          "expr": "round(sum(increase(dq_api_requests_errors_total[5m])) or vector(0))",
           "refId": "A"
         }
       ],
-      "title": "Auth Failures (last 5m)",
+      "title": "API Errors (last 5m)",
       "type": "stat"
     },
     {
@@ -295,7 +295,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(dq_api_request_count_total{status=\"error\"}[5m])) / clamp_min(sum(rate(dq_api_request_count_total[5m])), 0.001)",
+          "expr": "sum(rate(dq_api_requests_errors_total[5m])) / clamp_min(sum(rate(dq_api_requests_total[5m])), 0.001)",
           "refId": "A"
         }
       ],
@@ -353,11 +353,11 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(dq_api_operation_latency_ms_milliseconds_bucket[5m])))",
+          "expr": "dq_api_requests_p95_duration_ms",
           "refId": "A"
         }
       ],
-      "title": "Latency p95 (ms)",
+      "title": "API p95 Duration (ms)",
       "type": "stat"
     },
     {
@@ -404,12 +404,12 @@
       },
       "targets": [
         {
-          "expr": "sum by (endpoint_group, api_version) (rate(dq_api_request_count_total{api_version=~\"v[0-9]+\"}[5m]))",
-          "legendFormat": "{{endpoint_group}} / {{api_version}}",
+          "expr": "sum(rate(dq_api_requests_total[5m]))",
+          "legendFormat": "Total",
           "refId": "A"
         }
       ],
-      "title": "Request Rate by Endpoint Group and API Version",
+      "title": "API Request Rate (5m)",
       "type": "timeseries"
     },
     {
@@ -457,12 +457,12 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, endpoint_group, api_version) (rate(dq_api_operation_latency_ms_milliseconds_bucket{api_version=~\"v[0-9]+\"}[5m])))",
-          "legendFormat": "{{endpoint_group}} / {{api_version}}",
+          "expr": "dq_api_requests_p95_duration_ms",
+          "legendFormat": "p95 duration",
           "refId": "A"
         }
       ],
-      "title": "Latency p95 by Endpoint Group and API Version",
+      "title": "API p95 Duration (ms)",
       "type": "timeseries"
     },
     {
@@ -500,13 +500,13 @@
       },
       "targets": [
         {
-          "expr": "topk(10, sum by (endpoint_group, reason) (increase(dq_api_auth_failures_total[15m])))",
+          "expr": "sum(increase(dq_api_requests_errors_total[15m]))",
           "format": "table",
           "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Top Auth Failure Reasons (15m)",
+      "title": "API Errors (15m)",
       "type": "table"
     },
     {
@@ -899,7 +899,7 @@
       },
       "targets": [
         {
-          "expr": "sum(dq_api_request_count_total)",
+          "expr": "sum(dq_api_requests_total)",
           "refId": "A",
           "instant": true,
           "format": "table"
@@ -959,7 +959,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(dq_api_request_count_total{status=\"error\"}[5m])) / clamp_min(sum(rate(dq_api_request_count_total[5m])), 0.001)",
+          "expr": "sum(rate(dq_api_requests_errors_total[5m])) / clamp_min(sum(rate(dq_api_requests_total[5m])), 0.001)",
           "refId": "A",
           "instant": true,
           "format": "table"
@@ -1019,7 +1019,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(dq_api_operation_latency_ms_milliseconds_bucket[5m])))",
+          "expr": "dq_api_requests_p95_duration_ms",
           "refId": "A",
           "instant": true,
           "format": "table"
@@ -1063,14 +1063,14 @@
       },
       "targets": [
         {
-          "expr": "topk(10, sum by (endpoint_group, api_version) (rate(dq_api_request_count_total{api_version=~\"v[0-9]+\"}[5m])))",
+          "expr": "sum(rate(dq_api_requests_total[5m]))",
           "format": "table",
           "instant": true,
           "refId": "A",
-          "legendFormat": "{{endpoint_group}} {{api_version}}"
+          "legendFormat": "Total"
         }
       ],
-      "title": "Top API Endpoints (aggregated)",
+      "title": "API Request Rate (aggregated)",
       "type": "table"
     },
     {
@@ -1108,14 +1108,14 @@
       },
       "targets": [
         {
-          "expr": "topk(10, sum by (endpoint_group, api_version) (increase(dq_api_request_count_total{status=\"error\"}[15m])))",
+          "expr": "sum(increase(dq_api_requests_errors_total[15m]))",
           "format": "table",
           "instant": true,
           "refId": "A",
-          "legendFormat": "{{endpoint_group}} {{api_version}}"
+          "legendFormat": "Total"
         }
       ],
-      "title": "Top Erroring Endpoints (15m)",
+      "title": "API Errors (15m)",
       "type": "table"
     },
     {
@@ -1205,9 +1205,7 @@
   "schemaVersion": 30,
   "style": "dark",
   "tags": [
-    "DQ",
-    "API",
-    "Observability"
+    "DQ"
   ],
   "templating": {
     "list": []

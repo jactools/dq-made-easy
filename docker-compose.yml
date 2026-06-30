@@ -1390,10 +1390,12 @@ services:
       - "${PROMETHEUS_HOST_BIND:-0.0.0.0}:${PROMETHEUS_HOST_PORT:-9090}:9090"
     environment:
       - TZ=UTC
+      - SSO_INTERNAL_ISSUER_URL=${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      - DQ_ENGINE_OIDC_CLIENT_ID=${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml
-      - ./observability/prometheus/tmp/prometheus_bearer_token.txt:/etc/prometheus/bearer_token:ro
+      - ./observability/prometheus/tmp/prometheus_oauth2_client_secret.txt:/etc/prometheus/oauth2_client_secret:ro
       - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlparse, urlunparse
 
 from fastapi import Request
 
@@ -54,6 +55,21 @@ def normalize_auth_path(path: str) -> str:
     if normalized != "/" and normalized.endswith("/"):
         normalized = normalized.rstrip("/")
     return normalized or "/"
+
+
+def _issuer_variants(issuer: str | None) -> set[str]:
+    normalized = str(issuer or "").strip().rstrip("/")
+    if not normalized:
+        return set()
+
+    variants = {normalized}
+    parsed = urlparse(normalized)
+    if parsed.scheme == "https" and parsed.hostname:
+        internal_netloc = f"{parsed.hostname}:8080"
+        internal_issuer = parsed._replace(scheme="http", netloc=internal_netloc)
+        variants.add(urlunparse(internal_issuer).rstrip("/"))
+
+    return variants
 
 
 def is_public_route(path: str) -> bool:
@@ -279,8 +295,9 @@ def is_jwt_payload_valid(payload: dict[str, Any] | None, settings: Settings) -> 
 
     expected_issuer = (settings.sso_issuer or "").rstrip("/")
     token_issuer = str(payload.get("iss") or "").rstrip("/")
-    if settings.sso_enabled and expected_issuer and token_issuer and token_issuer != expected_issuer:
-        return False
+    if settings.sso_enabled and expected_issuer and token_issuer:
+        if token_issuer not in _issuer_variants(expected_issuer):
+            return False
 
     if settings.sso_enabled:
         allowed_clients = settings.sso_allowed_client_ids_list

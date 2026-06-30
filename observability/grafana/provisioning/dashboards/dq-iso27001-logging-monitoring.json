@@ -164,7 +164,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(dq_api_request_count_total[5m]))",
+          "expr": "sum(increase(dq_api_requests_total[5m]))",
           "refId": "A"
         }
       ],
@@ -206,11 +206,11 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(dq_api_auth_failures_total[5m])))",
+          "expr": "round(sum(increase(dq_api_requests_errors_total[5m])))",
           "refId": "A"
         }
       ],
-      "title": "Auth Failures (last 5m)",
+      "title": "API Errors (last 5m)",
       "type": "stat"
     },
     {
@@ -264,7 +264,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(dq_api_request_count_total{status=\"error\"}[5m])) / clamp_min(sum(rate(dq_api_request_count_total[5m])), 0.001)",
+          "expr": "sum(rate(dq_api_requests_errors_total[5m])) / clamp_min(sum(rate(dq_api_requests_total[5m])), 0.001)",
           "refId": "A"
         }
       ],
@@ -306,11 +306,11 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(dq_api_operation_latency_ms_milliseconds_bucket[5m])))",
+          "expr": "dq_api_requests_p95_duration_ms",
           "refId": "A"
         }
       ],
-      "title": "Latency p95 (ms)",
+      "title": "API p95 Duration (ms)",
       "type": "stat"
     },
     {
@@ -366,12 +366,12 @@
       },
       "targets": [
         {
-          "expr": "sum by (endpoint_group) (rate(dq_api_request_count_total[5m]))",
-          "legendFormat": "{{endpoint_group}}",
+          "expr": "sum(rate(dq_api_requests_total[5m]))",
+          "legendFormat": "Total",
           "refId": "A"
         }
       ],
-      "title": "Request Rate by Endpoint Group",
+      "title": "API Request Rate (5m)",
       "type": "timeseries"
     },
     {

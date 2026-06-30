@@ -63,7 +63,10 @@ scrape_configs:
           service: dq-api
           component: api
     metrics_path: "/metrics"
-    bearer_token_file: "/etc/prometheus/bearer_token"
+    oauth2:
+      client_id: "dq-engine-gx-worker"
+      client_secret_file: "/etc/prometheus/oauth2_client_secret"
+      token_url: "http://keycloak:8080/realms/jaccloud/protocol/openid-connect/token"
     scrape_interval: 15s
     scrape_timeout: 10s
 

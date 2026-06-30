@@ -1,15 +1,12 @@
 FROM python:3.14-slim
 WORKDIR /app
+ARG PIP_INDEX_URL
 RUN set -eux; \
-	for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
-		[ -e "$apt_sources" ] || continue; \
-		sed -i 's|http://|https://|g' "$apt_sources"; \
-	done; \
-	apt-get update && apt-get install -y git build-essential && rm -rf /var/lib/apt/lists/*
+	apt-get update && apt-get install -y git build-essential ca-certificates && rm -rf /var/lib/apt/lists/*
 ENV HF_HOME=/cache/huggingface
 RUN mkdir -p /cache/huggingface
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN PIP_CERT=/etc/ssl/certs/ca-certificates.crt PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 8000
 CMD ["python", "entrypoint.py"]
