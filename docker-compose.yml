@@ -488,6 +488,18 @@ services:
       retries: 5
       start_period: 5s
 
+  trino:
+    profiles: ["trino"]
+    image: ${TRINO_IMAGE:-trinodb/trino:477}
+    container_name: dq-made-easy-trino
+    ports:
+      - "${TRINO_HOST_BIND:-127.0.0.1}:${TRINO_HOST_PORT:-8084}:8080"
+    environment:
+      TZ: UTC
+    networks:
+      - dq-network
+    restart: unless-stopped
+
   delivery-seed:
     profiles: ["seed"]
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}

@@ -10,6 +10,7 @@ runtime_profile_values() {
     auth \
     engine \
     workers \
+    trino \
     profiling \
     metadata \
     llm \
@@ -36,7 +37,7 @@ default_runtime_profile_values() {
 
 is_runtime_profile() {
   case "$1" in
-     base|redis|spark|core|gateway|auth|engine|workers|profiling|metadata|llm|support|observability|edge)
+    base|redis|spark|core|gateway|auth|engine|workers|trino|profiling|metadata|llm|support|observability|edge)
       return 0
       ;;
     *)
@@ -121,6 +122,9 @@ image_targets_for_profile() {
       ;;
     workers)
       printf '%s\n' dq-engine dq-profiling
+      ;;
+    trino)
+      return 2
       ;;
     profiling)
       printf '%s\n' dq-profiling

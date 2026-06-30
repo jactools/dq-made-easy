@@ -6,8 +6,9 @@ set -euo pipefail
 # - Provides one command surface for build, pull, push, start, restart, stop, and seed.
 # - Uses canonical env selection (`--env` / `--env-file`) across all actions.
 # - Supports explicit selectors for profiles, services, images, and seed targets.
-# Version: 1.1
-# Last modified: 2026-05-09
+# Version: 1.2
+# Last modified: 2026-06-30
+# - 1.2 (2026-06-30): Made service-only lifecycle commands safe under set -u.
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
@@ -119,14 +120,14 @@ join_csv() {
 
 append_unique_profile() {
   local value="$1"
-  if ! contains_value "$value" "${SELECTED_PROFILES[@]}"; then
+  if ! contains_value "$value" ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"}; then
     SELECTED_PROFILES+=("$value")
   fi
 }
 
 append_unique_service() {
   local value="$1"
-  if ! contains_value "$value" "${SELECTED_SERVICES[@]}"; then
+  if ! contains_value "$value" ${SELECTED_SERVICES[@]+"${SELECTED_SERVICES[@]}"}; then
     SELECTED_SERVICES+=("$value")
   fi
 }
@@ -152,7 +153,7 @@ fail() {
 
 validate_runtime_profiles() {
   local profile=""
-  for profile in "${SELECTED_PROFILES[@]}"; do
+  for profile in ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"}; do
     if ! is_runtime_profile "$profile"; then
       fail "Unsupported runtime profile '$profile'"
     fi
@@ -229,15 +230,15 @@ resolve_services_from_profiles() {
 
   validate_runtime_profiles
 
-  profile_csv="$(join_csv "${SELECTED_PROFILES[@]}")"
-  service_csv="$(join_csv "${SELECTED_SERVICES[@]}")"
+  profile_csv="$(join_csv ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"})"
+  service_csv="$(join_csv ${SELECTED_SERVICES[@]+"${SELECTED_SERVICES[@]}"})"
 
   if ! planned="$(stack_dependency_plan_services "$ROOT_ENV_FILE" "$profile_csv" "$service_csv" "$ACTION")"; then
     fail "Unable to resolve dependency plan for $ACTION"
   fi
 
   while IFS= read -r service; do
-    if [ -n "$service" ] && ! contains_value "$service" "${RESOLVED_SERVICES[@]}"; then
+    if [ -n "$service" ] && ! contains_value "$service" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}; then
       RESOLVED_SERVICES+=("$service")
     fi
   done <<EOF
@@ -364,11 +365,11 @@ show_resolved_plan() {
           planned_args+=(stop)
           ;;
       esac
-      planned_args+=("${RESOLVED_SERVICES[@]}")
+      planned_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
       planned_command="$(printf '%s ' "${planned_args[@]}")"
       info "Plan: ${planned_command% }"
       info "Ordered services:"
-      for item in "${RESOLVED_SERVICES[@]}"; do
+      for item in ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}; do
         info "  - $item"
       done
       ;;
@@ -628,14 +629,14 @@ case "$ACTION" in
     fi
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_services_from_profiles
-    stack_dependency_validate_service_health "$ROOT_ENV_FILE" "${RESOLVED_SERVICES[@]}"
+    stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
     start_args=()
     if [ "$REMOVE_ORPHANS" = true ]; then
       start_args+=(up -d --remove-orphans)
     else
       start_args+=(up -d)
     fi
-    start_args+=("${RESOLVED_SERVICES[@]}")
+    start_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
     docker_compose "${start_args[@]}"
     ;;
   restart)
@@ -645,8 +646,8 @@ case "$ACTION" in
     fi
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_services_from_profiles
-    stack_dependency_validate_service_health "$ROOT_ENV_FILE" "${RESOLVED_SERVICES[@]}"
-    docker_compose restart "${RESOLVED_SERVICES[@]}"
+    stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
+    docker_compose restart ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
     ;;
   stop)
     if [ "$DRY_RUN" = true ]; then
@@ -654,8 +655,8 @@ case "$ACTION" in
       exit 0
     fi
     validate_selected_root_env_file "$ROOT_DIR" stop
-    profile_csv="$(join_csv "${SELECTED_PROFILES[@]}")"
-    service_csv="$(join_csv "${SELECTED_SERVICES[@]}")"
+    profile_csv="$(join_csv ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"})"
+    service_csv="$(join_csv ${SELECTED_SERVICES[@]+"${SELECTED_SERVICES[@]}"})"
     if ! teardown_collect_targets "$ROOT_ENV_FILE" "$ACTION" "$profile_csv" "$service_csv"; then
       exit 1
     fi

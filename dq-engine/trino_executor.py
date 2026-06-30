@@ -103,12 +103,9 @@ class TrinoExecutor:
                     http_scheme=config["http_scheme"],
                     verify=config["verify"],
                     source=config["source"],
-                    session_properties={
-                        "query_max_runtime_ms": str(config["timeout_ms"]),
-                        "memory_per_task": config["memory_per_task"],
-                        "max_row_fetch_size": str(config["max_row_fetch_size"]),
-                    },
-                    extra_credential_headers=config.get("extra_credential_headers") or {},
+                    request_timeout=float(config["timeout_ms"]) / 1000.0,
+                    session_properties={},
+                    http_headers=config.get("extra_credential_headers") or {},
                 )
             except Exception as exc:
                 last_error = exc

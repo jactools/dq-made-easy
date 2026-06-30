@@ -518,6 +518,7 @@ trino:
 - [x] Query DQ rules execute correctly and results are persisted
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
     - Dispatch evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_spark_expectations_payload tests/test_spark_expectations_adapter.py::test_process_dispatch_message_reports_structured_spark_expectations_failure tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_sql_engine_through_shared_reporting tests/test_trino_execution_pipeline.py::test_query_rule_execution_persists_bounded_results_and_query_artifact -q`
+    - Live container evidence: with Trino already running via `./scripts/stack_ctl.sh start --profile trino`, run `scripts/validation/validate_trino_live_container.sh` (`2 passed` live; broader Trino/dispatch suite with live tests: `49 passed`).
 - [x] Connection management works reliably
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py -q`
 - [ ] Error handling produces meaningful messages and is aligned with the existing error reporting structures.

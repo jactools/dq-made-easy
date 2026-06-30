@@ -153,12 +153,9 @@ def test_create_connection_uses_validated_dbapi_settings() -> None:
             "http_scheme": "https",
             "verify": False,
             "source": "dq-tests",
-            "session_properties": {
-                "query_max_runtime_ms": "60000",
-                "memory_per_task": "2GB",
-                "max_row_fetch_size": "500",
-            },
-            "extra_credential_headers": {"x-trino-token": "token"},
+            "request_timeout": 60.0,
+            "session_properties": {},
+            "http_headers": {"x-trino-token": "token"},
         }
     ]
 
