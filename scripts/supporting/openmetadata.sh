@@ -7,9 +7,8 @@
 # - Validates that the resulting token is authorized against the OpenMetadata API.
 # - Fails fast when required OpenMetadata or SSO inputs are missing.
 #
-# Version: 1.1
-# Last modified: 2026-06-11
-
+# Version: 1.3
+# Last modified: 2026-06-30
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -137,7 +136,7 @@ prepare_openmetadata_access_token() {
   fi
 
   info "openmetadata.sh" "Preparing OpenMetadata OM_TOKEN via shared auth helper..."
-  OM_TOKEN="$(dq_keycloak_seeded_user_access_token "${token_url%/}/protocol/openid-connect/token" "$client_id" "$seed_username" "$seed_password")" || {
+  OM_TOKEN="$(CURL_CA_BUNDLE= SSL_CERT_FILE= REQUESTS_CA_BUNDLE= dq_keycloak_seeded_user_access_token "${token_url%/}/protocol/openid-connect/token" "$client_id" "$seed_username" "$seed_password" -k)" || {
     error "openmetadata.sh" "Failed to prepare OpenMetadata OM_TOKEN"
     return 1
   }

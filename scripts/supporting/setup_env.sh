@@ -1,12 +1,14 @@
-# Purpose: Export repo environment variables and configure npm registry/auth.
+# Purpose: Export repo environment variables and derive shared Nexus auth values.
 #
 # What it does:
 # - Intended to be sourced (not executed) before running compose/scripts.
 # - Reads .env-derived configuration and exports image/tag/URL variables.
-# - Optionally configures npm registry auth (Nexus Cloud or public npm).
+# - Derives shared Nexus auth values for repo-root .npmrc consumers.
 #
-# Version: 1.7
-# Last modified: 2026-06-11
+# Version: 1.9
+# Last modified: 2026-06-30
+# Changelog:
+# - 1.9 (2026-06-30): Stop mutating npm config in shell and derive shared Nexus auth for repo-root .npmrc.
 
 # Source generic logging function
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -104,34 +106,20 @@ nexuscloud_username="${NEXUSCLOUD_USERNAME:-}"
 nexuscloud_password="${NEXUSCLOUD_PASSWORD:-}"
 nexuscloud_password_base64="${NEXUSCLOUD_PASSWORD_BASE64:-}"
 nexuscloud_group_repo="${NEXUSCLOUD_PYPI_GROUP_REPO:-}"
-npm_public="${NPM_PUBLIC:-}"
-npm_public_token="${NPM_PUBLIC_TOKEN:-}"
+
+if [ -z "$nexuscloud_password_base64" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
+    nexuscloud_password_base64=$(printf '%s' "${nexuscloud_username}:${nexuscloud_password}" | base64)
+fi
+
+NEXUSCLOUD_PASSWORD_BASE64="$nexuscloud_password_base64"
+export NEXUSCLOUD_PASSWORD_BASE64
 
 if [ -n "$nexuscloud_dns" ] || [ -n "$nexuscloud_registry" ]; then
     debug "$my_name" "NEXUSCLOUD_DNS: ${nexuscloud_dns}"
-    debug "$my_name" "Setting up npm registry and authentication for Nexus Cloud..."
-    debug "$my_name" "NEXUSCLOUD_DNS: ${nexuscloud_dns}"
     debug "$my_name" "NEXUSCLOUD_REGISTRY: ${nexuscloud_registry}"
-
-    base64token="$nexuscloud_password_base64"
-    if [ -z "$base64token" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
-        base64token=$(printf '%s' "${nexuscloud_username}:${nexuscloud_password}" | base64)
+    if [ -z "$nexuscloud_password_base64" ]; then
+        warning "$my_name" "Nexus Cloud is configured but no shared npm auth value is available"
     fi
-
-    if [ -n "$nexuscloud_registry" ] && [ -n "$base64token" ]; then
-        npm config set "${nexuscloud_registry}:_authToken"="${base64token}" >/dev/null 2>&1
-    else
-        warning "$my_name" "Skipping Nexus npm auth configuration: registry or token is not set"
-    fi
-elif [ -n "$npm_public" ]; then
-    info "$my_name" "NPM_PUBLIC: ${npm_public}"
-    npm config set registry="${npm_public}"
-
-    if [ -n "$npm_public_token" ]; then
-        npm config set "${npm_public}:_authToken"="${npm_public_token}" >/dev/null 2>&1
-    fi
-else
-    info "$my_name" "No npm registry override configured; using existing npm defaults"
 fi
 
 # ---------------------------------------------------------------------------

@@ -345,7 +345,7 @@ seed_keycloak_in_docker() {
       exit 33
     fi
 
-    run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" --new-password="$password" >/dev/null || {
+    run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" --new-password "$password" >/dev/null || {
       error "$my_name" "Failed to apply rotated password for ${email}"
       exit 33
     }

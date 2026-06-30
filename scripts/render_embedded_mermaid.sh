@@ -12,12 +12,12 @@ set -euo pipefail
 # - Reuses an installed Chromium or Chrome executable so Puppeteer does not try to download one.
 # - Fails fast if the source file, Mermaid block, or renderer is missing.
 #
-# Version: 1.4
-# Last modified: 2026-06-10
+# Version: 1.5
+# Last modified: 2026-06-30
 # Changelog:
 # - 1.4 (2026-06-10): Skip the Puppeteer browser download and point Mermaid CLI at an installed browser.
 # - 1.3 (2026-06-10): Stop overriding the registry so npx uses dq-api/.npmrc directly.
-# - 1.2 (2026-06-10): Source the canonical root env file before invoking Mermaid so NPM_TOKEN is available.
+# - 1.2 (2026-06-10): Source the canonical root env file before invoking Mermaid so the repo auth vars are available.
 # - 1.1 (2026-06-10): Added npx fallback with the repo's internal Nexus npm config for fresh checkouts.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,12 +29,6 @@ source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
 
 init_root_env_file "$ROOT_DIR"
 source_selected_root_env_file
-
-if [[ -z "${NPM_TOKEN:-}" ]]; then
-  error "$my_name" "NPM_TOKEN is missing after sourcing $ROOT_ENV_FILE"
-  error "$my_name" "Source .env.dev.local before running the Mermaid renderer"
-  exit 1
-fi
 
 usage() {
   cat <<'EOF'
@@ -106,14 +100,12 @@ run_mermaid_cli() {
     return 1
   fi
 
-  npmrc_path="${MERMAID_NPMRC:-$ROOT_DIR/dq-api/.npmrc}"
-  if [[ ! -f "$npmrc_path" ]]; then
-    error "$my_name" "NPM config not found for npx fallback: $npmrc_path"
+  if [[ ! -f "$ROOT_DIR/.npmrc" ]]; then
+    error "$my_name" "Repo-root npm config not found: $ROOT_DIR/.npmrc"
     return 1
   fi
 
-  PUPPETEER_SKIP_DOWNLOAD=1 PUPPETEER_EXECUTABLE_PATH="$puppeteer_executable_path" \
-    npm_config_userconfig="$npmrc_path" npx -y @mermaid-js/mermaid-cli -i "$diagram_mmd" -o "$output_svg"
+  (cd "$ROOT_DIR" && PUPPETEER_SKIP_DOWNLOAD=1 PUPPETEER_EXECUTABLE_PATH="$puppeteer_executable_path" npx -y @mermaid-js/mermaid-cli -i "$diagram_mmd" -o "$output_svg")
 }
 
 mkdir -p "$ROOT_DIR/tmp"

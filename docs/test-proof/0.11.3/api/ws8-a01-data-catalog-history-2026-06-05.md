@@ -32,7 +32,7 @@ The data-catalog API now persists immutable natural-language draft request histo
 
 ## Assertions
 
-- The new GET /api/data-catalog/v1/data-definition-tasks/requests/{request_id}/history endpoint returned 200 for an existing request and exposed the append-only request trail.
+- The new GET /api/data-catalog/v1/data-definition-tasks/requests/&#123;request_id&#125;/history endpoint returned 200 for an existing request and exposed the append-only request trail.
 - The internal API contract registry resolved the new history route after the aggregate bundle was updated.
 - The full data-catalog API regression file still passed after the contract and repository changes.
 
