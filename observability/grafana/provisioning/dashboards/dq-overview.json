@@ -298,7 +298,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(dq_api_requests_errors_total[5m])) / clamp_min(sum(rate(dq_api_requests_total[5m])), 0.001)",
+          "expr": "sum(rate(dq_api_requests_errors_total[5m])) / clamp_min(sum(rate(dq_api_requests_total[5m])), 0.001) or vector(0)",
           "refId": "A",
           "legendFormat": "Error Rate"
         }
@@ -344,7 +344,7 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "sum(increase(dq_api_requests_errors_total[15m]))",
+          "expr": "sum(increase(dq_api_requests_errors_total[15m])) or vector(0)",
           "refId": "A"
         }
       ],
