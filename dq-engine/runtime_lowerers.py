@@ -173,86 +173,23 @@ def lower_rule_to_soda(rule: dict[str, Any]) -> dict[str, Any]:
 
 
 def lower_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
+    from trino_adapter import (
+        lower_aggregate_rule_to_trino,
+        lower_query_rule_to_trino,
+        lower_row_rule_to_trino,
+    )
+
     rule_type = str(rule.get("type") or "").strip()
-    column = str(rule.get("column") or "").strip()
-    table = str(rule.get("table") or "source").strip() or "source"
-    params = rule.get("params") or {}
 
-    if params.get("expression") is not None:
-        raise ValueError("unsupported trino construct: custom expression")
-    if params.get("sql_predicate") is not None:
-        raise ValueError("unsupported trino construct: SQL predicate")
-    if params.get("window") is not None:
-        raise ValueError("unsupported trino construct: window/analytic operation")
-    if isinstance(params.get("columns"), list) and len(params.get("columns")) > 1:
-        raise ValueError("unsupported trino construct: multi-column predicate")
+    # Delegate to appropriate lowerer based on rule type
+    if rule_type in ROW_RULE_TYPES:
+        return lower_row_rule_to_trino(rule)
 
-    if rule_type in {"not_null", "min", "max", "equals", "not_equal", "between", "in", "not_in", "is_null"}:
-        if rule_type == "not_null":
-            expectation = f"{column} IS NOT NULL"
-        elif rule_type == "min":
-            expectation = f"{column} >= {params.get('min')}"
-        elif rule_type == "max":
-            expectation = f"{column} <= {params.get('max')}"
-        elif rule_type == "equals":
-            expectation = f"{column} == {_format_expectation_literal(params.get('expected'))}"
-        elif rule_type == "not_equal":
-            expectation = f"{column} != {_format_expectation_literal(params.get('expected'))}"
-        elif rule_type == "between":
-            expectation = f"{column} BETWEEN {_format_expectation_literal(params.get('min'))} AND {_format_expectation_literal(params.get('max'))}"
-        elif rule_type == "in":
-            values = params.get("values") or []
-            formatted_values = ", ".join(_format_expectation_literal(value) for value in values)
-            expectation = f"{column} IN ({formatted_values})"
-        elif rule_type == "not_in":
-            values = params.get("values") or []
-            formatted_values = ", ".join(_format_expectation_literal(value) for value in values)
-            expectation = f"{column} NOT IN ({formatted_values})"
-        else:
-            expectation = f"{column} IS NULL"
-        return {
-            "engine_type": "trino",
-            "engine_target": "trino_sql",
-            "rule_type": "row_dq",
-            "expectation": expectation,
-            "action_if_failed": "quarantine",
-            "query": f"SELECT * FROM {table} WHERE {expectation}",
-        }
-
-    if rule_type == "count":
-        expected_count = params.get("expected_count")
-        return {
-            "engine_type": "trino",
-            "engine_target": "trino_sql",
-            "rule_type": "aggregate_dq",
-            "expectation": f"COUNT(*) == {_format_expectation_literal(expected_count)}",
-            "action_if_failed": "quarantine",
-            "query": f"SELECT COUNT(*) AS dq_count FROM {table}",
-        }
-
-    if rule_type == "sum":
-        expected_value = params.get("expected_value")
-        return {
-            "engine_type": "trino",
-            "engine_target": "trino_sql",
-            "rule_type": "aggregate_dq",
-            "expectation": f"SUM({column}) == {_format_expectation_literal(expected_value)}",
-            "action_if_failed": "quarantine",
-            "query": f"SELECT SUM({column}) AS dq_sum FROM {table}",
-        }
+    if rule_type in AGGREGATE_RULE_TYPES:
+        return lower_aggregate_rule_to_trino(rule)
 
     if rule_type == "query":
-        query_text = str(params.get("query") or "").strip()
-        if not query_text:
-            raise ValueError("unsupported trino construct: query without text")
-        return {
-            "engine_type": "trino",
-            "engine_target": "trino_sql",
-            "rule_type": "query_dq",
-            "expectation": "query result count == expected_count",
-            "action_if_failed": "quarantine",
-            "query": query_text,
-        }
+        return lower_query_rule_to_trino(rule)
 
     raise ValueError(f"unsupported rule type for Trino adapter: {rule_type!r}")
 
