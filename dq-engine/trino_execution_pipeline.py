@@ -68,6 +68,7 @@ class ExecutionPlan:
         started_at = time.perf_counter()
         started_at_iso = datetime.now(timezone.utc).isoformat()
         result_rows: Any = []
+        client: Any = None
 
         try:
             client = self.executor.create_connection()
@@ -169,6 +170,11 @@ class ExecutionPlan:
                 **_summarize_result_rows(result_rows),
                 "lowered_rule": plan["lowered_rule"],
             }
+        finally:
+            if client is not None:
+                close_connection = getattr(self.executor, "close_connection", None)
+                if close_connection is not None:
+                    close_connection(client)
 
     def _validate_result(self, result_rows: Any, plan: dict[str, Any]) -> dict[str, Any]:
         rule_type = plan["rule_type"]

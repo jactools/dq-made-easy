@@ -10,6 +10,7 @@ import logging
 import time
 from dataclasses import dataclass
 from typing import Any
+from typing import Callable
 
 from trino.dbapi import Connection
 from trino.dbapi import connect
@@ -18,6 +19,8 @@ from trino.exceptions import TrinoQueryError
 from trino.exceptions import TrinoUserError
 
 from trino_config import load_trino_config
+from trino_config import normalize_trino_config
+from trino_config import validate_trino_config
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +62,7 @@ class TrinoExecutor:
     Execute Trino queries and collect results.
     """
     
-    def __init__(self, config: dict[str, Any] | None = None):
+    def __init__(self, config: dict[str, Any] | None = None, *, connect_factory: Callable[..., Connection] | None = None):
         """
         Initialize the Trino executor.
         
@@ -68,7 +71,14 @@ class TrinoExecutor:
         """
         if config is None:
             config = load_trino_config()
-        self.config = config
+        self.config = normalize_trino_config(config)
+        config_errors = validate_trino_config(self.config)
+        if config_errors:
+            raise TrinoExecutionError(
+                f"Invalid Trino configuration: {'; '.join(config_errors)}",
+                error_code="DQ_TRINO_INVALID_CONFIG",
+            )
+        self._connect_factory = connect_factory or connect
     
     def create_connection(self) -> Connection:
         """
@@ -78,19 +88,48 @@ class TrinoExecutor:
             Configured Trino DBAPI connection
         """
         config = self.config
-        return connect(
-            host=config["host"],
-            port=config["http_port"],
-            user=config["user"],
-            catalog=config["catalog"],
-            schema=config["schema"],
-            session_properties={
-                "query_max_runtime_ms": str(config["timeout_ms"]),
-                "memory_per_task": config["memory_per_task"],
-                "max_row_fetch_size": config["max_row_fetch_size"],
-            },
-            extra_credential_headers={},
+        attempts = max(int(config.get("connection_attempts", 1)), 1)
+        backoff_seconds = max(int(config.get("connection_retry_backoff_ms", 0)), 0) / 1000.0
+        last_error: Exception | None = None
+
+        for attempt in range(1, attempts + 1):
+            try:
+                return self._connect_factory(
+                    host=config["host"],
+                    port=config["http_port"],
+                    user=config["user"],
+                    catalog=config["catalog"],
+                    schema=config["schema"],
+                    http_scheme=config["http_scheme"],
+                    verify=config["verify"],
+                    source=config["source"],
+                    session_properties={
+                        "query_max_runtime_ms": str(config["timeout_ms"]),
+                        "memory_per_task": config["memory_per_task"],
+                        "max_row_fetch_size": str(config["max_row_fetch_size"]),
+                    },
+                    extra_credential_headers=config.get("extra_credential_headers") or {},
+                )
+            except Exception as exc:
+                last_error = exc
+                if attempt >= attempts:
+                    break
+                if backoff_seconds:
+                    time.sleep(backoff_seconds)
+
+        raise TrinoExecutionError(
+            f"Failed to create Trino connection after {attempts} attempt(s): {last_error}",
+            error_code="DQ_TRINO_CONNECTION_FAILED",
         )
+
+    def close_connection(self, client: Any) -> None:
+        close = getattr(client, "close", None)
+        if close is None:
+            return
+        try:
+            close()
+        except Exception as exc:
+            logger.warning("Failed to close Trino connection: %s", exc)
     
     def execute_query(
         self,

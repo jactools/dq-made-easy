@@ -7,7 +7,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from fastapi.testclient import TestClient
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -826,23 +825,8 @@ def test_generic_execution_dispatch_persists_spark_expectations_artifacts(tmp_pa
     assert persisted_errors["observability_summary"]["failed_count"] == 8
 
 
-def test_public_execute_endpoint_is_removed(tmp_path: Path) -> None:
-    client = TestClient(app)
-
-    response = client.post(
-        "/execute",
-        json={
-            "id": 105,
-            "table": "customers",
-            "column": "customer_id",
-            "type": "not_null",
-            "params": {},
-            "output_dir": str(tmp_path),
-            "engine_type": "gx",
-        },
-    )
-
-    assert response.status_code == 404
+def test_public_execute_endpoint_is_removed() -> None:
+    assert not any(route.path == "/execute" and "POST" in getattr(route, "methods", set()) for route in app.routes)
 
 
 def test_generic_execution_dispatch_evaluates_spark_expectations_rows(tmp_path: Path) -> None:

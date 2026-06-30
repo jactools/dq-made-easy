@@ -20,10 +20,14 @@ class RecordingExecutor:
         self.executed_queries: list[tuple[str, int | None]] = []
         self.validations: list[dict[str, object]] = []
         self.metric_calls: list[tuple[str, int]] = []
+        self.closed_connections = 0
 
     def create_connection(self) -> object:
         self.created_connections += 1
         return object()
+
+    def close_connection(self, client: object) -> None:
+        self.closed_connections += 1
 
     def execute_query(self, client: object, query: str, timeout: int | None = None) -> list[object]:
         self.executed_queries.append((query, timeout))
@@ -84,6 +88,7 @@ def test_query_rule_execution_uses_expected_count_and_scalar_result() -> None:
     assert result["engine_type"] == "trino"
     assert result["rule_type"] == "query"
     assert executor.created_connections == 1
+    assert executor.closed_connections == 1
     assert executor.executed_queries == [("SELECT COUNT(*) AS dq_count FROM customers", 1234)]
     assert executor.validations == [{"expected_count": 3, "treat_first_cell_as_count": True}]
     assert result["result"]["passed"] is True
