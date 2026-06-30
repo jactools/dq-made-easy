@@ -6,8 +6,8 @@
 # - Optionally includes observability components.
 # - Restarts the local Vite UI processes.
 #
-# Version: 1.7
-# Last modified: 2026-06-02
+# Version: 1.8
+# Last modified: 2026-06-30
 # Changelog:
 # - 1.2 (2026-04-26): Added env-file selection flags and propagated ROOT_ENV_FILE through the common startup chain.
 # - 1.3 (2026-04-29): Switched startup env selection to the canonical dev/test/prod contract.
@@ -15,6 +15,7 @@
 # - 1.5 (2026-05-30): Build the precompiled dq-airflow-sdk wheel during --force-build so Airflow image builds consume the current repo artifact.
 # - 1.6 (2026-05-30): Include the Airflow profile in the default common startup chain.
 # - 1.7 (2026-06-02): Allow the distributed Spark cluster profile to be opt-in via --with-spark.
+# - 1.8 (2026-06-30): Avoid Bash nounset failures when --env consumes all CLI arguments.
 
 set -euo pipefail
 
@@ -52,7 +53,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

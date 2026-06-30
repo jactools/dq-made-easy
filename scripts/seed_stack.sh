@@ -10,8 +10,8 @@
 # - Can optionally generate AIStor delivery objects for note-backed mock deliveries.
 # - Can purge target delivery buckets before seeding or wipe AIStor entirely for prototype resets.
 #
-# Version: 1.18
-# Last modified: 2026-05-26
+# Version: 1.19
+# Last modified: 2026-06-30
 # Changelog:
 # - 1.10 (2026-04-22): Replaced the delivery argument guard with a macOS Bash 3.2-safe array length check.
 # - 1.11 (2026-04-26): Made seeding source and docker compose calls honor ROOT_ENV_FILE.
@@ -21,6 +21,7 @@
 # - 1.16 (2026-05-07): Kept Keycloak seeding on the existing running stack without restarting Keycloak or deleting volumes.
 # - 1.17 (2026-05-09): Split seed actions into dedicated block modules sourced by seed_stack.sh.
 # - 1.18 (2026-05-26): Added --force-build propagation for one-shot delivery seed image rebuilds.
+# - 1.19 (2026-06-30): Avoid Bash nounset failures when --env consumes all CLI arguments.
 
 set -euo pipefail
 
@@ -34,7 +35,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-REMAINING_ARGS=("${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}")
+REMAINING_ARGS=(${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"})
 
 if [ ! -f "$ROOT_ENV_FILE" ]; then
   echo "Env file not found: $ROOT_ENV_FILE" >&2

@@ -9,7 +9,7 @@ set -euo pipefail
 # - Loads repo env and helper libraries.
 # - Starts the selected docker compose services (and optional seed steps).
 #
-# Version: 1.18
+# Version: 1.19
 # Last modified: 2026-06-30
 # Changelog:
 # - 1.4 (2026-04-26): Added env selectors and env-aware docker compose wrappers for local and deployment startup flows.
@@ -26,6 +26,7 @@ set -euo pipefail
 # - 1.16 (2026-06-02): Added explicit --with-spark startup support for the distributed Spark cluster profile.
 # - 1.17 (2026-06-30): Added Trino to --all startup and explicit --with-trino support.
 # - 1.18 (2026-06-30): Runs the Trino AIStor catalog seed after --seed-all delivery seeding.
+# - 1.19 (2026-06-30): Avoid Bash nounset failures when --env consumes all CLI arguments.
 # - 1.15 (2026-05-31): Delegated Airflow DAG artifact build calls through scripts/package-releases/build_dq_airflow_dag_artifact.sh.
 
 # Source generic logging function
@@ -51,7 +52,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 if [ ! -f "$ROOT_ENV_FILE" ]; then
   error "$my_name" "Env file not found: $ROOT_ENV_FILE"
