@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from datetime import date
+from datetime import datetime
+from datetime import time
 
 import pytest
 
@@ -31,6 +34,12 @@ def test_escape_trino_identifier_quotes_only_when_needed(identifier: str, expect
     assert escape_trino_identifier(identifier) == expected
 
 
+@pytest.mark.parametrize("identifier", ["", "catalog..table"])
+def test_escape_trino_identifier_rejects_empty_parts(identifier: str) -> None:
+    with pytest.raises(ValueError):
+        escape_trino_identifier(identifier)
+
+
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
@@ -43,6 +52,19 @@ def test_escape_trino_identifier_quotes_only_when_needed(identifier: str, expect
     ],
 )
 def test_format_trino_literal_supports_common_python_values(value: object, expected: str) -> None:
+    assert format_trino_literal(value) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (date(2026, 6, 30), "'2026-06-30'"),
+        (time(12, 5, 3), "'12:05:03'"),
+        (datetime(2026, 6, 30, 12, 5, 3), "'2026-06-30T12:05:03'"),
+        ({"quoted": "O'Reilly"}, "'{''quoted'': \"O''Reilly\"}'"),
+    ],
+)
+def test_format_trino_literal_supports_temporal_and_fallback_values(value: object, expected: str) -> None:
     assert format_trino_literal(value) == expected
 
 
@@ -151,3 +173,66 @@ def test_validate_trino_compatibility_reports_unsupported_constructs() -> None:
         "window/analytic functions",
         "multi-column predicates",
     ]
+
+
+def test_validate_trino_compatibility_reports_unknown_rule_type() -> None:
+    assert validate_trino_compatibility({"type": "window_count", "params": {}}) == [
+        "unsupported rule type: window_count"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("rule_type", "params", "expected_message"),
+    [
+        ("min", {}, "requires 'min' parameter"),
+        ("max", {}, "requires 'max' parameter"),
+        ("equals", {}, "requires 'expected' parameter"),
+        ("not_equal", {}, "requires 'expected' parameter"),
+        ("in", {}, "requires 'values' parameter"),
+        ("not_in", {}, "requires 'values' parameter"),
+        ("between", {"min": 1}, "requires 'min' and 'max' parameters"),
+    ],
+)
+def test_lower_row_rule_to_trino_rejects_missing_required_params(
+    rule_type: str,
+    params: dict[str, object],
+    expected_message: str,
+) -> None:
+    with pytest.raises(ValueError, match=expected_message):
+        lower_row_rule_to_trino(
+            {"id": 10, "table": "customers", "column": "amount", "type": rule_type, "params": params}
+        )
+
+
+def test_lower_row_rule_to_trino_rejects_missing_column() -> None:
+    with pytest.raises(ValueError, match="requires 'column'"):
+        lower_row_rule_to_trino(
+            {"id": 11, "table": "customers", "type": "not_null", "params": {}}
+        )
+
+
+@pytest.mark.parametrize(
+    ("rule_type", "params", "expected_message"),
+    [
+        ("count", {}, "requires 'expected_count' parameter"),
+        ("sum", {}, "requires 'expected_value' parameter"),
+        ("avg", {}, "requires 'expected_value' parameter"),
+        ("min", {}, "requires 'expected_value' parameter"),
+        ("max", {}, "requires 'expected_value' parameter"),
+        ("distinct_count", {}, "requires 'expected_count' parameter"),
+    ],
+)
+def test_lower_aggregate_rule_to_trino_rejects_missing_required_params(
+    rule_type: str,
+    params: dict[str, object],
+    expected_message: str,
+) -> None:
+    with pytest.raises(ValueError, match=expected_message):
+        lower_aggregate_rule_to_trino(
+            {"id": 12, "table": "customers", "column": "amount", "type": rule_type, "params": params}
+        )
+
+
+def test_lower_query_rule_to_trino_rejects_missing_query() -> None:
+    with pytest.raises(ValueError, match="requires 'query' parameter"):
+        lower_query_rule_to_trino({"id": 13, "type": "query", "params": {"query": "   "}})

@@ -523,8 +523,14 @@ trino:
     - Live container evidence: with Trino already running via `./scripts/stack_ctl.sh start --profile trino`, run `scripts/validation/validate_trino_live_container.sh` (`2 passed` live; broader Trino/dispatch suite with live tests: `49 passed`).
 - [x] Connection management works reliably
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py -q`
-- [ ] Error handling produces meaningful messages and is aligned with the existing error reporting structures, persisted and available through the reporting APIs
-- [ ] All tests pass (≥90% coverage)
+- [x] Error handling produces meaningful messages and is aligned with the existing error reporting structures, persisted and available through the reporting APIs
+    - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_execution_pipeline.py tests/test_spark_expectations_adapter.py::test_process_dispatch_message_reports_structured_spark_expectations_failure -q`
+    - Trino-specific proof: structured `failure_code`, `failure_message`, `failed_check`, `failure_metrics`, `trace`, and `error_management` fields are persisted to `trino_execution.json`/`trino_errors.json` and propagated through the generic run reporting flow.
+- [x] All Trino related tests pass (≥90% coverage)
+    - Evidence: `cd dq-engine && DQ_TRINO_HOST=127.0.0.1 DQ_TRINO_PORT=8084 DQ_TRINO_CATALOG=memory DQ_TRINO_SCHEMA=default /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_runtime_lowerer_registry.py tests/test_trino_live_container.py --cov=trino_adapter --cov=trino_config --cov=trino_executor --cov=trino_execution_pipeline --cov-report=term-missing --cov-fail-under=90 -q -rs`
+    - Result: `78 passed in 1.00s`; coverage gate reached with total coverage `96.12%` (`trino_adapter.py` 99%, `trino_config.py` 93%, `trino_execution_pipeline.py` 95%, `trino_executor.py` 96%).
+    - Proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-coverage-gate-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-coverage-gate-2026-06-30.json)
+    - Raw evidence: [test-results/evidence/0.11.5/api/20260630T150000Z-dq-engine-trino-coverage-gate](../../test-results/evidence/0.11.5/api/20260630T150000Z-dq-engine-trino-coverage-gate)
 
 ### Should Have
 - [ ] Performance metrics collection through the existing APIs and persistence

@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from typing import Any
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -10,8 +11,10 @@ if str(ROOT) not in sys.path:
 
 import pytest
 
+import trino_executor
 from trino_config import load_trino_config
 from trino_config import validate_trino_config
+from trino_executor import TrinoQueryResult
 from trino_executor import TrinoExecutionError
 from trino_executor import TrinoExecutor
 
@@ -42,6 +45,48 @@ class _FakeConnection:
         return self._cursor
 
 
+class _FailingCursor:
+    def __init__(self, exc: Exception) -> None:
+        self.exc = exc
+
+    def execute(self, query: str) -> None:
+        raise self.exc
+
+
+class _FailingConnection:
+    def __init__(self, exc: Exception) -> None:
+        self.exc = exc
+
+    def cursor(self) -> _FailingCursor:
+        return _FailingCursor(self.exc)
+
+
+def _executor() -> TrinoExecutor:
+    return TrinoExecutor(
+        config={
+            "host": "localhost",
+            "http_port": 8080,
+            "user": "user",
+            "catalog": "hive",
+            "schema": "default",
+            "timeout_ms": 30000,
+            "memory_per_task": "1GB",
+            "max_row_fetch_size": 2,
+            "max_result_sample_size": 3,
+            "connection_attempts": 1,
+            "connection_retry_backoff_ms": 0,
+        }
+    )
+
+
+def test_trino_query_result_bool_iteration_and_empty_error_message() -> None:
+    result = TrinoQueryResult(rows=[(1,), (2,)], row_count=2)
+
+    assert bool(result) is True
+    assert list(result) == [(1,), (2,)]
+    assert str(TrinoExecutionError("plain failure")) == "plain failure"
+
+
 def test_execute_query_streams_large_results_into_bounded_sample() -> None:
     rows = [(index,) for index in range(1, 6)]
     executor = TrinoExecutor(
@@ -66,6 +111,75 @@ def test_execute_query_streams_large_results_into_bounded_sample() -> None:
     assert result.truncated is True
     assert result.sample_rows == [(1,), (2,), (3,)]
     assert result[0] == (1,)
+
+
+@pytest.mark.parametrize(
+    ("exception_name", "error_code", "message_fragment"),
+    [
+        ("TrinoUserError", "DQ_TRINO_QUERY_ERROR", "Trino query error"),
+        ("TrinoQueryError", "DQ_TRINO_QUERY_ERROR", "Trino query exception"),
+        ("OperationalError", "DQ_TRINO_CONNECTION_FAILED", "Trino connection error"),
+        ("RuntimeError", "DQ_TRINO_EXECUTION_ERROR", "Query execution failed"),
+    ],
+)
+def test_execute_query_maps_dbapi_errors_to_structured_trino_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    exception_name: str,
+    error_code: str,
+    message_fragment: str,
+) -> None:
+    class FakeTrinoError(Exception):
+        def __init__(self, message: str) -> None:
+            self.message = message
+            super().__init__(message)
+
+    exception_type = RuntimeError if exception_name == "RuntimeError" else FakeTrinoError
+    if exception_name != "RuntimeError":
+        monkeypatch.setattr(trino_executor, exception_name, exception_type)
+
+    executor = _executor()
+    with pytest.raises(TrinoExecutionError) as exc_info:
+        executor.execute_query(_FailingConnection(exception_type("broken query")), "SELECT broken")
+
+    assert exc_info.value.error_code == error_code
+    assert message_fragment in str(exc_info.value)
+
+
+def test_close_connection_ignores_missing_close_and_logs_close_failures(caplog: pytest.LogCaptureFixture) -> None:
+    class BadClose:
+        def close(self) -> None:
+            raise RuntimeError("close failed")
+
+    executor = _executor()
+    executor.close_connection(object())
+    executor.close_connection(BadClose())
+
+    assert "Failed to close Trino connection" in caplog.text
+
+
+def test_validate_query_result_handles_scalar_variants_and_count_mismatch() -> None:
+    executor = _executor()
+
+    assert executor.validate_query_result([{"dq_count": 4}], {"expected_count": 4, "treat_first_cell_as_count": True})["passed"] is True
+    assert executor.validate_query_result([[4]], {"expected_count": 5, "treat_first_cell_as_count": True})["details"] == {
+        "count_mismatch": True,
+        "actual_count": 4,
+        "expected_count": 5,
+    }
+    assert executor.validate_query_result([1, 2], {"expected_count": 1})["details"] == {
+        "count_mismatch": True,
+        "actual_count": 2,
+        "expected_count": 1,
+    }
+
+
+def test_collect_query_metrics_reports_duration_and_rows() -> None:
+    executor = _executor()
+    metrics = executor.collect_query_metrics("SELECT 1", time.time() - 1, 7)
+
+    assert metrics["duration_ms"] >= 0
+    assert metrics["rows_returned"] == 7
+    assert metrics["warnings"] == []
 
 
 def test_load_trino_config_coerces_environment_values(monkeypatch: pytest.MonkeyPatch) -> None:

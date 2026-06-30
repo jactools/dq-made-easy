@@ -14,6 +14,7 @@ from typing import Any
 from execution_contract import build_execution_metadata
 from execution_contract import build_observability_summary
 from execution_contract import persist_execution_payload
+from runtime_lowerers import _infer_rule_family
 from trino_adapter import AGGREGATE_RULE_TYPES
 from trino_adapter import QUERY_RULE_TYPES
 from trino_adapter import ROW_RULE_TYPES
@@ -26,6 +27,71 @@ from trino_executor import TrinoQueryResult
 from trino_executor import TrinoExecutor
 
 logger = logging.getLogger(__name__)
+
+
+def _build_trino_failed_check(plan: dict[str, Any], failure_message: str, *, failure_stage: str) -> dict[str, Any]:
+    rule_type = plan["rule_type"]
+    params = dict(plan.get("params") or {})
+    return {
+        "rule_id": plan.get("rule_id"),
+        "engine_type": "trino",
+        "engine_target": "trino_sql",
+        "check_name": rule_type or "unknown",
+        "rule_type": rule_type or "unknown",
+        "rule_family": _infer_rule_family(rule_type),
+        "table": plan.get("table"),
+        "column": plan.get("column"),
+        "params": params,
+        "query": plan.get("query"),
+        "reason": failure_message,
+        "failure_stage": failure_stage,
+    }
+
+
+def _build_trino_failure_metrics(
+    plan: dict[str, Any],
+    *,
+    duration_ms: float,
+    failure_stage: str,
+    error_code: str | None,
+    result_row_count: int,
+) -> dict[str, Any]:
+    rule_type = plan["rule_type"]
+    return {
+        "engine_type": "trino",
+        "engine_target": "trino_sql",
+        "rule_id": plan.get("rule_id"),
+        "rule_type": rule_type,
+        "rule_family": _infer_rule_family(rule_type),
+        "failure_stage": failure_stage,
+        "failure_code": error_code,
+        "result": "failed",
+        "passed_count": 0,
+        "failed_count": 1,
+        "duration_ms": duration_ms,
+        "storage_kind": None,
+        "storage_uri": None,
+        "failure_count": 1,
+        "failed_check_count": 1,
+        "failed_row_count": int(result_row_count),
+        "failed_rule_count": 1,
+    }
+
+
+def _build_trino_error_management(error_code: str | None, failure_message: str) -> dict[str, Any]:
+    return {
+        "storage_strategy": "inline",
+        "total_error_count": 1,
+        "chunk_count": 1,
+        "overflowed": False,
+        "sampled_error_rows": [
+            {
+                "engine_type": "trino",
+                "error_code": error_code,
+                "message": failure_message,
+            }
+        ],
+    }
 
 
 @dataclass
@@ -56,6 +122,8 @@ class ExecutionPlan:
         return {
             "rule_id": self.rule.get("id"),
             "rule_type": rule_type,
+            "table": self.rule.get("table"),
+            "column": self.rule.get("column"),
             "params": dict(self.rule.get("params") or {}),
             "lowered_rule": lowered,
             "query": lowered["query"],
@@ -124,16 +192,31 @@ class ExecutionPlan:
                     "error_management": {},
                 },
             }
-        except TrinoExecutionError as exc:
+        except (TrinoExecutionError, ValueError) as exc:
             metrics = self.executor.collect_query_metrics(plan["query"], started_at, len(result_rows))
+            duration_ms = float(metrics.get("duration_ms", 0))
             completed_at_iso = datetime.now(timezone.utc).isoformat()
+            failure_message = str(exc)
+            failure_code = getattr(exc, "error_code", None) or (
+                "DQ_TRINO_VALIDATION_ERROR" if isinstance(exc, ValueError) else "DQ_TRINO_EXECUTION_ERROR"
+            )
+            query_id = getattr(exc, "query_id", None)
+            failed_check = _build_trino_failed_check(plan, failure_message, failure_stage="execute")
+            failure_metrics = _build_trino_failure_metrics(
+                plan,
+                duration_ms=duration_ms,
+                failure_stage="execute",
+                error_code=failure_code,
+                result_row_count=len(result_rows),
+            )
+            error_management = _build_trino_error_management(failure_code, failure_message)
             execution_metadata = build_execution_metadata(
                 rule_id=plan["rule_id"],
                 engine_type="trino",
                 runtime="trino",
                 started_at=started_at_iso,
                 completed_at=completed_at_iso,
-                duration_ms=float(metrics.get("duration_ms", 0)),
+                duration_ms=duration_ms,
                 source_row_count=int(len(result_rows)),
                 execution_name="dq-engine-trino",
                 guardrails={"sample_limit": int(getattr(self.executor, "config", {}).get("max_result_sample_size", 1000))},
@@ -144,7 +227,7 @@ class ExecutionPlan:
                 passed_count=0,
                 failed_count=1,
                 rule_family=rule_type,
-                duration_ms=float(metrics.get("duration_ms", 0)),
+                duration_ms=duration_ms,
                 storage_kind=None,
                 storage_uri=None,
             )
@@ -156,16 +239,25 @@ class ExecutionPlan:
                 "result_status": "failed",
                 "passed_count": 0,
                 "failed_count": 1,
+                "failure_code": failure_code,
+                "failure_message": failure_message,
+                "failed_check": failed_check,
+                "failure_metrics": failure_metrics,
+                "trace": {
+                    "exception_type": exc.__class__.__name__,
+                    "message": failure_message,
+                    "query_id": query_id,
+                },
                 "result": {
                     "passed": False,
-                    "error": str(exc),
-                    "error_code": exc.error_code,
-                    "query_id": exc.query_id,
+                    "error": failure_message,
+                    "error_code": failure_code,
+                    "query_id": query_id,
                 },
                 "metrics": metrics,
                 "execution_metadata": execution_metadata,
                 "quarantine_artifact": {},
-                "error_management": {},
+                "error_management": error_management,
                 "observability_summary": observability_summary,
                 **_summarize_result_rows(result_rows),
                 "lowered_rule": plan["lowered_rule"],
