@@ -436,17 +436,20 @@ trino:
 ## Milestones
 
 ### Milestone 1: Adapter Foundation (Week 1, Day 1-3)
-- [ ] Create `trino_adapter.py`
-- [ ] Implement identifier escaping
-- [ ] Implement literal formatting
-- [ ] Implement row rule lowering
-- [ ] Write unit tests (row rules)
-- [ ] **Acceptance:** All row-level rules generate correct Trino SQL
+- [x] Create `trino_adapter.py`
+- [x] Implement identifier escaping
+- [x] Implement literal formatting
+- [x] Implement row rule lowering
+- [x] Write unit tests (row rules)
+- [x] **Acceptance:** All row-level rules generate correct Trino SQL
+    - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
 
 ### Milestone 2: Aggregate Rules (Week 1, Day 4-6)
 - [ ] Implement aggregate rule lowering
 - [ ] Add DISTINCT support
 - [ ] Add aggregate function aliases
+- [ ] Add WHERE filters before aggregation
+- [ ] Add HAVING filters after aggregation
 - [ ] Write unit tests (aggregate rules)
 - [ ] **Acceptance:** All aggregate rules generate correct Trino SQL
 
