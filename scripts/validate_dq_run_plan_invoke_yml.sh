@@ -9,8 +9,8 @@ set -euo pipefail
 # - Confirms the CLI returns run_id and queue_message_id, then polls GET /rulebuilder/v1/gx/runs/{run_id} until the run succeeds.
 #
 # validate: groups=api,cli,regression
-# Version: 1.0.0
-# Last modified: 2026-05-30
+# Version: 1.0.1
+# Last modified: 2026-07-01
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -155,7 +155,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 for arg in "$@"; do
   case "$arg" in

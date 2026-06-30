@@ -6,7 +6,7 @@ set -euo pipefail
 # - Runs selected stack smoke checks after lifecycle actions complete.
 # - Keeps smoke validation separate from stack startup and seeding flows.
 # - Fails fast when a requested smoke target is unavailable.
-# Version: 1.0
+# Version: 1.1
 # Last modified: 2026-05-09
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -41,7 +41,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 if [ "$#" -eq 0 ]; then
   RUN_AUTH_KONG=true

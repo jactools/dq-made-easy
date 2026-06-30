@@ -10,7 +10,7 @@ set -euo pipefail
 # - Confirms /auth/v1/redirect points to the expected Keycloak auth endpoint.
 # - Verifies /auth/v1/login is reachable through Kong without a JWT.
 #
-# Version: 1.1
+# Version: 1.2
 # Last modified: 2026-05-01
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -28,7 +28,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 validate_selected_root_env_file "$ROOT_DIR" full
 

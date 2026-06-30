@@ -6,8 +6,8 @@ set -euo pipefail
 # - Resolves the canonical root env file using the shared --env/--env-file selector.
 # - Sources the selected root env file so downstream scripts inherit stack URLs and client ids.
 # - Sources the matching tmp/keycloak_seed_user_credentials.<stage>.env file.
-# Version: 1.0
-# Last modified: 2026-05-01
+# Version: 1.1
+# Last modified: 2026-07-01
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -125,7 +125,7 @@ dq_load_seeded_user_credentials_main() {
   if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
     return 1
   fi
-  set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+  set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
   while [[ $# -gt 0 ]]; do
     case "$1" in

@@ -10,8 +10,8 @@ set -euo pipefail
 # - Defaults to the standard seeded smoke checks when invoked without flags.
 # - Uses the repo venv and installs missing dev deps when required.
 #
-# Version: 1.0
-# Last modified: 2026-04-21
+# Version: 1.1
+# Last modified: 2026-07-01
 
 ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
 PYTHON_RUNNER="${PYTHON_RUNNER:-$ROOT_DIR/scripts/python_arm64.sh}"
@@ -118,7 +118,7 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     exit 1
   fi
 
-  set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+  set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
   validate_selected_root_env_file "$ROOT_DIR" full
 

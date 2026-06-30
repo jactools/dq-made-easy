@@ -8,8 +8,8 @@ set -euo pipefail
 # - Stops the local Vite frontend process (if running).
 # - Brings down the stack via stop_stack.sh.
 #
-# Version: 1.2
-# Last modified: 2026-04-29
+# Version: 1.3
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.1 (2026-04-27): Propagated env-file selection to stop_stack.sh so teardown uses the same deployment env.
 # - 1.2 (2026-04-29): Switched teardown env selection to the canonical dev/test/prod contract.
@@ -27,7 +27,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
 	exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ "$#" -gt 0 ]]; do
 	case "$1" in

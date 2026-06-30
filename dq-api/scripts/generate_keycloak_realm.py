@@ -437,6 +437,7 @@ def generate_realm(
                 "description": "Grafana - Rule Builder Observability UI",
                 "enabled": True,
                 "publicClient": False,
+                "serviceAccountsEnabled": True,
                 "secret": grafana_oidc_secret,
                 "protocol": "openid-connect",
                 "standardFlowEnabled": True,

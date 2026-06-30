@@ -11,7 +11,7 @@ set -euo pipefail
 #   and asserts a dispatch_id and accepted status are returned.
 # - Calls GET /agent/v1/audit/events and confirms the dispatch was audited.
 # validate: groups=api,regression
-# Version: 1.0
+# Version: 1.1
 # Last modified: 2026-06-02
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -30,7 +30,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   echo "Usage: $my_name [--env dev|test|prod] [--env-file PATH]" >&2
   exit 1
 fi
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 validate_selected_root_env_file "$ROOT_DIR" full
 

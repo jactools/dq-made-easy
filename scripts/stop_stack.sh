@@ -8,8 +8,8 @@ set -euo pipefail
 # - Brings down the full-stack compose profile.
 # - Optionally removes volumes when requested.
 #
-# Version: 1.3
-# Last modified: 2026-05-09
+# Version: 1.4
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.1 (2026-04-27): Added env-file selection so teardown follows the same deployment env as startup.
 # - 1.2 (2026-04-29): Switched teardown env selection to the canonical dev/test/prod contract.
@@ -46,7 +46,7 @@ if ! consume_root_env_selection_args "$ROOT" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ "$#" -gt 0 ]]; do
   case "$1" in

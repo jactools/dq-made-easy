@@ -9,8 +9,8 @@ set -euo pipefail
 # - Starts selected profiles (including metadata and ingestion).
 # - Optionally runs seeding steps for DB, Keycloak, or OpenMetadata.
 #
-# Version: 1.3
-# Last modified: 2026-04-29
+# Version: 1.4
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.1 (2026-04-27): Added env-file selection flags and propagated ROOT_ENV_FILE through compose calls.
 # - 1.2 (2026-04-28): Updated help text to reflect the tracked deployment example and local runtime copy split.
@@ -56,7 +56,7 @@ fi
 
 my_name="start_stack_pull.sh"
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

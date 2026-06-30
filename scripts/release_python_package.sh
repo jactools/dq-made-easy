@@ -8,8 +8,8 @@ set -euo pipefail
 # - Builds the package wheel into a temporary dist directory.
 # - Optionally publishes the wheel to PyPI or a corporate Nexus PyPI endpoint.
 #
-# Version: 1.2.0
-# Last modified: 2026-06-30
+# Version: 1.2.1
+# Last modified: 2026-07-01
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -234,7 +234,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+  set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

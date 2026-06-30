@@ -9,8 +9,8 @@ set -euo pipefail
 # - Obtains a Keycloak bearer token (password grant).
 # - Sends profiling enqueue requests at a configured interval.
 #
-# Version: 1.0
-# Last modified: 2026-04-07
+# Version: 1.1
+# Last modified: 2026-07-01
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON_RUNNER="$ROOT_DIR/scripts/python_arm64.sh"
@@ -48,7 +48,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

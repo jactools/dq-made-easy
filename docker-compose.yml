@@ -404,6 +404,7 @@ services:
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
       ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
       GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-http://observability.jac.dot:3000}
+      GRAFANA_OIDC_REALM_ROLE: ${GRAFANA_OIDC_REALM_ROLE:-dq:rules:read}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_REALM_ROLE: ${DQ_ENGINE_OIDC_REALM_ROLE:-dq:rules:write}
       UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
@@ -729,7 +730,7 @@ services:
       SSO_PROVIDER: ${SSO_PROVIDER}
       SSO_ISSUER: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
       SSO_CLIENT_ID: ${SSO_CLIENT_ID}
-      SSO_ALLOWED_CLIENT_IDS: ${SSO_ALLOWED_CLIENT_IDS:-dq-rules-ui,dq-made-easy-engine-gx-worker}
+      SSO_ALLOWED_CLIENT_IDS: ${SSO_ALLOWED_CLIENT_IDS:-dq-rules-ui,dq-made-easy-engine-gx-worker,grafana}
       SSO_ENABLED: ${SSO_ENABLED:-true}
       ALLOW_LOCAL_AUTH: ${ALLOW_LOCAL_AUTH}
       CATALOG_PROVIDER: ${CATALOG_PROVIDER:-openmetadata}
@@ -1472,6 +1473,7 @@ services:
       GF_AUTH_GENERIC_OAUTH_NAME: "Keycloak"
       GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
       GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "${GRAFANA_OIDC_SECRET:-changeme}"
+      GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
       GF_AUTH_GENERIC_OAUTH_SCOPES: "openid profile email roles"
       # AUTH_URL is followed by the browser — must use the public hostname, not the internal Docker service name
       GF_AUTH_GENERIC_OAUTH_AUTH_URL: "${KEYCLOAK_PUBLIC_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/auth"
@@ -1668,7 +1670,9 @@ services:
       timeout: 20s
       retries: 3
     networks:
-      - dq-network
+      dq-network:
+        aliases:
+          - minio
     labels:
       - "monitoring=false"
 

@@ -12,7 +12,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
 	exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 validate_selected_root_env_file "$ROOT_DIR" full
 

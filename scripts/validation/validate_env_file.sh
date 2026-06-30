@@ -8,7 +8,7 @@ set -euo pipefail
 # - Supports a reduced stop-mode check so teardown still works with invalid non-stop settings.
 # validate: groups=repo
 # validate: include=false
-# Version: 1.0
+# Version: 1.1
 # Last modified: 2026-05-13
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -285,7 +285,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

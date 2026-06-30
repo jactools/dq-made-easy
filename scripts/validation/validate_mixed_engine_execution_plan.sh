@@ -9,7 +9,7 @@ set -euo pipefail
 #
 # validate: groups=repo,api
 #
-# Version: 2.0
+# Version: 2.1
 # Last modified: 2026-05-14
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -65,7 +65,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 validate_selected_root_env_file "$ROOT_DIR" full
 
 if ! source_selected_root_env_file; then

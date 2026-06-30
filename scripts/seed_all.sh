@@ -7,8 +7,8 @@
 # - Seeds the local Postgres database.
 # - Optionally initializes Kong configuration.
 #
-# Version: 1.0
-# Last modified: 2026-04-07
+# Version: 1.1
+# Last modified: 2026-07-01
 
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -24,7 +24,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
     exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 if [ "$#" -gt 0 ]; then
     error "$my_name" "Unknown arg: $1"
     exit 1

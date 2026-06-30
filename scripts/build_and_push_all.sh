@@ -10,8 +10,8 @@ set -euo pipefail
 # - Supports automatic content-hash version tags (or a manual override).
 # - Publishes repo-managed wrapper images as multi-arch manifests when pushing.
 #
-# Version: 1.4
-# Last modified: 2026-06-10
+# Version: 1.5
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.3 (2026-04-27): Rewrote the repo build flow to use buildx multi-arch publishing and preserve a local-only --no-push path.
 # - 1.4 (2026-06-10): Require explicit OpenMetadata base and helper image settings instead of falling back to registry defaults.
@@ -139,7 +139,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

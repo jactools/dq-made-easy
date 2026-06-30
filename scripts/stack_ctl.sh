@@ -6,8 +6,8 @@ set -euo pipefail
 # - Provides one command surface for build, pull, push, start, restart, stop, and seed.
 # - Uses canonical env selection (`--env` / `--env-file`) across all actions.
 # - Supports explicit selectors for profiles, services, images, and seed targets.
-# Version: 1.2
-# Last modified: 2026-06-30
+# Version: 1.3
+# Last modified: 2026-07-01
 # - 1.2 (2026-06-30): Made service-only lifecycle commands safe under set -u.
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -484,7 +484,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

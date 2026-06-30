@@ -7,7 +7,7 @@ set -euo pipefail
 # - Verifies public path-prefix routes for /iam, /metadata, /observability, /support, and /ops/kong.
 # - Verifies that non-edge host-published ports resolve to 127.0.0.1 in the public deployment config.
 # validate: groups=repo,regression
-# Version: 1.9
+# Version: 1.10
 # Last modified: 2026-05-10
 # Changelog:
 # - 1.1 (2026-04-28): Switched validation to the tracked prod example and explicitly exported ROOT_ENV_FILE for nested compose env_file resolution.
@@ -31,7 +31,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 validate_selected_root_env_file "$ROOT_DIR" full
 

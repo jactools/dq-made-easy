@@ -6,8 +6,8 @@ set -euo pipefail
 # - Reconciles Kong, Keycloak, and OpenMetadata as separate explicit actions.
 # - Uses canonical env selection and shared compose/logging helpers.
 # - Fails fast when a selected reconciliation target is unavailable.
-# Version: 1.0
-# Last modified: 2026-05-09
+# Version: 1.1
+# Last modified: 2026-07-01
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
@@ -50,7 +50,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

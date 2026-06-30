@@ -11,7 +11,7 @@ set -euo pipefail
 # - Waits for the task event stream and verifies every selected attribute has a governed business term suggestion.
 #
 # validate: groups=api,regression
-# Version: 1.5
+# Version: 1.6
 # Last modified: 2026-06-01
 # Changelog:
 # - 1.5 (2026-06-01): On event stream timeout, fetches request status to distinguish still-running tasks from terminal outcomes.
@@ -153,7 +153,7 @@ init_root_env_file "$ROOT_DIR"
 if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 2
 fi
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 parse_script_args "$@"
 

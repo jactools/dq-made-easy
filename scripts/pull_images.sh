@@ -6,8 +6,8 @@ set -euo pipefail
 # - Loads image registry/tag configuration from the selected canonical root env file.
 # - Supports pulling either the default image scope or an explicit image subset.
 # - Supports semantic version overrides via calculate_versions.sh.
-# Version: 2.0
-# Last modified: 2026-04-29
+# Version: 2.1
+# Last modified: 2026-07-01
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -189,7 +189,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

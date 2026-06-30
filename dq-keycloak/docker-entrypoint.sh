@@ -173,9 +173,48 @@ sync_grafana_client() {
 
       /opt/keycloak/bin/kcadm.sh update "clients/${client_id}" -r "${KEYCLOAK_REALM}" \
             -s "redirectUris=${redirect_uris_json}" \
-            -s "webOrigins=${web_origins_json}" >/dev/null
+            -s "webOrigins=${web_origins_json}" \
+            -s 'serviceAccountsEnabled=true' >/dev/null
 
       echo "[entrypoint] synced grafana client redirects for ${grafana_public_url}"
+}
+
+sync_grafana_service_account_role() {
+      local client_name="grafana"
+      local required_role="${GRAFANA_OIDC_REALM_ROLE:-dq:rules:read}"
+      local client_json=""
+      local client_id=""
+      local service_account_json=""
+      local service_account_id=""
+      local has_required_role=""
+
+      if [ -z "$required_role" ]; then
+            echo "[entrypoint] ERROR: GRAFANA_OIDC_REALM_ROLE is required" >&2
+            exit 1
+      fi
+
+      client_json="$(/opt/keycloak/bin/kcadm.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=${client_name} --fields id)"
+      client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$client_id" ]; then
+            echo "[entrypoint] ERROR: ${client_name} client not found in realm ${KEYCLOAK_REALM}" >&2
+            exit 1
+      fi
+
+      service_account_json="$(/opt/keycloak/bin/kcadm.sh get "clients/${client_id}/service-account-user" -r "${KEYCLOAK_REALM}" --fields id)"
+      service_account_id="$(printf '%s\n' "$service_account_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$service_account_id" ]; then
+            echo "[entrypoint] ERROR: service-account user not found for client ${client_name}" >&2
+            exit 1
+      fi
+
+      has_required_role="$(/opt/keycloak/bin/kcadm.sh get "users/${service_account_id}/role-mappings/realm" -r "${KEYCLOAK_REALM}" | grep -F '"name" : "'"${required_role}"'"' || true)"
+      if [ -n "$has_required_role" ]; then
+            echo "[entrypoint] ${client_name} service-account already has realm role ${required_role}"
+            return
+      fi
+
+      /opt/keycloak/bin/kcadm.sh add-roles -r "${KEYCLOAK_REALM}" --uid "$service_account_id" --rolename "$required_role" >/dev/null
+      echo "[entrypoint] assigned realm role ${required_role} to ${client_name} service-account"
 }
 
 sync_zammad_client() {
@@ -264,6 +303,9 @@ sync_dq_rules_ui_client
 
 echo "[entrypoint] syncing grafana client redirect configuration"
 sync_grafana_client
+
+echo "[entrypoint] reconciling grafana service-account role"
+sync_grafana_service_account_role
 
 echo "[entrypoint] syncing zammad client redirect configuration"
 sync_zammad_client
