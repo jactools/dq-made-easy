@@ -1,6 +1,6 @@
 # Phase 1 Implementation Plan: Trino Lowerer
 
-**Status:** In Progress  
+**Status:** Phase 1 Complete  
 **Owner:** [To Be Assigned]  
 **Estimated Duration:** 2-3 weeks  
 **Priority:** High
@@ -17,23 +17,25 @@ This plan details the implementation of the Trino lowerer to enable distributed 
 
 ### Existing Implementation
 
-The Trino lowerer is **partially implemented** in `/dq-engine/runtime_lowerers.py`:
+The Trino lowerer Phase 1 implementation is complete across `/dq-engine/runtime_lowerers.py`, `/dq-engine/trino_adapter.py`, `/dq-engine/trino_executor.py`, and `/dq-engine/trino_execution_pipeline.py`:
 
 ✅ **Already Implemented:**
-- Basic row-level checks: `not_null`, `equals`, `not_equal`, `between`, `in`, `not_in`
-- Basic aggregate checks: `count`, `sum`, `min`, `max`
+- Basic row-level checks: `not_null`, `is_null`, `equals`, `not_equal`, `between`, `in`, `not_in`, `min`, `max`
+- Basic aggregate checks: `count`, `sum`, `avg`, `min`, `max`, `distinct_count`
 - Query-based validation patterns (`query` type)
+- Trino connection/execution logic through the DBAPI client
+- Bounded result sampling for large result sets
+- Artifact persistence through the shared execution contract
+- Structured error handling aligned with the shared reporting structures
+- Performance metrics collection and Phase 1 benchmark evidence
 - Failure envelope generation with proper error codes
 - Engine type normalization and aliasing
 - Integration with `compile_rule_payload`
 
-⚠️ **Limitations:**
-- No Trino connection/execution logic (currently only SQL generation)
-- No error handling for SQL execution failures
-- No performance metrics collection
+⚠️ **Phase 1 Limitations:**
 - Limited to basic constructs (no window functions, complex joins, etc.)
 - No schema validation
-- No dialect-specific SQL generation
+- Query result caching is not implemented
 
 ---
 
@@ -178,8 +180,8 @@ Enable end-to-end execution of Trino-backed data quality validations with:
 ```python
 # Key functions to implement:
 1. create_trino_connection(config: dict) -> trino.TrinoClient
-2. execute_trino_query(client: TrinoClient, query: str) -> pd.DataFrame
-3. validate_query_result(result: DataFrame, expected: dict) -> dict[str, Any]
+2. execute_trino_query(client: TrinoClient, query: str) -> TrinoQueryResult
+3. validate_query_result(result: TrinoQueryResult, expected: dict) -> dict[str, Any]
 4. collect_query_metrics(client: TrinoClient, query: str) -> dict[str, Any]
 5. handle_execution_error(error: Exception, query: str) -> dict[str, Any]
 ```
@@ -213,25 +215,24 @@ Enable end-to-end execution of Trino-backed data quality validations with:
 
 2. **Implement query execution**
    ```python
-   def execute_trino_query(client: TrinoClient, query: str) -> pd.DataFrame:
-       """Execute query with timeout and result collection"""
+   def execute_trino_query(client: TrinoClient, query: str) -> TrinoQueryResult:
+       """Execute query with timeout, streaming fetches, and bounded result sampling"""
        try:
-           # Execute with timeout
-           with client.query(query) as query_result:
-               # Handle streaming results for large queries
-               rows = list(query_result.iterrows(timeout=60))
-               return pd.DataFrame(rows)
+           cursor = client.cursor()
+           cursor.execute(query)
+           # Fetch in batches and retain only a bounded sample while counting all rows.
+           return TrinoQueryResult(rows=sample_rows, row_count=row_count, truncated=truncated)
        except trino.exceptions.TrinoUserError as e:
-           raise ValueError(f"Trino query error: {e.message}")
+           raise TrinoExecutionError(f"Trino query error: {e.message}", error_code="DQ_TRINO_QUERY_ERROR")
        except trino.exceptions.TrinoQueryException as e:
-           raise ValueError(f"Trino query exception: {e}")
+           raise TrinoExecutionError(f"Trino query exception: {e}", error_code="DQ_TRINO_QUERY_ERROR")
        except Exception as e:
-           raise RuntimeError(f"Query execution failed: {str(e)}")
+           raise TrinoExecutionError(f"Query execution failed: {str(e)}", error_code="DQ_TRINO_EXECUTION_ERROR")
    ```
 
 3. **Implement result validation**
    ```python
-   def validate_query_result(result: DataFrame, expected: dict) -> dict:
+    def validate_query_result(result: TrinoQueryResult, expected: dict) -> dict:
        """Validate query results against expected values"""
        validation_result = {
            "passed": True,
@@ -461,27 +462,30 @@ trino:
     - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json)
 
 ### Milestone 3: Execution Engine (Week 2, Day 1-4)
-- [ ] Create `trino_executor.py`
-- [ ] Implement connection factory
-- [ ] Implement query execution
-- [ ] Implement result validation
-- [ ] Write unit tests (executor)
-- [ ] **Acceptance:** Queries execute successfully against Trino
+- [x] Create `trino_executor.py`
+- [x] Implement connection factory
+- [x] Implement query execution
+- [x] Implement result validation
+- [x] Write unit tests (executor)
+- [x] **Acceptance:** Queries execute successfully against Trino
+    - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json)
 
 ### Milestone 4: Integration (Week 2, Day 5-7)
-- [ ] Create `trino_execution_pipeline.py`
-- [ ] Implement end-to-end flow
-- [ ] Add artifact persistence
-- [ ] Update `runtime_lowerers.py`
-- [ ] Write integration tests
-- [ ] **Acceptance:** Full rule execution works end-to-end
+- [x] Create `trino_execution_pipeline.py`
+- [x] Implement end-to-end flow
+- [x] Add artifact persistence
+- [x] Update `runtime_lowerers.py`
+- [x] Write integration tests
+- [x] **Acceptance:** Full rule execution works end-to-end
+    - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json)
 
 ### Milestone 5: Testing & Performance (Week 3)
-- [ ] Complete test coverage
-- [ ] Performance benchmarks
-- [ ] Error handling validation
-- [ ] Documentation
-- [ ] **Acceptance:** All tests pass, performance within bounds
+- [x] Complete test coverage
+- [x] Performance benchmarks
+- [x] Error handling validation
+- [x] Documentation
+- [x] **Acceptance:** All tests pass, performance within bounds
+    - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json)
 
 ---
 
@@ -516,7 +520,7 @@ trino:
 - Benchmark query execution time
 - Test memory usage
 - Test throughput
-- Compare with Spark performance
+- Validate Trino Phase 1 lowering throughput, in-process execution throughput, and bounded large-result sampling with `scripts/validation/benchmark_trino_phase1.py`
 
 ---
 
@@ -531,18 +535,22 @@ trino:
     - Milestone 2 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json)
 - [x] Query DQ rules execute correctly and results are persisted
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
+    - Milestone 4 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json)
     - Dispatch evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_spark_expectations_payload tests/test_spark_expectations_adapter.py::test_process_dispatch_message_reports_structured_spark_expectations_failure tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_sql_engine_through_shared_reporting tests/test_trino_execution_pipeline.py::test_query_rule_execution_persists_bounded_results_and_query_artifact -q`
     - Live container evidence: with Trino already running via `./scripts/stack_ctl.sh start --profile trino`, run `scripts/validation/validate_trino_live_container.sh` (`2 passed` live; broader Trino/dispatch suite with live tests: `49 passed`).
 - [x] Connection management works reliably
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py -q`
+    - Milestone 3 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json)
 - [x] Error handling produces meaningful messages and is aligned with the existing error reporting structures, persisted and available through the reporting APIs
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_execution_pipeline.py tests/test_spark_expectations_adapter.py::test_process_dispatch_message_reports_structured_spark_expectations_failure -q`
     - Trino-specific proof: structured `failure_code`, `failure_message`, `failed_check`, `failure_metrics`, `trace`, and `error_management` fields are persisted to `trino_execution.json`/`trino_errors.json` and propagated through the generic run reporting flow.
 - [x] All Trino related tests pass (≥90% coverage)
     - Evidence: `cd dq-engine && DQ_TRINO_HOST=127.0.0.1 DQ_TRINO_PORT=8084 DQ_TRINO_CATALOG=memory DQ_TRINO_SCHEMA=default /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_runtime_lowerer_registry.py tests/test_trino_live_container.py --cov=trino_adapter --cov=trino_config --cov=trino_executor --cov=trino_execution_pipeline --cov-report=term-missing --cov-fail-under=90 -q -rs`
-    - Result: `78 passed in 1.00s`; coverage gate reached with total coverage `96.12%` (`trino_adapter.py` 99%, `trino_config.py` 93%, `trino_execution_pipeline.py` 95%, `trino_executor.py` 96%).
+    - Result: `90 passed in 1.05s`; coverage gate reached with total coverage `95.24%` (`trino_adapter.py` 96%, `trino_config.py` 93%, `trino_execution_pipeline.py` 95%, `trino_executor.py` 96%).
     - Proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-coverage-gate-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-coverage-gate-2026-06-30.json)
+    - Milestone 5 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json)
     - Raw evidence: [test-results/evidence/0.11.5/api/20260630T150000Z-dq-engine-trino-coverage-gate](../../test-results/evidence/0.11.5/api/20260630T150000Z-dq-engine-trino-coverage-gate)
+    - Latest raw evidence: [test-results/evidence/0.11.5/api/20260630T172000Z-dq-engine-trino-milestone-5](../../test-results/evidence/0.11.5/api/20260630T172000Z-dq-engine-trino-milestone-5)
 
 ### Should Have
 - [ ] Performance metrics collection through the existing APIs and persistence
@@ -570,6 +578,23 @@ trino:
 - Curated proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-aggregate-lowerer-2026-06-30.json)
 - Focused test command: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
 
+### Milestone 3 Evidence
+- Raw evidence: [test-results/evidence/0.11.5/api/20260630T164500Z-dq-engine-trino-executor](../../test-results/evidence/0.11.5/api/20260630T164500Z-dq-engine-trino-executor)
+- Curated proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json)
+- Focused test command: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py -q`
+
+### Milestone 4 Evidence
+- Raw evidence: [test-results/evidence/0.11.5/api/20260630T170000Z-dq-engine-trino-integration](../../test-results/evidence/0.11.5/api/20260630T170000Z-dq-engine-trino-integration)
+- Curated proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json)
+- Focused test command: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_execution_pipeline.py tests/test_runtime_lowerer_registry.py -q`
+
+### Milestone 5 Evidence
+- Test and coverage raw evidence: [test-results/evidence/0.11.5/api/20260630T172000Z-dq-engine-trino-milestone-5](../../test-results/evidence/0.11.5/api/20260630T172000Z-dq-engine-trino-milestone-5)
+- Benchmark raw evidence: [test-results/evidence/0.11.5/api/20260630T171500Z-dq-engine-trino-phase1-benchmark](../../test-results/evidence/0.11.5/api/20260630T171500Z-dq-engine-trino-phase1-benchmark)
+- Curated proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json)
+- Coverage command: `cd dq-engine && DQ_TRINO_HOST=127.0.0.1 DQ_TRINO_PORT=8084 DQ_TRINO_CATALOG=memory DQ_TRINO_SCHEMA=default /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_runtime_lowerer_registry.py tests/test_trino_live_container.py --cov=trino_adapter --cov=trino_config --cov=trino_executor --cov=trino_execution_pipeline --cov-report=term-missing --cov-fail-under=90 -q -rs`
+- Benchmark command: `cd /Users/Jac.Beekers/gitrepos/dq-made-easy && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python scripts/validation/benchmark_trino_phase1.py --output test-results/evidence/0.11.5/api/20260630T171500Z-dq-engine-trino-phase1-benchmark/benchmark.json`
+
 ---
 
 ## Rollout Plan
@@ -596,7 +621,6 @@ trino:
 ### External Dependencies
 - Trino server (latest stable version)
 - Python Trino client (`trino` package)
-- Pandas for result handling
 
 ### Internal Dependencies
 - Existing `runtime_lowerers.py` infrastructure
