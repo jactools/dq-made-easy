@@ -30,14 +30,18 @@ from dq_utils.auth_utils import build_oidc_token_provider_from_env
 from dq_utils.spark_runtime import build_spark_session_builder
 from dq_utils.spark_runtime import resolve_spark_master
 from dq_utils.spark_runtime import resolve_spark_ui_port
-from gx_dispatch_dispatch import build_execution_progress
-from gx_dispatch_dispatch import build_token_provider
-from gx_dispatch_dispatch import coerce_int
-from gx_dispatch_dispatch import coerce_str
-from gx_dispatch_dispatch import log_dispatch_received
-from gx_dispatch_dispatch import parse_dispatch_payload
-from gx_dispatch_dispatch import report_execution_progress
-from gx_dispatch_dispatch import report_run
+from execution_dispatch import SUPPORTED_EXECUTION_ENGINES
+from execution_dispatch import build_execution_progress
+from execution_dispatch import build_token_provider
+from execution_dispatch import coerce_int
+from execution_dispatch import coerce_str
+from execution_dispatch import execute_engine_rule_payload
+from execution_dispatch import log_dispatch_received
+from execution_dispatch import normalize_execution_engine
+from execution_dispatch import parse_dispatch_payload
+from execution_dispatch import process_engine_dispatch_message
+from execution_dispatch import report_execution_progress
+from execution_dispatch import report_run
 from gx_dispatch_expectations import evaluate_expectations_spark
 from gx_dispatch_runtime import assert_supported_uri
 from gx_dispatch_runtime import coerce_source_location
@@ -60,8 +64,6 @@ from gx_dispatch_types import GxWorkerConfig
 from gx_dispatch_types import GxWorkerConfigError
 from gx_dispatch_types import GxWorkerExecutionError
 from gx_dispatch_types import SourceLocation
-from main import ExecuteRequest
-from main import execute_rule
 
 
 _S3_URI_RE = re.compile(r"^s3a?://")
@@ -2528,173 +2530,31 @@ def _process_spark_expectations_dispatch_message(
     correlation_id: str,
     requested_by: str | None,
 ) -> None:
-    rule_payload = payload.get("rule_payload")
-    if not isinstance(rule_payload, dict):
-        raise GxWorkerExecutionError(
-            "Spark Expectations dispatch payload is missing rule_payload",
-            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
-        )
-
-    engine_type = _coerce_str(payload, "engine_type") or _coerce_str(rule_payload, "engine_type")
-    if str(engine_type).strip().lower() != "spark_expectations":
-        raise GxWorkerExecutionError(
-            f"Unsupported Spark Expectations dispatch engine type: {engine_type!r}",
-            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
-        )
-
-    raw_rule_id = rule_payload.get("id")
-    try:
-        rule_id = int(raw_rule_id) if raw_rule_id is not None else 0
-    except Exception:
-        rule_id = 0
-
-    token_provider = _build_token_provider()
-    spark_expectations_started = time.perf_counter()
-    _api_report_run(
+    response_payload = process_engine_dispatch_message(
         config,
-        token_provider,
+        payload=payload,
         run_id=run_id,
         correlation_id=correlation_id,
-        new_status="running",
-        changed_by=requested_by,
-        reason="GX worker routed Spark Expectations execution",
-        details={"source": "dq-engine-gx-worker", "engine_type": "spark_expectations"},
-        execution_progress=_build_execution_progress(
-            completed_steps=1,
-            total_steps=2,
-            label="Invoking Spark Expectations execution endpoint",
-        ),
-        metrics={"engine_type": "spark_expectations", "stage": "started"},
+        requested_by=requested_by,
+        report_run_fn=_api_report_run,
+        report_progress_fn=_api_report_execution_progress,
+        token_provider_factory=_build_token_provider,
+        execute_payload_fn=execute_engine_rule_payload,
     )
-
-    execution_request = ExecuteRequest(
-        id=rule_id,
-        table=str(rule_payload.get("table") or ""),
-        column=rule_payload.get("column"),
-        type=str(rule_payload.get("type") or ""),
-        params=rule_payload.get("params") if isinstance(rule_payload.get("params"), dict) else None,
-        output_dir=str(payload.get("output_dir")) if payload.get("output_dir") is not None else None,
-        engine_type="spark_expectations",
-    )
-    response_payload = execute_rule(execution_request)
-    if not isinstance(response_payload, dict):
-        raise GxWorkerExecutionError(
-            "Spark Expectations execution failed",
-            failure_code="GX_WORKER_EXECUTION_ERROR",
-        )
-
-    report_summary = _build_spark_expectations_report_summary(response_payload, output_dir=payload.get("output_dir"))
-    report_details = {
-        "source": "dq-engine-gx-worker",
-        "engine_type": "spark_expectations",
-        "rule_id": rule_id,
-        "result": response_payload.get("result", "passed"),
-        "passed_count": response_payload.get("passed_count", 0),
-        "failed_count": response_payload.get("failed_count", 0),
-        "execution_metadata": response_payload.get("execution_metadata", {}),
-        "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
-        "error_management": response_payload.get("error_management", {}),
-        "observability_summary": response_payload.get("observability_summary", {}),
-        "output_dir": payload.get("output_dir"),
-    }
-    if not response_payload.get("ok"):
-        failure_code = response_payload.get("failure_code") or "GX_WORKER_EXECUTION_ERROR"
-        failure_message = response_payload.get("failure_message") or response_payload.get("error") or "Spark Expectations execution failed"
-        report_details.update(
-            {
-                "failure_code": failure_code,
-                "failure_message": failure_message,
-                "failed_check": response_payload.get("failed_check", {}),
-                "failure_metrics": response_payload.get("failure_metrics", {}),
-                "trace": response_payload.get("trace", {}),
-            }
-        )
+    engine_type = str(response_payload.get("engine_type") or normalize_execution_engine(_coerce_str(payload, "engine_type")))
+    if engine_type == "spark_expectations":
         record_spark_expectations_observability(
             observability_summary=response_payload.get("observability_summary"),
-            result=response_payload.get("result", "failed"),
+            result=response_payload.get("result") if isinstance(response_payload.get("result"), str) else response_payload.get("result_status"),
         )
-        _api_report_execution_progress(
-            config,
-            token_provider,
-            run_id=run_id,
-            correlation_id=correlation_id,
-            changed_by=requested_by,
-            reason="GX worker completed Spark Expectations execution with failures",
-            details=report_details,
-            completed_steps=2,
-            total_steps=2,
-            label="Spark Expectations execution completed with failures",
-        )
-        _api_report_run(
-            config,
-            token_provider,
-            run_id=run_id,
-            correlation_id=correlation_id,
-            new_status="failed",
-            changed_by=requested_by,
-            reason="GX worker completed Spark Expectations execution with failures",
-            details=report_details,
-            execution_progress=_build_execution_progress(
-                completed_steps=2,
-                total_steps=2,
-                label="Spark Expectations execution completed with failures",
-            ),
-            completed_at=_utc_now_iso(),
-            result_summary=report_summary,
-            metrics=response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {}),
-            diagnostics=[],
-            failure_code=failure_code,
-            failure_message=failure_message,
-        )
-        record_worker_duration(
-            stage="dispatch",
-            execution_shape="spark_expectations",
-            duration_ms=(time.perf_counter() - spark_expectations_started) * 1000.0,
-            result="failure",
-            batch_count=1,
-            suite_count=1,
-            target_count=1,
-        )
-        return
-
-    record_spark_expectations_observability(
-        observability_summary=response_payload.get("observability_summary"),
-        result=response_payload.get("result"),
-    )
-
-    _api_report_execution_progress(
-        config,
-        token_provider,
-        run_id=run_id,
-        correlation_id=correlation_id,
-        changed_by=requested_by,
-        reason="GX worker completed Spark Expectations execution",
-        details=report_details,
-        completed_steps=2,
-        total_steps=2,
-        label="Spark Expectations execution completed",
-    )
-
-    _api_report_run(
-        config,
-        token_provider,
-        run_id=run_id,
-        correlation_id=correlation_id,
-        new_status="succeeded",
-        changed_by=requested_by,
-        reason="GX worker completed Spark Expectations execution",
-        details=report_details,
-        execution_progress=_build_execution_progress(
-            completed_steps=2,
-            total_steps=2,
-            label="Spark Expectations execution completed",
-        ),
-        completed_at=_utc_now_iso(),
-        result_summary=report_summary,
-        metrics=response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {}),
-        diagnostics=[],
-        failure_code=None,
-        failure_message=None,
+    record_worker_duration(
+        stage="dispatch",
+        execution_shape=engine_type,
+        duration_ms=0.0,
+        result="success" if response_payload.get("ok") else "failure",
+        batch_count=1,
+        suite_count=1,
+        target_count=1,
     )
 
 
@@ -2723,7 +2583,8 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
         )
         return
 
-    if str(_coerce_str(payload, "engine_type") or "").strip().lower() == "spark_expectations":
+    dispatch_engine_type = normalize_execution_engine(_coerce_str(payload, "engine_type"))
+    if dispatch_engine_type in (SUPPORTED_EXECUTION_ENGINES - {"gx"}):
         _process_spark_expectations_dispatch_message(
             config,
             payload=payload,

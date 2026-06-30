@@ -397,19 +397,17 @@ def lower_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
     # Delegate to appropriate lowerer...
 ```
 
-### 2. Update `main.py`
+### 2. Use the engine-neutral execution dispatch flow
 
 **Changes needed:**
-- Add Trino execution endpoint
-- Add configuration loading
-- Add connection management
+- Publish Trino execution outcomes through the shared run/report/result/error contract
+- Reuse the existing reporting API that persists results/errors to Postgres and StorIO
+- Keep execution dispatch internal instead of adding a Trino-specific public endpoint
 
 ```python
-# Add to main.py:
-@app.post("/execute-trino")
-def execute_trino_rule(req: TrinoExecuteRequest):
-    """Execute a rule using Trino backend"""
-    # Implementation...
+# Engine dispatch flow:
+# execution_dispatch.process_engine_dispatch_message(..., engine_type="trino")
+# -> /rulebuilder/v1/gx/runs/{run_id}/report compatibility contract
 ```
 
 ### 3. Update `docker-compose.yml`
@@ -519,15 +517,16 @@ trino:
     - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
 - [x] Query DQ rules execute correctly and results are persisted
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
+    - Dispatch evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_spark_expectations_payload tests/test_spark_expectations_adapter.py::test_process_dispatch_message_reports_structured_spark_expectations_failure tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_sql_engine_through_shared_reporting tests/test_trino_execution_pipeline.py::test_query_rule_execution_persists_bounded_results_and_query_artifact -q`
 - [ ] Connection management works reliably
-- [ ] Error handling produces meaningful messages
+- [ ] Error handling produces meaningful messages and is aligned with the existing error reporting structures.
 - [ ] All tests pass (≥90% coverage)
 
 ### Should Have
-- [ ] Performance metrics collection
+- [ ] Performance metrics collection through the existing APIs and persistence
 - [ ] Schema validation
 - [ ] Query result caching
-- [ ] Streaming for large results
+- [ ] Streaming for large results, where aggregated results are stored in postgres and large detailed results on AIStor, the same way as for other lowerers
 - [ ] Comprehensive documentation
 
 ### Nice to Have

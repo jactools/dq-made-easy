@@ -19,6 +19,7 @@ if str(DQ_UTILS_ROOT) not in sys.path:
 
 from gx_dispatch_worker import GxWorkerConfig
 from gx_dispatch_worker import process_dispatch_message
+from execution_dispatch import execute_engine_rule_payload
 from main import app
 from main import compile_rule_payload
 from spark_expectations_adapter import build_error_management_plan
@@ -789,12 +790,10 @@ def test_execute_spark_expectations_rule_publishes_quarantine_artifact_to_aistor
     assert persisted_payload["execution_metadata"]["rule_id"] == 106
 
 
-def test_execute_endpoint_persists_artifacts(tmp_path: Path) -> None:
-    client = TestClient(app)
-
-    response = client.post(
-        "/execute",
-        json={
+def test_generic_execution_dispatch_persists_spark_expectations_artifacts(tmp_path: Path) -> None:
+    payload = execute_engine_rule_payload(
+        engine_type="spark_expectations",
+        rule_payload={
             "id": 103,
             "table": "customers",
             "column": "customer_id",
@@ -805,13 +804,10 @@ def test_execute_endpoint_persists_artifacts(tmp_path: Path) -> None:
                 "error_sample_size": 3,
                 "synthetic_row_count": 20,
             },
-            "output_dir": str(tmp_path),
-            "engine_type": "spark_expectations",
         },
+        output_dir=str(tmp_path),
     )
 
-    assert response.status_code == 200
-    payload = response.json()
     assert payload["ok"] is True
     assert payload["failed_count"] == 8
     assert payload["passed_count"] == 12
@@ -830,7 +826,7 @@ def test_execute_endpoint_persists_artifacts(tmp_path: Path) -> None:
     assert persisted_errors["observability_summary"]["failed_count"] == 8
 
 
-def test_execute_endpoint_persists_structured_failure_payload(tmp_path: Path) -> None:
+def test_public_execute_endpoint_is_removed(tmp_path: Path) -> None:
     client = TestClient(app)
 
     response = client.post(
@@ -846,39 +842,13 @@ def test_execute_endpoint_persists_structured_failure_payload(tmp_path: Path) ->
         },
     )
 
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["ok"] is False
-    assert payload["engine_type"] == "gx"
-    assert payload["rule_id"] == 105
-    assert payload["failure_code"] == "DQ_EXECUTION_UNSUPPORTED_ENGINE"
-    assert payload["failed_check"]["check_name"] == "not_null"
-    assert payload["failed_check"]["reason"] == "unsupported engine type for execution: 'gx'"
-    assert payload["failure_metrics"]["failure_stage"] == "execute"
-    assert payload["trace"]["exception_type"] == "ValueError"
-    assert "unsupported engine type" in payload["trace"]["message"]
-    assert "Traceback" in payload["trace"]["traceback"]
-    assert payload["compiled_artifact"] == {}
-    assert payload["observability_summary"]["result"] == "failed"
-    assert (tmp_path / "spark_expectations_execution.json").exists()
-    assert (tmp_path / "spark_expectations_errors.json").exists()
-
-    persisted_execution = json.loads((tmp_path / "spark_expectations_execution.json").read_text(encoding="utf-8"))
-    persisted_errors = json.loads((tmp_path / "spark_expectations_errors.json").read_text(encoding="utf-8"))
-    assert persisted_execution["failure_code"] == "DQ_EXECUTION_UNSUPPORTED_ENGINE"
-    assert persisted_execution["failed_check"]["check_name"] == "not_null"
-    assert persisted_execution["trace"]["exception_type"] == "ValueError"
-    assert persisted_errors["failure_code"] == "DQ_EXECUTION_UNSUPPORTED_ENGINE"
-    assert persisted_errors["failed_check"]["check_name"] == "not_null"
-    assert persisted_errors["trace"]["exception_type"] == "ValueError"
+    assert response.status_code == 404
 
 
-def test_execute_endpoint_evaluates_rows_with_pyspark(tmp_path: Path) -> None:
-    client = TestClient(app)
-
-    response = client.post(
-        "/execute",
-        json={
+def test_generic_execution_dispatch_evaluates_spark_expectations_rows(tmp_path: Path) -> None:
+    payload = execute_engine_rule_payload(
+        engine_type="spark_expectations",
+        rule_payload={
             "id": 104,
             "table": "customers",
             "column": "customer_id",
@@ -893,13 +863,10 @@ def test_execute_endpoint_evaluates_rows_with_pyspark(tmp_path: Path) -> None:
                 "error_chunk_size": 2,
                 "error_sample_size": 2,
             },
-            "output_dir": str(tmp_path),
-            "engine_type": "spark_expectations",
         },
+        output_dir=str(tmp_path),
     )
 
-    assert response.status_code == 200
-    payload = response.json()
     assert payload["ok"] is True
     assert payload["passed_count"] == 2
     assert payload["failed_count"] == 2
@@ -1098,7 +1065,7 @@ def test_process_dispatch_message_reports_structured_spark_expectations_failure(
     monkeypatch.setattr("gx_dispatch_worker._api_report_run", fake_report_run)
     monkeypatch.setattr("gx_dispatch_worker._api_report_execution_progress", fake_report_progress)
     monkeypatch.setattr("gx_dispatch_worker._build_token_provider", lambda: DummyTokenProvider())
-    monkeypatch.setattr("gx_dispatch_worker.execute_rule", lambda req: failure_payload)
+    monkeypatch.setattr("gx_dispatch_worker.execute_engine_rule_payload", lambda **kwargs: failure_payload)
 
     payload = {
         "run_id": "run-105",
@@ -1132,3 +1099,62 @@ def test_process_dispatch_message_reports_structured_spark_expectations_failure(
     assert details.get("failure_code") == "DQ_EXECUTION_ERROR"
     assert details.get("failed_check", {}).get("check_name") == "not_null"
     assert details.get("failure_metrics", {}).get("failure_stage") == "execute"
+
+
+def test_process_dispatch_message_routes_sql_engine_through_shared_reporting(monkeypatch: pytest.MonkeyPatch) -> None:
+    config = GxWorkerConfig(
+        redis_url="redis://localhost:6379/0",
+        queue_key="dq-gx:execution-dispatch",
+        processing_queue_key="dq-gx:execution-dispatch:processing",
+        heartbeat_key="dq-gx:execution-dispatch:heartbeat",
+        heartbeat_ttl_seconds=30,
+        heartbeat_interval_seconds=10,
+        max_rows=1000,
+        poll_timeout_seconds=5,
+        api_url="http://localhost",
+        spark_master="local[1]",
+        spark_ui_port=4044,
+        s3_endpoint=None,
+        s3_access_key=None,
+        s3_secret_key=None,
+        s3_region=None,
+        s3_path_style_access=False,
+        s3_ssl_enabled=None,
+    )
+
+    created_reports: list[dict[str, object]] = []
+
+    def fake_report_run(*args: object, **kwargs: object) -> None:
+        created_reports.append({"action": "report_run", **kwargs})
+
+    def fake_report_progress(*args: object, **kwargs: object) -> None:
+        created_reports.append({"action": "report_progress", **kwargs})
+
+    class DummyTokenProvider:
+        def get_token(self, *, correlation_id: str | None = None) -> str:
+            return "token"
+
+    monkeypatch.setattr("gx_dispatch_worker._api_report_run", fake_report_run)
+    monkeypatch.setattr("gx_dispatch_worker._api_report_execution_progress", fake_report_progress)
+    monkeypatch.setattr("gx_dispatch_worker._build_token_provider", lambda: DummyTokenProvider())
+
+    payload = {
+        "run_id": "run-sql-1",
+        "correlation_id": "corr-sql-1",
+        "requested_by": "tester",
+        "engine_type": "sql",
+        "rule_payload": {
+            "id": 205,
+            "table": "customers",
+            "column": "customer_id",
+            "type": "not_null",
+            "params": {},
+        },
+    }
+
+    process_dispatch_message(config, raw_message=json.dumps(payload))
+
+    failed_report = next(item for item in created_reports if item.get("new_status") == "failed")
+    assert failed_report["failure_code"] == "DQ_EXECUTION_NOT_IMPLEMENTED"
+    assert failed_report.get("details", {}).get("engine_type") == "sql"
+    assert failed_report.get("result_summary", {}).get("engine_type") == "sql"
