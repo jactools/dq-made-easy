@@ -495,7 +495,7 @@ services:
       context: ./dq-trino
       dockerfile: Dockerfile.trino
       args:
-        TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:-trinodb/trino:477}
+        TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:-trinodb/trino:482}
     container_name: dq-made-easy-trino
     ports:
       - "${TRINO_HOST_BIND:-127.0.0.1}:${TRINO_HOST_PORT:-8084}:8080"

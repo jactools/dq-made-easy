@@ -9,7 +9,7 @@ set -euo pipefail
 # - Loads repo env and helper libraries.
 # - Starts the selected docker compose services (and optional seed steps).
 #
-# Version: 1.17
+# Version: 1.18
 # Last modified: 2026-06-30
 # Changelog:
 # - 1.4 (2026-04-26): Added env selectors and env-aware docker compose wrappers for local and deployment startup flows.
@@ -25,6 +25,7 @@ set -euo pipefail
 # - 1.14 (2026-05-31): Switched startup to one wrapper script that builds all required wheel artifacts.
 # - 1.16 (2026-06-02): Added explicit --with-spark startup support for the distributed Spark cluster profile.
 # - 1.17 (2026-06-30): Added Trino to --all startup and explicit --with-trino support.
+# - 1.18 (2026-06-30): Runs the Trino AIStor catalog seed after --seed-all delivery seeding.
 # - 1.15 (2026-05-31): Delegated Airflow DAG artifact build calls through scripts/package-releases/build_dq_airflow_dag_artifact.sh.
 
 # Source generic logging function
@@ -1036,6 +1037,19 @@ if [ "${#POSTSTACK_SEED_ARGS[@]}" -gt 0 ]; then
     exit 1
   }
   info "$my_name" "Post-stack seeding completed successfully"
+fi
+
+if [ "$SEED_ALL" = true ] && [ "$SEED_DELIVERIES" = true ]; then
+  trino_seed_args=(--env-file "$ROOT_ENV_FILE")
+  if [ "$FORCE_BUILD" = true ]; then
+    trino_seed_args+=(--force-build)
+  fi
+  info "$my_name" "Running Trino AIStor catalog seed after --seed-all delivery seeding..."
+  ./scripts/seed_trino_aistor_catalogs.sh "${trino_seed_args[@]}" || {
+    warning "$my_name" "Trino AIStor catalog seeding failed during start-containers.sh --seed-all execution"
+    exit 1
+  }
+  info "$my_name" "Trino AIStor catalog seed completed successfully"
 fi
 
 if [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then

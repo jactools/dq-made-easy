@@ -431,7 +431,7 @@ trino:
         context: ./dq-trino
         dockerfile: Dockerfile.trino
         args:
-            TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:-trinodb/trino:477}
+            TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:-trinodb/trino:482}
   ports:
         - "${TRINO_HOST_BIND:-127.0.0.1}:${TRINO_HOST_PORT:-8084}:8080"
   # ... etc
@@ -515,6 +515,7 @@ trino:
 - Test with different data sources
 - Test with large datasets
 - Test error scenarios
+- Seed AIStor parquet data for Trino validation from `dq-db/mock-data` with `scripts/seed_trino_aistor_catalogs.sh`
 
 ### Performance Tests
 - Benchmark query execution time
@@ -538,6 +539,8 @@ trino:
     - Milestone 4 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-integration-2026-06-30.json)
     - Dispatch evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_spark_expectations_payload tests/test_spark_expectations_adapter.py::test_process_dispatch_message_reports_structured_spark_expectations_failure tests/test_spark_expectations_adapter.py::test_process_dispatch_message_routes_sql_engine_through_shared_reporting tests/test_trino_execution_pipeline.py::test_query_rule_execution_persists_bounded_results_and_query_artifact -q`
     - Live container evidence: with Trino already running via `./scripts/stack_ctl.sh start --profile trino`, run `scripts/validation/validate_trino_live_container.sh` (`2 passed` live; broader Trino/dispatch suite with live tests: `49 passed`).
+    - Real AIStor parquet seed proof: `scripts/seed_trino_aistor_catalogs.sh --dry-run` resolves the Currency v1 mock delivery to `s3a://retail-banking/standardized/analytics/Currency/v1/LOAD_DTS=20260220T071500000Z` (`180` rows, `2` parquet files, `5` columns) from `dq-db/mock-data` CSV inputs. Non-dry-run seeding assumes AIStor is already live and fails if the `dq-made-easy-aistor` container is not running. `scripts/start-containers.sh --seed-all` invokes this Trino seed after post-stack delivery seeding when delivery seeding is enabled.
+    - Real AIStor parquet validation proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-real-aistor-parquet-validation-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-real-aistor-parquet-validation-2026-06-30.json) records the implemented check and current environment block until Trino is rebuilt with the `aistor` catalog and the seed script has populated AIStor.
 - [x] Connection management works reliably
     - Evidence: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py tests/test_trino_execution_pipeline.py -q`
     - Milestone 3 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-executor-2026-06-30.json)
@@ -549,6 +552,8 @@ trino:
     - Result: `90 passed in 1.05s`; coverage gate reached with total coverage `95.24%` (`trino_adapter.py` 96%, `trino_config.py` 93%, `trino_execution_pipeline.py` 95%, `trino_executor.py` 96%).
     - Proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-coverage-gate-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-coverage-gate-2026-06-30.json)
     - Milestone 5 proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-milestone-5-2026-06-30.json)
+    - Trino validation wrapper proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-phase1-validation-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-phase1-validation-2026-06-30.json)
+    - Trino AIStor seed proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-aistor-catalog-seed-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-aistor-catalog-seed-2026-06-30.json)
     - Raw evidence: [test-results/evidence/0.11.5/api/20260630T150000Z-dq-engine-trino-coverage-gate](../../test-results/evidence/0.11.5/api/20260630T150000Z-dq-engine-trino-coverage-gate)
     - Latest raw evidence: [test-results/evidence/0.11.5/api/20260630T172000Z-dq-engine-trino-milestone-5](../../test-results/evidence/0.11.5/api/20260630T172000Z-dq-engine-trino-milestone-5)
 

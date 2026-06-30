@@ -1,0 +1,7 @@
+command: cd /Users/Jac.Beekers/gitrepos/dq-made-easy/dq-engine && ../venv/bin/python -m pytest tests/test_trino_real_aistor_parquet_validation.py -q
+executed_at_utc: 2026-06-30T17:20:19Z
+status: passed
+
+Output:
+.                                                                        [100%]
+1 passed in 0.36s

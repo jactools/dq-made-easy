@@ -1,0 +1,4 @@
+[2026-06-30T17:02:53Z] [INFO] [seed_trino_aistor_catalogs.sh] Environment selection: custom (.env.dev.local) -> .env.dev.local
+[2026-06-30T17:02:53Z] [INFO] [seed_trino_aistor_catalogs.sh] Trino validation parquet target: s3a://retail-banking/standardized/analytics/Currency/v1/LOAD_DTS=20260220T071500000Z
+[2026-06-30T17:02:53Z] [ERROR] [seed_trino_aistor_catalogs.sh] AIStor container is not running. Start it first with: ./scripts/stack_ctl.sh start --profile aistor
+exit_code=1

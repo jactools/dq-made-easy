@@ -1,0 +1,48 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "dq-engine-trino-real-aistor-parquet-validation-2026-06-30",
+  "proof_type": "api",
+  "feature": "trino-real-aistor-parquet-validation",
+  "summary": "Trino 482 reads the seeded Currency v1 parquet delivery from live AIStor through the aistor Hive catalog, returns the expected 180 rows, and passes the Trino execution pipeline validation test.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-30T17:20:19Z",
+  "command": "cd /Users/Jac.Beekers/gitrepos/dq-made-easy && scripts/seed_trino_aistor_catalogs.sh --env-file .env.dev.local && cd dq-engine && ../venv/bin/python -m pytest tests/test_trino_real_aistor_parquet_validation.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/20260630T172005Z-dq-engine-trino-real-aistor-parquet-validation",
+  "test_files": [
+    "dq-engine/tests/test_trino_real_aistor_parquet_validation.py",
+    "dq-trino/Dockerfile.trino",
+    "dq-trino/etc/catalog/aistor.properties",
+    "scripts/validation/validate_trino_phase1.sh"
+  ],
+  "test_file_count": 4,
+  "test_count": 1,
+  "assertions": [
+    "The validation test targets the same seeded Currency v1 AIStor parquet path used by the Spark Expectations real AIStor validator",
+    "The test registers the existing parquet location as an external Trino table through the aistor Hive catalog",
+    "The test executes a DQ-style count query through the Trino execution pipeline and persists Trino artifacts when live dependencies are configured",
+    "The validation wrapper runs this AIStor parquet test in non-dry-run mode and fails when live tests skip",
+    "The live seed command uploaded the expected Currency v1 parquet delivery to AIStor: 180 rows across 2 parquet files",
+    "The running Trino CLI reports version 482 and a direct Trino count over the external table returns 180",
+    "The focused live pytest passes after recreating the external table metadata against the seeded AIStor parquet location"
+  ],
+  "diagnostics": {
+    "pytest_result": "1 passed in 0.36s",
+    "direct_trino_count_result": "180",
+    "trino_cli_version": "Trino CLI 482",
+    "seed_result": "Completed 1 delivery object upload(s); 180 rows, 2 file(s)",
+    "root_cause_fixed": "Trino 482 could reach AIStor health checks, but the aistor DNS alias resolved ambiguously during S3 split reads. dq-trino/etc/catalog/aistor.properties now uses the explicit dq-made-easy-aistor alias."
+  },
+  "proof_data": {
+    "default_input_uri": "s3a://retail-banking/standardized/analytics/Currency/v1/LOAD_DTS=20260220T071500000Z",
+    "expected_row_count": 180,
+    "actual_row_count": 180,
+    "seeded_file_count": 2,
+    "required_trino_catalog": "aistor",
+    "required_trino_schema": "dq_validation",
+    "required_table": "currency_real_aistor_validation",
+    "seed_script": "scripts/seed_trino_aistor_catalogs.sh",
+    "trino_base_image": "trinodb/trino:482",
+    "trino_s3_endpoint": "http://dq-made-easy-aistor:9000",
+    "container_lifecycle_managed_by_validation_script": false
+  }
+}

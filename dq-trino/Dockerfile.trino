@@ -1,5 +1,9 @@
-ARG TRINO_BASE_IMAGE=trinodb/trino:477
+ARG TRINO_BASE_IMAGE=trinodb/trino:482
 FROM ${TRINO_BASE_IMAGE}
+
+RUN mkdir -p /tmp/trino-hive-metastore && chown trino:trino /tmp/trino-hive-metastore
+
+COPY etc/catalog/ /etc/trino/catalog/
 
 LABEL version="0.1.0"
 LABEL description="Data Quality Made Easy Trino coordinator service"
