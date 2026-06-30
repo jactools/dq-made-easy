@@ -513,26 +513,33 @@ trino:
 ## Acceptance Criteria
 
 ### Must Have
-1. ✅ All row-level rules (not_null, equals, not_equal, between, in, not_in, min, max) generate valid Trino SQL
-2. ✅ Basic aggregate rules (count, sum, avg, min, max) generate valid Trino SQL
-3. ✅ Query DQ rules execute correctly
-4. ✅ Connection management works reliably
-5. ✅ Error handling produces meaningful messages
-6. ✅ All tests pass (≥90% coverage)
+- [x] All row-level rules (not_null, equals, not_equal, between, in, not_in, min, max) generate valid Trino SQL
+    - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
+- [x] Basic aggregate rules (count, sum, avg, min, max) generate valid Trino SQL
+    - Evidence: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
+- [ ] Query DQ rules execute correctly
+- [ ] Connection management works reliably
+- [ ] Error handling produces meaningful messages
+- [ ] All tests pass (≥90% coverage)
 
 ### Should Have
-1. ✅ Performance metrics collection
-2. ✅ Schema validation
-3. ✅ Query result caching
-4. ✅ Streaming for large results
-5. ✅ Comprehensive documentation
+- [ ] Performance metrics collection
+- [ ] Schema validation
+- [ ] Query result caching
+- [ ] Streaming for large results
+- [ ] Comprehensive documentation
 
 ### Nice to Have
-1. ✅ Window function support
-2. ✅ Complex joins
-3. ✅ Subquery support
-4. ✅ CTE support
-5. ✅ Automatic optimization hints
+- [ ] Window function support
+- [ ] Complex joins
+- [ ] Subquery support
+- [ ] CTE support
+- [ ] Automatic optimization hints
+
+### Milestone 1 Evidence
+- Raw evidence: [test-results/evidence/0.11.5/api/20260630T135805Z-dq-engine-trino-lowerer](../../test-results/evidence/0.11.5/api/20260630T135805Z-dq-engine-trino-lowerer)
+- Curated proof: [test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json](../../test-results/test-proof/0.11.5/api/dq-engine-trino-lowerer-2026-06-30.json)
+- Focused test command: `cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q`
 
 ---
 

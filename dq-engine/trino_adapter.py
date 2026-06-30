@@ -1,129 +1,125 @@
-"""
-Trino Adapter Module
-
-Centralizes Trino-specific lowering logic and SQL generation.
-"""
+"""Trino adapter helpers for lowering canonical DQ rules to Trino SQL."""
 
 from __future__ import annotations
 
+import re
+from datetime import date
+from datetime import datetime
+from datetime import time
 from typing import Any
-
-from trino_config import load_trino_config, validate_trino_config
 
 ROW_RULE_TYPES = {"not_null", "is_null", "equals", "not_equal", "between", "in", "not_in", "min", "max"}
 AGGREGATE_RULE_TYPES = {"count", "sum", "avg", "min", "max", "distinct_count"}
 QUERY_RULE_TYPES = {"query"}
+_TRINO_SIMPLE_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 def escape_trino_identifier(identifier: str) -> str:
-    """
-    Escape a Trino identifier using backticks.
-    
-    Trino identifiers are case-insensitive and should be quoted with backticks.
-    
-    Args:
-        identifier: The identifier to escape
-        
-    Returns:
-        Escaped identifier with backticks
-    """
+    """Return a Trino-safe identifier, quoting only when needed."""
     if not identifier:
         raise ValueError("Identifier cannot be empty")
-    
-    # Trino uses backticks for identifiers
-    return f"`{identifier}`"
+
+    parts = identifier.split(".")
+    escaped_parts: list[str] = []
+    for part in parts:
+        if not part:
+            raise ValueError(f"Invalid Trino identifier: {identifier!r}")
+        if _TRINO_SIMPLE_IDENTIFIER_PATTERN.fullmatch(part):
+            escaped_parts.append(part)
+        else:
+            escaped_parts.append('"' + part.replace('"', '""') + '"')
+    return ".".join(escaped_parts)
 
 
 def format_trino_literal(value: Any, column_name: str | None = None) -> str:
-    """
-    Format a value as a Trino literal.
-    
-    Args:
-        value: The value to format
-        column_name: Optional column name for context (e.g., for min/max)
-        
-    Returns:
-        Formatted string literal for Trino
-    """
+    """Format a Python value as a Trino SQL literal."""
     if value is None:
         return "NULL"
-    
     if isinstance(value, bool):
         return "TRUE" if value else "FALSE"
-    
     if isinstance(value, (int, float)):
         return str(value)
-    
+    if isinstance(value, (datetime, date, time)):
+        return f"'{value.isoformat()}'"
     if isinstance(value, str):
-        # Escape single quotes in strings
-        escaped = value.replace("'", "''")
-        return f"'{escaped}'"
-    
-    # Try to convert to string
-    return str(value)
+        return "'" + value.replace("'", "''") + "'"
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def validate_trino_compatibility(rule: dict[str, Any]) -> list[str]:
+    """Return a list of unsupported Trino constructs for a rule."""
+    unsupported: list[str] = []
+    rule_type = str(rule.get("type") or "").strip().lower()
+    params = rule.get("params") or {}
+
+    if params.get("expression") is not None:
+        unsupported.append("custom expression")
+    if params.get("sql_predicate") is not None:
+        unsupported.append("SQL predicate")
+    if params.get("window") is not None:
+        unsupported.append("window/analytic functions")
+    if isinstance(params.get("columns"), list) and len(params.get("columns")) > 1:
+        unsupported.append("multi-column predicates")
+    if rule_type not in ROW_RULE_TYPES and rule_type not in AGGREGATE_RULE_TYPES and rule_type not in QUERY_RULE_TYPES:
+        unsupported.append(f"unsupported rule type: {rule_type}")
+
+    return unsupported
+
+
+def _raise_for_unsupported_trino_constructs(rule: dict[str, Any]) -> None:
+    unsupported = validate_trino_compatibility(rule)
+    if unsupported:
+        raise ValueError(f"unsupported trino construct: {unsupported[0]}")
+
+
+def _escape_rule_identifier(rule: dict[str, Any], key: str, default: str | None = None) -> str:
+    value = str(rule.get(key) or default or "").strip()
+    if not value:
+        raise ValueError(f"Rule '{rule.get('id')}' requires '{key}'")
+    return escape_trino_identifier(value)
 
 
 def lower_row_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
-    """
-    Lower a row-level data quality rule to Trino SQL.
-    
-    Args:
-        rule: The rule dictionary with type, column, table, and params
-        
-    Returns:
-        Dictionary with Trino SQL query
-    """
+    """Lower a row-level rule to Trino SQL."""
+    _raise_for_unsupported_trino_constructs(rule)
+
     rule_type = str(rule.get("type") or "").strip().lower()
-    column = str(rule.get("column") or "").strip()
-    table = str(rule.get("table") or "source").strip() or "source"
+    column = _escape_rule_identifier(rule, "column")
+    table = escape_trino_identifier(str(rule.get("table") or "source").strip() or "source")
     params = rule.get("params") or {}
-    
-    # Validate parameters based on rule type
-    if rule_type == "min":
-        if "min" not in params:
-            raise ValueError(f"Rule '{rule.get('id')}' requires 'min' parameter")
-    elif rule_type == "max":
-        if "max" not in params:
-            raise ValueError(f"Rule '{rule.get('id')}' requires 'max' parameter")
-    elif rule_type in ("equals", "not_equal"):
-        if "expected" not in params:
-            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected' parameter")
-    elif rule_type in ("between", "in", "not_in"):
-        if "values" not in params:
-            raise ValueError(f"Rule '{rule.get('id')}' requires 'values' parameter")
-    
-    # Build the expectation SQL
+
+    if rule_type == "min" and "min" not in params:
+        raise ValueError(f"Rule '{rule.get('id')}' requires 'min' parameter")
+    if rule_type == "max" and "max" not in params:
+        raise ValueError(f"Rule '{rule.get('id')}' requires 'max' parameter")
+    if rule_type in {"equals", "not_equal"} and "expected" not in params:
+        raise ValueError(f"Rule '{rule.get('id')}' requires 'expected' parameter")
+    if rule_type in {"in", "not_in"} and "values" not in params:
+        raise ValueError(f"Rule '{rule.get('id')}' requires 'values' parameter")
+    if rule_type == "between" and ("min" not in params or "max" not in params):
+        raise ValueError(f"Rule '{rule.get('id')}' requires 'min' and 'max' parameters")
+
     if rule_type == "not_null":
         expectation = f"{column} IS NOT NULL"
     elif rule_type == "is_null":
         expectation = f"{column} IS NULL"
     elif rule_type == "equals":
-        formatted_expected = format_trino_literal(params["expected"], column)
-        expectation = f"{column} == {formatted_expected}"
+        expectation = f"{column} = {format_trino_literal(params['expected'])}"
     elif rule_type == "not_equal":
-        formatted_expected = format_trino_literal(params["expected"], column)
-        expectation = f"{column} != {formatted_expected}"
+        expectation = f"{column} != {format_trino_literal(params['expected'])}"
     elif rule_type == "between":
-        min_val = format_trino_literal(params["min"], column)
-        max_val = format_trino_literal(params["max"], column)
-        expectation = f"{column} BETWEEN {min_val} AND {max_val}"
+        expectation = f"{column} BETWEEN {format_trino_literal(params['min'])} AND {format_trino_literal(params['max'])}"
     elif rule_type == "in":
-        values = params["values"]
-        formatted_values = ", ".join(format_trino_literal(v, column) for v in values)
-        expectation = f"{column} IN ({formatted_values})"
+        expectation = f"{column} IN ({', '.join(format_trino_literal(value) for value in params['values'])})"
     elif rule_type == "not_in":
-        values = params["values"]
-        formatted_values = ", ".join(format_trino_literal(v, column) for v in values)
-        expectation = f"{column} NOT IN ({formatted_values})"
+        expectation = f"{column} NOT IN ({', '.join(format_trino_literal(value) for value in params['values'])})"
     elif rule_type == "min":
-        formatted_min = format_trino_literal(params["min"], column)
-        expectation = f"{column} >= {formatted_min}"
+        expectation = f"{column} >= {format_trino_literal(params['min'])}"
     elif rule_type == "max":
-        formatted_max = format_trino_literal(params["max"], column)
-        expectation = f"{column} <= {formatted_max}"
+        expectation = f"{column} <= {format_trino_literal(params['max'])}"
     else:
         raise ValueError(f"Unsupported row rule type: {rule_type}")
-    
+
     return {
         "engine_type": "trino",
         "engine_target": "trino_sql",
@@ -135,65 +131,52 @@ def lower_row_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
 
 
 def lower_aggregate_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
-    """
-    Lower an aggregate data quality rule to Trino SQL.
-    
-    Args:
-        rule: The rule dictionary with type and params
-        
-    Returns:
-        Dictionary with Trino SQL query
-    """
+    """Lower an aggregate rule to Trino SQL."""
+    _raise_for_unsupported_trino_constructs(rule)
+
     rule_type = str(rule.get("type") or "").strip().lower()
-    column = str(rule.get("column") or "")
-    table = str(rule.get("table") or "source").strip() or "source"
+    column = str(rule.get("column") or "").strip()
+    table = escape_trino_identifier(str(rule.get("table") or "source").strip() or "source")
     params = rule.get("params") or {}
-    
-    # Validate parameters based on rule type
+
     if rule_type == "count":
         if "expected_count" not in params:
             raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_count' parameter")
-    elif rule_type == "sum":
-        if "expected_value" not in params:
-            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
-    elif rule_type in ("avg", "min", "max"):
-        if "expected_value" not in params:
-            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
-    
-    # Build the expectation SQL
-    if rule_type == "count":
-        expected_count = params["expected_count"]
-        formatted_expected = format_trino_literal(expected_count)
-        expectation = f"COUNT(*) == {formatted_expected}"
+        expectation = f"COUNT(*) = {format_trino_literal(params['expected_count'])}"
         query = f"SELECT COUNT(*) AS dq_count FROM {table}"
     elif rule_type == "sum":
-        expected_value = params["expected_value"]
-        formatted_expected = format_trino_literal(expected_value)
-        expectation = f"SUM({column}) == {formatted_expected}"
-        query = f"SELECT SUM({column}) AS dq_sum FROM {table}"
+        if "expected_value" not in params:
+            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
+        escaped_column = escape_trino_identifier(column)
+        expectation = f"SUM({escaped_column}) = {format_trino_literal(params['expected_value'])}"
+        query = f"SELECT SUM({escaped_column}) AS dq_sum FROM {table}"
     elif rule_type == "avg":
-        expected_value = params["expected_value"]
-        formatted_expected = format_trino_literal(expected_value)
-        expectation = f"AVG({column}) == {formatted_expected}"
-        query = f"SELECT AVG({column}) AS dq_avg FROM {table}"
+        if "expected_value" not in params:
+            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
+        escaped_column = escape_trino_identifier(column)
+        expectation = f"AVG({escaped_column}) = {format_trino_literal(params['expected_value'])}"
+        query = f"SELECT AVG({escaped_column}) AS dq_avg FROM {table}"
     elif rule_type == "min":
-        expected_value = params["expected_value"]
-        formatted_expected = format_trino_literal(expected_value)
-        expectation = f"MIN({column}) == {formatted_expected}"
-        query = f"SELECT MIN({column}) AS dq_min FROM {table}"
+        if "expected_value" not in params:
+            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
+        escaped_column = escape_trino_identifier(column)
+        expectation = f"MIN({escaped_column}) = {format_trino_literal(params['expected_value'])}"
+        query = f"SELECT MIN({escaped_column}) AS dq_min FROM {table}"
     elif rule_type == "max":
-        expected_value = params["expected_value"]
-        formatted_expected = format_trino_literal(expected_value)
-        expectation = f"MAX({column}) == {formatted_expected}"
-        query = f"SELECT MAX({column}) AS dq_max FROM {table}"
+        if "expected_value" not in params:
+            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_value' parameter")
+        escaped_column = escape_trino_identifier(column)
+        expectation = f"MAX({escaped_column}) = {format_trino_literal(params['expected_value'])}"
+        query = f"SELECT MAX({escaped_column}) AS dq_max FROM {table}"
     elif rule_type == "distinct_count":
-        expected_count = params["expected_count"]
-        formatted_expected = format_trino_literal(expected_count)
-        expectation = f"COUNT(DISTINCT {column}) == {formatted_expected}"
-        query = f"SELECT COUNT(DISTINCT {column}) AS dq_count FROM {table}"
+        if "expected_count" not in params:
+            raise ValueError(f"Rule '{rule.get('id')}' requires 'expected_count' parameter")
+        escaped_column = escape_trino_identifier(column)
+        expectation = f"COUNT(DISTINCT {escaped_column}) = {format_trino_literal(params['expected_count'])}"
+        query = f"SELECT COUNT(DISTINCT {escaped_column}) AS dq_count FROM {table}"
     else:
         raise ValueError(f"Unsupported aggregate rule type: {rule_type}")
-    
+
     return {
         "engine_type": "trino",
         "engine_target": "trino_sql",
@@ -205,21 +188,14 @@ def lower_aggregate_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
 
 
 def lower_query_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
-    """
-    Lower a query data quality rule to Trino SQL.
-    
-    Args:
-        rule: The rule dictionary with params containing query
-        
-    Returns:
-        Dictionary with Trino SQL query
-    """
+    """Lower a query rule to Trino SQL."""
+    _raise_for_unsupported_trino_constructs(rule)
+
     params = rule.get("params") or {}
     query_text = str(params.get("query") or "").strip()
-    
     if not query_text:
         raise ValueError("Query DQ rule requires 'query' parameter")
-    
+
     return {
         "engine_type": "trino",
         "engine_target": "trino_sql",
@@ -228,37 +204,3 @@ def lower_query_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
         "action_if_failed": "quarantine",
         "query": query_text,
     }
-
-
-def validate_trino_compatibility(rule: dict[str, Any]) -> list[str]:
-    """
-    Validate that a rule is compatible with Trino.
-    
-    Args:
-        rule: The rule dictionary to validate
-        
-    Returns:
-        List of unsupported constructs (empty if compatible)
-    """
-    unsupported = []
-    rule_type = str(rule.get("type") or "").strip().lower()
-    params = rule.get("params") or {}
-    
-    # Check for unsupported constructs
-    if params.get("expression") is not None:
-        unsupported.append("custom expression in params")
-    
-    if params.get("sql_predicate") is not None:
-        unsupported.append("SQL predicate in params")
-    
-    if params.get("window") is not None:
-        unsupported.append("window/analytic functions")
-    
-    if isinstance(params.get("columns"), list) and len(params.get("columns")) > 1:
-        unsupported.append("multi-column predicates")
-    
-    # Check for unsupported rule types
-    if rule_type not in ROW_RULE_TYPES and rule_type not in AGGREGATE_RULE_TYPES and rule_type not in QUERY_RULE_TYPES:
-        unsupported.append(f"unsupported rule type: {rule_type}")
-    
-    return unsupported

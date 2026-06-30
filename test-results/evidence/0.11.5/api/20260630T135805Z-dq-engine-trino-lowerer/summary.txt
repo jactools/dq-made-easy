@@ -1,0 +1,1 @@
+Milestone 1 Trino lowering now generates valid Trino SQL for row, aggregate, and query rules, and rejects unsupported constructs before parameter validation.
