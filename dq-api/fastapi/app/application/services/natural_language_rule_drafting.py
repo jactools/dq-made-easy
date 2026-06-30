@@ -19,7 +19,7 @@ from app.domain.interfaces import ProfilingRepository
 SUPPORTED_SEARCH_SCOPES = frozenset({"current", "all", "all_across_workspaces"})
 SUPPORTED_CHECK_TYPES = frozenset({"UNIQUENESS", "PRESENT", "REGEX", "RANGE", "ALLOWLIST", "FRESHNESS"})
 SUPPORTED_ANALYSIS_PROVIDERS = frozenset({"rapidfuzz", "llm"})
-DEFAULT_LLM_SERVICE_URL = "http://dq-llm:8000"
+DEFAULT_LLM_SERVICE_URL = "http://dq-made-easy-llm:8000"
 
 CHECK_TYPE_LABELS = {
     "UNIQUENESS": "Uniqueness",

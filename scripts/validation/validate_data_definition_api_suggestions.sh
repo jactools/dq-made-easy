@@ -4,15 +4,15 @@ set -euo pipefail
 # Purpose: Validate data-definition API suggestions for every attribute in one data object version.
 #
 # What it does:
-# - Requires the API, Kong, Redis, and dq-llm services to already be running.
+# - Requires the API, Kong, Redis, and dq-made-easy-llm services to already be running.
 # - Uses a seeded user token through the shared auth helper.
 # - Accepts a data object version id as a command-line argument, or discovers one when omitted.
 # - Queues one data-definition task with every attribute for that data object version.
 # - Waits for the task event stream and verifies every selected attribute has a governed business term suggestion.
 #
 # validate: groups=api,regression
-# Version: 1.6
-# Last modified: 2026-06-01
+# Version: 1.7
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.5 (2026-06-01): On event stream timeout, fetches request status to distinguish still-running tasks from terminal outcomes.
 # - 1.4 (2026-06-01): Improved health wait diagnostics to report curl timeout and transport failures explicitly.
@@ -560,14 +560,14 @@ require_cmd curl
 require_cmd jq
 require_cmd awk
 
-for service_name in api kong redis dq-llm; do
+for service_name in api kong redis dq-made-easy-llm; do
   require_running_service "$service_name"
 done
 
 wait_for_http_200 "${KONG_PUBLIC_URL%/}/health" "api health"
 
 DQ_LLM_PUBLIC_URL="${DQ_LLM_PUBLIC_URL:-http://${DQ_LLM_HOST_BIND:-127.0.0.1}:${DQ_LLM_HOST_PORT:-8123}}"
-wait_for_http_200 "${DQ_LLM_PUBLIC_URL%/}/health" "dq-llm health"
+wait_for_http_200 "${DQ_LLM_PUBLIC_URL%/}/health" "dq-made-easy-llm health"
 
 TOKEN_ENDPOINT="${SSO_PUBLIC_ISSUER_URL%/}/protocol/openid-connect/token"
 ACCESS_TOKEN="$(dq_keycloak_password_grant_access_token "$TOKEN_ENDPOINT" "$VITE_KEYCLOAK_CLIENT_ID" "$REQUESTER_EMAIL" "$REQUESTER_PASSWORD")"

@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     catalog_oidc_username: str | None = None
     catalog_oidc_password: str | None = None
     catalog_timeout_seconds: int = 30
-    llm_service_url: str = Field(default="http://dq-llm:8000", validation_alias="DQ_LLM_BASE_URL")
+    llm_service_url: str = Field(default="http://dq-made-easy-llm:8000", validation_alias="DQ_LLM_BASE_URL")
     gx_exception_storage_backend: str = "s3"
     gx_exception_storage_endpoint: str | None = None
     gx_exception_storage_bucket: str = "dq-gx-exceptions"

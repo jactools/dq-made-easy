@@ -11,8 +11,8 @@ set -euo pipefail
 #   and asserts a dispatch_id and accepted status are returned.
 # - Calls GET /agent/v1/audit/events and confirms the dispatch was audited.
 # validate: groups=api,regression
-# Version: 1.1
-# Last modified: 2026-06-02
+# Version: 1.2
+# Last modified: 2026-07-01
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
@@ -24,6 +24,10 @@ source "$ROOT_DIR/scripts/supporting/auth.sh"
 source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
 
 my_name="validate_agent_platform_integration_contracts.sh"
+agent_type="mcp"
+agent_source="dq-made-easy-mcp"
+CONFIG_TOKEN=""
+ORIGINAL_AGENT_ACCESS_POLICY=""
 
 init_root_env_file "$ROOT_DIR"
 if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
@@ -93,8 +97,8 @@ api_call() {
       -X "$method" "${KONG_PUBLIC_URL%/}${endpoint}" \
       -H "Authorization: Bearer ${token}" \
       -H 'Content-Type: application/json' \
-      -H 'X-Agent-Type: validation_script' \
-      -H 'X-Agent-Source: validate_agent_platform_integration_contracts' \
+        -H "X-Agent-Type: ${agent_type}" \
+        -H "X-Agent-Source: ${agent_source}" \
       -H "X-Request-Id: ac04-$(date +%s)" \
       -d "$body")"
   else
@@ -104,8 +108,8 @@ api_call() {
       -w '%{http_code}' \
       -X "$method" "${KONG_PUBLIC_URL%/}${endpoint}" \
       -H "Authorization: Bearer ${token}" \
-      -H 'X-Agent-Type: validation_script' \
-      -H 'X-Agent-Source: validate_agent_platform_integration_contracts' \
+        -H "X-Agent-Type: ${agent_type}" \
+        -H "X-Agent-Source: ${agent_source}" \
       -H "X-Request-Id: ac04-$(date +%s)")"
   fi
   curl_rc=$?
@@ -124,6 +128,37 @@ api_call() {
   rm -f "$response_file" "$headers_file"
 }
 
+set_agent_access_policy() {
+  local policy_json="$1"
+  local payload
+
+  payload="$(jq -nc --argjson agent_access_policy "$policy_json" '{agent_access_policy: $agent_access_policy}')"
+  api_call "$CONFIG_TOKEN" PUT "/system/v1/app-config" "$payload"
+
+  if [[ "$HTTP_CODE" != "200" ]]; then
+    error "$my_name" "PUT /system/v1/app-config returned HTTP ${HTTP_CODE} while updating agent_access_policy"
+    printf '%s\n' "$HTTP_BODY" >&2
+    exit 1
+  fi
+}
+
+restore_agent_access_policy() {
+  if [[ -z "$CONFIG_TOKEN" || -z "$ORIGINAL_AGENT_ACCESS_POLICY" ]]; then
+    return 0
+  fi
+
+  info "$my_name" "Restoring original agent_access_policy"
+  set_agent_access_policy "$ORIGINAL_AGENT_ACCESS_POLICY"
+}
+
+cleanup() {
+  set +e
+  restore_agent_access_policy
+  set -e
+}
+
+trap cleanup EXIT
+
 mkdir -p "$ROOT_DIR/tmp"
 
 # --------------------------------------------------------------------------
@@ -137,6 +172,39 @@ admin_email="${KEYCLOAK_JACCLOUD_USERNAME:-$SMOKE_LOGIN_EMAIL}"
 admin_password="${KEYCLOAK_JACCLOUD_PASSWORD:-$SMOKE_LOGIN_PASSWORD}"
 info "$my_name" "Minting admin token for audit read"
 admin_token="$(mint_access_token "$admin_email" "$admin_password")"
+
+for candidate_token in "$rw_token" "$admin_token"; do
+  api_call "$candidate_token" GET "/system/v1/app-config"
+  if [[ "$HTTP_CODE" == "200" ]]; then
+    CONFIG_TOKEN="$candidate_token"
+    ORIGINAL_AGENT_ACCESS_POLICY="$(printf '%s' "$HTTP_BODY" | jq -c '.agent_access_policy // null')"
+    break
+  fi
+done
+
+if [[ -z "$CONFIG_TOKEN" ]]; then
+  error "$my_name" "Could not read /system/v1/app-config with either seeded token"
+  printf '%s\n' "$HTTP_BODY" >&2
+  exit 1
+fi
+
+if [[ "$ORIGINAL_AGENT_ACCESS_POLICY" == "null" ]]; then
+  ORIGINAL_AGENT_ACCESS_POLICY='{"default_action":"deny","allowed_agents":[]}'
+fi
+
+temp_allowed_agent_policy="$(jq -nc \
+  --argjson original "$ORIGINAL_AGENT_ACCESS_POLICY" \
+  --arg agent_type "$agent_type" \
+  --arg agent_source "$agent_source" '
+    ($original // {"default_action":"deny","allowed_agents":[]}) as $policy |
+    {
+      default_action: ($policy.default_action // "deny"),
+      allowed_agents: (($policy.allowed_agents // []) + [{agent_type: $agent_type, agent_source: $agent_source}])
+        | unique_by([.agent_type, .agent_source, .agent_instance_id, .request_origin])
+    }
+  ')"
+
+set_agent_access_policy "$temp_allowed_agent_policy"
 
 # --------------------------------------------------------------------------
 # Step 2 — GET /agent/v1/integrations/contracts
@@ -211,9 +279,9 @@ if [[ "$HTTP_CODE" != "200" ]]; then
   exit 1
 fi
 
-dispatch_audit_count="$(printf '%s' "$HTTP_BODY" | jq '[.events[] | select(.action == "dispatch_agent_platform_integration")] | length')"
+dispatch_audit_count="$(printf '%s' "$HTTP_BODY" | jq '[.events[] | select(.action == "dispatch_platform_integration")] | length')"
 if [[ "$dispatch_audit_count" -lt 1 ]]; then
-  error "$my_name" "No dispatch_agent_platform_integration audit event found after dispatch"
+  error "$my_name" "No dispatch_platform_integration audit event found after dispatch"
   exit 1
 fi
 info "$my_name" "Dispatch audit event found (count=${dispatch_audit_count}) — PASS"
@@ -229,7 +297,7 @@ info "$my_name" "Audit response carries governance_metadata.governance_aware=tru
 # Step 5 — Reject unallowlisted platform (negative contract check)
 # --------------------------------------------------------------------------
 
-bad_payload='{"platform":"unknown_platform","dispatch_mode":"webhook","event_type":"dq.alert.created","webhook_url":"https://example.invalid/hooks/dq","payload":{}}'
+bad_payload='{"platform":"github_copilot","dispatch_mode":"webhook","event_type":"dq.alert.created","webhook_url":"https://example.invalid/hooks/dq","payload":{}}'
 
 info "$my_name" "POST /agent/v1/integrations/dispatches (unallowlisted platform — expecting 403)"
 api_call "$rw_token" POST "/agent/v1/integrations/dispatches" "$bad_payload"
