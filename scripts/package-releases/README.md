@@ -15,6 +15,10 @@ Wheel-only build helpers for Airflow image artifacts:
 - `build_dq_airflow_sdk_wheel.sh`
 - `build_dq_airflow_operator_wheel.sh`
 
+Generic package wheel builder and publisher:
+
+- `scripts/release_python_package.sh` (builds a wheel for any repo Python package and optionally publishes it)
+
 Airflow DAG artifact build helper:
 
 - `build_dq_airflow_dag_artifact.sh`
@@ -22,10 +26,9 @@ Airflow DAG artifact build helper:
 All scripts:
 
 - use the repo venv Python (`venv/bin/python`) through `scripts/python_arm64.sh`
-- build `sdist` and `wheel`
-- run `twine check`
-- optionally upload with `twine upload`
-- bump the package patch version in `pyproject.toml` after successful publish
+- build the wheel artifact for the selected package
+- optionally run `twine check` and upload with `twine upload`
+- the package-specific `release_dq_*.sh` scripts still bump the package patch version in `pyproject.toml` after successful publish
 
 ## Dry-run examples
 
@@ -48,3 +51,17 @@ scripts/package-releases/release_dq_airflow_operator.sh --repository pypi
 ```
 
 If your target repository is configured in `~/.pypirc` (for example, `nexus`), replace `pypi` with that repository name.
+
+## Generic builder
+
+The generic wrapper builds a wheel for one package at a time or everything with `--all`:
+
+```bash
+scripts/release_python_package.sh dq-utils
+scripts/release_python_package.sh dq-cli
+scripts/release_python_package.sh --all
+```
+
+Set `PACKAGE_RELEASE_PUBLISH=true` to upload the built wheel after validation.
+When `NEXUSCLOUD_PYPI_URL` is available in the environment, the script publishes to the corporate Nexus PyPI endpoint by default.
+Otherwise it falls back to PyPI unless `PACKAGE_RELEASE_REPOSITORY` or `PACKAGE_RELEASE_REPOSITORY_URL` overrides the target.
