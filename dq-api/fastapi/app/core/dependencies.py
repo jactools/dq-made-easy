@@ -5,6 +5,10 @@ from fastapi import HTTPException
 
 from app.application.services.data_contract_resolver import JoinConsistencyContractResolver
 from app.application.services.data_contract_resolver import OpenMetadataContractResolver
+from app.application.services.ui_registry import RegistryConfiguration
+from app.application.services.ui_registry import RegistryManifest
+from app.application.services.ui_registry import RegistryManager
+from app.application.services.ui_registry import RegistrySource
 from app.application.services.product_spec_resolver import OpenMetadataProductSpecResolver
 from app.application.services.product_spec_resolver import ProductSpecResolver
 from app.application.services.grouped_execution_planner import GroupedExecutionPlanner
@@ -80,6 +84,7 @@ from app.infrastructure.repositories import (
     PostgresDataProtectionRepository,
     PostgresDqResultEventRepository,
     PostgresFederatedMetadataRegistryRepository,
+    PostgresUiRegistryRepository,
     PostgresMasterDataRepository,
     PostgresDataAssetRepository,
     PostgresOntologyGraphRepository,
@@ -246,6 +251,11 @@ def _get_postgres_connector_registry_repository(database_url: str) -> PostgresCo
     return PostgresConnectorRegistryRepository(database_url)
 
 
+@lru_cache(maxsize=8)
+def _get_postgres_ui_registry_repository(database_url: str) -> PostgresUiRegistryRepository:
+    return PostgresUiRegistryRepository(database_url)
+
+
 @lru_cache
 def _get_postgres_workspaces_repository(database_url: str) -> PostgresWorkspacesRepository:
     return PostgresWorkspacesRepository(database_url)
@@ -368,6 +378,45 @@ def get_admin_repository() -> AdminRepository:
 def get_app_config_repository() -> AppConfigRepository:
     database_url = _require_database_url(service="app-config-repository", display_name="App config repository")
     return _get_postgres_app_config_repository(database_url)
+
+
+@lru_cache
+def _get_ui_registry_manager(
+    source: str,
+    json_payload: str | None,
+    file_path: str | None,
+    url: str | None,
+    expected_version: str,
+    cache_ttl_seconds: int,
+    repository: PostgresUiRegistryRepository | None,
+) -> RegistryManager:
+    configuration = RegistryConfiguration(
+        source=None if source == "default" else RegistrySource(source),
+        json_payload=json_payload,
+        file_path=file_path,
+        url=url,
+        expected_version=expected_version,
+        cache_ttl_seconds=cache_ttl_seconds,
+    )
+    return RegistryManager.from_configuration(configuration, repository=repository)
+
+
+def get_ui_registry_manager() -> RegistryManager:
+    settings = get_settings()
+    repository = _get_postgres_ui_registry_repository(settings.database_url)
+    return _get_ui_registry_manager(
+        settings.ui_registry_source,
+        settings.ui_registry_json,
+        settings.ui_registry_file,
+        settings.ui_registry_url,
+        settings.ui_registry_manifest_version,
+        settings.ui_registry_cache_ttl_seconds,
+        repository,
+    )
+
+
+def get_ui_registry_manifest() -> RegistryManifest:
+    return get_ui_registry_manager().load()
 
 
 def get_session_repository() -> "SessionRepository":

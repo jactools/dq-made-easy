@@ -4,7 +4,7 @@
 
 export type SettingsCategory = 'profile' | 'workspace' | 'notifications' | 'display' | 'security' | 'api' | 'application'
 export type IconProviderName = 'tabler' | 'lucide'
-export type StylePackageName = 'custom-built-package' | 'tailwind' | 'astrowind' | 'data-web-css'
+export type StylePackageName = string
 
 export interface AlertRoutingPolicy {
   deliveryTarget: 'app' | 'itsm' | 'both'

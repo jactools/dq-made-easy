@@ -1109,6 +1109,18 @@ class ConnectorRegistryRow(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class UiRegistryManifestRow(Base):
+    __tablename__ = "ui_registry_manifest"
+
+    manifest_key: Mapped[str] = mapped_column(Text, primary_key=True)
+    source_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source_ref: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    manifest_version: Mapped[str] = mapped_column(Text, nullable=False)
+    manifest_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    persisted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class ConnectorInstanceRow(Base):
     __tablename__ = "connector_instances"
 

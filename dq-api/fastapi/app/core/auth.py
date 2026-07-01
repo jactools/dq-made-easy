@@ -114,6 +114,11 @@ def get_required_scopes(method: str, path: str) -> list[str]:
             return ["dq:admin:read"]
         return ["dq:config:manage"]
 
+    if normalized_path.startswith("/system/v1/ui-registry"):
+        if normalized_method in {"GET", "HEAD", "OPTIONS"}:
+            return ["dq:admin:read"]
+        return ["dq:config:manage"]
+
     if normalized_path.startswith("/agent/v1/audit/events"):
         if normalized_method in {"GET", "HEAD", "OPTIONS"}:
             return ["dq:admin:read"]

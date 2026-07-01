@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     catalog_oidc_username: str | None = None
     catalog_oidc_password: str | None = None
     catalog_timeout_seconds: int = 30
+    ui_registry_source: str = Field(default="default", validation_alias="DQ_UI_REGISTRY_SOURCE")
+    ui_registry_file: str | None = Field(default=None, validation_alias="DQ_UI_REGISTRY_FILE")
+    ui_registry_url: str | None = Field(default=None, validation_alias="DQ_UI_REGISTRY_URL")
+    ui_registry_json: str | None = Field(default=None, validation_alias="DQ_UI_REGISTRY_JSON")
+    ui_registry_manifest_version: str = Field(default="1.0.0", validation_alias="DQ_UI_REGISTRY_VERSION")
+    ui_registry_cache_ttl_seconds: int = Field(default=300, validation_alias="DQ_UI_REGISTRY_CACHE_TTL_SECONDS")
     llm_service_url: str = Field(default="http://dq-made-easy-llm:8000", validation_alias="DQ_LLM_BASE_URL")
     gx_exception_storage_backend: str = "s3"
     gx_exception_storage_endpoint: str | None = None

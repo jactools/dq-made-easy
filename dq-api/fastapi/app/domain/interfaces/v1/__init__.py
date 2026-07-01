@@ -22,6 +22,7 @@ from app.domain.interfaces.v1.rules_repository import RulesRepository
 from app.domain.interfaces.v1.session_repository import SessionRepository
 from app.domain.interfaces.v1.suggestions_repository import SuggestionsRepository
 from app.domain.interfaces.v1.system_repository import SystemRepository
+from app.domain.interfaces.v1.ui_registry_repository import UiRegistryRepository
 from app.domain.interfaces.v1.testing_repository import TestingRepository
 from app.domain.interfaces.v1.validation_artifact_repository import ValidationArtifactRepository
 from app.domain.interfaces.v1.validation_run_plan_repository import ValidationRunPlanRepository
@@ -53,6 +54,7 @@ __all__ = [
     "SessionRepository",
     "SuggestionsRepository",
     "SystemRepository",
+    "UiRegistryRepository",
     "TestingRepository",
     "ValidationArtifactRepository",
     "ValidationRunPlanRepository",

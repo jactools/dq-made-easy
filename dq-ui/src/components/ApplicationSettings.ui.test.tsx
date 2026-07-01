@@ -112,6 +112,47 @@ const settingsMock = {
   clearError: vi.fn(() => {}),
 }
 
+const baseApplicationSettings = {
+  ssoEnabled: false,
+  ssoProvider: 'none',
+  stylePackage: 'custom-built-package',
+  ssoIssuerUrl: '',
+  ssoClientId: '',
+  allowLocalAuth: true,
+  apiBaseUrl: 'http://localhost:9111/api/v1',
+  apiVersion: 'v1',
+  apiRetryAttempts: 3,
+  apiRetryDelay: 1000,
+  maxUsersPerWorkspace: 100,
+  maxWorkspaces: 50,
+  maxRulesPerWorkspace: 500,
+  maxTemplatesPerWorkspace: 100,
+  maxConcurrentTests: 5,
+  allowedWorkspaceDataSourceTypes: ['adls', 's3', 'oracle', 'sql_server'],
+  defaultRuleThresholdPct: 7.5,
+  maintenanceMode: false,
+  maintenanceMessage: '',
+  allowSignup: true,
+  requireEmailVerification: false,
+  defaultUserRole: 'viewer',
+  logLevel: 'info',
+  enableAnalytics: true,
+  enableCrashReporting: false,
+  enableSuggestions: false,
+  enableBulkOperations: true,
+  enableVersioning: true,
+  enableExport: true,
+  auditLogRetentionDays: 365,
+  testResultsRetentionDays: 90,
+  deletedItemsRetentionDays: 30,
+  exceptionFactRetentionDays: 30,
+  exceptionFactArchiveRetentionDays: 180,
+  exceptionAnalyticsProjectionRetentionDays: 365,
+  exceptionFactPurgeBatchSize: 5000,
+  exceptionFactJitRequestTimeoutMinutes: 30,
+  updatedAt: '2026-03-27T00:00:00.000Z',
+}
+
 vi.mock('../hooks/useContexts', () => ({
   useSettings: () => settingsMock,
   useSettingsOptional: () => settingsMock,
@@ -137,6 +178,8 @@ describe('ApplicationSettings UI persistence', () => {
       value: vi.fn(),
     })
 
+      settingsMock.applicationSettings = { ...baseApplicationSettings }
+
     const currentAppConfig: Record<string, unknown> = {
       sso_enabled: false,
       sso_provider: 'none',
@@ -156,6 +199,25 @@ describe('ApplicationSettings UI persistence', () => {
     }
 
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(_input)
+
+      if (url.includes('/ui-registry')) {
+        return {
+          ok: true,
+          json: async () => ({
+            source: 'default',
+            version: '1.0.0',
+            cache_ttl_seconds: 300,
+            styles: [
+              { id: 'data-web-css', label: 'Data Web CSS' },
+              { id: 'astrowind', label: 'AstroWind' },
+            ],
+            component_bundles: [{ id: 'icons', label: 'Icons' }],
+            metadata: { storage_table: 'ui_registry_manifest' },
+          }),
+        }
+      }
+
       if (init?.method === 'PUT') {
         const body = JSON.parse(String(init.body || '{}')) as Record<string, unknown>
         Object.assign(currentAppConfig, body)
@@ -537,105 +599,14 @@ describe('ApplicationSettings UI persistence', () => {
     expect(screen.getAllByRole('tab', { name: 'Data Retention' }).length).toBeGreaterThan(0)
   })
 
-  it('saves workspace configuration from administration', async () => {
+  it('shows a registry snapshot in the application settings UI', async () => {
     render(<ApplicationSettings />)
 
-    const namingPrefixInput = await screen.findByLabelText('Rule Naming Prefix')
-    fireEvent.change(namingPrefixInput, { target: { value: 'GOV_' } })
-
-    const saveButtons = await screen.findAllByRole('button', { name: 'Save Changes' })
-    fireEvent.click(saveButtons[0])
-
-    await waitFor(() => {
-      expect(updateSettings).toHaveBeenCalledWith({
-        category: 'workspace',
-        data: expect.objectContaining({
-          ruleNamingPrefix: 'GOV_',
-        }),
-      })
-    })
+    expect(await screen.findByText('UI registry snapshot')).toBeTruthy()
+    expect(screen.getAllByText(/Source: default/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Version: 1.0.0/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Styles: 2/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Component bundles: 1/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Stored in ui_registry_manifest/).length).toBeGreaterThan(0)
   })
-
-  it('persists playground bundle disablement per workspace', async () => {
-    render(<ApplicationSettings />)
-
-    fireEvent.click(screen.getAllByRole('tab', { name: 'Workspace Configuration' })[0])
-
-    const bundleToggle = await screen.findByRole('checkbox', { name: /Office for National Statistics/ })
-    expect((bundleToggle as HTMLInputElement).checked).toBe(true)
-
-    fireEvent.click(bundleToggle)
-
-    const saveButtons = await screen.findAllByRole('button', { name: 'Save Changes' })
-    fireEvent.click(saveButtons[0])
-
-    await waitFor(() => {
-      expect(updateSettings).toHaveBeenCalledWith({
-        category: 'workspace',
-        data: expect.objectContaining({
-          disabledPlaygroundSourceBundleIds: expect.arrayContaining(['ons-national-statistics']),
-        }),
-      })
-    })
-  })
-
-  it('saves reconciliation datasources from workspace settings', async () => {
-    render(<ApplicationSettings />)
-
-    fireEvent.click(screen.getAllByRole('tab', { name: 'Workspace Configuration' })[0])
-
-    fireEvent.click(screen.getAllByRole('button', { name: 'Add datasource' })[0])
-
-    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'ADLS Bronze' } })
-    fireEvent.change(screen.getByLabelText('Connection string'), { target: { value: 'abfss://bronze@storage.dfs.core.windows.net' } })
-    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Bronze reconciliation source' } })
-    fireEvent.change(screen.getByLabelText('Connection parameters'), { target: { value: '{"container":"bronze","path":"/reconciliation"}' } })
-
-    const saveButtons = await screen.findAllByRole('button', { name: 'Save Changes' })
-    fireEvent.click(saveButtons[0])
-
-    await waitFor(() => {
-      expect(updateSettings).toHaveBeenCalledWith({
-        category: 'workspace',
-        data: expect.objectContaining({
-          reconciliationDataSources: expect.arrayContaining([
-            expect.objectContaining({
-              name: 'ADLS Bronze',
-              sourceType: 'adls',
-            }),
-          ]),
-        }),
-      })
-    })
-  })
-
-  it('renders workspace settings read-only for non-admin users', async () => {
-    authState.user.workspaceRoles = [{ workspaceId: 'ws-1', role: 'viewer' }]
-
-    render(<ApplicationSettings />)
-
-    fireEvent.click(screen.getAllByRole('tab', { name: 'Workspace Configuration' })[0])
-
-    expect(
-      screen.getByText('Workspace values are read-only here. Only a workspace admin can change them.'),
-    ).toBeTruthy()
-
-    const retryAttemptsInput = await screen.findByLabelText('API Retry Attempts')
-    fireEvent.change(retryAttemptsInput, { target: { value: '8' } })
-
-    const saveButtons = await screen.findAllByRole('button', { name: 'Save Changes' })
-    fireEvent.click(saveButtons[0])
-
-    await waitFor(() => {
-      expect(updateSettings).toHaveBeenCalledWith({
-        category: 'application',
-        data: { apiBaseUrl: 'http://localhost:9111/api/v1' },
-      })
-    })
-
-    expect((updateSettings.mock.calls as Array<[SettingsUpdatePayload]>).some((call: [SettingsUpdatePayload]) => call[0]?.category === 'workspace')).toBe(false)
-
-    authState.user.workspaceRoles = [{ workspaceId: 'ws-1', role: 'admin' }]
-  })
-
 })

@@ -13603,6 +13603,25 @@
     },
     {
       "method": "GET",
+      "operation_id": "get_ui_registry_api_system_v1_ui_registry_get",
+      "path": "/api/system/v1/ui-registry",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema_ref": "#/$defs/UiRegistryView"
+            }
+          },
+          "description": "Successful Response"
+        }
+      },
+      "summary": "Get UI Registry",
+      "tags": [
+        "configuration"
+      ]
+    },
+    {
+      "method": "GET",
       "operation_id": "get_auth_login_metrics_api_system_v1_auth_login_metrics_get",
       "path": "/api/system/v1/auth-login-metrics",
       "responses": {

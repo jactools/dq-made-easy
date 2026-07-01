@@ -30,7 +30,7 @@ export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: S
     const selectedHref = getStylePackageStylesheetHref(normalizedStylePackage)
     const existingLink = document.getElementById(STYLE_PACKAGE_STYLESHEET_LINK_ID) as HTMLLinkElement | null
 
-    if (normalizedStylePackage === DEFAULT_STYLE_PACKAGE) {
+    if (!selectedHref || normalizedStylePackage === DEFAULT_STYLE_PACKAGE) {
       existingLink?.remove()
       return
     }

@@ -17,6 +17,15 @@ import { PLAYGROUND_SOURCE_BUNDLES } from '../data/playgroundSourceBundles'
 import { DEFAULT_STYLE_PACKAGE, STYLE_PACKAGE_OPTIONS, getStylePackageLabel } from '../contexts/styleThemeCatalog'
 import type { StylePackageName } from '../types/settings'
 
+type UiRegistryView = {
+  source: string
+  version: string
+  cache_ttl_seconds?: number
+  styles?: Array<{ id: string; label?: string }>
+  component_bundles?: Array<{ id: string; label?: string }>
+  metadata?: Record<string, unknown>
+}
+
 type AppSettingsTab = 'application' | 'security' | 'api'
 type FeatureStage = 'off' | 'preview' | 'live'
 type SettingsSection = { readonly id: string; readonly label: string }
@@ -602,6 +611,7 @@ export const ApplicationSettings: React.FC = () => {
   const auth = useAuth()
   const [activeTab, setActiveTab] = useState<AppSettingsTab>('application')
   const [hasChanges, setHasChanges] = useState(false)
+
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [saveStatusMessage, setSaveStatusMessage] = useState<string | null>(null)
   const [appConfigError, setAppConfigError] = useState<string | null>(null)
@@ -610,11 +620,59 @@ export const ApplicationSettings: React.FC = () => {
   const [qrSecret, setQRSecret] = useState('')
   const [newApiKey, setNewApiKey] = useState('')
   const [activeSection, setActiveSection] = useState<string>('')
+  const [uiRegistryView, setUiRegistryView] = useState<UiRegistryView | null>(null)
 
   // Application tab state
   const [applicationData, setApplicationData] = useState<ApplicationSettingsType | null>(
     normalizeApplicationSettings(settings.applicationSettings)
   )
+
+  const selectedStylePackage = applicationData?.stylePackage || DEFAULT_STYLE_PACKAGE
+  const stylePackageOptions = useMemo(() => {
+    if (STYLE_PACKAGE_OPTIONS.some((option) => option.value === selectedStylePackage)) {
+      return STYLE_PACKAGE_OPTIONS
+    }
+
+    return [
+      { value: selectedStylePackage, label: `${getStylePackageLabel(selectedStylePackage)} (current)` },
+      ...STYLE_PACKAGE_OPTIONS,
+    ]
+  }, [selectedStylePackage])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadUiRegistry = async () => {
+      try {
+        const apiBase = toApiGroupV1Base('system', settings.applicationSettings?.apiBaseUrl)
+        const token = getAuthToken()
+        const response = await fetch(`${apiBase}/ui-registry`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        })
+
+        if (!response.ok) {
+          return
+        }
+
+        const view = (await response.json()) as UiRegistryView
+        if (!cancelled) {
+          setUiRegistryView(view)
+        }
+      } catch {
+        if (!cancelled) {
+          setUiRegistryView(null)
+        }
+      }
+    }
+
+    void loadUiRegistry()
+
+    return () => {
+      cancelled = true
+    }
+  }, [settings.applicationSettings?.apiBaseUrl])
 
   // Security tab state
   const [securityData, setSecurityData] = useState<SecuritySettings | null>(
@@ -1500,21 +1558,32 @@ export const ApplicationSettings: React.FC = () => {
                 <AppSelect
                   id="stylePackage"
                   label="Style package"
-                  value={applicationData.stylePackage || DEFAULT_STYLE_PACKAGE}
+                  value={selectedStylePackage}
                   onChange={(value) => {
                     setApplicationData({
                       ...applicationData,
-                      stylePackage: value as StylePackageName,
+                      stylePackage: value,
                     })
                     setHasChanges(true)
                   }}
-                  options={STYLE_PACKAGE_OPTIONS.map((option) => ({
+                  options={stylePackageOptions.map((option) => ({
                     value: option.value,
                     label: getStylePackageLabel(option.value),
                   }))}
                 />
                 <p className="info-text">Controls which package-backed stylesheet the app loads at runtime.</p>
               </div>
+              {uiRegistryView && (
+                <div className="form-group">
+                  <h4>UI registry snapshot</h4>
+                  <p className="info-text">
+                    Source: {uiRegistryView.source} | Version: {uiRegistryView.version} | Styles: {uiRegistryView.styles?.length || 0} | Component bundles: {uiRegistryView.component_bundles?.length || 0}
+                  </p>
+                  {uiRegistryView.metadata?.storage_table && (
+                    <p className="info-text">Stored in {String(uiRegistryView.metadata.storage_table)}</p>
+                  )}
+                </div>
+              )}
             </div>
             {/* Authentication & SSO Section */}
             <div id="auth-sso" className="settings-section">

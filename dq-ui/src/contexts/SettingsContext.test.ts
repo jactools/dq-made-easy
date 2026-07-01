@@ -131,6 +131,16 @@ describe('SettingsContext display preference mapping', () => {
     })
   })
 
+  it('preserves unknown application style package ids during normalization', () => {
+    const normalized = normalizeApplicationPreferences({
+      style_package: 'custom-registry-theme',
+    })
+
+    expect(normalized).toMatchObject({
+      stylePackage: 'custom-registry-theme',
+    })
+  })
+
   it('keeps the saved style package when /me returns snake_case preferences', async () => {
     vi.stubGlobal(
       'fetch',

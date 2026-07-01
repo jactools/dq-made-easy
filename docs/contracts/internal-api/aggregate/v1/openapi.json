@@ -43247,6 +43247,27 @@
                 }
               }
             },
+            "/api/system/v1/ui-registry": {
+              "get": {
+                "operationId": "get_ui_registry_api_system_v1_ui_registry_get",
+                "responses": {
+                  "200": {
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/UiRegistryView"
+                        }
+                      }
+                    },
+                    "description": "Successful Response"
+                  }
+                },
+                "summary": "Get UI Registry",
+                "tags": [
+                  "configuration"
+                ]
+              }
+            },
             "description": "Successful Response"
           }
         },

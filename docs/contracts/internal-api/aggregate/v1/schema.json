@@ -14,6 +14,207 @@
       "title": "AddRuleAttributesResultView",
       "type": "object"
     },
+      "UiRegistryComponentBundleView": {
+        "properties": {
+          "adapter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adapter"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "fallback": {
+            "default": "ignore",
+            "title": "Fallback",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "priority": {
+            "default": 0,
+            "title": "Priority",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "UiRegistryComponentBundleView",
+        "type": "object"
+      },
+      "UiRegistryStyleView": {
+        "properties": {
+          "css_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Css Url"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "fallback": {
+            "default": "ignore",
+            "title": "Fallback",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "priority": {
+            "default": 0,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "UiRegistryStyleView",
+        "type": "object"
+      },
+      "UiRegistryView": {
+        "properties": {
+          "cache_ttl_seconds": {
+            "default": 300,
+            "title": "Cache Ttl Seconds",
+            "type": "integer"
+          },
+          "component_bundles": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/UiRegistryComponentBundleView"
+            },
+            "title": "Component Bundles",
+            "type": "array"
+          },
+          "created": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Metadata",
+            "type": "object"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "styles": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/UiRegistryStyleView"
+            },
+            "title": "Styles",
+            "type": "array"
+          },
+          "updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "version"
+        ],
+        "title": "UiRegistryView",
+        "type": "object"
+    },
+    "AddRuleAttributesResultView": {
+      "properties": {
+        "added": {
+          "title": "Added",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "added"
+      ],
+      "title": "AddRuleAttributesResultView",
+      "type": "object"
+    },
     "AdminRoleView": {
       "properties": {
         "id": {
