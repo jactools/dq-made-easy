@@ -5,7 +5,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-RuleDslCapabilityTarget = Literal["gx", "sodacl", "sql", "pyspark_native", "custom_worker"]
+RuleDslCapabilityTarget = Literal["gx", "sodacl", "soda", "sql", "pyspark_native", "spark_expectations", "trino", "custom_worker"]
 RuleDslCapabilitySupport = Literal["native", "partial", "sql", "custom", "no"]
 RuleDslCapabilityFamily = Literal[
     "row_assertion",
@@ -174,7 +174,7 @@ class RuleDslBackendCapabilityRegistry(RuleDslCapabilityModel):
         return matrix
 
 
-TARGETS: tuple[RuleDslCapabilityTarget, ...] = ("gx", "sodacl", "sql", "pyspark_native", "custom_worker")
+TARGETS: tuple[RuleDslCapabilityTarget, ...] = ("gx", "sodacl", "soda", "sql", "pyspark_native", "spark_expectations", "trino", "custom_worker")
 
 
 def _build_family_entries(
@@ -205,7 +205,7 @@ def _build_schema_assertion_entries() -> tuple[RuleDslBackendCapabilityEntry, ..
             target="gx",
             support="partial",
             supported_subsets=("required_columns_present", "forbidden_columns_absent", "column_types_match", "column_count_between", "column_order_matches"),
-            compiler_behavior="Prefer native schema checks where the table shape can be expressed directly; lower required, forbidden, count, order, and type clauses explicitly.",
+            compiler_behavior="Prefer native schema checks where the table shape can be expressed directly",
             notes="GX supports required and forbidden column membership, ordered columns, column counts, and column type checks, but not every schema contract clause is represented natively.",
         ),
         RuleDslBackendCapabilityEntry(
@@ -215,6 +215,14 @@ def _build_schema_assertion_entries() -> tuple[RuleDslBackendCapabilityEntry, ..
             supported_subsets=SCHEMA_ASSERTION_SUBSETS,
             compiler_behavior="Prefer native schema checks when the target can expose table shape directly.",
             notes="SodaCL can express the full canonical schema contract family here.",
+        ),
+        RuleDslBackendCapabilityEntry(
+            construct_family="schema_assertion",
+            target="soda",
+            support="native",
+            supported_subsets=SCHEMA_ASSERTION_SUBSETS,
+            compiler_behavior="Prefer native schema checks when the target can expose table shape directly.",
+            notes="Soda (normalized from sodacl) can express the full canonical schema contract family.",
         ),
         RuleDslBackendCapabilityEntry(
             construct_family="schema_assertion",
@@ -231,6 +239,22 @@ def _build_schema_assertion_entries() -> tuple[RuleDslBackendCapabilityEntry, ..
             supported_subsets=SCHEMA_ASSERTION_SUBSETS,
             compiler_behavior="Use Spark metadata and catalog access for schema assertions.",
             notes="Spark-native support is implementation-defined and stays outside GX constraints.",
+        ),
+        RuleDslBackendCapabilityEntry(
+            construct_family="schema_assertion",
+            target="spark_expectations",
+            support="custom",
+            supported_subsets=SCHEMA_ASSERTION_SUBSETS,
+            compiler_behavior="Use Spark metadata and catalog access for schema assertions.",
+            notes="Spark Expectations support is implementation-defined and stays outside GX constraints.",
+        ),
+        RuleDslBackendCapabilityEntry(
+            construct_family="schema_assertion",
+            target="trino",
+            support="native",
+            supported_subsets=SCHEMA_ASSERTION_SUBSETS,
+            compiler_behavior="Use Trino metadata introspection for schema assertions.",
+            notes="Trino can expose table shape directly for schema validation.",
         ),
         RuleDslBackendCapabilityEntry(
             construct_family="schema_assertion",
@@ -263,6 +287,14 @@ def _build_custom_query_assertion_entries() -> tuple[RuleDslBackendCapabilityEnt
         ),
         RuleDslBackendCapabilityEntry(
             construct_family="custom_query_assertion",
+            target="soda",
+            support="no",
+            supported_subsets=CUSTOM_QUERY_ASSERTION_SUBSETS,
+            compiler_behavior="No repo-controlled Soda lowerer exists yet for custom query assertions.",
+            notes="Soda support remains future work.",
+        ),
+        RuleDslBackendCapabilityEntry(
+            construct_family="custom_query_assertion",
             target="sql",
             support="no",
             supported_subsets=CUSTOM_QUERY_ASSERTION_SUBSETS,
@@ -276,6 +308,22 @@ def _build_custom_query_assertion_entries() -> tuple[RuleDslBackendCapabilityEnt
             supported_subsets=CUSTOM_QUERY_ASSERTION_SUBSETS,
             compiler_behavior="No repo-controlled Spark-native lowerer exists yet for custom query assertions.",
             notes="Spark-native support remains future work.",
+        ),
+        RuleDslBackendCapabilityEntry(
+            construct_family="custom_query_assertion",
+            target="spark_expectations",
+            support="no",
+            supported_subsets=CUSTOM_QUERY_ASSERTION_SUBSETS,
+            compiler_behavior="No repo-controlled Spark Expectations lowerer exists yet for custom query assertions.",
+            notes="Spark Expectations support remains future work.",
+        ),
+        RuleDslBackendCapabilityEntry(
+            construct_family="custom_query_assertion",
+            target="trino",
+            support="no",
+            supported_subsets=CUSTOM_QUERY_ASSERTION_SUBSETS,
+            compiler_behavior="No repo-controlled Trino lowerer exists yet for custom query assertions.",
+            notes="Trino support remains future work.",
         ),
         RuleDslBackendCapabilityEntry(
             construct_family="custom_query_assertion",
@@ -295,8 +343,11 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "native",
                 "sodacl": "partial",
+                "soda": "native",
                 "sql": "native",
                 "pyspark_native": "native",
+                "spark_expectations": "native",
+                "trino": "native",
                 "custom_worker": "native",
             },
             supported_subsets=ROW_ASSERTION_SUBSETS,
@@ -308,8 +359,11 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "native",
                 "sodacl": "native",
+                "soda": "native",
                 "sql": "native",
                 "pyspark_native": "native",
+                "spark_expectations": "native",
+                "trino": "native",
                 "custom_worker": "native",
             },
             supported_subsets=METRIC_THRESHOLD_SUBSETS,
@@ -321,8 +375,11 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "partial",
                 "sodacl": "partial",
+                "soda": "partial",
                 "sql": "native",
                 "pyspark_native": "custom",
+                "spark_expectations": "custom",
+                "trino": "native",
                 "custom_worker": "custom",
             },
             supported_subsets=METRIC_COMPARISON_SUBSETS,
@@ -335,8 +392,11 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "partial",
                 "sodacl": "native",
+                "soda": "native",
                 "sql": "native",
                 "pyspark_native": "custom",
+                "spark_expectations": "custom",
+                "trino": "native",
                 "custom_worker": "custom",
             },
             supported_subsets=REFERENCE_ASSERTION_SUBSETS,
@@ -348,21 +408,27 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "partial",
                 "sodacl": "partial",
+                "soda": "partial",
                 "sql": "partial",
                 "pyspark_native": "native",
+                "spark_expectations": "native",
+                "trino": "partial",
                 "custom_worker": "partial",
             },
             supported_subsets=RECONCILIATION_ASSERTION_SUBSETS,
-            compiler_behavior="Use the existing PySpark worker path for reconciliation semantics; fail fast on non-worker targets.",
-            notes="Current reconciliation runs through the existing join-pair PySpark worker container; the contract now also exposes cross-dataset integrity as a reusable subset.",
+            compiler_behavior="Use the existing PySpark worker path for reconciliation semantics",
+            notes="Current reconciliation runs through the existing join-pair PySpark worker container",
         ),
         *_build_family_entries(
             construct_family="freshness_assertion",
             support_by_target={
                 "gx": "partial",
                 "sodacl": "native",
+                "soda": "native",
                 "sql": "native",
                 "pyspark_native": "native",
+                "spark_expectations": "native",
+                "trino": "native",
                 "custom_worker": "native",
             },
             supported_subsets=FRESHNESS_ASSERTION_SUBSETS,
@@ -374,26 +440,32 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "native",
                 "sodacl": "partial",
+                "soda": "partial",
                 "sql": "sql",
                 "pyspark_native": "custom",
+                "spark_expectations": "custom",
+                "trino": "sql",
                 "custom_worker": "custom",
             },
             supported_subsets=DISTRIBUTION_ASSERTION_SUBSETS,
             compiler_behavior="Prefer native statistical support; use SQL or custom runtime when portable semantics require it.",
-            notes="Portable statistical semantics now include distribution drift, outlier detection, entropy drift, probabilistic thresholds, and seasonality stability.",
+            notes="Portable statistical semantics now include distribution drift, outlier detection, entropy drift",
         ),
         *_build_family_entries(
             construct_family="anomaly_assertion",
             support_by_target={
                 "gx": "partial",
                 "sodacl": "partial",
+                "soda": "partial",
                 "sql": "no",
                 "pyspark_native": "custom",
+                "spark_expectations": "custom",
+                "trino": "no",
                 "custom_worker": "custom",
             },
             supported_subsets=ANOMALY_ASSERTION_SUBSETS,
             compiler_behavior="Require a history-aware engine or custom worker; fail fast for SQL-only targets.",
-            notes="Anomaly detection remains separated from deterministic SQL lowering while sharing the same advanced statistical subfamilies.",
+            notes="Anomaly detection remains separated from deterministic SQL lowering",
         ),
         *_build_custom_query_assertion_entries(),
         *_build_family_entries(
@@ -401,8 +473,11 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "partial",
                 "sodacl": "native",
+                "soda": "native",
                 "sql": "native",
                 "pyspark_native": "native",
+                "spark_expectations": "native",
+                "trino": "native",
                 "custom_worker": "native",
             },
             supported_subsets=FAILED_ROWS_EVIDENCE_SUBSETS,
@@ -414,8 +489,11 @@ RULE_DSL_BACKEND_CAPABILITY_REGISTRY = RuleDslBackendCapabilityRegistry(
             support_by_target={
                 "gx": "native",
                 "sodacl": "native",
+                "soda": "native",
                 "sql": "custom",
                 "pyspark_native": "custom",
+                "spark_expectations": "custom",
+                "trino": "custom",
                 "custom_worker": "custom",
             },
             supported_subsets=OPERATIONAL_METADATA_SUBSETS,
