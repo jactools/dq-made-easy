@@ -21,67 +21,17 @@ The platform currently supports the following DQ engine types:
 
 ## Execution Flow
 
-The following diagram illustrates how DQ engines relate to running a DQ plan:
-
 ```mermaid
-flowchart TD
-    %% DQ Plan Execution Flow
-
-    %% Main Components
-    DQPlan[("DQ Plan\n(Rules + Metadata)")] -->|compile| Compiler
-    Compiler[("Rule Compiler\n(rule_translator)")] -->|lower to| RuntimeLowerer
-    RuntimeLowerer[("Runtime Lowerer\n(runtime_lowerers.py)")] -->|select| EngineType
-
-    %% Engine Types
-    EngineType -->|gx| GXEngine["Great Expectations\n(gx)"]
-    EngineType -->|soda/sodacl| SodaEngine["SodaCL\n(soda/sodacl)"]
-    EngineType -->|pyspark/spark| SparkExpectationsEngine["Spark Expectations\n(spark_expectations)"]
-    EngineType -->|trino| TrinoEngine["Trino\n(trino)"]
-    EngineType -->|sql| SQLEngine["SQL\n(sql)"]
-    EngineType -->|custom| CustomWorker["Custom Worker\n(custom_worker)"]
-
-    %% Execution
-    GXEngine -->|execute| GXResults["GX Results"]
-    SodaEngine -->|execute| SodaResults["Soda Results"]
-    SparkExpectationsEngine -->|execute| SparkResults["Spark Results"]
-    TrinoEngine -->|execute| TrinoResults["Trino Results"]
-    SQLEngine -->|execute| SQLResults["SQL Results"]
-    CustomWorker -->|execute| CustomResults["Custom Results"]
-
-    %% Results aggregation
-    GXResults & SodaResults & SparkResults & TrinoResults & SQLResults & CustomResults -->|collect| DQResultEvent
-    DQResultEvent[("DQ Result Event\n(dq_result_event.py)")] -->|store| ValidationArtifact
-    ValidationArtifact[("Validation Artifact\n(validation_artifact.py)")] -->|persist| Database
-
-    %% Capability Registry
-    subgraph CapabilityRegistry["DSL Capability Registry"]
-        CR[("rule_dsl_capability_registry.py")] -->|defines| T1["Target Types"]
-        T1 -->|"gx, sodacl, soda, sql, pyspark_native, spark_expectations, trino, custom_worker"| EngineType
-        CR -->|defines| C1["Capability Families"]
-        C1 -->|"row_assertion, metric_threshold, schema_assertion, ..."| Compiler
-    end
-
-    %% Aliases
-    Aliases[("Engine Type Aliases\n(ENGINE_TYPE_ALIASES)")] -->|pyspark ->| SparkExpectationsEngine
-    Aliases -->|pyspark_native ->| SparkExpectationsEngine
-    Aliases -->|spark ->| SparkExpectationsEngine
-    Aliases -->|sodacl ->| SodaEngine
-    Aliases -->|great_expectations ->| GXEngine
-
-    %% Runtime Support
-    RuntimeSupport[("SUPPORTED_RUNTIME_ENGINES\n{ gx, soda, spark_expectations, trino }")] --> RuntimeLowerer
-
-    %% Styling
-    classDef component fill:#f9f,stroke:#333,stroke-width:2px
-    classDef engine fill:#bbf,stroke:#333,stroke-width:2px,color:#fff
-    classDef result fill:#dfd,stroke:#333,stroke-width:2px
-    classDef registry fill:#ffd,stroke:#333,stroke-width:2px
-
-    class DQPlan,Compiler,RuntimeLowerer,Aliases,RuntimeSupport component
-    class GXEngine,SodaEngine,SparkExpectationsEngine,TrinoEngine,SQLEngine,CustomWorker engine
-    class GXResults,SodaResults,SparkResults,TrinoResults,SQLResults,CustomResults,DQResultEvent,ValidationArtifact result
-    class CR,CapabilityRegistry registry
+graph LR
+    A --> B
 ```
+
+The capability registry influences this flow by defining:
+
+- Supported engine target types.
+- Capability families such as row assertions, metric thresholds, and schema assertions.
+- Engine aliases used to normalize external names to internal engine types.
+- Runtime support boundaries for the normalized engines.
 
 ## Component Details
 
