@@ -9,15 +9,15 @@ import {
   type AppIconName,
 } from './app-primitives'
 import { useSettingsOptional } from '../hooks/useContexts'
-import type { IconProviderName } from '../types/settings'
+import { DEFAULT_ICON_PROVIDER, getAppIconProviderLabel, normalizeIconProviderName } from './app-primitives/appIconProviders'
 import './IconGallery.css'
 
 export const IconGallery: React.FC = () => {
   const settings = useSettingsOptional()
   const [searchTerm, setSearchTerm] = useState('')
   const [copiedIconName, setCopiedIconName] = useState<AppIconName | null>(null)
-  const activeIconProvider = (settings?.applicationSettings?.iconProvider || 'tabler') as IconProviderName
-  const activeProviderLabel = APP_ICON_PROVIDER_LABELS[activeIconProvider]
+  const activeIconProvider = normalizeIconProviderName(settings?.applicationSettings?.iconProvider || DEFAULT_ICON_PROVIDER)
+  const activeProviderLabel = getAppIconProviderLabel(activeIconProvider)
   const allIcons = useMemo(
     () => [...getAppIconNamesForProvider(activeIconProvider)].sort(),
     [activeIconProvider],

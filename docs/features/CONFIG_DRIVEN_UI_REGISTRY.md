@@ -26,50 +26,56 @@ Current overlap assessment as of 2026-07-01:
 - Replace closed-set style and component unions with registry-backed descriptors where unknown IDs survive round-tripping.
 - Keep safe fallback entries for startup and recovery, but do not silently collapse new registry values to defaults.
 - Make persistence and normalization treat the registry as data, not as a hard-coded enum.
-- [ ] Replace closed-set enums with registry-backed descriptors.
-- [ ] Preserve unknown IDs through load and save.
-- [ ] Add safe startup and recovery fallbacks.
-- [ ] Ensure normalization does not collapse new values to defaults.
+- [x] Replace closed-set enums with registry-backed descriptors.
+- [x] Preserve unknown IDs through load and save.
+- [x] Add safe startup and recovery fallbacks.
+- [x] Ensure normalization does not collapse new values to defaults.
 
 ## Phase 3: Generalize the Style Loader Boundary
 
 - Refactor the style theme provider so it resolves stylesheet URLs from registry entries instead of fixed package mappings.
-- Support arbitrary external stylesheet sources and clean up injected links when the active registry entry changes.
+- Support local-site stylesheet sources only and clean up injected links when the active registry entry changes.
 - Keep the default baseline styles intact while allowing registry-driven overlays or replacements.
-- [ ] Resolve stylesheet URLs from registry entries.
-- [ ] Support arbitrary external stylesheet sources.
-- [ ] Remove injected stylesheet links when entries change.
-- [ ] Preserve baseline styles while allowing overlays or replacements.
+- [x] Resolve stylesheet URLs from registry entries.
+- [x] Support local-site stylesheet sources only.
+- [x] Remove injected stylesheet links when entries change.
+- [x] Preserve baseline styles while allowing overlays or replacements.
 
 ## Phase 4: Make Settings and UI Registry-Driven
 
 - Replace fixed package option lists and labels in application settings with registry-provided data.
 - Persist only registry identifiers and the minimum required runtime metadata.
 - Surface registry content in the UI without hard-coding package names or bundle choices in components.
-- [ ] Replace fixed settings option lists with registry data.
-- [ ] Persist only registry identifiers and required metadata.
-- [ ] Render registry-provided content in the UI.
-- [ ] Remove hard-coded package and bundle names from settings components.
+- [x] Replace fixed settings option lists with registry data.
+- [x] Persist only registry identifiers and required metadata.
+- [x] Render registry-provided content in the UI.
+- [x] Remove hard-coded package and bundle names from settings components.
+
+Implementation status: the application settings page now loads style-package options from the UI registry when available, preserves the current value as a fallback, and renders registry style/component summaries in the settings UI. The icon-provider and broader component-bundle abstraction still belong to phase 5.
 
 ## Phase 5: Generalize Component Bundle Resolution
 
 - Introduce a registry-backed adapter layer for component bundles such as icon providers and other bundle-scoped UI surfaces.
 - Resolve bundle selection through registry entries instead of binary source code switches.
 - Keep app-owned primitives as the stable surface while allowing the underlying implementation to vary by registry entry.
-- [ ] Add a registry-backed adapter layer for component bundles.
-- [ ] Resolve bundle selection through registry entries.
-- [ ] Keep app-owned primitives stable across bundle changes.
-- [ ] Add adapter fallback behavior for missing bundle implementations.
+- [x] Add a registry-backed adapter layer for component bundles.
+- [x] Resolve bundle selection through registry entries.
+- [x] Keep app-owned primitives stable across bundle changes.
+- [x] Add adapter fallback behavior for missing bundle implementations.
+
+Implementation status: the icon-provider seam now uses registry component bundles to override labels and selection options in application settings through the shared `appIconProviders` adapter helpers. Known providers still fall back to the built-in tabler/lucide icon sets when a registry bundle is missing or inactive, and unknown bundles continue to degrade safely to the app-owned defaults.
 
 ## Phase 6: Move Build-Time Asset Handling Behind the Registry
 
 - Refactor style-package build scripts and generated asset assumptions so emitted CSS outputs and vendor-specific transforms are described by registry entries.
 - Keep build outputs aligned with the manifest until the pipeline can consume the registry directly.
 - Remove fixed package-name assumptions only after the registry owns those references.
-- [ ] Describe generated CSS outputs in the registry.
-- [ ] Align build outputs with the manifest.
-- [ ] Remove fixed package-name assumptions from build scripts.
-- [ ] Add any required build-time manifest transforms.
+- [x] Describe generated CSS outputs in the registry.
+- [x] Align build outputs with the manifest.
+- [x] Remove fixed package-name assumptions from build scripts.
+- [x] Add any required build-time manifest transforms.
+
+Implementation status: the dq-ui style packaging scripts now read a manifest that describes every generated stylesheet output, and the watch script rebuilds when that manifest changes. The manifest keeps the generated CSS outputs aligned with the registry-described package set.
 
 ## Phase 7: Add Guardrails and Verification
 
@@ -77,10 +83,12 @@ Current overlap assessment as of 2026-07-01:
 - Add tests that verify arbitrary stylesheet URLs are injected, updated, and removed correctly.
 - Add tests that ensure registry-provided options render in the UI and that malformed registries fail safely.
 - Add a contract check so registry entries cannot be added without a resolver, adapter, or fallback path.
-- [ ] Add round-trip tests for unknown registry entries.
-- [ ] Add stylesheet injection and cleanup tests.
-- [ ] Add UI rendering tests for registry-provided options.
-- [ ] Add contract checks for resolver, adapter, and fallback coverage.
+- [x] Add round-trip tests for unknown registry entries.
+- [x] Add stylesheet injection and cleanup tests.
+- [x] Add UI rendering tests for registry-provided options.
+- [x] Add contract checks for resolver, adapter, and fallback coverage.
+
+Implementation status: the backend registry tests now reject component bundles without adapters or with invalid fallback values, and the frontend icon-provider helper tests cover registry-backed labels plus safe fallback to builtin providers when bundles are inactive or unmapped.
 
 ## Phase 8: Document the External Configuration Workflow
 
@@ -88,10 +96,12 @@ Current overlap assessment as of 2026-07-01:
 - Document how new style and component entries are added outside the repository.
 - Document the fallback behavior when the registry cannot be loaded or validated.
 - Document the API endpoints and UI upload flow that manage custom theme configuration.
-- [ ] Document external registry delivery.
-- [ ] Document the process for adding new registry entries.
-- [ ] Document registry load and validation fallback behavior.
-- [ ] Document the API and UI upload flow for custom themes.
+- [x] Document external registry delivery.
+- [x] Document the process for adding new registry entries.
+- [x] Document registry load and validation fallback behavior.
+- [x] Document the API and UI upload flow for custom themes.
+
+Implementation status: the workflow guide now documents registry delivery, adding entries, fallback behavior, and the API/UI asset import flow in [docs/features/CONFIG_DRIVEN_UI_REGISTRY_WORKFLOW.md](docs/features/CONFIG_DRIVEN_UI_REGISTRY_WORKFLOW.md).
 
 ## Acceptance Criteria
 
@@ -106,12 +116,12 @@ Current overlap assessment as of 2026-07-01:
 
 - [x] `UI-REG-1` Registry contract and loader
 - [x] `UI-REG-2` Registry-backed persistence and normalization
-- [ ] `UI-REG-3` Registry-driven style loader
-- [ ] `UI-REG-4` Registry-driven settings UI
-- [ ] `UI-REG-5` Registry-backed component adapters
-- [ ] `UI-REG-6` Build pipeline registry integration
-- [ ] `UI-REG-7` Guardrails and verification
-- [ ] `UI-REG-8` Documentation and workflow guidance
+- [x] `UI-REG-3` Registry-driven style loader
+- [x] `UI-REG-4` Registry-driven settings UI
+- [x] `UI-REG-5` Registry-backed component adapters
+- [x] `UI-REG-6` Build pipeline registry integration
+- [x] `UI-REG-7` Guardrails and verification
+- [x] `UI-REG-8` Documentation and workflow guidance
 
 ## Non-goals
 

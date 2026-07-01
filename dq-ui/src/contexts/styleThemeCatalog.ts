@@ -5,6 +5,36 @@ export type StylePackageOption = {
   label: string
 }
 
+export type StyleRegistryStyle = {
+  id: string
+  label?: string
+  description?: string
+  sourceRef?: string
+  cssUrl?: string
+  fallback?: string
+  priority?: number
+  isActive?: boolean
+}
+
+export const isLocalStylesheetHref = (href: string): boolean => {
+  const trimmed = href.trim()
+  if (!trimmed) {
+    return false
+  }
+
+  if (trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('../')) {
+    return true
+  }
+
+  try {
+    const baseOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+    const resolvedUrl = new URL(trimmed, baseOrigin)
+    return resolvedUrl.origin === baseOrigin
+  } catch {
+    return false
+  }
+}
+
 export const DEFAULT_STYLE_PACKAGE: StylePackageName = 'data-web-css'
 
 export const STYLE_PACKAGE_OPTIONS: readonly StylePackageOption[] = [
@@ -39,4 +69,36 @@ export const normalizeStylePackageName = (value: unknown): StylePackageName => {
 
 export const getStylePackageLabel = (stylePackage: StylePackageName): string => STYLE_PACKAGE_LABELS[stylePackage] || stylePackage
 
-export const getStylePackageStylesheetHref = (stylePackage: StylePackageName): string | undefined => STYLE_PACKAGE_STYLESHEETS[stylePackage]
+export const getStylePackageOptions = (
+  selectedStylePackage: StylePackageName,
+  registryStyles?: readonly StyleRegistryStyle[] | null,
+): readonly StylePackageOption[] => {
+  const activeRegistryOptions = (registryStyles ?? [])
+    .filter((entry) => entry.isActive !== false && typeof entry.id === 'string' && entry.id.trim())
+    .map((entry) => ({
+      value: entry.id as StylePackageName,
+      label: entry.label?.trim() || getStylePackageLabel(entry.id as StylePackageName),
+    }))
+
+  if (activeRegistryOptions.some((option) => option.value === selectedStylePackage)) {
+    return activeRegistryOptions
+  }
+
+  return [
+    { value: selectedStylePackage, label: `${getStylePackageLabel(selectedStylePackage)} (current)` },
+    ...activeRegistryOptions,
+  ]
+}
+
+export const getStylePackageStylesheetHref = (
+  stylePackage: StylePackageName,
+  registryStyles?: readonly StyleRegistryStyle[] | null,
+): string | undefined => {
+  const registryStyle = registryStyles?.find((entry) => entry.isActive !== false && entry.id === stylePackage)
+  const registryHref = registryStyle?.cssUrl?.trim()
+  if (registryHref && isLocalStylesheetHref(registryHref)) {
+    return registryHref
+  }
+
+  return STYLE_PACKAGE_STYLESHEETS[stylePackage]
+}

@@ -4,7 +4,9 @@ import type { StylePackageName } from '../types/settings'
 import {
   DEFAULT_STYLE_PACKAGE,
   STYLE_PACKAGE_OPTIONS,
+  type StyleRegistryStyle,
   getStylePackageStylesheetHref,
+  isLocalStylesheetHref,
   normalizeStylePackageName,
 } from './styleThemeCatalog'
 
@@ -17,20 +19,29 @@ const STYLE_PACKAGE_STYLESHEET_LINK_ID = 'dq-style-package-stylesheet'
 
 const StyleThemeContext = createContext<StyleThemeContextType | undefined>(undefined)
 
-export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: StylePackageName }> = ({
+export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: StylePackageName; registryStyles?: readonly StyleRegistryStyle[] | null }> = ({
   children,
   stylePackage,
+  registryStyles,
 }) => {
   const normalizedStylePackage = normalizeStylePackageName(stylePackage)
+  const registryStyleHref = useMemo(() => {
+    const registryStyle = registryStyles?.find((entry) => entry.isActive !== false && entry.id === normalizedStylePackage)
+    const href = registryStyle?.cssUrl?.trim() || undefined
+    return href && isLocalStylesheetHref(href) ? href : undefined
+  }, [normalizedStylePackage, registryStyles])
+  const selectedHref = useMemo(
+    () => getStylePackageStylesheetHref(normalizedStylePackage, registryStyles),
+    [normalizedStylePackage, registryStyles],
+  )
 
   useLayoutEffect(() => {
     const root = document.documentElement
     root.setAttribute('data-style-package', normalizedStylePackage)
 
-    const selectedHref = getStylePackageStylesheetHref(normalizedStylePackage)
     const existingLink = document.getElementById(STYLE_PACKAGE_STYLESHEET_LINK_ID) as HTMLLinkElement | null
 
-    if (!selectedHref || normalizedStylePackage === DEFAULT_STYLE_PACKAGE) {
+    if (!selectedHref || (normalizedStylePackage === DEFAULT_STYLE_PACKAGE && !registryStyleHref)) {
       existingLink?.remove()
       return
     }
@@ -48,7 +59,7 @@ export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: S
     return () => {
       link.remove()
     }
-  }, [normalizedStylePackage])
+  }, [normalizedStylePackage, registryStyleHref, selectedHref])
 
   const value = useMemo<StyleThemeContextType>(
     () => ({

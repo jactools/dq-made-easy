@@ -12,12 +12,28 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib.error import URLError
+from urllib.parse import urlparse
 from urllib.request import urlopen
 
 
 logger = logging.getLogger(__name__)
 
 REGISTRY_SCHEMA_VERSION = "1.0.0"
+
+
+def _is_local_stylesheet_href(value: str | None) -> bool:
+    if not value:
+        return False
+
+    normalized = value.strip()
+    if not normalized:
+        return False
+
+    if normalized.startswith(("/", "./", "../")):
+        return True
+
+    parsed = urlparse(normalized)
+    return not parsed.scheme and not parsed.netloc
 
 
 class RegistrySource(Enum):
@@ -400,6 +416,8 @@ class RegistryManager:
         if entry_type == "style":
             if not getattr(entry, "css_url", None):
                 errors.append("css_url is required for styles")
+            elif not _is_local_stylesheet_href(getattr(entry, "css_url", None)):
+                errors.append("css_url must reference a local site path")
             fallback = getattr(entry, "fallback", "ignore")
             if fallback not in {"ignore", "fallback", "replace"}:
                 errors.append(f"Invalid fallback value: {fallback}")
@@ -424,6 +442,8 @@ class RegistryManager:
                 entry_errors.append("label is required")
             if not entry.css_url:
                 entry_errors.append("css_url is required for styles")
+            elif not _is_local_stylesheet_href(entry.css_url):
+                entry_errors.append("css_url must reference a local site path")
             if entry.fallback not in {"ignore", "fallback", "replace"}:
                 entry_errors.append(f"Invalid fallback value: {entry.fallback}")
             if entry_errors:

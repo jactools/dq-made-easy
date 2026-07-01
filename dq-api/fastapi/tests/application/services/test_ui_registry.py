@@ -39,6 +39,24 @@ def test_registry_manifest_enforces_version_contract() -> None:
         manifest.validate_contract("1.0.0")
 
 
+def test_registry_manifest_rejects_component_bundles_without_adapter() -> None:
+    manifest = RegistryManifest(
+        component_bundles=[ComponentBundleEntry(id="icons", label="Icons", adapter=None)],
+    )
+
+    with pytest.raises(RegistryValidationError, match="adapter is required for component bundles"):
+        RegistryManager(source=RegistrySource.DEFAULT, default_manifest=manifest).load()
+
+
+def test_registry_manifest_rejects_component_bundles_with_invalid_fallback() -> None:
+    manifest = RegistryManifest(
+        component_bundles=[ComponentBundleEntry(id="icons", label="Icons", adapter="app.adapters.icons", fallback="later")],
+    )
+
+    with pytest.raises(RegistryValidationError, match="Invalid fallback value"):
+        RegistryManager(source=RegistrySource.DEFAULT, default_manifest=manifest).load()
+
+
 def test_registry_configuration_resolves_source_precedence() -> None:
     configuration = RegistryConfiguration(
         source=RegistrySource.DEFAULT,

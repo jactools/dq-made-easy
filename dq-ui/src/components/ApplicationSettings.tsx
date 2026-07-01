@@ -14,16 +14,23 @@ import './Settings.css'
 import { camelToSnake, snakeToCamel } from '../utils/caseConverters'
 import { createSupportReferenceId, formatSupportReferenceId } from '../utils/supportReference'
 import { PLAYGROUND_SOURCE_BUNDLES } from '../data/playgroundSourceBundles'
-import { DEFAULT_STYLE_PACKAGE, STYLE_PACKAGE_OPTIONS, getStylePackageLabel } from '../contexts/styleThemeCatalog'
+import { DEFAULT_STYLE_PACKAGE, getStylePackageLabel, getStylePackageOptions, type StyleRegistryStyle } from '../contexts/styleThemeCatalog'
 import type { StylePackageName } from '../types/settings'
+import { DEFAULT_ICON_PROVIDER, getAppIconProviderOptions, type RegistryComponentBundle } from './app-primitives/appIconProviders'
 
 type UiRegistryView = {
   source: string
   version: string
   cache_ttl_seconds?: number
-  styles?: Array<{ id: string; label?: string }>
-  component_bundles?: Array<{ id: string; label?: string }>
+  styles?: readonly StyleRegistryStyle[]
+  component_bundles?: readonly RegistryComponentBundle[]
   metadata?: Record<string, unknown>
+}
+
+const formatRegistryComponentBundle = (bundle: RegistryComponentBundle): string => {
+  const details = [bundle.label, bundle.adapter, bundle.fallback ? `fallback=${bundle.fallback}` : null]
+    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+  return details.length > 0 ? `${bundle.id} (${details.join(', ')})` : bundle.id
 }
 
 type AppSettingsTab = 'application' | 'security' | 'api'
@@ -627,17 +634,17 @@ export const ApplicationSettings: React.FC = () => {
     normalizeApplicationSettings(settings.applicationSettings)
   )
 
-  const selectedStylePackage = applicationData?.stylePackage || DEFAULT_STYLE_PACKAGE
-  const stylePackageOptions = useMemo(() => {
-    if (STYLE_PACKAGE_OPTIONS.some((option) => option.value === selectedStylePackage)) {
-      return STYLE_PACKAGE_OPTIONS
-    }
+  const selectedIconProvider = applicationData?.iconProvider || DEFAULT_ICON_PROVIDER
+  const iconProviderOptions = useMemo(
+    () => getAppIconProviderOptions(selectedIconProvider, uiRegistryView?.component_bundles ?? null),
+    [selectedIconProvider, uiRegistryView?.component_bundles],
+  )
 
-    return [
-      { value: selectedStylePackage, label: `${getStylePackageLabel(selectedStylePackage)} (current)` },
-      ...STYLE_PACKAGE_OPTIONS,
-    ]
-  }, [selectedStylePackage])
+  const selectedStylePackage = applicationData?.stylePackage || DEFAULT_STYLE_PACKAGE
+  const stylePackageOptions = useMemo(
+    () => getStylePackageOptions(selectedStylePackage, uiRegistryView?.styles ?? null),
+    [selectedStylePackage, uiRegistryView?.styles],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -1538,7 +1545,7 @@ export const ApplicationSettings: React.FC = () => {
                 <AppSelect
                   id="iconProvider"
                   label="Icon provider"
-                  value={applicationData.iconProvider || 'tabler'}
+                  value={selectedIconProvider}
                   onChange={(value) => {
                     setApplicationData({
                       ...applicationData,
@@ -1546,12 +1553,12 @@ export const ApplicationSettings: React.FC = () => {
                     })
                     setHasChanges(true)
                   }}
-                  options={[
-                    { value: 'tabler', label: 'Tabler' },
-                    { value: 'lucide', label: 'Lucide' },
-                  ]}
+                  options={iconProviderOptions.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
                 />
-                <p className="info-text">Controls the package-backed icon provider used by the app-owned icon seam.</p>
+                <p className="info-text">Controls the active icon provider used by the app-owned icon seam.</p>
               </div>
 
               <div className="form-group">
@@ -1568,10 +1575,10 @@ export const ApplicationSettings: React.FC = () => {
                   }}
                   options={stylePackageOptions.map((option) => ({
                     value: option.value,
-                    label: getStylePackageLabel(option.value),
+                    label: option.label,
                   }))}
                 />
-                <p className="info-text">Controls which package-backed stylesheet the app loads at runtime.</p>
+                <p className="info-text">Controls which stylesheet the app loads at runtime.</p>
               </div>
               {uiRegistryView && (
                 <div className="form-group">
@@ -1579,6 +1586,16 @@ export const ApplicationSettings: React.FC = () => {
                   <p className="info-text">
                     Source: {uiRegistryView.source} | Version: {uiRegistryView.version} | Styles: {uiRegistryView.styles?.length || 0} | Component bundles: {uiRegistryView.component_bundles?.length || 0}
                   </p>
+                  {uiRegistryView.styles?.length ? (
+                    <p className="info-text">
+                      Styles: {uiRegistryView.styles.map((style) => `${style.id}${style.label ? ` (${style.label})` : ''}`).join(', ')}
+                    </p>
+                  ) : null}
+                  {uiRegistryView.component_bundles?.length ? (
+                    <p className="info-text">
+                      Component bundles: {uiRegistryView.component_bundles.map((bundle) => formatRegistryComponentBundle(bundle)).join(', ')}
+                    </p>
+                  ) : null}
                   {uiRegistryView.metadata?.storage_table && (
                     <p className="info-text">Stored in {String(uiRegistryView.metadata.storage_table)}</p>
                   )}

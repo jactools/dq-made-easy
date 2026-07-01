@@ -3,7 +3,7 @@
  */
 
 export type SettingsCategory = 'profile' | 'workspace' | 'notifications' | 'display' | 'security' | 'api' | 'application'
-export type IconProviderName = 'tabler' | 'lucide'
+export type IconProviderName = string
 export type StylePackageName = string
 
 export interface AlertRoutingPolicy {

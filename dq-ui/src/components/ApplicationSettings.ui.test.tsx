@@ -212,7 +212,11 @@ describe('ApplicationSettings UI persistence', () => {
               { id: 'data-web-css', label: 'Data Web CSS' },
               { id: 'astrowind', label: 'AstroWind' },
             ],
-            component_bundles: [{ id: 'icons', label: 'Icons' }],
+            component_bundles: [
+              { id: 'tabler', label: 'Registry Tabler', adapter: 'app.adapters.icons.tabler', fallback: 'fallback' },
+              { id: 'lucide', label: 'Registry Lucide', adapter: 'app.adapters.icons.lucide', fallback: 'replace' },
+              { id: 'icons', label: 'Icons', adapter: 'app.adapters.icons', fallback: 'ignore' },
+            ],
             metadata: { storage_table: 'ui_registry_manifest' },
           }),
         }
@@ -298,12 +302,14 @@ describe('ApplicationSettings UI persistence', () => {
   it('persists the style package selection in app-config payload', async () => {
     render(<ApplicationSettings />)
 
+    await screen.findByText(/Styles: data-web-css \(Data Web CSS\), astrowind \(AstroWind\)/)
+
     const stylePackageSelect = await screen.findByLabelText('Style package')
-    expect(screen.getByText('Controls which package-backed stylesheet the app loads at runtime.')).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Tailwind CSS' })).toBeTruthy()
+    expect(screen.getByText('Controls which stylesheet the app loads at runtime.')).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Custom-built CSS package (current)' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Data Web CSS' })).toBeTruthy()
     expect(screen.getByRole('option', { name: 'AstroWind' })).toBeTruthy()
     expect(screen.getByRole('option', { name: 'Data Web CSS' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Custom-built CSS package' })).toBeTruthy()
     fireEvent.change(stylePackageSelect, { target: { value: 'astrowind' } })
 
     const saveButtons = await screen.findAllByRole('button', { name: 'Save Changes' })
@@ -326,6 +332,22 @@ describe('ApplicationSettings UI persistence', () => {
 
     const payload = JSON.parse((putCall?.[1] as RequestInit).body as string)
     expect(payload.style_package).toBe('astrowind')
+  })
+
+  it('renders registry-provided stylesheet and component bundle summaries', async () => {
+    render(<ApplicationSettings />)
+
+    expect(await screen.findByText(/Styles: data-web-css \(Data Web CSS\), astrowind \(AstroWind\)/)).toBeTruthy()
+    expect(screen.getAllByText(/Component bundles: tabler \(Registry Tabler, app.adapters.icons.tabler, fallback=fallback\), lucide \(Registry Lucide, app.adapters.icons.lucide, fallback=replace\), icons \(Icons, app.adapters.icons, fallback=ignore\)/).length).toBeGreaterThan(0)
+  })
+
+  it('uses registry-backed labels for icon provider options when bundles map to known adapters', async () => {
+    render(<ApplicationSettings />)
+
+    const iconProviderSelect = await screen.findByLabelText('Icon provider')
+    expect(iconProviderSelect).toBeTruthy()
+    expect(screen.getAllByRole('option', { name: 'Registry Tabler' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('option', { name: 'Registry Lucide' }).length).toBeGreaterThan(0)
   })
 
   it('persists the data web css selection in app-config payload', async () => {
@@ -568,9 +590,22 @@ describe('ApplicationSettings UI persistence', () => {
   })
 
   it('hydrates suggestions toggle from snake_case app-config responses', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+
+      if (url.includes('/ui-registry')) {
+        return {
+          ok: true,
+          json: async () => ({
+            source: 'default',
+            version: '1.0.0',
+            styles: [],
+            component_bundles: [],
+          }),
+        }
+      }
+
+      return {
         ok: true,
         json: async () => ({
           sso_enabled: false,
@@ -578,15 +613,15 @@ describe('ApplicationSettings UI persistence', () => {
           allow_local_auth: true,
           feature_rule_suggestions: true,
         }),
-      })
+      }
+    })
 
     vi.stubGlobal('fetch', fetchMock)
 
     render(<ApplicationSettings />)
 
-    const suggestionsToggle = await screen.findByLabelText('Enable suggestions (AI-powered)')
     await waitFor(() => {
-      expect((suggestionsToggle as HTMLInputElement).checked).toBe(true)
+      expect((screen.getByLabelText('Enable suggestions (AI-powered)') as HTMLInputElement).checked).toBe(true)
     })
   })
 
@@ -602,7 +637,7 @@ describe('ApplicationSettings UI persistence', () => {
   it('shows a registry snapshot in the application settings UI', async () => {
     render(<ApplicationSettings />)
 
-    expect(await screen.findByText('UI registry snapshot')).toBeTruthy()
+    expect(screen.getAllByText('UI registry snapshot').length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Source: default/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Version: 1.0.0/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/Styles: 2/).length).toBeGreaterThan(0)

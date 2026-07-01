@@ -141,6 +141,16 @@ describe('SettingsContext display preference mapping', () => {
     })
   })
 
+  it('preserves unknown application icon provider ids during normalization', () => {
+    const normalized = normalizeApplicationPreferences({
+      icon_provider: 'custom-registry-icons',
+    })
+
+    expect(normalized).toMatchObject({
+      iconProvider: 'custom-registry-icons',
+    })
+  })
+
   it('keeps the saved style package when /me returns snake_case preferences', async () => {
     vi.stubGlobal(
       'fetch',

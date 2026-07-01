@@ -24,6 +24,7 @@ from app.api.v1.endpoints.rules import router as rules_router
 from app.api.v1.endpoints.suggestions import router as suggestions_router
 from app.api.v1.endpoints.status_governance import router as status_governance_router
 from app.api.v1.endpoints.system import router as system_router
+from app.api.v1.endpoints.ui_registry_assets import router as ui_registry_assets_router
 from app.api.v1.endpoints.testing import router as testing_router
 from app.api.v1.endpoints.validation_runs import router as validation_runs_router
 from app.api.v1.endpoints.workspaces import router as workspaces_router
@@ -62,6 +63,7 @@ api_router.include_router(user_group)
 system_group = APIRouter(prefix="/system/v1")
 system_group.include_router(system_router)
 system_group.include_router(app_config_router)
+system_group.include_router(ui_registry_assets_router)
 system_group.include_router(data_protection_router)
 system_group.include_router(health_router)
 system_group.include_router(support_router)

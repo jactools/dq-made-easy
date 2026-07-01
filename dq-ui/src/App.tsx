@@ -61,7 +61,7 @@ import {
   ExceptionRecordHandling,
   RuleExecutionMonitoring,
 } from './components/features'
-import { DEFAULT_STYLE_PACKAGE } from './contexts/styleThemeCatalog'
+import { DEFAULT_STYLE_PACKAGE, type StyleRegistryStyle } from './contexts/styleThemeCatalog'
 
 const RULE_VALIDATION_NAV_SELECTION_KEY = 'dq-rule-validation-navigation-selection'
 
@@ -159,6 +159,7 @@ function AppContent() {
     message: '',
   })
   const [authToken, setAuthToken] = useState<string | null>(() => getAuthToken())
+  const [uiRegistryStyles, setUiRegistryStyles] = useState<readonly StyleRegistryStyle[] | null>(null)
   const auth = useAuth()
   const settings = useSettings()
   const allowLocalAuth = settings.applicationSettings?.allowLocalAuth === true
@@ -215,6 +216,46 @@ function AppContent() {
 
     setLoginModalOpen(true)
   }, [auth.currentWorkspaceId, auth.isAuthenticated, auth.user, loginModalOpen])
+
+  useEffect(() => {
+    const apiBaseUrl = settings.applicationSettings?.apiBaseUrl
+    if (!apiBaseUrl || !authToken) {
+      setUiRegistryStyles(null)
+      return
+    }
+
+    let cancelled = false
+
+    const loadUiRegistry = async () => {
+      try {
+        const apiBase = toApiGroupV1Base('system', apiBaseUrl)
+        const response = await fetch(`${apiBase}/ui-registry`, {
+          headers: {
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+        })
+
+        if (!response.ok || cancelled) {
+          return
+        }
+
+        const view = (await response.json()) as { styles?: StyleRegistryStyle[] }
+        if (!cancelled) {
+          setUiRegistryStyles(Array.isArray(view.styles) ? view.styles : [])
+        }
+      } catch {
+        if (!cancelled) {
+          setUiRegistryStyles(null)
+        }
+      }
+    }
+
+    void loadUiRegistry()
+
+    return () => {
+      cancelled = true
+    }
+  }, [authToken, settings.applicationSettings?.apiBaseUrl])
 
   const isAdminUser = auth.getCurrentUserRole() === 'admin'
 
@@ -550,7 +591,7 @@ function AppContent() {
 
   if (maintenanceState.enabled && !isAdminUser) {
     return (
-      <StyleThemeProvider stylePackage={stylePackage}>
+      <StyleThemeProvider stylePackage={stylePackage} registryStyles={uiRegistryStyles}>
         <div className="app maintenance-mode" data-theme={effectiveTheme} data-app-theme={effectiveTheme}>
           <Header
             onLoginClick={() => setLoginModalOpen(true)}
@@ -587,7 +628,7 @@ function AppContent() {
 
   if (publicDocsRoute) {
     return (
-      <StyleThemeProvider stylePackage={stylePackage}>
+      <StyleThemeProvider stylePackage={stylePackage} registryStyles={uiRegistryStyles}>
         <div className="app public-documentation" data-theme={effectiveTheme} data-app-theme={effectiveTheme}>
           <main className="app-main app-main-full">
             <div className="app-content">
@@ -606,7 +647,7 @@ function AppContent() {
   }
 
   return (
-    <StyleThemeProvider stylePackage={stylePackage}>
+    <StyleThemeProvider stylePackage={stylePackage} registryStyles={uiRegistryStyles}>
       <div className="app" data-theme={effectiveTheme} data-app-theme={effectiveTheme}>
       <Header
         onLoginClick={() => setLoginModalOpen(true)}
