@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useLayoutEffect, ReactNode } from 'react'
 
 type ThemeMode = 'light' | 'dark' | 'system'
 
@@ -45,7 +45,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }
 
   // Update effective mode based on selected mode and system preference
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateEffectiveMode = () => {
       const effective = mode === 'system' ? getSystemPreference() : mode
       setEffectiveMode(effective)

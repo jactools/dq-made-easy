@@ -32,7 +32,7 @@
   --app-select-text: #161616;
   --app-select-border: #8d8d8d;
   --app-shell-bg: #f4f4f4;
-  --app-header-bg: #161616;
+  --app-header-bg: var(--app-brand-primary);
   --app-header-text: #ffffff;
   --app-sidebar-bg: #ffffff;
   --app-sidebar-border: #e0e0e0;

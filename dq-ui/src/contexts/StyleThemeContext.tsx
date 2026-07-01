@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
+import React, { createContext, useContext, useLayoutEffect, useMemo, type ReactNode } from 'react'
 
 import type { StylePackageName } from '../types/settings'
 import {
@@ -23,7 +23,7 @@ export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: S
 }) => {
   const normalizedStylePackage = normalizeStylePackageName(stylePackage)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement
     root.setAttribute('data-style-package', normalizedStylePackage)
 

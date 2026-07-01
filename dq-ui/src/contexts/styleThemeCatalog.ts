@@ -5,7 +5,7 @@ export type StylePackageOption = {
   label: string
 }
 
-export const DEFAULT_STYLE_PACKAGE: StylePackageName = 'custom-built-package'
+export const DEFAULT_STYLE_PACKAGE: StylePackageName = 'data-web-css'
 
 export const STYLE_PACKAGE_OPTIONS: readonly StylePackageOption[] = [
   { value: 'custom-built-package', label: 'Custom-built CSS package' },
