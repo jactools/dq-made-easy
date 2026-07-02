@@ -589,7 +589,7 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "DQ_LLM_TAG" \
       "${DQ_LLM_REGISTRY}${DQ_LLM_NAMESPACE}${DQ_LLM_IMAGE}" \
       "$ROOT_DIR/dq-llm/Dockerfile.llm" \
-      "$ROOT_DIR/dq-made-easy-llm" \
+      "$ROOT_DIR/dq-llm" \
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
   fi
 fi
