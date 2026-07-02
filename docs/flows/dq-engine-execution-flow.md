@@ -22,8 +22,23 @@ The platform currently supports the following DQ engine types:
 ## Execution Flow
 
 ```mermaid
-graph LR
-    A --> B
+sequenceDiagram
+    participant User
+    participant Plan as DQ Plan
+    participant Compiler as Rule Compiler
+    participant Lowerer as Runtime Lowerer
+    participant Engine as DQ Engine
+    participant Result as Result Processor
+    participant Store as Validation Store
+
+    User->>Plan: Submit DQ plan and rules
+    Plan->>Compiler: Compile rule DSL
+    Compiler->>Lowerer: Provide intermediate representation
+    Lowerer->>Lowerer: Normalize engine aliases and validate support
+    Lowerer->>Engine: Lower rules for selected engine
+    Engine->>Result: Execute rules and return results
+    Result->>Store: Convert to DQ Result Events
+    Store->>Store: Persist validation artifacts and audit data
 ```
 
 The capability registry influences this flow by defining:
@@ -86,6 +101,38 @@ The runtime lowerers currently support these normalized engine types:
 5. **Result Collection**: Results from all executed rules are collected
 6. **Result Processing**: Results are processed into DQ Result Events
 7. **Persistence**: Validation artifacts are stored in the database for audit and reporting
+
+## Engine Translation Flow
+
+
+```mermaid
+flowchart TD
+    User["User / scheduler"]
+    Plan["DQ plan execution invoked"]
+    Compiler["Rule compiler / rule_translator"]
+    IR["Intermediate rule representation"]
+    Registry["Capability registry"]
+    Lowerer["Runtime lowerer"]
+    Normalize["Normalize engine aliases"]
+    Select{Selected engine type}
+    GX["Great Expectations<br/>(gx)"]
+    Soda["SodaCL<br/>(soda)"]
+    Spark["Spark Expectations<br/>(spark_expectations)"]
+    Trino["Trino<br/>(trino)"]
+    SQL["SQL<br/>(sql)"]
+    Custom["Custom Worker<br/>(custom_worker)"]
+    Execute["Engine-specific execution"]
+    Results["Result collection and DQ Result Events"]
+
+    User --> Plan --> Compiler --> IR --> Registry --> Lowerer --> Normalize --> Select
+    Select --> GX --> Execute
+    Select --> Soda --> Execute
+    Select --> Spark --> Execute
+    Select --> Trino --> Execute
+    Select --> SQL --> Execute
+    Select --> Custom --> Execute
+    Execute --> Results
+```
 
 ## Engine Capabilities
 
