@@ -21,6 +21,7 @@ The platform currently supports the following DQ engine types:
 
 ## Execution Flow
 
+
 ```mermaid
 sequenceDiagram
     participant User
@@ -104,34 +105,29 @@ The runtime lowerers currently support these normalized engine types:
 
 ## Engine Translation Flow
 
-
 ```mermaid
-flowchart TD
-    User["User / scheduler"]
-    Plan["DQ plan execution invoked"]
-    Compiler["Rule compiler / rule_translator"]
-    IR["Intermediate rule representation"]
-    Registry["Capability registry"]
-    Lowerer["Runtime lowerer"]
-    Normalize["Normalize engine aliases"]
-    Select{Selected engine type}
-    GX["Great Expectations<br/>(gx)"]
-    Soda["SodaCL<br/>(soda)"]
-    Spark["Spark Expectations<br/>(spark_expectations)"]
-    Trino["Trino<br/>(trino)"]
-    SQL["SQL<br/>(sql)"]
-    Custom["Custom Worker<br/>(custom_worker)"]
-    Execute["Engine-specific execution"]
-    Results["Result collection and DQ Result Events"]
+flowchart TB
+    User["User / scheduler"] --> Plan["DQ plan execution invoked"] --> Compiler["Rule compiler / rule_translator"] --> IR["Intermediate rule representation"] --> Registry["Capability registry"] --> Lowerer["Runtime lowerer"] --> Normalize["Normalize engine aliases"] --> Select{Selected engine type}
 
-    User --> Plan --> Compiler --> IR --> Registry --> Lowerer --> Normalize --> Select
-    Select --> GX --> Execute
-    Select --> Soda --> Execute
-    Select --> Spark --> Execute
-    Select --> Trino --> Execute
-    Select --> SQL --> Execute
-    Select --> Custom --> Execute
-    Execute --> Results
+    Select --> PythonGroup["Python / validation engines"]
+    PythonGroup --> Native{Python engines}
+    Native --> GX["Great Expectations<br/>(gx)"]
+    Native --> Soda["SodaCL<br/>(soda)"]
+
+    Select --> DistGroup["Distributed / SQL engines"]
+    DistGroup --> Distributed{SQL / distributed engines}
+    Distributed --> Spark["Spark Expectations<br/>(spark_expectations)"]
+    Distributed --> Trino["Trino<br/>(trino)"]
+    Distributed --> SQL["SQL<br/>(sql)"]
+    Distributed --> Custom["Custom Worker<br/>(custom_worker)"]
+
+    GX --> Execute["Engine-specific execution"]
+    Soda --> Execute
+    Spark --> Execute
+    Trino --> Execute
+    SQL --> Execute
+    Custom --> Execute
+    Execute --> Results["Result collection and DQ Result Events"]
 ```
 
 ## Engine Capabilities
