@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.13-slim-bookworm
+ARG PYTHON_REGISTRY="docker.io/"
+ARG PYTHON_IMAGE="library/python"
+ARG PYTHON_TAG="3.13-slim-bookworm"
+
+FROM ${PYTHON_REGISTRY}${PYTHON_IMAGE}:${PYTHON_TAG}
 
 LABEL version="0.3.0"
 LABEL description="Data Quality rule execution engine (Python/FastAPI)"

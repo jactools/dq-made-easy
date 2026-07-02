@@ -445,6 +445,9 @@ services:
       context: .
       dockerfile: dq-engine/Dockerfile.engine
       args:
+        PYTHON_REGISTRY: ${PYTHON_REGISTRY:-}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-library/python}
+        PYTHON_TAG: ${PYTHON_TAG:-3.13-slim-bookworm}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
         SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:-false}

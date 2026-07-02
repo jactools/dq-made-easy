@@ -122,6 +122,12 @@ if [ -n "$nexuscloud_dns" ] || [ -n "$nexuscloud_registry" ]; then
     fi
 fi
 
+if [ -n "${NEXUSCLOUD_NPM_REGISTRY:-}" ]; then
+    NPM_CONFIG_REGISTRY="$NEXUSCLOUD_NPM_REGISTRY"
+else
+    NPM_CONFIG_REGISTRY="https://registry.npmjs.org/"
+fi
+
 # ---------------------------------------------------------------------------
 # PyPI (pip) registry configuration
 #
@@ -163,6 +169,7 @@ export NEXUSCLOUD_GROUP_REPO
 export NEXUSCLOUD_PYPI_URL
 export NEXUSCLOUD_PYPI_URL_NO_AUTH
 export PIP_INDEX_URL
+export NPM_CONFIG_REGISTRY
 
 export REGISTRY
 
@@ -401,7 +408,11 @@ if [ -n "${DOCKER_DOMAIN:-}" ]; then
     # Force base image registries through Nexus group.
     NODE_REGISTRY="${DOCKER_DOMAIN}/"
     NGINX_REGISTRY="${DOCKER_DOMAIN}/"
-    PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
+    if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ]; then
+        PYTHON_REGISTRY=""
+    else
+        PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
+    fi
     export NODE_REGISTRY NGINX_REGISTRY PYTHON_REGISTRY
 
     # Ensure Docker is authenticated to Docker Hub for public base-image pulls.
@@ -412,6 +423,19 @@ if [ -n "${DOCKER_DOMAIN:-}" ]; then
         fi
     else
         warning "$my_name" "Docker Hub credentials missing; cannot login to $DOCKER_DOMAIN"
+    fi
+fi
+
+if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ] && [ -n "${NEXUSCLOUD_USERNAME:-}" ] && [ -n "${NEXUSCLOUD_PASSWORD:-}" ]; then
+    nexus_docker_io_registry="${NEXUSCLOUD_DOCKER_IO_REGISTRY#http://}"
+    nexus_docker_io_registry="${nexus_docker_io_registry#https://}"
+    nexus_docker_io_host="${nexus_docker_io_registry%%/*}"
+    if [ -n "$nexus_docker_io_host" ]; then
+        info "$my_name" "Logging in to Nexus Docker registry host: $nexus_docker_io_host"
+        if ! printf '%s' "$NEXUSCLOUD_PASSWORD" | docker login "$nexus_docker_io_host" --username "$NEXUSCLOUD_USERNAME" --password-stdin >/dev/null 2>&1; then
+            error "$my_name" "Docker login failed for Nexus registry host $nexus_docker_io_host"
+            return 1
+        fi
     fi
 fi
 
