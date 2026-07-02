@@ -17,7 +17,7 @@ describe('StyleThemeProvider', () => {
       getStylePackageStylesheetHref('custom-registry-theme', [
         { id: 'custom-registry-theme', cssUrl: '/themes/custom.css' },
       ]),
-    ).toBe('/themes/custom.css')
+    ).toBe('/api/themes/custom.css')
   })
 
   it('ignores remote registry stylesheet urls', () => {
@@ -42,7 +42,7 @@ describe('StyleThemeProvider', () => {
 
     const initialLink = document.getElementById('dq-style-package-stylesheet') as HTMLLinkElement | null
     expect(initialLink).toBeTruthy()
-    expect(initialLink?.getAttribute('href')).toBe('/themes/custom-built.css')
+    expect(initialLink?.getAttribute('href')).toBe('/api/themes/custom-built.css')
 
     rerender(
       <StyleThemeProvider
@@ -55,7 +55,7 @@ describe('StyleThemeProvider', () => {
 
     const updatedLink = document.getElementById('dq-style-package-stylesheet') as HTMLLinkElement | null
     expect(updatedLink).toBeTruthy()
-    expect(updatedLink?.getAttribute('href')).toBe('/themes/astrowind.css')
+    expect(updatedLink?.getAttribute('href')).toBe('/api/themes/astrowind.css')
 
     unmount()
     expect(document.getElementById('dq-style-package-stylesheet')).toBeNull()

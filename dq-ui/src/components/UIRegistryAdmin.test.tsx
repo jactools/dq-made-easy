@@ -2,12 +2,9 @@
 
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, waitFor, within } from '@testing-library/react'
 
-import { UIRegistryAdmin } from './UIRegistryAdmin'
-import type { SettingsUpdatePayload } from '../types/settings'
-
-const updateSettings = vi.fn(async (_payload: SettingsUpdatePayload) => {})
+import { UIRegistryAdmin, verifyUploadedUiRegistryAssetUrl } from './UIRegistryAdmin'
 
 const settingsMock = {
   userSettings: null,
@@ -61,7 +58,7 @@ const settingsMock = {
   adminRoles: [],
   isLoading: false,
   error: null,
-  updateSettings,
+  updateSettings: vi.fn(async () => {}),
   loadSettings: vi.fn(async () => {}),
   loadAdminUsers: vi.fn(async () => {}),
   loadAdminRoles: vi.fn(async () => {}),
@@ -93,15 +90,58 @@ vi.mock('../hooks/useKeycloak', () => ({
 }))
 
 beforeEach(() => {
-  updateSettings.mockClear()
   settingsMock.applicationSettings = {
     ...settingsMock.applicationSettings,
     stylePackage: 'custom-built-package',
     iconProvider: 'tabler',
   }
 
+  let savedIconProvider = settingsMock.applicationSettings.iconProvider
+  let savedStylePackage = settingsMock.applicationSettings.stylePackage
+
   vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input)
+    const method = String(init?.method || 'GET').toUpperCase()
+
+    if (url.includes('/app-config') && method === 'PUT') {
+      const body = typeof init?.body === 'string' ? JSON.parse(init.body) : {}
+      savedIconProvider = typeof body.iconProvider === 'string' ? body.iconProvider : savedIconProvider
+      savedStylePackage = typeof body.stylePackage === 'string' ? body.stylePackage : savedStylePackage
+
+      return {
+        ok: true,
+        json: async () => ({
+          iconProvider: savedIconProvider,
+          stylePackage: savedStylePackage,
+        }),
+      }
+    }
+
+    if (url.includes('/admin/v1/me')) {
+      return {
+        ok: true,
+        json: async () => ({
+          id: 'user-1',
+          email: 'tester@example.com',
+          preferences: {
+            application: {
+              apiBaseUrl: 'http://localhost:9111/api/v1',
+            },
+          },
+        }),
+      }
+    }
+
+    if (url.includes('/app-config')) {
+      return {
+        ok: true,
+        json: async () => ({
+          defaultRuleThresholdPct: 95,
+          iconProvider: savedIconProvider,
+          stylePackage: savedStylePackage,
+        }),
+      }
+    }
 
     if (url.includes('/ui-registry/assets/upload')) {
       const formData = init?.body as FormData
@@ -212,14 +252,16 @@ describe('UIRegistryAdmin', () => {
     fireEvent.click(view.getByRole('button', { name: 'Save Changes' }))
 
     await waitFor(() => {
-      expect(updateSettings).toHaveBeenCalledWith({
-        category: 'application',
-        data: {
-          apiBaseUrl: 'http://localhost:9111/api/v1',
-          iconProvider: 'lucide',
-          stylePackage: 'astrowind',
-        },
-      })
+      expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+        'http://localhost:9111/system/v1/app-config',
+        expect.objectContaining({
+          method: 'PUT',
+          body: JSON.stringify({
+            iconProvider: 'lucide',
+            stylePackage: 'astrowind',
+          }),
+        }),
+      )
     })
   })
 
@@ -244,13 +286,13 @@ describe('UIRegistryAdmin', () => {
     expect(within(styleSection).getByRole('button', { name: 'Import Style Bundle' })).toBeTruthy()
     expect((document.getElementById('styleBundleSourceUrl') as HTMLInputElement).value).toBe('https://example.com/theme.css')
     expect((document.getElementById('styleBundleFilename') as HTMLInputElement).value).toBe('theme.css')
-    expect(updateSettings).not.toHaveBeenCalledWith(expect.objectContaining({ category: 'application' }))
   })
 
   it('uploads a style bundle archive through the ui registry asset endpoint', async () => {
     const view = render(<UIRegistryAdmin />)
 
     const styleSection = await getSection(view.container, 'Import Style Bundle')
+    expect(document.getElementById('styleBundleName')).toBeTruthy()
     const styleArchiveInput = document.getElementById('styleBundleArchive') as HTMLInputElement | null
 
     if (!styleArchiveInput) {
@@ -262,8 +304,82 @@ describe('UIRegistryAdmin', () => {
       target: { files: [archive] },
     })
 
-    expect(within(styleSection).getByRole('button', { name: 'Upload Style Bundle Archive' })).toBeTruthy()
     expect(document.getElementById('styleBundleArchive')).toBeTruthy()
+    expect(within(styleSection).getByRole('button', { name: 'Upload Style Bundle Archive' })).toBeTruthy()
+  })
+
+  it('falls back to GET when HEAD verification fails for a style bundle upload', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      const method = String(init?.method || 'GET').toUpperCase()
+
+      if (url.includes('/ui-registry/assets/upload')) {
+        return {
+          ok: true,
+          json: async () => ({
+            kind: 'styles',
+            source_url: 'upload://theme.zip',
+            file_name: 'bundle/css/theme.css',
+            content_type: 'text/css',
+            asset_path: '/tmp/ui-registry-assets/styles/bundle/css/theme.css',
+            public_url: '/system/v1/ui-registry/assets/styles/bundle/css/theme.css',
+            byte_count: 24,
+          }),
+        }
+      }
+
+      if (url.includes('/ui-registry/assets/styles/') && method === 'HEAD') {
+        return {
+          ok: false,
+          status: 500,
+          text: async () => 'verification failed',
+          json: async () => ({ detail: 'verification failed' }),
+        }
+      }
+
+      if (url.includes('/ui-registry/assets/styles/') && method === 'GET') {
+        return {
+          ok: true,
+          status: 200,
+          text: async () => 'body { color: #123456; }',
+          json: async () => ({}),
+        }
+      }
+
+      if (url.includes('/ui-registry')) {
+        return {
+          ok: true,
+          json: async () => ({
+            source: 'default',
+            version: '1.0.0',
+            cache_ttl_seconds: 300,
+            styles: [],
+            component_bundles: [],
+            metadata: {},
+          }),
+        }
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+      }
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const verified = await verifyUploadedUiRegistryAssetUrl('/system/v1/ui-registry/assets/styles/bundle/css/theme.css', 'test-token')
+
+    expect(verified).toBe(true)
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/ui-registry/assets/styles/bundle/css/theme.css'),
+      expect.objectContaining({ method: 'HEAD' }),
+    )
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/ui-registry/assets/styles/bundle/css/theme.css'),
+      expect.objectContaining({ method: 'GET' }),
+    )
   })
 
   it('uploads a component bundle archive through the ui registry asset endpoint', async () => {

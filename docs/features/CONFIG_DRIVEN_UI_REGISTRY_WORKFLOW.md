@@ -24,6 +24,8 @@ Registry sources can come from the API-managed manifest, an environment payload,
 
 The application settings page shows the current registry snapshot, the active style package options, and the resolved component bundles. The imported asset endpoints are the only supported way to host custom stylesheet assets at runtime.
 
+Bundle upload rule: style bundles may include a `package.json` plus supporting assets such as fonts or favicons. The importer uses the package metadata and archive layout to locate the stylesheet entry and keep sibling assets local. Component bundles must still contain a single loadable entry file such as `index.js` or `icons.mjs`, not a full `dist/` directory.
+
 ## Admin Workflow In The App
 
 If you have downloaded custom UI styles or component bundles, use the app as an admin in this order:
@@ -40,8 +42,8 @@ If you have downloaded custom UI styles or component bundles, use the app as an 
 A custom UI style or component bundle is considered usable only when all of these are true:
 
 1. The entry appears in the **UI Registry** snapshot on **Admin** → **App Settings**.
-2. The style asset has already been imported and is served from a local API URL, not a raw remote stylesheet URL.
-3. The component bundle has a resolver, adapter, or fallback path in the registry.
+2. The uploaded style archive exposed a discoverable stylesheet entry, and the extracted style asset is served from a local API URL, not a raw remote stylesheet URL.
+3. The component bundle has a resolver, adapter, or fallback path in the registry, and the archive contained one loadable entry file rather than a whole `dist/` tree.
 4. The entry is not marked inactive or unmapped in the registry snapshot.
 5. The selected value is saved as a registry identifier, and the app still shows the entry after refresh.
 

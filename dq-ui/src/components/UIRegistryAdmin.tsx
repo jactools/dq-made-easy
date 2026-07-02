@@ -33,10 +33,95 @@ type UiRegistryAssetImportResponse = {
   file_name?: string
 }
 
+type UiRegistryAssetErrorResponse = {
+  detail?: string | { message?: string }
+  message?: string
+}
+
+type UiRegistryAssetUploadFeedbackTone = 'progress' | 'success' | 'error'
+
+type UiRegistryAssetUploadFeedback = {
+  kind: UiRegistryAssetKind
+  tone: UiRegistryAssetUploadFeedbackTone
+  message: string
+} | null
+
 const formatRegistryComponentBundle = (bundle: RegistryComponentBundle): string => {
   const details = [bundle.label, bundle.adapter, bundle.fallback ? `fallback=${bundle.fallback}` : null]
     .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
   return details.length > 0 ? `${bundle.id} (${details.join(', ')})` : bundle.id
+}
+
+const toBrowserAssetUrl = (publicUrl: string): string => {
+  const trimmed = publicUrl.trim()
+  if (!trimmed) {
+    return ''
+  }
+
+  if (trimmed.startsWith('/api/')) {
+    return trimmed
+  }
+
+  return trimmed.startsWith('/') ? `/api${trimmed}` : trimmed
+}
+
+export const verifyUploadedUiRegistryAssetUrl = async (publicUrl?: string, token?: string): Promise<boolean> => {
+  const verificationUrl = publicUrl ? toBrowserAssetUrl(publicUrl) : ''
+  if (!verificationUrl) {
+    return false
+  }
+
+  try {
+    const headResponse = await fetch(verificationUrl, {
+      method: 'HEAD',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    })
+
+    if (headResponse.ok) {
+      return true
+    }
+  } catch {
+    // Fall through to a GET probe when HEAD is not supported or the gateway rejects it.
+  }
+
+  // Some gateway and contract-validation layers reject HEAD even when GET works.
+  // Always probe GET after a failed HEAD so verification follows the same path as the browser.
+  try {
+    const getResponse = await fetch(verificationUrl, {
+      method: 'GET',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      cache: 'no-store',
+    })
+    return getResponse.ok
+  } catch {
+    return false
+  }
+}
+
+const readUiRegistryAssetErrorMessage = async (response: Response, fallbackMessage: string): Promise<string> => {
+  try {
+    const payload = (await response.clone().json()) as UiRegistryAssetErrorResponse
+    if (typeof payload.detail === 'string' && payload.detail.trim()) {
+      return payload.detail.trim()
+    }
+    if (payload.detail && typeof payload.detail === 'object' && typeof payload.detail.message === 'string' && payload.detail.message.trim()) {
+      return payload.detail.message.trim()
+    }
+    if (typeof payload.message === 'string' && payload.message.trim()) {
+      return payload.message.trim()
+    }
+  } catch {
+    const text = (await response.clone().text()).trim()
+    if (text) {
+      return text
+    }
+  }
+
+  return fallbackMessage
 }
 
 export const UIRegistryAdmin: React.FC = () => {
@@ -46,6 +131,7 @@ export const UIRegistryAdmin: React.FC = () => {
   const [selectedStylePackage, setSelectedStylePackage] = useState<StylePackageName>(settings.applicationSettings?.stylePackage || DEFAULT_STYLE_PACKAGE)
   const [styleBundleSourceUrl, setStyleBundleSourceUrl] = useState('')
   const [styleBundleFilename, setStyleBundleFilename] = useState('')
+  const [styleBundleName, setStyleBundleName] = useState('')
   const [styleBundleArchive, setStyleBundleArchive] = useState<File | null>(null)
   const [styleBundleArchiveKey, setStyleBundleArchiveKey] = useState(0)
   const [componentBundleSourceUrl, setComponentBundleSourceUrl] = useState('')
@@ -58,6 +144,7 @@ export const UIRegistryAdmin: React.FC = () => {
   const [saveErrorReferenceId, setSaveErrorReferenceId] = useState<string | null>(null)
   const [importStatusMessage, setImportStatusMessage] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
+  const [uploadFeedback, setUploadFeedback] = useState<UiRegistryAssetUploadFeedback>(null)
   const [importingAsset, setImportingAsset] = useState<UiRegistryAssetImportState>(null)
 
   useEffect(() => {
@@ -111,14 +198,31 @@ export const UIRegistryAdmin: React.FC = () => {
       setSaveErrorReferenceId(null)
       setSaveStatusMessage(null)
 
-      await settings.updateSettings({
-        category: 'application',
-        data: {
-          apiBaseUrl: settings.applicationSettings?.apiBaseUrl,
+      const apiBaseUrl = settings.applicationSettings?.apiBaseUrl
+      if (!apiBaseUrl) {
+        throw new Error('Unable to save UI registry settings because the API base URL is unavailable.')
+      }
+
+      const token = getAuthToken()
+      const apiBase = toApiGroupV1Base('system', apiBaseUrl)
+      const response = await fetch(`${apiBase}/app-config`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
           iconProvider: selectedIconProvider,
           stylePackage: selectedStylePackage,
-        },
+        }),
       })
+
+      if (!response.ok) {
+        const message = await readUiRegistryAssetErrorMessage(response, 'Unable to save UI registry settings.')
+        throw new Error(message)
+      }
+
+      await settings.loadSettings()
 
       setHasChanges(false)
       setSaveStatusMessage('UI registry settings saved successfully')
@@ -142,6 +246,7 @@ export const UIRegistryAdmin: React.FC = () => {
     if (kind === 'style') {
       setStyleBundleArchive(null)
       setStyleBundleArchiveKey((current) => current + 1)
+      setStyleBundleName('')
       return
     }
 
@@ -149,9 +254,33 @@ export const UIRegistryAdmin: React.FC = () => {
     setComponentBundleArchiveKey((current) => current + 1)
   }
 
+  const beginUploadProgressNotice = useCallback((kind: UiRegistryAssetKind) => {
+    const actionLabel = kind === 'style' ? 'Style bundle' : 'Component bundle'
+    setUploadFeedback({
+      kind,
+      tone: 'progress',
+      message: `${actionLabel} upload in progress...`,
+    })
+  }, [])
+
+  const renderUploadFeedback = useCallback((kind: UiRegistryAssetKind) => {
+    if (!uploadFeedback || uploadFeedback.kind !== kind) {
+      return null
+    }
+
+    return (
+      <span className={`upload-status upload-status--${uploadFeedback.tone}`} role="status" aria-live="polite">
+        {uploadFeedback.tone === 'success' ? <AppIcon name="check-circle" /> : null}
+        {uploadFeedback.tone === 'error' ? <AppIcon name="exclamation-circle" /> : null}
+        <span>{uploadFeedback.message}</span>
+      </span>
+    )
+  }, [uploadFeedback])
+
   const handleImportAsset = async (kind: UiRegistryAssetKind) => {
     const sourceUrl = kind === 'style' ? styleBundleSourceUrl : componentBundleSourceUrl
     const filename = kind === 'style' ? styleBundleFilename : componentBundleFilename
+    const actionLabel = kind === 'style' ? 'Style bundle' : 'Component bundle'
 
     if (!sourceUrl.trim()) {
       setImportError('Source URL is required before importing a UI registry asset.')
@@ -162,7 +291,7 @@ export const UIRegistryAdmin: React.FC = () => {
     try {
       setImportingAsset({ kind, mode: 'url' })
       setImportError(null)
-      setImportStatusMessage(null)
+      setImportStatusMessage(`${actionLabel} import in progress...`)
 
       if (!settings.applicationSettings?.apiBaseUrl) {
         throw new Error('Application API base URL is not configured.')
@@ -184,15 +313,21 @@ export const UIRegistryAdmin: React.FC = () => {
       })
 
       if (!response.ok) {
-        throw new Error(`Unable to import ${kind === 'style' ? 'style bundle' : 'component bundle'} (${response.status}).`)
+        throw new Error(
+          await readUiRegistryAssetErrorMessage(
+            response,
+            `Unable to import ${kind === 'style' ? 'style bundle' : 'component bundle'} (${response.status}).`,
+          ),
+        )
       }
 
       const payload = (await response.json()) as UiRegistryAssetImportResponse
       setImportStatusMessage(
-        `${kind === 'style' ? 'Style bundle' : 'Component bundle'} imported successfully${payload.public_url ? `: ${payload.public_url}` : ''}`,
+        `${actionLabel} imported successfully${payload.public_url ? `: ${payload.public_url}` : ''}`,
       )
       void loadUiRegistry()
     } catch (error) {
+      setImportStatusMessage(null)
       setImportError(error instanceof Error ? error.message : 'Unable to import UI registry asset.')
     } finally {
       setImportingAsset(null)
@@ -203,15 +338,18 @@ export const UIRegistryAdmin: React.FC = () => {
     const archive = kind === 'style' ? styleBundleArchive : componentBundleArchive
 
     if (!archive) {
-      setImportError('Select a zip or tgz archive before uploading a UI registry asset.')
-      setImportStatusMessage(null)
+      setUploadFeedback({
+        kind,
+        tone: 'error',
+        message: 'Select a zip or tgz archive before uploading a UI registry asset.',
+      })
       return
     }
 
     try {
       setImportingAsset({ kind, mode: 'upload' })
-      setImportError(null)
-      setImportStatusMessage(null)
+      setUploadFeedback(null)
+      beginUploadProgressNotice(kind)
 
       if (!settings.applicationSettings?.apiBaseUrl) {
         throw new Error('Application API base URL is not configured.')
@@ -222,6 +360,9 @@ export const UIRegistryAdmin: React.FC = () => {
       const formData = new FormData()
       formData.append('kind', kind)
       formData.append('file', archive, archive.name)
+      if (kind === 'style' && styleBundleName.trim()) {
+        formData.append('label', styleBundleName.trim())
+      }
 
       const response = await fetch(`${apiBase}/ui-registry/assets/upload`, {
         method: 'POST',
@@ -232,17 +373,32 @@ export const UIRegistryAdmin: React.FC = () => {
       })
 
       if (!response.ok) {
-        throw new Error(`Unable to upload ${kind === 'style' ? 'style bundle' : 'component bundle'} (${response.status}).`)
+        throw new Error(
+          await readUiRegistryAssetErrorMessage(
+            response,
+            `Unable to upload ${kind === 'style' ? 'style bundle' : 'component bundle'} (${response.status}).`,
+          ),
+        )
       }
 
       const payload = (await response.json()) as UiRegistryAssetImportResponse
-      setImportStatusMessage(
-        `${kind === 'style' ? 'Style bundle' : 'Component bundle'} uploaded successfully${payload.public_url ? `: ${payload.public_url}` : ''}`,
-      )
+
+      setUploadFeedback({
+        kind,
+        tone: 'success',
+        message:
+          kind === 'style'
+            ? `Style bundle uploaded successfully${styleBundleName.trim() ? `: ${styleBundleName.trim()}` : ''}`
+            : `Component bundle uploaded successfully${payload.public_url ? `: ${payload.public_url}` : ''}`,
+      })
       resetArchiveSelection(kind)
       void loadUiRegistry()
     } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Unable to upload UI registry asset.')
+      setUploadFeedback({
+        kind,
+        tone: 'error',
+        message: error instanceof Error ? error.message : 'Unable to upload UI registry asset.',
+      })
     } finally {
       setImportingAsset(null)
     }
@@ -330,6 +486,18 @@ export const UIRegistryAdmin: React.FC = () => {
 
               <div className="form-group">
                 <AppInput
+                  id="styleBundleName"
+                  label="Style bundle name"
+                  type="text"
+                  value={styleBundleName}
+                  onChange={(event) => setStyleBundleName(event.target.value)}
+                  placeholder="Custom Style"
+                  hint="Optional. Leave empty to keep the archive-derived label."
+                />
+              </div>
+
+              <div className="form-group">
+                <AppInput
                   key={styleBundleArchiveKey}
                   id="styleBundleArchive"
                   label="Style bundle archive"
@@ -337,6 +505,7 @@ export const UIRegistryAdmin: React.FC = () => {
                   accept=".zip,.tgz,.tar.gz,application/zip,application/gzip,application/x-gtar,application/x-tar"
                   onChange={(event) => {
                     setStyleBundleArchive(event.target.files?.[0] ?? null)
+                    setUploadFeedback(null)
                     setImportError(null)
                     setImportStatusMessage(null)
                   }}
@@ -345,9 +514,12 @@ export const UIRegistryAdmin: React.FC = () => {
                 {styleBundleArchive ? <p className="info-text">Selected archive: {styleBundleArchive.name}</p> : null}
               </div>
 
-              <PrimaryButton onClick={() => void handleUploadAsset('style')} disabled={importingAsset !== null || !styleBundleArchive}>
-                {importingAsset?.kind === 'style' && importingAsset.mode === 'upload' ? 'Uploading Style Bundle...' : 'Upload Style Bundle Archive'}
-              </PrimaryButton>
+              <div className="upload-action-row">
+                <PrimaryButton onClick={() => void handleUploadAsset('style')} disabled={importingAsset !== null || !styleBundleArchive}>
+                  Upload Style Bundle Archive
+                </PrimaryButton>
+                {renderUploadFeedback('style')}
+              </div>
             </div>
 
             <div className="settings-section">
@@ -390,6 +562,7 @@ export const UIRegistryAdmin: React.FC = () => {
                   accept=".zip,.tgz,.tar.gz,application/zip,application/gzip,application/x-gtar,application/x-tar"
                   onChange={(event) => {
                     setComponentBundleArchive(event.target.files?.[0] ?? null)
+                    setUploadFeedback(null)
                     setImportError(null)
                     setImportStatusMessage(null)
                   }}
@@ -398,9 +571,12 @@ export const UIRegistryAdmin: React.FC = () => {
                 {componentBundleArchive ? <p className="info-text">Selected archive: {componentBundleArchive.name}</p> : null}
               </div>
 
-              <PrimaryButton onClick={() => void handleUploadAsset('component')} disabled={importingAsset !== null || !componentBundleArchive}>
-                {importingAsset?.kind === 'component' && importingAsset.mode === 'upload' ? 'Uploading Component Bundle...' : 'Upload Component Bundle Archive'}
-              </PrimaryButton>
+              <div className="upload-action-row">
+                <PrimaryButton onClick={() => void handleUploadAsset('component')} disabled={importingAsset !== null || !componentBundleArchive}>
+                  Upload Component Bundle Archive
+                </PrimaryButton>
+                {renderUploadFeedback('component')}
+              </div>
             </div>
 
             <div className="settings-section">

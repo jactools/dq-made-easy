@@ -16,6 +16,33 @@ export type StyleRegistryStyle = {
   isActive?: boolean
 }
 
+export const toBrowserStylesheetHref = (href: string): string | undefined => {
+  const trimmed = href.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed.startsWith('/api/')) {
+    return trimmed
+  }
+
+  if (trimmed.startsWith('/')) {
+    return `/api${trimmed}`
+  }
+
+  try {
+    const baseOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+    const resolvedUrl = new URL(trimmed, baseOrigin)
+    if (resolvedUrl.origin !== baseOrigin) {
+      return undefined
+    }
+
+    return `/api${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`
+  } catch {
+    return undefined
+  }
+}
+
 export const isLocalStylesheetHref = (href: string): boolean => {
   const trimmed = href.trim()
   if (!trimmed) {
@@ -96,8 +123,11 @@ export const getStylePackageStylesheetHref = (
 ): string | undefined => {
   const registryStyle = registryStyles?.find((entry) => entry.isActive !== false && entry.id === stylePackage)
   const registryHref = registryStyle?.cssUrl?.trim()
-  if (registryHref && isLocalStylesheetHref(registryHref)) {
-    return registryHref
+  if (registryHref) {
+    const browserHref = toBrowserStylesheetHref(registryHref)
+    if (browserHref) {
+      return browserHref
+    }
   }
 
   return STYLE_PACKAGE_STYLESHEETS[stylePackage]

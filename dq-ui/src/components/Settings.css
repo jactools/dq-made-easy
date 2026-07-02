@@ -343,6 +343,46 @@
   margin: 0 0 12px 0;
 }
 
+.upload-action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.upload-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--app-text-primary, #1a1a1a);
+  border: 1px solid var(--app-border-subtle, #cccccc);
+  background-color: var(--app-surface-tertiary, #fafafa);
+}
+
+.upload-status i {
+  font-size: 14px;
+}
+
+.upload-status--progress {
+  background-color: var(--app-surface-tertiary, #fafafa);
+  border-color: var(--app-border-subtle, #cccccc);
+}
+
+.upload-status--success {
+  background-color: var(--app-status-success-bg, #e8f5e9);
+  border-color: var(--app-status-success-text, #4caf50);
+}
+
+.upload-status--error {
+  background-color: var(--app-status-error-bg, #ffebee);
+  border-color: var(--app-status-error-text, #f44336);
+}
+
 .settings-divider {
   border: none;
   border-top: 1px solid var(--app-border-subtle, #e8e8e8);

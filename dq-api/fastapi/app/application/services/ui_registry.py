@@ -484,6 +484,12 @@ class RegistryManager:
         self._loaded = False
         return self.load()
 
+    def save_manifest(self, manifest: RegistryManifest) -> RegistryManifest:
+        self.current_manifest = self._persist_manifest_snapshot(self._validate_and_normalize(manifest))
+        self._loaded = True
+        self._loaded_at = self._clock()
+        return self.current_manifest
+
     def update_manifest(self, manifest: RegistryManifest) -> None:
         self.current_manifest = manifest
         self._loaded = False

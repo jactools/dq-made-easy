@@ -16,7 +16,7 @@ import {
 } from '../types/settings'
 import { camelToSnake, snakeToCamel } from '../utils/caseConverters'
 import { resolvePersonName } from '../utils/personName'
-import { DEFAULT_STYLE_PACKAGE, normalizeStylePackageName } from './styleThemeCatalog'
+import { normalizeStylePackageName } from './styleThemeCatalog'
 
 interface SettingsPreferences {
   profile?: Partial<UserSettings>
@@ -112,19 +112,15 @@ export const normalizeApplicationPreferences = (application: unknown): Partial<A
   }
 
   const source = snakeToCamel<Record<string, unknown>>(application as Record<string, unknown>)
+  const { stylePackage: _ignoredStylePackage, ...sourceWithoutStylePackage } = source
   const normalizedApiBaseUrl =
-    typeof source.apiBaseUrl === 'string'
-      ? normalizeApiBaseUrl(source.apiBaseUrl)
-      : source.apiBaseUrl
-  const normalizedStylePackage =
-    typeof source.stylePackage === 'string'
-      ? normalizeStylePackageName(source.stylePackage)
-      : undefined
+    typeof sourceWithoutStylePackage.apiBaseUrl === 'string'
+      ? normalizeApiBaseUrl(sourceWithoutStylePackage.apiBaseUrl)
+      : sourceWithoutStylePackage.apiBaseUrl
 
   return {
-    ...source,
+    ...sourceWithoutStylePackage,
     ...(normalizedApiBaseUrl ? { apiBaseUrl: normalizedApiBaseUrl } : {}),
-    ...(normalizedStylePackage ? { stylePackage: normalizedStylePackage } : {}),
   } as Partial<ApplicationSettings>
 }
 
@@ -155,7 +151,7 @@ export const serializePreferencesForApi = (prefs: SettingsPreferences): Record<s
   ...(prefs.workspace ? { workspace: prefs.workspace } : {}),
   ...(prefs.security ? { security: prefs.security } : {}),
   ...(prefs.api ? { api: prefs.api } : {}),
-  ...(prefs.application ? { application: prefs.application } : {}),
+  ...(prefs.application?.apiBaseUrl ? { application: { apiBaseUrl: prefs.application.apiBaseUrl } } : {}),
 })
 
 export interface AdminUserSummary {
@@ -341,7 +337,6 @@ const buildDefaultSettings = (user: any): CompleteSettings => {
     applicationSettings: {
       debounceMs: 300,
       iconProvider: 'tabler',
-      stylePackage: DEFAULT_STYLE_PACKAGE,
       alertRoutingPolicy: {
         deliveryTarget: 'app',
         channels: ['in_app'],
@@ -935,7 +930,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
         case 'application': {
           if (!applicationSettings) break
-          const next = { ...applicationSettings, ...payload.data, updatedAt } as ApplicationSettings
+          const next = {
+            ...applicationSettings,
+            ...(typeof payload.data?.apiBaseUrl === 'string' ? { apiBaseUrl: payload.data.apiBaseUrl } : {}),
+            updatedAt,
+          } as ApplicationSettings
           setApplicationSettings(next)
           nextPreferences.application = next
           break

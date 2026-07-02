@@ -127,18 +127,8 @@ describe('SettingsContext display preference mapping', () => {
 
     expect(normalized).toMatchObject({
       apiBaseUrl: 'http://localhost:9111',
-      stylePackage: 'astrowind',
     })
-  })
-
-  it('preserves unknown application style package ids during normalization', () => {
-    const normalized = normalizeApplicationPreferences({
-      style_package: 'custom-registry-theme',
-    })
-
-    expect(normalized).toMatchObject({
-      stylePackage: 'custom-registry-theme',
-    })
+    expect(normalized.stylePackage).toBeUndefined()
   })
 
   it('preserves unknown application icon provider ids during normalization', () => {
@@ -151,7 +141,7 @@ describe('SettingsContext display preference mapping', () => {
     })
   })
 
-  it('keeps the saved style package when /me returns snake_case preferences', async () => {
+  it('hydrates the active style package from app-config, not /me preferences', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL) => {
@@ -164,7 +154,7 @@ describe('SettingsContext display preference mapping', () => {
             preferences: {
               application: {
                 api_base_url: 'http://localhost:9111/api/v1',
-                style_package: 'astrowind',
+                style_package: 'custom-registry-theme',
               },
             },
           })
@@ -172,6 +162,7 @@ describe('SettingsContext display preference mapping', () => {
 
         if (url.includes('/app-config')) {
           return createJsonResponse({
+            stylePackage: 'astrowind',
             default_rule_threshold_pct: 95,
           })
         }

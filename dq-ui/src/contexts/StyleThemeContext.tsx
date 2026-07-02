@@ -6,8 +6,8 @@ import {
   STYLE_PACKAGE_OPTIONS,
   type StyleRegistryStyle,
   getStylePackageStylesheetHref,
-  isLocalStylesheetHref,
   normalizeStylePackageName,
+  toBrowserStylesheetHref,
 } from './styleThemeCatalog'
 
 export interface StyleThemeContextType {
@@ -28,7 +28,7 @@ export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: S
   const registryStyleHref = useMemo(() => {
     const registryStyle = registryStyles?.find((entry) => entry.isActive !== false && entry.id === normalizedStylePackage)
     const href = registryStyle?.cssUrl?.trim() || undefined
-    return href && isLocalStylesheetHref(href) ? href : undefined
+    return href ? toBrowserStylesheetHref(href) : undefined
   }, [normalizedStylePackage, registryStyles])
   const selectedHref = useMemo(
     () => getStylePackageStylesheetHref(normalizedStylePackage, registryStyles),

@@ -160,6 +160,13 @@ if [ -z "${VITE_OTEL_PROXY_TARGET:-}" ]; then
 	fi
 fi
 
+if [ -z "${VITE_OTEL_ENDPOINT:-}" ]; then
+	VITE_OTEL_ENDPOINT="$(read_root_env_var VITE_OTEL_ENDPOINT || true)"
+	if [ -n "${VITE_OTEL_ENDPOINT:-}" ]; then
+		export VITE_OTEL_ENDPOINT
+	fi
+fi
+
 # Ensure idempotent startup: stop any previously launched local Vite instance.
 if [ -f .pids/vite.pid ]; then
 	OLD_PID=$(cat .pids/vite.pid)

@@ -97,6 +97,9 @@ def get_required_scopes(method: str, path: str) -> list[str]:
     normalized_method = str(method or "GET").upper()
     normalized_path = normalize_auth_path(path)
 
+    if normalized_path.startswith("/system/v1/ui-registry/assets/") and normalized_method in {"GET", "HEAD", "OPTIONS"}:
+        return []
+
     if is_public_route(normalized_path):
         return []
 
@@ -116,7 +119,7 @@ def get_required_scopes(method: str, path: str) -> list[str]:
 
     if normalized_path.startswith("/system/v1/ui-registry"):
         if normalized_method in {"GET", "HEAD", "OPTIONS"}:
-            return ["dq:admin:read"]
+            return ["dq:admin:read", "dq:config:manage"]
         return ["dq:config:manage"]
 
     if normalized_path.startswith("/agent/v1/audit/events"):
