@@ -44,6 +44,7 @@ def test_required_scopes_follow_current_mapping() -> None:
     assert get_required_scopes("PATCH", "/system/v1/app-config") == ["dq:config:manage"]
     assert get_required_scopes("GET", "/system/v1/app-config") == ["dq:admin:read"]
     assert get_required_scopes("POST", "/system/v1/ui-registry/assets/import") == ["dq:config:manage"]
+    assert get_required_scopes("POST", "/system/v1/ui-registry/assets/upload") == ["dq:config:manage"]
     assert get_required_scopes("GET", "/system/v1/ui-registry/assets/styles/theme.css") == ["dq:admin:read"]
     assert get_required_scopes("GET", "/agent/v1/openapi") == ["dq:rules:read"]
     assert get_required_scopes("POST", "/agent/v1/rules/execute-batch") == ["dq:rules:write"]

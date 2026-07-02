@@ -35,3 +35,9 @@ def test_internal_ui_registry_endpoint_returns_resolved_manifest(client, auth_he
     assert payload["cache_ttl_seconds"] == 120
     assert payload["styles"][0]["id"] == "theme-a"
     assert payload["component_bundles"][0]["adapter"] == "app.adapters.icons"
+
+
+def test_public_ui_registry_endpoint_is_not_exposed(client, auth_headers) -> None:
+    response = client.get("/system/v1/ui-registry", headers=auth_headers("dq:admin:read"))
+
+    assert response.status_code == 404

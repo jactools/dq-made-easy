@@ -113,27 +113,6 @@ export VITE_HTTPS_CERT_FILE
 
 # Local UI is started as a separate process (Vite), so it won't automatically inherit
 # repo-level .env variables unless they are explicitly exported here.
-if [ -z "${VITE_OTEL_ENDPOINT:-}" ]; then
-	VITE_OTEL_ENDPOINT="$(read_root_env_var VITE_OTEL_ENDPOINT || true)"
-	if [ -n "${VITE_OTEL_ENDPOINT:-}" ]; then
-		export VITE_OTEL_ENDPOINT
-	fi
-fi
-
-if [ -z "${VITE_OTEL_ENABLED:-}" ]; then
-	VITE_OTEL_ENABLED="$(read_root_env_var VITE_OTEL_ENABLED || true)"
-	if [ -n "${VITE_OTEL_ENABLED:-}" ]; then
-		export VITE_OTEL_ENABLED
-	fi
-fi
-
-if [ -z "${VITE_OTEL_SAMPLE_RATIO:-}" ]; then
-	VITE_OTEL_SAMPLE_RATIO="$(read_root_env_var VITE_OTEL_SAMPLE_RATIO || true)"
-	if [ -n "${VITE_OTEL_SAMPLE_RATIO:-}" ]; then
-		export VITE_OTEL_SAMPLE_RATIO
-	fi
-fi
-
 if [ -z "${VITE_SSO_PROVIDER:-}" ]; then
 	VITE_SSO_PROVIDER="$(read_root_env_var VITE_SSO_PROVIDER || true)"
 	if [ -n "${VITE_SSO_PROVIDER:-}" ]; then
@@ -165,6 +144,22 @@ if [ -z "${VITE_SSO_ENABLED:-}" ]; then
 	fi
 fi
 
+if [ -z "${VITE_OTEL_PROXY_TARGET:-}" ]; then
+	VITE_OTEL_PROXY_TARGET="$(read_root_env_var VITE_OTEL_PROXY_TARGET || true)"
+	if [ -z "${VITE_OTEL_PROXY_TARGET:-}" ]; then
+		LOCAL_OBSERVABILITY_HOST="$(read_root_env_var LOCAL_OBSERVABILITY_HOST || true)"
+		if [ -z "${LOCAL_OBSERVABILITY_HOST:-}" ]; then
+			LOCAL_OBSERVABILITY_HOST="$(read_root_env_var EDGE_LOCAL_OBSERVABILITY_HOST || true)"
+		fi
+		if [ -n "${LOCAL_OBSERVABILITY_HOST:-}" ]; then
+			VITE_OTEL_PROXY_TARGET="https://${LOCAL_OBSERVABILITY_HOST}:4318"
+		fi
+	fi
+	if [ -n "${VITE_OTEL_PROXY_TARGET:-}" ]; then
+		export VITE_OTEL_PROXY_TARGET
+	fi
+fi
+
 # Ensure idempotent startup: stop any previously launched local Vite instance.
 if [ -f .pids/vite.pid ]; then
 	OLD_PID=$(cat .pids/vite.pid)
@@ -187,7 +182,7 @@ if command -v lsof >/dev/null 2>&1; then
 			echo "Stopping stale Vite listener (pid=$pid)"
 			kill "$pid" 2>/dev/null || true
 		fi
-	done
+		done
 fi
 
 LOCAL_UI_PROXY_TARGET="$(resolve_local_proxy_target)"
@@ -226,7 +221,7 @@ VITE_DEV_ARGS=(-- --host "$VITE_HOST" --port "$VITE_PORT" --strictPort)
 # Build the Vite app before starting the dev server to ensure any build errors are caught early.
 # Set SKIP_DIST_BUILD=true to skip this when the caller has already done a fresh build.
 if [ "${SKIP_DIST_BUILD:-false}" != "true" ]; then
-        npm run build
+	npm run build
 fi
 
 # Start Vite detached so it doesn't rely on the calling shell staying open.

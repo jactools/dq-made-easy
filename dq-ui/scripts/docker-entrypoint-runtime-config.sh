@@ -31,7 +31,7 @@ else
   # Avoid heredoc; write the JS runtime config atomically using printf.
   printf '%s\n' \
     "window.__DQ_CONFIG__ = Object.assign({}, window.__DQ_CONFIG__, {" \
-    "  API_BASE_URL: \"${KONG_PUBLIC_URL}\"" \
+    "  API_BASE_URL: \"${KONG_PUBLIC_URL}/api\"" \
     "});" \
     > /usr/share/nginx/html/runtime-config.js
 fi

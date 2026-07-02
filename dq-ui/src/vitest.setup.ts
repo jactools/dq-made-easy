@@ -18,6 +18,6 @@ beforeAll(() => {
 
   // Tests must explicitly configure the API base URL (no implicit fallbacks).
   if (!g.window.__DQ_CONFIG__.API_BASE_URL) {
-    g.window.__DQ_CONFIG__.API_BASE_URL = 'http://localhost:9111'
+    g.window.__DQ_CONFIG__.API_BASE_URL = 'http://localhost:9111/api'
   }
 })
