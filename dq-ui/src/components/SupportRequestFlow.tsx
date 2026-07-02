@@ -41,6 +41,11 @@ export const SupportRequestFlow: React.FC<SupportRequestFlowProps> = ({
       referenceId: response.referenceId,
       ticketUrl: response.ticketUrl || null,
     })
+
+    if (response.mailtoUrl) {
+      window.open(response.mailtoUrl, '_blank', 'noopener,noreferrer')
+    }
+
     onSuccess?.(response)
   }, [onSuccess])
 

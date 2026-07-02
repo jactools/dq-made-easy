@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.13-slim
+FROM python:3.13-slim-bookworm
 
 LABEL version="0.3.0"
 LABEL description="Data Quality rule execution engine (Python/FastAPI)"
@@ -24,10 +24,6 @@ RUN set -eux; \
 	if [ -f /run/secrets/internal_corporate_root_ca ]; then \
 		cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
 	fi; \
-	for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
-		[ -e "$apt_sources" ] || continue; \
-		sed -i 's|http://|https://|g' "$apt_sources"; \
-	done; \
 	apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		build-essential \

@@ -137,7 +137,7 @@ def test_support_request_email_only_sends_smtp_email_and_reference_id(client, su
     assert "Reference ID: SUP-TEST123456" in email_message.get_content()
 
 
-def test_support_request_email_requires_smtp_configuration(client, support_config_headers, support_request_headers) -> None:
+def test_support_request_email_falls_back_to_mailto_when_smtp_is_missing(client, support_config_headers, support_request_headers) -> None:
     _save_app_config(
         client,
         support_config_headers,
@@ -161,9 +161,13 @@ def test_support_request_email_requires_smtp_configuration(client, support_confi
         },
     )
 
-    assert response.status_code == 400
+    assert response.status_code == 200
     payload = response.json()
-    assert payload["detail"]["error"] == "email_transport_missing"
+    assert payload["delivery_modes"] == ["email"]
+    assert payload["recipient_email"] == "prototype@jaccloud.nl"
+    assert payload["mailto_url"] is not None
+    assert payload["mailto_url"].startswith("mailto:prototype@jaccloud.nl")
+    assert payload["message"] == "Prepared email draft for prototype@jaccloud.nl. Reference ID: SUP-TEST123456"
 
 
 def test_support_request_routes_to_teams_and_itsm(client, support_config_headers, support_request_headers, monkeypatch: pytest.MonkeyPatch) -> None:
