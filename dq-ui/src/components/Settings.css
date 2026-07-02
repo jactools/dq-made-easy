@@ -273,6 +273,11 @@
   margin-bottom: 0;
 }
 
+.settings-sections-nav-search {
+  max-width: 420px;
+  margin-bottom: 12px;
+}
+
 .settings-sections-nav-label {
   font-size: 13px;
   font-weight: 600;
@@ -311,7 +316,15 @@
   white-space: nowrap;
 }
 
+.settings-sections-nav-empty {
+  margin: 0;
+}
+
 @media (max-width: 768px) {
+  .settings-sections-nav-search {
+    max-width: none;
+  }
+
   .settings-sections-nav-label {
     display: block;
   }

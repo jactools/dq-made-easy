@@ -4,7 +4,7 @@ import { getAuthToken } from '../contexts/AuthContext'
 import { useAuth } from '../hooks/useKeycloak'
 import { toApiGroupV1Base } from '../config/api'
 import { ApplicationSettings as ApplicationSettingsType, AlertRoutingPolicy, SecuritySettings, APISettings, WorkspaceSettings, type IconProviderName } from '../types/settings'
-import { AppSelect, AppPageShell } from './app-primitives'
+import { AppInput, AppSelect, AppPageShell } from './app-primitives'
 import { Button } from './Button'
 import { PrimaryButton, SecondaryButton } from './Button'
 import { AdminPageHeader } from './AdminPageHeader'
@@ -14,28 +14,12 @@ import './Settings.css'
 import { camelToSnake, snakeToCamel } from '../utils/caseConverters'
 import { createSupportReferenceId, formatSupportReferenceId } from '../utils/supportReference'
 import { PLAYGROUND_SOURCE_BUNDLES } from '../data/playgroundSourceBundles'
-import { DEFAULT_STYLE_PACKAGE, getStylePackageLabel, getStylePackageOptions, type StyleRegistryStyle } from '../contexts/styleThemeCatalog'
+import { DEFAULT_STYLE_PACKAGE } from '../contexts/styleThemeCatalog'
 import type { StylePackageName } from '../types/settings'
-import { DEFAULT_ICON_PROVIDER, getAppIconProviderOptions, type RegistryComponentBundle } from './app-primitives/appIconProviders'
-
-type UiRegistryView = {
-  source: string
-  version: string
-  cache_ttl_seconds?: number
-  styles?: readonly StyleRegistryStyle[]
-  component_bundles?: readonly RegistryComponentBundle[]
-  metadata?: Record<string, unknown>
-}
-
-const formatRegistryComponentBundle = (bundle: RegistryComponentBundle): string => {
-  const details = [bundle.label, bundle.adapter, bundle.fallback ? `fallback=${bundle.fallback}` : null]
-    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-  return details.length > 0 ? `${bundle.id} (${details.join(', ')})` : bundle.id
-}
 
 type AppSettingsTab = 'application' | 'security' | 'api'
 type FeatureStage = 'off' | 'preview' | 'live'
-type SettingsSection = { readonly id: string; readonly label: string }
+type SettingsSection = { readonly id: string; readonly label: string; readonly searchTerms?: readonly string[] }
 type AgentDefaultAction = 'deny' | 'allow'
 
 type AgentAccessAllowEntry = {
@@ -618,6 +602,7 @@ export const ApplicationSettings: React.FC = () => {
   const auth = useAuth()
   const [activeTab, setActiveTab] = useState<AppSettingsTab>('application')
   const [hasChanges, setHasChanges] = useState(false)
+  const [sectionSearchQuery, setSectionSearchQuery] = useState('')
 
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [saveStatusMessage, setSaveStatusMessage] = useState<string | null>(null)
@@ -627,59 +612,11 @@ export const ApplicationSettings: React.FC = () => {
   const [qrSecret, setQRSecret] = useState('')
   const [newApiKey, setNewApiKey] = useState('')
   const [activeSection, setActiveSection] = useState<string>('')
-  const [uiRegistryView, setUiRegistryView] = useState<UiRegistryView | null>(null)
 
   // Application tab state
   const [applicationData, setApplicationData] = useState<ApplicationSettingsType | null>(
     normalizeApplicationSettings(settings.applicationSettings)
   )
-
-  const selectedIconProvider = applicationData?.iconProvider || DEFAULT_ICON_PROVIDER
-  const iconProviderOptions = useMemo(
-    () => getAppIconProviderOptions(selectedIconProvider, uiRegistryView?.component_bundles ?? null),
-    [selectedIconProvider, uiRegistryView?.component_bundles],
-  )
-
-  const selectedStylePackage = applicationData?.stylePackage || DEFAULT_STYLE_PACKAGE
-  const stylePackageOptions = useMemo(
-    () => getStylePackageOptions(selectedStylePackage, uiRegistryView?.styles ?? null),
-    [selectedStylePackage, uiRegistryView?.styles],
-  )
-
-  useEffect(() => {
-    let cancelled = false
-
-    const loadUiRegistry = async () => {
-      try {
-        const apiBase = toApiGroupV1Base('system', settings.applicationSettings?.apiBaseUrl)
-        const token = getAuthToken()
-        const response = await fetch(`${apiBase}/ui-registry`, {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        })
-
-        if (!response.ok) {
-          return
-        }
-
-        const view = (await response.json()) as UiRegistryView
-        if (!cancelled) {
-          setUiRegistryView(view)
-        }
-      } catch {
-        if (!cancelled) {
-          setUiRegistryView(null)
-        }
-      }
-    }
-
-    void loadUiRegistry()
-
-    return () => {
-      cancelled = true
-    }
-  }, [settings.applicationSettings?.apiBaseUrl])
 
   // Security tab state
   const [securityData, setSecurityData] = useState<SecuritySettings | null>(
@@ -1000,13 +937,10 @@ export const ApplicationSettings: React.FC = () => {
           if (!applicationData) return
           // Keep API base URL user-specific; global settings are persisted to app-config.
           console.info(`${logPrefix} Saving user-scoped application preferences`)
-          const nextStylePackage = applicationData.stylePackage || DEFAULT_STYLE_PACKAGE
-          const currentStylePackage = settings.applicationSettings?.stylePackage || DEFAULT_STYLE_PACKAGE
           await settings.updateSettings({
             category: 'application',
             data: {
               apiBaseUrl: applicationData.apiBaseUrl,
-              ...(nextStylePackage !== currentStylePackage ? { stylePackage: nextStylePackage } : {}),
             },
           })
           {
@@ -1214,6 +1148,16 @@ export const ApplicationSettings: React.FC = () => {
     }
   }
 
+  const matchesSectionSearch = (section: SettingsSection, query: string): boolean => {
+    const normalizedQuery = query.trim().toLowerCase()
+    if (!normalizedQuery) {
+      return true
+    }
+
+    const searchableText = [section.label, ...(section.searchTerms ?? [])].join(' ').toLowerCase()
+    return searchableText.includes(normalizedQuery)
+  }
+
   const getSectionsForTab = (): readonly SettingsSection[] => {
     switch (activeTab) {
       case 'application':
@@ -1227,6 +1171,11 @@ export const ApplicationSettings: React.FC = () => {
     }
   }
 
+  const visibleSections = useMemo(
+    () => getSectionsForTab().filter((section) => matchesSectionSearch(section, sectionSearchQuery)),
+    [activeTab, sectionSearchQuery],
+  )
+
   const getSelectedSectionId = (sections: readonly SettingsSection[]): string => {
     if (sections.some((section) => section.id === activeSection)) {
       return activeSection
@@ -1237,20 +1186,34 @@ export const ApplicationSettings: React.FC = () => {
 
   const renderSectionsNav = (sections: readonly SettingsSection[], navId: string) => (
     <div className="settings-sections-nav settings-sections-nav--header">
-      <span className="settings-sections-nav-label">Jump to section:</span>
-      <div className="settings-sections-nav-scroll">
-        <AppTabs
-          ariaLabel={navId}
-          value={getSelectedSectionId(sections)}
-          onChange={scrollToSection}
-          className="settings-sections-nav-control"
-          tabs={sections.map((section) => ({
-            value: section.id,
-            label: section.label,
-            title: `Jump to ${section.label}`,
-          }))}
+      <div className="settings-sections-nav-search">
+        <AppInput
+          id="settingsSectionSearch"
+          label="Search settings sections"
+          value={sectionSearchQuery}
+          onChange={(event) => setSectionSearchQuery(event.target.value)}
+          placeholder="Search SSO, workspace, or retention"
+          hint="Use this to quickly find application settings sections."
         />
       </div>
+      <span className="settings-sections-nav-label">Jump to section:</span>
+      {sections.length > 0 ? (
+        <div className="settings-sections-nav-scroll">
+          <AppTabs
+            ariaLabel={navId}
+            value={getSelectedSectionId(sections)}
+            onChange={scrollToSection}
+            className="settings-sections-nav-control"
+            tabs={sections.map((section) => ({
+              value: section.id,
+              label: section.label,
+              title: `Jump to ${section.label}`,
+            }))}
+          />
+        </div>
+      ) : (
+        <p className="settings-hint settings-sections-nav-empty">No matching settings sections.</p>
+      )}
     </div>
   )
 
@@ -1470,7 +1433,7 @@ export const ApplicationSettings: React.FC = () => {
       <AdminPageHeader
         title="Application Settings"
         subtitle="Configure application-wide settings, limits, and workspace defaults"
-        supplementary={renderSectionsNav(getSectionsForTab(), 'Application settings sections')}
+        supplementary={renderSectionsNav(visibleSections, 'Application settings sections')}
         actions={
           hasChanges ? (
             <>
@@ -1542,65 +1505,8 @@ export const ApplicationSettings: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <AppSelect
-                  id="iconProvider"
-                  label="Icon provider"
-                  value={selectedIconProvider}
-                  onChange={(value) => {
-                    setApplicationData({
-                      ...applicationData,
-                      iconProvider: value as IconProviderName,
-                    })
-                    setHasChanges(true)
-                  }}
-                  options={iconProviderOptions.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                />
-                <p className="info-text">Controls the active icon provider used by the app-owned icon seam.</p>
+                <p className="info-text">Application-wide behavior settings continue below.</p>
               </div>
-
-              <div className="form-group">
-                <AppSelect
-                  id="stylePackage"
-                  label="Style package"
-                  value={selectedStylePackage}
-                  onChange={(value) => {
-                    setApplicationData({
-                      ...applicationData,
-                      stylePackage: value,
-                    })
-                    setHasChanges(true)
-                  }}
-                  options={stylePackageOptions.map((option) => ({
-                    value: option.value,
-                    label: option.label,
-                  }))}
-                />
-                <p className="info-text">Controls which stylesheet the app loads at runtime.</p>
-              </div>
-              {uiRegistryView && (
-                <div className="form-group">
-                  <h4>UI registry snapshot</h4>
-                  <p className="info-text">
-                    Source: {uiRegistryView.source} | Version: {uiRegistryView.version} | Styles: {uiRegistryView.styles?.length || 0} | Component bundles: {uiRegistryView.component_bundles?.length || 0}
-                  </p>
-                  {uiRegistryView.styles?.length ? (
-                    <p className="info-text">
-                      Styles: {uiRegistryView.styles.map((style) => `${style.id}${style.label ? ` (${style.label})` : ''}`).join(', ')}
-                    </p>
-                  ) : null}
-                  {uiRegistryView.component_bundles?.length ? (
-                    <p className="info-text">
-                      Component bundles: {uiRegistryView.component_bundles.map((bundle) => formatRegistryComponentBundle(bundle)).join(', ')}
-                    </p>
-                  ) : null}
-                  {uiRegistryView.metadata?.storage_table && (
-                    <p className="info-text">Stored in {String(uiRegistryView.metadata.storage_table)}</p>
-                  )}
-                </div>
-              )}
             </div>
             {/* Authentication & SSO Section */}
             <div id="auth-sso" className="settings-section">

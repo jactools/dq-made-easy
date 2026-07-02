@@ -172,7 +172,6 @@ export const SIDEBAR_MENU_ITEMS: MenuItem[] = [
     id: 'notifications',
     label: 'Notifications',
     icon: 'bell',
-    requiredScopes: [...SCOPE_REQUIREMENTS.notifications],
     requiredRoles: ['analyst', 'data-steward', 'admin'],
   },
   {
@@ -182,14 +181,14 @@ export const SIDEBAR_MENU_ITEMS: MenuItem[] = [
     requiredScopes: [...SCOPE_REQUIREMENTS.administration],
     requiredRoles: ['admin'],
     submenu: [
-      { id: 'administration-connectors', label: 'Connectors', icon: 'database', requiredRoles: ['admin', 'cross-admin'] },
+      { id: 'administration-connectors', label: 'Connectors', icon: 'database', requiredRoles: ['admin'] },
       { id: 'administration-users', label: 'User Management', icon: 'folder', requiredScopes: ['dq:admin:read', 'dq:workspace:read'] },
       { id: 'administration-roles', label: 'Role Management', icon: 'shield-check', requiredScopes: ['dq:admin:read', 'dq:workspace:read'] },
       { id: 'administration-system-metrics', label: 'System Metrics', icon: 'info-circle', requiredScopes: ['dq:admin:read'] },
       { id: 'administration-gx-run-plans', label: 'Validation Run Plans', icon: 'calendar', requiredScopes: ['dq:admin:read'] },
       { id: 'administration-gx-suites', label: 'Validation Suites', icon: 'list', requiredScopes: ['dq:admin:read'] },
+      { id: 'administration-ui-registry', label: 'UI Registry', icon: 'sliders', requiredRoles: ['admin'] },
       { id: 'administration-application', label: 'Application Settings', icon: 'sliders', requiredScopes: ['dq:admin:read'] },
-      { id: 'administration-icon-gallery', label: 'Icon Gallery', icon: 'image-placeholder', requiredScopes: ['dq:admin:read'] },
     ],
   },
   { id: 'documentation', label: 'Documentation', icon: 'book' },
@@ -236,8 +235,12 @@ export const canShowSidebarItem = (
     hasAdminWorkspaceAccess: boolean
   },
 ): boolean => {
-  if (item.id === 'administration' || item.id === 'administration-connectors') {
+  if (item.id === 'administration') {
     return input.isAuthenticated && input.hasAdminWorkspaceAccess
+  }
+
+  if (item.id === 'administration-connectors' || item.id === 'administration-ui-registry') {
+    return input.isAuthenticated && input.currentRole === 'admin'
   }
 
   if (!item.requiredRoles && !item.requiredScopes) {
@@ -253,6 +256,14 @@ export const canShowSidebarItem = (
   }
 
   return Boolean(input.isAuthenticated && input.currentRole && item.requiredRoles?.includes(input.currentRole))
+}
+
+export const shouldRenderSidebarItem = (item: Pick<MenuItem, 'id' | 'submenu'>): boolean => {
+  if (item.id === 'administration') {
+    return Boolean(item.submenu && item.submenu.length > 0)
+  }
+
+  return true
 }
 
 export const SIDEBAR_PARENT_DEFAULTS: Record<string, string> = {
@@ -396,8 +407,8 @@ export const Sidebar: React.FC<{
         return {
           ...item,
           submenu: item.submenu.filter((subItem) => {
-            if (subItem.id === 'administration-connectors') {
-              return hasAdminWorkspaceAccess
+            if (subItem.id === 'administration-connectors' || subItem.id === 'administration-ui-registry') {
+              return currentRole === 'admin'
             }
 
             const scopeAllowed = !subItem.requiredScopes || subItem.requiredScopes.length === 0
@@ -420,7 +431,7 @@ export const Sidebar: React.FC<{
         canEditGovernance,
       hasAnyScope: auth.hasAnyScope,
       hasAdminWorkspaceAccess,
-    })
+    }) && shouldRenderSidebarItem(item)
   })
 
   const handleMenuClick = (itemId: string, hasSubmenu: boolean) => {

@@ -8,8 +8,8 @@
       },
       "group": "aggregate",
       "kind": "aggregate",
-      "operation_count": 322,
-      "path_count": 275,
+      "operation_count": 323,
+      "path_count": 276,
       "version": "v1"
     },
     {
@@ -68,8 +68,8 @@
       },
       "group": "by-tag/configuration",
       "kind": "tag",
-      "operation_count": 2,
-      "path_count": 1,
+      "operation_count": 3,
+      "path_count": 2,
       "version": "v1"
     },
     {

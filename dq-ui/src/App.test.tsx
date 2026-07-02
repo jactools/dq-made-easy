@@ -81,6 +81,7 @@ vi.mock('./components/Sidebar', () => ({
       <button type="button" onClick={() => onItemClick('reports-incidents')}>Open incidents</button>
       <button type="button" onClick={() => onItemClick('reports-service-levels')}>Open service levels</button>
       <button type="button" onClick={() => onItemClick('discussions')}>Open discussions</button>
+      <button type="button" onClick={() => onItemClick('administration-ui-registry')}>Open UI registry</button>
     </div>
   ),
 }))
@@ -115,6 +116,10 @@ vi.mock('./components/Dashboard', () => ({
 
 vi.mock('./components/DefinitionMappingsPage', () => ({
   DefinitionMappingsPage: () => <div data-testid="definition-mappings-page" />,
+}))
+
+vi.mock('./components/UIRegistryAdmin', () => ({
+  UIRegistryAdmin: () => <div data-testid="ui-registry-admin" />,
 }))
 
 vi.mock('./components/Documentation', () => ({
@@ -456,6 +461,35 @@ describe('App workspace selection bootstrap', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('discussion-hub')).toBeTruthy()
+    })
+  })
+
+  it('opens the UI registry admin page for workspace admins', async () => {
+    mockUseSettings.mockReturnValue({
+      displaySettings: { theme: 'auto' },
+      applicationSettings: { apiBaseUrl: 'http://localhost:8000/v1', sessionTimeoutMinutes: 0 },
+    })
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      currentWorkspaceId: 'retail-banking',
+      user: {
+        name: 'Admin User',
+        workspaceRoles: [
+          { workspaceId: 'retail-banking', role: 'admin' },
+        ],
+      },
+      getCurrentUserRole: () => 'admin',
+      hasAnyScope: () => true,
+      hasScope: () => true,
+      canManageUsers: () => true,
+    })
+
+    render(<App />)
+
+    fireEvent.click(screen.getByText('Open UI registry'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ui-registry-admin')).toBeTruthy()
     })
   })
 })

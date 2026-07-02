@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 
-import { canShowSidebarItem, getFeatureNavItemLabel, shouldShowFeatureNavItem, SIDEBAR_MENU_ITEMS, SIDEBAR_PARENT_DEFAULTS } from './Sidebar'
+import { canShowSidebarItem, getFeatureNavItemLabel, shouldRenderSidebarItem, shouldShowFeatureNavItem, SIDEBAR_MENU_ITEMS, SIDEBAR_PARENT_DEFAULTS } from './Sidebar'
 
 const mockUseAuth = vi.fn()
 const mockUsePreviewFeatures = vi.fn()
@@ -55,6 +55,20 @@ describe('Sidebar', () => {
       },
     )).toBe(true)
     expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'administration')?.submenu?.some((subItem) => subItem.id === 'administration-connectors')).toBe(true)
+    expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'administration')?.submenu?.some((subItem) => subItem.id === 'administration-ui-registry')).toBe(true)
+    expect(canShowSidebarItem(
+      {
+        id: 'administration-connectors',
+        requiredRoles: ['admin'],
+      },
+      {
+        isAuthenticated: true,
+        currentRole: 'cross-admin',
+        canEditGovernance: false,
+        hasAnyScope: () => false,
+        hasAdminWorkspaceAccess: true,
+      },
+    )).toBe(false)
     expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-validation-plans')).toBe(true)
     expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-incidents')).toBe(true)
     expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-service-levels')).toBe(true)
@@ -123,6 +137,12 @@ describe('Sidebar', () => {
         hasAdminWorkspaceAccess: false,
       },
     )).toBe(true)
+  })
+
+  it('hides the Administration section when no submenu items remain visible', () => {
+    expect(shouldRenderSidebarItem({ id: 'administration', submenu: [] })).toBe(false)
+    expect(shouldRenderSidebarItem({ id: 'administration', submenu: [{ id: 'administration-users', label: 'User Management' }] })).toBe(true)
+    expect(shouldRenderSidebarItem({ id: 'reports' })).toBe(true)
   })
 
   it('only appends preview labels for preview-stage capabilities', () => {

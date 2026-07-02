@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant User
+    participant Plan as DQ Plan
+    participant Compiler as Rule Compiler
+    participant Lowerer as Runtime Lowerer
+    participant Engine as DQ Engine
+    participant Result as Result Processor
+    participant Store as Validation Store
+
+    User->>Plan: Submit DQ plan and rules
+    Plan->>Compiler: Compile rule DSL
+    Compiler->>Lowerer: Provide intermediate representation
+    Lowerer->>Lowerer: Normalize engine aliases and validate support
+    Lowerer->>Engine: Lower rules for selected engine
+    Engine->>Result: Execute rules and return results
+    Result->>Store: Convert to DQ Result Events
+    Store->>Store: Persist validation artifacts and audit data

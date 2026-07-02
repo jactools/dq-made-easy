@@ -634,14 +634,13 @@ describe('ApplicationSettings UI persistence', () => {
     expect(screen.getAllByRole('tab', { name: 'Data Retention' }).length).toBeGreaterThan(0)
   })
 
-  it('shows a registry snapshot in the application settings UI', async () => {
+  it('filters settings sections with the search bar', async () => {
     render(<ApplicationSettings />)
 
-    expect(screen.getAllByText('UI registry snapshot').length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/Source: default/).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/Version: 1.0.0/).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/Styles: 2/).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/Component bundles: 1/).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/Stored in ui_registry_manifest/).length).toBeGreaterThan(0)
+    const searchInput = await screen.findByLabelText('Search settings sections')
+    fireEvent.change(searchInput, { target: { value: 'sso' } })
+
+    expect(screen.getAllByRole('tab', { name: 'Authentication & SSO' }).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('tab', { name: 'Data Retention' })).toBeNull()
   })
 })

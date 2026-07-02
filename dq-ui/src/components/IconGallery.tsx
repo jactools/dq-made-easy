@@ -2,10 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import {
   AppInput,
   AppIcon,
-  APP_ICON_PROVIDER_LABELS,
   getAppIconNamesForProvider,
-  AppPageHeader,
-  AppPageShell,
   type AppIconName,
 } from './app-primitives'
 import { useSettingsOptional } from '../hooks/useContexts'
@@ -63,12 +60,7 @@ export const IconGallery: React.FC = () => {
   }, [allIcons, searchTerm])
 
   return (
-    <AppPageShell className="icon-gallery">
-      <AppPageHeader
-        title="Icon Gallery"
-        subtitle={`Browse ${allIcons.length} ${activeProviderLabel} icons available from the selected active icon provider. Click any icon name to copy it.`}
-      />
-
+    <div className="icon-gallery icon-gallery--embedded">
       <div className="icon-gallery-controls">
         <div className="icon-gallery-search">
           <div style={{ position: 'relative', width: '100%' }}>
@@ -132,6 +124,6 @@ export const IconGallery: React.FC = () => {
           <p>No {activeProviderLabel} icons found matching "{searchTerm}"</p>
         </div>
       )}
-    </AppPageShell>
+    </div>
   )
 }

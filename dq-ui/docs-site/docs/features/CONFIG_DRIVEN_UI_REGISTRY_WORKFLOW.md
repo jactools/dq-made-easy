@@ -4,7 +4,7 @@ This workflow describes how the UI registry is supplied and maintained without c
 
 ## Delivery
 
-The API exposes the active registry snapshot from `/api/system/v1/ui-registry`. When a registry entry references custom stylesheet assets, those assets are imported once through `POST /api/system/v1/ui-registry/assets/import` and then served back only from local API URLs under `/api/system/v1/ui-registry/assets/{kind}/{file_name}`.
+The API exposes the active registry snapshot from `/api/system/v1/ui-registry`. When a registry entry references custom stylesheet assets, those assets are imported once through `POST /api/system/v1/ui-registry/assets/import` and then served back only from local API URLs under `/api/system/v1/ui-registry/assets/&#123;kind&#125;/&#123;file_name&#125;`.
 
 Registry sources can come from the API-managed manifest, an environment payload, a file path, or a deployment-provided URL. If the registry cannot be loaded or validated, the app falls back to the built-in defaults and preserves app-owned primitives.
 

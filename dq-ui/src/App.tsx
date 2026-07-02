@@ -34,7 +34,7 @@ import { ApplicationSettings } from './components/ApplicationSettings'
 import { RoleManagement } from './components/RoleManagement'
 import { UserManagement } from './components/UserManagement'
 import { snakeToCamel } from './utils/caseConverters'
-import { IconGallery } from './components/IconGallery'
+import { UIRegistryAdmin } from './components/UIRegistryAdmin'
 import { ValidationRunPlansAdmin } from './components/GxRunPlansAdmin'
 import { GxSuitesAdmin } from './components/GxSuitesAdmin'
 import { AccessRequestsDashboard } from './components/AccessRequestsDashboard'
@@ -260,8 +260,12 @@ function AppContent() {
   const isAdminUser = auth.getCurrentUserRole() === 'admin'
 
   const hasNavAccess = useCallback((navId: string): boolean => {
+    if (navId === 'administration-ui-registry') {
+      return isAdminUser
+    }
+
     if (navId === 'administration-connectors') {
-      return hasAdminWorkspaceAccess
+      return isAdminUser
     }
 
     const requirement = NAV_SCOPE_REQUIREMENTS.find((entry) => entry.match.test(navId))
@@ -283,7 +287,7 @@ function AppContent() {
     }
 
     return true
-  }, [auth, hasAdminWorkspaceAccess])
+  }, [auth, hasAdminWorkspaceAccess, isAdminUser])
 
   const handleNavigate = useCallback((nextNav: string) => {
     const normalizedNextNav = NAV_SECTION_DEFAULTS[nextNav] || nextNav
@@ -831,11 +835,11 @@ function AppContent() {
                   {activeNav === 'administration-connectors' && <ConnectorWorkbench />}
                   {activeNav === 'administration-system-metrics' && <SystemMetrics />}
                   {activeNav === 'administration-application' && <ApplicationSettings />}
+                  {activeNav === 'administration-ui-registry' && <UIRegistryAdmin />}
                   {activeNav === 'administration-users' && <UserManagement />}
                   {activeNav === 'administration-roles' && <RoleManagement />}
                   {activeNav === 'administration-gx-run-plans' && <ValidationRunPlansAdmin />}
                   {activeNav === 'administration-gx-suites' && <GxSuitesAdmin />}
-                  {activeNav === 'administration-icon-gallery' && <IconGallery />}
                 </>
                 )
               )}
