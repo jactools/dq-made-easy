@@ -499,7 +499,7 @@ wait_for_terminal_data_definition_event() {
   if [[ "$curl_rc" -ne 0 ]]; then
     if [[ "$curl_rc" -eq 28 ]]; then
       info "$my_name" "Data-definition task events timed out after ${event_timeout_seconds}s; checking current request status for ${request_id}"
-      api_request_with_token "$ACCESS_TOKEN" GET "/data-catalog/v1/data-definition-tasks/${request_id}"
+      api_request_with_token "$ACCESS_TOKEN" GET "/data-catalog/v1/data-definition-tasks/requests/${request_id}/status"
       if [[ "$HTTP_CODE" == "200" ]]; then
         status_body="$HTTP_BODY"
         task_status="$(jq -r '.request.status // empty' <<<"$status_body")"
