@@ -16,7 +16,7 @@ import { snakeToCamel } from '../utils/caseConverters'
 import './Reports.css'
 
 interface ReportsProps {
-  initialTab?: 'metrics' | 'result-explorer' | 'test-results' | 'incidents' | 'reconciliation'
+  initialTab?: 'metrics' | 'agent-access' | 'data-definition' | 'result-explorer' | 'test-results' | 'incidents' | 'reconciliation'
   onNavigate?: (destination: string) => void
 }
 
@@ -137,6 +137,65 @@ interface RootCauseSuggestionsPagePayload {
   limit: number
 }
 
+interface DataDefinitionRequestRow {
+  requestId: string
+  currentWorkspaceId: string
+  prompt: string
+  requestedByUserId: string | null
+  requestedByEmail: string | null
+  requestedAt: string | null
+  startedAt: string | null
+  completedAt: string | null
+  status: 'pending' | 'started' | 'completed' | 'failed'
+  errorMessage: string | null
+  analysisType: string
+  analysisProvider: string
+}
+
+interface DataDefinitionTaskStatusResponsePayload {
+  success: boolean
+  request: DataDefinitionRequestRow
+}
+
+interface AgentAuditEventRow {
+  id: string
+  requestId: string
+  timestamp: string
+  action: string
+  endpoint: string
+  method: string
+  actorId: string | null
+  correlationId: string | null
+  agentType: string | null
+  agentSource: string | null
+  agentInstanceId: string | null
+  requestOrigin: string | null
+  userAgent: string | null
+  responseType: string
+  statusCode: number
+  success: boolean
+  details: Record<string, unknown>
+  governanceContextRef?: Record<string, unknown>
+}
+
+interface AgentAuditEventListPayload {
+  events: AgentAuditEventRow[]
+  governanceMetadata: Record<string, unknown>
+}
+
+interface AgentAccessSummaryRow {
+  key: string
+  agentLabel: string
+  targetLabel: string
+  count: number
+  firstSeenAt: string | null
+  lastSeenAt: string | null
+  latestStatusLabel: string
+  latestStatusTone: string
+  latestRequestOrigin: string
+  latestActorLabel: string
+}
+
 const uniqueValues = (values: Array<string | null | undefined>): string[] => {
   return Array.from(new Set(values.filter((value): value is string => Boolean(value))))
 }
@@ -197,6 +256,98 @@ const formatIncidentDate = (value?: string | null): string => {
 
   const parsed = new Date(value)
   return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString()
+}
+
+const formatDataDefinitionDate = (value?: string | null): string => {
+  if (!value) {
+    return '—'
+  }
+
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString()
+}
+
+const formatAgentAccessDate = (value?: string | null): string => formatDataDefinitionDate(value)
+
+const getAgentAccessAgentLabel = (event: AgentAuditEventRow): string => {
+  return String(
+    event.agentType ||
+      event.agentSource ||
+      event.agentInstanceId ||
+      event.actorId ||
+      'Unknown agent',
+  )
+}
+
+const formatAgentAccessTargetLabel = (event: AgentAuditEventRow): string => {
+  const actionLabel = humanizeLabel(String(event.action || 'access'))
+  const endpointLabel = String(event.endpoint || '').trim() || 'Unknown endpoint'
+  return `${actionLabel} · ${endpointLabel}`
+}
+
+const formatAgentAccessStatusLabel = (success: boolean): string => (success ? 'Success' : 'Failed')
+
+const getAgentAccessStatusTone = (success: boolean): string => (success ? 'status-completed' : 'status-failed')
+
+const formatAgentAccessRequestOrigin = (event: AgentAuditEventRow): string => {
+  const parts: string[] = []
+
+  if (event.requestOrigin) {
+    parts.push(`Origin ${humanizeLabel(event.requestOrigin)}`)
+  }
+  if (event.agentSource && event.agentSource !== event.agentType) {
+    parts.push(`Source ${event.agentSource}`)
+  }
+  if (event.agentInstanceId) {
+    parts.push(`Instance ${event.agentInstanceId}`)
+  }
+  if (event.responseType) {
+    parts.push(`Response ${event.responseType}`)
+  }
+
+  return parts.length > 0 ? parts.join(' · ') : 'No additional details'
+}
+
+const formatDataDefinitionStatusLabel = (value: string): string => {
+  switch (value) {
+    case 'pending':
+      return 'Pending'
+    case 'started':
+      return 'Started'
+    case 'completed':
+      return 'Completed'
+    case 'failed':
+      return 'Failed'
+    default:
+      return humanizeLabel(value)
+  }
+}
+
+const getDataDefinitionStatusTone = (value: string): string => {
+  switch (value) {
+    case 'started':
+      return 'status-started'
+    case 'completed':
+      return 'status-completed'
+    case 'failed':
+      return 'status-failed'
+    case 'pending':
+    default:
+      return 'status-pending'
+  }
+}
+
+const getDataDefinitionStatusChangedAt = (request: DataDefinitionRequestRow): string | null => {
+  switch (request.status) {
+    case 'completed':
+    case 'failed':
+      return request.completedAt || request.startedAt || request.requestedAt
+    case 'started':
+      return request.startedAt || request.requestedAt
+    case 'pending':
+    default:
+      return request.requestedAt
+  }
 }
 
 const getIncidentSeverityTone = (severity?: string | null): string => {
@@ -281,6 +432,54 @@ const sortIncidents = (left: IncidentListItem, right: IncidentListItem): number 
   const leftTime = new Date(left.updatedAt || left.createdAt || 0).getTime()
   const rightTime = new Date(right.updatedAt || right.createdAt || 0).getTime()
   return rightTime - leftTime
+}
+
+const buildHeaders = (): HeadersInit => {
+  const token = getAuthToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+const readErrorMessage = async (response: Response, fallback: string): Promise<string> => {
+  const bodyText = await response.text().catch(() => '')
+  if (!bodyText.trim()) {
+    return fallback
+  }
+
+  try {
+    const parsed = JSON.parse(bodyText) as Record<string, unknown>
+    const detail = parsed.detail
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail.trim()
+    }
+    if (detail && typeof detail === 'object') {
+      const nested = detail as Record<string, unknown>
+      const nestedMessage = asString(nested.message) || asString(nested.error)
+      if (nestedMessage) {
+        return nestedMessage
+      }
+    }
+    const parsedMessage = asString(parsed.message) || asString(parsed.error)
+    if (parsedMessage) {
+      return parsedMessage
+    }
+  } catch {
+    return bodyText.trim()
+  }
+
+  return bodyText.trim() || fallback
+}
+
+const fetchJson = async <T,>(url: string, fallbackMessage: string): Promise<T> => {
+  const response = await fetch(url, {
+    headers: buildHeaders(),
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response, fallbackMessage))
+  }
+
+  return snakeToCamel<T>(await response.json())
 }
 
 const toRecord = (value: unknown): Record<string, any> => {
@@ -440,7 +639,7 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
   const { rules } = useRules()
   const auth = useAuth()
   const settings = useSettings()
-  const [activeTab, setActiveTab] = useState<'metrics' | 'result-explorer' | 'test-results' | 'incidents' | 'reconciliation'>(initialTab)
+  const [activeTab, setActiveTab] = useState<'metrics' | 'agent-access' | 'data-definition' | 'result-explorer' | 'test-results' | 'incidents' | 'reconciliation'>(initialTab)
   const [telemetryConnectionState, setTelemetryConnectionState] = useState(getUiTelemetryConnectionState())
   const [expandedTestGroups, setExpandedTestGroups] = useState<Record<string, boolean>>({})
   const [ruleSearchInput, setRuleSearchInput] = useState('')
@@ -455,6 +654,13 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
   const [selectedIncidentIds, setSelectedIncidentIds] = useState<string[]>([])
   const [rootCauseActionLoadingId, setRootCauseActionLoadingId] = useState<string | null>(null)
   const [rootCauseActionError, setRootCauseActionError] = useState<string | null>(null)
+  const [refreshNonce, setRefreshNonce] = useState(0)
+  const [agentAccessEvents, setAgentAccessEvents] = useState<AgentAuditEventRow[]>([])
+  const [agentAccessLoading, setAgentAccessLoading] = useState(false)
+  const [agentAccessError, setAgentAccessError] = useState<string | null>(null)
+  const [dataDefinitionRequests, setDataDefinitionRequests] = useState<DataDefinitionRequestRow[]>([])
+  const [dataDefinitionRequestsLoading, setDataDefinitionRequestsLoading] = useState(false)
+  const [dataDefinitionRequestsError, setDataDefinitionRequestsError] = useState<string | null>(null)
 
   // Update activeTab when initialTab prop changes
   useEffect(() => {
@@ -464,6 +670,10 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
   useEffect(() => subscribeUiTelemetryConnectionState(setTelemetryConnectionState), [])
 
   const currentWorkspaceId = String(auth.currentWorkspaceId || '').trim()
+
+  const refreshAll = () => {
+    setRefreshNonce((current) => current + 1)
+  }
 
   const loadIncidents = useCallback(async () => {
     if (!currentWorkspaceId) {
@@ -537,6 +747,72 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
     }
   }, [currentWorkspaceId, settings.applicationSettings?.apiBaseUrl])
 
+  const loadDataDefinitionRequests = useCallback(async () => {
+    if (!currentWorkspaceId) {
+      setDataDefinitionRequests([])
+      setDataDefinitionRequestsError('Select an active workspace to view data-definition insights.')
+      setDataDefinitionRequestsLoading(false)
+      return
+    }
+
+    setDataDefinitionRequestsLoading(true)
+    setDataDefinitionRequestsError(null)
+
+    try {
+      const apiBase = toApiGroupV1Base('data-catalog', settings.applicationSettings?.apiBaseUrl)
+      const payload = await fetchJson<{ requests: DataDefinitionRequestRow[]; count: number }>(
+        `${apiBase}/data-definition-tasks/requests?workspace_id=${encodeURIComponent(currentWorkspaceId)}&limit=50`,
+        'Unable to load data-definition insights.',
+      )
+
+      const initialRequests = Array.isArray(payload.requests) ? payload.requests : []
+      const nextRequests = await Promise.all(
+        initialRequests.map(async (request) => {
+          if (request.status !== 'started') {
+            return request
+          }
+
+          try {
+            const statusPayload = await fetchJson<DataDefinitionTaskStatusResponsePayload>(
+              `${apiBase}/data-definition-tasks/requests/${encodeURIComponent(request.requestId)}/status`,
+              `Unable to refresh data-definition request ${request.requestId}.`,
+            )
+            return statusPayload.request || request
+          } catch {
+            return request
+          }
+        }),
+      )
+
+      setDataDefinitionRequests(nextRequests)
+    } catch (loadError) {
+      setDataDefinitionRequests([])
+      setDataDefinitionRequestsError(loadError instanceof Error ? loadError.message : 'Unable to load data-definition insights.')
+    } finally {
+      setDataDefinitionRequestsLoading(false)
+    }
+  }, [currentWorkspaceId, settings.applicationSettings?.apiBaseUrl])
+
+  const loadAgentAccessEvents = useCallback(async () => {
+    setAgentAccessLoading(true)
+    setAgentAccessError(null)
+
+    try {
+      const apiBase = toApiGroupV1Base('agent', settings.applicationSettings?.apiBaseUrl)
+      const payload = await fetchJson<AgentAuditEventListPayload>(
+        `${apiBase}/audit/events?limit=200&offset=0`,
+        'Unable to load agent access insights.',
+      )
+
+      setAgentAccessEvents(Array.isArray(payload.events) ? payload.events : [])
+    } catch (loadError) {
+      setAgentAccessEvents([])
+      setAgentAccessError(loadError instanceof Error ? loadError.message : 'Unable to load agent access insights.')
+    } finally {
+      setAgentAccessLoading(false)
+    }
+  }, [settings.applicationSettings?.apiBaseUrl])
+
   useEffect(() => {
     if (activeTab !== 'incidents') {
       return
@@ -545,6 +821,22 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
     void loadIncidents()
     void loadRootCauseSuggestions()
   }, [activeTab, loadIncidents, loadRootCauseSuggestions])
+
+  useEffect(() => {
+    if (activeTab !== 'data-definition') {
+      return
+    }
+
+    void loadDataDefinitionRequests()
+  }, [activeTab, loadDataDefinitionRequests, refreshNonce])
+
+  useEffect(() => {
+    if (activeTab !== 'agent-access') {
+      return
+    }
+
+    void loadAgentAccessEvents()
+  }, [activeTab, loadAgentAccessEvents, refreshNonce])
 
   useEffect(() => {
     setSelectedIncidentIds([])
@@ -557,6 +849,86 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
 
     return rules.filter((rule) => rule.workspace === auth.currentWorkspaceId)
   }, [rules, auth.currentWorkspaceId])
+
+  const dataDefinitionRequestsSorted = useMemo(
+    () => [...dataDefinitionRequests].sort((left, right) => {
+      const leftTime = new Date(left.requestedAt || left.startedAt || left.completedAt || 0).getTime()
+      const rightTime = new Date(right.requestedAt || right.startedAt || right.completedAt || 0).getTime()
+      return rightTime - leftTime
+    }),
+    [dataDefinitionRequests],
+  )
+
+  const dataDefinitionCounts = useMemo(() => ({
+    total: dataDefinitionRequestsSorted.length,
+    pending: dataDefinitionRequestsSorted.filter((request) => request.status === 'pending').length,
+    started: dataDefinitionRequestsSorted.filter((request) => request.status === 'started').length,
+    completed: dataDefinitionRequestsSorted.filter((request) => request.status === 'completed').length,
+    failed: dataDefinitionRequestsSorted.filter((request) => request.status === 'failed').length,
+  }), [dataDefinitionRequestsSorted])
+
+  const agentAccessEventsSorted = useMemo(
+    () => [...agentAccessEvents].sort((left, right) => {
+      const leftTime = new Date(left.timestamp || 0).getTime()
+      const rightTime = new Date(right.timestamp || 0).getTime()
+      return rightTime - leftTime
+    }),
+    [agentAccessEvents],
+  )
+
+  const agentAccessSummaries = useMemo(() => {
+    const summaryMap = new Map<string, AgentAccessSummaryRow & { lastSeenEpoch: number }>()
+
+    for (const event of agentAccessEventsSorted) {
+      const agentLabel = getAgentAccessAgentLabel(event)
+      const targetLabel = formatAgentAccessTargetLabel(event)
+      const key = `${agentLabel}|||${targetLabel}`
+      const eventTime = new Date(event.timestamp || 0).getTime()
+      const current = summaryMap.get(key)
+
+      if (!current) {
+        summaryMap.set(key, {
+          key,
+          agentLabel,
+          targetLabel,
+          count: 1,
+          firstSeenAt: event.timestamp || null,
+          lastSeenAt: event.timestamp || null,
+          latestStatusLabel: formatAgentAccessStatusLabel(event.success),
+          latestStatusTone: getAgentAccessStatusTone(event.success),
+          latestRequestOrigin: formatAgentAccessRequestOrigin(event),
+          latestActorLabel: event.actorId || 'Unknown actor',
+          lastSeenEpoch: Number.isNaN(eventTime) ? 0 : eventTime,
+        })
+        continue
+      }
+
+      current.count += 1
+      if ((current.firstSeenAt === null || eventTime < new Date(current.firstSeenAt).getTime()) && event.timestamp) {
+        current.firstSeenAt = event.timestamp
+      }
+      if ((current.lastSeenAt === null || eventTime > new Date(current.lastSeenAt).getTime()) && event.timestamp) {
+        current.lastSeenAt = event.timestamp
+        current.latestStatusLabel = formatAgentAccessStatusLabel(event.success)
+        current.latestStatusTone = getAgentAccessStatusTone(event.success)
+        current.latestRequestOrigin = formatAgentAccessRequestOrigin(event)
+        current.latestActorLabel = event.actorId || 'Unknown actor'
+        current.lastSeenEpoch = Number.isNaN(eventTime) ? current.lastSeenEpoch : eventTime
+      }
+    }
+
+    return Array.from(summaryMap.values())
+      .sort((left, right) => right.lastSeenEpoch - left.lastSeenEpoch)
+      .map(({ lastSeenEpoch: _lastSeenEpoch, ...summary }) => summary)
+  }, [agentAccessEventsSorted])
+
+  const agentAccessCounts = useMemo(() => ({
+    total: agentAccessEventsSorted.length,
+    agents: uniqueValues(agentAccessEventsSorted.map((event) => getAgentAccessAgentLabel(event))).length,
+    targets: uniqueValues(agentAccessEventsSorted.map((event) => formatAgentAccessTargetLabel(event))).length,
+    failed: agentAccessEventsSorted.filter((event) => !event.success).length,
+    successful: agentAccessEventsSorted.filter((event) => event.success).length,
+  }), [agentAccessEventsSorted])
 
   const searchQuery = normalizeSearchValue(ruleSearchInput)
   const activeSearchQuery = searchQuery.length >= 3 ? searchQuery : ''
@@ -762,6 +1134,8 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
             className="reports-tabs-control"
             tabs={[
               { value: 'metrics', label: 'Health Dashboard', title: 'Show Health Dashboard', iconName: 'line-chart' },
+              { value: 'agent-access', label: 'Agent Access', title: 'Show Agent Access', iconName: 'shield-check' },
+              { value: 'data-definition', label: 'Data-Definition Insights', title: 'Show Data-Definition Insights', iconName: 'document' },
               { value: 'result-explorer', label: 'Result Explorer', title: 'Show Result Explorer', iconName: 'search' },
               { value: 'test-results', label: 'Validation Test Results', title: 'Show Validation Test Results', iconName: 'list' },
               { value: 'incidents', label: 'Incidents', title: 'Show Incidents', iconName: 'exclamation-circle' },
@@ -789,6 +1163,222 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
             rules={currentWorkspaceRules}
             onRuleClick={handleRuleClick}
           />
+        </div>
+      )}
+
+      {activeTab === 'agent-access' && (
+        <div className="reports-content">
+          <div className="latest-test-summary">
+            <div className="latest-test-summary-header">
+              <div>
+                <p className="latest-test-summary-kicker">Agent access audit</p>
+                <h3>AI agent access insights</h3>
+                <p className="incident-workspace-label">
+                  Monitor which agent accessed which endpoint, how often, and when.
+                </p>
+                <p className="incident-workspace-label">
+                  Showing the latest agent audit events available to the app.
+                </p>
+              </div>
+              <Button onClick={refreshAll}>Refresh</Button>
+            </div>
+
+            <div className="latest-test-summary-grid incident-summary-grid">
+              <div className="latest-test-summary-metric">
+                <span>Total events</span>
+                <strong>{agentAccessCounts.total}</strong>
+                <p>Recent agent audit records</p>
+              </div>
+              <div className="latest-test-summary-metric">
+                <span>Agents observed</span>
+                <strong>{agentAccessCounts.agents}</strong>
+                <p>Distinct agent identities</p>
+              </div>
+              <div className="latest-test-summary-metric">
+                <span>Unique targets</span>
+                <strong>{agentAccessCounts.targets}</strong>
+                <p>Different actions and endpoints</p>
+              </div>
+              <div className="latest-test-summary-metric">
+                <span>Successful / failed</span>
+                <strong>{agentAccessCounts.successful} / {agentAccessCounts.failed}</strong>
+                <p>Latest result window</p>
+              </div>
+            </div>
+          </div>
+
+          {agentAccessLoading ? (
+            <div className="empty-results">
+              <p>Loading agent access events…</p>
+            </div>
+          ) : agentAccessError ? (
+            <div className="empty-results">
+              <p>{agentAccessError}</p>
+            </div>
+          ) : agentAccessSummaries.length === 0 ? (
+            <div className="empty-results">
+              <p>No agent access audit events found.</p>
+            </div>
+          ) : (
+            <div className="results-table">
+              <div
+                className="table-header"
+                style={{ gridTemplateColumns: '1.2fr 1.8fr 0.6fr 1fr 1fr 0.9fr 1.2fr' }}
+              >
+                <div className="column rule-group">Agent</div>
+                <div className="column target">Accessed what</div>
+                <div className="column status">Count</div>
+                <div className="column test-date">First seen</div>
+                <div className="column test-date">Last seen</div>
+                <div className="column status">Latest status</div>
+                <div className="column target">Latest details</div>
+              </div>
+
+              {agentAccessSummaries.map((summary) => (
+                <div
+                  key={summary.key}
+                  className="table-row agent-access-table-row"
+                  style={{ gridTemplateColumns: '1.2fr 1.8fr 0.6fr 1fr 1fr 0.9fr 1.2fr' }}
+                >
+                  <div className="column rule-group">
+                    <div className="rule-group-text no-toggle">
+                      <strong>{summary.agentLabel}</strong>
+                      <span>{summary.latestActorLabel}</span>
+                    </div>
+                  </div>
+                  <div className="column target agent-access-target-column">
+                    <div className="target-stack agent-access-target-stack">
+                      <strong>{summary.targetLabel}</strong>
+                      <span>{summary.latestRequestOrigin}</span>
+                    </div>
+                  </div>
+                  <div className="column status">
+                    <span className="status-badge status-started agent-access-count-badge">
+                      {summary.count}
+                    </span>
+                  </div>
+                  <div className="column test-date">{formatAgentAccessDate(summary.firstSeenAt)}</div>
+                  <div className="column test-date">{formatAgentAccessDate(summary.lastSeenAt)}</div>
+                  <div className="column status">
+                    <span className={`status-badge ${summary.latestStatusTone}`}>
+                      {summary.latestStatusLabel}
+                    </span>
+                  </div>
+                  <div className="column target agent-access-details-column">
+                    <span className="agent-access-details">{summary.latestRequestOrigin}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'data-definition' && (
+        <div className="reports-content">
+          <div className="latest-test-summary">
+            <div className="latest-test-summary-header">
+              <div>
+                <p className="latest-test-summary-kicker">Data-definition requests</p>
+                <h3>Workspace request insights</h3>
+                <p className="incident-workspace-label">
+                  {currentWorkspaceId ? `Current workspace: ${currentWorkspaceId}` : 'No workspace selected'}
+                </p>
+                <p className="incident-workspace-label">
+                  Request counts, runtime timestamps, and any recorded error messages for generated business-term tasks.
+                </p>
+              </div>
+              <Button onClick={refreshAll}>Refresh</Button>
+            </div>
+
+            <div className="latest-test-summary-grid incident-summary-grid">
+              <div className="latest-test-summary-metric">
+                <span>Total</span>
+                <strong>{dataDefinitionCounts.total}</strong>
+                <p>Requests in the selected workspace</p>
+              </div>
+              <div className="latest-test-summary-metric">
+                <span>Pending</span>
+                <strong>{dataDefinitionCounts.pending}</strong>
+                <p>Waiting to start</p>
+              </div>
+              <div className="latest-test-summary-metric">
+                <span>Started</span>
+                <strong>{dataDefinitionCounts.started}</strong>
+                <p>Currently running</p>
+              </div>
+              <div className="latest-test-summary-metric">
+                <span>Completed / Failed</span>
+                <strong>{dataDefinitionCounts.completed} / {dataDefinitionCounts.failed}</strong>
+                <p>Terminal requests</p>
+              </div>
+            </div>
+          </div>
+
+          {dataDefinitionRequestsLoading ? (
+            <div className="empty-results">
+              <p>Loading data-definition requests…</p>
+            </div>
+          ) : dataDefinitionRequestsError ? (
+            <div className="empty-results">
+              <p>{dataDefinitionRequestsError}</p>
+            </div>
+          ) : dataDefinitionRequestsSorted.length === 0 ? (
+            <div className="empty-results">
+              <p>No data-definition requests found for the selected workspace.</p>
+            </div>
+          ) : (
+            <div className="results-table">
+              <div
+                className="table-header"
+                style={{ gridTemplateColumns: '2.3fr 0.9fr 1.2fr 1.2fr 1.2fr 1.2fr 1.6fr' }}
+              >
+                <div className="column rule-group">Request</div>
+                <div className="column status">Status</div>
+                <div className="column test-date">Requested</div>
+                <div className="column test-date">Started</div>
+                <div className="column test-date">Ended</div>
+                <div className="column test-date">Status changed</div>
+                <div className="column target">Error message</div>
+              </div>
+
+              {dataDefinitionRequestsSorted.map((request) => {
+                const statusChangedAt = getDataDefinitionStatusChangedAt(request)
+
+                return (
+                  <div
+                    key={request.requestId}
+                    className="table-row data-definition-table-row"
+                    style={{ gridTemplateColumns: '2.3fr 0.9fr 1.2fr 1.2fr 1.2fr 1.2fr 1.6fr' }}
+                  >
+                    <div className="column rule-group">
+                      <div className="rule-group-text no-toggle">
+                        <strong>{request.prompt}</strong>
+                        <span>{request.requestId}</span>
+                      </div>
+                    </div>
+                    <div className="column status">
+                      <span className={`status-badge ${getDataDefinitionStatusTone(request.status)}`}>
+                        {formatDataDefinitionStatusLabel(request.status)}
+                      </span>
+                    </div>
+                    <div className="column test-date">{formatDataDefinitionDate(request.requestedAt)}</div>
+                    <div className="column test-date">{formatDataDefinitionDate(request.startedAt)}</div>
+                    <div className="column test-date">{formatDataDefinitionDate(request.completedAt)}</div>
+                    <div className="column test-date">{formatDataDefinitionDate(statusChangedAt)}</div>
+                    <div className="column target data-definition-error-column">
+                      <span
+                        className="execution-inline-summary data-definition-error-message"
+                        title={request.errorMessage || 'No error message recorded'}
+                      >
+                        {request.errorMessage || 'No error message'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

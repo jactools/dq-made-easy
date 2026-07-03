@@ -89,6 +89,7 @@ const NAV_SCOPE_REQUIREMENTS: Array<{ match: RegExp; scopes: string[] }> = [
   { match: /^(data-browser|data-browser-|definition-mappings)/, scopes: ['dq:data_catalog:read', 'dq:data_catalog:*', 'dq:*'] },
   { match: /^data-assets$/, scopes: ['dq:data_catalog:read', 'dq:data_catalog:write', 'dq:data_catalog:*', 'dq:*'] },
   { match: /^(delivery-inventory|delivery-inventory-)/, scopes: ['dq:data_catalog:read', 'dq:data_catalog:*', 'dq:*'] },
+  { match: /^reports-agent-access$/, scopes: ['dq:admin:read'] },
   { match: /^(reports|reports-)/, scopes: ['dq:reports:read', 'dq:reports:*', 'dq:*'] },
   { match: /^discussions$/, scopes: ['dq:rules:approve', 'dq:reports:read', 'dq:data_catalog:read', 'dq:workspace:read', 'dq:*'] },
   { match: /^(audit|audit-)/, scopes: ['dq:audit:read', 'dq:audit:*', 'dq:*'] },
@@ -776,9 +777,9 @@ function AppContent() {
               {(activeNav === 'reports' || activeNav.startsWith('reports-')) && (
                 hasNavAccess(activeNav) && (
                 <>
-                  {(activeNav === 'reports' || activeNav === 'reports-metrics' || activeNav === 'reports-test-results' || activeNav === 'reports-incidents' || activeNav === 'reports-reconciliation') && (
+                  {(activeNav === 'reports' || activeNav === 'reports-metrics' || activeNav === 'reports-agent-access' || activeNav === 'reports-data-definition' || activeNav === 'reports-test-results' || activeNav === 'reports-incidents' || activeNav === 'reports-reconciliation') && (
                     <Reports
-                      initialTab={activeNav === 'reports-test-results' ? 'test-results' : activeNav === 'reports-incidents' ? 'incidents' : activeNav === 'reports-reconciliation' ? 'reconciliation' : 'metrics'}
+                      initialTab={activeNav === 'reports-test-results' ? 'test-results' : activeNav === 'reports-agent-access' ? 'agent-access' : activeNav === 'reports-data-definition' ? 'data-definition' : activeNav === 'reports-incidents' ? 'incidents' : activeNav === 'reports-reconciliation' ? 'reconciliation' : 'metrics'}
                       onNavigate={handleNavigate}
                     />
                   )}

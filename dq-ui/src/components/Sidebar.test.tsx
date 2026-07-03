@@ -72,6 +72,9 @@ describe('Sidebar', () => {
     expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-validation-plans')).toBe(true)
     expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-incidents')).toBe(true)
     expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-service-levels')).toBe(true)
+    expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-agent-access')).toBe(true)
+    expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'reports')?.submenu?.some((subItem) => subItem.id === 'reports-data-definition')).toBe(true)
+    expect(SIDEBAR_MENU_ITEMS.find((item) => item.id === 'audit')?.submenu?.some((subItem) => subItem.id === 'audit-data-definition')).toBe(false)
   })
 
   it('keeps All Rules visible and reserves All Across Workspaces for workspace-read access', () => {

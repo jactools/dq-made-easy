@@ -1,4 +1,5 @@
 import asyncio
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
@@ -1294,3 +1295,45 @@ def test_data_definition_pending_approval_does_not_import(monkeypatch) -> None:
     assert response.status_code == 200
     assert importer.imported_contracts == []
     assert suggestions_repository.update_calls[0]["result"]["review_status"] == "pending_board_review"
+
+
+def test_data_definition_task_status_reconciles_stale_started_request(monkeypatch) -> None:
+    monkeypatch.setenv("SSO_ENABLED", "true")
+    monkeypatch.setenv("SSO_PUBLIC_ISSUER_URL", "http://keycloak.local:8080/realms/jaccloud")
+    monkeypatch.setenv("SSO_CLIENT_ID", "dq-rules-ui")
+    monkeypatch.setenv("DQ_DATA_DEFINITION_EVENT_TIMEOUT_SECONDS", "1")
+    get_settings.cache_clear()
+
+    record = {
+        "request_id": "dd-task-stale-1",
+        "job_id": "job-stale-1",
+        "current_workspace_id": "retail-banking",
+        "version_id": "version-1",
+        "selected_attribute_ids": ["attr-1"],
+        "prompt": "Generate data definitions",
+        "requested_by_user_id": "user-123",
+        "requested_at": "2026-05-26T12:00:00+00:00",
+        "started_at": (datetime.now(UTC) - timedelta(minutes=5)).isoformat(),
+        "status": "started",
+        "analysis_type": "definition_task",
+        "analysis_provider": "llm",
+        "auto_import": False,
+        "task_payload": {},
+        "result": None,
+    }
+    saved_records: list[dict] = []
+
+    monkeypatch.setattr(data_catalog_endpoints, "load_request_record_from_settings", lambda settings, request_id: record)
+    monkeypatch.setattr(data_catalog_endpoints, "save_request_record_to_settings", lambda settings, saved_record: saved_records.append(dict(saved_record)))
+
+    response = client.get(
+        "/api/data-catalog/v1/data-definition-tasks/requests/dd-task-stale-1/status",
+        headers=_auth_headers("dq:rules:read"),
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["request"]["status"] == "failed"
+    assert payload["request"]["error_message"] == "Data-definition task timed out after 1 seconds without completing"
+    assert saved_records[0]["status"] == "failed"
+    assert saved_records[0]["error_message"] == "Data-definition task timed out after 1 seconds without completing"

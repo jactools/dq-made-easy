@@ -127,6 +127,8 @@ export const SIDEBAR_MENU_ITEMS: MenuItem[] = [
     requiredRoles: ['analyst', 'data-steward', 'admin'],
     submenu: [
       { id: 'reports-metrics', label: 'Operational Metrics', icon: 'info-circle' },
+      { id: 'reports-agent-access', label: 'Agent Access', icon: 'shield-check', requiredScopes: ['dq:admin:read'] },
+      { id: 'reports-data-definition', label: 'Data-Definition Insights', icon: 'document' },
       { id: 'reports-test-results', label: 'Validation Test Results', icon: 'play' },
       { id: 'reports-incidents', label: 'Incidents', icon: 'warning' },
       { id: 'reports-service-levels', label: 'Service Levels', icon: 'shield-check' },
@@ -149,7 +151,6 @@ export const SIDEBAR_MENU_ITEMS: MenuItem[] = [
     submenu: [
       { id: 'audit-all', label: 'Overview', icon: 'list' },
       { id: 'audit-changes', label: 'Rule History', icon: 'arrow-curve-right' },
-      { id: 'audit-data-definition', label: 'Data-Definition History', icon: 'document' },
       { id: 'audit-validation', label: 'Validation History', icon: 'play' },
       { id: 'audit-approvals', label: 'Approval History', icon: 'check-circle' },
       { id: 'audit-rule-compiler-versions', label: 'Rule & Compiler Versions', icon: 'info-circle' },

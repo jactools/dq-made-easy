@@ -79,6 +79,7 @@ vi.mock('./components/Sidebar', () => ({
       <button type="button" onClick={() => onItemClick('rules-all')}>Open all rules</button>
       <button type="button" onClick={() => onItemClick('approvals-exceptions')}>Open exception records</button>
       <button type="button" onClick={() => onItemClick('reports-incidents')}>Open incidents</button>
+      <button type="button" onClick={() => onItemClick('reports-agent-access')}>Open agent access</button>
       <button type="button" onClick={() => onItemClick('reports-service-levels')}>Open service levels</button>
       <button type="button" onClick={() => onItemClick('discussions')}>Open discussions</button>
       <button type="button" onClick={() => onItemClick('administration-ui-registry')}>Open UI registry</button>
@@ -375,6 +376,37 @@ describe('App workspace selection bootstrap', () => {
     })
 
     expect(screen.getByTestId('reports-page').getAttribute('data-initial-tab')).toBe('incidents')
+  })
+
+  it('opens agent access from the Operations sidebar entry', async () => {
+    mockUseSettings.mockReturnValue({
+      displaySettings: { theme: 'auto' },
+      applicationSettings: { apiBaseUrl: 'http://localhost:8000/v1', sessionTimeoutMinutes: 0 },
+    })
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      currentWorkspaceId: 'retail-banking',
+      user: {
+        name: 'Operations Admin',
+        workspaceRoles: [
+          { workspaceId: 'retail-banking', role: 'admin' },
+        ],
+      },
+      getCurrentUserRole: () => 'admin',
+      hasAnyScope: () => true,
+      hasScope: () => true,
+      canManageUsers: () => false,
+    })
+
+    render(<App />)
+
+    fireEvent.click(screen.getByText('Open agent access'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('reports-page')).toBeTruthy()
+    })
+
+    expect(screen.getByTestId('reports-page').getAttribute('data-initial-tab')).toBe('agent-access')
   })
 
   it('opens service levels from the Operations sidebar entry', async () => {
