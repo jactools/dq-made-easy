@@ -263,6 +263,8 @@ run_full_validation() {
       require_nonempty EDGE_SSL_CERTS_DIR
       validate_filename EDGE_SSL_CERT_FILE_NAME
       validate_filename EDGE_SSL_KEY_FILE_NAME
+      validate_filename ZAMMAD_SSL_CERT_FILE_NAME
+      validate_filename ZAMMAD_SSL_KEY_FILE_NAME
       ;;
   esac
 }
