@@ -8,8 +8,8 @@ raise 'KEYCLOAK_SERVER_SIDE_URL is required' if server_side_url.empty?
 require 'openid_connect'
 require 'omni_auth/strategies/oidc_database'
 
-# Zammad should discover Keycloak over HTTPS, but it must exchange tokens and
-# fetch JWKS/userinfo through the canonical server-side URL that is reachable from the container.
+# Zammad should discover Keycloak over HTTPS through the host-published issuer
+# that is reachable from the container.
 OpenIDConnect.validate_discovery_issuer = false
 
 # The bundled Zammad login shell starts the OpenID Connect flow with a POST,
@@ -56,6 +56,8 @@ module ZammadOpenIdConnectServerSideUrl
 
     response = super(server_side_identifier.to_s, cache_options)
     response.issuer = identifier if response.respond_to?(:issuer=)
+    public_auth_endpoint = "#{identifier.to_s.chomp('/')}/protocol/openid-connect/auth"
+    public_logout_endpoint = "#{identifier.to_s.chomp('/')}/protocol/openid-connect/logout"
 
     SERVER_SIDE_FIELDS.each do |field|
       next unless response.respond_to?(field) && response.respond_to?("#{field}=")
@@ -70,8 +72,34 @@ module ZammadOpenIdConnectServerSideUrl
       response.public_send("#{field}=", rewritten.to_s)
     end
 
+    if response.respond_to?(:authorization_endpoint=)
+      response.authorization_endpoint = public_auth_endpoint
+    end
+
+    if response.respond_to?(:end_session_endpoint=)
+      response.end_session_endpoint = public_logout_endpoint
+    end
+
     response
   end
 end
 
 OpenIDConnect::Discovery::Provider::Config.singleton_class.prepend(ZammadOpenIdConnectServerSideUrl)
+
+module ZammadOpenIdConnectServerSideResourceUrl
+  def initialize(uri)
+    @scheme = uri.scheme
+    super
+  end
+
+  def endpoint
+    URI::Generic.build(
+      scheme: @scheme,
+      host: instance_variable_get(:@host),
+      port: instance_variable_get(:@port),
+      path: instance_variable_get(:@path),
+    ).to_s
+  end
+end
+
+OpenIDConnect::Discovery::Provider::Config::Resource.prepend(ZammadOpenIdConnectServerSideResourceUrl)

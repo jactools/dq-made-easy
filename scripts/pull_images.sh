@@ -12,14 +12,47 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-source "$ROOT_DIR/scripts/supporting/logging.sh"
-source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
+source "$SCRIPT_DIR/supporting/logging.sh"
+#source "$ROOT_DIR/scripts/supporting/auth.sh"
+#source "$ROOT_DIR/scripts/supporting/openmetadata.sh"
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
 source "$ROOT_DIR/scripts/stack_catalog.sh"
-init_root_env_file "$ROOT_DIR"
-
+set_log_level INFO
 my_name="pull_images.sh"
 
-PULL_SCOPE="core"
+# init_root_env_file "$ROOT_DIR"
+
+PYTHON_RUNNER="$ROOT_DIR/scripts/python_arm64.sh"
+PYTHON_BIN="$ROOT_DIR/venv/bin/python"
+if [ ! -x "$PYTHON_BIN" ]; then
+  PYTHON_BIN="python3"
+fi
+init_root_env_file "$ROOT_DIR"
+
+if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
+  exit 1
+fi
+
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
+
+if [ ! -f "$ROOT_ENV_FILE" ]; then
+  error "$my_name" "Env file not found: $ROOT_ENV_FILE"
+  exit 1
+fi
+
+validate_selected_root_env_file "$ROOT_DIR" full
+
+export ROOT_ENV_FILE
+
+info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
+
+# source repository-level .env
+source "$ROOT_ENV_FILE"
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+cd "$ROOT_DIR"
+
+PULL_SCOPE="repo"
 VERSION=""
 SELECTED_IMAGES=()
 FAILED_IMAGES=()
@@ -35,7 +68,7 @@ Canonical env options:
   --env-file PATH          Use an explicit env file
 
 Options:
-  --scope <core|repo>      Pull the default core or full repo-managed image scope (default: core)
+  --scope <core|repo>      Pull the default core or full repo-managed image scope (default: repo)
   --image <name>           Pull only the named repo-managed image (repeatable)
   --version <tag>          Override tags for this pull operation
   -h, --help               Show this help message
@@ -59,7 +92,7 @@ append_unique_image() {
   local candidate="$1"
   local existing
 
-  for existing in "${SELECTED_IMAGES[@]}"; do
+  for existing in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
     if [ "$existing" = "$candidate" ]; then
       return 0
     fi
@@ -256,7 +289,7 @@ if ! source_selected_root_env_file; then
   exit 1
 fi
 
-source "$SCRIPT_DIR/supporting/setup_env.sh"
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 set_aux_image_defaults
 resolve_selected_images
 set_override_tags
@@ -269,13 +302,13 @@ info "$my_name" "Scope: $PULL_SCOPE"
 if [ -n "$VERSION" ]; then
   info "$my_name" "Version override: $VERSION"
 fi
-info "$my_name" "Images: ${SELECTED_IMAGES[*]}"
+info "$my_name" "Images: ${SELECTED_IMAGES[*]+"${SELECTED_IMAGES[*]}"}"
 info "$my_name" "========================================"
 
 success_count=0
 fail_count=0
 
-for image in "${SELECTED_IMAGES[@]}"; do
+for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
   full_image="$(resolve_full_image_name "$image")"
   info "$my_name" "Pulling: $full_image"
 
@@ -297,7 +330,7 @@ info "$my_name" "Successful: $success_count"
 info "$my_name" "Failed: $fail_count"
 
 if [ "$fail_count" -gt 0 ]; then
-  error "$my_name" "Failed images: ${FAILED_IMAGES[*]}"
+  error "$my_name" "Failed images: ${FAILED_IMAGES[*]+"${FAILED_IMAGES[*]}"}"
   exit 1
 fi
 

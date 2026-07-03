@@ -28,6 +28,7 @@ x-zammad-service: &zammad-service
     ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
     ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
     KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL?KEYCLOAK_SERVER_SIDE_URL is required}
+    SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
     SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
     CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
     TZ: ${TZ}
@@ -300,7 +301,7 @@ services:
       - "monitoring=true"
 
   zammad-https:
-    profiles: ["zammad-direct-https"]
+    profiles: ["support"]
     image: nginx:stable-bookworm
     restart: unless-stopped
     depends_on:
@@ -308,8 +309,8 @@ services:
         condition: service_started
     environment:
       ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
-      EDGE_SSL_CERT_FILE_NAME: ${EDGE_SSL_CERT_FILE_NAME}
-      EDGE_SSL_KEY_FILE_NAME: ${EDGE_SSL_KEY_FILE_NAME}
+      ZAMMAD_SSL_CERT_FILE_NAME: ${ZAMMAD_SSL_CERT_FILE_NAME}
+      ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME}
     volumes:
       - ${EDGE_SSL_CERTS_DIR}:/etc/nginx/certs:ro
       - ./docker/zammad/nginx-https.conf.template:/etc/nginx/templates/default.conf.template:ro
