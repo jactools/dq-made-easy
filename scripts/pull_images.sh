@@ -52,7 +52,7 @@ source "$ROOT_ENV_FILE"
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 cd "$ROOT_DIR"
 
-PULL_SCOPE="core"
+PULL_SCOPE="repo"
 VERSION=""
 SELECTED_IMAGES=()
 FAILED_IMAGES=()
@@ -68,7 +68,7 @@ Canonical env options:
   --env-file PATH          Use an explicit env file
 
 Options:
-  --scope <core|repo>      Pull the default core or full repo-managed image scope (default: core)
+  --scope <core|repo>      Pull the default core or full repo-managed image scope (default: repo)
   --image <name>           Pull only the named repo-managed image (repeatable)
   --version <tag>          Override tags for this pull operation
   -h, --help               Show this help message

@@ -366,8 +366,8 @@ To pull and run pre-built Docker images on a different machine:
 ### Quick Deploy
 
 ```bash
-# 1. Pull all images
-./scripts/pull_images.sh          # pulls latest
+# 1. Pull all repo-managed images using the tags from .env.prod.local
+./scripts/pull_images.sh          # pulls repo-managed images from the selected env file
 ./scripts/pull_images.sh 0.3.2    # pulls specific version
 
 # 2. Start services
