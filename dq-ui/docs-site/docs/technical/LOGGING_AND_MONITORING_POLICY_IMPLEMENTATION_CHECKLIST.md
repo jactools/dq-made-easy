@@ -421,7 +421,7 @@ None for policy **documentation** and **logging/monitoring deployment**.
 - [.github/workflows/governance-gates.yml](https://github.com/jactools/dq-rulebuilder/blob/main/.github/workflows/governance-gates.yml) — Automated enforcement
 - [.github/workflows/quarterly-governance-reminder.yml](https://github.com/jactools/dq-rulebuilder/blob/main/.github/workflows/quarterly-governance-reminder.yml) — Compliance tracking
 - [docs/runbooks/](https://github.com/jactools/dq-rulebuilder/blob/main/docs/runbooks) — Incident response procedures
-- [observability/grafana/dashboards/](https://github.com/jactools/dq-rulebuilder/blob/main/observability/grafana/dashboards) — Grafana dashboards
+- [observability/grafana/dashboards/](https://github.com/jactools/dq-rulebuilder/blob/main/observability/grafana/dashboards/) — Grafana dashboards
 - [observability/prometheus/alerts.yml](https://github.com/jactools/dq-rulebuilder/blob/main/observability/prometheus/alerts.yml) — Alert definitions
 
 ### Sign-Off

@@ -108,7 +108,7 @@ This matrix defines clear ownership, responsibilities, and escalation paths for 
 | Infrastructure management | Operate Prometheus, Loki, Tempo, Grafana, databases | ops-team-observability | Team lead |
 | Alert rule ownership | Create/update/maintain alert rules in [observability/prometheus/alerts.yml](https://github.com/jactools/dq-rulebuilder/blob/main/observability/prometheus/alerts.yml) | ops-team-observability | Tech lead → CISO |
 | Runbook creation | Author and maintain incident runbooks in [docs/runbooks/](https://github.com/jactools/dq-rulebuilder/blob/main/docs/runbooks) | ops-team-observability | Tech lead |
-| Dashboard provisioning | Create/update Grafana dashboards under [observability/grafana/dashboards/](https://github.com/jactools/dq-rulebuilder/blob/main/observability/grafana/dashboards) | ops-team-observability | Tech lead |
+| Dashboard provisioning | Create/update Grafana dashboards under [observability/grafana/dashboards/](https://github.com/jactools/dq-rulebuilder/blob/main/observability/grafana/dashboards/) | ops-team-observability | Tech lead |
 | Retention policy enforcement | Configure and monitor log/metric/trace retention by environment | ops-team-observability | Tech lead |
 | Access control management | Maintain GitHub CODEOWNERS, Grafana roles, Prometheus ACLs | ops-team-observability | Team lead → security-team |
 | Quarterly access reviews | Audit and document active observability user roles | ops-team-observability | Team lead → security-team |
