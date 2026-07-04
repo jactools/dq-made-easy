@@ -48,7 +48,9 @@ OmniAuth::Strategies::OidcDatabase.singleton_class.prepend(ZammadOpenIdConnectCa
 module ZammadOpenIdConnectUserInfoFallback
   def user_info
     super
-  rescue OpenIDConnect::Unauthorized
+  rescue OpenIDConnect::Unauthorized, OpenIDConnect::HttpError, Rack::OAuth2::Client::Error, StandardError
+    raise unless access_token&.id_token
+
     decoded = decode_id_token(access_token.id_token).raw_attributes
     ::OpenIDConnect::ResponseObject::UserInfo.new(decoded)
   end
