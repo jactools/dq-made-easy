@@ -58,7 +58,7 @@ run_fastapi_seeded_list_verification_tests() {
     env REQUIRE_DATABASE=false DQ_DB_LOCAL_URL="$database_url" DQ_DB_HOST="${DQ_DB_HOST:-dq-db.jac.dot}" \
       "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pytest \
       tests/api/test_list_endpoints_non_empty.py \
-      --cov-fail-under=0 -q
+      --cov-fail-under=0 -q -o addopts='' --disable-warnings
   ) || {
     error "$my_name" "FastAPI seeded-list unit verification failed."
     return 1
@@ -70,7 +70,7 @@ run_fastapi_seeded_list_verification_tests() {
     env DQ_DB_LOCAL_URL="$database_url" DQ_DB_HOST="${DQ_DB_HOST:-dq-db.jac.dot}" \
       "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pytest -m integration \
       tests/infrastructure/integration/test_endpoint_list_non_empty.py \
-      --cov-fail-under=0 -q
+      --cov-fail-under=0 -q -o addopts='' --disable-warnings
   ) || {
     error "$my_name" "FastAPI seeded-list integration verification failed."
     return 1

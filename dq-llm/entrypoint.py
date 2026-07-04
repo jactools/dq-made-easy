@@ -46,6 +46,10 @@ PROMPT_DIR = Path(__file__).resolve().parent
 EXTRACT_RULES_PROMPT_PATH = PROMPT_DIR / "extract_rules_prompt.jinja2"
 
 MODEL_ID = os.getenv("DQ_LLM_MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
+
+# Smaller model options for faster startup
+SMALL_MODEL_ID = os.getenv("DQ_LLM_SMALL_MODEL_ID", "Qwen/Qwen2.5-0.5B-Instruct")
+
 DEVICE_MAP = os.getenv("DQ_LLM_DEVICE_MAP", "auto")
 MAX_NEW_TOKENS = int(os.getenv("DQ_LLM_MAX_NEW_TOKENS", "512"))
 CHAT_PROVIDER = os.getenv("DQ_LLM_CHAT_PROVIDER", "huggingface").strip().lower() or "huggingface"
@@ -1190,8 +1194,11 @@ def get_chat_client() -> Any:
         )
     if provider != "huggingface":
         raise LLMServiceUnavailableError(f"Unsupported DQ_LLM_CHAT_PROVIDER '{provider}'.")
+    # Use smaller model if requested
+    effective_model_id = os.getenv("DQ_LLM_SMALL_MODEL_ID", SMALL_MODEL_ID)
+    model_id = effective_model_id if effective_model_id else os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
     return HuggingFaceChatClient(
-        model_id=os.getenv("DQ_LLM_MODEL_ID", MODEL_ID),
+        model_id=model_id,
         device_map=os.getenv("DQ_LLM_DEVICE_MAP", DEVICE_MAP),
         max_new_tokens=int(os.getenv("DQ_LLM_MAX_NEW_TOKENS", str(MAX_NEW_TOKENS))),
         load_in_4bit=os.getenv("DQ_LLM_LOAD_IN_4BIT", str(LOAD_IN_4BIT)).strip().lower() in ("1", "true"),
@@ -1996,11 +2003,14 @@ async def generate_data_definitions(request: DataDefinitionRequest):
 @app.get("/health")
 async def health():
     provider_name = os.getenv("DQ_LLM_CHAT_PROVIDER", CHAT_PROVIDER).strip().lower() or "huggingface"
-    model_name = (
-        os.getenv("DQ_LLM_OLLAMA_MODEL", OLLAMA_MODEL).strip()
-        if provider_name == "ollama"
-        else os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
-    )
+    # Use smaller model if requested
+    effective_model_id = os.getenv("DQ_LLM_SMALL_MODEL_ID", SMALL_MODEL_ID)
+    if provider_name == "ollama":
+        model_name = os.getenv("DQ_LLM_OLLAMA_MODEL", OLLAMA_MODEL).strip()
+    elif effective_model_id:
+        model_name = effective_model_id
+    else:
+        model_name = os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
     return {
         "status": "ok",
         "provider": provider_name,

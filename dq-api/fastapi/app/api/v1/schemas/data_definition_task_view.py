@@ -76,6 +76,9 @@ class DataDefinitionTaskStatusView(SnakeModel):
     completedAt: str | None = None
     status: Literal["pending", "started", "completed", "failed"]
     errorMessage: str | None = None
+    monitoringState: Literal["running", "stale", "terminal", "unavailable"] = Field(
+        description="API-derived monitoring signal for whether the worker heartbeat is active, stale, terminal, or unavailable."
+    )
     analysisType: str
     analysisProvider: str
     autoImport: bool = False

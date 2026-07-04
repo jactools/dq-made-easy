@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from 'react'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Rule } from '../types/rules'
@@ -145,6 +145,7 @@ describe('Reports', () => {
               error_message: 'LLM timed out',
               analysis_type: 'definition_task',
               analysis_provider: 'llm',
+              monitoring_state: 'stale',
             },
           ],
           count: 2,
@@ -167,6 +168,7 @@ describe('Reports', () => {
             error_message: null,
             analysis_type: 'definition_task',
             analysis_provider: 'llm',
+            monitoring_state: 'terminal',
           },
         })
       }
@@ -183,8 +185,45 @@ describe('Reports', () => {
     expect(screen.getByText('Completed / Failed')).toBeTruthy()
     expect(screen.getByText('Generate definitions for customer profile fields')).toBeTruthy()
     expect(screen.getByText('Draft payment terms definitions')).toBeTruthy()
-    expect(screen.getAllByText('Completed')).toHaveLength(2)
-    expect(screen.queryByText('LLM timed out')).toBeNull()
+    expect(screen.getAllByText('Stale')).toHaveLength(2)
+
+    const staleRow = screen.getByText('Draft payment terms definitions').closest('.table-row') as HTMLElement
+    expect(within(staleRow).getByText('Started')).toBeTruthy()
+    expect(within(staleRow).getByText('Stale')).toBeTruthy()
+
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+
+      if (url.includes('/data-definition-tasks/requests/dd-2/status')) {
+        return buildJsonResponse({
+          success: true,
+          request: {
+            request_id: 'dd-2',
+            current_workspace_id: 'retail-banking',
+            prompt: 'Draft payment terms definitions',
+            requested_by_user_id: 'user-2',
+            requested_by_email: 'user2@example.com',
+            requested_at: '2026-07-03T09:00:00Z',
+            started_at: '2026-07-03T09:01:00Z',
+            completed_at: '2026-07-03T09:04:00Z',
+            status: 'completed',
+            error_message: null,
+            analysis_type: 'definition_task',
+            analysis_provider: 'llm',
+            monitoring_state: 'terminal',
+          },
+        })
+      }
+
+      throw new Error(`Unexpected fetch URL: ${url}`)
+    }))
+
+    screen.getByRole('button', { name: 'Check status for Draft payment terms definitions' }).click()
+
+    await waitFor(() => {
+      expect(within(staleRow).getByText('Completed')).toBeTruthy()
+    })
+    expect(within(staleRow).queryByText('Stale')).toBeNull()
   })
 
   it('shows agent access insights in the Operations tab', async () => {

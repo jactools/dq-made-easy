@@ -818,17 +818,26 @@ services:
     ports:
       - "${DQ_LLM_HOST_BIND:-127.0.0.1}:${DQ_LLM_HOST_PORT:-8123}:8000"
     volumes:
-      - dq-made-easy-llm-hf-cache:/cache/huggingface
+      - dq-made-easy-llm-hf-cache:/cache/huggingface:delegated
+      - dq-made-easy-llm-model-cache:/hf_cache_temp:tmpfs
     networks:
       - default
       - dq-network
+    deploy:
+      resources:
+        limits:
+          memory: ${DQ_LLM_MEMORY_LIMIT:-8G}
+          cpus: "${DQ_LLM_CPUS:-4}"
+        reservations:
+          memory: ${DQ_LLM_MEMORY_RES:-4G}
+          cpus: "${DQ_LLM_CPU_RES:-2}"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\" || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 30s
+      retries: 10
+      start_period: 120s
 
   profiling-worker:
     profiles: ["workers", "profiling", "observability"]
@@ -1800,6 +1809,7 @@ volumes:
     driver: local
   aistor_data:
     driver: local
+  dq-made-easy-llm-model-cache:
   pgdata_v18:
   keycloak_data:
   keycloak_seed_artifacts:

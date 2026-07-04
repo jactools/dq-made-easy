@@ -1,8 +1,6 @@
 from collections.abc import AsyncIterator, Mapping
 import json
-import os
 from typing import Any
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi import Request
@@ -94,6 +92,7 @@ from app.application.services.data_definition_task_service import require_approv
 from app.application.services.natural_language_draft_enqueue_service import enqueue_natural_language_draft_job
 from app.application.services.natural_language_draft_enqueue_service import build_request_status_event_payload
 from app.application.services.natural_language_draft_enqueue_service import load_request_record_from_settings
+from app.application.services.natural_language_draft_enqueue_service import load_request_worker_heartbeat_from_settings
 from app.application.services.natural_language_draft_enqueue_service import NaturalLanguageDraftEnqueueServiceError
 from app.application.services.natural_language_draft_enqueue_service import open_request_event_stream_client
 from app.application.services.natural_language_draft_enqueue_service import read_request_status_events
@@ -155,6 +154,7 @@ def _build_definition_task_status_view(record: Mapping[str, Any]) -> DataDefinit
             "completedAt": record.get("completed_at"),
             "status": str(record.get("status") or "pending"),
             "errorMessage": record.get("error_message"),
+            "monitoringState": str(record.get("monitoring_state") or record.get("monitoringState") or "unavailable"),
             "analysisType": str(record.get("analysis_type") or ANALYSIS_TYPE_DEFINITION_TASK),
             "analysisProvider": str(record.get("analysis_provider") or "llm"),
             "autoImport": bool(record.get("auto_import")),
@@ -164,55 +164,20 @@ def _build_definition_task_status_view(record: Mapping[str, Any]) -> DataDefinit
     )
 
 
-def _resolve_definition_task_timeout_seconds() -> int:
-    raw_value = str(os.getenv("DQ_DATA_DEFINITION_EVENT_TIMEOUT_SECONDS") or "").strip()
-    if not raw_value:
-        return 900
+def _definition_task_monitoring_state(record: Mapping[str, Any], settings: Any) -> str:
+    status = str(record.get("status") or "pending").strip().lower()
+    if status in {"completed", "failed"}:
+        return "terminal"
+
+    if status != "started":
+        return "unavailable"
 
     try:
-        timeout_seconds = int(float(raw_value))
-    except ValueError:
-        return 900
+        heartbeat = load_request_worker_heartbeat_from_settings(settings, str(record.get("request_id") or ""))
+    except Exception:
+        return "unavailable"
 
-    return max(1, timeout_seconds)
-
-
-def _parse_definition_task_timestamp(value: Any) -> datetime | None:
-    if value is None:
-        return None
-
-    text = str(value).strip()
-    if not text:
-        return None
-
-    normalized = text.replace("Z", "+00:00")
-    try:
-        parsed = datetime.fromisoformat(normalized)
-    except ValueError:
-        return None
-
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=UTC)
-    return parsed.astimezone(UTC)
-
-
-def _reconcile_stale_definition_task_status(record: dict[str, Any]) -> dict[str, Any]:
-    if str(record.get("status") or "").strip().lower() != "started":
-        return record
-
-    started_at = _parse_definition_task_timestamp(record.get("started_at"))
-    if started_at is None:
-        return record
-
-    timeout_seconds = _resolve_definition_task_timeout_seconds()
-    elapsed_seconds = (datetime.now(UTC) - started_at).total_seconds()
-    if elapsed_seconds < timeout_seconds:
-        return record
-
-    record["status"] = "failed"
-    record["completed_at"] = record.get("completed_at") or datetime.now(UTC).isoformat()
-    record["error_message"] = f"Data-definition task timed out after {timeout_seconds} seconds without completing"
-    return record
+    return "running" if heartbeat else "stale"
 
 
 def _build_definition_task_audit_event_view(record: Mapping[str, Any]) -> DataDefinitionTaskAuditEventView:
@@ -1022,17 +987,10 @@ async def get_data_definition_task_status(request_id: str) -> JSONResponse:
             content={"error": "data_definition_task_not_found", "message": "Data-definition task was not found", "status": 404},
         )
 
-    reconciled_record = _reconcile_stale_definition_task_status(dict(record))
-    if reconciled_record != record:
-        try:
-            save_request_record_to_settings(get_settings(), reconciled_record)
-        except Exception:
-            pass
-
     return JSONResponse(
         status_code=200,
         content=DataDefinitionTaskStatusResponseView(
-            request=_build_definition_task_status_view(reconciled_record),
+            request=_build_definition_task_status_view({**dict(record), "monitoringState": _definition_task_monitoring_state(record, get_settings())}),
         ).model_dump(by_alias=True, mode="json"),
     )
 
@@ -1125,6 +1083,13 @@ async def list_data_definition_tasks(
                     "analysis_type": request_entity.analysis_type,
                     "analysis_provider": request_entity.analysis_provider,
                     "result": request_entity.result,
+                    "monitoringState": _definition_task_monitoring_state(
+                        {
+                            "request_id": request_entity.request_id,
+                            "status": request_entity.status,
+                        },
+                        get_settings(),
+                    ),
                 }
             )
             for request_entity in filtered

@@ -150,6 +150,7 @@ interface DataDefinitionRequestRow {
   errorMessage: string | null
   analysisType: string
   analysisProvider: string
+  monitoringState?: 'running' | 'stale' | 'terminal' | 'unavailable'
 }
 
 interface DataDefinitionTaskStatusResponsePayload {
@@ -332,6 +333,36 @@ const getDataDefinitionStatusTone = (value: string): string => {
     case 'failed':
       return 'status-failed'
     case 'pending':
+    default:
+      return 'status-pending'
+  }
+}
+
+const DATA_DEFINITION_TABLE_COLUMNS = '2.1fr 0.9fr 1.05fr 1.05fr 1.05fr 1.05fr 0.95fr 1.6fr 0.8fr'
+
+const getDataDefinitionMonitoringStateLabel = (value?: string | null): string => {
+  switch (value) {
+    case 'running':
+      return 'Running'
+    case 'stale':
+      return 'Stale'
+    case 'terminal':
+      return 'Terminal'
+    case 'unavailable':
+    default:
+      return 'Unavailable'
+  }
+}
+
+const getDataDefinitionMonitoringStateTone = (value?: string | null): string => {
+  switch (value) {
+    case 'running':
+      return 'status-completed'
+    case 'stale':
+      return 'status-failed'
+    case 'terminal':
+      return 'status-pending'
+    case 'unavailable':
     default:
       return 'status-pending'
   }
@@ -661,6 +692,7 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
   const [dataDefinitionRequests, setDataDefinitionRequests] = useState<DataDefinitionRequestRow[]>([])
   const [dataDefinitionRequestsLoading, setDataDefinitionRequestsLoading] = useState(false)
   const [dataDefinitionRequestsError, setDataDefinitionRequestsError] = useState<string | null>(null)
+  const [dataDefinitionRequestCheckingId, setDataDefinitionRequestCheckingId] = useState<string | null>(null)
 
   // Update activeTab when initialTab prop changes
   useEffect(() => {
@@ -765,31 +797,40 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
         'Unable to load data-definition insights.',
       )
 
-      const initialRequests = Array.isArray(payload.requests) ? payload.requests : []
-      const nextRequests = await Promise.all(
-        initialRequests.map(async (request) => {
-          if (request.status !== 'started') {
-            return request
-          }
-
-          try {
-            const statusPayload = await fetchJson<DataDefinitionTaskStatusResponsePayload>(
-              `${apiBase}/data-definition-tasks/requests/${encodeURIComponent(request.requestId)}/status`,
-              `Unable to refresh data-definition request ${request.requestId}.`,
-            )
-            return statusPayload.request || request
-          } catch {
-            return request
-          }
-        }),
-      )
-
-      setDataDefinitionRequests(nextRequests)
+      setDataDefinitionRequests(Array.isArray(payload.requests) ? payload.requests : [])
     } catch (loadError) {
       setDataDefinitionRequests([])
       setDataDefinitionRequestsError(loadError instanceof Error ? loadError.message : 'Unable to load data-definition insights.')
     } finally {
       setDataDefinitionRequestsLoading(false)
+    }
+  }, [currentWorkspaceId, settings.applicationSettings?.apiBaseUrl])
+
+  const refreshDataDefinitionRequestStatus = useCallback(async (requestId: string) => {
+    if (!currentWorkspaceId) {
+      return
+    }
+
+    setDataDefinitionRequestCheckingId(requestId)
+
+    try {
+      const apiBase = toApiGroupV1Base('data-catalog', settings.applicationSettings?.apiBaseUrl)
+      const statusPayload = await fetchJson<DataDefinitionTaskStatusResponsePayload>(
+        `${apiBase}/data-definition-tasks/requests/${encodeURIComponent(requestId)}/status`,
+        `Unable to refresh data-definition request ${requestId}.`,
+      )
+
+      if (statusPayload.request) {
+        setDataDefinitionRequests((currentRequests) => (
+          currentRequests.map((request) => (
+            request.requestId === requestId ? statusPayload.request : request
+          ))
+        ))
+      }
+    } catch (loadError) {
+      setDataDefinitionRequestsError(loadError instanceof Error ? loadError.message : `Unable to refresh data-definition request ${requestId}.`)
+    } finally {
+      setDataDefinitionRequestCheckingId((currentRequestId) => (currentRequestId === requestId ? null : currentRequestId))
     }
   }, [currentWorkspaceId, settings.applicationSettings?.apiBaseUrl])
 
@@ -862,7 +903,8 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
   const dataDefinitionCounts = useMemo(() => ({
     total: dataDefinitionRequestsSorted.length,
     pending: dataDefinitionRequestsSorted.filter((request) => request.status === 'pending').length,
-    started: dataDefinitionRequestsSorted.filter((request) => request.status === 'started').length,
+    running: dataDefinitionRequestsSorted.filter((request) => request.monitoringState === 'running').length,
+    stale: dataDefinitionRequestsSorted.filter((request) => request.monitoringState === 'stale').length,
     completed: dataDefinitionRequestsSorted.filter((request) => request.status === 'completed').length,
     failed: dataDefinitionRequestsSorted.filter((request) => request.status === 'failed').length,
   }), [dataDefinitionRequestsSorted])
@@ -1303,9 +1345,14 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
                 <p>Waiting to start</p>
               </div>
               <div className="latest-test-summary-metric">
-                <span>Started</span>
-                <strong>{dataDefinitionCounts.started}</strong>
-                <p>Currently running</p>
+                <span>Running</span>
+                <strong>{dataDefinitionCounts.running}</strong>
+                <p>Worker heartbeat active</p>
+              </div>
+              <div className="latest-test-summary-metric">
+                <span>Stale</span>
+                <strong>{dataDefinitionCounts.stale}</strong>
+                <p>Started but heartbeat missing</p>
               </div>
               <div className="latest-test-summary-metric">
                 <span>Completed / Failed</span>
@@ -1331,15 +1378,17 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
             <div className="results-table">
               <div
                 className="table-header"
-                style={{ gridTemplateColumns: '2.3fr 0.9fr 1.2fr 1.2fr 1.2fr 1.2fr 1.6fr' }}
+                style={{ gridTemplateColumns: DATA_DEFINITION_TABLE_COLUMNS }}
               >
                 <div className="column rule-group">Request</div>
                 <div className="column status">Status</div>
+                <div className="column status">Monitor</div>
                 <div className="column test-date">Requested</div>
                 <div className="column test-date">Started</div>
                 <div className="column test-date">Ended</div>
                 <div className="column test-date">Status changed</div>
                 <div className="column target">Error message</div>
+                <div className="column status">Action</div>
               </div>
 
               {dataDefinitionRequestsSorted.map((request) => {
@@ -1349,7 +1398,7 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
                   <div
                     key={request.requestId}
                     className="table-row data-definition-table-row"
-                    style={{ gridTemplateColumns: '2.3fr 0.9fr 1.2fr 1.2fr 1.2fr 1.2fr 1.6fr' }}
+                    style={{ gridTemplateColumns: DATA_DEFINITION_TABLE_COLUMNS }}
                   >
                     <div className="column rule-group">
                       <div className="rule-group-text no-toggle">
@@ -1360,6 +1409,11 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
                     <div className="column status">
                       <span className={`status-badge ${getDataDefinitionStatusTone(request.status)}`}>
                         {formatDataDefinitionStatusLabel(request.status)}
+                      </span>
+                    </div>
+                    <div className="column status">
+                      <span className={`status-badge ${getDataDefinitionMonitoringStateTone(request.monitoringState)}`}>
+                        {getDataDefinitionMonitoringStateLabel(request.monitoringState)}
                       </span>
                     </div>
                     <div className="column test-date">{formatDataDefinitionDate(request.requestedAt)}</div>
@@ -1373,6 +1427,20 @@ export const Reports: React.FC<ReportsProps> = ({ initialTab = 'metrics', onNavi
                       >
                         {request.errorMessage || 'No error message'}
                       </span>
+                    </div>
+                    <div className="column status data-definition-row-action-column">
+                      <Button
+                        variant="tertiary"
+                        className="data-definition-row-action-button"
+                        disabled={dataDefinitionRequestCheckingId === request.requestId}
+                        title="Check the request status on the executor"
+                        aria-label={`Check status for ${request.prompt}`}
+                        onClick={() => {
+                          void refreshDataDefinitionRequestStatus(request.requestId)
+                        }}
+                      >
+                        {dataDefinitionRequestCheckingId === request.requestId ? 'Checking…' : 'Check'}
+                      </Button>
                     </div>
                   </div>
                 )

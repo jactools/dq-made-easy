@@ -3,6 +3,8 @@ import json
 import os
 from typing import Iterable
 from typing import Callable
+from contextlib import contextmanager
+from urllib.error import URLError
 
 from confection import Config
 from confection import SimpleFrozenDict
@@ -10,6 +12,30 @@ from spacy_llm.models.hf.base import HuggingFace
 from spacy_llm.registry.util import registry
 from spacy_llm.util import assemble_from_config
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+from huggingface_hub import hf_hub_download, HfFolder
+from huggingface_hub.utils import RepositoryNotFoundError, LoginError
+
+
+def _get_huggingface_token():
+    """Get HuggingFace token from environment variable."""
+    return os.getenv("HF_TOKEN", "")
+
+
+@contextmanager
+def hf_hub_download_timeout(url: str, **kwargs) -> Callable:
+    """Context manager to handle HuggingFace Hub download timeouts."""
+    try:
+        yield hf_hub_download(url, **kwargs)
+    except RepositoryNotFoundError:
+        raise ValueError(f"Model {url} not found on HuggingFace Hub")
+    except LoginError as e:
+        raise ValueError(f"HuggingFace authentication required: {e}")
+    except URLError as e:
+        timeout_msg = f"HuggingFace Hub download timed out. Consider increasing DQ_LLM_MODEL_SIZE or using a smaller model."
+        raise ValueError(timeout_msg) from e
+    except Exception as e:
+        timeout_msg = f"HuggingFace Hub download failed: {e}. Consider increasing DQ_LLM_MODEL_SIZE or using a smaller model."
+        raise ValueError(timeout_msg) from e
 
 
 MODEL_ID = os.getenv("DQ_LLM_MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
@@ -37,19 +63,39 @@ class GenericChatHuggingFace(HuggingFace):
         return ""
 
     def init_model(self):
-        self._tokenizer = AutoTokenizer.from_pretrained(self._name)
-        init_cfg = self._config_init
-        device = None
-        if "device" in init_cfg:
-            device = init_cfg.pop("device")
+        # Get model ID from config if not set directly
+        model_id = self._name if hasattr(self, '_name') else os.getenv("DQ_LLM_MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
+        
+        # Use HF_TOKEN env var for authentication
+        hf_token = _get_huggingface_token()
+        
+        # Create temp file for cached model
+        temp_model_dir = f".hf_cache_temp_{os.getpid()}"
+        os.makedirs(temp_model_dir, exist_ok=True)
+        
+        try:
+            # Download model with timeout handling
+            with hf_hub_download_timeout(model_id, repo_type="model", revision="main") as cache_path:
+                # Initialize tokenizer
+                self._tokenizer = AutoTokenizer.from_pretrained(cache_path)
+                init_cfg = self._config_init
+                device = None
+                if "device" in init_cfg:
+                    device = init_cfg.pop("device")
 
-        model = AutoModelForCausalLM.from_pretrained(
-            self._name, **init_cfg, resume_download=True
-        )
-        if device:
-            model.to(device)
+                # Load model with resume for faster subsequent loads
+                model = AutoModelForCausalLM.from_pretrained(
+                    cache_path, **init_cfg, resume_download=True
+                )
+                if device:
+                    model.to(device)
 
-        return model
+                return model
+        finally:
+            # Cleanup temp directory
+            if os.path.exists(temp_model_dir):
+                import shutil
+                shutil.rmtree(temp_model_dir, ignore_errors=True)
 
     def _tokenize_prompt(self, prompt_text: str):
         encoding = self._tokenizer(
@@ -141,6 +187,9 @@ def generic_chat_hf(
 
 
 def main() -> None:
+    # Add timeout environment variable for HuggingFace downloads
+    MODEL_DOWNLOAD_TIMEOUT = int(os.getenv("DQ_LLM_MODEL_DOWNLOAD_TIMEOUT", "300"))
+    
     config = Config().from_str(
         f"""
 [nlp]

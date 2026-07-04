@@ -31,6 +31,7 @@ except Exception:
 
 NATURAL_LANGUAGE_DRAFT_REQUEST_TTL_SECONDS = 24 * 60 * 60
 NATURAL_LANGUAGE_DRAFT_EVENT_STREAM_MAXLEN = 100
+NATURAL_LANGUAGE_DRAFT_WORKER_HEARTBEAT_TTL_SECONDS = 600
 
 
 class NaturalLanguageDraftEnqueueServiceError(Exception):
@@ -93,6 +94,10 @@ def _request_key(request_id: str) -> str:
 
 def request_event_stream_key(request_id: str) -> str:
     return f"natural-language-draft-request-events:{request_id}"
+
+
+def request_worker_heartbeat_key(request_id: str) -> str:
+    return f"natural-language-draft-request-worker-heartbeat:{request_id}"
 
 
 def _inject_trace_headers(payload: dict[str, Any]) -> None:
@@ -241,6 +246,24 @@ def load_request_record_from_settings(settings: Any, request_id: str) -> dict[st
 
     client = redis_sync.from_url(redis_url, decode_responses=True)
     return load_request_record(client, request_id)
+
+
+def load_request_worker_heartbeat_from_settings(settings: Any, request_id: str) -> dict[str, Any] | None:
+    redis_url = _resolve_redis_url(settings)
+    if not redis_url or redis_sync is None:
+        raise NaturalLanguageDraftQueueNotConfiguredError()
+
+    client = redis_sync.from_url(redis_url, decode_responses=True)
+    raw_value = client.get(request_worker_heartbeat_key(request_id))
+    if not raw_value:
+        return None
+
+    try:
+        parsed = json.loads(raw_value)
+    except Exception:
+        return {"status": "running"}
+
+    return parsed if isinstance(parsed, dict) else {"status": "running"}
 
 
 def save_request_record_to_settings(settings: Any, record: dict[str, Any]) -> None:

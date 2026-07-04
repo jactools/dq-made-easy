@@ -129,6 +129,14 @@ class NaturalLanguageDraftQueueWorker:
             try:
                 mark_request_started(client, request_id=request_id, job_id=job_id)
                 try:
+                    client.set(
+                        request_worker_heartbeat_key(request_id),
+                        json.dumps({"request_id": request_id, "job_id": job_id, "status": "running"}),
+                        ex=NATURAL_LANGUAGE_DRAFT_WORKER_HEARTBEAT_TTL_SECONDS,
+                    )
+                except Exception:
+                    logger.exception("failed to record worker heartbeat", extra={"request_id": request_id, "job_id": job_id})
+                try:
                     suggestions_repository.update_natural_language_request(
                         request_id=request_id,
                         status="started",

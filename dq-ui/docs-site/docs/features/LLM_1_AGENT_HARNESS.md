@@ -617,9 +617,21 @@ Integrate agents into existing UI workflows:
 ```bash
 # LLM Configuration (existing, reused)
 DQ_LLM_MODEL_ID=Qwen/Qwen2.5-7B-Instruct
+DQ_LLM_SMALL_MODEL_ID=Qwen/Qwen2.5-0.5B-Instruct  # Smaller alternative for faster startup
 DQ_LLM_DEVICE_MAP=auto
 DQ_LLM_MAX_NEW_TOKENS=512
 DQ_LLM_CHAT_PROVIDER=huggingface
+DQ_LLM_OLLAMA_BASE_URL=
+DQ_LLM_OLLAMA_MODEL=
+DQ_LLM_OLLAMA_TIMEOUT_SECONDS=180
+DQ_LLM_LOAD_IN_4BIT=false
+DQ_LLM_MODEL_DOWNLOAD_TIMEOUT=300  # Timeout for HuggingFace model downloads (seconds)
+
+# Resource Limits
+DQ_LLM_MEMORY_LIMIT=8G
+DQ_LLM_CPUS=4
+DQ_LLM_MEMORY_RES=4G
+DQ_LLM_CPU_RES=2
 
 # Agent Configuration (new)
 DQ_AGENT_WORKSPACE=/tmp/dq-agent

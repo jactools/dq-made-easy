@@ -499,6 +499,18 @@
   align-items: flex-start;
 }
 
+.data-definition-row-action-column {
+  justify-content: center;
+}
+
+.data-definition-row-action-button {
+  min-height: 28px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .rule-group-toggle,
 .rule-group-label {
   display: flex;
@@ -761,6 +773,11 @@
 .status-badge.status-completed {
   background: rgba(76, 175, 80, 0.15);
   color: rgb(37, 123, 40);
+}
+
+.status-badge.status-stale {
+  background: rgba(244, 67, 54, 0.14);
+  color: rgb(178, 38, 30);
 }
 
 .data-definition-table-row {
