@@ -94,6 +94,13 @@ Tests and verification
 - Unit tests should assert that dependency failures result in explicit error propagation (exceptions or HTTP 5xx), not silent success.
 - Integration/smoke tests should include a dependency-failure scenario to confirm fail-fast behaviour.
 
+DQ UI typography and font sizes
+-------------------------------
+- In `dq-ui`, prefer the existing tokenized typography patterns in `dq-ui/src/App.css`, `dq-ui/src/styles/appPatterns.css`, and `dq-ui/src/themes.css` instead of introducing new one-off font-size values.
+- Use `rem` for new text sizes unless a component already has a documented fixed-size token; avoid mixing arbitrary `px` values into reusable UI code.
+- When a font-size change is part of a broader style-package update, change the source CSS under `dq-ui/src/` and rebuild the published style assets rather than editing generated files in `dq-ui/dist/` or `dq-ui/public/`.
+- If a text size looks like it should become a reusable pattern, prefer adding or reusing a CSS custom property rather than duplicating hardcoded values across components.
+
 Enforcement suggestions
 -----------------------
 - Add a lightweight static check (semgrep rule or grep-based CI check) that flags obvious "swallowing exceptions" patterns and returning default values when calling external services.
