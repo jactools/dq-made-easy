@@ -123,7 +123,7 @@ EOF
       API_CID=$(docker compose ps -q api 2>/dev/null || true)
       if [ -n "$API_CID" ]; then
         echo "Applying Alembic migrations inside api container via docker compose exec"
-        if docker compose exec -T api bash -lc "export DQ_DB_INTERNAL_URL='postgresql://postgres:postgres@db:5432/dq' && alembic -c /app/alembic.ini upgrade head"; then
+        if docker compose exec -T api bash -lc "export DQ_DB_INTERNAL_URL='postgresql://postgres:postgres@db:5432/dq' && alembic -c /app/alembic.ini upgrade heads"; then
           APPLIED=true
         else
           echo "Container-based alembic upgrade failed; will try venv fallback" >&2
@@ -136,10 +136,10 @@ EOF
     fi
 
     if [ "$APPLIED" = false ] && [ -x "$PY_CMD" ]; then
-      echo "Applying Alembic migrations (upgrade head) using $PY_CMD (venv)"
+      echo "Applying Alembic migrations (upgrade heads) using $PY_CMD (venv)"
       (
         cd "$REPO_ROOT/dq-api/fastapi"
-        DQ_DB_LOCAL_URL="postgresql://postgres:postgres@dq-db.local:5432/dq" "$PY_CMD" -m alembic -c "$REPO_ROOT/dq-api/fastapi/alembic.ini" upgrade head
+        DQ_DB_LOCAL_URL="postgresql://postgres:postgres@dq-db.local:5432/dq" "$PY_CMD" -m alembic -c "$REPO_ROOT/dq-api/fastapi/alembic.ini" upgrade heads
       ) && APPLIED=true || echo "Venv-based alembic upgrade failed; will attempt direct SQL apply" >&2
     fi
 

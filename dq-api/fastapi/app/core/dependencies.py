@@ -52,6 +52,7 @@ from app.domain.interfaces import SlaSloRepository
 from app.domain.interfaces import IncidentRepository
 from app.domain.interfaces import OntologyGraphRepository
 from app.domain.interfaces import FederatedMetadataRegistryRepository
+from app.domain.interfaces import DQPlanTemplateRepository
 from app.infrastructure.repositories import (
     InMemoryAdminRepository,
     InMemoryAgentRequestAuditRepository,
@@ -773,3 +774,16 @@ def get_incident_repository() -> IncidentRepository:
         service="incident-repository", display_name="Incident repository"
     )
     return _get_postgres_incident_repository(database_url)
+
+
+@lru_cache
+def _get_postgres_dq_plan_template_repository(database_url: str) -> PostgresDQPlanTemplateRepository:
+    from app.infrastructure.repositories.postgres_dq_plan_template_repository import PostgresDQPlanTemplateRepository
+    return PostgresDQPlanTemplateRepository(database_url)
+
+
+def get_dq_plan_template_repository() -> DQPlanTemplateRepository:
+    database_url = _require_database_url(
+        service="dq-plan-template-repository", display_name="DQ Plan template repository"
+    )
+    return _get_postgres_dq_plan_template_repository(database_url)

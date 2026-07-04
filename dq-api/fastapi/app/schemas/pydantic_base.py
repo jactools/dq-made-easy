@@ -25,6 +25,12 @@ class SnakeModel(BaseModel):
     )
 
 
+class BaseSchema(SnakeModel):
+    """Backward-compatible base schema alias for existing API imports."""
+
+    pass
+
+
 # Export a convenient name for use in other modules when they need the
 # alias generator in local `ConfigDict` merges.
 to_snake_alias = _to_snake

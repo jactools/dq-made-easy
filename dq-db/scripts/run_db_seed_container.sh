@@ -312,7 +312,7 @@ SEED_ROOT="$INIT_DIR" DB_NAME="$PGDATABASE" DB_USER="$PGUSER" bash "$ROOT_DIR/dq
 info "$my_name" "Applying Alembic migrations..."
 (
   cd "$FASTAPI_DIR"
-  python -m alembic -c "$FASTAPI_DIR/alembic.ini" upgrade head
+  python -m alembic -c "$FASTAPI_DIR/alembic.ini" upgrade heads
 )
 
 info "$my_name" "Applying generated seed SQL files..."

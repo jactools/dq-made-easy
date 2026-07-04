@@ -34,17 +34,18 @@ async def persist_report_violations(
     if body.newStatus != "failed":
         return 0
 
-    violation_batch = collect_exception_facts(run_result=body, execution_context=run)
-    if not violation_batch:
+    # Check if violations were streamed via Kafka (not included in API payload)
+    # The engine now streams violations directly to Kafka
+    # This function is only called for summary counts
+    violation_count = getattr(body, "violation_count", 0) or body.details.get("violation_count", 0) if hasattr(body, "details") and body.details else 0
+    
+    if violation_count == 0:
+        # No violations to persist
         return 0
 
-    return await emit_exception_fact_batch(
-        violation_batch=violation_batch,
-        settings_provider=settings_provider,
-        violation_repository=violation_repository,
-        exception_storage_builder=exception_storage_builder,
-        projection_repository=projection_repository,
-    )
+    # Violations were already streamed to Kafka by the engine
+    # We only need to persist the summary metadata here
+    return violation_count
 
 
 async def persist_dq_result_event(

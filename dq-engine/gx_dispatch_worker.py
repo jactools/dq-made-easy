@@ -61,6 +61,10 @@ from gx_dispatch_telemetry import record_worker_failure
 from gx_dispatch_telemetry import record_worker_heartbeat
 from gx_dispatch_telemetry import traced_worker_span
 from gx_dispatch_types import GxWorkerConfig
+
+# Kafka client for streaming violations
+from kafka_client import build_kafka_publisher
+from kafka_client import KafkaExceptionPublisher
 from gx_dispatch_types import GxWorkerConfigError
 from gx_dispatch_types import GxWorkerExecutionError
 from gx_dispatch_types import SourceLocation

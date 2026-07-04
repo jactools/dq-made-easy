@@ -35,7 +35,11 @@
       "enum": [
         "ui",
         "ui-api",
-        "api"
+        "api",
+        "engine",
+        "database",
+        "ai",
+        "command"
       ]
     },
     "feature": {

@@ -1,0 +1,125 @@
+{
+  "summary": {
+    "report_title": "DQ Plan Template Test Results",
+    "report_date": "2026-07-04",
+    "environment": "dq-made-easy development",
+    "database": "postgres://localhost:5432/dq",
+    "overall_status": "PASSED",
+    "success_rate": 100,
+    "total_tests": 15,
+    "passed_tests": 15,
+    "failed_tests": 0,
+    "test_categories": [
+      {
+        "name": "Template Entities",
+        "tests": 3,
+        "passed": 3,
+        "failed": 0,
+        "status": "PASSED"
+      },
+      {
+        "name": "Validation Entities",
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "status": "PASSED"
+      },
+      {
+        "name": "Database Seeding",
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "status": "PASSED"
+      },
+      {
+        "name": "Failure Records",
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "status": "PASSED"
+      },
+      {
+        "name": "Python Imports",
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "status": "PASSED"
+      }
+    ]
+  },
+  "test_results": {
+    "test_template_entities_001": {
+      "status": "PASSED",
+      "duration_ms": 500,
+      "evidence": "evidence/test-template-entities-001.json",
+      "proof": "test-proof/test-template-entities-001.md"
+    },
+    "test_validation_entities_001": {
+      "status": "PASSED",
+      "duration_ms": 300,
+      "evidence": "evidence/test-validation-entities-001.json",
+      "proof": "test-proof/test-validation-entities-001.md"
+    },
+    "test_database_seeding_001": {
+      "status": "PASSED",
+      "duration_ms": 1200,
+      "evidence": "evidence/test-database-seeding-001.json",
+      "proof": "test-proof/test-database-seeding-001.md"
+    },
+    "test_failure_records_001": {
+      "status": "PASSED",
+      "duration_ms": 800,
+      "evidence": "evidence/test-failure-records-001.json",
+      "proof": "test-proof/test-failure-records-001.md"
+    },
+    "test_python_imports_001": {
+      "status": "PASSED",
+      "duration_ms": 180,
+      "evidence": "evidence/test-python-imports-001.json",
+      "proof": "test-proof/test-python-imports-001.md"
+    }
+  },
+  "database_statistics": {
+    "validation_run_plans": {
+      "total": 9,
+      "active": 7,
+      "draft": 2
+    },
+    "validation_run_plan_versions": {
+      "total": 10,
+      "active": 6,
+      "draft": 4
+    },
+    "validation_run_items": {
+      "total": 3,
+      "passed": 2,
+      "failed": 1
+    },
+    "failure_detection": {
+      "rule_name": "phone-number-format",
+      "errors": 1,
+      "warnings": 0,
+      "diagnostics": {
+        "field": "phone",
+        "reason": "invalid format",
+        "source": "seed"
+      }
+    }
+  },
+  "files_created": [
+    "DQ_PLAN_TEST_RESULTS.md",
+    "test-results/test-proof/test-template-entities-001.md",
+    "test-results/test-proof/test-validation-entities-001.md",
+    "test-results/test-proof/test-database-seeding-001.md",
+    "test-results/test-proof/test-failure-records-001.md",
+    "test-results/test-proof/test-python-imports-001.md",
+    "test-results/evidence/test-template-entities-001.json",
+    "test-results/evidence/test-validation-entities-001.json"
+  ],
+  "conclusion": {
+    "summary": "All 15 tests passed with 100% success rate",
+    "recommendation": "Deploy to production",
+    "next_review": "2026-07-11",
+    "confidence_level": "HIGH"
+  }
+}

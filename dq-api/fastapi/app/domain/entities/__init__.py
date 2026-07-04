@@ -25,6 +25,23 @@ from app.domain.entities.data_catalog import (
 	DomainEntity,
 	RuleAttributeEntity,
 )
+from app.domain.entities.dq_plan_template import (
+	DQPlanTemplateEntity,
+	DQPlanTemplateParameterEntity,
+	DQPlanTemplateConfigurationEntity,
+	DQPlanTemplateScopeEntity,
+	DQPlanTemplateSuiteEntity,
+	DQPlanTemplateScheduleEntity,
+	InstantiateTemplateRequestEntity,
+	build_dq_plan_template_entity,
+	build_dq_plan_template_parameter_entity,
+	build_dq_plan_template_configuration_entity,
+	build_dq_plan_template_scope_entity,
+	build_dq_plan_template_suite_entity,
+	build_dq_plan_template_schedule_entity,
+	build_instantiate_template_request_entity,
+)
+
 from app.domain.entities.federated_metadata_registry import (
 	FederatedMetadataRegistryAccessGrantEntity,
 	FederatedMetadataRegistryExchangeSnapshotEntity,

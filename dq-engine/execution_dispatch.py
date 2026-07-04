@@ -12,6 +12,12 @@ from dq_utils.auth_utils import TokenProvider
 from dq_utils.auth_utils import build_oidc_token_provider_from_env
 from dq_utils.logging_utils import log_event
 from gx_dispatch_types import GxWorkerConfig
+
+# Optional Kafka client
+try:
+    from kafka_client import KafkaExceptionPublisher
+except ImportError:
+    KafkaExceptionPublisher = None  # type: ignore
 from gx_dispatch_types import GxWorkerConfigError
 from gx_dispatch_types import GxWorkerExecutionError
 from runtime_lowerers import build_failure_envelope
@@ -117,7 +123,7 @@ def api_request(
         return response.text
 
 
-def report_run(
+async def report_run(
     config: GxWorkerConfig,
     token_provider: TokenProvider,
     *,
@@ -126,7 +132,7 @@ def report_run(
     new_status: str,
     changed_by: str | None,
     reason: str | None,
-    details: dict[str, Any] | None,
+    details: dict[str, Any] | None = None,
     execution_progress: dict[str, Any] | None = None,
     started_at: str | None = None,
     completed_at: str | None = None,
@@ -135,27 +141,41 @@ def report_run(
     diagnostics: list[dict[str, Any]] | None = None,
     failure_code: str | None = None,
     failure_message: str | None = None,
+    kafka_publisher: KafkaExceptionPublisher | None = None,
 ) -> None:
+    # Separate diagnostics (violations) from metadata
+    violation_diagnostics = diagnostics if diagnostics else []
+    
+    # Publish violations to Kafka if available
+    if kafka_publisher and violation_diagnostics:
+        await kafka_publisher.publish_violations(violation_diagnostics)
+        logger.info("Published %d violations to Kafka for run %s", len(violation_diagnostics), run_id)
+    
+    # Only send summary metadata via API (not full violation details)
+    api_payload = {
+        "new_status": new_status,
+        "changed_by": changed_by,
+        "reason": reason,
+        "details": details,
+        "execution_progress": execution_progress,
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "result_summary": result_summary,
+        "metrics": metrics,
+        # Send summary counts, not full diagnostics
+        "violation_count": len(violation_diagnostics),
+        "diagnostics_count": min(len(violation_diagnostics), 100),  # Only first 100 for debugging
+        "failure_code": failure_code,
+        "failure_message": failure_message,
+    }
+    
     _ = api_request(
         config,
         token_provider,
         method="POST",
         path=REPORT_RUN_PATH_TEMPLATE.format(run_id=run_id),
         correlation_id=correlation_id,
-        json_body={
-            "new_status": new_status,
-            "changed_by": changed_by,
-            "reason": reason,
-            "details": details,
-            "execution_progress": execution_progress,
-            "started_at": started_at,
-            "completed_at": completed_at,
-            "result_summary": result_summary,
-            "metrics": metrics,
-            "diagnostics": diagnostics,
-            "failure_code": failure_code,
-            "failure_message": failure_message,
-        },
+        json_body=api_payload,
     )
 
 
@@ -341,7 +361,7 @@ TokenProviderFactory = Callable[[], TokenProvider]
 ExecutePayloadFn = Callable[..., dict[str, Any]]
 
 
-def process_engine_dispatch_message(
+async def process_engine_dispatch_message(
     config: GxWorkerConfig,
     *,
     payload: dict[str, Any],
@@ -370,82 +390,102 @@ def process_engine_dispatch_message(
     token_provider = token_provider_factory()
     execution_started = time.perf_counter()
     output_dir = str(payload.get("output_dir")) if payload.get("output_dir") is not None else None
+    
+    # Initialize Kafka publisher for streaming violations
+    kafka_publisher = None
+    try:
+        kafka_publisher = await build_kafka_publisher()
+        if kafka_publisher:
+            await kafka_publisher.start()
+    except Exception as exc:
+        logger.warning("Failed to initialize Kafka publisher: %s", exc)
 
-    report_run_fn(
-        config,
-        token_provider,
-        run_id=run_id,
-        correlation_id=correlation_id,
-        new_status="running",
-        changed_by=requested_by,
-        reason=f"Execution worker routed {engine_type} execution",
-        details={"source": "dq-engine-execution-worker", "engine_type": engine_type, "rule_payload": rule_payload},
-        execution_progress=build_execution_progress(
-            completed_steps=1,
-            total_steps=2,
-            label=f"Invoking {engine_type} execution",
-        ),
-        metrics={"engine_type": engine_type, "stage": "started"},
-    )
-
-    response_payload = execute_payload_fn(
-        engine_type=engine_type,
-        rule_payload=rule_payload,
-        output_dir=output_dir,
-        config=payload.get("config") if isinstance(payload.get("config"), dict) else None,
-    )
-    if not isinstance(response_payload, dict):
-        raise GxWorkerExecutionError(
-            f"{engine_type} execution failed",
-            failure_code="GX_WORKER_EXECUTION_ERROR",
-        )
-
-    report_summary = build_execution_report_summary(response_payload, output_dir=payload.get("output_dir"))
-    report_details = build_execution_report_details(response_payload, output_dir=payload.get("output_dir"))
-    metrics = response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {})
-    status = "succeeded" if response_payload.get("ok") else "failed"
-    label = f"{engine_type} execution completed" if status == "succeeded" else f"{engine_type} execution completed with failures"
-    failure_code = None if status == "succeeded" else response_payload.get("failure_code") or "GX_WORKER_EXECUTION_ERROR"
-    failure_message = None if status == "succeeded" else response_payload.get("failure_message") or response_payload.get("error") or f"{engine_type} execution failed"
-
-    if report_progress_fn is not None:
-        report_progress_fn(
+    try:
+        await report_run_fn(
             config,
             token_provider,
             run_id=run_id,
             correlation_id=correlation_id,
+            new_status="running",
+            changed_by=requested_by,
+            reason=f"Execution worker routed {engine_type} execution",
+            details={"source": "dq-engine-execution-worker", "engine_type": engine_type, "rule_payload": rule_payload},
+            execution_progress=build_execution_progress(
+                completed_steps=1,
+                total_steps=2,
+                label=f"Invoking {engine_type} execution",
+            ),
+            metrics={"engine_type": engine_type, "stage": "started"},
+            kafka_publisher=kafka_publisher,
+        )
+
+        response_payload = execute_payload_fn(
+            engine_type=engine_type,
+            rule_payload=rule_payload,
+            output_dir=output_dir,
+            config=payload.get("config") if isinstance(payload.get("config"), dict) else None,
+        )
+        if not isinstance(response_payload, dict):
+            raise GxWorkerExecutionError(
+                f"{engine_type} execution failed",
+                failure_code="GX_WORKER_EXECUTION_ERROR",
+            )
+
+        report_summary = build_execution_report_summary(response_payload, output_dir=payload.get("output_dir"))
+        report_details = build_execution_report_details(response_payload, output_dir=payload.get("output_dir"))
+        metrics = response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {})
+        
+        # Extract diagnostics for violation streaming
+        diagnostics = response_payload.get("diagnostics") or []
+        
+        status = "succeeded" if response_payload.get("ok") else "failed"
+        label = f"{engine_type} execution completed" if status == "succeeded" else f"{engine_type} execution completed with failures"
+        failure_code = None if status == "succeeded" else response_payload.get("failure_code") or "GX_WORKER_EXECUTION_ERROR"
+        failure_message = None if status == "succeeded" else response_payload.get("failure_message") or response_payload.get("error") or f"{engine_type} execution failed"
+
+        if report_progress_fn is not None:
+            await report_progress_fn(
+                config,
+                token_provider,
+                run_id=run_id,
+                correlation_id=correlation_id,
+                changed_by=requested_by,
+                reason=label,
+                details=report_details,
+                completed_steps=2,
+                total_steps=2,
+                label=label,
+            )
+
+        await report_run_fn(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            new_status=status,
             changed_by=requested_by,
             reason=label,
             details=report_details,
-            completed_steps=2,
-            total_steps=2,
-            label=label,
+            execution_progress=build_execution_progress(
+                completed_steps=2,
+                total_steps=2,
+                label=label,
+            ),
+            completed_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            result_summary=report_summary,
+            metrics=metrics,
+            diagnostics=diagnostics,
+            failure_code=failure_code,
+            failure_message=failure_message,
+            kafka_publisher=kafka_publisher,
         )
 
-    report_run_fn(
-        config,
-        token_provider,
-        run_id=run_id,
-        correlation_id=correlation_id,
-        new_status=status,
-        changed_by=requested_by,
-        reason=label,
-        details=report_details,
-        execution_progress=build_execution_progress(
-            completed_steps=2,
-            total_steps=2,
-            label=label,
-        ),
-        completed_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        result_summary=report_summary,
-        metrics=metrics,
-        diagnostics=[],
-        failure_code=failure_code,
-        failure_message=failure_message,
-    )
+        record_duration = payload.get("record_duration")
+        if callable(record_duration):
+            record_duration(engine_type=engine_type, status=status, duration_ms=(time.perf_counter() - execution_started) * 1000.0)
 
-    record_duration = payload.get("record_duration")
-    if callable(record_duration):
-        record_duration(engine_type=engine_type, status=status, duration_ms=(time.perf_counter() - execution_started) * 1000.0)
-
-    return response_payload
+        return response_payload
+    finally:
+        # Stop Kafka publisher and flush
+        if kafka_publisher:
+            await kafka_publisher.stop()

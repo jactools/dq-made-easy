@@ -1952,3 +1952,95 @@ class ValidationRunItemRow(Base):
     warnings: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     diagnostics: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     conflicts: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# DQ Plan Templates (DQ-2.0)
+# ---------------------------------------------------------------------------
+
+
+class DQPlanTemplateRow(Base):
+    """DQ Plan Template - reusable validation definition."""
+
+    __tablename__ = "dq_plan_templates"
+
+    template_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    template_name: Mapped[str] = mapped_column(Text, nullable=False)
+    template_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    template_version: Mapped[str] = mapped_column(Text, nullable=False)
+    template_type: Mapped[str] = mapped_column(Text, nullable=False)
+    domain: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tags: Mapped[list] = mapped_column(ARRAY(Text), nullable=False, default=list)
+    workspace_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    parameters_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=False)
+    scope_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    suites_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=False)
+    configuration_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    schedule_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
+    owner: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    approver: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    approved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    approval_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    created_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    updated_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    __table_args__ = (
+        Index(
+            "ix_dq_plan_templates_workspace",
+            "workspace_id",
+        ),
+        Index(
+            "ix_dq_plan_templates_domain",
+            "domain",
+        ),
+        Index(
+            "ix_dq_plan_templates_type",
+            "template_type",
+        ),
+        Index(
+            "ix_dq_plan_templates_tags",
+            "tags",
+            postgresql_using="gin",
+        ),
+        Index(
+            "ix_dq_plan_templates_is_active",
+            "is_active",
+        ),
+    )
+
+
+class DQPlanTemplateVersionRow(Base):
+    """Template version tracking for audit trail."""
+
+    __tablename__ = "dq_plan_template_versions"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    template_id: Mapped[str] = mapped_column(Text, nullable=False)
+    template_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    template_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    created_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    __table_args__ = (
+        Index(
+            "ix_dq_plan_template_versions_template_id",
+            "template_id",
+        ),
+        Index(
+            "ix_dq_plan_template_versions_created_at",
+            "created_at",
+        ),
+        UniqueConstraint("template_id", "template_version", name="uq_template_version"),
+    )
+
