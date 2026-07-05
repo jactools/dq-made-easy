@@ -89,26 +89,6 @@ def _should_fail_closed_worker(exc: BaseException) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _coerce_str(payload: dict[str, Any], key: str, fallback_key: str = "") -> str | None:
-    value = payload.get(key) if isinstance(payload, dict) else None
-    if value is not None and isinstance(value, str) and str(value).strip():
-        return str(value).strip()
-    if fallback_key and isinstance(payload, dict):
-        value = payload.get(fallback_key)
-        if value is not None and isinstance(value, str) and str(value).strip():
-            return str(value).strip()
-    return None
-
-
-def _coerce_int(payload: dict[str, Any], key: str, default: int = 0) -> int:
-    value = payload.get(key) if isinstance(payload, dict) else None
-    if value is None:
-        return default
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
-
 
 # ---------------------------------------------------------------------------
 # Failure reporting
@@ -124,15 +104,15 @@ def _report_dispatch_failure(
 ) -> bool:
     from gx_dispatch_config import _utc_now_iso
 
-    run_id = _coerce_str(payload, "run_id", "queue_message_id")
+    run_id = coerce_str(payload, "run_id", "queue_message_id")
     if not run_id:
         return False
 
-    correlation_id = _coerce_str(payload, "correlation_id") or f"corr-{uuid4().hex[:12]}"
-    requested_by = _coerce_str(payload, "requested_by") or None
+    correlation_id = coerce_str(payload, "correlation_id") or f"corr-{uuid4().hex[:12]}"
+    requested_by = coerce_str(payload, "requested_by") or None
     failure = _coerce_reported_failure(exc)
 
-    _api_report_run(
+    report_run(
         config,
         token_provider,
         run_id=run_id,
@@ -269,62 +249,6 @@ def _api_get_data_object_version(
 # ---------------------------------------------------------------------------
 
 
-def _api_report_run(
-    config: GxWorkerConfig,
-    token_provider: TokenProvider,
-    *,
-    run_id: str,
-    correlation_id: str,
-    new_status: str,
-    changed_by: str | None,
-    reason: str | None,
-    details: dict[str, Any] | None,
-    execution_progress: dict[str, Any] | None = None,
-    started_at: str | None = None,
-    completed_at: str | None = None,
-    result_summary: dict[str, Any] | None = None,
-    metrics: dict[str, Any] | None = None,
-    diagnostics: list[dict[str, Any]] | None = None,
-    failure_code: str | None = None,
-    failure_message: str | None = None,
-) -> None:
-    report_run(
-        config,
-        token_provider,
-        run_id=run_id,
-        correlation_id=correlation_id,
-        new_status=new_status,
-        changed_by=changed_by,
-        reason=reason,
-        details=details,
-        execution_progress=execution_progress,
-        started_at=started_at,
-        completed_at=completed_at,
-        result_summary=result_summary,
-        metrics=metrics,
-        diagnostics=diagnostics,
-        failure_code=failure_code,
-        failure_message=failure_message,
-    )
-
-
-def _build_execution_progress(
-    *,
-    completed_steps: int,
-    total_steps: int,
-    label: str,
-) -> dict[str, Any]:
-    from gx_dispatch_config import _utc_now_iso
-
-    percent = 0 if total_steps <= 0 else int(round((completed_steps / total_steps) * 100))
-    return {
-        "percent": max(0, min(percent, 100)),
-        "label": label,
-        "completed_steps": completed_steps,
-        "total_steps": total_steps,
-        "source": "dq-engine-gx-worker",
-        "updated_at": _utc_now_iso(),
-    }
 
 
 def _api_report_execution_progress(
@@ -340,7 +264,7 @@ def _api_report_execution_progress(
     total_steps: int,
     label: str,
 ) -> None:
-    _api_report_run(
+    report_run(
         config,
         token_provider,
         run_id=run_id,
@@ -349,7 +273,7 @@ def _api_report_execution_progress(
         changed_by=changed_by,
         reason=reason,
         details=details,
-        execution_progress=_build_execution_progress(
+        execution_progress=build_execution_progress(
             completed_steps=completed_steps,
             total_steps=total_steps,
             label=label,

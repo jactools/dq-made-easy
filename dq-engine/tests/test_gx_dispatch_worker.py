@@ -359,7 +359,7 @@ class GxDispatchWorkerQueryComparisonTests(unittest.TestCase):
 
         with TemporaryDirectory() as tmpdir:
             with patch("gx_dispatch_worker._build_token_provider", return_value=_StubTokenProvider()), patch(
-                "gx_dispatch_worker._api_report_run",
+                "execution_dispatch.report_run",
                 side_effect=lambda *args, **kwargs: None,
             ), patch(
                 "gx_dispatch_worker._api_get_suite_envelope",
@@ -434,7 +434,7 @@ class GxDispatchWorkerQueryComparisonTests(unittest.TestCase):
             "gx_dispatch_worker.process_dispatch_message",
             side_effect=ConnectionRefusedError(111, "Connection refused"),
         ), patch(
-            "gx_dispatch_worker._api_report_run",
+            "execution_dispatch.report_run",
             side_effect=lambda *args, **kwargs: reports.append(kwargs),
         ), patch(
             "gx_dispatch_worker.time.sleep",
@@ -502,7 +502,7 @@ class GxDispatchWorkerQueryComparisonTests(unittest.TestCase):
             "gx_dispatch_worker.process_dispatch_message",
             side_effect=ConnectionRefusedError(111, "Connection refused"),
         ), patch(
-            "gx_dispatch_worker._api_report_run",
+            "execution_dispatch.report_run",
             side_effect=GxWorkerExecutionError(
                 "API request failed: POST /rulebuilder/v1/gx/runs/run-not-found-1/report -> 404",
                 failure_code="GX_API_REQUEST_FAILED",
@@ -582,7 +582,7 @@ class GxDispatchWorkerQueryComparisonTests(unittest.TestCase):
             "gx_dispatch_worker.process_dispatch_message",
             side_effect=fatal_exc,
         ), patch(
-            "gx_dispatch_worker._api_report_run",
+            "execution_dispatch.report_run",
             side_effect=lambda *args, **kwargs: reports.append(kwargs),
         ), patch(
             "gx_dispatch_worker.time.sleep",
@@ -651,7 +651,7 @@ class GxDispatchWorkerQueryComparisonTests(unittest.TestCase):
             "gx_dispatch_worker.process_dispatch_message",
             side_effect=SystemExit("Spark jar directory not found"),
         ), patch(
-            "gx_dispatch_worker._api_report_run",
+            "execution_dispatch.report_run",
             side_effect=lambda *args, **kwargs: reports.append(kwargs),
         ), patch(
             "gx_dispatch_worker.time.sleep",
@@ -807,7 +807,7 @@ class GxDispatchWorkerGroupedExecutionTests(unittest.TestCase):
 
         with TemporaryDirectory() as tmpdir:
             with patch("gx_dispatch_worker._build_token_provider", return_value=_StubTokenProvider()), patch(
-                "gx_dispatch_worker._api_report_run",
+                "execution_dispatch.report_run",
                 side_effect=lambda *args, **kwargs: reports.append(kwargs),
             ), patch(
                 "gx_dispatch_worker._api_get_data_object_version",
@@ -906,7 +906,7 @@ class GxDispatchWorkerGroupedExecutionTests(unittest.TestCase):
 
         with TemporaryDirectory() as tmpdir:
             with patch("gx_dispatch_worker._build_token_provider", return_value=_StubTokenProvider()), patch(
-                "gx_dispatch_worker._api_report_run",
+                "execution_dispatch.report_run",
                 side_effect=lambda *args, **kwargs: reports.append(kwargs),
             ), patch(
                 "gx_dispatch_worker._api_get_suite_envelope",

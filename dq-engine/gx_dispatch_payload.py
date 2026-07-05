@@ -47,17 +47,6 @@ class SourceLocation:
 # ---------------------------------------------------------------------------
 
 
-def _parse_dispatch_payload(raw: str) -> dict[str, Any]:
-    return parse_dispatch_payload(raw)
-
-
-def _coerce_str_wrapped(payload: dict[str, Any], *keys: str) -> str:
-    return coerce_str(payload, *keys)
-
-
-def _coerce_int_wrapped(payload: dict[str, Any], *keys: str) -> int:
-    return coerce_int(payload, *keys)
-
 
 # ---------------------------------------------------------------------------
 # Suite envelope helpers

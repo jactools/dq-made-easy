@@ -18,17 +18,19 @@ from uuid import uuid4
 from dq_utils.logging_utils import log_event
 from execution_dispatch import (
     SUPPORTED_EXECUTION_ENGINES,
+    build_execution_progress,
+    coerce_int,
+    coerce_str,
     execute_engine_rule_payload,
     normalize_execution_engine,
     parse_dispatch_payload,
     process_engine_dispatch_message,
+    report_run,
 )
 
 from gx_dispatch_api import (
     _api_get_suite_envelope,
     _api_report_execution_progress,
-    _api_report_run,
-    _build_execution_progress,
 )
 from gx_dispatch_config import (
     _build_token_provider,
@@ -67,25 +69,6 @@ from gx_dispatch_types import GxWorkerExecutionError
 
 # ---------------------------------------------------------------------------
 # Payload coercion helpers (thin wrappers around execution_dispatch)
-# ---------------------------------------------------------------------------
-
-
-def _parse_dispatch_payload(raw: str) -> dict[str, Any]:
-    return parse_dispatch_payload(raw)
-
-
-def _coerce_str(payload: dict[str, Any], *keys: str) -> str:
-    from execution_dispatch import coerce_str
-
-    return coerce_str(payload, *keys)
-
-
-def _coerce_int(payload: dict[str, Any], *keys: str) -> int:
-    from execution_dispatch import coerce_int
-
-    return coerce_int(payload, *keys)
-
-
 # ---------------------------------------------------------------------------
 # Grouped dispatch processing
 # ---------------------------------------------------------------------------
@@ -339,7 +322,7 @@ def _process_grouped_dispatch_message(
     }
 
     if all_ok:
-        _api_report_run(
+        report_run(
             config,
             token_provider,
             run_id=run_id,
@@ -348,7 +331,7 @@ def _process_grouped_dispatch_message(
             changed_by=requested_by,
             reason="GX worker completed grouped execution",
             details={"source": "dq-engine-gx-worker", "selection_mode": "grouped_scope"},
-            execution_progress=_build_execution_progress(
+            execution_progress=build_execution_progress(
                 completed_steps=total_steps,
                 total_steps=total_steps,
                 label="Grouped execution completed",
@@ -369,7 +352,7 @@ def _process_grouped_dispatch_message(
             target_count=len(target_ids),
         )
     else:
-        _api_report_run(
+        report_run(
             config,
             token_provider,
             run_id=run_id,
@@ -378,7 +361,7 @@ def _process_grouped_dispatch_message(
             changed_by=requested_by,
             reason="GX worker completed grouped execution with failures",
             details={"source": "dq-engine-gx-worker", "selection_mode": "grouped_scope", "failure_count": len(all_diagnostics)},
-            execution_progress=_build_execution_progress(
+            execution_progress=build_execution_progress(
                 completed_steps=total_steps,
                 total_steps=total_steps,
                 label="Grouped execution completed with failures",
@@ -405,29 +388,6 @@ def _process_grouped_dispatch_message(
 # ---------------------------------------------------------------------------
 
 
-def _build_spark_expectations_report_summary(response_payload: dict[str, Any], *, output_dir: Any) -> dict[str, Any]:
-    metrics = response_payload.get("metrics")
-    return {
-        "engine_type": "spark_expectations",
-        "rule_id": response_payload.get("rule_id"),
-        "result": response_payload.get("result", "passed"),
-        "passed_count": response_payload.get("passed_count", 0),
-        "failed_count": response_payload.get("failed_count", 0),
-        "failure_code": response_payload.get("failure_code"),
-        "failure_message": response_payload.get("failure_message"),
-        "failed_check": response_payload.get("failed_check", {}),
-        "failure_metrics": response_payload.get("failure_metrics", {}),
-        "trace": response_payload.get("trace", {}),
-        "summary": response_payload,
-        "output_dir": output_dir,
-        "execution_metadata": response_payload.get("execution_metadata", {}),
-        "quarantine_artifact": response_payload.get("quarantine_artifact", {}),
-        "error_management": response_payload.get("error_management", {}),
-        "observability_summary": response_payload.get("observability_summary", {}),
-        "metrics": metrics if isinstance(metrics, dict) else response_payload.get("observability_summary", {}),
-    }
-
-
 def _process_spark_expectations_dispatch_message(
     config: GxWorkerConfig,
     *,
@@ -442,12 +402,12 @@ def _process_spark_expectations_dispatch_message(
         run_id=run_id,
         correlation_id=correlation_id,
         requested_by=requested_by,
-        report_run_fn=_api_report_run,
+        report_run_fn=report_run,
         report_progress_fn=_api_report_execution_progress,
         token_provider_factory=_build_token_provider,
         execute_payload_fn=execute_engine_rule_payload,
     )
-    engine_type = str(response_payload.get("engine_type") or normalize_execution_engine(_coerce_str(payload, "engine_type")))
+    engine_type = str(response_payload.get("engine_type") or normalize_execution_engine(coerce_str(payload, "engine_type")))
     if engine_type == "spark_expectations":
         record_spark_expectations_observability(
             observability_summary=response_payload.get("observability_summary"),
@@ -475,14 +435,14 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
     Handles: grouped_scope, spark expectations (generic engines), single_object,
     and join_pair execution shapes.
     """
-    payload = _parse_dispatch_payload(raw_message)
+    payload = parse_dispatch_payload(raw_message)
 
-    run_id = _coerce_str(payload, "run_id", "queue_message_id")
-    execution_shape = _coerce_str(payload, "execution_shape") or "single_object"
-    suite_id = _coerce_str(payload, "suite_id")
-    suite_version = _coerce_int(payload, "suite_version")
-    correlation_id = _coerce_str(payload, "correlation_id") or f"corr-{uuid4().hex[:12]}"
-    requested_by = _coerce_str(payload, "requested_by") or None
+    run_id = coerce_str(payload, "run_id", "queue_message_id")
+    execution_shape = coerce_str(payload, "execution_shape") or "single_object"
+    suite_id = coerce_str(payload, "suite_id")
+    suite_version = coerce_int(payload, "suite_version")
+    correlation_id = coerce_str(payload, "correlation_id") or f"corr-{uuid4().hex[:12]}"
+    requested_by = coerce_str(payload, "requested_by") or None
 
     if execution_shape == "grouped_scope":
         if not run_id:
@@ -499,7 +459,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
         )
         return
 
-    dispatch_engine_type = normalize_execution_engine(_coerce_str(payload, "engine_type"))
+    dispatch_engine_type = normalize_execution_engine(coerce_str(payload, "engine_type"))
     if dispatch_engine_type in (SUPPORTED_EXECUTION_ENGINES - {"gx"}):
         _process_spark_expectations_dispatch_message(
             config,
@@ -530,7 +490,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
     token_provider = _build_token_provider()
     single_execution_started = time.perf_counter()
 
-    _api_report_run(
+    report_run(
         config,
         token_provider,
         run_id=run_id,
@@ -539,7 +499,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
         changed_by=requested_by,
         reason="GX worker started execution",
         details={"source": "dq-engine-gx-worker", "dispatch": payload},
-        execution_progress=_build_execution_progress(
+        execution_progress=build_execution_progress(
             completed_steps=0,
             total_steps=1,
             label="Queued for execution",
@@ -675,7 +635,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
             ],
         }
         if ok:
-            _api_report_run(
+            report_run(
                 config,
                 token_provider,
                 run_id=run_id,
@@ -684,7 +644,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                 changed_by=requested_by,
                 reason="GX worker completed join-pair execution",
                 details={"source": "dq-engine-gx-worker", "execution_shape": "join_pair"},
-                execution_progress=_build_execution_progress(
+                execution_progress=build_execution_progress(
                     completed_steps=total_steps,
                     total_steps=total_steps,
                     label="Execution completed",
@@ -703,7 +663,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                 target_count=len(target_ids),
             )
         else:
-            _api_report_run(
+            report_run(
                 config,
                 token_provider,
                 run_id=run_id,
@@ -712,7 +672,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                 changed_by=requested_by,
                 reason="GX worker completed join-pair execution with failures",
                 details={"source": "dq-engine-gx-worker", "execution_shape": "join_pair", "failure_count": len(diagnostics)},
-                execution_progress=_build_execution_progress(
+                execution_progress=build_execution_progress(
                     completed_steps=total_steps,
                     total_steps=total_steps,
                     label="Execution completed with failures",
@@ -864,7 +824,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
     }
 
     if all_ok:
-        _api_report_run(
+        report_run(
             config,
             token_provider,
             run_id=run_id,
@@ -873,7 +833,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
             changed_by=requested_by,
             reason="GX worker completed execution",
             details={"source": "dq-engine-gx-worker"},
-            execution_progress=_build_execution_progress(
+            execution_progress=build_execution_progress(
                 completed_steps=total_steps,
                 total_steps=total_steps,
                 label="Execution completed",
@@ -892,7 +852,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
             target_count=len(target_ids),
         )
     else:
-        _api_report_run(
+        report_run(
             config,
             token_provider,
             run_id=run_id,
@@ -901,7 +861,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
             changed_by=requested_by,
             reason="GX worker completed execution with failures",
             details={"source": "dq-engine-gx-worker", "failure_count": len(all_diagnostics)},
-            execution_progress=_build_execution_progress(
+            execution_progress=build_execution_progress(
                 completed_steps=total_steps,
                 total_steps=total_steps,
                 label="Execution completed with failures",

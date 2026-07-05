@@ -38,7 +38,7 @@ from gx_dispatch_config import _resolve_worker_heartbeat_key
 from gx_dispatch_config import _resolve_worker_heartbeat_ttl_seconds
 from gx_dispatch_config import load_config
 from gx_dispatch_dispatch import process_dispatch_message
-from gx_dispatch_payload import _parse_dispatch_payload
+from execution_dispatch import parse_dispatch_payload
 from gx_dispatch_telemetry import configure_worker_telemetry
 from gx_dispatch_telemetry import record_worker_failure
 from gx_dispatch_types import GxWorkerConfig
@@ -204,7 +204,7 @@ def run_worker_forever() -> None:
                 payload: dict[str, Any] = {}
                 if raw_message is not None:
                     try:
-                        payload = _parse_dispatch_payload(raw_message)
+                        payload = parse_dispatch_payload(raw_message)
                         execution_shape = (
                             str(payload.get("execution_shape") or "").strip()
                             if isinstance(payload, dict)

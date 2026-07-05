@@ -384,7 +384,7 @@ class GxDispatchWorkerCustomExpectationTests(unittest.TestCase):
         with TemporaryDirectory() as tmpdir:
             with _fake_pyspark(datetime(2026, 4, 18, 12, 0, tzinfo=UTC)):
                 with patch("gx_dispatch_worker._build_token_provider", return_value=_StubTokenProvider()), patch(
-                    "gx_dispatch_worker._api_report_run",
+                    "execution_dispatch.report_run",
                     side_effect=lambda *args, **kwargs: reports.append(kwargs),
                 ), patch(
                     "gx_dispatch_worker._api_report_execution_progress",
@@ -453,7 +453,7 @@ class GxDispatchWorkerCustomExpectationTests(unittest.TestCase):
         with TemporaryDirectory() as tmpdir:
             with _fake_pyspark(datetime(2026, 4, 18, 12, 0, tzinfo=UTC)):
                 with patch("gx_dispatch_worker._build_token_provider", return_value=_StubTokenProvider()), patch(
-                    "gx_dispatch_worker._api_report_run",
+                    "execution_dispatch.report_run",
                     side_effect=lambda *args, **kwargs: reports.append(kwargs),
                 ), patch(
                     "gx_dispatch_worker._api_report_execution_progress",

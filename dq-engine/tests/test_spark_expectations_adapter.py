@@ -893,7 +893,7 @@ def test_process_dispatch_message_routes_spark_expectations_payload(monkeypatch:
         def get_token(self, *, correlation_id: str | None = None) -> str:
             return "token"
 
-    monkeypatch.setattr("gx_dispatch_worker._api_report_run", fake_report_run)
+    monkeypatch.setattr("execution_dispatch.report_run", fake_report_run)
     monkeypatch.setattr("gx_dispatch_worker._api_report_execution_progress", fake_report_progress)
     monkeypatch.setattr("gx_dispatch_worker._build_token_provider", lambda: DummyTokenProvider())
 
@@ -1046,7 +1046,7 @@ def test_process_dispatch_message_reports_structured_spark_expectations_failure(
         },
     }
 
-    monkeypatch.setattr("gx_dispatch_worker._api_report_run", fake_report_run)
+    monkeypatch.setattr("execution_dispatch.report_run", fake_report_run)
     monkeypatch.setattr("gx_dispatch_worker._api_report_execution_progress", fake_report_progress)
     monkeypatch.setattr("gx_dispatch_worker._build_token_provider", lambda: DummyTokenProvider())
     monkeypatch.setattr("gx_dispatch_worker.execute_engine_rule_payload", lambda **kwargs: failure_payload)
@@ -1118,7 +1118,7 @@ def test_process_dispatch_message_routes_sql_engine_through_shared_reporting(mon
         def get_token(self, *, correlation_id: str | None = None) -> str:
             return "token"
 
-    monkeypatch.setattr("gx_dispatch_worker._api_report_run", fake_report_run)
+    monkeypatch.setattr("execution_dispatch.report_run", fake_report_run)
     monkeypatch.setattr("gx_dispatch_worker._api_report_execution_progress", fake_report_progress)
     monkeypatch.setattr("gx_dispatch_worker._build_token_provider", lambda: DummyTokenProvider())
 
