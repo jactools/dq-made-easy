@@ -57,7 +57,7 @@ The engine now:
 **Configuration**:
 ```bash
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-KAFKA_TOPIC_PREFIX=dq-made-easy
+KAFKA_VIOLATIONS_TOPIC=dq-made-easy.gx.violations
 KAFKA_BATCH_SIZE=10000
 KAFKA_FLUSH_INTERVAL_SECONDS=30
 KAFKA_MAX_BATCH_BYTES=10000000  # 10MB
@@ -84,12 +84,16 @@ KAFKA_MAX_BATCH_BYTES=10000000  # 10MB
     "validation_artifact_id": "suite-uuid",
     "engine_type": "gx"
   },
+  "schemaVersion": "v1",
   "kafka": {
     "publishedAt": "2026-07-04T12:00:00Z",
     "batchSize": 10000
   }
 }
 ```
+
+Required fields are validated by the producer (`violationId`, `dataObjectVersionId`, `executionRunId`, `ruleId`,
+`recordIdentifierType`, `recordIdentifierValue`, `reasonCode`, `reasonText`, `detectedAt`). Invalid records are rejected.
 
 ### 3. Consumer (S3 Storage)
 

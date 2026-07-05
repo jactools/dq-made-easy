@@ -55,6 +55,8 @@ fi
 
 cp "$mkcert_root_ca" "$CERTS_DIR/mkcert-rootCA.pem"
 
+echo "kafka.jac.dot"
+generate_cert "$CERTS_DIR/kafka.jac.dot+3.pem" "$CERTS_DIR/kafka.jac.dot+3-key.pem" "kafka.jac.dot" localhost 127.0.0.1 ::1
 echo "itsm.jac.dot"
 generate_cert "$CERTS_DIR/itsm.jac.dot+3.pem" "$CERTS_DIR/itsm.jac.dot+3-key.pem" "itsm.jac.dot" localhost 127.0.0.1 ::1
 echo "support.jac.dot"

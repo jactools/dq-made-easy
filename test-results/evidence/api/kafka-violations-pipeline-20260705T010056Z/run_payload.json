@@ -1,0 +1,368 @@
+{
+  "id": "run-89b7154fadbb",
+  "suite_id": "gx_rule-24f83bcf701e47e494031afe4c204257",
+  "suite_version": 1,
+  "rule_id": "rule-24f83bcf701e47e494031afe4c204257",
+  "rule_version_id": "rv_0fbb6b70-3a51-4baa-9996-ae513b51b063",
+  "run_plan_id": null,
+  "correlation_id": "corr-78fe5d7de232",
+  "requested_by": "alice@jaccloud.nl",
+  "engine_target": "pyspark",
+  "execution_shape": "single_object",
+  "status": "failed",
+  "submitted_at": "2026-07-05T01:00:53.599897+00:00",
+  "started_at": "2026-07-05T01:00:53.604888+00:00",
+  "completed_at": "2026-07-05T01:00:54.222078+00:00",
+  "created_at": "2026-07-05T01:00:53.601383+00:00",
+  "updated_at": "2026-07-05T01:00:54.230650+00:00",
+  "execution_contract": {
+    "engine_type": "gx",
+    "engine_target": "pyspark",
+    "execution_shape": "single_object",
+    "traceability": {
+      "rule_id": "rule-24f83bcf701e47e494031afe4c204257",
+      "rule_version_id": "rv_0fbb6b70-3a51-4baa-9996-ae513b51b063",
+      "gx_suite_id": "gx_rule-24f83bcf701e47e494031afe4c204257",
+      "gx_suite_version": 1,
+      "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+      "source_rule_expression": "email = '__kafka_integration_test_expected_failure_8a284c1a__'",
+      "compiled_expression": "email = '__kafka_integration_test_expected_failure_8a284c1a__'",
+      "artifact_key": "rule::rule-24f83bcf701e47e494031afe4c204257::version::rv_0fbb6b70-3a51-4baa-9996-ae513b51b063::ab90100b6a5df505"
+    },
+    "resolved_data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+    "resolved_data_delivery_id": "td-del-9f4939b5088d",
+    "resolved_delivery_location": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+    "delivery_resolution_mode": "latest_delivery",
+    "scope_selector": {},
+    "suite_refs": []
+  },
+  "handoff_payload": {
+    "run_id": "run-89b7154fadbb",
+    "queue_message_id": "run-89b7154fadbb",
+    "suite_id": "gx_rule-24f83bcf701e47e494031afe4c204257",
+    "suite_version": 1,
+    "correlation_id": "corr-78fe5d7de232",
+    "requested_by": "alice@jaccloud.nl",
+    "engine_type": "gx",
+    "engine_target": "pyspark",
+    "execution_shape": "single_object",
+    "dispatch_mode": "queued",
+    "executor_target": "dq-engine",
+    "queue_key": "dq-gx:execution-dispatch",
+    "handoff_status": "accepted",
+    "handoff_ready": true,
+    "submitted_at": "2026-07-05T01:00:53.599897+00:00",
+    "scheduled_at": "2026-07-05T01:00:53.589950+00:00",
+    "execution_scope_override": [],
+    "execution_contract": {
+      "engine_type": "gx",
+      "engine_target": "pyspark",
+      "execution_shape": "single_object",
+      "traceability": {
+        "rule_id": "rule-24f83bcf701e47e494031afe4c204257",
+        "rule_version_id": "rv_0fbb6b70-3a51-4baa-9996-ae513b51b063",
+        "gx_suite_id": "gx_rule-24f83bcf701e47e494031afe4c204257",
+        "gx_suite_version": 1,
+        "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+        "source_rule_expression": "email = '__kafka_integration_test_expected_failure_8a284c1a__'",
+        "compiled_expression": "email = '__kafka_integration_test_expected_failure_8a284c1a__'",
+        "artifact_key": "rule::rule-24f83bcf701e47e494031afe4c204257::version::rv_0fbb6b70-3a51-4baa-9996-ae513b51b063::ab90100b6a5df505"
+      },
+      "resolved_data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+      "resolved_data_delivery_id": "td-del-9f4939b5088d",
+      "resolved_delivery_location": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+      "delivery_resolution_mode": "latest_delivery",
+      "scope_selector": {},
+      "suite_refs": []
+    },
+    "scope_selector": {},
+    "suite_refs": [],
+    "headers": {
+      "traceparent": "00-f1ff33eab589d5f59823ecd0e9307793-e51dfc1232058428-00"
+    },
+    "source_overrides_by_data_object_version_id": {
+      "019e0488-9a53-7a41-86dc-5b725064f27d": {
+        "uri": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+        "format": "parquet"
+      }
+    },
+    "status_details": {
+      "source": "gx.suite.run.schedule",
+      "queue_key": "dq-gx:execution-dispatch",
+      "engine_type": "gx",
+      "scheduled_at": "2026-07-05T01:00:53.589950+00:00",
+      "dispatch_mode": "queued",
+      "handoff_ready": true,
+      "handoff_status": "accepted",
+      "queue_message_id": "run-89b7154fadbb",
+      "source_overrides_by_data_object_version_id": {
+        "019e0488-9a53-7a41-86dc-5b725064f27d": {
+          "uri": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+          "format": "parquet"
+        }
+      }
+    }
+  },
+  "resolved_data_delivery_id": "td-del-9f4939b5088d",
+  "execution_progress": {
+    "percent": 100,
+    "label": "Execution completed with failures",
+    "completed_steps": 2,
+    "total_steps": 2,
+    "source": "dq-engine-gx-worker",
+    "updated_at": "2026-07-05T01:00:54.222066Z"
+  },
+  "result_summary": {
+    "results": [
+      {
+        "ok": false,
+        "summary": {
+          "row_count": null,
+          "started_at": "2026-07-05T01:00:53.837552Z",
+          "completed_at": "2026-07-05T01:00:54.175795Z",
+          "expectation_count": 1,
+          "failed_expectation_count": 1,
+          "passed_expectation_count": 0
+        },
+        "storage_uri": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+        "storage_format": "parquet",
+        "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d"
+      }
+    ],
+    "suite_id": "gx_rule-24f83bcf701e47e494031afe4c204257",
+    "target_count": 1,
+    "suite_version": 1
+  },
+  "metrics": null,
+  "performance_summary": null,
+  "diagnostics": [
+    {
+      "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+      "reason": "expectation_failed",
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "message": "Expectation failed",
+      "gx_result": {
+        "element_count": 500,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_count": 500,
+        "unexpected_percent": 100.0,
+        "partial_unexpected_list": [
+          "user201@example.com",
+          "user202@example.com",
+          "user203@example.com",
+          "user204@example.com",
+          "user205@example.com",
+          "user206@example.com",
+          "user207@example.com",
+          "user208@example.com",
+          "user209@example.com",
+          "user210@example.com",
+          "user211@example.com",
+          "user212@example.com",
+          "user213@example.com",
+          "user214@example.com",
+          "user215@example.com",
+          "user216@example.com",
+          "user217@example.com",
+          "user218@example.com",
+          "user219@example.com",
+          "user220@example.com"
+        ],
+        "unexpected_percent_total": 100.0,
+        "partial_unexpected_counts": [
+          {
+            "count": 1,
+            "value": "user201@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user202@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user203@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user204@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user205@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user206@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user207@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user208@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user209@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user210@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user211@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user212@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user213@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user214@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user215@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user216@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user217@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user218@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user219@example.com"
+          },
+          {
+            "count": 1,
+            "value": "user220@example.com"
+          }
+        ],
+        "unexpected_percent_nonmissing": 100.0
+      },
+      "storage_uri": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+      "storage_format": "parquet",
+      "expectation_index": 0
+    }
+  ],
+  "failure_code": "GX_VALIDATION_FAILED",
+  "failure_message": "One or more expectations failed",
+  "comments": null,
+  "status_history": [
+    {
+      "id": "gx-run-hist-efe5bd44ca93495ab5ea1ab229033c81",
+      "run_id": "run-89b7154fadbb",
+      "from_status": null,
+      "to_status": "pending",
+      "changed_by": "alice@jaccloud.nl",
+      "changed_at": "2026-07-05T01:00:53.601178+00:00",
+      "reason": "GX suite run scheduled",
+      "details": {
+        "source": "gx.suite.run.schedule",
+        "queue_key": "dq-gx:execution-dispatch",
+        "engine_type": "gx",
+        "scheduled_at": "2026-07-05T01:00:53.589950+00:00",
+        "dispatch_mode": "queued",
+        "handoff_ready": true,
+        "handoff_status": "accepted",
+        "queue_message_id": "run-89b7154fadbb",
+        "source_overrides_by_data_object_version_id": {
+          "019e0488-9a53-7a41-86dc-5b725064f27d": {
+            "uri": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+            "format": "parquet"
+          }
+        }
+      }
+    },
+    {
+      "id": "gx-run-hist-d6a792ba369b483dbabc564255c43680",
+      "run_id": "run-89b7154fadbb",
+      "from_status": "pending",
+      "to_status": "running",
+      "changed_by": "alice@jaccloud.nl",
+      "changed_at": "2026-07-05T01:00:53.618339+00:00",
+      "reason": "GX worker started execution",
+      "details": {
+        "source": "dq-engine-gx-worker",
+        "dispatch": {
+          "run_id": "run-89b7154fadbb",
+          "headers": {
+            "traceparent": "00-f1ff33eab589d5f59823ecd0e9307793-e51dfc1232058428-00"
+          },
+          "suite_id": "gx_rule-24f83bcf701e47e494031afe4c204257",
+          "queue_key": "dq-gx:execution-dispatch",
+          "suite_refs": [],
+          "engine_type": "gx",
+          "requested_by": "alice@jaccloud.nl",
+          "scheduled_at": "2026-07-05T01:00:53.589950+00:00",
+          "submitted_at": "2026-07-05T01:00:53.599897+00:00",
+          "dispatch_mode": "queued",
+          "engine_target": "pyspark",
+          "handoff_ready": true,
+          "suite_version": 1,
+          "correlation_id": "corr-78fe5d7de232",
+          "handoff_status": "accepted",
+          "scope_selector": {},
+          "execution_shape": "single_object",
+          "executor_target": "dq-engine",
+          "queue_message_id": "run-89b7154fadbb",
+          "execution_contract": {
+            "suite_refs": [],
+            "engine_type": "gx",
+            "traceability": {
+              "rule_id": "rule-24f83bcf701e47e494031afe4c204257",
+              "gx_suite_id": "gx_rule-24f83bcf701e47e494031afe4c204257",
+              "artifact_key": "rule::rule-24f83bcf701e47e494031afe4c204257::version::rv_0fbb6b70-3a51-4baa-9996-ae513b51b063::ab90100b6a5df505",
+              "rule_version_id": "rv_0fbb6b70-3a51-4baa-9996-ae513b51b063",
+              "gx_suite_version": 1,
+              "compiled_expression": "email = '__kafka_integration_test_expected_failure_8a284c1a__'",
+              "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+              "source_rule_expression": "email = '__kafka_integration_test_expected_failure_8a284c1a__'"
+            },
+            "engine_target": "pyspark",
+            "scope_selector": {},
+            "execution_shape": "single_object",
+            "delivery_resolution_mode": "latest_delivery",
+            "resolved_data_delivery_id": "td-del-9f4939b5088d",
+            "resolved_delivery_location": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+            "resolved_data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d"
+          },
+          "execution_scope_override": [],
+          "source_overrides_by_data_object_version_id": {
+            "019e0488-9a53-7a41-86dc-5b725064f27d": {
+              "uri": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+              "format": "parquet"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "gx-run-hist-2f2c97e818774d3a867a237d57dfb603",
+      "run_id": "run-89b7154fadbb",
+      "from_status": "running",
+      "to_status": "failed",
+      "changed_by": "alice@jaccloud.nl",
+      "changed_at": "2026-07-05T01:00:54.229255+00:00",
+      "reason": "GX worker completed execution with failures",
+      "details": {
+        "source": "dq-engine-gx-worker",
+        "failure_count": 1
+      }
+    }
+  ]
+}

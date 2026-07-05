@@ -135,6 +135,66 @@ set_aux_image_defaults() {
   DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
 }
 
+auto_resolve_tags_from_calculated_versions() {
+  local tag_var=""
+  local needs_calculated_tags=false
+  local calculate_rc=0
+  local calculated_tag_lines=""
+  local tag_vars=(
+    DQ_BASE_TAG
+    DQ_API_TAG
+    DQ_ENGINE_TAG
+    DQ_PROFILING_TAG
+    DQ_FRONTEND_TAG
+    DQ_KONG_TAG
+    DQ_DB_TAG
+    DQ_KEYCLOAK_TAG
+    DQ_DB_SEED_TAG
+    DQ_KEYCLOAK_SEED_TAG
+    DQ_LLM_TAG
+    DQ_OPENMETADATA_DB_TAG
+    DQ_OPENMETADATA_SERVER_TAG
+    DQ_METADATA_CONFIGURE_TAG
+    DQ_CONTAINER_METRICS_TAG
+    DQ_ZAMMAD_SEED_TAG
+  )
+
+  if [ -n "$VERSION" ]; then
+    return 0
+  fi
+
+  for tag_var in "${tag_vars[@]}"; do
+    if [ -z "${!tag_var:-}" ]; then
+      needs_calculated_tags=true
+      break
+    fi
+  done
+
+  if [ "$needs_calculated_tags" = "true" ]; then
+    calculated_tag_lines="$(
+      ROOT_ENV_FILE="$ROOT_ENV_FILE" LOG_LEVEL=1 bash -c '
+        source "$1" >/dev/null 2>&1
+        shift
+        for tag_var in "$@"; do
+          eval "tag_value=\${$tag_var-}"
+          printf "%s=%s\n" "$tag_var" "$tag_value"
+        done
+      ' "$ROOT_DIR/scripts/calculate_versions.sh" "$ROOT_DIR/scripts/calculate_versions.sh" "${tag_vars[@]}"
+    )" || calculate_rc=$?
+    if [ "$calculate_rc" -ne 0 ]; then
+      error "$my_name" "Unable to auto-calculate image tags via scripts/calculate_versions.sh"
+      exit 1
+    fi
+    while IFS= read -r line; do
+      [ -z "$line" ] && continue
+      export "$line"
+    done <<EOF
+$calculated_tag_lines
+EOF
+    info "$my_name" "Auto-resolved image tags from scripts/calculate_versions.sh"
+  fi
+}
+
 set_override_tags() {
   local image=""
   local vars=()
@@ -291,6 +351,7 @@ fi
 
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 set_aux_image_defaults
+auto_resolve_tags_from_calculated_versions
 resolve_selected_images
 set_override_tags
 

@@ -23,6 +23,8 @@ class ScheduleGxSuiteRunCommand:
     status: str = "active"
     requested_by: str | None = None
     correlation_id: str | None = None
+    source_override_uri: str | None = None
+    source_override_format: str | None = None
 
 
 @dataclass(slots=True)
@@ -189,6 +191,18 @@ async def schedule_gx_suite_run(
 ) -> GxDispatchPayloadEntity:
     suite = await resolve_suite(command.suite_id, command.suite_version, command.status)
     correlation_id = command.correlation_id or f"corr-{uuid4().hex[:12]}"
+    source_override_uri = _normalize_optional_str(command.source_override_uri)
+    source_override_format = _normalize_optional_str(command.source_override_format)
+    suite_targets = _suite_scope_targets(suite)
+    overrides_by_target: dict[str, dict[str, Any]] | None = None
+    if source_override_uri and suite_targets:
+        overrides_by_target = {
+            target_id: {
+                "uri": source_override_uri,
+                "format": source_override_format,
+            }
+            for target_id in suite_targets
+        }
     return _as_dispatch_payload_entity(
         await enqueue_suite_run(
             suite=suite,
@@ -196,7 +210,7 @@ async def schedule_gx_suite_run(
             requested_by=command.requested_by,
             correlation_id=correlation_id,
             execution_scope_override=None,
-            source_overrides_by_data_object_version_id=None,
+            source_overrides_by_data_object_version_id=overrides_by_target,
             status_source="gx.suite.run.schedule",
             status_reason="GX suite run scheduled",
         )

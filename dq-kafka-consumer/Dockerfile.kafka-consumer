@@ -1,0 +1,31 @@
+# syntax=docker/dockerfile:1.7
+ARG PYTHON_REGISTRY="docker.io/"
+ARG PYTHON_IMAGE="library/python"
+ARG PYTHON_TAG="3.13-slim-bookworm"
+
+FROM ${PYTHON_REGISTRY}${PYTHON_IMAGE}:${PYTHON_TAG}
+
+LABEL version="0.1.0"
+LABEL description="Lightweight Kafka consumer worker (batch mode)"
+
+WORKDIR /app
+
+ARG PIP_INDEX_URL
+ENV PIP_INDEX_URL=${PIP_INDEX_URL}
+
+# System dependencies for psycopg2
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY kafka_consumer_worker.py /app/
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-u", "kafka_consumer_worker.py"]

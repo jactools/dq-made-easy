@@ -25,10 +25,10 @@ x-zammad-service: &zammad-service
     RAILS_TRUSTED_PROXIES: ${ZAMMAD_RAILS_TRUSTED_PROXIES}
     ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE}
     ZAMMAD_FQDN: ${ZAMMAD_FQDN}
-    ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
+    ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
     ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
-    KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL?KEYCLOAK_SERVER_SIDE_URL is required}
-    SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+    KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
+    SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL:-}
     SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
     CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
     TZ: ${TZ}
@@ -156,6 +156,59 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5s
+
+  kafka:
+    profiles: ["engine", "core", "gateway", "observability"]
+    image: ${DQ_KAFKA_REGISTRY:-}${DQ_KAFKA_NAMESPACE:-}${DQ_KAFKA_IMAGE:-dq-made-easy-kafka}:${DQ_KAFKA_TAG:-latest}
+    build:
+      context: ./dq-kafka
+      dockerfile: Dockerfile.kafka
+    container_name: dq-made-easy-kafka
+    environment:
+      TZ: UTC
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: SSL://:9092,BROKER://:9094,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: SSL://${KAFKA_ADVERTISED_HOST:-kafka.jac.dot}:${KAFKA_HOST_PORT:-9092},BROKER://kafka:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.p12
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka_key_creds
+      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_SSL_CLIENT_AUTH: none
+      KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED:-true}
+      KAFKA_TLS_CERT_FILE: ${KAFKA_TLS_CERT_FILE:-/etc/kafka/certs/kafka.jac.dot+3.pem}
+      KAFKA_TLS_KEY_FILE: ${KAFKA_TLS_KEY_FILE:-/etc/kafka/certs/kafka.jac.dot+3-key.pem}
+      KAFKA_TLS_KEYSTORE_PASSWORD: ${KAFKA_TLS_KEYSTORE_PASSWORD:-changeit}
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    command: ["/opt/kafka/bin/start-kafka.sh"]
+    ports:
+      - "${KAFKA_HOST_BIND:-127.0.0.1}:${KAFKA_HOST_PORT:-9092}:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - ./tmp/certs:/etc/kafka/certs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "echo | openssl s_client -connect 127.0.0.1:9092 -servername kafka.jac.dot -CAfile /etc/kafka/certs/mkcert-rootCA.pem >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      default:
+        aliases:
+          - kafka.jac.dot
+      dq-network:
+        aliases:
+          - kafka.jac.dot
 
   redis-exporter:
     profiles: ["observability"]
@@ -351,7 +404,7 @@ services:
       KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS?KEYCLOAK_ADMIN_PASS is required}
       KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
       KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
-      KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL?KEYCLOAK_SERVER_SIDE_URL is required}
+      KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
       ZAMMAD_SUPPORT_TOKEN_NAME: ${ZAMMAD_SUPPORT_TOKEN_NAME:-dq-made-easy support integration}
       ZAMMAD_SUPPORT_TOKEN_PERMISSION: ${ZAMMAD_SUPPORT_TOKEN_PERMISSION:-ticket.agent}
@@ -378,7 +431,7 @@ services:
       EDGE_LOCAL_SUPPORT_HOST: ${EDGE_LOCAL_SUPPORT_HOST?EDGE_LOCAL_SUPPORT_HOST is required}
       UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
       UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
-      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
+      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
       OPENMETADATA_CALLBACK: ${OPENMETADATA_CALLBACK:-https://openmetadata.jac.dot:8585/callback}
       GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-http://observability.jac.dot:3000}
       GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
@@ -403,7 +456,7 @@ services:
       KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}
       OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL?OIDC_REDIRECT_BASE_URL is required}
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
-      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL?ZAMMAD_PUBLIC_URL is required}
+      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
       GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-http://observability.jac.dot:3000}
       GRAFANA_OIDC_REALM_ROLE: ${GRAFANA_OIDC_REALM_ROLE:-dq:rules:read}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
@@ -682,6 +735,44 @@ services:
       DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    networks:
+      - default
+      - dq-network
+    restart: unless-stopped
+
+  kafka-consumer:
+    profiles: ["workers"]
+    image: ${DQ_KAFKA_CONSUMER_REGISTRY:-}${DQ_KAFKA_CONSUMER_NAMESPACE:-}${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}:${DQ_KAFKA_CONSUMER_TAG:-latest}
+    build:
+      context: ./dq-kafka-consumer
+      dockerfile: Dockerfile.kafka-consumer
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      TZ: UTC
+      # Kafka
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9094
+      KAFKA_TOPIC: ${KAFKA_CONSUMER_TOPIC:-dq-made-easy.gx.violations}
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID:-dq-consumer-violations}
+      KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS: ${KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS:-5}
+      KAFKA_CONSUMER_MAX_POLL_RECORDS: ${KAFKA_CONSUMER_MAX_POLL_RECORDS:-500}
+      KAFKA_CONSUMER_LOOP_DELAY_SECONDS: ${KAFKA_CONSUMER_LOOP_DELAY_SECONDS:-30}
+      KAFKA_CONSUMER_BATCH_SIZE: ${KAFKA_CONSUMER_BATCH_SIZE:-1000}
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest}
+      # S3 storage (optional)
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      KAFKA_CONSUMER_S3_BUCKET: ${KAFKA_CONSUMER_S3_BUCKET:-dq-gx-exceptions}
+      KAFKA_CONSUMER_S3_PREFIX: ${KAFKA_CONSUMER_S3_PREFIX:-gx-exceptions}
+      KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS: ${KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS:-true}
+      # PostgreSQL storage (default: same DB as the rest of the stack)
+      KAFKA_CONSUMER_DB_URL: ${KAFKA_CONSUMER_DB_URL:-${DQ_DB_INTERNAL_URL}}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-INFO}
     networks:
       - default
       - dq-network
@@ -1825,6 +1916,7 @@ volumes:
   spark-jars:
   ivy2_cache:
   dq-made-easy-llm-hf-cache:
+  kafka_data:
 
 secrets:
   internal_mkcert_root_ca:

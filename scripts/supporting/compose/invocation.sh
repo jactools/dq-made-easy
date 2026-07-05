@@ -11,12 +11,90 @@
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 
+IMAGE_TAG_VARS=(
+  DQ_BASE_TAG
+  DQ_API_TAG
+  DQ_ENGINE_TAG
+  DQ_PROFILING_TAG
+  DQ_FRONTEND_TAG
+  DQ_KONG_TAG
+  DQ_DB_TAG
+  DQ_KEYCLOAK_TAG
+  DQ_LLM_TAG
+  DQ_OPENMETADATA_DB_TAG
+  DQ_OPENMETADATA_SERVER_TAG
+  DQ_METADATA_CONFIGURE_TAG
+)
+
+ensure_calculated_image_tags() {
+  if [ "${COMPOSE_TAGS_AUTO_LOADED:-false}" = "true" ]; then
+    return 0
+  fi
+
+  local needs_calculated_tags=false
+  local tag_var=""
+  local saved_tags_file=""
+  local line=""
+  local calculate_rc=0
+  local calculated_tag_lines=""
+
+  for tag_var in "${IMAGE_TAG_VARS[@]}"; do
+    if [ -z "${!tag_var:-}" ]; then
+      needs_calculated_tags=true
+      break
+    fi
+  done
+
+  if [ "$needs_calculated_tags" != "true" ]; then
+    COMPOSE_TAGS_AUTO_LOADED=true
+    return 0
+  fi
+
+  saved_tags_file="$(mktemp)"
+  for tag_var in "${IMAGE_TAG_VARS[@]}"; do
+    if [ -n "${!tag_var:-}" ]; then
+      printf '%s=%s\n' "$tag_var" "${!tag_var}" >> "$saved_tags_file"
+    fi
+  done
+
+  calculated_tag_lines="$(
+    ROOT_ENV_FILE="$ROOT_ENV_FILE" LOG_LEVEL=1 bash -c '
+      source "$1" >/dev/null 2>&1
+      shift
+      for tag_var in "$@"; do
+        eval "tag_value=\${$tag_var-}"
+        printf "%s=%s\n" "$tag_var" "$tag_value"
+      done
+    ' "$ROOT_DIR/scripts/calculate_versions.sh" "$ROOT_DIR/scripts/calculate_versions.sh" "${IMAGE_TAG_VARS[@]}"
+  )" || calculate_rc=$?
+
+  if [ "$calculate_rc" -ne 0 ]; then
+    warning "compose/invocation.sh" "Unable to auto-calculate image tags via scripts/calculate_versions.sh"
+  else
+    while IFS= read -r line; do
+      [ -z "$line" ] && continue
+      export "$line"
+    done <<EOF
+$calculated_tag_lines
+EOF
+  fi
+
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    export "$line"
+  done < "$saved_tags_file"
+  rm -f "$saved_tags_file"
+
+  COMPOSE_TAGS_AUTO_LOADED=true
+}
+
 docker_compose() {
   if [ -z "${ROOT_ENV_FILE:-}" ]; then
     error "compose/invocation.sh" "ROOT_ENV_FILE must be set before calling docker_compose"
     return 1
   fi
 
+  ensure_calculated_image_tags
   docker compose --env-file "$ROOT_ENV_FILE" "$@"
 }
 
