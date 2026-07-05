@@ -45,6 +45,7 @@ os.environ["APP_CONFIG_ENCRYPTION_KEY"] = "i0aU2BE0dzqEVAWxfEsvffw5zw93FjFZrr24R
 # Make commonly-used local package source dirs importable during tests
 local_src_paths = [
     os.path.join(ROOT, "dq-api", "fastapi"),
+    os.path.join(ROOT, "dq-engine"),
     os.path.join(ROOT, "dq-utils", "src"),
     os.path.join(ROOT, "dq-domain-validation", "src"),
 ]

@@ -6,8 +6,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from dq_utils.logging_utils import configure_logging
-from runtime_lowerers import build_failure_envelope
-from runtime_lowerers import build_compiled_artifact_for_engine
+from dq_plan_lowerers import build_failure_envelope
+from dq_plan_lowerers import build_compiled_artifact_for_engine
 from spark_expectations_metrics import render_prometheus_metrics
 
 LOG_LEVEL = os.getenv("DQ_LOG_LEVEL", "INFO")

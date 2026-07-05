@@ -47,6 +47,12 @@ Layer 6 (dispatch):       gx_dispatch_*.py, *_dispatch*.py
 - Policy docs go in `docs/policies/`
 - Always update docs when code changes. If you modify a module, update its architecture doc reference.
 
+## Running Tests
+
+- Never run `python3`, `pytest`, or `venv/bin/python` directly for tests.
+- Always use `scripts/python_arm64.sh --python-bin ./venv/bin/python -m pytest ...`
+- See `.github/copilot/03-testing.md` for the full rules and error patterns.
+
 ## Conflict Resolution
 
 If a rule conflicts with an explicit developer or system instruction, raise the conflict to the user. Do not silently override.

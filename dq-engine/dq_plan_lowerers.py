@@ -1,7 +1,22 @@
+"""Runtime lowerer registry and shared lowering helpers (Layer 2).
+
+This module owns the lowerer registry, normalization helpers, failure
+envelope construction, and per-engine lowering dispatch. Per-engine
+lowering logic lives in `dq_plan_lowerers_gx.py`, `dq_plan_lowerers_trino.py`,
+and `dq_plan_lowerers_soda.py`.
+
+All constants and shared utilities that support lowering are kept here so
+per-engine modules stay small and focused.
+"""
+
 from __future__ import annotations
 
 import traceback
 from typing import Any
+
+# ---------------------------------------------------------------------------
+# Registry constants
+# ---------------------------------------------------------------------------
 
 SUPPORTED_RUNTIME_ENGINES = {"gx", "soda", "spark_expectations", "trino"}
 SUPPORTED_RUNTIME_CAPABILITIES = {
@@ -24,21 +39,48 @@ ENGINE_TARGETS = {
     "spark_expectations": "pyspark",
     "trino": "trino_sql",
 }
-ROW_RULE_TYPES = {"not_null", "min", "max", "equals", "not_equal", "between", "in", "not_in", "is_null"}
-AGGREGATE_RULE_TYPES = {"count", "sum", "avg", "stddev", "row_count", "unique", "missing_count", "duplicate_count", "distinct_count"}
+ROW_RULE_TYPES = {
+    "not_null",
+    "min",
+    "max",
+    "equals",
+    "not_equal",
+    "between",
+    "in",
+    "not_in",
+    "is_null",
+}
+AGGREGATE_RULE_TYPES = {
+    "count",
+    "sum",
+    "avg",
+    "stddev",
+    "row_count",
+    "unique",
+    "missing_count",
+    "duplicate_count",
+    "distinct_count",
+}
+
+# ---------------------------------------------------------------------------
+# Normalization helpers
+# ---------------------------------------------------------------------------
 
 
 def normalize_engine_type(engine_type: str | None) -> str:
+    """Normalize an engine type string to its canonical form."""
     normalized_engine = (engine_type or "").strip().lower()
     return ENGINE_TYPE_ALIASES.get(normalized_engine, normalized_engine)
 
 
 def _resolve_engine_target(engine_type: str | None) -> str | None:
+    """Resolve the runtime target for a normalized engine type."""
     normalized_engine = normalize_engine_type(engine_type)
     return ENGINE_TARGETS.get(normalized_engine)
 
 
 def _infer_rule_family(rule_type: str | None) -> str:
+    """Infer the rule family (row, aggregate, query) from a rule type string."""
     normalized_rule_type = (rule_type or "").strip().lower()
     if normalized_rule_type in ROW_RULE_TYPES:
         return "row"
@@ -49,7 +91,13 @@ def _infer_rule_family(rule_type: str | None) -> str:
     return "unknown"
 
 
+# ---------------------------------------------------------------------------
+# Failure envelope helpers
+# ---------------------------------------------------------------------------
+
+
 def _build_failure_metrics(*, rule: dict[str, Any], engine_type: str | None, failure_stage: str) -> dict[str, Any]:
+    """Build failure metrics for a failed lowering attempt."""
     normalized_engine = normalize_engine_type(engine_type)
     rule_type = str(rule.get("type") or "").strip().lower()
     return {
@@ -83,13 +131,25 @@ def build_failure_envelope(
     compiled_artifact: dict[str, Any] | None = None,
     failure_metrics: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """Build a complete failure envelope for a lowering/compilation error."""
     normalized_engine = normalize_engine_type(engine_type)
     rule_type = str(rule.get("type") or "").strip()
-    metrics = dict(failure_metrics or _build_failure_metrics(rule=rule, engine_type=normalized_engine, failure_stage=failure_stage))
+    metrics = dict(
+        failure_metrics
+        or _build_failure_metrics(
+            rule=rule,
+            engine_type=normalized_engine,
+            failure_stage=failure_stage,
+        )
+    )
     trace = {
         "exception_type": exception.__class__.__name__ if exception else None,
         "message": failure_message,
-        "traceback": "".join(traceback.TracebackException.from_exception(exception).format()) if exception else None,
+        "traceback": (
+            "".join(traceback.TracebackException.from_exception(exception).format())
+            if exception
+            else None
+        ),
     }
     failed_check = {
         "rule_id": rule.get("id"),
@@ -124,7 +184,13 @@ def build_failure_envelope(
     }
 
 
+# ---------------------------------------------------------------------------
+# Utility helpers
+# ---------------------------------------------------------------------------
+
+
 def _format_expectation_literal(value: Any) -> str:
+    """Format an expectation parameter value as a literal string."""
     if isinstance(value, str):
         return repr(value)
     if isinstance(value, bool):
@@ -134,7 +200,13 @@ def _format_expectation_literal(value: Any) -> str:
     return str(value)
 
 
+# ---------------------------------------------------------------------------
+# Registry
+# ---------------------------------------------------------------------------
+
+
 def get_runtime_capabilities(engine_type: str | None) -> set[str]:
+    """Return the set of supported capabilities for an engine type."""
     normalized_engine = normalize_engine_type(engine_type)
     if normalized_engine not in SUPPORTED_RUNTIME_ENGINES:
         raise ValueError(f"unsupported runtime engine: {engine_type!r}")
@@ -142,59 +214,40 @@ def get_runtime_capabilities(engine_type: str | None) -> set[str]:
 
 
 def get_runtime_lowerer(engine_type: str | None) -> Any:
+    """Resolve and return the lowering function for a given engine type."""
     normalized_engine = normalize_engine_type(engine_type)
     if normalized_engine == "gx":
+        from dq_plan_lowerers_gx import lower_rule_to_gx
+
         return lower_rule_to_gx
     if normalized_engine == "soda":
+        from dq_plan_lowerers_soda import lower_rule_to_soda
+
         return lower_rule_to_soda
     if normalized_engine == "spark_expectations":
-        from spark_expectations_execution_adapter import lower_rule_to_spark_expectations
+        from spark_expectations_execution_adapter import (
+            lower_rule_to_spark_expectations,
+        )
 
         return lower_rule_to_spark_expectations
     if normalized_engine == "trino":
+        from dq_plan_lowerers_trino import lower_rule_to_trino
+
         return lower_rule_to_trino
     raise ValueError(f"unsupported runtime engine: {engine_type!r}")
 
 
-def lower_rule_to_gx(rule: dict[str, Any]) -> dict[str, Any]:
-    from rule_translator import translate
-
-    expectation = translate(rule)
-    return {
-        "engine_type": "gx",
-        "engine_target": "pyspark",
-        "expectation": type(expectation).__name__,
-        "kwargs": expectation.to_json_dict() if hasattr(expectation, "to_json_dict") else {},
-    }
+# ---------------------------------------------------------------------------
+# Compilation
+# ---------------------------------------------------------------------------
 
 
-def lower_rule_to_soda(rule: dict[str, Any]) -> dict[str, Any]:
-    raise ValueError(f"Soda lowering is not implemented for rule {rule.get('id')!r}")
-
-
-def lower_rule_to_trino(rule: dict[str, Any]) -> dict[str, Any]:
-    from trino_adapter import (
-        lower_aggregate_rule_to_trino,
-        lower_query_rule_to_trino,
-        lower_row_rule_to_trino,
-    )
-
-    rule_type = str(rule.get("type") or "").strip()
-
-    # Delegate to appropriate lowerer based on rule type
-    if rule_type in ROW_RULE_TYPES:
-        return lower_row_rule_to_trino(rule)
-
-    if rule_type in AGGREGATE_RULE_TYPES:
-        return lower_aggregate_rule_to_trino(rule)
-
-    if rule_type == "query":
-        return lower_query_rule_to_trino(rule)
-
-    raise ValueError(f"unsupported rule type for Trino adapter: {rule_type!r}")
-
-
-def build_compiled_artifact_for_engine(rule: dict[str, Any], *, engine_type: str | None) -> dict[str, Any]:
+def build_compiled_artifact_for_engine(
+    rule: dict[str, Any],
+    *,
+    engine_type: str | None,
+) -> dict[str, Any]:
+    """Build a compiled artifact for a rule targeting a specific engine."""
     normalized_engine = normalize_engine_type(engine_type)
     try:
         if normalized_engine == "gx":
@@ -211,16 +264,31 @@ def build_compiled_artifact_for_engine(rule: dict[str, Any], *, engine_type: str
             raise ValueError(f"unsupported runtime engine: {engine_type!r}")
 
         if normalized_engine == "spark_expectations":
-            from spark_expectations_execution_adapter import build_error_management_plan
+            from spark_expectations_execution_adapter import (
+                build_error_management_plan,
+            )
 
             lowered_rule = get_runtime_lowerer(normalized_engine)(rule)
             error_plan = build_error_management_plan(
                 (
-                    {"row_id": row_id, "reason": f"synthetic-failure-{row_id}"}
-                    for row_id in range(int(rule.get("params", {}).get("synthetic_error_count", 0)))
+                    {
+                        "row_id": row_id,
+                        "reason": f"synthetic-failure-{row_id}",
+                    }
+                    for row_id in range(
+                        int(
+                            rule.get("params", {}).get(
+                                "synthetic_error_count", 0
+                            )
+                        )
+                    )
                 ),
-                chunk_size=int(rule.get("params", {}).get("error_chunk_size", 10_000)),
-                max_samples=int(rule.get("params", {}).get("error_sample_size", 20)),
+                chunk_size=int(
+                    rule.get("params", {}).get("error_chunk_size", 10_000)
+                ),
+                max_samples=int(
+                    rule.get("params", {}).get("error_sample_size", 20)
+                ),
             )
             return {
                 "ok": True,
@@ -236,6 +304,8 @@ def build_compiled_artifact_for_engine(rule: dict[str, Any], *, engine_type: str
             }
 
         if normalized_engine == "trino":
+            from dq_plan_lowerers_trino import lower_rule_to_trino
+
             lowered_rule = lower_rule_to_trino(rule)
             return {
                 "ok": True,

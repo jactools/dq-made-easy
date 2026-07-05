@@ -28,6 +28,7 @@ Use this folder for implementation notes, phase reports, and deep-dive execution
 
 - [DQ_RULE_TO_RUN_PLAN_FLOW.md](/docs/implementation-details/DQ_RULE_TO_RUN_PLAN_FLOW/)
 - [DQ_19_MULTI_RUNTIME_LOWERERS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/DQ_19_MULTI_RUNTIME_LOWERERS_IMPLEMENTATION_PLAN/)
+- [DQ_20_EXECUTION_DISPATCH_AND_LOWERER_MODULE_SPLIT_PLAN.md](/docs/implementation-details/DQ_20_EXECUTION_DISPATCH_AND_LOWERER_MODULE_SPLIT_PLAN/) — Actionable split plan for making `execution_dispatch` the shared abstraction layer and keeping GX/lowerer modules separate
 - [SPARK_EXPECTATIONS_ENGINE_PLAN.md](/docs/implementation-details/SPARK_EXPECTATIONS_ENGINE_PLAN/)
 - [ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS.md](/docs/implementation-details/ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS/)
 - [ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS.md](/docs/implementation-details/ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS/)

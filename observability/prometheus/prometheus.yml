@@ -56,17 +56,17 @@ scrape_configs:
   # ========================================================================
   # DQ-API Service
   # ========================================================================
+  # Scrape /health (public) so Prometheus can set up{job="dq-api"}=1.
+  # The /metrics endpoint stays protected behind auth — we only need
+  # the auto-generated up metric to confirm the container is reachable.
+  # ========================================================================
   - job_name: "dq-api"
     static_configs:
       - targets: ["api:4010"]
         labels:
           service: dq-api
           component: api
-    metrics_path: "/metrics"
-    oauth2:
-      client_id: "dq-engine-gx-worker"
-      client_secret_file: "/etc/prometheus/oauth2_client_secret"
-      token_url: "http://keycloak:8080/realms/jaccloud/protocol/openid-connect/token"
+    metrics_path: "/health"
     scrape_interval: 15s
     scrape_timeout: 10s
 

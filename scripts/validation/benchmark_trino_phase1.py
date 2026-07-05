@@ -31,9 +31,9 @@ DQ_ENGINE_DIR = ROOT_DIR / "dq-engine"
 if str(DQ_ENGINE_DIR) not in sys.path:
     sys.path.insert(0, str(DQ_ENGINE_DIR))
 
-from runtime_lowerers import lower_rule_to_trino  # noqa: E402
-from trino_execution_pipeline import create_trino_execution_plan  # noqa: E402
-from trino_execution_pipeline import execute_trino_pipeline  # noqa: E402
+from dq_plan_lowerers_trino import lower_rule_to_trino  # noqa: E402
+from trino_execution_adapter import create_trino_execution_plan  # noqa: E402
+from trino_execution_adapter import execute_trino_pipeline  # noqa: E402
 from trino_executor import TrinoQueryResult  # noqa: E402
 
 APP_VERSION = os.environ.get("APP_VERSION", "0.11.5").strip() or "0.11.5"

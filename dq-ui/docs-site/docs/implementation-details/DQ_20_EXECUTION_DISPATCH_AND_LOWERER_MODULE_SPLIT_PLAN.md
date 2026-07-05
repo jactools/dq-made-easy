@@ -149,11 +149,11 @@ gx_dispatch_telemetry.py              ← GX-only telemetry
 - `gx_dispatch_*` modules remain unchanged in name but become strictly GX-specific.
 - `spark_expectations_execution_adapter.py` (renamed from `spark_expectations_adapter.py`) and `trino_execution_adapter.py` (renamed from `trino_execution_pipeline.py`) keep their engine-specific nature with consistent naming.
 - `execution_contract.py` is renamed to `dq_plan_execution_contract.py` for namespace consistency.
-- Engine-specific dispatch modules follow the pattern `<engine>_dispatch.py`, `<engine>_worker.py`, etc. (e.g., `gx_dispatch_worker.py`, `spark_expectations_dispatch.py`).
+- Engine-specific dispatch modules follow the pattern `&lt;engine&gt;_dispatch.py`, `&lt;engine&gt;_worker.py`, etc. (e.g., `gx_dispatch_worker.py`, `spark_expectations_dispatch.py`).
 
 ### Naming consistency for engine-specific modules
 
-Engine-specific execution adapters use the pattern `<engine>_execution_adapter.py`. This is the only place where the engine name appears as a prefix in the shared layer. The full set:
+Engine-specific execution adapters use the pattern `&lt;engine&gt;_execution_adapter.py`. This is the only place where the engine name appears as a prefix in the shared layer. The full set:
 
 - `gx_execution_adapter.py` — Great Expectations execution (to be created)
 - `spark_expectations_execution_adapter.py` — Spark Expectations execution (renamed from `spark_expectations_adapter.py`)
@@ -333,7 +333,7 @@ No layer may import from a higher layer. A layer may import from any equal-or-lo
 - [x] `runtime_lowerers.py` and `execution_dispatch.py` are fully removed.
 - [x] All new tests pass (49 tests across 6 test files).
 - [x] No import cycles exist in the new module graph.
-- [x] Engine-specific dispatch modules follow the `<engine>_execution_adapter.py` naming pattern (consistent with `gx_dispatch_*`).
+- [x] Engine-specific dispatch modules follow the `&lt;engine&gt;_execution_adapter.py` naming pattern (consistent with `gx_dispatch_*`).
 
 ## Risks and mitigations
 
@@ -344,7 +344,7 @@ No layer may import from a higher layer. A layer may import from any equal-or-lo
 | Behavior drift if lowerer modules build different failure envelopes | Centralize `build_failure_envelope` in `dq_plan_lowerers.py`; per-engine modules must use it. |
 | Output generation (DB, S3, Kafka) leaks into engine-specific modules | Centralize output/reporting in `dq_plan_execution_report.py`, `dq_plan_execution_persistence.py`, and `dq_plan_execution_streaming.py`. Engine-specific modules should compose, not duplicate. |
 | The `build_execution_progress` / `report_execution_progress` functions use GX-specific API paths | These are already generic enough. If GX-specific paths emerge, create a GX-specific override. |
-| Engine-specific naming inconsistency | Follow `<engine>_execution_adapter.py` and `<engine>_dispatch.py` patterns consistently. Document the naming convention in the architecture doc. |
+| Engine-specific naming inconsistency | Follow `&lt;engine&gt;_execution_adapter.py` and `&lt;engine&gt;_dispatch.py` patterns consistently. Document the naming convention in the architecture doc. |
 | Renaming existing files breaks imports | Rename `spark_expectations_adapter.py` → `spark_expectations_execution_adapter.py` and `trino_execution_pipeline.py` → `trino_execution_adapter.py` in Phase 1 with compat shims. Update all callers in Phase 6. |
 
 ## Module line-count targets (approximate)

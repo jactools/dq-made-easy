@@ -24,6 +24,8 @@ from dq_plan_execution_api import (
     TokenProviderFactory,
     build_execution_progress,
     build_token_provider,
+)
+from dq_plan_execution_report import (
     report_execution_progress,
     report_run,
 )
@@ -63,7 +65,7 @@ def execute_engine_rule_payload(
     config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Execute a rule payload through the appropriate engine adapter."""
-    from runtime_lowerers import build_failure_envelope
+    from dq_plan_lowerers import build_failure_envelope
 
     normalized_engine = normalize_execution_engine(engine_type)
     if normalized_engine not in SUPPORTED_EXECUTION_ENGINES:
@@ -76,7 +78,7 @@ def execute_engine_rule_payload(
         )
 
     if normalized_engine in {"spark_expectations", "pyspark"}:
-        from dq_plan_execution_contract import persist_execution_payload
+        from dq_plan_execution_persistence import persist_execution_payload
         from spark_expectations_execution_adapter import execute_spark_expectations_rule
 
         request = _request_from_rule_payload(rule_payload, engine_type="spark_expectations", output_dir=output_dir)
