@@ -10,9 +10,9 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from execution_dispatch import coerce_int
-from execution_dispatch import coerce_str
-from execution_dispatch import parse_dispatch_payload
+from dq_plan_execution import coerce_int
+from dq_plan_execution import coerce_str
+from dq_plan_execution import parse_dispatch_payload
 
 from gx_dispatch_api import (
     _api_get_data_object_version,
@@ -24,8 +24,8 @@ from gx_dispatch_runtime import (
     _coerce_source_location,
     _infer_materialized_source_location,
 )
-from gx_dispatch_types import GxWorkerConfig
-from gx_dispatch_types import GxWorkerExecutionError
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerExecutionError
 
 from dq_utils.auth_utils import TokenProvider
 

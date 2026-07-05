@@ -24,10 +24,10 @@ from dq_utils.spark_runtime import build_spark_session_builder
 from dq_utils.spark_runtime import resolve_spark_master
 from dq_utils.spark_runtime import resolve_spark_ui_port
 
-from gx_dispatch_types import GxWorkerConfig
-from gx_dispatch_types import GxWorkerConfigError
-from gx_dispatch_types import GxWorkerExecutionError
-from gx_dispatch_types import SourceLocation
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerConfigError
+from dq_plan_execution_types import GxWorkerExecutionError
+from dq_plan_execution_types import SourceLocation
 
 
 # ---------------------------------------------------------------------------

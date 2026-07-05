@@ -148,7 +148,7 @@ def get_runtime_lowerer(engine_type: str | None) -> Any:
     if normalized_engine == "soda":
         return lower_rule_to_soda
     if normalized_engine == "spark_expectations":
-        from spark_expectations_adapter import lower_rule_to_spark_expectations
+        from spark_expectations_execution_adapter import lower_rule_to_spark_expectations
 
         return lower_rule_to_spark_expectations
     if normalized_engine == "trino":
@@ -211,7 +211,7 @@ def build_compiled_artifact_for_engine(rule: dict[str, Any], *, engine_type: str
             raise ValueError(f"unsupported runtime engine: {engine_type!r}")
 
         if normalized_engine == "spark_expectations":
-            from spark_expectations_adapter import build_error_management_plan
+            from spark_expectations_execution_adapter import build_error_management_plan
 
             lowered_rule = get_runtime_lowerer(normalized_engine)(rule)
             error_plan = build_error_management_plan(

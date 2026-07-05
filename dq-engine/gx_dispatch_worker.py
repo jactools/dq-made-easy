@@ -38,11 +38,11 @@ from gx_dispatch_config import _resolve_worker_heartbeat_key
 from gx_dispatch_config import _resolve_worker_heartbeat_ttl_seconds
 from gx_dispatch_config import load_config
 from gx_dispatch_dispatch import process_dispatch_message
-from execution_dispatch import parse_dispatch_payload
+from dq_plan_execution import parse_dispatch_payload
 from gx_dispatch_telemetry import configure_worker_telemetry
 from gx_dispatch_telemetry import record_worker_failure
-from gx_dispatch_types import GxWorkerConfig
-from gx_dispatch_types import GxWorkerExecutionError
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerExecutionError
 
 
 # ---------------------------------------------------------------------------

@@ -1,241 +1,49 @@
+"""Engine dispatch orchestration and report envelope shaping (Layer 3).
+
+This module owns the main execution dispatch loop
+(`execute_engine_rule_payload` and `process_engine_dispatch_message`) and
+the report envelope shaping helpers. It imports from lower layers only:
+- Layer 0: dq_plan_execution_types
+- Layer 2: runtime_lowerers (for build_failure_envelope)
+- Layer 3: dq_plan_execution_api, dq_plan_execution_payload
+"""
+
 from __future__ import annotations
 
-import json
 import logging
 import time
 from types import SimpleNamespace
-from typing import Any, Callable
+from typing import Any
 
-import requests
-
-from dq_utils.auth_utils import TokenProvider
-from dq_utils.auth_utils import build_oidc_token_provider_from_env
 from dq_utils.logging_utils import log_event
-from gx_dispatch_types import GxWorkerConfig
 
-# Optional Kafka client
-try:
-    from kafka_client import KafkaExceptionPublisher
-except ImportError:
-    KafkaExceptionPublisher = None  # type: ignore
-from gx_dispatch_types import GxWorkerConfigError
-from gx_dispatch_types import GxWorkerExecutionError
-from runtime_lowerers import build_failure_envelope
-
+from dq_plan_execution_api import (
+    ExecutePayloadFn,
+    ReportProgressFn,
+    ReportRunFn,
+    TokenProviderFactory,
+    build_execution_progress,
+    build_token_provider,
+    report_execution_progress,
+    report_run,
+)
+from dq_plan_execution_payload import (
+    normalize_execution_engine,
+)
+from dq_plan_execution_types import DqWorkerConfig, DqWorkerExecutionError
 
 logger = logging.getLogger(__name__)
 
 SUPPORTED_EXECUTION_ENGINES = {"gx", "soda", "sql", "pyspark", "spark", "spark_expectations", "trino"}
-ENGINE_ALIASES = {
-    "great_expectations": "gx",
-    "great-expectations": "gx",
-    "pyspark_native": "pyspark",
-    "spark": "pyspark",
-}
-REPORT_RUN_PATH_TEMPLATE = "/rulebuilder/v1/gx/runs/{run_id}/report"
 
 
-def normalize_execution_engine(engine_type: str | None) -> str:
-    normalized = str(engine_type or "").strip().lower()
-    return ENGINE_ALIASES.get(normalized, normalized)
-
-
-def parse_dispatch_payload(raw: str) -> dict[str, Any]:
-    try:
-        payload = json.loads(raw)
-    except Exception as exc:
-        raise GxWorkerExecutionError("Execution dispatch message is not valid JSON", failure_code="GX_DISPATCH_INVALID_JSON") from exc
-    if not isinstance(payload, dict):
-        raise GxWorkerExecutionError("Execution dispatch message must be a JSON object", failure_code="GX_DISPATCH_INVALID_JSON")
-    return payload
-
-
-def coerce_str(payload: dict[str, Any], *keys: str) -> str:
-    for key in keys:
-        value = payload.get(key)
-        if value is None:
-            continue
-        text_value = str(value).strip()
-        if text_value:
-            return text_value
-    return ""
-
-
-def coerce_int(payload: dict[str, Any], *keys: str) -> int:
-    for key in keys:
-        value = payload.get(key)
-        if value is None:
-            continue
-        try:
-            parsed = int(value)
-            if parsed >= 1:
-                return parsed
-        except Exception:
-            continue
-    return 0
-
-
-def build_token_provider() -> TokenProvider:
-    try:
-        return build_oidc_token_provider_from_env()
-    except Exception:
-        raise GxWorkerConfigError("Failed to initialize API token provider") from None
-
-
-def _build_api_request_headers(config: GxWorkerConfig, token_provider: TokenProvider, *, correlation_id: str) -> dict[str, str]:
-    token = token_provider.get_token(correlation_id=correlation_id)
-    return {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "X-Correlation-ID": correlation_id,
-        "X-Request-Source": "dq-engine-execution-worker",
-        "X-Api-Url": config.api_url,
-    }
-
-
-def api_request(
-    config: GxWorkerConfig,
-    token_provider: TokenProvider,
-    *,
-    method: str,
-    path: str,
-    correlation_id: str,
-    params: dict[str, Any] | None = None,
-    json_body: dict[str, Any] | None = None,
-) -> Any:
-    url = f"{config.api_url.rstrip('/')}{path}"
-    headers = _build_api_request_headers(config, token_provider, correlation_id=correlation_id)
-    try:
-        response = requests.request(method=method.upper(), url=url, headers=headers, params=params, json=json_body, timeout=30)
-    except requests.RequestException as exc:  # pragma: no cover
-        raise GxWorkerExecutionError(f"API request failed: {exc}", failure_code="GX_API_REQUEST_FAILED") from exc
-
-    if response.status_code >= 400:
-        raise GxWorkerExecutionError(
-            f"API request failed with {response.status_code}: {response.text}",
-            failure_code="GX_API_REQUEST_FAILED",
-            status_code=response.status_code,
-        )
-
-    try:
-        return response.json() if response.content else None
-    except ValueError:
-        return response.text
-
-
-async def report_run(
-    config: GxWorkerConfig,
-    token_provider: TokenProvider,
-    *,
-    run_id: str,
-    correlation_id: str,
-    new_status: str,
-    changed_by: str | None,
-    reason: str | None,
-    details: dict[str, Any] | None = None,
-    execution_progress: dict[str, Any] | None = None,
-    started_at: str | None = None,
-    completed_at: str | None = None,
-    result_summary: dict[str, Any] | None = None,
-    metrics: dict[str, Any] | None = None,
-    diagnostics: list[dict[str, Any]] | None = None,
-    failure_code: str | None = None,
-    failure_message: str | None = None,
-    kafka_publisher: KafkaExceptionPublisher | None = None,
-) -> None:
-    # Separate diagnostics (violations) from metadata
-    violation_diagnostics = diagnostics if diagnostics else []
-    
-    # Publish violations to Kafka if available
-    if kafka_publisher and violation_diagnostics:
-        await kafka_publisher.publish_violations(violation_diagnostics)
-        logger.info("Published %d violations to Kafka for run %s", len(violation_diagnostics), run_id)
-    
-    # Only send summary metadata via API (not full violation details)
-    api_payload = {
-        "new_status": new_status,
-        "changed_by": changed_by,
-        "reason": reason,
-        "details": details,
-        "execution_progress": execution_progress,
-        "started_at": started_at,
-        "completed_at": completed_at,
-        "result_summary": result_summary,
-        "metrics": metrics,
-        # Send summary counts, not full diagnostics
-        "violation_count": len(violation_diagnostics),
-        "diagnostics_count": min(len(violation_diagnostics), 100),  # Only first 100 for debugging
-        "failure_code": failure_code,
-        "failure_message": failure_message,
-    }
-    
-    _ = api_request(
-        config,
-        token_provider,
-        method="POST",
-        path=REPORT_RUN_PATH_TEMPLATE.format(run_id=run_id),
-        correlation_id=correlation_id,
-        json_body=api_payload,
-    )
-
-
-def build_execution_progress(*, completed_steps: int, total_steps: int, label: str, source: str = "dq-engine-execution-worker") -> dict[str, Any]:
-    percent = 0 if total_steps <= 0 else int(round((completed_steps / total_steps) * 100))
-    return {
-        "percent": max(0, min(percent, 100)),
-        "label": label,
-        "completed_steps": completed_steps,
-        "total_steps": total_steps,
-        "source": source,
-        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-    }
-
-
-def report_execution_progress(
-    config: GxWorkerConfig,
-    token_provider: TokenProvider,
-    *,
-    run_id: str,
-    correlation_id: str,
-    changed_by: str | None,
-    reason: str,
-    details: dict[str, Any] | None,
-    completed_steps: int,
-    total_steps: int,
-    label: str,
-) -> None:
-    report_run(
-        config,
-        token_provider,
-        run_id=run_id,
-        correlation_id=correlation_id,
-        new_status="running",
-        changed_by=changed_by,
-        reason=reason,
-        details=details,
-        execution_progress=build_execution_progress(
-            completed_steps=completed_steps,
-            total_steps=total_steps,
-            label=label,
-        ),
-    )
-
-
-def log_dispatch_received(*, correlation_id: str, run_id: str, suite_id: str | None = None, suite_version: int | None = None, execution_shape: str | None = None, **extra: Any) -> None:
-    log_event(
-        logger,
-        "execution.worker.dispatch.received",
-        component="dq-engine-execution-worker",
-        correlation_id=correlation_id,
-        run_id=run_id,
-        suite_id=suite_id,
-        suite_version=suite_version,
-        execution_shape=execution_shape,
-        **extra,
-    )
+# ---------------------------------------------------------------------------
+# Dispatch loop
+# ---------------------------------------------------------------------------
 
 
 def _request_from_rule_payload(rule_payload: dict[str, Any], *, engine_type: str, output_dir: str | None) -> Any:
+    """Build a request namespace from a rule payload."""
     return SimpleNamespace(
         id=rule_payload.get("id"),
         table=str(rule_payload.get("table") or ""),
@@ -254,6 +62,9 @@ def execute_engine_rule_payload(
     output_dir: str | None = None,
     config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """Execute a rule payload through the appropriate engine adapter."""
+    from runtime_lowerers import build_failure_envelope
+
     normalized_engine = normalize_execution_engine(engine_type)
     if normalized_engine not in SUPPORTED_EXECUTION_ENGINES:
         return build_failure_envelope(
@@ -265,8 +76,8 @@ def execute_engine_rule_payload(
         )
 
     if normalized_engine in {"spark_expectations", "pyspark"}:
-        from execution_contract import persist_execution_payload
-        from spark_expectations_adapter import execute_spark_expectations_rule
+        from dq_plan_execution_contract import persist_execution_payload
+        from spark_expectations_execution_adapter import execute_spark_expectations_rule
 
         request = _request_from_rule_payload(rule_payload, engine_type="spark_expectations", output_dir=output_dir)
         result = execute_spark_expectations_rule(request)
@@ -277,8 +88,8 @@ def execute_engine_rule_payload(
         return result
 
     if normalized_engine == "trino":
-        from trino_execution_pipeline import create_trino_execution_plan
-        from trino_execution_pipeline import execute_trino_pipeline
+        from trino_execution_adapter import create_trino_execution_plan
+        from trino_execution_adapter import execute_trino_pipeline
 
         plan = create_trino_execution_plan(rule_payload, config=config or {})
         return execute_trino_pipeline(plan, output_dir=output_dir)
@@ -292,7 +103,13 @@ def execute_engine_rule_payload(
     )
 
 
+# ---------------------------------------------------------------------------
+# Report envelope shaping
+# ---------------------------------------------------------------------------
+
+
 def _result_status(payload: dict[str, Any]) -> str:
+    """Derive a result status string from an execution payload."""
     observability = payload.get("observability_summary") if isinstance(payload.get("observability_summary"), dict) else {}
     explicit_status = payload.get("result_status") or observability.get("result")
     if isinstance(explicit_status, str) and explicit_status.strip():
@@ -306,6 +123,7 @@ def _result_status(payload: dict[str, Any]) -> str:
 
 
 def build_execution_report_summary(response_payload: dict[str, Any], *, output_dir: Any = None) -> dict[str, Any]:
+    """Build an aggregated execution report summary."""
     metrics = response_payload.get("metrics")
     return {
         "engine_type": response_payload.get("engine_type"),
@@ -329,6 +147,7 @@ def build_execution_report_summary(response_payload: dict[str, Any], *, output_d
 
 
 def build_execution_report_details(response_payload: dict[str, Any], *, output_dir: Any = None) -> dict[str, Any]:
+    """Build a detailed execution report."""
     details = {
         "source": "dq-engine-execution-worker",
         "engine_type": response_payload.get("engine_type"),
@@ -355,14 +174,13 @@ def build_execution_report_details(response_payload: dict[str, Any], *, output_d
     return details
 
 
-ReportRunFn = Callable[..., None]
-ReportProgressFn = Callable[..., None]
-TokenProviderFactory = Callable[[], TokenProvider]
-ExecutePayloadFn = Callable[..., dict[str, Any]]
+# ---------------------------------------------------------------------------
+# Full dispatch message processing
+# ---------------------------------------------------------------------------
 
 
 async def process_engine_dispatch_message(
-    config: GxWorkerConfig,
+    config: DqWorkerConfig,
     *,
     payload: dict[str, Any],
     run_id: str,
@@ -373,24 +191,28 @@ async def process_engine_dispatch_message(
     token_provider_factory: TokenProviderFactory = build_token_provider,
     execute_payload_fn: ExecutePayloadFn = execute_engine_rule_payload,
 ) -> dict[str, Any]:
+    """Process a full engine dispatch message through the execution pipeline."""
+    from dq_plan_execution_api import build_token_provider
+    from kafka_client import build_kafka_publisher
+
     rule_payload = payload.get("rule_payload")
     if not isinstance(rule_payload, dict):
-        raise GxWorkerExecutionError(
+        raise DqWorkerExecutionError(
             "Execution dispatch payload is missing rule_payload",
-            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+            failure_code="DQ_DISPATCH_INVALID_PAYLOAD",
         )
 
-    engine_type = normalize_execution_engine(coerce_str(payload, "engine_type") or coerce_str(rule_payload, "engine_type"))
+    engine_type = normalize_execution_engine(payload.get("engine_type", ""))
     if engine_type not in SUPPORTED_EXECUTION_ENGINES:
-        raise GxWorkerExecutionError(
+        raise DqWorkerExecutionError(
             f"Unsupported execution dispatch engine type: {engine_type!r}",
-            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+            failure_code="DQ_DISPATCH_INVALID_PAYLOAD",
         )
 
     token_provider = token_provider_factory()
     execution_started = time.perf_counter()
     output_dir = str(payload.get("output_dir")) if payload.get("output_dir") is not None else None
-    
+
     # Initialize Kafka publisher for streaming violations
     kafka_publisher = None
     try:
@@ -426,21 +248,20 @@ async def process_engine_dispatch_message(
             config=payload.get("config") if isinstance(payload.get("config"), dict) else None,
         )
         if not isinstance(response_payload, dict):
-            raise GxWorkerExecutionError(
+            raise DqWorkerExecutionError(
                 f"{engine_type} execution failed",
-                failure_code="GX_WORKER_EXECUTION_ERROR",
+                failure_code="DQ_WORKER_EXECUTION_ERROR",
             )
 
         report_summary = build_execution_report_summary(response_payload, output_dir=payload.get("output_dir"))
         report_details = build_execution_report_details(response_payload, output_dir=payload.get("output_dir"))
         metrics = response_payload.get("metrics") if isinstance(response_payload.get("metrics"), dict) else response_payload.get("observability_summary", {})
-        
-        # Extract diagnostics for violation streaming
+
         diagnostics = response_payload.get("diagnostics") or []
-        
+
         status = "succeeded" if response_payload.get("ok") else "failed"
         label = f"{engine_type} execution completed" if status == "succeeded" else f"{engine_type} execution completed with failures"
-        failure_code = None if status == "succeeded" else response_payload.get("failure_code") or "GX_WORKER_EXECUTION_ERROR"
+        failure_code = None if status == "succeeded" else response_payload.get("failure_code") or "DQ_WORKER_EXECUTION_ERROR"
         failure_message = None if status == "succeeded" else response_payload.get("failure_message") or response_payload.get("error") or f"{engine_type} execution failed"
 
         if report_progress_fn is not None:
@@ -486,6 +307,5 @@ async def process_engine_dispatch_message(
 
         return response_payload
     finally:
-        # Stop Kafka publisher and flush
         if kafka_publisher:
             await kafka_publisher.stop()

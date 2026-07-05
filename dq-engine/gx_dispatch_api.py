@@ -16,10 +16,10 @@ import requests
 
 from dq_utils.logging_utils import log_event
 from dq_utils.auth_utils import TokenProvider
-from execution_dispatch import report_run
+from dq_plan_execution import report_run
 
-from gx_dispatch_types import GxWorkerConfig
-from gx_dispatch_types import GxWorkerExecutionError
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerExecutionError
 
 logger = logging.getLogger(__name__)
 

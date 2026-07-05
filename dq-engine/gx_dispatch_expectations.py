@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from gx_dispatch_types import GxWorkerExecutionError
+from dq_plan_execution_types import GxWorkerExecutionError
 
 
 class _NativeGxBatchRunner:

@@ -7,9 +7,9 @@ import tempfile
 from typing import Any
 from uuid import uuid4
 
-from gx_dispatch_types import GxWorkerConfig
-from gx_dispatch_types import GxWorkerConfigError
-from gx_dispatch_types import GxWorkerExecutionError
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerConfigError
+from dq_plan_execution_types import GxWorkerExecutionError
 from gx_dispatch_payload import SourceLocation
 from gx_dispatch_api import _api_get_data_object_version
 from gx_dispatch_api import _api_report_execution_progress

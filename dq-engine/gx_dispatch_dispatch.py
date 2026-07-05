@@ -16,7 +16,7 @@ from typing import Any
 from uuid import uuid4
 
 from dq_utils.logging_utils import log_event
-from execution_dispatch import (
+from dq_plan_execution import (
     SUPPORTED_EXECUTION_ENGINES,
     build_execution_progress,
     coerce_int,
@@ -36,7 +36,7 @@ from gx_dispatch_config import (
     _build_token_provider,
     _utc_now_iso,
 )
-from gx_dispatch_expectations import _evaluate_expectations_spark
+from gx_dispatch_expectations import evaluate_expectations_spark
 from gx_dispatch_expectations import _column_is_available
 from gx_dispatch_payload import (
     SourceLocation,
@@ -63,8 +63,8 @@ from gx_dispatch_telemetry import (
     record_worker_expectation_results,
     traced_worker_span,
 )
-from gx_dispatch_types import GxWorkerConfig
-from gx_dispatch_types import GxWorkerExecutionError
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerExecutionError
 
 
 # ---------------------------------------------------------------------------
@@ -237,7 +237,7 @@ def _process_grouped_dispatch_message(
                             f"Grouped GX dispatch suite is not attached to target '{target_id}'",
                             failure_code="GX_DISPATCH_INVALID_PAYLOAD",
                         )
-                    ok, summary, diagnostics = _evaluate_expectations_spark(
+                    ok, summary, diagnostics = evaluate_expectations_spark(
                         df,
                         expectations,
                         primary_key_fields=primary_key_fields,
@@ -587,7 +587,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                     target_count=len(target_ids),
                 )
 
-                ok, summary, diagnostics = _evaluate_expectations_spark(
+                ok, summary, diagnostics = evaluate_expectations_spark(
                     df,
                     expectations,
                     primary_key_fields=primary_key_fields,
@@ -763,7 +763,7 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                     target_count=len(target_ids),
                 )
 
-                ok, summary, diagnostics = _evaluate_expectations_spark(
+                ok, summary, diagnostics = evaluate_expectations_spark(
                     df,
                     expectations,
                     primary_key_fields=primary_key_fields,
