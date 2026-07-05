@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: python-file-sizes
+        name: Python file size check (< 1000 lines)
+        entry: python3 scripts/validation/validate_python_file_sizes.py --allow-list scripts/validation/python-file-allow-list.txt --files
+        args: []
+        language: system
+        types: [python]
+        stages: [pre-commit]
+        pass_filenames: true

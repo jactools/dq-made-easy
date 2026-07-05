@@ -38,6 +38,7 @@ If a `validate_*.sh` file should be completely ignored by the wrapper:
 
 - `all`: runs validation smoke scripts plus all directly includable `validate_*.sh` scripts, excluding `include=false` helpers and `ignore=true` entries.
 - `repo`: repo-only checks (typically no Docker).
+  - Includes repository hygiene checks such as the new Python module line-limit rule for newly added or generated `*.py` files.
 - `governance`: governance logging, monitoring, and release-policy checks used by CI gates.
 - `api`: API validations and API observability smoke.
 - `regression`: end-to-end regression validations for high-value workflows.
