@@ -1,0 +1,34 @@
+{
+  "app_version": "0.11.5",
+  "assertions": [
+    "ValidationRunPlanEntity creation successful",
+    "Plan ID preserved: plan-123",
+    "Business Key preserved: test:validation:v1",
+    "Status preserved: active",
+    "Serialization round-trip successful"
+  ],
+  "command": "python3 -c \"from app.domain.entities.validation_run_plan import ValidationRunPlanEntity; plan = ValidationRunPlanEntity(runPlanId='plan-123', businessKey='test:validation:v1', workspaceId='ws-456', scopeSelector={}, planningMode='single_suite', status='active', currentActiveVersionId='version-123', createdBy='test-user', createdAt='2026-07-04T00:00:00Z', updatedAt='2026-07-04T00:00:00Z'); data = plan.model_dump(by_alias=True); restored = ValidationRunPlanEntity.model_validate(data); assert restored.runPlanId == 'plan-123'\"",
+  "diagnostics": {
+    "execution_time_ms": 300,
+    "pydantic_version": "2.x",
+    "python_version": "3.13.13"
+  },
+  "executed_at_utc": "2026-07-04T00:00:00Z",
+  "feature": "ValidationRunPlanEntity serialization",
+  "proof_data": {
+    "database_verification": {
+      "query": "SELECT COUNT(*) FROM validation_run_plans",
+      "result": 9
+    }
+  },
+  "proof_id": "test-validation-entities-001",
+  "proof_type": "api",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/test-validation-entities-001.json",
+  "status": "passed",
+  "summary": "ValidationRunPlanEntity and ValidationRunPlanVersionEntity serialization test",
+  "test_count": 5,
+  "test_file_count": 1,
+  "test_files": [
+    "/Users/jacbeekers/gitrepos/dq-made-easy/dq-api/fastapi/app/domain/entities/validation_run_plan.py"
+  ]
+}

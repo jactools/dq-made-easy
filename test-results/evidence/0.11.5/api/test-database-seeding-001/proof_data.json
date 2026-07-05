@@ -1,0 +1,21 @@
+{
+  "database_summary": {
+    "validation_run_items": {
+      "failed": 1,
+      "passed": 2,
+      "total": 3,
+      "warnings": 1
+    },
+    "validation_run_plan_versions": {
+      "active": 6,
+      "draft": 4,
+      "total": 10
+    },
+    "validation_run_plans": {
+      "active": 7,
+      "draft": 2,
+      "total": 9
+    }
+  },
+  "foreign_key_integrity": true
+}

@@ -16,8 +16,8 @@ DQ_UTILS_ROOT = ROOT.parent / "dq-utils" / "src"
 if str(DQ_UTILS_ROOT) not in sys.path:
     sys.path.insert(0, str(DQ_UTILS_ROOT))
 
-from gx_dispatch_worker import GxWorkerConfig
-from gx_dispatch_worker import process_dispatch_message
+from gx_dispatch_types import GxWorkerConfig
+from gx_dispatch_dispatch import process_dispatch_message
 from execution_dispatch import execute_engine_rule_payload
 from main import app
 from main import compile_rule_payload

@@ -43,8 +43,6 @@ import redis
 
 WORKFLOW_LABEL = "validate_kafka_violations_pipeline"
 ROOT_DIR = Path(__file__).resolve().parents[2]
-PROOF_DIR = ROOT_DIR / "test-results" / "test-proof" / "api" / "engine"
-EVIDENCE_DIR = ROOT_DIR / "test-results" / "evidence" / "api"
 
 
 # ---------------------------------------------------------------------------
@@ -152,42 +150,7 @@ def _mint_access_token(session: requests.Session) -> str:
     return token
 
 
-def _write_proof(
-    *,
-    proof_id: str,
-    feature: str,
-    summary: str,
-    status: str,
-    test_count: int,
-    assertions: list[str],
-    proof_data: dict[str, Any],
-    diagnostics: dict[str, Any] | None = None,
-) -> str:
-    """Write a test-proof JSON artifact and return its path."""
-    PROOF_DIR.mkdir(parents=True, exist_ok=True)
-    proof: dict[str, Any] = {
-        "app_version": "api",
-        "proof_id": proof_id,
-        "proof_type": "engine",
-        "feature": feature,
-        "summary": summary,
-        "status": status,
-        "executed_at_utc": datetime.now(UTC).isoformat(),
-        "command": f"bash scripts/validation/validate_kafka_violations_pipeline.sh",
-        "test_files": [
-            "scripts/validation/validate_kafka_violations_pipeline.py",
-            "dq-engine/kafka_client.py",
-        ],
-        "test_file_count": 2,
-        "test_count": test_count,
-        "assertions": assertions,
-        "diagnostics": diagnostics or {},
-        "proof_data": proof_data,
-    }
-
-    proof_path = PROOF_DIR / f"{proof_id}.json"
-    proof_path.write_text(json.dumps(proof, indent=2, sort_keys=True) + "\n")
-    return str(proof_path)
+from scripts.validation._test_proof import write_evidence_files, write_proof
 
 
 # ---------------------------------------------------------------------------
@@ -1123,28 +1086,22 @@ def _main() -> int:
     # ---- Write evidence ----
     evidence_ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     evidence_id = f"kafka-violations-pipeline-{evidence_ts}"
-    evidence_path = EVIDENCE_DIR / evidence_id
-    evidence_path.mkdir(parents=True, exist_ok=True)
-
-    # Write run payload evidence
-    (evidence_path / "run_payload.json").write_text(
-        json.dumps(run_payload, indent=2, default=str)
-    )
-    # Write DB violations
-    (evidence_path / "db_violations.json").write_text(
-        json.dumps(db_violations, indent=2, default=str)
-    )
-    # Write S3 violations
-    (evidence_path / "s3_violations.json").write_text(
-        json.dumps(s3_violations, indent=2, default=str)
-    )
-    # Write Kafka info
-    (evidence_path / "kafka_info.json").write_text(
-        json.dumps(kafka_info, indent=2, default=str)
+    evidence_path, relative_evidence = write_evidence_files(
+        app_version="api",
+        proof_type="engine",
+        feature="kafka-violations-pipeline",
+        files={
+            "run_payload.json": json.dumps(run_payload, indent=2, default=str),
+            "db_violations.json": json.dumps(db_violations, indent=2, default=str),
+            "s3_violations.json": json.dumps(s3_violations, indent=2, default=str),
+            "kafka_info.json": json.dumps(kafka_info, indent=2, default=str),
+        },
     )
 
     # ---- Write test-proof artifact ----
-    proof_path = _write_proof(
+    proof_path = write_proof(
+        app_version="api",
+        proof_type="engine",
         proof_id=evidence_id,
         feature="kafka-violations-pipeline",
         summary=(
@@ -1158,6 +1115,8 @@ def _main() -> int:
         status=status,
         test_count=test_count,
         assertions=assertions,
+        raw_evidence_directory=relative_evidence,
+        command="bash scripts/validation/validate_kafka_violations_pipeline.sh",
         proof_data={
             "run_id": run_id,
             "run_status": run_status,

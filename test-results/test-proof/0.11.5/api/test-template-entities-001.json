@@ -1,0 +1,41 @@
+{
+  "app_version": "0.11.5",
+  "assertions": [
+    "DQPlanTemplateEntity creation successful",
+    "Template ID preserved: test-123",
+    "Template Name preserved: Test Template",
+    "Parameter count: 1",
+    "Suite count: 1",
+    "Serialization round-trip successful"
+  ],
+  "command": "python3 -c \"from app.domain.entities.dq_plan_template import DQPlanTemplateEntity; template = DQPlanTemplateEntity(template_id='test-123', template_name='Test Template', template_type='data_quality', domain='test', tags=['test', 'validation'], parameters=[{'name': 'dataset_name', 'type': 'string', 'required': True}], suites=[{'suite_name': 'test_suite', 'engine_type': 'gx'}], is_active=True, is_default=True); data = template.model_dump(by_alias=True); restored = DQPlanTemplateEntity.model_validate(data); assert restored.template_id == 'test-123'\"",
+  "diagnostics": {
+    "execution_time_ms": 500,
+    "pydantic_version": "2.x",
+    "python_version": "3.13.13"
+  },
+  "executed_at_utc": "2026-07-04T00:00:00Z",
+  "feature": "DQPlanTemplateEntity serialization",
+  "proof_data": {
+    "input_template": {
+      "template_id": "test-123",
+      "template_name": "Test Template"
+    },
+    "results": {
+      "parameters_count": 1,
+      "suites_count": 1,
+      "template_id": "test-123",
+      "template_name": "Test Template"
+    }
+  },
+  "proof_id": "test-template-entities-001",
+  "proof_type": "api",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/test-template-entities-001.json",
+  "status": "passed",
+  "summary": "DQPlanTemplateEntity and related entities serialization/deserialization test",
+  "test_count": 6,
+  "test_file_count": 1,
+  "test_files": [
+    "/Users/jacbeekers/gitrepos/dq-made-easy/dq-api/fastapi/app/domain/entities/dq_plan_template.py"
+  ]
+}

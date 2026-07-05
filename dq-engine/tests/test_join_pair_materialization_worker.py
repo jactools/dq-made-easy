@@ -15,7 +15,7 @@ sys.path.insert(0, DQ_UTILS_SRC)
 sys.path.insert(0, ENGINE_DIR)
 
 import join_pair_materialization_worker as worker
-from gx_dispatch_worker import GxWorkerConfig
+from gx_dispatch_types import GxWorkerConfig
 
 
 class _RedisCapture:

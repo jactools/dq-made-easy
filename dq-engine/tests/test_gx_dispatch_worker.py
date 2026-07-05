@@ -17,17 +17,17 @@ os.environ.setdefault("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 sys.path.insert(0, DQ_UTILS_SRC)
 sys.path.insert(0, ENGINE_DIR)
 
-from gx_dispatch_worker import GxWorkerConfig
-from gx_dispatch_worker import GxWorkerExecutionError
-from gx_dispatch_worker import _create_spark_session
-from gx_dispatch_worker import _configure_worker_spark_builder
-from gx_dispatch_worker import _coerce_reported_failure
-from gx_dispatch_worker import _resolve_spark_ui_port
-from gx_dispatch_worker import _resolve_worker_heartbeat_key
-from gx_dispatch_worker import _resolve_worker_heartbeat_interval_seconds
-from gx_dispatch_worker import _resolve_worker_heartbeat_ttl_seconds
+from gx_dispatch_types import GxWorkerConfig
+from gx_dispatch_types import GxWorkerExecutionError
+from gx_dispatch_runtime import _create_spark_session
+from gx_dispatch_runtime import _configure_worker_spark_builder
+from gx_dispatch_api import _coerce_reported_failure
+from gx_dispatch_config import _resolve_spark_ui_port
+from gx_dispatch_config import _resolve_worker_heartbeat_key
+from gx_dispatch_config import _resolve_worker_heartbeat_interval_seconds
+from gx_dispatch_config import _resolve_worker_heartbeat_ttl_seconds
 from gx_dispatch_worker import _write_worker_heartbeat
-from gx_dispatch_worker import process_dispatch_message
+from gx_dispatch_dispatch import process_dispatch_message
 from gx_dispatch_worker import run_worker_forever
 import gx_dispatch_worker
 

@@ -26,12 +26,12 @@ sys.path.insert(0, FASTAPI_SRC)
 from app.application.services import build_gx_expectations_for_rule
 from app.application.services import compile_rule_to_intermediate_model
 from app.domain.entities import RuleEntity
-from gx_dispatch_worker import GxWorkerConfig
-from gx_dispatch_worker import _build_row_identifier
-from gx_dispatch_worker import _build_native_gx_alias_map
-from gx_dispatch_worker import _evaluate_expectations_spark
-from gx_dispatch_worker import _rewrite_native_gx_expectation_for_aliases
-from gx_dispatch_worker import process_dispatch_message
+from gx_dispatch_types import GxWorkerConfig
+from gx_dispatch_expectations import _build_row_identifier
+from gx_dispatch_expectations import _build_native_gx_alias_map
+from gx_dispatch_expectations import _evaluate_expectations_spark
+from gx_dispatch_expectations import _rewrite_native_gx_expectation_for_aliases
+from gx_dispatch_dispatch import process_dispatch_message
 
 
 def _parse_timestamp(value):

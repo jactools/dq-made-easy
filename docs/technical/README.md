@@ -2,6 +2,10 @@
 
 Use this folder for technical references, deployment guides, and system-level documentation.
 
+## Service Architecture
+
+- [DQ_ENGINE_MODULE_ARCHITECTURE.md](./DQ_ENGINE_MODULE_ARCHITECTURE.md) — dq-engine module split, dependency graph, and responsibility boundaries
+
 ## Current technical sources
 
 - [DATABASE_ERD.md](./DATABASE_ERD.md)
