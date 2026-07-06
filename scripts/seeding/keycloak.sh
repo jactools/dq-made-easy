@@ -111,7 +111,11 @@ sync_keycloak_seed_user_profiles() {
     exit 33
   fi
 
-  operator_email="${OPERATOR_LOGIN_EMAIL:-operator@jaccloud.nl}"
+  operator_email="${OPERATOR_LOGIN_EMAIL:-${SMOKE_LOGIN_EMAIL:-}}"
+  if [ -z "$operator_email" ]; then
+    error "$my_name" "OPERATOR_LOGIN_EMAIL or SMOKE_LOGIN_EMAIL is required for Keycloak profile reconciliation"
+    exit 33
+  fi
   operator_payload="$(docker exec "$keycloak_container_id" cat "$realm_import_file" | jq -c --arg operator_email "$operator_email" '.users[] | select((.username // .email // empty) == $operator_email) | {
     username: (.username // .email // empty),
     email: (.email // empty),
@@ -254,7 +258,11 @@ seed_keycloak_in_docker() {
     exit 33
   fi
 
-  keycloak_local_base="${KEYCLOAK_LOCAL_URL:-${KEYCLOAK_PUBLIC_URL:-https://${KEYCLOAK_PUBLIC_HOSTNAME:-keycloak.jac.dot}:9444}}"
+  keycloak_local_base="${KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_LOCAL_URL:-}}"
+  if [ -z "$keycloak_local_base" ]; then
+    error "$my_name" "KEYCLOAK_PUBLIC_URL or KEYCLOAK_LOCAL_URL is required for Keycloak readiness checks"
+    exit 33
+  fi
   keycloak_ready_url="${keycloak_local_base}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration"
 
   info "$my_name" "Checking Keycloak realm readiness before applying seed artifacts..."

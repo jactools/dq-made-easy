@@ -28,6 +28,15 @@ set -a
 source "$ROOT_ENV_FILE"
 set +a
 
+# Derive canonical registry variables (including NPM_CONFIG_REGISTRY) from env contract.
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+
+if [ ! -f "$ROOT_DIR/.npmrc" ]; then
+  error "local_build_frontend.sh" "Missing required npm config: $ROOT_DIR/.npmrc"
+  exit 1
+fi
+export NPM_CONFIG_USERCONFIG="$ROOT_DIR/.npmrc"
+
 # Optional: check node version
 if command -v node >/dev/null 2>&1; then
   NODE_VER=$(node -v)

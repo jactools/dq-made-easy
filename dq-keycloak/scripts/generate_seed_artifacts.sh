@@ -7,6 +7,12 @@ realm_display_name="${KEYCLOAK_REALM_DISPLAY_NAME:-Jaccloud Realm}"
 redirect_base="${OIDC_REDIRECT_BASE_URL:-${KONG_PUBLIC_URL:?KONG_PUBLIC_URL is required}}"
 redirect_base="${redirect_base%/}"
 
+seed_email_domain="${KEYCLOAK_EMAIL_DOMAIN:-}"
+domain_args=()
+if [ -n "$seed_email_domain" ]; then
+  domain_args+=(--domain "$seed_email_domain")
+fi
+
 : "${UI_VITE_LOCAL_URL:?UI_VITE_LOCAL_URL is required}"
 : "${UI_NGINX_LOCAL_URL:?UI_NGINX_LOCAL_URL is required}"
 : "${ZAMMAD_PUBLIC_URL:?ZAMMAD_PUBLIC_URL is required}"
@@ -53,9 +59,13 @@ workspace_engine_oidc_env="$workspace_tmp_dir/dq_engine_oidc${workspace_stage_su
 
 KEYCLOAK_JACCLOUD_USERNAME="${KEYCLOAK_JACCLOUD_USERNAME:-}"
 SMOKE_LOGIN_EMAIL="${SMOKE_LOGIN_EMAIL:-}"
-OPERATOR_LOGIN_EMAIL="${OPERATOR_LOGIN_EMAIL:-operator@jaccloud.nl}"
-AUDITOR_LOGIN_EMAIL="${AUDITOR_LOGIN_EMAIL:-auditor@jaccloud.nl}"
-REGULATOR_LOGIN_EMAIL="${REGULATOR_LOGIN_EMAIL:-regulator@jaccloud.nl}"
+OPERATOR_LOGIN_EMAIL="${OPERATOR_LOGIN_EMAIL:-}"
+AUDITOR_LOGIN_EMAIL="${AUDITOR_LOGIN_EMAIL:-}"
+REGULATOR_LOGIN_EMAIL="${REGULATOR_LOGIN_EMAIL:-}"
+if [ -z "$OPERATOR_LOGIN_EMAIL" ] || [ -z "$AUDITOR_LOGIN_EMAIL" ] || [ -z "$REGULATOR_LOGIN_EMAIL" ]; then
+  echo "OPERATOR_LOGIN_EMAIL, AUDITOR_LOGIN_EMAIL, and REGULATOR_LOGIN_EMAIL are required" >&2
+  exit 2
+fi
 export KEYCLOAK_JACCLOUD_USERNAME SMOKE_LOGIN_EMAIL OPERATOR_LOGIN_EMAIL AUDITOR_LOGIN_EMAIL REGULATOR_LOGIN_EMAIL
 
 cp -f /app/mock-data/roles.csv "$roles_csv"
@@ -161,7 +171,6 @@ cp -f "$credentials_env" "$workspace_credentials_env"
 
 python /app/generate_keycloak_realm.py \
   --input "$rotated_users_csv" \
-  --domain jaccloud.nl \
   --realm-name "$realm_name" \
   --realm-display-name "$realm_display_name" \
   --redirect "${redirect_base}/auth/v1/callback" \
@@ -169,6 +178,7 @@ python /app/generate_keycloak_realm.py \
   --frontend-origin "$UI_NGINX_LOCAL_URL" \
   --frontend-origin "${KONG_PUBLIC_URL%/}" \
   --zammad-public-url "$ZAMMAD_PUBLIC_URL" \
+  "${domain_args[@]}" \
   --output "$seed_dir/${realm_name}-realm.json" \
   --engine-service-client-id "$DQ_ENGINE_OIDC_CLIENT_ID" \
   --engine-service-client-secret "$DQ_ENGINE_OIDC_CLIENT_SECRET" \

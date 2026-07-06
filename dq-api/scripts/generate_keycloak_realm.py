@@ -3,7 +3,7 @@
 Generate a Keycloak realm JSON from the seed users CSV.
 
 Usage:
-    python generate_keycloak_realm.py --input ../mock-data/users.csv --output ../keycloak/jaccloud-realm.json --domain jaccloud.nl
+    python generate_keycloak_realm.py --input ../mock-data/users.csv --output ../keycloak/realm.json --domain example.org
 
 The script reads the CSV with headers including 'first_name', 'last_name', 'email', and 'password' and emits a realm JSON
 compatible with Keycloak import (users + public clients named `dq-rules-ui` and `zammad`).
@@ -269,12 +269,27 @@ def generate_realm(
     engine_service_client_secret: str | None = None,
 ):
     # Resolve runtime defaults from environment (after .env has been loaded).
-    realm_name = realm_name or os.getenv("KEYCLOAK_REALM", "jaccloud")
-    realm_display_name = realm_display_name or os.getenv("KEYCLOAK_REALM_DISPLAY_NAME", "Jaccloud Realm")
-    openmetadata_callback = openmetadata_callback or os.getenv("OPENMETADATA_CALLBACK", "https://openmetadata.jac.dot:8585/callback")
-    grafana_public_url = grafana_public_url or os.getenv("GRAFANA_PUBLIC_URL", "http://observability.jac.dot:3000")
-    grafana_oidc_secret = grafana_oidc_secret or os.getenv("GRAFANA_OIDC_SECRET", "changeme")
+    realm_name = realm_name or os.getenv("KEYCLOAK_REALM")
+    if not realm_name:
+        raise SystemExit("KEYCLOAK_REALM is required")
+
+    realm_display_name = realm_display_name or os.getenv("KEYCLOAK_REALM_DISPLAY_NAME", "Keycloak Realm")
+
+    openmetadata_callback = openmetadata_callback or os.getenv("OPENMETADATA_CALLBACK")
+    if not openmetadata_callback:
+        raise SystemExit("OPENMETADATA_CALLBACK is required")
+
+    grafana_public_url = grafana_public_url or os.getenv("GRAFANA_PUBLIC_URL")
+    if not grafana_public_url:
+        raise SystemExit("GRAFANA_PUBLIC_URL is required")
+
+    grafana_oidc_secret = grafana_oidc_secret or os.getenv("GRAFANA_OIDC_SECRET")
+    if not grafana_oidc_secret:
+        raise SystemExit("GRAFANA_OIDC_SECRET is required")
+
     zammad_public_url = zammad_public_url or os.getenv("ZAMMAD_PUBLIC_URL")
+    if not zammad_public_url:
+        raise SystemExit("ZAMMAD_PUBLIC_URL is required")
 
     frontend_origins = frontend_origins or [os.getenv("UI_VITE_LOCAL_URL"), os.getenv("UI_NGINX_LOCAL_URL")]
 
@@ -562,7 +577,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--input", default="../mock-data/users.csv", help="Path to users CSV")
     p.add_argument("--output", default="../keycloak/jaccloud-realm.json", help="Output realm JSON path")
-    p.add_argument("--domain", default=None, help="Optional email domain to replace existing domains, e.g. jaccloud.nl")
+    p.add_argument("--domain", default=None, help="Optional email domain to replace existing domains, e.g. example.org")
     p.add_argument("--redirect", help="Client redirect URI")
     p.add_argument("--realm-name", default=None, help="Realm name (falls back to .env KEYCLOAK_REALM)")
     p.add_argument("--realm-display-name", default=None, help="Realm display name (falls back to .env KEYCLOAK_REALM_DISPLAY_NAME)")

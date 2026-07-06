@@ -15,6 +15,12 @@ cd "$ROOT_DIR"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 my_name="clean_install.sh"
 
+if [ ! -f "$ROOT_DIR/.npmrc" ]; then
+	error "$my_name" "Missing required npm config: $ROOT_DIR/.npmrc"
+	exit 1
+fi
+export NPM_CONFIG_USERCONFIG="$ROOT_DIR/.npmrc"
+
 info "$my_name" "Cleaning and reinstalling npm dependencies for dq-ui..."
 cd "$ROOT_DIR/dq-ui"
 rm -f package-lock.json

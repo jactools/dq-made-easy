@@ -984,6 +984,10 @@ services:
       context: ./dq-ui
       dockerfile: Dockerfile.frontend
       args:
+        NODE_REGISTRY: ${NODE_REGISTRY}
+        NODE_NAMESPACE: ${NODE_NAMESPACE}
+        NODE_IMAGE: "${NODE_IMAGE}"
+        NODE_TAG: ${NODE_TAG}
         NGINX_REGISTRY: ${NGINX_REGISTRY}
         NGINX_NAMESPACE: ${NGINX_NAMESPACE}
         NGINX_IMAGE: "${NGINX_IMAGE}"
@@ -993,6 +997,8 @@ services:
         VITE_OTEL_ENDPOINT: ${VITE_OTEL_ENDPOINT:-}
         VITE_ENVIRONMENT: ${ENVIRONMENT}
         VITE_SERVICE_VERSION: ${DQ_FRONTEND_TAG:-dev}
+      secrets:
+        - repo_npmrc
     depends_on:
       api:
         condition: service_healthy
@@ -1399,11 +1405,12 @@ services:
       OM_DB_NAME: ${OM_DB_NAME:-openmetadata_db}
       OM_DB_SSL_MODE: ${OM_DB_SSL_MODE:-disable}
       OPENMETADATA_BASE_PATH: ${OPENMETADATA_BASE_PATH:-/}
+      OPENMETADATA_PUBLIC_URL: ${OPENMETADATA_PUBLIC_URL:-https://openmetadata.jac.dot:8585}
       OM_AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:-custom-oidc}
       OM_OIDC_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:-Keycloak}
       OM_AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:-https://keycloak.jac.dot:9444/realms/jaccloud}
       OM_AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}
-      OM_AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-https://openmetadata.jac.dot:8585/callback}
+      OM_AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-${OPENMETADATA_PUBLIC_URL:-https://openmetadata.jac.dot:8585}/callback}
       OM_AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}
       OM_AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[http://keycloak:8080/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
       OM_ENABLE_AUTO_REDIRECT: ${OM_ENABLE_AUTO_REDIRECT:-false}
@@ -1413,9 +1420,11 @@ services:
       KEYCLOAK_USER_PASSWORD: ${KEYCLOAK_USER_PASSWORD:-password}
       OPENMETADATA_OIDC_SEED_USERNAME: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME is required}
       OPENMETADATA_OIDC_SEED_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD is required}
-      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
-      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
-      CURL_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:-https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api}
+      OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:-true}
+      OPENMETADATA_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
+      SSL_CERT_FILE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
+      CURL_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
       SEED_ALL: ${SEED_ALL:-false}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -1433,9 +1442,9 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////tmp/airflow.db
       AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
       AIRFLOW__WEBSERVER__SECRET_KEY: ${OM_AIRFLOW_SECRET_KEY:-openmetadata_airflow_secret}
-      OPENMETADATA_SERVER_URL: https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api
-      OPENMETADATA_VERIFY_SSL: "true"
-      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:-https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api}
+      OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:-true}
+      OPENMETADATA_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
       # OpenTelemetry (for Python/Airflow instrumentation when enabled)
       OTEL_SERVICE_NAME: dq-made-easy-openmetadata-ingestion
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
@@ -1919,6 +1928,8 @@ volumes:
   kafka_data:
 
 secrets:
+  repo_npmrc:
+    file: ./.npmrc
   internal_mkcert_root_ca:
     file: ./tmp/certs/trust/internal-ca-bundle.pem
   internal_root_ca:

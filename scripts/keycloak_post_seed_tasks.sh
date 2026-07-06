@@ -49,12 +49,17 @@ set +a
 : "${KEYCLOAK_CLIENT_SECRET:?Need KEYCLOAK_CLIENT_SECRET from the selected env file or environment}"
 
 # Enforce in-network only operation (deterministic inside Docker Compose).
-# Always use the compose service host and require an operator-provided
+# Always use the selected secure URL and require an operator-provided
 # `KEYCLOAK_CLIENT_SECRET` for client_credentials flow.
 KEYCLOAK_NETWORK="${KEYCLOAK_NETWORK:-dq-rulebuilder_default}"
 KEYCLOAK_HOST="${KEYCLOAK_HOST:-keycloak:8080}"
+KEYCLOAK_BASE_URL="${KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_LOCAL_URL:-}}"
+if [ -z "$KEYCLOAK_BASE_URL" ]; then
+  error "$my_name" "KEYCLOAK_PUBLIC_URL or KEYCLOAK_LOCAL_URL is required for Keycloak readiness checks"
+  exit 1
+fi
 
-kc_ready_url="http://${KEYCLOAK_HOST}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration"
+kc_ready_url="${KEYCLOAK_BASE_URL%/}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration"
 
 info "$my_name" "Keycloak post-seed: starting (realm=${KEYCLOAK_REALM} client=${KEYCLOAK_CLIENT_ID} host=${KEYCLOAK_HOST} network=${KEYCLOAK_NETWORK})"
 

@@ -8,6 +8,7 @@ import glob
 import os
 import shutil
 import sys
+from xml.sax.saxutils import escape
 
 from pyspark.sql import SparkSession
 
@@ -96,6 +97,45 @@ def _truthy_env(name: str, default: bool = False) -> bool:
     return val.strip().lower() in ("1", "true", "yes", "on")
 
 
+def _split_repositories(raw_repositories: str) -> list[str]:
+    repositories: list[str] = []
+    for raw_entry in raw_repositories.split(","):
+        entry = raw_entry.strip()
+        if not entry:
+            continue
+        if not entry.endswith("/"):
+            entry = f"{entry}/"
+        repositories.append(entry)
+    return repositories
+
+
+def _write_ivy_settings(ivy_settings_path: str, repositories: list[str]) -> None:
+    if not repositories:
+        raise ValueError("at least one repository URL is required")
+
+    resolver_entries: list[str] = []
+    for index, repository in enumerate(repositories, start=1):
+        resolver_entries.append(
+            f'      <ibiblio name="dq-repo-{index}" root="{escape(repository)}" '
+            'm2compatible="true" usepoms="true" />'
+        )
+
+    xml_lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        "<ivysettings>",
+        '  <settings defaultResolver="dq-chain" />',
+        "  <resolvers>",
+        '    <chain name="dq-chain" returnFirst="true">',
+        *resolver_entries,
+        "    </chain>",
+        "  </resolvers>",
+        "</ivysettings>",
+        "",
+    ]
+    with open(ivy_settings_path, "w", encoding="utf-8") as handle:
+        handle.write("\n".join(xml_lines))
+
+
 def copy_jars(src_dirs, dest_dir, max_mb: int = 200, include_large: bool = False):
     os.makedirs(dest_dir, exist_ok=True)
     count = 0
@@ -161,6 +201,11 @@ def main():
     maven_repos = os.environ.get("MAVEN_REPOSITORIES")
     if maven_repos:
         print("using MAVEN_REPOSITORIES=", maven_repos)
+        repositories = _split_repositories(maven_repos)
+        ivy_settings_path = os.path.join(ivy_dir, "dq-ivysettings.xml")
+        _write_ivy_settings(ivy_settings_path, repositories)
+        print("using ivy settings:", ivy_settings_path)
+        builder = builder.config("spark.jars.ivySettings", ivy_settings_path)
         builder = builder.config("spark.jars.repositories", maven_repos)
 
     try:

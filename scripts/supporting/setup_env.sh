@@ -100,12 +100,25 @@ curl_kong_host_probe() {
     fi
 }
 
+nexuscloud_hostname="${NEXUSCLOUD_HOSTNAME:-}"
 nexuscloud_dns="${NEXUSCLOUD_DNS:-}"
 nexuscloud_registry="${NEXUSCLOUD_REGISTRY:-}"
 nexuscloud_username="${NEXUSCLOUD_USERNAME:-}"
 nexuscloud_password="${NEXUSCLOUD_PASSWORD:-}"
 nexuscloud_password_base64="${NEXUSCLOUD_PASSWORD_BASE64:-}"
 nexuscloud_group_repo="${NEXUSCLOUD_PYPI_GROUP_REPO:-}"
+nexuscloud_maven_group_repo="${NEXUSCLOUD_MAVEN_GROUP_REPO:-${NEXUSCLOUD_MPM_GROUP_REPO:-}}"
+
+if [ -z "$nexuscloud_hostname" ] && [ -n "$nexuscloud_dns" ]; then
+    nexuscloud_hostname="${nexuscloud_dns#//}"
+fi
+
+if [ -n "$nexuscloud_hostname" ]; then
+    nexuscloud_dns="//${nexuscloud_hostname}"
+    NEXUSCLOUD_HOSTNAME="$nexuscloud_hostname"
+    NEXUSCLOUD_DNS="$nexuscloud_dns"
+    export NEXUSCLOUD_HOSTNAME NEXUSCLOUD_DNS
+fi
 
 if [ -z "$nexuscloud_password_base64" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
     nexuscloud_password_base64=$(printf '%s' "${nexuscloud_username}:${nexuscloud_password}" | base64)
@@ -114,8 +127,8 @@ fi
 NEXUSCLOUD_PASSWORD_BASE64="$nexuscloud_password_base64"
 export NEXUSCLOUD_PASSWORD_BASE64
 
-if [ -n "$nexuscloud_dns" ] || [ -n "$nexuscloud_registry" ]; then
-    debug "$my_name" "NEXUSCLOUD_DNS: ${nexuscloud_dns}"
+if [ -n "$nexuscloud_hostname" ] || [ -n "$nexuscloud_registry" ]; then
+    debug "$my_name" "NEXUSCLOUD_HOSTNAME: ${nexuscloud_hostname}"
     debug "$my_name" "NEXUSCLOUD_REGISTRY: ${nexuscloud_registry}"
     if [ -z "$nexuscloud_password_base64" ]; then
         warning "$my_name" "Nexus Cloud is configured but no shared npm auth value is available"
@@ -138,36 +151,77 @@ fi
 # provided so Docker builds can be deterministic.
 # ---------------------------------------------------------------------------
 
-if [ -n "$nexuscloud_dns" ]; then
-    nexus_host="${nexuscloud_dns#//}"
+if [ -n "$nexuscloud_hostname" ]; then
+    nexus_host="$nexuscloud_hostname"
     if [ -z "$nexus_host" ]; then
-        error "$my_name" "NEXUSCLOUD_DNS is set but could not derive host (expected leading //host)"
+        error "$my_name" "NEXUSCLOUD_HOSTNAME is set but empty"
         return 1
     fi
 
     if [ -z "$nexuscloud_group_repo" ]; then
-        error "$my_name" "NEXUSCLOUD_DNS is set but NEXUSCLOUD_GROUP_REPO is not set (expected e.g. gr-pypi-36)"
+        error "$my_name" "NEXUSCLOUD_HOSTNAME is set but NEXUSCLOUD_GROUP_REPO is not set (expected e.g. gr-pypi-36)"
         return 1
     fi
 
     NEXUSCLOUD_PYPI_URL_NO_AUTH="https://${nexus_host}/repository/${nexuscloud_group_repo}/simple"
 
     if [ -z "$nexuscloud_username" ] || [ -z "$nexuscloud_password" ]; then
-        error "$my_name" "NEXUSCLOUD_DNS is set but NEXUSCLOUD_USERNAME/NEXUSCLOUD_PASSWORD are not set (required for authenticated PyPI URL)"
+        error "$my_name" "NEXUSCLOUD_HOSTNAME is set but NEXUSCLOUD_USERNAME/NEXUSCLOUD_PASSWORD are not set (required for authenticated PyPI URL)"
         return 1
     fi
 
     # Do not log this value; it contains credentials.
     NEXUSCLOUD_PYPI_URL="https://${nexuscloud_username}:${nexuscloud_password}@${nexus_host}/repository/${nexuscloud_group_repo}/simple"
-    # Use the standard pip env var name so `docker compose build` can pass it through.
-    PIP_INDEX_URL="$NEXUSCLOUD_PYPI_URL"
-    export NEXUSCLOUD_PYPI_URL NEXUSCLOUD_PYPI_URL_NO_AUTH PIP_INDEX_URL
+    export NEXUSCLOUD_PYPI_URL NEXUSCLOUD_PYPI_URL_NO_AUTH
+fi
+
+if [ -z "${PIP_INDEX_URL:-}" ]; then
+    if [ -n "${NEXUSCLOUD_PYPI_URL:-}" ]; then
+        PIP_INDEX_URL="$NEXUSCLOUD_PYPI_URL"
+    elif [ -n "${NEXUSCLOUD_PYPI_URL_NO_AUTH:-}" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
+        pip_index_host="${NEXUSCLOUD_PYPI_URL_NO_AUTH#https://}"
+        pip_index_host="${pip_index_host%%/repository/*}"
+        PIP_INDEX_URL="https://${nexuscloud_username}:${nexuscloud_password}@${pip_index_host}/repository/${nexuscloud_group_repo}/simple"
+    fi
+fi
+
+if [ -n "${PIP_INDEX_URL:-}" ]; then
+    export PIP_INDEX_URL
+fi
+
+# ---------------------------------------------------------------------------
+# Maven repositories configuration
+#
+# Spark package warm-up uses Maven/Ivy under the hood. Derive a Nexus-backed
+# Maven repository URL when a Nexus host and Maven group repo are configured.
+# Keep explicit MAVEN_REPOSITORIES overrides intact.
+# ---------------------------------------------------------------------------
+
+if [ -n "$nexuscloud_hostname" ] && [ -n "$nexuscloud_maven_group_repo" ]; then
+    NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH="https://${nexuscloud_hostname}/repository/${nexuscloud_maven_group_repo}/"
+    if [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
+        NEXUSCLOUD_MAVEN_REPOSITORY_URL="https://${nexuscloud_username}:${nexuscloud_password}@${nexuscloud_hostname}/repository/${nexuscloud_maven_group_repo}/"
+    fi
+fi
+
+if [ -z "${MAVEN_REPOSITORIES:-}" ]; then
+    if [ -n "${NEXUSCLOUD_MAVEN_REPOSITORY_URL:-}" ]; then
+        MAVEN_REPOSITORIES="$NEXUSCLOUD_MAVEN_REPOSITORY_URL"
+    elif [ -n "${NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH:-}" ]; then
+        MAVEN_REPOSITORIES="$NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH"
+    fi
+fi
+
+if [ -n "${MAVEN_REPOSITORIES:-}" ]; then
+    export MAVEN_REPOSITORIES
 fi
 
 export NEXUSCLOUD_REGISTRY
 export NEXUSCLOUD_GROUP_REPO
 export NEXUSCLOUD_PYPI_URL
 export NEXUSCLOUD_PYPI_URL_NO_AUTH
+export NEXUSCLOUD_MAVEN_REPOSITORY_URL
+export NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH
 export PIP_INDEX_URL
 export NPM_CONFIG_REGISTRY
 

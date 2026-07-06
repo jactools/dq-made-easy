@@ -88,14 +88,89 @@ EOF
   COMPOSE_TAGS_AUTO_LOADED=true
 }
 
+build_effective_compose_env_file() {
+  local source_env_file="$1"
+  local effective_env_file=""
+  local key=""
+  local value=""
+
+  effective_env_file="$(mktemp)"
+  cp "$source_env_file" "$effective_env_file"
+
+  # Compose interpolation with --env-file prefers the file values. Keep the
+  # selected root env file as baseline, but inject derived runtime values.
+  for key in PIP_INDEX_URL MAVEN_REPOSITORIES; do
+    value="${!key:-}"
+    if [ -z "$value" ]; then
+      continue
+    fi
+
+    awk -v env_key="$key" -F= '$1 != env_key { print }' "$effective_env_file" > "${effective_env_file}.tmp"
+    mv "${effective_env_file}.tmp" "$effective_env_file"
+    printf '%s=%s\n' "$key" "$value" >> "$effective_env_file"
+  done
+
+  printf '%s' "$effective_env_file"
+}
+
 docker_compose() {
   if [ -z "${ROOT_ENV_FILE:-}" ]; then
     error "compose/invocation.sh" "ROOT_ENV_FILE must be set before calling docker_compose"
     return 1
   fi
 
+  # Enforce the single Nexus->PIP_INDEX_URL contract for image builds.
+  # If Nexus is configured, setup_env.sh must have derived PIP_INDEX_URL before
+  # any compose build path runs.
+  local is_build_command=false
+  local arg=""
+  for arg in "$@"; do
+    case "$arg" in
+      build|up|run)
+        is_build_command=true
+        ;;
+    esac
+  done
+
+  if [ "$is_build_command" = "true" ]; then
+    local nexus_host="${NEXUSCLOUD_HOSTNAME:-}"
+    if [ -z "$nexus_host" ] && [ -n "${NEXUSCLOUD_DNS:-}" ]; then
+      nexus_host="${NEXUSCLOUD_DNS#//}"
+    fi
+    local nexus_maven_group_repo="${NEXUSCLOUD_MAVEN_GROUP_REPO:-${NEXUSCLOUD_MPM_GROUP_REPO:-}}"
+
+    if [ -n "$nexus_host" ] && [ -z "${PIP_INDEX_URL:-}" ]; then
+      error "compose/invocation.sh" "Nexus is configured (NEXUSCLOUD_HOSTNAME/NEXUSCLOUD_DNS), but PIP_INDEX_URL is empty"
+      error "compose/invocation.sh" "Ensure scripts/supporting/setup_env.sh is sourced before docker_compose build paths"
+      return 1
+    fi
+
+    if [ -n "$nexus_host" ] && [ -n "$nexus_maven_group_repo" ] && [ -z "${MAVEN_REPOSITORIES:-}" ]; then
+      error "compose/invocation.sh" "Nexus Maven group is configured (NEXUSCLOUD_MAVEN_GROUP_REPO/NEXUSCLOUD_MPM_GROUP_REPO), but MAVEN_REPOSITORIES is empty"
+      error "compose/invocation.sh" "Ensure scripts/supporting/setup_env.sh is sourced before docker_compose build paths"
+      return 1
+    fi
+  fi
+
   ensure_calculated_image_tags
-  docker compose --env-file "$ROOT_ENV_FILE" "$@"
+  local effective_env_file="$ROOT_ENV_FILE"
+  local generated_effective_env_file=""
+
+  generated_effective_env_file="$(build_effective_compose_env_file "$ROOT_ENV_FILE")"
+  effective_env_file="$generated_effective_env_file"
+
+  local compose_exit_code=0
+  if docker compose --env-file "$effective_env_file" "$@"; then
+    compose_exit_code=0
+  else
+    compose_exit_code=$?
+  fi
+
+  if [ -n "$generated_effective_env_file" ] && [ -f "$generated_effective_env_file" ]; then
+    rm -f "$generated_effective_env_file"
+  fi
+
+  return $compose_exit_code
 }
 
 wait_for_compose_service_healthy() {

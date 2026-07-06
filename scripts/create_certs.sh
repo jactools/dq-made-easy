@@ -22,6 +22,15 @@ generate_cert() {
 	mkcert -cert-file "$cert_file" -key-file "$key_file" "$@"
 }
 
+write_internal_ca_bundle() {
+	local source_file="$1"
+	local trust_dir="$CERTS_DIR/trust"
+
+	mkdir -p "$trust_dir"
+	cp "$source_file" "$CERTS_DIR/internal-ca-bundle.pem"
+	cp "$source_file" "$trust_dir/internal-ca-bundle.pem"
+}
+
 create_openmetadata_keystore() {
 	local cert_file="$1"
 	local key_file="$2"
@@ -36,15 +45,6 @@ create_openmetadata_keystore() {
 		-name openmetadata \
 		-out "$keystore_file" \
 		-passout "pass:$keystore_password"
-	write_internal_ca_bundle() {
-		local source_file="$1"
-		local trust_dir="$CERTS_DIR/trust"
-
-		mkdir -p "$trust_dir"
-		cp "$source_file" "$CERTS_DIR/internal-ca-bundle.pem"
-		cp "$source_file" "$trust_dir/internal-ca-bundle.pem"
-	}
-write_internal_ca_bundle "$mkcert_root_ca"
 }
 
 generate_service_cert() {
@@ -72,7 +72,7 @@ if [ ! -f "$mkcert_root_ca" ]; then
 fi
 
 cp "$mkcert_root_ca" "$CERTS_DIR/mkcert-rootCA.pem"
-	write_internal_ca_bundle "$mkcert_root_ca"
+write_internal_ca_bundle "$mkcert_root_ca"
 
 echo "internal service DNS: api"
 generate_service_cert "api" api localhost 127.0.0.1 ::1

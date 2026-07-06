@@ -220,14 +220,16 @@ export ROOT_ENV_FILE
 expand_selected_image_dependencies
 
 derive_docker_domain() {
-  local dns="${NEXUSCLOUD_DNS:-}"
-  dns="${dns#//}"
-  if [ -z "$dns" ]; then
+  local host="${NEXUSCLOUD_HOSTNAME:-}"
+  if [ -z "$host" ] && [ -n "${NEXUSCLOUD_DNS:-}" ]; then
+    host="${NEXUSCLOUD_DNS#//}"
+  fi
+  if [ -z "$host" ]; then
     return 1
   fi
   local suffix
-  suffix="$(printf '%s' "$dns" | sed 's/^[^.]*\.//')"
-  if [ -z "$suffix" ] || [ "$suffix" = "$dns" ]; then
+  suffix="$(printf '%s' "$host" | sed 's/^[^.]*\.//')"
+  if [ -z "$suffix" ] || [ "$suffix" = "$host" ]; then
     return 1
   fi
   printf '%s' "group-docker-19.${suffix}"

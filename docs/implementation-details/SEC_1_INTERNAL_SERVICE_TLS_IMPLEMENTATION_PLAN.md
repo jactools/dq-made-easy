@@ -65,15 +65,24 @@ The migration must preserve the repository no-fallback rule: once a dependency i
 
 ## Workstream 2: Compose and Environment Canonicalization
 
-- [ ] (SEC1-I-W2-01) Replace internal plaintext HTTP defaults in `.env.example` and related env surfaces with canonical HTTPS equivalents for migrated services.
-- [ ] (SEC1-I-W2-02) Add explicit internal TLS configuration variables where listener ports, certificate paths, or verification modes must be configured.
-- [ ] (SEC1-I-W2-03) Update `docker-compose.yml` service definitions to mount trust bundles and TLS materials consistently.
-- [ ] (SEC1-I-W2-04) Update bootstrap scripts and seed tooling so internal service discovery uses canonical secure URLs.
-- [ ] (SEC1-I-W2-05) Keep plaintext compatibility switches out of the default path once a service migration is complete.
+- [x] (SEC1-I-W2-01) Replace internal plaintext HTTP defaults in `.env.example` and related env surfaces with canonical HTTPS equivalents for migrated services.
+	- OpenMetadata env surfaces now expose HTTPS public and internal URLs plus explicit trust settings instead of relying on implicit hardcoded values.
+	- Zammad env surfaces already use HTTPS public URLs and now sit beside the canonical trust-bundle contract documented in W1.
+- [x] (SEC1-I-W2-02) Add explicit internal TLS configuration variables where listener ports, certificate paths, or verification modes must be configured.
+	- OpenMetadata now consumes `OPENMETADATA_SERVER_URL`, `OPENMETADATA_VERIFY_SSL`, `OPENMETADATA_CA_BUNDLE`, and `OPENMETADATA_PUBLIC_URL` from the env contract.
+	- The metadata compose stack now passes those settings through to the server, configure, and ingestion paths.
+- [x] (SEC1-I-W2-03) Update `docker-compose.yml` service definitions to mount trust bundles and TLS materials consistently.
+	- The root and metadata compose files now read the canonical internal CA bundle path and use env-driven TLS settings for OpenMetadata ingestion/configuration.
+- [x] (SEC1-I-W2-04) Update bootstrap scripts and seed tooling so internal service discovery uses canonical secure URLs.
+	- Keycloak seed artifact generation now requires env-provided URLs and identities instead of hardcoded `jaccloud.nl` or localhost-style defaults.
+	- Keycloak post-seed readiness probes now use the selected secure Keycloak URL from the env contract.
+- [x] (SEC1-I-W2-05) Keep plaintext compatibility switches out of the default path once a service migration is complete.
+	- The Keycloak seed/bootstrap path now fails fast when the selected env file does not provide the secure URLs or required seeded identities.
+	- Hardcoded fallback realm/domain values were removed from the Keycloak realm generator and patch helpers.
 
 ## Workstream 3: HTTP Service Migration
 
-- [ ] (SEC1-I-W3-01) Add an internal TLS serving strategy for the API service, either directly in the app runtime or via a dedicated sidecar/proxy pattern.
+- [ ] (SEC1-I-W3-01) Add an internal TLS serving strategy for the API service, directly in the app runtime
 - [ ] (SEC1-I-W3-02) Update Kong bootstrap and service registration so internal upstreams target HTTPS endpoints with certificate validation.
 - [ ] (SEC1-I-W3-03) Update API callers such as workers, metadata integrations, and internal UI config loaders to trust and use HTTPS endpoints.
 - [ ] (SEC1-I-W3-04) Update internal auth issuer, token, JWKS, and admin endpoints to use canonical secure URLs where traffic crosses service boundaries.
