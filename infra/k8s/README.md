@@ -110,6 +110,14 @@ Preflight validator:
 
 ## Local Build And Deploy Workflow (macOS: minikube or kind)
 
+Before running the local pipeline scripts, ensure a local Kubernetes cluster exists:
+
+```bash
+./scripts/k8s/ensure_local_cluster.sh
+./scripts/k8s/ensure_local_cluster.sh --cluster-runtime kind
+./scripts/k8s/ensure_local_cluster.sh --cluster-runtime minikube --driver docker
+```
+
 To mirror pipeline stages locally (Build -> Test -> Publish -> Deploy -> Smoke), use:
 
 - `scripts/k8s/local_pipeline.sh`
@@ -190,8 +198,18 @@ Dry-run batch example:
 ./scripts/k8s/local_pipeline_batch.sh --env dev \
   --cluster-runtime kind \
   --services all \
-  --image-tag-prefix local-dev \
+  --image-tag latest \
   --dry-run
+```
+
+Deploy-only batch example:
+
+```bash
+./scripts/k8s/local_pipeline_batch.sh --env dev \
+  --cluster-runtime kind \
+  --services all \
+  --image-tag latest \
+  --deploy-only
 ```
 
 Useful options:

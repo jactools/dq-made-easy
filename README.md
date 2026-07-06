@@ -36,6 +36,13 @@ Run smoke validation separately after startup:
 ./scripts/smoke_stack.sh
 ```
 
+Deployment workflows:
+
+- WF6 Kubernetes image deployment: [docs/features/WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md](docs/features/WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md)
+- WF7 Azure Container Apps deployment: [docs/features/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md](docs/features/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md)
+- Local Kubernetes bootstrap: [scripts/k8s/ensure_local_cluster.sh](scripts/k8s/ensure_local_cluster.sh)
+- Local Kubernetes pipeline wrappers: [scripts/k8s/local_pipeline.sh](scripts/k8s/local_pipeline.sh) and [scripts/k8s/local_pipeline_batch.sh](scripts/k8s/local_pipeline_batch.sh)
+
 Use the common local startup wrapper:
 
 ```bash

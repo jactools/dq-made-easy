@@ -4,6 +4,8 @@ Goal: define a single, environment-aware deployment feature that promotes reposi
 
 Implementation plan: [WF_6_KUBERNETES_IMAGE_DEPLOYMENT_IMPLEMENTATION_PLAN.md](../implementation-details/WF_6_KUBERNETES_IMAGE_DEPLOYMENT_IMPLEMENTATION_PLAN.md)
 
+Implementation status: base manifests, environment overlays, provider-aware render/deploy scripts, local pipeline wrappers, and local cluster bootstrap helpers are implemented. The remaining work is tracked in the implementation plan.
+
 ## Principles
 
 - Keep one deployment contract across all environments, with environment-specific values and guardrails.
@@ -97,11 +99,11 @@ Common requirements across dev/test/prod:
 
 ### Phase 1: Baseline Kubernetes Contract
 
-- [ ] (WF6-F-P1-01) Define base Kubernetes resource templates for each repo-managed runtime service.
-- [ ] (WF6-F-P1-02) Define dev, test, and prod overlays with environment-specific config boundaries.
-- [ ] (WF6-F-P1-03) Define namespace and ingress hostname conventions for all environments.
-- [ ] (WF6-F-P1-04) Define migration and seed job lifecycle behavior per environment.
-- [ ] (WF6-F-P1-05) Define required labels and annotations for traceability.
+- [x] (WF6-F-P1-01) Define base Kubernetes resource templates for each repo-managed runtime service.
+- [x] (WF6-F-P1-02) Define dev, test, and prod overlays with environment-specific config boundaries.
+- [x] (WF6-F-P1-03) Define namespace and ingress hostname conventions for all environments.
+- [x] (WF6-F-P1-04) Define migration and seed job lifecycle behavior per environment.
+- [x] (WF6-F-P1-05) Define required labels and annotations for traceability.
 
 ### Phase 2: Pipeline and Promotion Automation
 

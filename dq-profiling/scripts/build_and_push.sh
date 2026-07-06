@@ -22,6 +22,8 @@ if ! source_selected_root_env_file; then
     exit 1
 fi
 
+source "$ROOT_DIR/../scripts/supporting/setup_env.sh"
+
 # Restore exported TAGs if they were previously set
 if [ -n "$SAVED_DQ_PROFILING_TAG" ]; then
     DQ_PROFILING_TAG="$SAVED_DQ_PROFILING_TAG"

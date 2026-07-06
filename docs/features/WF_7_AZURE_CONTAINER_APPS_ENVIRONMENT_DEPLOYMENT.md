@@ -4,6 +4,8 @@ Goal: define a single deployment feature that promotes repository-managed Docker
 
 Implementation plan: [WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT_IMPLEMENTATION_PLAN.md](../implementation-details/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT_IMPLEMENTATION_PLAN.md)
 
+Implementation status: dev/test/prod ACA parameter contracts, environment provisioning, per-app deploy inputs, deploy-stage smoke validation, and evidence publishing are implemented. Remaining ACA rollout and hardening work is tracked in the implementation plan.
+
 ## Principles
 
 - Keep one environment contract across dev, test, and prod.
@@ -90,11 +92,11 @@ Common requirements across environments:
 
 ### Phase 1: Environment and Contract Baseline
 
-- [ ] (WF7-F-P1-01) Define dev, test, and prod ACA environment contract and required variables.
-- [ ] (WF7-F-P1-02) Define per-service deployment inputs (image, container name, target port, ingress).
-- [ ] (WF7-F-P1-03) Define naming conventions for resource groups, environment names, and state keys.
-- [ ] (WF7-F-P1-04) Define environment provisioning behavior and idempotency expectations.
-- [ ] (WF7-F-P1-05) Define deployment evidence schema (image, ingress, revision, validation result).
+- [x] (WF7-F-P1-01) Define dev, test, and prod ACA environment contract and required variables.
+- [x] (WF7-F-P1-02) Define per-service deployment inputs (image, container name, target port, ingress).
+- [x] (WF7-F-P1-03) Define naming conventions for resource groups, environment names, and state keys.
+- [x] (WF7-F-P1-04) Define environment provisioning behavior and idempotency expectations.
+- [x] (WF7-F-P1-05) Define deployment evidence schema (image, ingress, revision, validation result).
 
 ### Phase 2: Deployment Automation
 

@@ -50,6 +50,7 @@ info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROO
 # source repository-level .env
 source "$ROOT_ENV_FILE"
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+my_name="pull_images.sh"
 cd "$ROOT_DIR"
 
 PULL_SCOPE="repo"
@@ -100,6 +101,53 @@ append_unique_image() {
   done
 
   SELECTED_IMAGES+=("$candidate")
+}
+
+extract_image_name_from_ref() {
+  local raw_value="$1"
+
+  if [[ "$raw_value" == *:* ]]; then
+    printf '%s' "${raw_value%%:*}"
+  else
+    printf '%s' "$raw_value"
+  fi
+}
+
+extract_image_tag_from_ref() {
+  local raw_value="$1"
+
+  if [[ "$raw_value" == *:* ]]; then
+    printf '%s' "${raw_value##*:}"
+  else
+    printf '%s' ""
+  fi
+}
+
+normalize_repo_image_name() {
+  case "$1" in
+    dq-made-easy-base) printf '%s' 'dq-base' ;;
+    dq-made-easy-api) printf '%s' 'dq-api' ;;
+    dq-made-easy-engine) printf '%s' 'dq-engine' ;;
+    dq-made-easy-profiling) printf '%s' 'dq-profiling' ;;
+    dq-made-easy-frontend) printf '%s' 'dq-frontend' ;;
+    dq-made-easy-kong) printf '%s' 'dq-kong' ;;
+    dq-made-easy-db) printf '%s' 'dq-db' ;;
+    dq-made-easy-keycloak) printf '%s' 'dq-keycloak' ;;
+    dq-made-easy-kafka) printf '%s' 'dq-kafka' ;;
+    dq-made-easy-kafka-consumer) printf '%s' 'dq-kafka-consumer' ;;
+    dq-made-easy-trino) printf '%s' 'dq-trino' ;;
+    dq-made-easy-edge) printf '%s' 'dq-edge' ;;
+    dq-made-easy-airflow) printf '%s' 'dq-airflow' ;;
+    dq-made-easy-llm) printf '%s' 'dq-llm' ;;
+    dq-made-easy-db-seed) printf '%s' 'dq-db-seed' ;;
+    dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-keycloak-seed-artifacts' ;;
+    dq-made-easy-openmetadata-db) printf '%s' 'dq-openmetadata-db' ;;
+    dq-made-easy-openmetadata-server) printf '%s' 'dq-openmetadata-server' ;;
+    dq-made-easy-metadata-configure) printf '%s' 'dq-metadata-configure' ;;
+    dq-made-easy-container-metrics) printf '%s' 'dq-container-metrics' ;;
+    dq-made-easy-zammad-seed) printf '%s' 'dq-zammad-seed' ;;
+    *) printf '%s' "$1" ;;
+  esac
 }
 
 set_aux_image_defaults() {
@@ -329,16 +377,29 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --image)
+      normalized_image=""
+      image_name_arg=""
+      image_tag_arg=""
       if [[ -z "${2:-}" ]]; then
         error "$my_name" "--image requires a repo-managed image name"
         exit 1
       fi
-      if ! is_repo_managed_image "$2"; then
+      image_name_arg="$(extract_image_name_from_ref "$2")"
+      image_tag_arg="$(extract_image_tag_from_ref "$2")"
+      normalized_image="$(normalize_repo_image_name "$image_name_arg")"
+      if ! is_repo_managed_image "$normalized_image"; then
         error "$my_name" "Unsupported image '$2'"
         exit 1
       fi
-      append_unique_image "$2"
-      if ! is_core_repo_image "$2"; then
+      if [[ -n "$image_tag_arg" ]]; then
+        if [[ -n "$VERSION" && "$VERSION" != "$image_tag_arg" ]]; then
+          error "$my_name" "Conflicting version values supplied: '$VERSION' and '$image_tag_arg'"
+          exit 1
+        fi
+        VERSION="$image_tag_arg"
+      fi
+      append_unique_image "$normalized_image"
+      if ! is_core_repo_image "$normalized_image"; then
         PULL_SCOPE="repo"
       fi
       shift 2

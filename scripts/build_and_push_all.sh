@@ -213,6 +213,8 @@ if ! source_selected_root_env_file; then
   exit 1
 fi
 
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+
 export ROOT_ENV_FILE
 
 expand_selected_image_dependencies

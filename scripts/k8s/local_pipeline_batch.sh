@@ -35,12 +35,14 @@ CLUSTER_RUNTIME="auto"
 SERVICES_CSV="dq-api,dq-engine,dq-frontend"
 ALL_SERVICES_CSV="dq-api,dq-engine,dq-frontend,dq-kong,dq-db,dq-keycloak,dq-profiling,dq-llm"
 IMAGE_TAG_PREFIX="local"
+IMAGE_TAG_OVERRIDE=""
 TEST_COMMAND="./scripts/validate.sh"
 SKIP_TESTS="true"
 SKIP_MIGRATIONS="true"
 RUN_SEEDS="false"
 RUN_PREFLIGHT_FIRST="false"
 DRY_RUN="false"
+DEPLOY_ONLY="false"
 
 usage() {
   cat <<'EOF'
@@ -53,12 +55,14 @@ Canonical env options:
 Options:
   --services CSV|all       Comma-separated deploy service names or 'all'
                            (default: dq-api,dq-engine,dq-frontend)
-  --image-tag-prefix TAG   Prefix used per service image tag (default: local)
+  --image-tag TAG          Exact image tag used for every service in --deploy-only mode
+  --image-tag-prefix TAG   Prefix used per service image tag in build mode (default: local)
   --cloud-provider aks|eks|gke
                            Overlay/provider family for deploy.sh (default: aks)
   --cluster-runtime kind|minikube|auto
                            Runtime used for local image loading (default: auto)
   --test-command CMD       Test command for local Test stage (default: ./scripts/validate.sh)
+  --deploy-only            Skip local build for every service; prefer matching local Docker images and otherwise deploy env-configured registry images
   --run-tests              Run local Test stage for each service
   --run-migrations         Run migration jobs during deploy
   --run-seeds              Run seed jobs during deploy
@@ -94,6 +98,10 @@ while [[ $# -gt 0 ]]; do
       IMAGE_TAG_PREFIX="${2:-}"
       shift 2
       ;;
+    --image-tag)
+      IMAGE_TAG_OVERRIDE="${2:-}"
+      shift 2
+      ;;
     --cloud-provider)
       CLOUD_PROVIDER="${2:-}"
       shift 2
@@ -105,6 +113,10 @@ while [[ $# -gt 0 ]]; do
     --test-command)
       TEST_COMMAND="${2:-}"
       shift 2
+      ;;
+    --deploy-only)
+      DEPLOY_ONLY="true"
+      shift
       ;;
     --run-tests)
       SKIP_TESTS="false"
@@ -167,6 +179,11 @@ if [[ -z "$SERVICES_CSV" ]]; then
   exit 1
 fi
 
+if [[ "$DEPLOY_ONLY" == "true" && -z "$IMAGE_TAG_OVERRIDE" ]]; then
+  error "$SCRIPT_NAME" "--image-tag is required with --deploy-only"
+  exit 1
+fi
+
 if [[ "$SERVICES_CSV" == "all" ]]; then
   SERVICES_CSV="$ALL_SERVICES_CSV"
 fi
@@ -211,6 +228,9 @@ for idx in "${!services[@]}"; do
   fi
 
   image_tag="${IMAGE_TAG_PREFIX}-${service_name}"
+  if [[ "$DEPLOY_ONLY" == "true" ]]; then
+    image_tag="$IMAGE_TAG_OVERRIDE"
+  fi
 
   info "$SCRIPT_NAME" "Running local pipeline for service=$service_name image=$image_name tag=$image_tag"
 
@@ -244,6 +264,10 @@ for idx in "${!services[@]}"; do
 
   if [[ "$DRY_RUN" == "true" ]]; then
     args+=("--dry-run")
+  fi
+
+  if [[ "$DEPLOY_ONLY" == "true" ]]; then
+    args+=("--deploy-only")
   fi
 
   "$local_pipeline_script" "${args[@]}"

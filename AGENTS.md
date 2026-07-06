@@ -23,6 +23,24 @@ Additional instruction files (if they exist):
 3. If modifying an existing file over 1000 lines, extract new logic into a new module rather than adding to the large file.
 4. Run the validation script through `scripts/python_arm64.sh --python-bin ./venv/bin/python` (see `.github/copilot/03-testing.md`) when done to verify.
 
+## Repository workflow notes
+
+Startup and image refresh:
+- `scripts/common_startup.sh` and `scripts/start-containers.sh` honor `ROOT_ENV_FILE`, but the normal startup path uses `docker compose up -d --no-build` and does not pull updated images.
+- When current registry contents matter, use `scripts/pull_images.sh` or `scripts/start_stack_pull.sh` instead of assuming startup will refresh images.
+
+WF6 Kubernetes notes:
+- Base WF6 manifests live under `infra/k8s/base`; overlays own namespace assignment and patch the `Namespace` object name for `dev`, `test`, and `prod`.
+- Kustomize patch matching is strict. When patching namespaced base resources, include the correct namespace or use explicit patch target selectors.
+- Keep overlay/provider patch files inside the overlay directory tree; parent-directory patch references can fail under default kustomize security restrictions.
+- Local Kubernetes bootstrap lives at `scripts/k8s/ensure_local_cluster.sh`; default local cluster/profile name is `dq-made-easy`, and auto runtime selection prefers `kind` over `minikube`.
+- WF6 deploy lifecycle policy: migration jobs run in all environments; seed jobs follow mode semantics (`auto` = dev/test, `always` = all with explicit prod allowance, `never` = disabled).
+
+WF7 Azure Container Apps notes:
+- ACA env parameter contracts include `environmentName`, `deploymentPlatform`, `resourceNamePrefix`, `stateKeyPrefixEnvironment`, `stateKeyPrefixApp`, `acaIngressDefault`, and `acaEvidencePath`.
+- ACA environment provisioning uses `stateKeyPrefixEnvironment` for `environment.tfstate`; per-app deployment uses `stateKeyPrefixApp` for individual app state.
+- ACA deploy pipelines publish smoke/evidence output through `azure-pipelines/templates/dq-made-easy-container-app-smoke.yml` into `tmp/release/aca-deploy-evidence/<env>`.
+
 ## Conflict resolution
 
 If a rule conflicts with an explicit developer or system instruction, raise the conflict to the user. Do not silently override.
