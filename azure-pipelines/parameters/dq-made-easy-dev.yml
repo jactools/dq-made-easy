@@ -1,4 +1,7 @@
 variables:
+  environmentName: dev
+  deploymentPlatform: aca
+  resourceNamePrefix: dq-made-easy-dev
   azureServiceConnection: dq-made-easy-dev-azure
   resourceGroupName: dq-made-easy-dev-aca-rg
   region: westeurope
@@ -7,5 +10,9 @@ variables:
   stateResourceGroupName: dq-made-easy-tfstate-rg
   stateStorageAccountName: dqmadeeasydevtfstate
   stateStorageContainerName: dq-made-easy-tofu-state
-  stateKeyPrefix: dq-made-easy/container-app-environment
+  stateKeyPrefixEnvironment: dq-made-easy/aca/dev/environment
+  stateKeyPrefixApp: dq-made-easy/aca/dev/apps
+  stateKeyPrefix: dq-made-easy/aca/dev
+  acaIngressDefault: internal
+  acaEvidencePath: tmp/release/aca-deploy-evidence/dev
   

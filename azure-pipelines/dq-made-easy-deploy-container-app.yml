@@ -239,3 +239,11 @@ stages:
           registryServer: ${{ parameters.registryServer }}
           registryUsername: ${{ parameters.registryUsername }}
           registryPassword: ${{ parameters.registryPassword }}
+      - template: templates/dq-made-easy-container-app-smoke.yml
+        parameters:
+          dependsOn: DeployContainerApp
+          containerAppName: ${{ parameters.containerAppName }}
+          expectedImage: $(DEPLOY_IMAGE_REF)
+          expectedTargetPort: ${{ parameters.targetPort }}
+          expectedIngress: ${{ parameters.ingress }}
+          evidencePath: $(acaEvidencePath)

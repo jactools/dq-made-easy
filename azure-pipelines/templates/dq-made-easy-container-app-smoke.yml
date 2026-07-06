@@ -1,0 +1,122 @@
+parameters:
+  - name: containerAppName
+    type: string
+  - name: expectedImage
+    type: string
+  - name: expectedTargetPort
+    type: number
+  - name: expectedIngress
+    type: string
+    default: internal
+  - name: evidencePath
+    type: string
+    default: tmp/release/aca-deploy-evidence
+  - name: dependsOn
+    type: string
+    default: DeployContainerApp
+
+jobs:
+  - job: ValidateContainerAppRollout
+    displayName: dq-made-easy - Validate ACA rollout and publish evidence
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: succeeded()
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - checkout: self
+
+      - task: AzureCLI@2
+        name: ValidateSmoke
+        displayName: dq-made-easy - Validate deployed image and ingress
+        inputs:
+          azureSubscription: $(azureServiceConnection)
+          scriptType: bash
+          scriptLocation: inlineScript
+          addSpnToEnvironment: false
+          inlineScript: |
+            set -euo pipefail
+
+            app_name='${{ parameters.containerAppName }}'
+            expected_image='${{ parameters.expectedImage }}'
+            expected_target_port='${{ parameters.expectedTargetPort }}'
+            expected_ingress='${{ parameters.expectedIngress }}'
+            resource_group='$(resourceGroupName)'
+
+            if [[ -z "$app_name" || -z "$expected_image" || -z "$expected_target_port" ]]; then
+              echo "containerAppName, expectedImage, and expectedTargetPort are required" >&2
+              exit 1
+            fi
+
+            deployed_image="$(az containerapp show \
+              --name "$app_name" \
+              --resource-group "$resource_group" \
+              --query 'properties.template.containers[0].image' \
+              --output tsv)"
+
+            deployed_target_port="$(az containerapp show \
+              --name "$app_name" \
+              --resource-group "$resource_group" \
+              --query 'properties.configuration.ingress.targetPort' \
+              --output tsv)"
+
+            deployed_external="$(az containerapp show \
+              --name "$app_name" \
+              --resource-group "$resource_group" \
+              --query 'properties.configuration.ingress.external' \
+              --output tsv)"
+
+            deployed_ingress='internal'
+            if [[ "$deployed_external" == "true" ]]; then
+              deployed_ingress='external'
+            fi
+
+            ingress_fqdn="$(az containerapp show \
+              --name "$app_name" \
+              --resource-group "$resource_group" \
+              --query 'properties.configuration.ingress.fqdn' \
+              --output tsv 2>/dev/null || true)"
+
+            active_revision="$(az containerapp revision list \
+              --name "$app_name" \
+              --resource-group "$resource_group" \
+              --query "[?properties.active].name | [0]" \
+              --output tsv 2>/dev/null || true)"
+
+            validation_result='pass'
+
+            if [[ "$deployed_image" != "$expected_image" ]]; then
+              echo "Deployed image mismatch: expected $expected_image got $deployed_image" >&2
+              validation_result='fail'
+            fi
+
+            if [[ "$deployed_target_port" != "$expected_target_port" ]]; then
+              echo "Deployed target port mismatch: expected $expected_target_port got $deployed_target_port" >&2
+              validation_result='fail'
+            fi
+
+            if [[ "$deployed_ingress" != "$expected_ingress" ]]; then
+              echo "Deployed ingress mismatch: expected $expected_ingress got $deployed_ingress" >&2
+              validation_result='fail'
+            fi
+
+            echo "##vso[task.setvariable variable=ACA_DEPLOYED_IMAGE;isOutput=true]${deployed_image}"
+            echo "##vso[task.setvariable variable=ACA_DEPLOYED_INGRESS_FQDN;isOutput=true]${ingress_fqdn}"
+            echo "##vso[task.setvariable variable=ACA_DEPLOYED_REVISION;isOutput=true]${active_revision}"
+            echo "##vso[task.setvariable variable=ACA_VALIDATION_RESULT;isOutput=true]${validation_result}"
+
+            if [[ "$validation_result" != "pass" ]]; then
+              exit 1
+            fi
+
+      - template: shared/publish-deploy-evidence.yml
+        parameters:
+          artifactName: aca-deploy-evidence
+          evidencePath: ${{ parameters.evidencePath }}
+          platform: aca
+          environmentName: $(environmentName)
+          serviceName: ${{ parameters.containerAppName }}
+          imageRef: ${{ parameters.expectedImage }}
+          rolloutResult: succeeded
+          ingressFqdn: $(ValidateSmoke.ACA_DEPLOYED_INGRESS_FQDN)
+          revisionName: $(ValidateSmoke.ACA_DEPLOYED_REVISION)
+          validationResult: $(ValidateSmoke.ACA_VALIDATION_RESULT)

@@ -16,6 +16,15 @@ parameters:
   - name: rolloutResult
     type: string
     default: unknown
+  - name: ingressFqdn
+    type: string
+    default: ''
+  - name: revisionName
+    type: string
+    default: ''
+  - name: validationResult
+    type: string
+    default: unknown
 
 steps:
   - bash: |
@@ -27,6 +36,9 @@ steps:
       service_name='${{ parameters.serviceName }}'
       image_ref='${{ parameters.imageRef }}'
       rollout_result='${{ parameters.rolloutResult }}'
+      ingress_fqdn='${{ parameters.ingressFqdn }}'
+      revision_name='${{ parameters.revisionName }}'
+      validation_result='${{ parameters.validationResult }}'
       timestamp="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
       mkdir -p "$evidence_path"
@@ -38,6 +50,9 @@ steps:
         "service": "${service_name}",
         "image": "${image_ref}",
         "rolloutResult": "${rollout_result}",
+        "ingressFqdn": "${ingress_fqdn}",
+        "revisionName": "${revision_name}",
+        "validationResult": "${validation_result}",
         "timestampUtc": "${timestamp}"
       }
       JSON

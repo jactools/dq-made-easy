@@ -106,17 +106,17 @@ Pipeline templates and evidence output:
 
 ### Phase 1: Environment and Contract Baseline
 
-- [ ] WF7-F-P1-01 Define dev, test, and prod ACA environment contract and required variables.
+- [x] WF7-F-P1-01 Define dev, test, and prod ACA environment contract and required variables.
   - Files: `azure-pipelines/parameters/dq-made-easy-dev.yml`, `azure-pipelines/parameters/dq-made-easy-test.yml`, `azure-pipelines/parameters/dq-made-easy-prod.yml`
   - Existing references: `scripts/supporting/env/selection.sh`, `docs/features/WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md`
-- [ ] WF7-F-P1-02 Define per-service deployment inputs (image, container name, target port, ingress).
+- [x] WF7-F-P1-02 Define per-service deployment inputs (image, container name, target port, ingress).
   - Files: `azure-pipelines/dq-made-easy-deploy-container-app.yml`, `azure-pipelines/templates/dq-made-easy-container-app-deploy-tofu.yml`
-- [ ] WF7-F-P1-03 Define naming conventions for resource groups, environment names, and state keys.
+- [x] WF7-F-P1-03 Define naming conventions for resource groups, environment names, and state keys.
   - Files: `azure-pipelines/parameters/*.yml`, `provision-container-app-environment.yml`
   - OpenTofu state key references in deployment templates.
-- [ ] WF7-F-P1-04 Define environment provisioning behavior and idempotency expectations.
+- [x] WF7-F-P1-04 Define environment provisioning behavior and idempotency expectations.
   - Files: `azure-pipelines/provision-container-app-environment.yml`, `infra/opentofu/container-app-environment/*`
-- [ ] WF7-F-P1-05 Define deployment evidence schema (image, ingress, revision, validation result).
+- [x] WF7-F-P1-05 Define deployment evidence schema (image, ingress, revision, validation result).
   - Files: `azure-pipelines/templates/dq-made-easy-container-app-smoke.yml`, `tmp/release/aca-deploy-evidence/*`
 
 ### Phase 2: Deployment Automation
