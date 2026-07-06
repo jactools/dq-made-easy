@@ -114,6 +114,7 @@ from app.infrastructure.repositories import (
     InMemoryIncidentRepository,
     PostgresIncidentRepository,
 )
+from app.infrastructure.repositories.postgres_dq_plan_template_repository import PostgresDQPlanTemplateRepository
 
 _rules_repository = InMemoryRulesRepository()
 _catalog_repository = InMemoryDataCatalogRepository()
@@ -778,7 +779,6 @@ def get_incident_repository() -> IncidentRepository:
 
 @lru_cache
 def _get_postgres_dq_plan_template_repository(database_url: str) -> PostgresDQPlanTemplateRepository:
-    from app.infrastructure.repositories.postgres_dq_plan_template_repository import PostgresDQPlanTemplateRepository
     return PostgresDQPlanTemplateRepository(database_url)
 
 

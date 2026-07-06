@@ -4,8 +4,33 @@ from types import SimpleNamespace
 
 import pytest
 
-import app.infrastructure.repositories.postgres_rules_repository as rules_mod
+import app.infrastructure.repositories._postgres_rule_helpers as rules_mod
+import app.infrastructure.repositories._postgres_rules_read as _read_mod
+import app.infrastructure.repositories._postgres_rules_write as _write_mod
+import app.infrastructure.repositories._postgres_rule_lifecycle as _lifecycle_mod
+import app.infrastructure.repositories._postgres_rule_versions as _versions_mod
+import app.infrastructure.repositories._postgres_rule_audit as _audit_mod
+import app.infrastructure.repositories._postgres_compiler_artifacts as _artifacts_mod
+import app.infrastructure.repositories._postgres_reusable_parts as _reusable_mod
 from app.infrastructure.repositories.postgres_rules_repository import PostgresRulesRepository
+from app.infrastructure.orm.models import RuleCurrentVersionRow as _RuleCurrentVersionRow
+
+_SESSION_SCOPE_MODS = (
+    rules_mod,
+    _read_mod,
+    _write_mod,
+    _lifecycle_mod,
+    _versions_mod,
+    _audit_mod,
+    _artifacts_mod,
+    _reusable_mod,
+)
+
+
+def _patch_session(monkeypatch, ctx_factory):
+    """Patch session_scope in every mixin module so a single call covers all call sites."""
+    for mod in _SESSION_SCOPE_MODS:
+        monkeypatch.setattr(mod, "session_scope", ctx_factory)
 
 
 class _ScalarResult:
@@ -121,7 +146,7 @@ def _rule_row():
 
 def test_list_rule_records_maps_rows(monkeypatch) -> None:
     session = _Session(scalar_values=[[_rule_row()]])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.list_rule_records())
@@ -138,7 +163,7 @@ def test_get_rule_by_id_maps_entity(monkeypatch) -> None:
             [("rf-1",), ("rf-2",)],
         ]
     )
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.get_rule_by_id("rule-1"))
@@ -151,9 +176,9 @@ def test_get_rule_by_id_maps_entity(monkeypatch) -> None:
 
 
 def test_get_user_by_id_maps_rule_creator(monkeypatch) -> None:
-    user = SimpleNamespace(id="user-admin", name="Platform Admin", email="admin@example.com")
+    user = SimpleNamespace(id="user-admin", first_name="Platform", last_name="Admin", email="admin@example.com")
     session = _Session(gets={(rules_mod.UserRow, "user-admin"): user})
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.get_user_by_id("user-admin"))
@@ -197,10 +222,10 @@ def test_list_rule_versions_maps_postgres_rows(monkeypatch) -> None:
         scalar_values=[
             _rule_row(),
             [_version_row("rv-002", 3), _version_row("rv-001", 2)],
-            [SimpleNamespace(id="user-admin", name="Platform Admin", email="admin@example.com")],
+            [SimpleNamespace(id="user-admin", first_name="Platform", last_name="Admin", email="admin@example.com")],
         ]
     )
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.list_rule_versions("rule-1", limit=1, offset=0))
@@ -216,10 +241,10 @@ def test_get_rule_version_maps_postgres_detail(monkeypatch) -> None:
     session = _Session(
         scalar_values=[
             _version_row("rv-001", 2),
-            [SimpleNamespace(id="user-admin", name="Platform Admin", email="admin@example.com")],
+            [SimpleNamespace(id="user-admin", first_name="Platform", last_name="Admin", email="admin@example.com")],
         ]
     )
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.get_rule_version("rule-1", "rv-001"))
@@ -232,7 +257,7 @@ def test_get_rule_version_maps_postgres_detail(monkeypatch) -> None:
 
 def test_get_rule_by_id_returns_none_when_missing(monkeypatch) -> None:
     session = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.get_rule_by_id("missing"))
@@ -242,7 +267,7 @@ def test_get_rule_by_id_returns_none_when_missing(monkeypatch) -> None:
 
 def test_create_rule_adds_only_non_empty_unique_reusable_filters(monkeypatch) -> None:
     session = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(
@@ -283,7 +308,7 @@ def test_create_rule_adds_only_non_empty_unique_reusable_filters(monkeypatch) ->
 
 def test_update_rule_returns_none_when_missing(monkeypatch) -> None:
     session = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(
@@ -317,8 +342,8 @@ def test_update_rule_replaces_existing_filter_links(monkeypatch) -> None:
     row.validated_at = datetime(2026, 3, 10, tzinfo=UTC)
     links = [SimpleNamespace(id="l1"), SimpleNamespace(id="l2")]
     current_pointer = SimpleNamespace(rule_id="rule-1", version_id="rv-001")
-    session = _Session(scalar_values=[row, links], gets={(rules_mod.RuleCurrentVersionRow, "rule-1"): current_pointer})
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    session = _Session(scalar_values=[row, links], gets={(_RuleCurrentVersionRow, "rule-1"): current_pointer})
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(
@@ -361,7 +386,7 @@ def test_update_rule_replaces_existing_filter_links(monkeypatch) -> None:
 
 def test_activate_rule_record_returns_none_when_missing(monkeypatch) -> None:
     session = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     assert asyncio.run(repo.activate_rule_record("missing")) is None
@@ -369,7 +394,7 @@ def test_activate_rule_record_returns_none_when_missing(monkeypatch) -> None:
 
 def test_save_rule_as_template_returns_none_when_source_missing(monkeypatch) -> None:
     session = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(
@@ -386,7 +411,7 @@ def test_save_rule_as_template_returns_none_when_source_missing(monkeypatch) -> 
 
 def test_list_rule_versions_returns_none_when_rule_missing(monkeypatch) -> None:
     session = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: None))
 
     repo = PostgresRulesRepository("postgresql://example")
@@ -395,7 +420,7 @@ def test_list_rule_versions_returns_none_when_rule_missing(monkeypatch) -> None:
 
 def test_get_rule_version_returns_none_when_missing(monkeypatch) -> None:
     session = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     assert asyncio.run(repo.get_rule_version("rule-1", "missing")) is None
@@ -409,7 +434,7 @@ def test_upsert_active_compiler_artifact_creates_new_internal_revision(monkeypat
             [existing],
         ]
     )
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(
@@ -432,7 +457,7 @@ def test_upsert_active_compiler_artifact_creates_new_internal_revision(monkeypat
 
 def test_upsert_active_compiler_artifact_raises_for_missing_rule_version(monkeypatch) -> None:
     session = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     with pytest.raises(LookupError):
@@ -477,7 +502,7 @@ def test_get_and_list_compiler_artifacts_map_payload(monkeypatch) -> None:
         created_at=None,
     )
     session = _Session(scalar_values=[artifact_active, [artifact_active, artifact_old]])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     active = asyncio.run(repo.get_active_compiler_artifact("rv-001"))
@@ -493,7 +518,7 @@ def test_get_and_list_compiler_artifacts_map_payload(monkeypatch) -> None:
 
 def test_get_rule_rollback_history_returns_none_when_rule_missing(monkeypatch) -> None:
     session = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: None))
 
     repo = PostgresRulesRepository("postgresql://example")
@@ -502,7 +527,7 @@ def test_get_rule_rollback_history_returns_none_when_rule_missing(monkeypatch) -
 
 def test_compare_rule_versions_returns_none_when_missing_version(monkeypatch) -> None:
     session = _Session(scalar_values=[[_version_row("v1", 1)]])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.compare_rule_versions("rule-1", "v1", "v2"))
@@ -518,10 +543,10 @@ def test_compare_rule_versions_collects_field_and_tag_changes(monkeypatch) -> No
     session = _Session(
         scalar_values=[
             [first, second],
-            [SimpleNamespace(id="user-admin", name="Platform Admin", email="admin@example.com")],
+            [SimpleNamespace(id="user-admin", first_name="Platform", last_name="Admin", email="admin@example.com")],
         ]
     )
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(repo.compare_rule_versions("rule-1", "v1", "v2"))
@@ -532,7 +557,7 @@ def test_compare_rule_versions_collects_field_and_tag_changes(monkeypatch) -> No
 
 def test_get_rule_version_statistics_returns_none_when_rule_missing(monkeypatch) -> None:
     session = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: None))
 
     repo = PostgresRulesRepository("postgresql://example")
@@ -553,7 +578,7 @@ def test_get_rule_version_statistics_aggregates_counts(monkeypatch) -> None:
     ]
 
     session = _Session(scalar_values=[versions, rollbacks])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: _rule_row()))
 
     repo = PostgresRulesRepository("postgresql://example")
@@ -567,7 +592,7 @@ def test_get_rule_version_statistics_aggregates_counts(monkeypatch) -> None:
 
 def test_execute_rule_rollback_returns_none_when_rule_missing(monkeypatch) -> None:
     session = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: None))
 
     repo = PostgresRulesRepository("postgresql://example")
@@ -577,7 +602,7 @@ def test_execute_rule_rollback_returns_none_when_rule_missing(monkeypatch) -> No
 
 def test_execute_rule_rollback_rejects_invalid_states(monkeypatch) -> None:
     session = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
 
@@ -596,7 +621,7 @@ def test_execute_rule_rollback_rejects_invalid_states(monkeypatch) -> None:
 
 def test_execute_rule_rollback_rejects_missing_target(monkeypatch) -> None:
     session = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     rule = _rule_row()
     rule.current_version_id = "v1"
@@ -609,8 +634,8 @@ def test_execute_rule_rollback_rejects_missing_target(monkeypatch) -> None:
 
 def test_execute_rule_rollback_success_uses_fallback_timestamp(monkeypatch) -> None:
     target = _version_row("v2", 2)
-    session = _Session(scalar_values=[target], gets={(rules_mod.RuleCurrentVersionRow, "rule-1"): SimpleNamespace(rule_id="rule-1", version_id="v1")})
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    session = _Session(scalar_values=[target], gets={(_RuleCurrentVersionRow, "rule-1"): SimpleNamespace(rule_id="rule-1", version_id="v1")})
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     rule = _rule_row()
     rule.current_version_id = "v1"
@@ -631,7 +656,7 @@ def test_execute_rule_rollback_success_uses_fallback_timestamp(monkeypatch) -> N
 
 def test_update_rule_version_tags_and_mark_for_rollback_none_paths(monkeypatch) -> None:
     session = _Session(scalar_values=[None, None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     assert asyncio.run(repo.update_rule_version_tags("rule-1", "missing", ["a"])) is None
@@ -641,24 +666,24 @@ def test_update_rule_version_tags_and_mark_for_rollback_none_paths(monkeypatch) 
 def test_reusable_asset_delete_branches(monkeypatch) -> None:
     # filter: missing row -> False
     session_filter_missing = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_filter_missing))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_filter_missing))
     repo = PostgresRulesRepository("postgresql://example")
     assert asyncio.run(repo.delete_reusable_filter("rf-missing")) is False
 
     # filter: in use -> ValueError
     session_filter_in_use = _Session(scalar_values=[SimpleNamespace(id="rf-1"), SimpleNamespace(id="link")])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_filter_in_use))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_filter_in_use))
     with pytest.raises(ValueError):
         asyncio.run(repo.delete_reusable_filter("rf-1"))
 
     # join: missing row -> False
     session_join_missing = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_join_missing))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_join_missing))
     assert asyncio.run(repo.delete_reusable_join("rj-missing")) is False
 
     # join: in use -> ValueError
     session_join_in_use = _Session(scalar_values=[SimpleNamespace(id="rj-1"), SimpleNamespace(id="rule")])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_join_in_use))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_join_in_use))
     with pytest.raises(ValueError):
         asyncio.run(repo.delete_reusable_join("rj-1"))
 
@@ -669,9 +694,9 @@ def test_helper_branches_for_username_tags_and_lookup_loading(monkeypatch) -> No
     assert repo._display_name_for_tag("tag") == "tag"
     assert repo._display_name_for_tag("abc-def") == "ABC DEF"
 
-    assert repo._username_for_user(SimpleNamespace(email="a@b.com", name="", id="u1")) == "a"
-    assert repo._username_for_user(SimpleNamespace(email="", name="Jane Doe", id="u2")) == "jane-doe"
-    assert repo._username_for_user(SimpleNamespace(email="", name="", id="u3")) == "u3"
+    assert repo._username_for_user(SimpleNamespace(email="a@b.com", first_name="", last_name="", id="u1")) == "a"
+    assert repo._username_for_user(SimpleNamespace(email="", first_name="Jane", last_name="Doe", id="u2")) == "jane-doe"
+    assert repo._username_for_user(SimpleNamespace(email="", first_name="", last_name="", id="u3")) == "u3"
 
     assert asyncio.run(repo.get_tags_by_ids(["", " tag_quality "]))[0].name == "Quality"
 
@@ -681,7 +706,7 @@ def test_helper_branches_for_username_tags_and_lookup_loading(monkeypatch) -> No
 
     non_empty = _Session(
         scalar_values=[
-            [SimpleNamespace(id="u1", name="User One", email="u1@example.com")],
+            [SimpleNamespace(id="u1", first_name="User", last_name="One", email="u1@example.com")],
             [SimpleNamespace(id="v1", version_number=7)],
         ]
     )
@@ -708,7 +733,7 @@ def test_activate_deactivate_and_save_template_success_paths(monkeypatch) -> Non
     row_template_source = _rule_row()
 
     session = _Session(scalar_values=[row_active, row_inactive, row_template_source])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     activated = asyncio.run(repo.activate_rule_record("rule-1"))
@@ -746,7 +771,7 @@ def test_soft_delete_and_recover_rule_success_paths(monkeypatch) -> None:
     removed.deleted_by = "user-admin"
 
     session_remove = _Session(scalar_values=[removable])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_remove))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_remove))
 
     repo = PostgresRulesRepository("postgresql://example")
     removed_payload = asyncio.run(repo.soft_delete_rule_record("rule-1", removed_by="user-admin"))
@@ -757,7 +782,7 @@ def test_soft_delete_and_recover_rule_success_paths(monkeypatch) -> None:
     assert removed_payload.last_approval_status == "removed"
 
     session_recover = _Session(scalar_values=[removed])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_recover))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_recover))
     recovered_payload = asyncio.run(repo.recover_rule("rule-1", recovered_by="user-admin"))
 
     assert recovered_payload is not None
@@ -770,7 +795,7 @@ def test_soft_delete_and_recover_rule_success_paths(monkeypatch) -> None:
 def test_soft_delete_rule_requires_deactivated_state(monkeypatch) -> None:
     active_row = _rule_row()
     session = _Session(scalar_values=[active_row])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     with pytest.raises(ValueError, match="deactivated"):
@@ -789,7 +814,7 @@ def test_record_rule_status_transition_updates_rule_row(monkeypatch, to_status: 
     row.active = False
     row.last_approval_status = "pending-approval"
     session = _Session(scalar_values=[row])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(
@@ -827,7 +852,7 @@ def test_set_rule_lifecycle_status_records_lifecycle_action(
     row.active = False
     row.current_version_id = None
     session = _Session(scalar_values=[row])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
 
     repo = PostgresRulesRepository("postgresql://example")
     payload = asyncio.run(
@@ -859,7 +884,7 @@ def test_get_rule_rollback_history_success_path(monkeypatch) -> None:
         )
     ]
     session = _Session(scalar_values=[rollback_rows])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: _rule_row()))
 
     repo = PostgresRulesRepository("postgresql://example")
@@ -878,10 +903,10 @@ def test_update_tags_and_mark_for_rollback_success_paths(monkeypatch) -> None:
         scalar_values=[
             _version_row("v1", 1),
             [],
-            [SimpleNamespace(id="user-admin", name="Platform Admin", email="admin@example.com")],
+            [SimpleNamespace(id="user-admin", first_name="Platform", last_name="Admin", email="admin@example.com")],
         ]
     )
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_tags))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_tags))
     updated_tags = asyncio.run(
         repo.update_rule_version_tags("rule-1", "v1", ["critical"], updated_by_user_id="user-admin")
     )
@@ -892,7 +917,7 @@ def test_update_tags_and_mark_for_rollback_success_paths(monkeypatch) -> None:
     assert updated_tags["updatedBy"]["id"] == "user-admin"
 
     session_mark = _Session(scalar_values=[_version_row("v1", 1), []])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_mark))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_mark))
     updated_mark = asyncio.run(repo.mark_rule_version_for_rollback("rule-1", "v1", True))
 
     assert updated_mark is not None
@@ -904,7 +929,7 @@ def test_set_current_rule_version_validation_variants(monkeypatch) -> None:
     repo = PostgresRulesRepository("postgresql://example")
 
     session_none = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_none))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_none))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: None))
     assert asyncio.run(
         repo.set_current_rule_version_validation(rule_id="rule-1", validation_status="valid", validated_by=None)
@@ -913,7 +938,7 @@ def test_set_current_rule_version_validation_variants(monkeypatch) -> None:
     row_no_current = _rule_row()
     row_no_current.current_version_id = None
     session_no_current = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_no_current))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_no_current))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: row_no_current))
     assert asyncio.run(
         repo.set_current_rule_version_validation(rule_id="rule-1", validation_status="valid", validated_by=None)
@@ -922,7 +947,7 @@ def test_set_current_rule_version_validation_variants(monkeypatch) -> None:
     row_missing_version = _rule_row()
     row_missing_version.current_version_id = "v1"
     session_missing_version = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_missing_version))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_missing_version))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: row_missing_version))
     assert asyncio.run(
         repo.set_current_rule_version_validation(rule_id="rule-1", validation_status="valid", validated_by="user-admin")
@@ -932,7 +957,7 @@ def test_set_current_rule_version_validation_variants(monkeypatch) -> None:
     row_ok.current_version_id = "v1"
     version_row = _version_row("v1", 1)
     session_ok = _Session(scalar_values=[version_row])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_ok))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_ok))
     monkeypatch.setattr(PostgresRulesRepository, "_get_rule_row", staticmethod(lambda _s, _id: row_ok))
 
     payload = asyncio.run(
@@ -952,7 +977,7 @@ def test_compiler_artifact_and_reusable_assets_success_paths(monkeypatch) -> Non
     repo = PostgresRulesRepository("postgresql://example")
 
     session_active_none = _Session(scalar_values=[None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_active_none))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_active_none))
     assert asyncio.run(repo.get_active_compiler_artifact("rv-missing")) is None
 
     reusable_filter_row = SimpleNamespace(
@@ -978,15 +1003,15 @@ def test_compiler_artifact_and_reusable_assets_success_paths(monkeypatch) -> Non
         updated_at=None,
     )
     session_filters = _Session(scalar_values=[[reusable_filter_row]])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_filters))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_filters))
     filters = asyncio.run(repo.list_reusable_filters(workspace="default"))
 
     session_joins = _Session(scalar_values=[[reusable_join_row]])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_joins))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_joins))
     joins = asyncio.run(repo.list_reusable_joins(workspace="default"))
 
     session_create_filter = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_create_filter))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_create_filter))
     created_filter = asyncio.run(
         repo.create_reusable_filter(
             name="Filter New",
@@ -999,7 +1024,7 @@ def test_compiler_artifact_and_reusable_assets_success_paths(monkeypatch) -> Non
     )
 
     session_create_join = _Session()
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_create_join))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_create_join))
     created_join = asyncio.run(
         repo.create_reusable_join(
             name="Join New",
@@ -1012,11 +1037,11 @@ def test_compiler_artifact_and_reusable_assets_success_paths(monkeypatch) -> Non
     )
 
     session_delete_filter = _Session(scalar_values=[reusable_filter_row, None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_delete_filter))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_delete_filter))
     deleted_filter = asyncio.run(repo.delete_reusable_filter("rf-1"))
 
     session_delete_join = _Session(scalar_values=[reusable_join_row, None])
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session_delete_join))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session_delete_join))
     deleted_join = asyncio.run(repo.delete_reusable_join("rj-1"))
 
     assert filters[0]["id"] == "rf-1"
@@ -1029,7 +1054,7 @@ def test_compiler_artifact_and_reusable_assets_success_paths(monkeypatch) -> Non
 
 def test_get_user_and_json_parse_fallback_paths(monkeypatch) -> None:
     session = _Session(gets={(rules_mod.UserRow, "missing"): None})
-    monkeypatch.setattr(rules_mod, "session_scope", lambda db_url: _Ctx(session))
+    _patch_session(monkeypatch, lambda db_url: _Ctx(session))
     repo = PostgresRulesRepository("postgresql://example")
     assert asyncio.run(repo.get_user_by_id("missing")) is None
 
