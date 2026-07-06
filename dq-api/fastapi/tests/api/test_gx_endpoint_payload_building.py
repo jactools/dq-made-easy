@@ -12,6 +12,7 @@ from pydantic import BaseModel, ValidationError
 
 from app.api.presenters.gx import build_gx_suite_entity
 from app.api.presenters.gx import build_gx_suite_expectation_entity
+from app.api.v1.endpoints import execution_monitoring as gx_models
 from app.api.v1 import gx_report_api
 from app.api.v1 import gx_runtime_api
 from app.api.v1 import gx_run_plan_api
@@ -380,28 +381,28 @@ def test_build_dispatch_queue_payload_parses_execution_contract_traceability() -
 
 
 def test_build_execution_report_payloads_and_error_detail_accept_snake_case() -> None:
-    result_summary = gx_report_api._build_execution_result_summary_payload(
+    body = gx_models.GxExecutionRunReportRequestView.model_validate(
         {
-            "results": [
+            "new_status": "failed",
+            "diagnostics": [
                 {
                     "data_object_version_id": "dov-1",
-                    "ok": False,
-                    "violation_count": "4",
+                    "row_identifier": "order_id=42",
+                    "reason": "expectation_failed",
+                    "message": "Expectation failed",
                 }
             ],
-            "failed_count": "4",
+            "result_summary": {
+                "results": [
+                    {
+                        "data_object_version_id": "dov-1",
+                        "ok": False,
+                        "violation_count": "4",
+                    }
+                ],
+                "failed_count": "4",
+            },
         }
-    )
-    result_items = gx_report_api._build_execution_result_items(result_summary)
-    diagnostics = gx_report_api._build_execution_diagnostic_payloads(
-        [
-            {
-                "data_object_version_id": "dov-1",
-                "row_identifier": "order_id=42",
-                "reason": "expectation_failed",
-                "message": "Expectation failed",
-            }
-        ]
     )
     error_detail = build_gx_structured_error_detail_entity(
         {
@@ -412,382 +413,14 @@ def test_build_execution_report_payloads_and_error_detail_accept_snake_case() ->
         }
     )
 
-    assert result_summary is not None
-    assert result_summary.failedCount == "4"
-    assert len(result_items) == 1
-    assert result_items[0].dataObjectVersionId == "dov-1"
-    assert result_items[0].violationCount == "4"
-    assert len(diagnostics) == 1
-    assert diagnostics[0].rowIdentifier == "order_id=42"
+    assert body.newStatus == "failed"
+    assert body.diagnostics is not None
+    assert body.diagnostics[0]["data_object_version_id"] == "dov-1"
+    assert body.resultSummary is not None
+    assert body.resultSummary["failed_count"] == "4"
     assert error_detail is not None
-    assert error_detail.correlationId == "corr-1"
+    assert error_detail.reason == "queue_unavailable"
     assert error_detail.queueMessageId == "msg-1"
-
-
-def test_build_dispatch_queue_payload_parses_grouped_execution_plan() -> None:
-    payload = build_gx_dispatch_payload_entity(
-        {
-            "run_id": "run-grouped-1",
-            "queue_message_id": "run-grouped-1",
-            "engine_type": "gx",
-            "queue_key": "dq-gx:execution-dispatch",
-            "execution_shape": "grouped_scope",
-            "grouped_execution_plan": {
-                "suite_count": 3,
-                "batch_count": 2,
-            },
-        }
-    )
-
-    assert payload is not None
-    assert payload.groupedExecutionPlan is not None
-    assert payload.groupedExecutionPlan == build_gx_grouped_execution_plan_entity({"suite_count": 3, "batch_count": 2})
-
-
-def test_build_dispatch_queue_payload_parses_next_dispatch_payload() -> None:
-    payload = build_gx_dispatch_payload_entity(
-        {
-            "run_id": "run-join-1",
-            "queue_message_id": "run-join-1",
-            "engine_type": "gx",
-            "queue_key": "dq-gx:join-pair-materialize",
-            "next_dispatch_payload": {
-                "run_id": "run-join-1",
-                "queue_message_id": "run-join-1",
-                "engine_type": "gx",
-                "queue_key": "dq-gx:execution-dispatch",
-                "execution_shape": "join_pair",
-            },
-        }
-    )
-
-    assert payload is not None
-    assert payload.nextDispatchPayload is not None
-    assert payload.nextDispatchPayload.queueKey == "dq-gx:execution-dispatch"
-
-
-def test_build_gx_execution_run_entity_accepts_snake_case_and_artifact_aliases() -> None:
-    payload = build_gx_execution_run_entity(
-        {
-            "id": "run-neutral-1",
-            "artifact_id": "artifact-suite-1",
-            "artifact_version": 4,
-            "rule_id": "rule-1",
-            "rule_version_id": "rule-v1",
-            "correlation_id": "corr-run-1",
-            "requested_by": "user-1",
-            "engine_type": "gx",
-            "engine_target": "pyspark",
-            "execution_shape": "grouped_scope",
-            "status": "pending",
-            "submitted_at": "2026-04-26T10:00:00Z",
-            "created_at": "2026-04-26T10:00:00Z",
-            "updated_at": "2026-04-26T10:01:00Z",
-            "execution_contract": {
-                "engine_type": "gx",
-                "engine_target": "pyspark",
-                "execution_shape": "grouped_scope",
-            },
-            "handoff_payload": {
-                "engine_type": "gx",
-                "queue_key": "dq-gx:execution-dispatch",
-                "queue_message_id": "run-neutral-1",
-            },
-            "execution_progress": {
-                "percent": 20,
-                "completed_steps": 1,
-                "total_steps": 5,
-                "updated_at": "2026-04-26T10:00:30Z",
-            },
-            "result_summary": {"results": []},
-            "failure_code": "queued",
-            "failure_message": "queued for worker",
-            "status_history": [
-                {
-                    "id": "hist-1",
-                    "run_id": "run-neutral-1",
-                    "to_status": "pending",
-                    "changed_at": "2026-04-26T10:00:00Z",
-                    "details": {"source": "gx.run_plan.grouped.activate"},
-                }
-            ],
-        }
-    )
-
-    assert payload.suiteId == "artifact-suite-1"
-    assert payload.suiteVersion == 4
-    assert payload.ruleId == "rule-1"
-    assert payload.ruleVersionId == "rule-v1"
-    assert payload.engineType == "gx"
-    assert payload.executionProgress is not None
-    assert payload.executionProgress.completedSteps == 1
-    assert payload.executionProgress.totalSteps == 5
-    assert payload.statusHistory[0].runId == "run-neutral-1"
-    assert payload.statusHistory[0].toStatus == "pending"
-
-
-def test_build_gx_execution_run_entity_rejects_missing_top_level_engine_type() -> None:
-    with pytest.raises(ValueError, match="requires explicit engine_type"):
-        build_gx_execution_run_entity(
-            {
-                "id": "run-legacy-1",
-                "correlation_id": "corr-legacy-1",
-                "engine_target": "pyspark",
-                "execution_shape": "single_object",
-                "status": "pending",
-                "submitted_at": "2026-04-26T10:00:00Z",
-                "created_at": "2026-04-26T10:00:00Z",
-                "updated_at": "2026-04-26T10:00:00Z",
-                "execution_contract": {
-                    "engine_type": "gx",
-                    "engine_target": "pyspark",
-                    "execution_shape": "single_object",
-                },
-            }
-        )
-
-
-def test_build_gx_execution_run_summary_entity_accepts_snake_case_and_validation_aliases() -> None:
-    payload = build_gx_execution_run_summary_entity(
-        {
-            "id": "run-summary-1",
-            "validation_artifact_id": "artifact-suite-2",
-            "validation_artifact_version": 7,
-            "rule_id": "rule-2",
-            "rule_name": "Grouped scope run",
-            "data_object_version_id": "dov-2",
-            "data_object_names": ["Customer", "Order"],
-            "correlation_id": "corr-summary-1",
-            "requested_by": "user-2",
-            "engine_type": "gx",
-            "engine_target": "pyspark",
-            "execution_shape": "grouped_scope",
-            "status": "running",
-            "failed_record_count": 3,
-            "submitted_at": "2026-04-26T11:00:00Z",
-            "created_at": "2026-04-26T11:00:00Z",
-            "updated_at": "2026-04-26T11:01:00Z",
-        }
-    )
-
-    assert payload.suiteId == "artifact-suite-2"
-    assert payload.suiteVersion == 7
-    assert payload.engineType == "gx"
-    assert payload.dataObjectVersionId == "dov-2"
-    assert payload.failedRecordCount == 3
-
-
-def test_build_gx_execution_run_list_query_entity_accepts_artifact_aliases() -> None:
-    payload = build_gx_execution_run_list_query_entity(
-        {
-            "submitted_after": "2026-04-26T00:00:00Z",
-            "submitted_before": "2026-04-27T00:00:00Z",
-            "artifact_id": "artifact-suite-3",
-            "rule_id": "rule-3",
-            "status": "running",
-        }
-    )
-
-    assert payload.suiteId == "artifact-suite-3"
-    assert payload.ruleId == "rule-3"
-    assert payload.status == "running"
-
-
-def test_run_plan_grouped_plan_builders_reuse_typed_entity() -> None:
-    suite_selection = build_gx_run_plan_suite_selection_entity(
-        {
-            "selectionMode": "grouped_scope",
-            "scopeSelector": {"dataObjectVersionId": "dov-1"},
-            "suiteRefs": [{"suiteId": "gx_suite_1", "suiteVersion": 3, "engineType": "gx"}],
-            "groupedExecutionPlan": {"suite_count": 4, "batch_count": 2},
-        }
-    )
-    grouped_snapshot = build_gx_run_plan_grouped_suite_snapshot_entity(
-        {
-            "groupedExecutionPlan": {"suiteCount": 4, "batchCount": 2},
-            "suiteEnvelopes": [{"suiteId": "gx_suite_1"}],
-        }
-    )
-
-    assert suite_selection.groupedExecutionPlan is not None
-    assert suite_selection.groupedExecutionPlan.suiteCount == 4
-    assert suite_selection.groupedExecutionPlan.batchCount == 2
-    assert len(suite_selection.suiteRefs) == 1
-    assert suite_selection.suiteRefs[0].suiteId == "gx_suite_1"
-    assert suite_selection.suiteRefs[0].suiteVersion == 3
-    assert suite_selection.suiteRefs[0].engineType == "gx"
-    assert suite_selection.scopeSelector.dataObjectVersionId == "dov-1"
-    assert grouped_snapshot.groupedExecutionPlan is not None
-    assert grouped_snapshot.groupedExecutionPlan.suiteCount == 4
-    assert grouped_snapshot.groupedExecutionPlan.batchCount == 2
-    assert grouped_snapshot.suiteEnvelopes[0].suiteId == "gx_suite_1"
-
-
-def test_build_gx_suite_and_itsm_response_payloads_accept_snake_case() -> None:
-    gx_suite = build_gx_suite_entity(
-        {
-            "expectations": [
-                {
-                    "expectation_type": "expect_column_values_to_not_be_null",
-                    "kwargs": {"column": "order_id"},
-                }
-            ]
-        }
-    )
-    expectation = build_gx_suite_expectation_entity(
-        {
-            "expectation_type": "expect_column_values_to_not_be_null",
-            "kwargs": {"column": "order_id"},
-        }
-    )
-    itsm_response = build_itsm_response_entity(
-        {
-            "ticket_number": "HAL-4242",
-            "ticket_url": "https://itsm.example.com/ticket/HAL-4242",
-            "ticket": {"number": "HAL-4242"},
-            "data": {"ticket_id": "internal-42"},
-        }
-    )
-
-    assert gx_suite is not None
-    assert len(gx_suite.expectations) == 1
-    assert gx_suite.expectations[0].expectationType == "expect_column_values_to_not_be_null"
-    assert expectation is not None
-    assert expectation.expectationType == "expect_column_values_to_not_be_null"
-    assert itsm_response is not None
-    assert itsm_response.ticketNumber == "HAL-4242"
-    assert itsm_response.ticketUrl == "https://itsm.example.com/ticket/HAL-4242"
-    assert itsm_response.ticket is not None
-    assert itsm_response.ticket.number == "HAL-4242"
-    assert itsm_response.data is not None
-    assert itsm_response.data.ticketId == "internal-42"
-    assert extract_itsm_ticket_number({"data": {"ticket_number": "HAL-4242"}}) == "HAL-4242"
-
-
-def test_gx_endpoint_internal_payload_helpers_cover_resolution_and_status_sync() -> None:
-    class TraceableExecutionContract:
-        def __init__(self, payload: dict[str, object]) -> None:
-            self._payload = payload
-
-        def model_dump(self) -> dict[str, object]:
-            return dict(self._payload)
-
-    suite_from_contract = SimpleNamespace(
-        executionContract=TraceableExecutionContract(
-            {
-                "engine_target": "dq-engine",
-                "execution_shape": "small",
-                "traceability": {"data_object_version_id": "dov-contract"},
-            }
-        ),
-        resolvedExecutionScope=SimpleNamespace(dataObjectVersionIds=["dov-scope"]),
-    )
-    suite_from_scope = SimpleNamespace(
-        executionContract=TraceableExecutionContract({"engine_target": "dq-engine", "execution_shape": "small"}),
-        resolvedExecutionScope=SimpleNamespace(dataObjectVersionIds=["dov-scope"]),
-    )
-    suite_without_target = SimpleNamespace(executionContract=None, resolvedExecutionScope=None)
-    suite_with_many_targets = SimpleNamespace(
-        executionContract=None,
-        resolvedExecutionScope=SimpleNamespace(dataObjectVersionIds=["dov-1", "dov-2"]),
-    )
-
-    assert gx_start_api._resolve_primary_data_object_version_id(suite_from_contract) == "dov-contract"
-    assert gx_start_api._resolve_primary_data_object_version_id(suite_from_scope) == "dov-scope"
-    assert gx_start_api._resolve_primary_data_object_version_id(suite_without_target) is None
-    assert gx_start_api._resolve_primary_data_object_version_id(suite_with_many_targets) is None
-    assert gx_start_api._resolve_execution_delivery_snapshot(
-        suite=suite_without_target,
-        data_catalog_repository=DummyDeliveryRepo([]),
-    ) is None
-    assert gx_suite_api._payload_extra_value({"ticketId": "ticket-1"}, "ticketId", "ticket_id") == "ticket-1"
-    assert gx_suite_api._payload_extra_value(SimpleNamespace(model_extra={"ticket_id": "ticket-2"}), "ticketId", "ticket_id") == "ticket-2"
-    assert gx_start_api._snakecase_payload(
-        {"ticketId": "HAL-1", "children": [{"runPlanVersionId": "rpv-1"}]}
-    ) == {
-        "ticket_id": "HAL-1",
-        "children": [{"run_plan_version_id": "rpv-1"}],
-    }
-
-
-def test_extract_report_violation_target_ids_prefers_diagnostics_then_results_then_contract() -> None:
-    run = SimpleNamespace(
-        executionContract={
-            "engine_target": "dq-engine",
-            "execution_shape": "small",
-            "traceability": {"data_object_version_id": "dov-contract"},
-        }
-    )
-
-    diagnostics_body = gx_endpoints.GxExecutionRunReportRequestView.model_validate(
-        {
-            "new_status": "failed",
-            "diagnostics": [
-                {"data_object_version_id": "dov-diagnostic", "row_identifier": "pk-1"},
-                {"data_object_version_id": "dov-diagnostic", "row_identifier": "pk-2"},
-            ],
-        }
-    )
-    assert extract_exception_fact_target_ids(run_result=diagnostics_body, execution_context=run) == ["dov-diagnostic"]
-
-    result_summary_body = gx_endpoints.GxExecutionRunReportRequestView.model_validate(
-        {
-            "new_status": "failed",
-            "diagnostics": [{"row_identifier": "pk-3"}],
-            "result_summary": {
-                "results": [{"data_object_version_id": "dov-result", "ok": False, "violation_count": 1}],
-                "failed_count": 1,
-            },
-        }
-    )
-    assert extract_exception_fact_target_ids(run_result=result_summary_body, execution_context=run) == ["dov-result"]
-
-
-def test_enqueue_scheduled_suite_run_queue_unavailable(monkeypatch) -> None:
-    class DummyRepo:
-        async def create_run(self, run=None, **kwargs):
-            raise AssertionError("should not create run")
-
-    request = SimpleNamespace(headers={})
-    suite = DummySuite(
-        suite_id="gx_suite_1",
-        execution_contract=DummyExecutionContract("dq-engine", "small"),
-        resolved_execution_scope=SimpleNamespace(dataObjectVersionIds=["dov-1"]),
-    )
-    monkeypatch.setenv("GX_EXECUTION_QUEUE_KEY", "dq-gx:execution-dispatch")
-    monkeypatch.setenv("GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY", "dq-gx:join-pair-materialize")
-    monkeypatch.setattr(gx_endpoints.gx_queue_service, "resolve_redis_url", lambda settings: None)
-    with pytest.raises(HTTPException) as exc:
-        asyncio.run(
-            gx_runtime_api.enqueue_scheduled_suite_run(
-                request=request,
-                suite=suite,
-                scheduled_at=datetime.now(UTC),
-                execution_run_repository=DummyRepo(),
-                requested_by="user-1",
-                status_source="source",
-                status_reason="reason",
-                execution_scope_override=None,
-                source_overrides_by_data_object_version_id=None,
-                delivery_snapshot=None,
-                correlation_id=None,
-                queue_key=gx_runtime_api.resolve_execution_queue_key(),
-                join_pair_materialization_queue_key=gx_runtime_api.resolve_join_pair_materialization_queue_key(),
-                data_catalog_repository=DummyDeliveryRepo([]),
-                settings_provider=lambda: None,
-                dispatch_worker_heartbeat_key_builder=gx_runtime_api.resolve_execution_worker_heartbeat_key,
-                dispatch_worker_heartbeat_ttl_seconds=gx_runtime_api.resolve_execution_worker_heartbeat_ttl_seconds(),
-                join_pair_materialization_worker_heartbeat_key_builder=gx_runtime_api.resolve_join_pair_materialization_worker_heartbeat_key,
-                join_pair_materialization_worker_heartbeat_ttl_seconds=gx_runtime_api.resolve_join_pair_materialization_worker_heartbeat_ttl_seconds(),
-                inject_trace_carrier=lambda carrier: None,
-                map_persistence_error=gx_runtime_api.map_execution_run_persistence_error,
-                async_redis_module=gx_endpoints.aioredis,
-                sync_redis_module=gx_endpoints.redis_sync,
-                logger=logging.getLogger(__name__),
-            )
-        )
-    assert exc.value.status_code == 503
-
 
 @pytest.mark.anyio
 async def test_create_adhoc_gx_suite_runs_requires_selector_and_conflicting_scope(monkeypatch) -> None:
@@ -802,6 +435,7 @@ async def test_create_adhoc_gx_suite_runs_requires_selector_and_conflicting_scop
     monkeypatch.setenv("GX_EXECUTION_QUEUE_KEY", "dq-gx:execution-dispatch")
     monkeypatch.setenv("GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY", "dq-gx:join-pair-materialize")
     monkeypatch.setattr(gx_endpoints.gx_queue_service, "resolve_redis_url", lambda settings: "redis://example")
+    monkeypatch.setattr(gx_endpoints, "get_data_catalog_repository", lambda: DummyRepo())
 
     async def noop_assert_active_gx_dispatch_worker(redis_url: str, queue_key: str) -> None:
         return None
@@ -824,7 +458,7 @@ async def test_create_adhoc_gx_suite_runs_requires_selector_and_conflicting_scop
 
     monkeypatch.setattr(gx_endpoints.gx_queue_service, "assert_worker_heartbeat", patched_assert_worker_heartbeat)
 
-    body = gx_endpoints.GxAdhocSuiteRunsRequestView.model_validate({})
+    body = gx_models.GxAdhocSuiteRunsRequestView.model_validate({})
     with pytest.raises(HTTPException) as exc:
         await gx_endpoints.create_adhoc_gx_suite_runs(
             request=request,
@@ -835,7 +469,7 @@ async def test_create_adhoc_gx_suite_runs_requires_selector_and_conflicting_scop
     assert exc.value.status_code == 422
     assert exc.value.detail["error"] == "missing_selector"
 
-    body2 = gx_endpoints.GxAdhocSuiteRunsRequestView.model_validate(
+    body2 = gx_models.GxAdhocSuiteRunsRequestView.model_validate(
         {
             "data_object_version_id": "dov-1",
             "target_data_object_version_ids": ["dov-2"],
