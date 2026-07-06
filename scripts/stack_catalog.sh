@@ -60,6 +60,11 @@ repo_image_values() {
     dq-kong \
     dq-db \
     dq-keycloak \
+    dq-kafka \
+    dq-kafka-consumer \
+    dq-trino \
+    dq-edge \
+    dq-airflow \
     dq-llm \
     dq-db-seed \
     dq-keycloak-seed-artifacts \
@@ -95,7 +100,7 @@ is_core_repo_image() {
 
 is_repo_managed_image() {
   case "$1" in
-    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak|dq-llm|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
+    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak|dq-kafka|dq-kafka-consumer|dq-trino|dq-edge|dq-airflow|dq-llm|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
       return 0
       ;;
     *)
@@ -176,6 +181,21 @@ repo_image_env_vars() {
       ;;
     dq-keycloak)
       printf '%s\n' DQ_KEYCLOAK_REGISTRY DQ_KEYCLOAK_NAMESPACE DQ_KEYCLOAK_IMAGE DQ_KEYCLOAK_TAG
+      ;;
+    dq-kafka)
+      printf '%s\n' DQ_KAFKA_REGISTRY DQ_KAFKA_NAMESPACE DQ_KAFKA_IMAGE DQ_KAFKA_TAG
+      ;;
+    dq-kafka-consumer)
+      printf '%s\n' DQ_KAFKA_CONSUMER_REGISTRY DQ_KAFKA_CONSUMER_NAMESPACE DQ_KAFKA_CONSUMER_IMAGE DQ_KAFKA_CONSUMER_TAG
+      ;;
+    dq-trino)
+      printf '%s\n' DQ_TRINO_REGISTRY DQ_TRINO_NAMESPACE DQ_TRINO_IMAGE DQ_TRINO_TAG
+      ;;
+    dq-edge)
+      printf '%s\n' DQ_EDGE_REGISTRY DQ_EDGE_NAMESPACE DQ_EDGE_IMAGE DQ_EDGE_TAG
+      ;;
+    dq-airflow)
+      printf '%s\n' DQ_AIRFLOW_REGISTRY DQ_AIRFLOW_NAMESPACE DQ_AIRFLOW_IMAGE DQ_AIRFLOW_TAG
       ;;
     dq-llm)
       printf '%s\n' DQ_LLM_REGISTRY DQ_LLM_NAMESPACE DQ_LLM_IMAGE DQ_LLM_TAG
