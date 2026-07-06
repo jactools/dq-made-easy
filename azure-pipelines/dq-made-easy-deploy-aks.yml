@@ -1,18 +1,24 @@
-# Purpose: Deploy any dq-made-easy Docker image to an existing Azure Container Apps environment with OpenTofu.
+# Purpose: Deploy any dq-made-easy Docker image to Kubernetes (AKS/EKS/GKE) using an explicit Build -> Test -> Publish -> Deploy stage contract.
 # What it does:
-# - Selects the env-specific dq-made-easy parameter template.
-# - Runs Build -> Test -> Publish -> Deploy stages.
-# - Publishes image references to Docker Hub or an internal registry and deploys using the published reference.
-# - Passes the selected environment, image, and ingress settings into the OpenTofu deployment job template.
-# - Fails fast when required deploy inputs are missing.
-# Version: 1.1
+# - Selects env-specific parameter templates.
+# - Resolves publish/deploy image references from Docker Hub or an internal registry.
+# - Ensures deploy uses published image references, never local agent images.
+# Version: 1.0
 # Last modified: 2026-07-06
 
 trigger: none
 pr: none
-name: dq-made-easy-deploy-container-app_$(Date:yyyyMMdd)$(Rev:.r)
+name: dq-made-easy-deploy-aks_$(Date:yyyyMMdd)$(Rev:.r)
 
 parameters:
+  - name: cloudProvider
+    displayName: Cloud provider
+    type: string
+    default: aks
+    values:
+      - aks
+      - eks
+      - gke
   - name: environment
     displayName: Environment
     type: string
@@ -21,8 +27,8 @@ parameters:
       - dev
       - test
       - prod
-  - name: containerAppName
-    displayName: Container App name
+  - name: serviceName
+    displayName: Workload/service name
     type: string
   - name: imageName
     displayName: Image name (namespace/repository)
@@ -35,8 +41,8 @@ parameters:
     displayName: Test command
     type: string
     default: ./scripts/validate.sh
-  - name: containerImage
-    displayName: Optional explicit image ref override
+  - name: imageDigest
+    displayName: Optional image digest override
     type: string
     default: ''
   - name: registryTarget
@@ -46,27 +52,8 @@ parameters:
     values:
       - dockerhub
       - internal
-  - name: targetPort
-    displayName: Target port
-    type: number
-    default: 80
-  - name: ingress
-    displayName: Ingress
-    type: string
-    default: internal
-    values:
-      - internal
-      - external
-  - name: revisionSuffix
-    displayName: Revision suffix
-    type: string
-    default: ''
-  - name: containerName
-    displayName: Container name
-    type: string
-    default: app
   - name: registryServer
-    displayName: Registry server
+    displayName: Internal registry server (required when registryTarget=internal)
     type: string
     default: ''
   - name: registryUsername
@@ -79,12 +66,26 @@ parameters:
     default: ''
 
 variables:
-  - ${{ if eq(parameters.environment, 'dev') }}:
-    - template: parameters/dq-made-easy-dev.yml
-  - ${{ if eq(parameters.environment, 'test') }}:
-    - template: parameters/dq-made-easy-test.yml
-  - ${{ if eq(parameters.environment, 'prod') }}:
-    - template: parameters/dq-made-easy-prod.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'aks'), eq(parameters.environment, 'dev')) }}:
+    - template: parameters/dq-made-easy-aks-dev.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'aks'), eq(parameters.environment, 'test')) }}:
+    - template: parameters/dq-made-easy-aks-test.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'aks'), eq(parameters.environment, 'prod')) }}:
+    - template: parameters/dq-made-easy-aks-prod.yml
+
+  - ${{ if and(eq(parameters.cloudProvider, 'eks'), eq(parameters.environment, 'dev')) }}:
+    - template: parameters/dq-made-easy-eks-dev.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'eks'), eq(parameters.environment, 'test')) }}:
+    - template: parameters/dq-made-easy-eks-test.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'eks'), eq(parameters.environment, 'prod')) }}:
+    - template: parameters/dq-made-easy-eks-prod.yml
+
+  - ${{ if and(eq(parameters.cloudProvider, 'gke'), eq(parameters.environment, 'dev')) }}:
+    - template: parameters/dq-made-easy-gke-dev.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'gke'), eq(parameters.environment, 'test')) }}:
+    - template: parameters/dq-made-easy-gke-test.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'gke'), eq(parameters.environment, 'prod')) }}:
+    - template: parameters/dq-made-easy-gke-prod.yml
 
 stages:
   - stage: Build
@@ -167,8 +168,7 @@ stages:
               registry_server='${{ parameters.registryServer }}'
               image_name='${{ parameters.imageName }}'
               image_tag='${{ parameters.imageTag }}'
-              image_digest=''
-              explicit_image='${{ parameters.containerImage }}'
+              image_digest='${{ parameters.imageDigest }}'
 
               case "$registry_target" in
                 dockerhub)
@@ -187,14 +187,9 @@ stages:
                   ;;
               esac
 
-              if [[ -n "$explicit_image" ]]; then
-                publish_image_ref="$explicit_image"
+              if [[ -n "$image_digest" ]]; then
+                publish_image_ref="${registry_host}/${image_name}@${image_digest}"
               else
-                if [[ -z "$image_name" ]]; then
-                  echo "imageName is required when containerImage override is not provided" >&2
-                  exit 1
-                fi
-
                 source_image_ref="docker.io/${image_name}:${image_tag}"
                 publish_image_ref="${registry_host}/${image_name}:${image_tag}"
 
@@ -223,19 +218,31 @@ stages:
             displayName: dq-made-easy - Resolve and publish image reference
 
   - stage: Deploy
-    displayName: dq-made-easy - Deploy Container App
+    displayName: dq-made-easy - Deploy to Kubernetes
     dependsOn: Publish
     variables:
       DEPLOY_IMAGE_REF: $[ stageDependencies.Publish.PublishToRegistry.outputs['PublishImage.DEPLOY_IMAGE_REF'] ]
     jobs:
-      - template: templates/dq-made-easy-container-app-deploy-tofu.yml
+      - template: templates/dq-made-easy-aks-deploy.yml
         parameters:
-          containerAppName: ${{ parameters.containerAppName }}
-          containerImage: $(DEPLOY_IMAGE_REF)
-          targetPort: ${{ parameters.targetPort }}
-          ingress: ${{ parameters.ingress }}
-          revisionSuffix: ${{ parameters.revisionSuffix }}
-          containerName: ${{ parameters.containerName }}
-          registryServer: ${{ parameters.registryServer }}
-          registryUsername: ${{ parameters.registryUsername }}
-          registryPassword: ${{ parameters.registryPassword }}
+          cloudProvider: ${{ parameters.cloudProvider }}
+          serviceName: ${{ parameters.serviceName }}
+          imageRef: $(DEPLOY_IMAGE_REF)
+          kubernetesClusterName: $(aksClusterName)
+          kubernetesNamespace: $(aksNamespace)
+          kubeContext: $(kubeContext)
+          azureServiceConnection: $(azureServiceConnection)
+
+  - stage: Smoke
+    displayName: dq-made-easy - Kubernetes smoke validation
+    dependsOn: Deploy
+    jobs:
+      - template: templates/dq-made-easy-aks-smoke.yml
+        parameters:
+          cloudProvider: ${{ parameters.cloudProvider }}
+          serviceName: ${{ parameters.serviceName }}
+          kubernetesClusterName: $(aksClusterName)
+          kubernetesNamespace: $(aksNamespace)
+          kubeContext: $(kubeContext)
+          azureServiceConnection: $(azureServiceConnection)
+          imageRef: $(DEPLOY_IMAGE_REF)

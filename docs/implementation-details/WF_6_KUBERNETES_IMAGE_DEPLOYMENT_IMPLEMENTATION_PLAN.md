@@ -114,19 +114,19 @@ Validation additions:
 
 ### Phase 1: Baseline Kubernetes Contract
 
-- [ ] WF6-F-P1-01 Define base Kubernetes resource templates for each repo-managed runtime service.
+- [x] WF6-F-P1-01 Define base Kubernetes resource templates for each repo-managed runtime service.
   - Files: `infra/k8s/base/services/*`, `infra/k8s/base/config/*`, `infra/k8s/base/README.md`
   - Existing references: `docker-compose.yml`, `scripts/stack_catalog.sh`
-- [ ] WF6-F-P1-02 Define dev, test, and prod overlays with environment-specific config boundaries.
+- [x] WF6-F-P1-02 Define dev, test, and prod overlays with environment-specific config boundaries.
   - Files: `infra/k8s/overlays/dev/*`, `infra/k8s/overlays/test/*`, `infra/k8s/overlays/prod/*`
   - Existing references: `.env.dev.local`, `.env.test.local`, `.env.prod.local`, `scripts/supporting/env/selection.sh`
-- [ ] WF6-F-P1-03 Define namespace and ingress hostname conventions for all environments.
+- [x] WF6-F-P1-03 Define namespace and ingress hostname conventions for all environments.
   - Files: `infra/k8s/base/namespace.yaml`, `infra/k8s/base/ingress/*`, `infra/k8s/README.md`
   - Existing references: `docs/features/WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md`, `docs/technical/KONG_DEPLOYMENT.md`
-- [ ] WF6-F-P1-04 Define migration and seed job lifecycle behavior per environment.
+- [x] WF6-F-P1-04 Define migration and seed job lifecycle behavior per environment.
   - Files: `infra/k8s/base/jobs/*`, `scripts/k8s/deploy.sh`
   - Existing references: `scripts/start-containers.sh`, `scripts/seed_stack.sh`, `scripts/start_stack.sh`
-- [ ] WF6-F-P1-05 Define required labels and annotations for traceability.
+- [x] WF6-F-P1-05 Define required labels and annotations for traceability.
   - Files: `infra/k8s/base/metadata/labels.yaml`, `infra/k8s/base/services/*`
   - Existing references: `VERSION_MANIFEST.json`
 
@@ -147,6 +147,15 @@ Validation additions:
   - Existing references: environment parameter pattern in `azure-pipelines/parameters/dq-made-easy-aks-*.yml`
 - [ ] WF6-F-P2-05 Persist deployment evidence per environment for audit and release notes.
   - Files: `azure-pipelines/templates/dq-made-easy-aks-smoke.yml`, `docs/releases/*` (release evidence entries)
+- [ ] WF6-F-P2-06 Add cloud-specific environment parameter templates and enforce non-placeholder cluster context values.
+  - Files: `azure-pipelines/parameters/dq-made-easy-eks-*.yml`, `azure-pipelines/parameters/dq-made-easy-gke-*.yml`, `azure-pipelines/dq-made-easy-deploy-aks.yml`
+  - Validation: fail pipeline when placeholder `kubeContext` or cluster identifiers are detected.
+- [ ] WF6-F-P2-07 Implement native cluster credential acquisition for EKS and GKE in deploy/smoke templates.
+  - Files: `azure-pipelines/templates/dq-made-easy-aks-deploy.yml`, `azure-pipelines/templates/dq-made-easy-aks-smoke.yml`
+  - Existing references: EKS (`aws eks update-kubeconfig`) and GKE (`gcloud container clusters get-credentials`) auth patterns.
+- [ ] WF6-F-P2-08 Add provider-aware render and preflight checks to CI validation gates.
+  - Files: `scripts/k8s/render.sh`, `scripts/validation/validate_k8s_cluster_capabilities.sh`, `azure-pipelines/dq-made-easy-deploy-aks.yml`
+  - Validation: render matrix for `aks|eks|gke` and preflight capability checks per target provider.
 
 ### Phase 3: Runtime Hardening
 

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-airflow
+  labels:
+    app.kubernetes.io/name: dq-airflow
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-airflow
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-airflow
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-airflow
+          image: docker.io/jacbeekers/dq-made-easy-airflow:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-airflow-config
+            - secretRef:
+                name: dq-airflow-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-airflow
+  labels:
+    app.kubernetes.io/name: dq-airflow
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-airflow
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

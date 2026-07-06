@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-frontend
+  labels:
+    app.kubernetes.io/name: dq-frontend
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-frontend
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-frontend
+          image: docker.io/jacbeekers/dq-made-easy-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 443
+              name: https
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-frontend-config
+            - secretRef:
+                name: dq-frontend-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-frontend
+  labels:
+    app.kubernetes.io/name: dq-frontend
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-frontend
+  ports:
+    - name: https
+      port: 443
+      targetPort: https

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-db
+  labels:
+    app.kubernetes.io/name: dq-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-db
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-db
+          image: docker.io/jacbeekers/dq-made-easy-db:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-db-config
+            - secretRef:
+                name: dq-db-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-db
+  labels:
+    app.kubernetes.io/name: dq-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

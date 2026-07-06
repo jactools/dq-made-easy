@@ -1,0 +1,8 @@
+variables:
+  cloudProvider: gke
+  region: europe-west4
+  aksClusterName: dq-made-easy-test-gke
+  aksNamespace: dq-made-easy-test
+  kubeContext: gke_project_europe-west4_dq-made-easy-test-gke
+  azureServiceConnection: ''
+  ingressDomain: test.dq-made-easy.jaccloud.nl

@@ -1,0 +1,176 @@
+parameters:
+  - name: cloudProvider
+    type: string
+  - name: serviceName
+    type: string
+  - name: imageRef
+    type: string
+  - name: kubernetesClusterName
+    type: string
+  - name: kubernetesNamespace
+    type: string
+  - name: kubeContext
+    type: string
+  - name: azureServiceConnection
+    type: string
+
+jobs:
+  - job: DeployK8sWorkload
+    displayName: dq-made-easy - Deploy Kubernetes workload
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - checkout: self
+
+      - bash: |
+          set -euo pipefail
+
+          if [[ -z '${{ parameters.serviceName }}' ]]; then
+            echo "serviceName is required" >&2
+            exit 1
+          fi
+          if [[ -z '${{ parameters.imageRef }}' ]]; then
+            echo "imageRef is required" >&2
+            exit 1
+          fi
+          if [[ -z '${{ parameters.kubernetesClusterName }}' || -z '${{ parameters.kubernetesNamespace }}' ]]; then
+            echo "kubernetesClusterName and kubernetesNamespace are required" >&2
+            exit 1
+          fi
+          case '${{ parameters.cloudProvider }}' in
+            aks|eks|gke) ;;
+            *)
+              echo "Unsupported cloudProvider: ${{ parameters.cloudProvider }}" >&2
+              exit 1
+              ;;
+          esac
+        displayName: dq-made-easy - Validate AKS deploy inputs
+
+      - ${{ if eq(parameters.cloudProvider, 'aks') }}:
+        - task: AzureCLI@2
+          displayName: dq-made-easy - Authenticate kubectl context for AKS
+          inputs:
+            azureSubscription: ${{ parameters.azureServiceConnection }}
+            scriptType: bash
+            scriptLocation: inlineScript
+            inlineScript: |
+              set -euo pipefail
+
+              cluster_name='${{ parameters.kubernetesClusterName }}'
+              resource_group='$(resourceGroupName)'
+
+              if [[ -z "$resource_group" ]]; then
+                echo "resourceGroupName variable is required for AKS deploy" >&2
+                exit 1
+              fi
+
+              az aks get-credentials \
+                --resource-group "$resource_group" \
+                --name "$cluster_name" \
+                --overwrite-existing
+
+      - ${{ if ne(parameters.cloudProvider, 'aks') }}:
+        - bash: |
+            set -euo pipefail
+
+            kube_context='${{ parameters.kubeContext }}'
+
+            if [[ -n "$kube_context" ]]; then
+              kubectl config use-context "$kube_context"
+            else
+              echo "kubeContext not provided; using current kubectl context"
+            fi
+          displayName: dq-made-easy - Prepare non-AKS kubectl context
+
+      - bash: |
+          set -euo pipefail
+
+          ./scripts/validation/validate_k8s_cluster_capabilities.sh \
+            --provider '${{ parameters.cloudProvider }}' \
+            --namespace '${{ parameters.kubernetesNamespace }}'
+        displayName: dq-made-easy - Preflight cluster capability checks
+
+      - task: AzureCLI@2
+        displayName: dq-made-easy - Deploy workload
+        condition: eq('${{ parameters.cloudProvider }}', 'aks')
+        inputs:
+          azureSubscription: ${{ parameters.azureServiceConnection }}
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -euo pipefail
+
+            service_name='${{ parameters.serviceName }}'
+            image_ref='${{ parameters.imageRef }}'
+            namespace='${{ parameters.kubernetesNamespace }}'
+
+            kubectl get namespace "$namespace" >/dev/null 2>&1 || kubectl create namespace "$namespace"
+
+            if kubectl -n "$namespace" get deployment "$service_name" >/dev/null 2>&1; then
+              kubectl -n "$namespace" set image "deployment/${service_name}" "${service_name}=${image_ref}"
+            else
+              cat <<EOF | kubectl -n "$namespace" apply -f -
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: ${service_name}
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app: ${service_name}
+                template:
+                  metadata:
+                    labels:
+                      app: ${service_name}
+                  spec:
+                    containers:
+                      - name: ${service_name}
+                        image: ${image_ref}
+                        imagePullPolicy: Always
+              EOF
+            fi
+
+            kubectl -n "$namespace" rollout status "deployment/${service_name}" --timeout=300s
+
+            echo "Target cluster: ${{ parameters.kubernetesClusterName }}"
+            echo "Target namespace: $namespace"
+            echo "Deploy image ref: $image_ref"
+
+      - bash: |
+          set -euo pipefail
+
+          service_name='${{ parameters.serviceName }}'
+          image_ref='${{ parameters.imageRef }}'
+          namespace='${{ parameters.kubernetesNamespace }}'
+
+          kubectl get namespace "$namespace" >/dev/null 2>&1 || kubectl create namespace "$namespace"
+
+          if kubectl -n "$namespace" get deployment "$service_name" >/dev/null 2>&1; then
+            kubectl -n "$namespace" set image "deployment/${service_name}" "${service_name}=${image_ref}"
+          else
+            cat <<EOF | kubectl -n "$namespace" apply -f -
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: ${service_name}
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: ${service_name}
+              template:
+                metadata:
+                  labels:
+                    app: ${service_name}
+                spec:
+                  containers:
+                    - name: ${service_name}
+                      image: ${image_ref}
+                      imagePullPolicy: Always
+            EOF
+          fi
+
+          kubectl -n "$namespace" rollout status "deployment/${service_name}" --timeout=300s
+        displayName: dq-made-easy - Deploy workload (EKS/GKE)
+        condition: ne('${{ parameters.cloudProvider }}', 'aks')

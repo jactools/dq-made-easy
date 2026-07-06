@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - config/common-config.yaml
+  - ingress/frontend.yaml
+  - ingress/keycloak.yaml
+  - ingress/openmetadata.yaml
+  - jobs/api-migrate.yaml
+  - jobs/kong-migrate.yaml
+  - jobs/openmetadata-seed.yaml
+  - services/api.yaml
+  - services/db.yaml
+  - services/frontend.yaml
+  - services/engine.yaml
+  - services/profiling-worker.yaml
+  - services/kong.yaml
+  - services/keycloak.yaml
+  - services/llm.yaml
+  - services/kafka.yaml
+  - services/kafka-consumer.yaml
+  - services/trino.yaml
+  - services/airflow.yaml
+  - services/openmetadata-db.yaml
+  - services/openmetadata-server.yaml
+
+transformers:
+  - metadata/labels.yaml
+  - metadata/annotations.yaml

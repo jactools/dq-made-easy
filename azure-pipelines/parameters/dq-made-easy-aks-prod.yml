@@ -1,4 +1,6 @@
 variables:
+  cloudProvider: aks
+  kubeContext: ''
   azureServiceConnection: dq-made-easy-prod-azure
   resourceGroupName: dq-made-easy-prod-aks-rg
   region: westeurope

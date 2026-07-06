@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dq-made-easy-dev
+
+resources:
+  - ../../base
+  - config/service-config.yaml
+  - config/service-secrets-placeholder.yaml
+
+patches:
+  - path: namespace-patch.yaml
+  - path: ingress-hosts-patch.yaml
+  - path: common-config-patch.yaml
+  - target:
+      group: ""
+      version: v1
+      kind: Namespace
+      name: dq-made-easy
+    path: namespace-name-patch.yaml
+
+replicas:
+  - name: dq-api
+    count: 1
+  - name: dq-engine
+    count: 1
+  - name: dq-frontend
+    count: 1
+  - name: dq-kong
+    count: 1
+  - name: dq-keycloak
+    count: 1

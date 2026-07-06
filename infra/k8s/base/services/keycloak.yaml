@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-keycloak
+  labels:
+    app.kubernetes.io/name: dq-keycloak
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-keycloak
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-keycloak
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-keycloak
+          image: docker.io/jacbeekers/dq-made-easy-keycloak:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 8443
+              name: https
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-keycloak-config
+            - secretRef:
+                name: dq-keycloak-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-keycloak
+  labels:
+    app.kubernetes.io/name: dq-keycloak
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+    - name: https
+      port: 8443
+      targetPort: https
