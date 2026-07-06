@@ -335,12 +335,21 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      if [ -n "$VERSION" ]; then
-        error "$my_name" "Multiple VERSION values supplied"
-        exit 1
-      fi
-      VERSION="$1"
-      shift
+      case "$1" in
+        core|repo)
+          # Backward-compatible fallback: accept bare scope values without --scope.
+          PULL_SCOPE="$1"
+          shift
+          ;;
+        *)
+          if [ -n "$VERSION" ]; then
+            error "$my_name" "Multiple VERSION values supplied"
+            exit 1
+          fi
+          VERSION="$1"
+          shift
+          ;;
+      esac
       ;;
   esac
  done
