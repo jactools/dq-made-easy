@@ -380,7 +380,10 @@ if [ "$internal_ca_bundle_found" = true ]; then
     export INTERNAL_CA_BUNDLE
 
     INTERNAL_CA_BUNDLE_FILE="$ROOT_DIR/tmp/certs/internal-ca-bundle.pem"
+    INTERNAL_CA_BUNDLE_FILE="$ROOT_DIR/tmp/certs/trust/internal-ca-bundle.pem"
+    mkdir -p "$ROOT_DIR/tmp/certs/trust"
     cp "$internal_ca_bundle_file" "$INTERNAL_CA_BUNDLE_FILE"
+    cp "$internal_ca_bundle_file" "$ROOT_DIR/tmp/certs/internal-ca-bundle.pem"
     export INTERNAL_CA_BUNDLE_FILE
 fi
 rm -f "$internal_ca_bundle_file"

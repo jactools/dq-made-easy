@@ -1,5 +1,5 @@
 # Create certs for local development and testing. These are used by the local Kong and Keycloak instances, and can be trusted by the local browser to avoid SSL warnings.
-# Version: 1.3
+# Version: 1.4
 # Last modified: 2026-04-25
 # Usage: ./scripts/create_certs.sh
 #!/usr/bin/env bash
@@ -36,6 +36,24 @@ create_openmetadata_keystore() {
 		-name openmetadata \
 		-out "$keystore_file" \
 		-passout "pass:$keystore_password"
+	write_internal_ca_bundle() {
+		local source_file="$1"
+		local trust_dir="$CERTS_DIR/trust"
+
+		mkdir -p "$trust_dir"
+		cp "$source_file" "$CERTS_DIR/internal-ca-bundle.pem"
+		cp "$source_file" "$trust_dir/internal-ca-bundle.pem"
+	}
+write_internal_ca_bundle "$mkcert_root_ca"
+}
+
+generate_service_cert() {
+	local service_name="$1"
+	shift
+
+	local service_dir="$CERTS_DIR/services/$service_name"
+	mkdir -p "$service_dir"
+	generate_cert "$service_dir/tls.crt" "$service_dir/tls.key" "$@"
 }
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -54,6 +72,42 @@ if [ ! -f "$mkcert_root_ca" ]; then
 fi
 
 cp "$mkcert_root_ca" "$CERTS_DIR/mkcert-rootCA.pem"
+	write_internal_ca_bundle "$mkcert_root_ca"
+
+echo "internal service DNS: api"
+generate_service_cert "api" api localhost 127.0.0.1 ::1
+echo "internal service DNS: airflow-server"
+generate_service_cert "airflow-server" airflow-server localhost 127.0.0.1 ::1
+echo "internal service DNS: aistor"
+generate_service_cert "aistor" aistor minio dq-made-easy-aistor localhost 127.0.0.1 ::1
+echo "internal service DNS: db"
+generate_service_cert "db" db localhost 127.0.0.1 ::1
+echo "internal service DNS: grafana"
+generate_service_cert "grafana" grafana localhost 127.0.0.1 ::1
+echo "internal service DNS: itsm"
+generate_service_cert "itsm" itsm localhost 127.0.0.1 ::1
+echo "internal service DNS: kafka"
+generate_service_cert "kafka" kafka localhost 127.0.0.1 ::1
+echo "internal service DNS: keycloak"
+generate_service_cert "keycloak" keycloak host.docker.internal localhost 127.0.0.1 ::1
+echo "internal service DNS: kong"
+generate_service_cert "kong" kong localhost 127.0.0.1 ::1
+echo "internal service DNS: observability"
+generate_service_cert "observability" observability localhost 127.0.0.1 ::1
+echo "internal service DNS: openmetadata-db"
+generate_service_cert "openmetadata-db" openmetadata-db localhost 127.0.0.1 ::1
+echo "internal service DNS: openmetadata-ingestion"
+generate_service_cert "openmetadata-ingestion" openmetadata-ingestion localhost 127.0.0.1 ::1
+echo "internal service DNS: openmetadata-search-v9"
+generate_service_cert "openmetadata-search-v9" openmetadata-search-v9 localhost 127.0.0.1 ::1
+echo "internal service DNS: openmetadata-server"
+generate_service_cert "openmetadata-server" openmetadata-server localhost 127.0.0.1 ::1
+echo "internal service DNS: otel-collector"
+generate_service_cert "otel-collector" otel-collector dq-made-easy-otel-collector localhost 127.0.0.1 ::1
+echo "internal service DNS: redis"
+generate_service_cert "redis" redis localhost 127.0.0.1 ::1
+echo "internal service DNS: support"
+generate_service_cert "support" support localhost 127.0.0.1 ::1
 
 echo "kafka.jac.dot"
 generate_cert "$CERTS_DIR/kafka.jac.dot+3.pem" "$CERTS_DIR/kafka.jac.dot+3-key.pem" "kafka.jac.dot" localhost 127.0.0.1 ::1

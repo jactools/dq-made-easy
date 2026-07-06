@@ -36,11 +36,32 @@ The migration must preserve the repository no-fallback rule: once a dependency i
 
 ## Workstream 1: Trust Plane and Certificate Lifecycle
 
-- [ ] (SEC1-I-W1-01) Define the repository-managed internal CA layout and output paths for service certificates, keys, and trust bundles.
-- [ ] (SEC1-I-W1-02) Extend certificate-generation tooling to issue certificates for internal service DNS names used on the Docker network.
-- [ ] (SEC1-I-W1-03) Standardize mounted certificate and trust-bundle paths across containers.
-- [ ] (SEC1-I-W1-04) Document client-side trust environment variables and service-specific trust configuration hooks.
-- [ ] (SEC1-I-W1-05) Add fail-fast checks in startup scripts or entrypoints for required certificate and trust artifacts.
+- [x] (SEC1-I-W1-01) Define the repository-managed internal CA layout and output paths for service certificates, keys, and trust bundles.
+	- Canonical repo-managed output root: `tmp/certs/`
+	- Root CA material: `tmp/certs/ca/rootCA.pem` and `tmp/certs/ca/rootCA-key.pem`
+	- Shared trust bundle: `tmp/certs/trust/internal-ca-bundle.pem`
+	- Per-service leaf certificates: `tmp/certs/services/<service-name>/tls.crt` and `tmp/certs/services/<service-name>/tls.key`
+	- Optional service-specific SAN bundles or wildcard leaves must still be written under the per-service directory, not alongside the trust bundle.
+	- Current mkcert output files already live under `tmp/certs`, but W1-01 still needs the canonical directory contract, the producer/consumer mapping, and the fail-fast checks that enforce it.
+
+- [x] (SEC1-I-W1-02) Extend certificate-generation tooling to issue certificates for internal service DNS names used on the Docker network.
+	- URL audit snapshot: most remaining `127.0.0.1` uses are intentional local-only defaults or binds, but a few host-facing defaults still deserve explicit naming or follow-up cleanup.
+	- Safe local-only defaults: `DQ_API_LOCAL_URL`, `DQ_DB_LOCAL_URL`, `KONG_ADMIN_LOCAL_URL`, `KEYCLOAK_HOST`, `DQ_LLM_HOST_BIND`, `AIRFLOW_HOST_BIND`, and the local probe/bind settings in `scripts/supporting/setup_env.sh`.
+	- Rename or make explicit: host-facing helper defaults that still imply `localhost` in script-level fallbacks, such as `scripts/configure_kong.sh`, `scripts/init_kong_config.sh`, and `scripts/keycloak_fetch_client_secret.sh`.
+	- True regressions to fix: any public or browser-facing URL that resolves to `127.0.0.1` by default. The current sweep did not find a clear public-facing default of that kind in the env templates, but this remains the rule to enforce during future TLS/host migration work.
+
+- [x] (SEC1-I-W1-03) Standardize mounted certificate and trust-bundle paths across containers.
+	- Container trust mounts now use the canonical internal CA bundle path under `tmp/certs/trust/internal-ca-bundle.pem` and mount it at a consistent in-container path for Zammad and OpenMetadata consumers.
+	- `scripts/supporting/setup_env.sh` now writes the trust bundle to the canonical trust path and keeps the root-level bundle as an alias for existing host-side tooling.
+
+- [x] (SEC1-I-W1-04) Document client-side trust environment variables and service-specific trust configuration hooks.
+	- Client-side trust variables currently used by repo tooling include `MKCERT_ROOT_CA`, `INTERNAL_ROOT_CA`, `INTERNAL_CORPORATE_ROOT_CA`, `INTERNAL_CA_BUNDLE`, and `INTERNAL_CA_BUNDLE_FILE` from `scripts/supporting/setup_env.sh`.
+	- Generic client trust variables that should be documented for downstream consumers include `PIP_CERT`, `REQUESTS_CA_BUNDLE`, `SSL_CERT_FILE`, and `CURL_CA_BUNDLE`.
+	- Current service-specific trust hooks that need to stay aligned with the canonical bundle path include Zammad's `SSL_CERT_FILE`/`CURL_CA_BUNDLE`, OpenMetadata's `OPENMETADATA_CA_BUNDLE`/`SSL_CERT_FILE`/`CURL_CA_BUNDLE`, and the host-side bootstrap secret files for internal CA material in `docker-compose.yml`.
+	- The documented contract should make clear that service-specific hooks consume the bundle path exported by repo bootstrap, while the repo still keeps a root-level alias for older host-side consumers.
+- [x] (SEC1-I-W1-05) Add fail-fast checks in startup scripts or entrypoints for required certificate and trust artifacts.
+	- `scripts/start_stack.sh` now refuses to start TLS-aware profile sets when the internal root CA or canonical internal trust bundle is missing.
+	- The existing edge startup preflight still fails fast on missing edge leaf certificate material before Compose is launched.
 
 ## Workstream 2: Compose and Environment Canonicalization
 

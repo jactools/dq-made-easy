@@ -29,13 +29,13 @@ x-zammad-service: &zammad-service
     ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
     KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
     SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL:-}
-    SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
-    CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
+    SSL_CERT_FILE: /etc/zammad/certs/internal-ca-bundle.pem
+    CURL_CA_BUNDLE: /etc/zammad/certs/internal-ca-bundle.pem
     TZ: ${TZ}
   volumes:
     - zammad_backup:/var/tmp/zammad:ro
     - zammad_storage:/opt/zammad/storage
-    - ${EDGE_SSL_CERTS_DIR}/mkcert-rootCA.pem:/etc/zammad/certs/mkcert-rootCA.pem:ro
+    - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/zammad/certs/internal-ca-bundle.pem:ro
     - ./docker/zammad/initializers/99-openid-connect-server-side-url.rb:/opt/zammad/config/initializers/99-openid-connect-server-side-url.rb:ro
   networks:
     - default
@@ -885,7 +885,7 @@ services:
     # load canonical envs from repo .env and expose Keycloak admin creds
     env_file: ${ROOT_ENV_FILE:-.env}
     volumes:
-      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
       - default
       - dq-network
@@ -1413,13 +1413,13 @@ services:
       KEYCLOAK_USER_PASSWORD: ${KEYCLOAK_USER_PASSWORD:-password}
       OPENMETADATA_OIDC_SEED_USERNAME: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME is required}
       OPENMETADATA_OIDC_SEED_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD is required}
-      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
-      SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
-      CURL_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
       SEED_ALL: ${SEED_ALL:-false}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     restart: "no"
 
   openmetadata-ingestion:
@@ -1920,13 +1920,13 @@ volumes:
 
 secrets:
   internal_mkcert_root_ca:
-    file: ./tmp/certs/mkcert-rootCA.pem
+    file: ./tmp/certs/trust/internal-ca-bundle.pem
   internal_root_ca:
-    file: ${INTERNAL_ROOT_CA_FILE:-./tmp/certs/mkcert-rootCA.pem}
+    file: ${INTERNAL_ROOT_CA_FILE:-./tmp/certs/trust/internal-ca-bundle.pem}
   internal_corporate_root_ca:
-    file: ${INTERNAL_CORPORATE_ROOT_CA_FILE:-./tmp/certs/mkcert-rootCA.pem}
+    file: ${INTERNAL_CORPORATE_ROOT_CA_FILE:-./tmp/certs/trust/internal-ca-bundle.pem}
   internal_ca_bundle:
-    file: ${INTERNAL_CA_BUNDLE_FILE:-./tmp/certs/mkcert-rootCA.pem}
+    file: ${INTERNAL_CA_BUNDLE_FILE:-./tmp/certs/trust/internal-ca-bundle.pem}
 
 # ==============================================================================
 # NETWORK: Shared with observability stack (docker-compose-observability.yml).

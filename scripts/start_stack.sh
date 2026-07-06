@@ -273,7 +273,52 @@ ensure_edge_cert_assets() {
   fi
 }
 
+ensure_internal_tls_artifacts() {
+  local needs_internal_tls=false
+  local root_ca_file="${KONG_CA_CERT:-$ROOT_DIR/tmp/certs/mkcert-rootCA.pem}"
+  local internal_ca_bundle_file="${INTERNAL_CA_BUNDLE_FILE:-$ROOT_DIR/tmp/certs/trust/internal-ca-bundle.pem}"
+
+  if [ "$START_GATEWAY" = "true" ] \
+    || [ "$START_AUTH" = "true" ] \
+    || [ "$START_EDGE" = "true" ] \
+    || [ "$START_CORE" = "true" ] \
+    || [ "$START_ENGINE" = "true" ] \
+    || [ "$START_WORKERS" = "true" ] \
+    || [ "$START_TRINO" = "true" ] \
+    || [ "$START_AIRFLOW" = "true" ] \
+    || [ "$START_PROFILING" = "true" ] \
+    || [ "$START_METADATA" = "true" ] \
+    || [ "$START_METADATA_INGESTION" = "true" ] \
+    || [ "$START_LLM" = "true" ] \
+    || [ "$START_SUPPORT" = "true" ] \
+    || [ "$START_OBSERVABILITY" = "true" ]; then
+    needs_internal_tls=true
+  fi
+
+  if [ "$needs_internal_tls" != "true" ]; then
+    return 0
+  fi
+
+  if [ ! -f "$root_ca_file" ]; then
+    error "$my_name" "Missing internal root CA certificate: $root_ca_file"
+    error "$my_name" "Run ./scripts/create_certs.sh before starting TLS-aware profiles"
+    return 1
+  fi
+
+  if [ ! -f "$internal_ca_bundle_file" ]; then
+    error "$my_name" "Missing internal trust bundle: $internal_ca_bundle_file"
+    error "$my_name" "Run ./scripts/create_certs.sh before starting TLS-aware profiles"
+    return 1
+  fi
+
+  return 0
+}
+
 if ! ensure_edge_cert_assets; then
+  exit 1
+fi
+
+if ! ensure_internal_tls_artifacts; then
   exit 1
 fi
 
