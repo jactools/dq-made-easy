@@ -1,0 +1,11 @@
+variables:
+  azureServiceConnection: dq-made-easy-dev-azure
+  resourceGroupName: dq-made-easy-dev-aks-rg
+  region: westeurope
+  aksClusterName: dq-made-easy-dev-aks
+  aksNamespace: dq-made-easy-dev
+  ingressDomain: dev.dq-made-easy.jaccloud.nl
+  stateResourceGroupName: dq-made-easy-tfstate-rg
+  stateStorageAccountName: dqmadeeasydevakstfstate
+  stateStorageContainerName: dq-made-easy-tofu-state
+  stateKeyPrefix: dq-made-easy/aks

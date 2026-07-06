@@ -198,21 +198,3 @@ jobs:
               echo "Deployed target port mismatch for $container_app_name: expected $target_port, got $deployed_target_port" >&2
               exit 1
             fi
-
-*** Add File: /Users/Jac.Beekers/gitrepos/dq-rulebuilder/infra/opentofu/container-app-environment/versions.tf
-terraform {
-  required_version = ">= 1.8.0"
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 4.0.0"
-    }
-  }
-
-  backend "azurerm" {}
-}
-
-provider "azurerm" {
-  features {}
-}
