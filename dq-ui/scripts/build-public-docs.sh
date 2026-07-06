@@ -299,11 +299,23 @@ if [[ ! -x "$docs_site_dir/node_modules/.bin/docusaurus" ]]; then
   (cd "$repo_root" && npm --prefix "$docs_site_dir" install --include=dev --no-audit --no-fund --package-lock=false)
 fi
 
-"$repo_root/scripts/publish_test_proof.sh"
+if [[ -x "$repo_root/scripts/publish_test_proof.sh" ]]; then
+  "$repo_root/scripts/publish_test_proof.sh"
+else
+  echo "[build-public-docs] Skipping test proof publishing; helper not available at $repo_root/scripts/publish_test_proof.sh" >&2
+fi
 
 prepare_docs_tree "$docs_site_dir/docs"
-copy_docs_contents "$repo_root/docs" "$docs_site_dir/docs"
-copy_docs_tree "$repo_root/architecture" "$docs_site_dir/docs/architecture"
+if [[ -d "$repo_root/docs" ]]; then
+  copy_docs_contents "$repo_root/docs" "$docs_site_dir/docs"
+else
+  echo "[build-public-docs] Skipping repo docs copy; source directory not available at $repo_root/docs" >&2
+fi
+if [[ -d "$repo_root/architecture" ]]; then
+  copy_docs_tree "$repo_root/architecture" "$docs_site_dir/docs/architecture"
+else
+  echo "[build-public-docs] Skipping architecture copy; source directory not available at $repo_root/architecture" >&2
+fi
 rm -f \
   "$docs_site_dir/docs/README.md" \
   "$docs_site_dir/docs/user-manuals/README.md" \

@@ -12,6 +12,9 @@
 
 # Source generic logging function
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -z "${ROOT_DIR:-}" ]; then
+    ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
 
 source "$SCRIPT_DIR/logging.sh"
 my_name="setup_env.sh"
@@ -141,6 +144,26 @@ else
     NPM_CONFIG_REGISTRY="https://registry.npmjs.org/"
 fi
 
+REPO_NPMRC_FILE="${REPO_NPMRC_FILE:-}"
+if [ -n "$REPO_NPMRC_FILE" ] && [ ! -f "$REPO_NPMRC_FILE" ]; then
+    REPO_NPMRC_FILE=""
+fi
+
+if [ -z "$REPO_NPMRC_FILE" ]; then
+    if [ -f "$ROOT_DIR/.npmrc" ]; then
+        REPO_NPMRC_FILE="$ROOT_DIR/.npmrc"
+    else
+        mkdir -p "$ROOT_DIR/tmp"
+        REPO_NPMRC_FILE="$ROOT_DIR/tmp/public.npmrc"
+        if [ ! -f "$REPO_NPMRC_FILE" ]; then
+            cat > "$REPO_NPMRC_FILE" <<'EOF'
+registry=https://registry.npmjs.org/
+EOF
+        fi
+        warning "$my_name" "Repo-root .npmrc not found; using public npm registry fallback"
+    fi
+fi
+
 # ---------------------------------------------------------------------------
 # PyPI (pip) registry configuration
 #
@@ -224,6 +247,8 @@ export NEXUSCLOUD_MAVEN_REPOSITORY_URL
 export NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH
 export PIP_INDEX_URL
 export NPM_CONFIG_REGISTRY
+export REPO_NPMRC_FILE
+export NPM_CONFIG_USERCONFIG="$REPO_NPMRC_FILE"
 
 export REGISTRY
 

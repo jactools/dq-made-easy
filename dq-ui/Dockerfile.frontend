@@ -1,6 +1,5 @@
-## Multi-stage frontend image build.
-## Stage 1 builds the Vite assets inside Docker.
-## Stage 2 serves static files with nginx and injects runtime config at startup.
+## Frontend runtime image build.
+## The Vite assets are built locally before this image is assembled.
 
 ARG NODE_REGISTRY=""
 ARG NODE_NAMESPACE=""
@@ -11,23 +10,6 @@ ARG NGINX_NAMESPACE=""
 ARG NGINX_IMAGE="nginx"
 ARG NGINX_TAG="stable-bookworm"
 
-FROM ${NODE_REGISTRY}${NODE_NAMESPACE}${NODE_IMAGE}:${NODE_TAG} AS uibuild
-
-WORKDIR /app
-
-ARG VITE_OTEL_ENABLED=false
-ARG VITE_OTEL_ENDPOINT=
-ARG VITE_ENVIRONMENT=dev
-ARG VITE_SERVICE_VERSION=dev
-
-COPY package*.json ./
-RUN --mount=type=secret,id=repo_npmrc,target=/tmp/repo.npmrc,required=true \
-	set -eux; \
-	NPM_CONFIG_USERCONFIG=/tmp/repo.npmrc npm install --include=dev
-
-COPY . .
-RUN npm run build
-
 FROM ${NGINX_REGISTRY}${NGINX_NAMESPACE}${NGINX_IMAGE}:${NGINX_TAG} AS uiruntime
 
 LABEL version="0.3.0"
@@ -35,8 +17,8 @@ LABEL description="Data Quality frontend UI (React + Vite)"
 
 WORKDIR /usr/share/nginx/html
 
-# Copy built site assets into nginx html dir
-COPY --from=uibuild /app/dist/ /usr/share/nginx/html/
+# Copy the prebuilt site assets into nginx html dir
+COPY dist/ /usr/share/nginx/html/
 
 # Copy runtime config template and startup script for runtime API URL injection
 COPY nginx/runtime-config.template.js /usr/share/nginx/html/runtime-config.template.js

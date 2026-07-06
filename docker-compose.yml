@@ -1929,7 +1929,7 @@ volumes:
 
 secrets:
   repo_npmrc:
-    file: ./.npmrc
+    file: ${REPO_NPMRC_FILE:-./.npmrc}
   internal_mkcert_root_ca:
     file: ./tmp/certs/trust/internal-ca-bundle.pem
   internal_root_ca:
