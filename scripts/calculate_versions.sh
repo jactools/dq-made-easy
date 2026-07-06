@@ -256,7 +256,7 @@ content_hash_airflow="$(calculate_image_hash \
     dq-airflow-operator \
     dq-api/fastapi/app/airflow_sdk.py \
     dq-api/fastapi/app/airflow_operator.py \
-    scripts/build_dq_airflow_dag_artifact.sh \
+    scripts/package-releases/build_dq_airflow_dag_artifact.sh \
     scripts/package-releases/build_dq_airflow_wheels.sh \
     scripts/package-releases/build_dq_airflow_sdk_wheel.sh \
     scripts/package-releases/build_dq_airflow_operator_wheel.sh

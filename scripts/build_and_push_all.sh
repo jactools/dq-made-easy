@@ -669,7 +669,7 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
   if image_selected "dq-made-easy-airflow"; then
     info "$my_name" "Preparing Airflow build artifacts..."
     bash "$ROOT_DIR/scripts/package-releases/build_dq_airflow_wheels.sh"
-    bash "$ROOT_DIR/scripts/build_dq_airflow_dag_artifact.sh"
+    bash "$ROOT_DIR/scripts/package-releases/build_dq_airflow_dag_artifact.sh"
     run_direct_build_step \
       "dq-made-easy-airflow" \
       "DQ_AIRFLOW_TAG" \
