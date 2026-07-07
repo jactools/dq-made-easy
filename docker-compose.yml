@@ -945,13 +945,11 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      api:
+      kong:
         condition: service_healthy
     environment:
-      # Profiling worker must not connect directly to Postgres; it reports status via the API.
-      # Status reporting uses the internal API service endpoint; requests include X-Kong-Request-Id
-      # so the backend's RequireKongGatewayMiddleware accepts them.
-      DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
+      # Profiling worker must route API traffic through Kong, never directly to dq-api.
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_URL: redis://redis:6379/0

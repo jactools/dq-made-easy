@@ -85,6 +85,8 @@ The migration must preserve the repository no-fallback rule: once a dependency i
 - [ ] (SEC1-I-W3-01) Add an internal TLS serving strategy for the API service, directly in the app runtime
 - [ ] (SEC1-I-W3-02) Update Kong bootstrap and service registration so internal upstreams target HTTPS endpoints with certificate validation.
 - [ ] (SEC1-I-W3-03) Update API callers such as workers, metadata integrations, and internal UI config loaders to trust and use HTTPS endpoints.
+	- Non-Kong containers must call repository APIs through `KONG_INTERNAL_URL` (or the matching audience-scoped Kong URL), never directly through `DQ_API_INTERNAL_URL`.
+	- `DQ_API_INTERNAL_URL` is reserved for Kong's upstream registration and bootstrap path into the API service.
 - [ ] (SEC1-I-W3-04) Update internal auth issuer, token, JWKS, and admin endpoints to use canonical secure URLs where traffic crosses service boundaries.
 - [ ] (SEC1-I-W3-05) Update service health checks, readiness checks, and smoke tests so TLS failures surface clearly.
 

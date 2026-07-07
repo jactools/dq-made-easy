@@ -4,7 +4,7 @@ Standalone background worker for data profiling and rule suggestion generation.
 
 ## Purpose
 
-`dq-profiling` consumes profiling jobs from Redis (`data-profiling` queue), profiles data sources, reports request lifecycle status back to the dq-api, and writes generated suggestions/artifacts.
+`dq-profiling` consumes profiling jobs from Redis (`data-profiling` queue), profiles data sources, reports request lifecycle status back through Kong to the API, and writes generated suggestions/artifacts.
 
 Python ETL
 ----------
@@ -20,7 +20,7 @@ The Python ETL supports `inlineData` and S3 sources and writes artifacts to S3 (
 
 - Node.js 20+
 - Access to Redis
-- Access to dq-api (for profiling request lifecycle reporting)
+- Access to Kong (for profiling request lifecycle reporting to the API)
 
 ## Install
 
@@ -57,7 +57,7 @@ npm run build
 
 | Variable | Default | Description |
 |---|---|---|
-| `DQ_API_INTERNAL_URL` | `http://api:4010` | Internal API base URL used for profiling request status reporting |
+| `KONG_INTERNAL_URL` | `http://kong:8000` | Internal Kong base URL used for profiling request status reporting |
 | `REDIS_HOST` | `redis` | Redis host |
 | `REDIS_PORT` | `6379` | Redis port |
 | `REDIS_PASSWORD` | _(empty)_ | Redis password (optional) |
@@ -71,7 +71,7 @@ Build and run directly:
 ```bash
 docker build -t dq-profiling:latest ./dq-profiling
 docker run --rm \
-  -e DQ_API_INTERNAL_URL=http://host.docker.internal:4010 \
+  -e KONG_INTERNAL_URL=http://host.docker.internal:8000 \
   -e REDIS_HOST=host.docker.internal \
   -e REDIS_PORT=6379 \
   -e PROFILING_WORKER_CONCURRENCY=2 \

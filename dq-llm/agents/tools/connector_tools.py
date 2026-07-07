@@ -26,7 +26,7 @@ Usage:
     
     # Create the tool with API client
     connector_tool = ConnectorTool(
-        api_base_url="http://dq-api:4010",
+        api_base_url="http://kong:8000",
         api_key="your-api-key"
     )
     
@@ -470,7 +470,7 @@ class ConnectorTool(PiTool):
     
     Usage:
         connector_tool = ConnectorTool(
-            api_base_url="http://dq-api:4010",
+            api_base_url="http://kong:8000",
             api_key="your-api-key"
         )
         

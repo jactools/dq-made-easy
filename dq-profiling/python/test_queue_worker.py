@@ -204,11 +204,11 @@ def test_status_reporter_uses_gateway_prefix(monkeypatch) -> None:
 
     monkeypatch.setattr("queue_worker.urllib.request.urlopen", _fake_urlopen)
 
-    reporter = ProfilingRequestStatusReporter("http://api:4010")
+    reporter = ProfilingRequestStatusReporter("http://kong:8000")
     reporter.set_started("pr-123", "job-123", correlation_id="corr-123")
     reporter.set_completed("pr-123", True, correlation_id="corr-123")
 
     assert captured_urls == [
-        "http://api:4010/rulebuilder/v1/profiling/requests/pr-123/report",
-        "http://api:4010/rulebuilder/v1/profiling/requests/pr-123/report",
+        "http://kong:8000/rulebuilder/v1/profiling/requests/pr-123/report",
+        "http://kong:8000/rulebuilder/v1/profiling/requests/pr-123/report",
     ]
