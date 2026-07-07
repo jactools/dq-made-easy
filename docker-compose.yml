@@ -487,7 +487,6 @@ services:
       KEYCLOAK_HTTPS_KEYSTORE_PASSWORD: ${KEYCLOAK_HTTPS_KEYSTORE_PASSWORD:-changeit}
     command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTP_RELATIVE_PATH}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME}", "--hostname-strict=false"]
     ports:
-      - "${KEYCLOAK_HTTP_HOST_BIND}:${KEYCLOAK_HTTP_HOST_PORT}:8080"
       - "${KEYCLOAK_HTTPS_HOST_BIND}:${KEYCLOAK_HTTPS_HOST_PORT}:8443"
     volumes:
       - keycloak_data:/opt/keycloak/data
@@ -1185,8 +1184,6 @@ services:
       - dq-network
     ports:
       - "${KONG_PROXY_HOST_BIND}:${KONG_PROXY_HOST_PORT}:8443"   # HTTPS proxy (public browser/API entrypoint)
-      - "${KONG_ADMIN_HOST_BIND}:${KONG_ADMIN_HOST_PORT}:8001"   # Admin API
-      - "${KONG_MANAGER_HOST_BIND}:${KONG_MANAGER_HOST_PORT}:8002"   # Kong Manager (GUI)
     volumes:
       - ./tmp/certs:/etc/kong/certs:ro
     restart: unless-stopped
