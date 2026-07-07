@@ -92,7 +92,7 @@ def _resolve_config() -> WorkerConfig:
         or f"{queue_key}:processing"
     )
 
-    api_url = str(os.getenv("KONG_INTERNAL_URL") or "http://kong:8000").strip().rstrip("/")
+    api_url = str(os.getenv("KONG_INTERNAL_URL") or "https://kong:8443").strip().rstrip("/")
     if not api_url:
         raise RuntimeError("Missing KONG_INTERNAL_URL")
 

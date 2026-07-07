@@ -27,7 +27,7 @@ This document defines the first-party Airflow integration path for dq-made-easy 
 
 The example DAG and compose profile use these environment variables:
 
-- `DQ_AIRFLOW_BASE_URL`: internal dq-api URL reachable from Airflow, for example `http://api:4010`.
+- `DQ_AIRFLOW_BASE_URL`: internal Kong URL reachable from Airflow, for example `https://kong:8443`.
 - `DQ_AIRFLOW_ISSUER_URL`: Keycloak realm issuer URL, for example `http://keycloak:8080/realms/jaccloud`.
 - `DQ_AIRFLOW_CLIENT_ID`: OIDC client id used for password-grant token acquisition.
 - `DQ_AIRFLOW_USERNAME`: user or service-account username. In the seeded local stack this resolves to the rotated operator login by default.

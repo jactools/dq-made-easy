@@ -87,7 +87,9 @@ The migration must preserve the repository no-fallback rule: once a dependency i
 - [ ] (SEC1-I-W3-03) Update API callers such as workers, metadata integrations, and internal UI config loaders to trust and use HTTPS endpoints.
 	- Non-Kong containers must call repository APIs through `KONG_INTERNAL_URL` (or the matching audience-scoped Kong URL), never directly through `DQ_API_INTERNAL_URL`.
 	- `DQ_API_INTERNAL_URL` is reserved for Kong's upstream registration and bootstrap path into the API service.
-- [ ] (SEC1-I-W3-04) Update internal auth issuer, token, JWKS, and admin endpoints to use canonical secure URLs where traffic crosses service boundaries.
+- [x] (SEC1-I-W3-04) Update internal auth issuer, token, JWKS, and admin endpoints to use canonical secure URLs where traffic crosses service boundaries.
+	- Keycloak-facing internal defaults now use the HTTPS listener at `https://keycloak:8443` or `https://keycloak:8443/iam` in repo env templates and Compose consumers.
+	- OpenMetadata auth defaults now resolve Keycloak JWKS and discovery endpoints over HTTPS instead of the legacy internal HTTP listener.
 - [ ] (SEC1-I-W3-05) Update service health checks, readiness checks, and smoke tests so TLS failures surface clearly.
 
 ## Workstream 4: Stateful Transport Migration

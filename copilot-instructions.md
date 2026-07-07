@@ -131,3 +131,5 @@ Next steps I can take
 - Add example unit/integration tests that show the fail-fast behavior patterns.
 
 When in doubt, ask the maintainers before introducing any behaviour that relaxes this rule.
+
+Repository-specific env, URL, and trust-bundle contracts live in [.github/copilot/06-internal-service-contracts.md](.github/copilot/06-internal-service-contracts.md).

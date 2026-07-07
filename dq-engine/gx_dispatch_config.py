@@ -190,7 +190,7 @@ def _resolve_optional_bool_env(name: str) -> bool | None:
 
 def _resolve_api_url() -> str:
     # Must route through Kong. Default works for docker-compose.
-    api_url = os.getenv("KONG_INTERNAL_URL") or "http://kong:8000"
+    api_url = os.getenv("KONG_INTERNAL_URL") or "https://kong:8443"
     api_url = str(api_url).strip().rstrip("/")
     if not api_url:
         raise GxWorkerConfigError("KONG_INTERNAL_URL is required for dq-engine GX worker")

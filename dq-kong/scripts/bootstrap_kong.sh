@@ -24,6 +24,7 @@ require_env() {
 KONG_ADMIN_INTERNAL_URL="${KONG_ADMIN_INTERNAL_URL:-http://127.0.0.1:8001}"
 DQ_API_INTERNAL_URL="$(require_env DQ_API_INTERNAL_URL)"
 APP_CONFIG_INTERNAL_URL="${DQ_API_INTERNAL_URL%/}/api/system/v1/app-config"
+KONG_LUA_SSL_TRUSTED_CERTIFICATE="${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-/etc/kong/certs/trust/internal-ca-bundle.pem}"
 MAX_RETRIES="${MAX_RETRIES:-60}"
 RETRY_COUNT=0
 KEYCLOAK_INTERNAL_URL="$(require_env KEYCLOAK_INTERNAL_URL)"
@@ -44,6 +45,7 @@ ADMIN_ONLY_GROUPS='["admin"]'
 REALM_CONSUMERS_SYNCED=false
 
 echo "[kong-bootstrap] waiting for Kong Admin API at ${KONG_ADMIN_INTERNAL_URL}"
+export KONG_LUA_SSL_TRUSTED_CERTIFICATE
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
   if curl -s -f "$KONG_ADMIN_INTERNAL_URL/" >/dev/null 2>&1; then
     break
@@ -551,7 +553,7 @@ disable_jwt_for_route() {
   done
 }
 
-create_service "dq-api" "http://api:4010"
+create_service "dq-api" "https://api:4010"
 create_route "dq-api" "dq-api-auth-v1" "/auth/v1"
 create_route "dq-api" "dq-api-admin-v1" "/admin/v1"
 create_route "dq-api" "dq-api-admin-v1-users" "/admin/v1/users"

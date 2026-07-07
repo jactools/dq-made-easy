@@ -633,6 +633,7 @@ services:
     volumes:
       - spark-jars:/home/appuser/.dq-spark-jars
       - ivy2_cache:/home/appuser/.ivy2
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     environment:
       TZ: UTC
       # OpenTelemetry
@@ -662,6 +663,8 @@ services:
       DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
       # API access: worker must call FastAPI through Kong (no direct DB connections).
       KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
@@ -679,6 +682,8 @@ services:
       redis:
         condition: service_healthy
     command: ["python", "-u", "join_pair_materialization_worker.py"]
+    volumes:
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     environment:
       TZ: UTC
       REDIS_URL: redis://redis:6379/0
@@ -699,6 +704,8 @@ services:
       DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
       DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
       KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
@@ -714,6 +721,8 @@ services:
       redis:
         condition: service_healthy
     command: ["python", "-u", "test_data_materialization_worker.py"]
+    volumes:
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     environment:
       TZ: UTC
       TEST_DATA_MATERIALIZATION_REDIS_URL: redis://redis:6379/0
@@ -732,6 +741,8 @@ services:
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
       DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
       KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
@@ -832,8 +843,8 @@ services:
       CATALOG_ENDPOINT: ${CATALOG_ENDPOINT:-https://openmetadata-server:8585/api}
       CATALOG_API_KEY: ${CATALOG_API_KEY:-}
       SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
-      CATALOG_OIDC_ISSUER: ${CATALOG_OIDC_ISSUER:-http://keycloak:8080/realms/jaccloud}
-      CATALOG_OIDC_TOKEN_URL: ${CATALOG_OIDC_TOKEN_URL:-http://keycloak:8080/realms/jaccloud/protocol/openid-connect/token}
+      CATALOG_OIDC_ISSUER: ${CATALOG_OIDC_ISSUER:-https://keycloak:8443/realms/jaccloud}
+      CATALOG_OIDC_TOKEN_URL: ${CATALOG_OIDC_TOKEN_URL:-https://keycloak:8443/realms/jaccloud/protocol/openid-connect/token}
       CATALOG_OIDC_CLIENT_ID: ${CATALOG_OIDC_CLIENT_ID:-openmetadata}
       CATALOG_OIDC_CLIENT_SECRET: ${CATALOG_OIDC_CLIENT_SECRET:-}
       CATALOG_OIDC_SCOPE: ${CATALOG_OIDC_SCOPE:-}
@@ -885,13 +896,14 @@ services:
     # load canonical envs from repo .env and expose Keycloak admin creds
     env_file: ${ROOT_ENV_FILE:-.env}
     volumes:
+      - ./tmp/certs/services/api:/etc/api/certs:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
       - default
       - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:4010/health')\" || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import ssl, urllib.request; ctx = ssl.create_default_context(cafile='/etc/openmetadata/certs/internal-ca-bundle.pem'); urllib.request.urlopen('https://127.0.0.1:4010/health', context=ctx)\" || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -911,6 +923,7 @@ services:
     volumes:
       - dq-made-easy-llm-hf-cache:/cache/huggingface:delegated
       - dq-made-easy-llm-model-cache:/hf_cache_temp:tmpfs
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     networks:
       - default
       - dq-network
@@ -950,6 +963,8 @@ services:
     environment:
       # Profiling worker must route API traffic through Kong, never directly to dq-api.
       KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_URL: redis://redis:6379/0
@@ -971,6 +986,8 @@ services:
     networks:
       - default
       - dq-network
+    volumes:
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     restart: unless-stopped
     healthcheck:
       disable: true
@@ -1110,6 +1127,7 @@ services:
       KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-http://localhost:8002}
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
       DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
+      KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
       SSO_ENABLED: ${SSO_ENABLED?SSO_ENABLED is required}
       SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
       TRUST_PROXY_AUTH: ${TRUST_PROXY_AUTH?TRUST_PROXY_AUTH is required}
@@ -1340,7 +1358,7 @@ services:
       AUTHORIZER_PRINCIPAL_DOMAIN: ${OM_AUTHORIZER_PRINCIPAL_DOMAIN:-jaccloud.nl}
       AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:-custom-oidc}
       CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:-Keycloak}
-      AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[http://keycloak:8080/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
+      AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[https://keycloak:8443/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
       AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:-https://keycloak.jac.dot:9444/realms/jaccloud}
       AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}
       AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-https://openmetadata.jac.dot:8585/callback}
@@ -1410,7 +1428,7 @@ services:
       OM_AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}
       OM_AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-${OPENMETADATA_PUBLIC_URL:-https://openmetadata.jac.dot:8585}/callback}
       OM_AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}
-      OM_AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[http://keycloak:8080/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
+      OM_AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[https://keycloak:8443/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
       OM_ENABLE_AUTO_REDIRECT: ${OM_ENABLE_AUTO_REDIRECT:-false}
       OM_TOKEN: ${OM_TOKEN:-}
       SSO_INTERNAL_ISSUER_URL: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
