@@ -7,7 +7,7 @@ set -euo pipefail
 # What it does:
 # - Verifies Node is available, installs deps, and runs the UI build.
 # - Produces a local dist/ for the frontend Docker build.
-# - Runs `docker compose build frontend` using the local dist/.
+# - Can optionally package the image after assets are built.
 #
 # Version: 1.0
 # Last modified: 2026-04-07
@@ -15,8 +15,34 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
-source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
 init_root_env_file "$ROOT_DIR"
+
+PACKAGE_IMAGE=true
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-docker-build)
+      PACKAGE_IMAGE=false
+      shift
+      ;;
+    -h|--help)
+      cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Build the frontend locally.
+
+Options:
+  --no-docker-build   Only build local assets, do not build the Docker image
+  -h, --help          Show this help message
+EOF
+      exit 0
+      ;;
+    *)
+      error "local_build_frontend.sh" "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
 
 if [[ ! -f "$ROOT_ENV_FILE" ]]; then
   error "local_build_frontend.sh" "Env file not found: $ROOT_ENV_FILE"
@@ -30,12 +56,7 @@ set +a
 
 # Derive canonical registry variables (including NPM_CONFIG_REGISTRY) from env contract.
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
-
-if [ ! -f "$ROOT_DIR/.npmrc" ]; then
-  error "local_build_frontend.sh" "Missing required npm config: $ROOT_DIR/.npmrc"
-  exit 1
-fi
-export NPM_CONFIG_USERCONFIG="$ROOT_DIR/.npmrc"
+export NPM_CONFIG_USERCONFIG="$REPO_NPMRC_FILE"
 
 # Optional: check node version
 if command -v node >/dev/null 2>&1; then
@@ -55,8 +76,15 @@ npm install --include=dev
 npm run build
 cd "$ROOT_DIR"
 
-# Build docker image for frontend using local dist
-info "local_build_frontend.sh" "Building Docker image for frontend using local dist"
-DOCKER_BUILDKIT=1 docker_compose --progress=plain -f "$ROOT_DIR/docker-compose.yml" build frontend
+if [ "$PACKAGE_IMAGE" = true ]; then
+  source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
+  # Build docker image for frontend using local dist
+  info "local_build_frontend.sh" "Building Docker image for frontend using local dist"
+  DOCKER_BUILDKIT=1 docker_compose --progress=plain -f "$ROOT_DIR/docker-compose.yml" build frontend
+fi
 
-success "local_build_frontend.sh" "Done. If the docker build succeeds, run ./scripts/start_stack.sh to bring up the stack."
+if [ "$PACKAGE_IMAGE" = true ]; then
+  success "local_build_frontend.sh" "Done. The frontend image was packaged after the local asset build."
+else
+  success "local_build_frontend.sh" "Done. Local frontend assets were built successfully."
+fi

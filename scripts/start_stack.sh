@@ -397,6 +397,14 @@ fi
 docker network prune -f >/dev/null 2>&1 || true
 
 if [ "$NO_BUILD" = false ]; then
+  if [ "$START_CORE" = "true" ] || [ "$START_ALL" = "true" ]; then
+    info "$my_name" "Prebuilding frontend assets locally before compose build..."
+    if ! "$ROOT_DIR/scripts/local_build_frontend.sh" --no-docker-build; then
+      error "$my_name" "Failed to prebuild frontend assets"
+      exit 1
+    fi
+  fi
+
   info "$my_name" "Running docker compose build with BuildKit (shows BuildKit output)..."
   if ! COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker_compose --progress=plain "${PROFILE_ARGS[@]}" build; then
     error "$my_name" "docker compose build failed; aborting startup"
