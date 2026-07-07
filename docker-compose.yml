@@ -152,14 +152,14 @@ services:
     container_name: dq-made-easy-redis
     ports:
       - "${REDIS_HOST_BIND}:${REDIS_HOST_PORT}:6379"
-    command: ["redis-server", "--port", "0", "--tls-port", "6379", "--tls-cert-file", "/etc/redis/certs/tls.crt", "--tls-key-file", "/etc/redis/certs/tls.key", "--tls-ca-cert-file", "/etc/redis/certs/internal-ca-bundle.pem", "--tls-auth-clients", "no", "--appendonly", "yes"]
+    command: ["redis-server", "--port", "0", "--tls-port", "6379", "--tls-cert-file", "/etc/redis/certs/tls.crt", "--tls-key-file", "/etc/redis/certs/tls.key", "--tls-ca-cert-file", "/etc/redis/internal-ca-bundle.pem", "--tls-auth-clients", "no", "--appendonly", "yes"]
     volumes:
       - ./tmp/certs/services/redis:/etc/redis/certs:ro
-      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/redis/certs/internal-ca-bundle.pem:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/redis/internal-ca-bundle.pem:ro
       - redis_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli --tls --cacert /etc/redis/certs/internal-ca-bundle.pem -h localhost -p 6379 ping"]
+      test: ["CMD-SHELL", "redis-cli --tls --cacert /etc/redis/internal-ca-bundle.pem -h localhost -p 6379 ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -1064,6 +1064,7 @@ services:
     profiles: ["gateway", "observability"]
     image: postgres:17-bookworm
     container_name: dq-made-easy-kong-db
+    command: ["postgres", "-c", "ssl=on", "-c", "ssl_cert_file=/etc/postgresql/certs/tls.crt", "-c", "ssl_key_file=/etc/postgresql/certs/tls.key"]
     environment:
       POSTGRES_DB: kong
       POSTGRES_USER: kong
@@ -1091,7 +1092,7 @@ services:
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
     volumes:
       - ./observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
-      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
       - default
@@ -1120,7 +1121,7 @@ services:
       KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
     volumes:
       - ./tmp/certs/services/kong-db:/etc/postgresql/certs:ro
-      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/kong/certs/trust/internal-ca-bundle.pem:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/kong/certs/trust/internal-ca-bundle.pem:ro
     restart: "no"
 
   kong:
