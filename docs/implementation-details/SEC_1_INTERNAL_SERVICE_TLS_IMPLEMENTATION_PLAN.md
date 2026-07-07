@@ -82,31 +82,43 @@ The migration must preserve the repository no-fallback rule: once a dependency i
 
 ## Workstream 3: HTTP Service Migration
 
-- [ ] (SEC1-I-W3-01) Add an internal TLS serving strategy for the API service, directly in the app runtime
-- [ ] (SEC1-I-W3-02) Update Kong bootstrap and service registration so internal upstreams target HTTPS endpoints with certificate validation.
-- [ ] (SEC1-I-W3-03) Update API callers such as workers, metadata integrations, and internal UI config loaders to trust and use HTTPS endpoints.
+- [x] (SEC1-I-W3-01) Add an internal TLS serving strategy for the API service, directly in the app runtime
+	- The API entrypoint now starts uvicorn with the repository-managed leaf certificate and key, and fails fast when either artifact is missing.
+- [x] (SEC1-I-W3-02) Update Kong bootstrap and service registration so internal upstreams target HTTPS endpoints with certificate validation.
+	- Kong bootstrap now registers `dq-api` against `https://api:4010` and exports the repository CA bundle path for upstream trust validation.
+- [x] (SEC1-I-W3-03) Update API callers such as workers, metadata integrations, and internal UI config loaders to trust and use HTTPS endpoints.
 	- Non-Kong containers must call repository APIs through `KONG_INTERNAL_URL` (or the matching audience-scoped Kong URL), never directly through `DQ_API_INTERNAL_URL`.
 	- `DQ_API_INTERNAL_URL` is reserved for Kong's upstream registration and bootstrap path into the API service.
+	- The UI nginx reverse proxy now forwards `/api` and `/api/system/v1/ui-registry` to Kong over HTTPS with certificate verification enabled.
+	- Profiling worker tests now exercise the HTTPS Kong base URL instead of the legacy HTTP default.
 - [x] (SEC1-I-W3-04) Update internal auth issuer, token, JWKS, and admin endpoints to use canonical secure URLs where traffic crosses service boundaries.
 	- Keycloak-facing internal defaults now use the HTTPS listener at `https://keycloak:8443` or `https://keycloak:8443/iam` in repo env templates and Compose consumers.
 	- OpenMetadata auth defaults now resolve Keycloak JWKS and discovery endpoints over HTTPS instead of the legacy internal HTTP listener.
-- [ ] (SEC1-I-W3-05) Update service health checks, readiness checks, and smoke tests so TLS failures surface clearly.
+- [x] (SEC1-I-W3-05) Update service health checks, readiness checks, and smoke tests so TLS failures surface clearly.
+	- The API container healthcheck now validates `https://127.0.0.1:4010/health` with the repository-managed trust bundle.
 
 ## Workstream 4: Stateful Transport Migration
 
-- [ ] (SEC1-I-W4-01) Enable and validate TLS for Postgres connections used by services and exporters.
-- [ ] (SEC1-I-W4-02) Enable and validate TLS for Redis connections used by API, workers, and supporting services.
-- [ ] (SEC1-I-W4-03) Enable and validate HTTPS for AIStor and any S3-compatible clients in the stack.
-- [ ] (SEC1-I-W4-04) Update telemetry exporters and collectors to use trusted TLS endpoints where cross-process traffic exists.
-- [ ] (SEC1-I-W4-05) Capture any service-specific transport gaps as named follow-up items instead of leaving anonymous plaintext exceptions.
+- [x] (SEC1-I-W4-01) Enable and validate TLS for Postgres connections used by services and exporters.
+	- The DB, Kong DB, and OpenMetadata DB/exporter paths now use verified TLS with the repository CA bundle instead of `sslmode=disable`.
+- [x] (SEC1-I-W4-02) Enable and validate TLS for Redis connections used by API, workers, and supporting services.
+	- The Redis service now runs on a TLS-only listener with repository-managed certificates, and the API, engine, profiling, and exporter clients use `rediss://` endpoints with CA-bundle verification.
+- [x] (SEC1-I-W4-03) Enable and validate HTTPS for AIStor and any S3-compatible clients in the stack.
+	- The engine's S3-compatible write paths now require a repository CA bundle when the endpoint uses HTTPS, and the engine worker containers mount that bundle at a stable in-container path.
+	- Dedicated tests now cover both the quarantine artifact upload path and the test-data worker upload path with HTTPS S3 endpoints.
+- [x] (SEC1-I-W4-04) Update telemetry exporters and collectors to use trusted TLS endpoints where cross-process traffic exists.
+	- Kong, the Python OTLP exporter paths, and the OpenMetadata JVM agent now target the collector's HTTPS receiver on `https://dq-made-easy-otel-collector:4318` with the repository CA bundle mounted in the worker, ingestion, and server containers.
+- [x] (SEC1-I-W4-05) Capture any service-specific transport gaps as named follow-up items instead of leaving anonymous plaintext exceptions.
+	- The remaining Postgres-family transport gaps have been resolved by moving the DB, Kong DB, and OpenMetadata DB/exporter paths to verified TLS.
 
 ## Workstream 5: Validation, Observability, and Runbooks
 
-- [ ] (SEC1-I-W5-01) Add a validation script that flags known plaintext internal URLs, disabled TLS modes, or missing trust mounts.
+- [x] (SEC1-I-W5-01) Add a validation script that flags known plaintext internal URLs, disabled TLS modes, or missing trust mounts.
 - [ ] (SEC1-I-W5-02) Add smoke coverage for representative secure paths across HTTP, data, cache, and telemetry surfaces.
-- [ ] (SEC1-I-W5-03) Add observability guidance and dashboards or log filters for trust and handshake failures.
-- [ ] (SEC1-I-W5-04) Document certificate rotation, trust debugging, and common failure modes in runbooks.
-- [ ] (SEC1-I-W5-05) Document the migration matrix that shows which services are TLS-complete, in progress, or pending.
+	- The smoke orchestrator exists, but the live-stack run still needs to be executed against a running environment.
+- [x] (SEC1-I-W5-03) Add observability guidance and dashboards or log filters for trust and handshake failures.
+- [x] (SEC1-I-W5-04) Document certificate rotation, trust debugging, and common failure modes in runbooks.
+- [x] (SEC1-I-W5-05) Document the migration matrix that shows which services are TLS-complete, in progress, or pending.
 
 ## Sequencing
 

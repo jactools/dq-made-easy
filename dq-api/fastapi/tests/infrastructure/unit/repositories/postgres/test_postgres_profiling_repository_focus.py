@@ -42,6 +42,32 @@ def _install_session_scope(monkeypatch: pytest.MonkeyPatch, session: _FakeSessio
     )
 
 
+def test_enqueue_profiling_request_initializes_tls_enabled_redis_client(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+    client = SimpleNamespace(rpush=lambda *args, **kwargs: None)
+
+    def _fake_redis(**kwargs):
+        captured.update(kwargs)
+        return client
+
+    monkeypatch.setattr(postgres_profiling_repository.redis, "Redis", _fake_redis)
+    monkeypatch.setattr(postgres_profiling_repository, "get_settings", lambda: SimpleNamespace(redis_host="redis", redis_port=6379, redis_db=0, redis_password=None))
+
+    repository = PostgresProfilingRepository("postgresql://example")
+    repository._enqueue_profiling_request(
+        request_id="pr-1",
+        data_source_id="ds-1",
+        user_id="user-1",
+        data_source_name="source",
+        source_type="sql",
+    )
+
+    assert captured["ssl"] is True
+    assert captured["ssl_cert_reqs"] == "required"
+    assert captured["ssl_check_hostname"] is True
+    assert str(captured["ssl_ca_certs"]).endswith("internal-ca-bundle.pem")
+
+
 def test_create_request_uses_supplied_identifier_and_persists_row(monkeypatch: pytest.MonkeyPatch) -> None:
     repository = PostgresProfilingRepository("postgresql://example")
     session = _FakeSession()

@@ -72,6 +72,28 @@ def _parse_s3a_uri(uri: str) -> tuple[str, str]:
     return bucket, key
 
 
+def _resolve_s3_verify(endpoint_url: str | None) -> bool | str:
+    endpoint = str(endpoint_url or "").strip()
+    if endpoint.lower().startswith("https://"):
+        bundle = str(
+            os.getenv("DQ_S3_CA_BUNDLE")
+            or os.getenv("AWS_CA_BUNDLE")
+            or os.getenv("REQUESTS_CA_BUNDLE")
+            or ""
+        ).strip()
+        if not bundle:
+            raise RuntimeError(
+                "S3 HTTPS requires DQ_S3_CA_BUNDLE, AWS_CA_BUNDLE, or REQUESTS_CA_BUNDLE"
+            )
+
+        bundle_path = Path(bundle).expanduser()
+        if not bundle_path.is_file():
+            raise RuntimeError(f"Missing S3 CA bundle: {bundle_path}")
+        return str(bundle_path)
+
+    return True
+
+
 def _write_quarantine_artifact(
     failed_rows: Any,
     *,
@@ -125,7 +147,7 @@ def _write_quarantine_artifact(
         aws_access_key_id=os.getenv("DQ_S3_ACCESS_KEY") or os.getenv("AWS_ACCESS_KEY_ID"),
         aws_secret_access_key=os.getenv("DQ_S3_SECRET_KEY") or os.getenv("AWS_SECRET_ACCESS_KEY"),
         region_name=os.getenv("DQ_S3_REGION") or os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION") or "us-east-1",
-        verify=(os.getenv("DQ_S3_SSL_ENABLED") or "true").lower() not in {"0", "false", "no"},
+        verify=_resolve_s3_verify(os.getenv("DQ_S3_ENDPOINT") or os.getenv("AWS_ENDPOINT_URL")),
     )
 
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:

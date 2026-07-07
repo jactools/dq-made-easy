@@ -30,6 +30,27 @@ def _build_resolver() -> OpenMetadataContractResolver:
     )
 
 
+def test_get_redis_client_uses_tls_verification_and_repo_ca_bundle(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+
+    class _FakeRedisModule:
+        @staticmethod
+        def Redis(**kwargs):
+            captured.update(kwargs)
+            return object()
+
+    monkeypatch.setitem(sys.modules, "redis", _FakeRedisModule)
+
+    resolver = _build_resolver()
+    client = resolver._get_redis_client()
+
+    assert client is not None
+    assert captured["ssl"] is True
+    assert captured["ssl_cert_reqs"] == "required"
+    assert captured["ssl_check_hostname"] is True
+    assert str(captured["ssl_ca_certs"]).endswith("internal-ca-bundle.pem")
+
+
 def test_extract_policy_uses_openmetadata_sla_and_odcs_extension_version() -> None:
     resolver = _build_resolver()
 

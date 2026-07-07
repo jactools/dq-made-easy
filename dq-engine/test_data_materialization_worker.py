@@ -162,6 +162,27 @@ def _derive_s3_ssl_enabled(cfg: WorkerConfig) -> bool:
     return cfg.s3_endpoint.lower().startswith("https://")
 
 
+def _resolve_s3_verify(cfg: WorkerConfig) -> bool | str:
+    if cfg.s3_endpoint.lower().startswith("https://"):
+        bundle = str(
+            os.getenv("DQ_S3_CA_BUNDLE")
+            or os.getenv("AWS_CA_BUNDLE")
+            or os.getenv("REQUESTS_CA_BUNDLE")
+            or ""
+        ).strip()
+        if not bundle:
+            raise RuntimeError(
+                "S3 HTTPS requires DQ_S3_CA_BUNDLE, AWS_CA_BUNDLE, or REQUESTS_CA_BUNDLE"
+            )
+
+        bundle_path = Path(bundle).expanduser()
+        if not bundle_path.is_file():
+            raise RuntimeError(f"Missing S3 CA bundle: {bundle_path}")
+        return str(bundle_path)
+
+    return _derive_s3_ssl_enabled(cfg)
+
+
 def _ensure_bucket_exists(cfg: WorkerConfig, *, bucket: str) -> None:
     import boto3
 
@@ -171,7 +192,7 @@ def _ensure_bucket_exists(cfg: WorkerConfig, *, bucket: str) -> None:
         aws_access_key_id=cfg.s3_access_key,
         aws_secret_access_key=cfg.s3_secret_key,
         region_name=cfg.s3_region or "us-east-1",
-        verify=_derive_s3_ssl_enabled(cfg),
+        verify=_resolve_s3_verify(cfg),
     )
 
     try:
@@ -210,7 +231,7 @@ def _upload_directory_to_s3(
         aws_access_key_id=cfg.s3_access_key,
         aws_secret_access_key=cfg.s3_secret_key,
         region_name=cfg.s3_region or "us-east-1",
-        verify=_derive_s3_ssl_enabled(cfg),
+        verify=_resolve_s3_verify(cfg),
     )
 
     normalized_prefix = str(key_prefix or "").lstrip("/")

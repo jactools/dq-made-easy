@@ -62,7 +62,7 @@ services:
     build:
       context: ./dq-db
       dockerfile: Dockerfile.db
-    command: postgres -c shared_preload_libraries=pg_stat_statements
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "ssl=on", "-c", "ssl_cert_file=/etc/postgresql/certs/tls.crt", "-c", "ssl_key_file=/etc/postgresql/certs/tls.key"]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -71,10 +71,12 @@ services:
     ports:
       - "${DB_HOST_BIND}:${DB_HOST_PORT}:5432"
     volumes:
+      - ./tmp/certs/services/db:/etc/postgresql/certs:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
       - pgdata_v18:/var/lib/postgresql
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d dq -h localhost || exit 1"]
+      test: ["CMD-SHELL", "PGPASSWORD=postgres psql 'host=localhost port=5432 dbname=dq user=postgres sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -95,6 +97,8 @@ services:
       KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL?KEYCLOAK_PUBLIC_URL is required}
       SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      CURL_CA_BUNDLE: /workspace-tmp/certs/mkcert-rootCA.pem
+      SSL_CERT_FILE: /workspace-tmp/certs/mkcert-rootCA.pem
     build:
       context: .
       dockerfile: dq-db/Dockerfile.dq-db.seed
@@ -119,6 +123,7 @@ services:
       - ./VERSION_MANIFEST.json:/workspace/VERSION_MANIFEST.json:ro
       - ./docs/contracts/internal-api:/workspace/dq-api/fastapi/docs/contracts/internal-api:ro
       - ./data_sources/contracts:/workspace/dq-api/fastapi/data_sources/contracts:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/workspace-tmp/certs/mkcert-rootCA.pem:ro
     restart: "no"
 
   dq-made-easy-db-postgres-exporter:
@@ -129,10 +134,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATA_SOURCE_NAME: postgresql://postgres:postgres@db:5432/dq?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
     volumes:
       - ./observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
       - default
@@ -146,12 +152,14 @@ services:
     container_name: dq-made-easy-redis
     ports:
       - "${REDIS_HOST_BIND}:${REDIS_HOST_PORT}:6379"
-    command: redis-server --appendonly yes
+    command: ["redis-server", "--port", "0", "--tls-port", "6379", "--tls-cert-file", "/etc/redis/certs/tls.crt", "--tls-key-file", "/etc/redis/certs/tls.key", "--tls-ca-cert-file", "/etc/redis/certs/internal-ca-bundle.pem", "--tls-auth-clients", "no", "--appendonly", "yes"]
     volumes:
+      - ./tmp/certs/services/redis:/etc/redis/certs:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/redis/certs/internal-ca-bundle.pem:ro
       - redis_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli --tls --cacert /etc/redis/certs/internal-ca-bundle.pem -h localhost -p 6379 ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -214,10 +222,12 @@ services:
     profiles: ["observability"]
     image: oliver006/redis_exporter:v1.67.0
     environment:
-      REDIS_ADDR: redis://redis:6379
+      REDIS_ADDR: rediss://redis:6379?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
       - default
@@ -408,8 +418,11 @@ services:
       KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
       ZAMMAD_SUPPORT_TOKEN_NAME: ${ZAMMAD_SUPPORT_TOKEN_NAME:-dq-made-easy support integration}
       ZAMMAD_SUPPORT_TOKEN_PERMISSION: ${ZAMMAD_SUPPORT_TOKEN_PERMISSION:-ticket.agent}
+      CURL_CA_BUNDLE: /workspace-tmp/certs/mkcert-rootCA.pem
+      SSL_CERT_FILE: /workspace-tmp/certs/mkcert-rootCA.pem
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./tmp/certs/mkcert-rootCA.pem:/workspace-tmp/certs/mkcert-rootCA.pem:ro
     restart: "no"
 
   keycloak-seed-artifacts:
@@ -637,13 +650,12 @@ services:
     environment:
       TZ: UTC
       # OpenTelemetry
-      OTEL_SERVICE_NAME: dq-made-easy-engine-gx-worker
+      OTEL_SERVICE_NAME: dq-made-easy-engine
       OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-made-easy-otel-collector:4317}
-      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
-      OTEL_TRACES_SAMPLER: parentbased_traceidratio
-      OTEL_TRACES_SAMPLER_ARG: "1.0"
-      GX_EXECUTION_REDIS_URL: redis://redis:6379/0
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
+      OTEL_CONSOLE_EXPORT: "1"
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      GX_EXECUTION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
       GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY}
       # Spark + S3-compatible object storage execution config.
       # The worker resolves dataObjectVersionId -> storage_uri/storage_format from the data catalog DB.
@@ -659,6 +671,7 @@ services:
       DQ_S3_REGION: ${DQ_S3_REGION:-}
       DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
       DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
       # API access: worker must call FastAPI through Kong (no direct DB connections).
@@ -686,8 +699,8 @@ services:
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     environment:
       TZ: UTC
-      REDIS_URL: redis://redis:6379/0
-      GX_JOIN_PAIR_MATERIALIZATION_REDIS_URL: redis://redis:6379/0
+      REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+      GX_JOIN_PAIR_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
       GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-join-pair-etl-worker
@@ -701,6 +714,7 @@ services:
       DQ_S3_REGION: ${DQ_S3_REGION:-}
       DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
       DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
       KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
@@ -725,7 +739,7 @@ services:
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     environment:
       TZ: UTC
-      TEST_DATA_MATERIALIZATION_REDIS_URL: redis://redis:6379/0
+      TEST_DATA_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
       TEST_DATA_MATERIALIZATION_QUEUE_KEY: ${TEST_DATA_MATERIALIZATION_QUEUE_KEY:-dq-test-data:materialize}
       TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS}
       # Spark + S3-compatible object storage materialization config.
@@ -739,6 +753,7 @@ services:
       DQ_S3_REGION: ${DQ_S3_REGION:-}
       DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
       KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
@@ -825,7 +840,7 @@ services:
       REQUIRE_DATABASE: "true"
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/openmetadata/certs/internal-ca-bundle.pem&ssl_check_hostname=true
       PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
       GX_EXECUTION_QUEUE_KEY: "${GX_EXECUTION_QUEUE_KEY}"
       GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: "${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}"
@@ -967,7 +982,7 @@ services:
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
       PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
       DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
       ENVIRONMENT: ${ENVIRONMENT}
@@ -977,7 +992,8 @@ services:
       # OpenTelemetry
       OTEL_SERVICE_NAME: dq-made-easy-profiling
       OTEL_SERVICE_VERSION: ${DQ_PROFILING_TAG:-dev}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_EXPORTER_OTLP_FORCE: "1"
       OTEL_CONSOLE_EXPORT: "1"
       OTEL_TRACE_EXPORT_DEBUG: "1"
@@ -1053,10 +1069,12 @@ services:
       POSTGRES_USER: kong
       POSTGRES_PASSWORD: kongpass
     volumes:
+      - ./tmp/certs/services/kong-db:/etc/postgresql/certs:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
       - kong-db-data-v17:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kong"]
+      test: ["CMD-SHELL", "PGPASSWORD=kongpass psql 'host=localhost port=5432 dbname=kong user=kong sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -1069,10 +1087,11 @@ services:
       kong-db:
         condition: service_healthy
     environment:
-      DATA_SOURCE_NAME: postgresql://kong:kongpass@kong-db:5432/kong?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://kong:kongpass@kong-db:5432/kong?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
     volumes:
       - ./observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
       - default
@@ -1095,6 +1114,13 @@ services:
       KONG_PG_DATABASE: kong
       KONG_PG_USER: kong
       KONG_PG_PASSWORD: kongpass
+      KONG_PG_SSL: on
+      KONG_PG_SSL_REQUIRED: on
+      KONG_PG_SSL_VERIFY: on
+      KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
+    volumes:
+      - ./tmp/certs/services/kong-db:/etc/postgresql/certs:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/kong/certs/trust/internal-ca-bundle.pem:ro
     restart: "no"
 
   kong:
@@ -1119,6 +1145,10 @@ services:
       KONG_PG_DATABASE: kong
       KONG_PG_USER: kong
       KONG_PG_PASSWORD: kongpass
+      KONG_PG_SSL: on
+      KONG_PG_SSL_REQUIRED: on
+      KONG_PG_SSL_VERIFY: on
+      KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
@@ -1127,7 +1157,6 @@ services:
       KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-http://localhost:8002}
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
       DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
-      KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
       SSO_ENABLED: ${SSO_ENABLED?SSO_ENABLED is required}
       SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
       TRUST_PROXY_AUTH: ${TRUST_PROXY_AUTH?TRUST_PROXY_AUTH is required}
@@ -1147,7 +1176,7 @@ services:
       # OpenTelemetry — Kong 3.x native tracing (plugin configured via bootstrap_kong.sh)
       KONG_TRACING_INSTRUMENTATIONS: ${KONG_TRACING_INSTRUMENTATIONS?KONG_TRACING_INSTRUMENTATIONS is required}
       KONG_TRACING_SAMPLING_RATE: ${KONG_TRACING_SAMPLING_RATE?KONG_TRACING_SAMPLING_RATE is required}
-      KONG_OTEL_ENDPOINT: http://dq-made-easy-otel-collector:4319/v1/traces
+      KONG_OTEL_ENDPOINT: https://dq-made-easy-otel-collector:4318/v1/traces
       KONG_SSL_CERT: /etc/kong/certs/kong.jac.dot+3.pem
       KONG_SSL_CERT_KEY: /etc/kong/certs/kong.jac.dot+3-key.pem
     networks:
@@ -1216,6 +1245,12 @@ services:
       - pg_stat_statements.max=10000
       - -c
       - pg_stat_statements.track=all
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/etc/postgresql/certs/tls.crt
+      - -c
+      - ssl_key_file=/etc/postgresql/certs/tls.key
     environment:
       POSTGRES_USER: ${OM_DB_USER:-openmetadata_user}
       POSTGRES_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
@@ -1223,6 +1258,8 @@ services:
     ports:
       - "${OPENMETADATA_DB_HOST_BIND}:${OPENMETADATA_DB_HOST_PORT}:5432"
     volumes:
+      - ./tmp/certs/services/openmetadata-db:/etc/postgresql/certs:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
       - openmetadata_pgdata_v18:/var/lib/postgresql
     restart: unless-stopped
     healthcheck:
@@ -1243,10 +1280,11 @@ services:
       openmetadata-db:
         condition: service_healthy
     environment:
-      DATA_SOURCE_NAME: postgresql://${OM_DB_USER:-openmetadata_user}:${OM_DB_PASSWORD:-openmetadata_pass}@openmetadata-db:5432/${OM_DB_NAME:-openmetadata_db}?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://${OM_DB_USER:-openmetadata_user}:${OM_DB_PASSWORD:-openmetadata_pass}@openmetadata-db:5432/${OM_DB_NAME:-openmetadata_db}?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
     volumes:
       - ./observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
       - default
@@ -1309,12 +1347,14 @@ services:
       OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
       DB_USER: ${OM_DB_USER:-openmetadata_user}
       DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
-      DB_PARAMS: sslmode=disable
+      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
       OM_SEARCH_TYPE: elasticsearch
       ELASTICSEARCH_HOST: openmetadata-search-v9
       ELASTICSEARCH_PORT: 9200
       SECRET_MANAGER: db
     command: ["/opt/openmetadata/bootstrap/openmetadata-ops.sh", "migrate"]
+    volumes:
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     restart: "no"
 
   openmetadata-server:
@@ -1348,7 +1388,7 @@ services:
       OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
       DB_USER: ${OM_DB_USER:-openmetadata_user}
       DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
-      DB_PARAMS: sslmode=disable
+      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
       OM_SEARCH_TYPE: elasticsearch
       ELASTICSEARCH_HOST: openmetadata-search-v9
       ELASTICSEARCH_PORT: 9200
@@ -1370,10 +1410,11 @@ services:
       # OpenTelemetry (enabled when the image/runtime supports OTEL env wiring)
       OTEL_SERVICE_NAME: dq-made-easy-openmetadata
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-made-easy-otel-collector:4317}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
-      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_CERTIFICATE: /etc/openmetadata/certs/internal-ca-bundle.pem
       OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT}
       OTEL_LOGS_EXPORTER: none
       JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
@@ -1384,6 +1425,7 @@ services:
       - "${OPENMETADATA_HOST_BIND:-127.0.0.1}:${OPENMETADATA_HOST_PORT:-8585}:8585"
     volumes:
       - ./tmp/certs/openmetadata.p12:/opt/openmetadata/conf/openmetadata.p12:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
       - default
       - dq-network
@@ -1461,10 +1503,13 @@ services:
       OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:-https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api}
       OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:-true}
       OPENMETADATA_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
+      REQUESTS_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
+      SSL_CERT_FILE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
       # OpenTelemetry (for Python/Airflow instrumentation when enabled)
       OTEL_SERVICE_NAME: dq-made-easy-openmetadata-ingestion
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://dq-made-easy-otel-collector:4317}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
       ENVIRONMENT: ${ENVIRONMENT}
@@ -1476,6 +1521,7 @@ services:
       - "${OPENMETADATA_INGESTION_HOST_BIND}:${OPENMETADATA_INGESTION_HOST_PORT}:8080"
     volumes:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
       - default
       - dq-network

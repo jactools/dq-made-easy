@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 import uuid
 from typing import Any, Protocol
@@ -242,6 +243,12 @@ class OpenMetadataContractResolver:
                 db=self._redis_db,
                 password=self._redis_password,
                 decode_responses=True,
+                ssl=True,
+                ssl_cert_reqs="required",
+                ssl_ca_certs=os.getenv("REDIS_CA_BUNDLE")
+                or os.getenv("SSL_CERT_FILE")
+                or "/etc/openmetadata/certs/internal-ca-bundle.pem",
+                ssl_check_hostname=True,
                 socket_connect_timeout=0.3,
                 socket_timeout=0.3,
             )

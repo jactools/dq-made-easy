@@ -88,8 +88,10 @@ echo "internal service DNS: itsm"
 generate_service_cert "itsm" itsm localhost 127.0.0.1 ::1
 echo "internal service DNS: kafka"
 generate_service_cert "kafka" kafka localhost 127.0.0.1 ::1
+echo "internal service DNS: kong-db"
+generate_service_cert "kong-db" kong-db localhost 127.0.0.1 ::1
 echo "internal service DNS: keycloak"
-generate_service_cert "keycloak" keycloak host.docker.internal localhost 127.0.0.1 ::1
+generate_service_cert "keycloak" keycloak keycloak.jac.dot host.docker.internal localhost 127.0.0.1 ::1
 echo "internal service DNS: kong"
 generate_service_cert "kong" kong localhost 127.0.0.1 ::1
 echo "internal service DNS: observability"
@@ -118,7 +120,7 @@ generate_cert "$CERTS_DIR/support.jac.dot+3.pem" "$CERTS_DIR/support.jac.dot+3-k
 echo "dq-made-easy.jac.dot"
 generate_cert "$CERTS_DIR/dq-made-easy.jac.dot+3.pem" "$CERTS_DIR/dq-made-easy.jac.dot+3-key.pem" "dq-made-easy.jac.dot" localhost 127.0.0.1 ::1
 echo "keycloak.jac.dot"
-generate_cert "$CERTS_DIR/keycloak.jac.dot+3.pem" "$CERTS_DIR/keycloak.jac.dot+3-key.pem" "keycloak.jac.dot" "host.docker.internal" localhost 127.0.0.1 ::1
+generate_cert "$CERTS_DIR/keycloak.jac.dot+3.pem" "$CERTS_DIR/keycloak.jac.dot+3-key.pem" "keycloak.jac.dot" keycloak "host.docker.internal" localhost 127.0.0.1 ::1
 echo "kong.jac.dot"
 generate_cert "$CERTS_DIR/kong.jac.dot+3.pem" "$CERTS_DIR/kong.jac.dot+3-key.pem" "kong.jac.dot" localhost 127.0.0.1 ::1
 echo "observability.jac.dot"

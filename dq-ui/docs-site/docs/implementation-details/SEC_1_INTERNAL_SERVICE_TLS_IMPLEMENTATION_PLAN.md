@@ -90,19 +90,20 @@ The migration must preserve the repository no-fallback rule: once a dependency i
 
 ## Workstream 4: Stateful Transport Migration
 
-- [ ] (SEC1-I-W4-01) Enable and validate TLS for Postgres connections used by services and exporters.
+- [x] (SEC1-I-W4-01) Enable and validate TLS for Postgres connections used by services and exporters.
 - [ ] (SEC1-I-W4-02) Enable and validate TLS for Redis connections used by API, workers, and supporting services.
 - [ ] (SEC1-I-W4-03) Enable and validate HTTPS for AIStor and any S3-compatible clients in the stack.
 - [ ] (SEC1-I-W4-04) Update telemetry exporters and collectors to use trusted TLS endpoints where cross-process traffic exists.
-- [ ] (SEC1-I-W4-05) Capture any service-specific transport gaps as named follow-up items instead of leaving anonymous plaintext exceptions.
+- [x] (SEC1-I-W4-05) Capture any service-specific transport gaps as named follow-up items instead of leaving anonymous plaintext exceptions.
 
 ## Workstream 5: Validation, Observability, and Runbooks
 
-- [ ] (SEC1-I-W5-01) Add a validation script that flags known plaintext internal URLs, disabled TLS modes, or missing trust mounts.
+- [x] (SEC1-I-W5-01) Add a validation script that flags known plaintext internal URLs, disabled TLS modes, or missing trust mounts.
 - [ ] (SEC1-I-W5-02) Add smoke coverage for representative secure paths across HTTP, data, cache, and telemetry surfaces.
-- [ ] (SEC1-I-W5-03) Add observability guidance and dashboards or log filters for trust and handshake failures.
-- [ ] (SEC1-I-W5-04) Document certificate rotation, trust debugging, and common failure modes in runbooks.
-- [ ] (SEC1-I-W5-05) Document the migration matrix that shows which services are TLS-complete, in progress, or pending.
+	- The smoke orchestrator exists, but the live-stack run still needs to be executed against a running environment.
+- [x] (SEC1-I-W5-03) Add observability guidance and dashboards or log filters for trust and handshake failures.
+- [x] (SEC1-I-W5-04) Document certificate rotation, trust debugging, and common failure modes in runbooks.
+- [x] (SEC1-I-W5-05) Document the migration matrix that shows which services are TLS-complete, in progress, or pending.
 
 ## Sequencing
 
