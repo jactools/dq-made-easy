@@ -29,13 +29,14 @@ x-zammad-service: &zammad-service
     ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
     KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
     SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL:-}
-    SSL_CERT_FILE: /etc/zammad/certs/internal-ca-bundle.pem
-    CURL_CA_BUNDLE: /etc/zammad/certs/internal-ca-bundle.pem
+    SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
+    CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
     TZ: ${TZ}
   volumes:
     - zammad_backup:/var/tmp/zammad:ro
     - zammad_storage:/opt/zammad/storage
-    - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/zammad/certs/internal-ca-bundle.pem:ro
+    - ./tmp/certs/mkcert-rootCA.pem:/usr/lib/ssl/cert.pem:ro
+    - ./tmp/certs/mkcert-rootCA.pem:/etc/zammad/certs/mkcert-rootCA.pem:ro
     - ./docker/zammad/initializers/99-openid-connect-server-side-url.rb:/opt/zammad/config/initializers/99-openid-connect-server-side-url.rb:ro
   networks:
     - default
@@ -736,9 +737,10 @@ services:
     command: ["python", "-u", "test_data_materialization_worker.py"]
     volumes:
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/test-data-worker/certs/mkcert-rootCA.pem:ro
     environment:
       TZ: UTC
-      TEST_DATA_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+      TEST_DATA_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/test-data-worker/certs/mkcert-rootCA.pem&ssl_check_hostname=true
       TEST_DATA_MATERIALIZATION_QUEUE_KEY: ${TEST_DATA_MATERIALIZATION_QUEUE_KEY:-dq-test-data:materialize}
       TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS}
       # Spark + S3-compatible object storage materialization config.
@@ -1345,13 +1347,14 @@ services:
       OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
       DB_USER: ${OM_DB_USER:-openmetadata_user}
       DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
-      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
+      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/mkcert-rootCA.pem
       OM_SEARCH_TYPE: elasticsearch
       ELASTICSEARCH_HOST: openmetadata-search-v9
       ELASTICSEARCH_PORT: 9200
       SECRET_MANAGER: db
     command: ["/opt/openmetadata/bootstrap/openmetadata-ops.sh", "migrate"]
     volumes:
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     restart: "no"
 
@@ -1386,7 +1389,7 @@ services:
       OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
       DB_USER: ${OM_DB_USER:-openmetadata_user}
       DB_USER_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
-      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
+      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/mkcert-rootCA.pem
       OM_SEARCH_TYPE: elasticsearch
       ELASTICSEARCH_HOST: openmetadata-search-v9
       ELASTICSEARCH_PORT: 9200
@@ -1423,13 +1426,14 @@ services:
       - "${OPENMETADATA_HOST_BIND:-127.0.0.1}:${OPENMETADATA_HOST_PORT:-8585}:8585"
     volumes:
       - ./tmp/certs/openmetadata.p12:/opt/openmetadata/conf/openmetadata.p12:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
       - default
       - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "base_path='${OPENMETADATA_BASE_PATH:-/}'; if [ \"$$base_path\" = \"/\" ]; then base_path=''; fi; wget --no-check-certificate -q -O /dev/null \"https://127.0.0.1:8585$${base_path}/api/v1/system/version\" || exit 1"]
+      test: ["CMD-SHELL", "base_path='${OPENMETADATA_BASE_PATH:-/}'; if [ \"$$base_path\" = \"/\" ]; then base_path=''; fi; wget --ca-certificate=/etc/openmetadata/certs/mkcert-rootCA.pem -q -O /dev/null \"https://127.0.0.1:8585$${base_path}/api/v1/system/version\" || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 20
@@ -1478,12 +1482,13 @@ services:
       OPENMETADATA_OIDC_SEED_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD is required}
       OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:-https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api}
       OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:-true}
-      OPENMETADATA_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
-      SSL_CERT_FILE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
-      CURL_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
+      OPENMETADATA_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
+      SSL_CERT_FILE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
+      CURL_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
       SEED_ALL: ${SEED_ALL:-false}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     restart: "no"
 
@@ -1500,9 +1505,9 @@ services:
       AIRFLOW__WEBSERVER__SECRET_KEY: ${OM_AIRFLOW_SECRET_KEY:-openmetadata_airflow_secret}
       OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:-https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api}
       OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:-true}
-      OPENMETADATA_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
-      REQUESTS_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
-      SSL_CERT_FILE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/internal-ca-bundle.pem}
+      OPENMETADATA_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
+      REQUESTS_CA_BUNDLE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
+      SSL_CERT_FILE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
       # OpenTelemetry (for Python/Airflow instrumentation when enabled)
       OTEL_SERVICE_NAME: dq-made-easy-openmetadata-ingestion
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
