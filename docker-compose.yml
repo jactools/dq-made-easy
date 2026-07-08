@@ -858,7 +858,6 @@ services:
       CATALOG_PROVIDER: ${CATALOG_PROVIDER:-openmetadata}
       CATALOG_ENDPOINT: ${CATALOG_ENDPOINT:-https://openmetadata-server:8585/api}
       CATALOG_API_KEY: ${CATALOG_API_KEY:-}
-      SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
       CATALOG_OIDC_ISSUER: ${CATALOG_OIDC_ISSUER:-https://keycloak:8443/realms/jaccloud}
       CATALOG_OIDC_TOKEN_URL: ${CATALOG_OIDC_TOKEN_URL:-https://keycloak:8443/realms/jaccloud/protocol/openid-connect/token}
       CATALOG_OIDC_CLIENT_ID: ${CATALOG_OIDC_CLIENT_ID:-openmetadata}
@@ -882,6 +881,9 @@ services:
       DQ_ENGINE_INTERNAL_URL: ${DQ_ENGINE_INTERNAL_URL}
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
       OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:-}
+      REDIS_CA_BUNDLE: /etc/api/mkcert-rootCA.pem
+      REQUESTS_CA_BUNDLE: /etc/api/mkcert-rootCA.pem
+      SSL_CERT_FILE: /etc/api/mkcert-rootCA.pem
       # OpenTelemetry
       OTEL_SERVICE_NAME: dq-made-easy-api
       OTEL_SERVICE_VERSION: ${DQ_API_TAG:-dev}
@@ -913,6 +915,7 @@ services:
     env_file: ${ROOT_ENV_FILE:-.env}
     volumes:
       - ./tmp/certs/services/api:/etc/api/certs:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/api/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
       - default
