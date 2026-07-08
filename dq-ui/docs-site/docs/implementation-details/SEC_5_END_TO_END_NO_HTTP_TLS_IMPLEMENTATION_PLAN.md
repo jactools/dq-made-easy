@@ -58,24 +58,24 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 ## Workstream 1: Define The No-HTTP Contract
 
-- [ ] (SEC5-I-W1-01) Define the repository-wide no-HTTP rule for browser URLs, inter-container traffic, and health checks.
-- [ ] (SEC5-I-W1-02) Document the exception boundary for loopback-only probes that are not supported runtime traffic.
-- [ ] (SEC5-I-W1-03) Classify every current `http://` occurrence into one of three buckets: must-fix, intentional local-only, or requires service redesign.
-- [ ] (SEC5-I-W1-04) Add the no-HTTP policy to the implementation-details index and the relevant runbooks.
+- [x] (SEC5-I-W1-01) Define the repository-wide no-HTTP rule for browser URLs, inter-container traffic, and health checks.
+- [x] (SEC5-I-W1-02) Document the exception boundary for loopback-only probes that are not supported runtime traffic.
+- [x] (SEC5-I-W1-03) Classify every current `http://` occurrence into one of three buckets: must-fix, intentional local-only, or requires service redesign.
+- [x] (SEC5-I-W1-04) Add the no-HTTP policy to the implementation-details index and the relevant runbooks.
 
 ## Workstream 2: Give Every TLS Listener A Certificate
 
-- [ ] (SEC5-I-W2-01) Extend certificate generation so every browser-facing hostname and every HTTPS service listener has a matching leaf certificate and SAN set.
-- [ ] (SEC5-I-W2-02) Standardize trust bundle mounts and env variables so callers can validate the appropriate certificate chain without custom per-service wiring.
-- [ ] (SEC5-I-W2-03) Ensure the certificate layout distinguishes between service leaf certs, root CA material, and any shared trust bundles.
-- [ ] (SEC5-I-W2-04) Add fail-fast checks for missing certs, keys, and CA bundles before startup or health probing begins.
+- [x] (SEC5-I-W2-01) Extend certificate generation so every browser-facing hostname and every HTTPS service listener has a matching leaf certificate and SAN set.
+- [x] (SEC5-I-W2-02) Standardize trust bundle mounts and env variables so callers can validate the appropriate certificate chain without custom per-service wiring.
+- [x] (SEC5-I-W2-03) Ensure the certificate layout distinguishes between service leaf certs, root CA material, and any shared trust bundles.
+- [x] (SEC5-I-W2-04) Add fail-fast checks for missing certs, keys, and CA bundles before startup or health probing begins.
 
 ## Workstream 3: Remove Plain HTTP Browser Surfaces
 
-- [ ] (SEC5-I-W3-01) Replace any browser-facing `http://` defaults in `.env.*local`, `.env.*example`, and related templates with HTTPS equivalents.
-- [ ] (SEC5-I-W3-02) Remove or rename browser-facing ports that imply unsupported HTTP exposure.
+- [x] (SEC5-I-W3-01) Replace any browser-facing `http://` defaults in `.env.*local`, `.env.*example`, and related templates with HTTPS equivalents.
+- [x] (SEC5-I-W3-02) Remove or rename browser-facing ports that imply unsupported HTTP exposure.
 - [ ] (SEC5-I-W3-03) Ensure local browser URLs align with the actual service listener and certificate pair, not with a proxy-side convenience URL.
-- [ ] (SEC5-I-W3-04) Keep browser-facing URLs stable enough for docs and smoke scripts, but only if they resolve over HTTPS.
+- [x] (SEC5-I-W3-04) Keep browser-facing URLs stable enough for docs and smoke scripts, but only if they resolve over HTTPS.
 
 ## Workstream 4: Convert Inter-Container Traffic To TLS End-to-End
 
@@ -137,6 +137,7 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 ## Related Documents
 
+- [SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY.md](/docs/implementation-details/SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY/)
 - [SEC-1 Internal Service TLS Implementation Plan](/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/)
 - [Kong Single HTTPS Ingress - Implementation Plan](/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_IMPLEMENTATION_PLAN/)
 - [SEC-4 Container Egress Control Implementation Plan](/docs/implementation-details/SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN/)

@@ -18,6 +18,7 @@ Use this folder for implementation notes, phase reports, and deep-dive execution
 ## Security & Transport
 
 - [SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/) — Internal service TLS migration plan covering service-to-service traffic, stateful transports, validation, and runbooks
+- [SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY.md](/docs/implementation-details/SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY/) — Repository no-HTTP contract, exception boundary, and current classification snapshot for SEC-5 enforcement
 - [SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN/) — Deny-by-default container egress plan with approved external destinations and enforcement-plane requirements
 - [SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN/) — End-to-end no-HTTP plan for browser URLs, health checks, inter-container traffic, and non-terminating proxy routing
 

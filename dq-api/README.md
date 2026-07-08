@@ -21,7 +21,7 @@ docker-compose up -d kong
 curl http://localhost:8000/v1/health
 ```
 
-Access Kong Manager UI: http://localhost:8002
+Access Kong Manager UI: https://localhost:8444/ops/kong
 
 ---
 

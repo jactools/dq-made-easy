@@ -1159,7 +1159,7 @@ services:
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
-      KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-http://localhost:8002}
+      KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-https://localhost:8002}
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
       DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
       SSO_ENABLED: ${SSO_ENABLED?SSO_ENABLED is required}
@@ -1646,7 +1646,7 @@ services:
     image: grafana/grafana:12.3
     container_name: dq-made-easy-grafana
     ports:
-      - "${GRAFANA_HOST_BIND:-0.0.0.0}:${GRAFANA_HOST_PORT:-3000}:3000"
+      - "${GRAFANA_HOST_BIND:-0.0.0.0}:${GRAFANA_HTTPS_HOST_PORT:-3000}:3000"
     environment:
       # ---- Basic Auth (fallback, for when OIDC is down) ----
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-changeme}"

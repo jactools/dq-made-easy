@@ -2,6 +2,8 @@
 
 This runbook covers the repository-managed internal TLS paths that SEC-1 moved to verified transport.
 
+For the broader SEC-5 no-HTTP policy and the current exception boundary, see [SEC-5 No-HTTP Contract and Exception Boundary](../implementation-details/SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY.md).
+
 ## What To Run
 
 Generate or refresh certificates and trust artifacts with:
@@ -16,6 +18,18 @@ Validate the active compose/env surfaces with:
 ./scripts/validation/validate_internal_tls_migration.sh
 ```
 
+Validate the certificate inventory with:
+
+```bash
+./scripts/validation/validate_tls_certificate_inventory.sh
+```
+
+Validate the trust-bundle conventions with:
+
+```bash
+./scripts/validation/validate_tls_trust_bundle_conventions.sh
+```
+
 Run the representative smoke checks with:
 
 ```bash
@@ -28,6 +42,16 @@ Run the representative smoke checks with:
 - The DB, Kong DB, and OpenMetadata DB/exporter paths all mount the repository CA bundle.
 - Kong Postgres connections require TLS verification.
 - The Kong DB certificate is present in the certificate-generation script.
+- The full TLS listener inventory has matching leaf cert and key files under `tmp/certs/services/`.
+- Browser-facing leaf certs under `tmp/certs/*.pem` contain the expected SAN hostname for the public or local listener.
+
+## Certificate Layout
+
+- Service leaf certificates live under `tmp/certs/services/<service-name>/tls.crt` and `tls.key`.
+- Browser-facing host certificates live under `tmp/certs/*.pem` and their matching `-key.pem` files.
+- `tmp/certs/mkcert-rootCA.pem` is the host-trusted root CA bundle.
+- `tmp/certs/internal-ca-bundle.pem` and `tmp/certs/trust/internal-ca-bundle.pem` are the shared internal trust bundles mounted into callers.
+- The standard client-side env hooks for internal TLS callers are `REQUESTS_CA_BUNDLE` and `SSL_CERT_FILE`; OpenMetadata also uses `OPENMETADATA_CA_BUNDLE` as its service-specific alias.
 
 ## Common Failures
 
@@ -66,3 +90,5 @@ Rotation is repo-managed rather than manual:
 2. Restart the affected containers so they pick up the new leaf certificates and trust bundle.
 3. Re-run the validator and the smoke checks.
 4. Investigate hostname/SAN mismatches if verification fails after rotation.
+
+If a listener starts without a certificate, run `./scripts/validation/validate_tls_certificate_inventory.sh` first to pinpoint the missing artifact.
