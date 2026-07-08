@@ -190,6 +190,8 @@ wait_for_compose_service_healthy() {
     return 127
   fi
 
+  info "compose/invocation.sh" "Waiting for ${service_label} to become healthy..."
+
   for attempt in $(seq 1 "$max_attempts"); do
     container_ids="$(docker_compose ps -q "$service_name" 2>/dev/null || true)"
     all_ready=true
@@ -231,7 +233,7 @@ EOF
       return 0
     fi
 
-    if (( attempt % 10 == 0 )); then
+    if [ "$attempt" -eq 1 ] || (( attempt % 5 == 0 )); then
       info "compose/invocation.sh" "Waiting for ${service_label} to become healthy... (${attempt}/${max_attempts})"
     fi
 

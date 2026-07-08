@@ -25,10 +25,13 @@ generate_cert() {
 write_internal_ca_bundle() {
 	local source_file="$1"
 	local trust_dir="$CERTS_DIR/trust"
+	local aistor_trust_dir="$CERTS_DIR/services/aistor/CAs"
 
 	mkdir -p "$trust_dir"
+	mkdir -p "$aistor_trust_dir"
 	cp "$source_file" "$CERTS_DIR/internal-ca-bundle.pem"
 	cp "$source_file" "$trust_dir/internal-ca-bundle.pem"
+	cp "$source_file" "$aistor_trust_dir/internal-ca-bundle.pem"
 }
 
 create_openmetadata_keystore() {
@@ -136,7 +139,7 @@ generate_cert "$CERTS_DIR/observability.jac.dot+3.pem" "$CERTS_DIR/observability
 echo "api.jac.dot"
 generate_cert "$CERTS_DIR/api.jac.dot+3.pem" "$CERTS_DIR/api.jac.dot+3-key.pem" "api.jac.dot" localhost 127.0.0.1 ::1
 echo "grafana.jac.dot"
-generate_cert "$CERTS_DIR/grafana.jac.dot+3.pem" "$CERTS_DIR/grafana.jac.dot+3-key.pem" "grafana.jac.dot" localhost 127.0.0.1 ::1
+generate_cert "$CERTS_DIR/grafana.jac.dot+3.pem" "$CERTS_DIR/grafana.jac.dot+3-key.pem" "grafana.jac.dot" grafana localhost 127.0.0.1 ::1
 echo "openmetadata.jac.dot"
 generate_cert "$CERTS_DIR/openmetadata.jac.dot+3.pem" "$CERTS_DIR/openmetadata.jac.dot+3-key.pem" "openmetadata.jac.dot" "openmetadata-server" localhost 127.0.0.1 ::1
 create_openmetadata_keystore "$CERTS_DIR/openmetadata.jac.dot+3.pem" "$CERTS_DIR/openmetadata.jac.dot+3-key.pem"

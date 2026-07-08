@@ -72,6 +72,7 @@ fi
 
 export ROOT_ENV_FILE
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
+info "$my_name" "Starting container stack orchestration..."
 
 START_ARGS=(--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --seed-all --init-db)
 if [ "$START_SPARK" = true ]; then
@@ -91,6 +92,8 @@ START_ARGS+=(--no-seed-deliveries)
   error "Failed to start containers. Aborting startup."
   exit 2
 }
+
+info "$my_name" "Container stack startup completed; refreshing local UI..."
 
 # Stop and restart the UI
 ./dq-ui/scripts/stop_local.sh

@@ -1622,6 +1622,7 @@ services:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml
       - ./observability/prometheus/tmp/prometheus_oauth2_client_secret.txt:/etc/prometheus/oauth2_client_secret:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/prometheus/certs/mkcert-rootCA.pem:ro
       - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -1751,11 +1752,11 @@ services:
       - grafana_data:/var/lib/grafana
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--ca-certificate=/etc/grafana/certs/mkcert-rootCA.pem", "https://127.0.0.1:3000/api/health"]
+      test: ["CMD-SHELL", "curl --fail --silent --show-error --cacert /etc/grafana/certs/mkcert-rootCA.pem https://127.0.0.1:3000/api/health >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 120s
     networks:
       - dq-network
     depends_on:
@@ -1894,7 +1895,6 @@ services:
       - aistor_data:/mnt/data
       - ${AISTOR_LICENSE_FILE:?AISTOR_LICENSE_FILE is required}:/minio.license:ro
       - ./tmp/certs/services/aistor:/root/.minio/certs:ro
-      - ./tmp/certs/trust/internal-ca-bundle.pem:/root/.minio/certs/CAs/internal-ca-bundle.pem:ro
     command: ["minio", "server", "/mnt/data", "--certs-dir", "/root/.minio/certs", "--console-address", ":9001", "--license", "/minio.license"]
     restart: unless-stopped
     healthcheck:
@@ -1921,7 +1921,7 @@ services:
     command:
       - |
         echo "Waiting for Grafana to be ready..."
-        until curl -sf https://grafana:3000/api/health > /dev/null 2>&1; do
+        until curl --fail --silent --show-error --cacert /etc/grafana-init/mkcert-rootCA.pem https://grafana:3000/api/health > /dev/null 2>&1; do
           echo "  Grafana not ready yet, waiting..."
           sleep 2
         done
@@ -2014,7 +2014,7 @@ services:
       - dq-network
     depends_on:
       grafana:
-        condition: service_healthy
+        condition: service_started
     restart: "no"
     labels:
       - "monitoring=false"

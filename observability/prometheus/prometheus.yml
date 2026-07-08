@@ -180,6 +180,9 @@ scrape_configs:
         labels:
           service: grafana
           component: dashboards
+    scheme: https
+    tls_config:
+      ca_file: /etc/prometheus/certs/mkcert-rootCA.pem
     metrics_path: "/metrics"
     scrape_interval: 15s
 

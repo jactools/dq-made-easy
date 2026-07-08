@@ -55,6 +55,8 @@ wait_for_http_ready() {
     return 127
   fi
 
+  info "readiness.sh" "Waiting for ${service_label} to become ready..."
+
   for attempt in $(seq 1 "$max_attempts"); do
     set +e
     probe_output="$("${probe_command[@]}" "$ready_url" 2>&1)"
@@ -73,7 +75,7 @@ wait_for_http_ready() {
       last_error=""
     fi
 
-    if (( attempt % 10 == 0 )); then
+    if [ "$attempt" -eq 1 ] || (( attempt % 5 == 0 )); then
       info "readiness.sh" "Waiting for ${service_label}... (${attempt}/${max_attempts})"
       info "readiness.sh" "  last status: code=${http_code} rc=${probe_rc} url=${ready_url}"
       if [ -n "$last_error" ]; then

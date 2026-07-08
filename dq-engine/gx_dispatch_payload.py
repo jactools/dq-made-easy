@@ -30,6 +30,9 @@ from dq_plan_execution_types import GxWorkerExecutionError
 from dq_utils.auth_utils import TokenProvider
 
 
+_parse_dispatch_payload = parse_dispatch_payload
+
+
 # ---------------------------------------------------------------------------
 # Source location dataclass
 # ---------------------------------------------------------------------------

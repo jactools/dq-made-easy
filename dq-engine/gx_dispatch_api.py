@@ -7,6 +7,7 @@ transient-error detection logic.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from typing import Any
@@ -16,12 +17,20 @@ import requests
 
 from dq_utils.logging_utils import log_event
 from dq_utils.auth_utils import TokenProvider
-from dq_plan_execution import report_run
+from dq_plan_execution import report_run as _async_report_run
 
 from dq_plan_execution_types import GxWorkerConfig
 from dq_plan_execution_types import GxWorkerExecutionError
 
 logger = logging.getLogger(__name__)
+
+
+def _run_report_run(
+    config: GxWorkerConfig,
+    token_provider: TokenProvider,
+    **kwargs: Any,
+) -> None:
+    asyncio.run(_async_report_run(config, token_provider, **kwargs))
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +121,7 @@ def _report_dispatch_failure(
     requested_by = coerce_str(payload, "requested_by") or None
     failure = _coerce_reported_failure(exc)
 
-    report_run(
+    _run_report_run(
         config,
         token_provider,
         run_id=run_id,
@@ -188,6 +197,47 @@ def _api_request(
             status_code=response.status_code,
         )
     return payload
+
+
+def _api_report_run(
+    config: GxWorkerConfig,
+    token_provider: TokenProvider,
+    *,
+    run_id: str,
+    correlation_id: str,
+    new_status: str,
+    changed_by: str | None,
+    reason: str | None,
+    details: dict[str, Any] | None = None,
+    execution_progress: dict[str, Any] | None = None,
+    started_at: str | None = None,
+    completed_at: str | None = None,
+    result_summary: dict[str, Any] | None = None,
+    metrics: dict[str, Any] | None = None,
+    diagnostics: list[dict[str, Any]] | None = None,
+    failure_code: str | None = None,
+    failure_message: str | None = None,
+    kafka_publisher: Any = None,
+) -> None:
+    _run_report_run(
+        config,
+        token_provider,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        new_status=new_status,
+        changed_by=changed_by,
+        reason=reason,
+        details=details,
+        execution_progress=execution_progress,
+        started_at=started_at,
+        completed_at=completed_at,
+        result_summary=result_summary,
+        metrics=metrics,
+        diagnostics=diagnostics,
+        failure_code=failure_code,
+        failure_message=failure_message,
+        kafka_publisher=kafka_publisher,
+    )
 
 
 def _should_discard_failed_message(exc: BaseException) -> bool:
