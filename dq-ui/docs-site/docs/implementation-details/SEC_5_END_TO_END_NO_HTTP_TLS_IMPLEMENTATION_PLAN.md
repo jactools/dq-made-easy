@@ -14,8 +14,8 @@ The end state is not just "internal TLS" or "single HTTPS ingress". It is a stri
 
 - no container may advertise a plain HTTP listener as part of the supported stack,
 - no browser-facing runtime URL may default to `http://`,
-- no health check or smoke check may rely on plain HTTP when the service can speak TLS,
-- no inter-container communication may use `http://` when an HTTPS/TLS equivalent exists,
+- no health check or smoke check may rely on plain HTTP, HTTPS/TLS must be used,
+- no inter-container communication may use `http://`. HTTPS/TLS must be used,
 - and if a proxy is used, it must not terminate TLS in the proxy.
 
 That last point changes the architecture materially. A proxy that terminates TLS is an HTTP reverse proxy. SEC-5 requires a non-terminating relay model instead: SNI/TCP passthrough or another transport-layer routing design that keeps TLS end-to-end to the origin service.
@@ -29,12 +29,14 @@ This plan therefore treats the current stack as a mix of:
 
 The migration must preserve the repository no-fallback rule: once a service is moved to TLS, callers must fail fast on missing trust, incorrect listener configuration, or a proxy that attempts to downgrade or terminate TLS unexpectedly.
 
+The one documented exception is the dedicated mTLS NGINX front door for the Ollama-backed LLM path. That proxy is allowed to terminate client TLS because it is the explicit model-access boundary, and only dq-api may connect to it.
+
 ## Scope Definition
 
 ### In Scope
 
 - Browser-facing URLs for local development and any public or semi-public paths exposed by the repository-managed stack.
-- Health checks, readiness checks, and smoke checks for services that can be verified over TLS.
+- Health checks, readiness checks, and smoke checks for services must be over TLS.
 - Inter-container calls between API, workers, metadata services, auth services, observability services, and stateful dependencies.
 - Compose, env, bootstrap, edge/proxy, validation, and runbook changes needed to enforce the no-HTTP rule.
 - Certificate lifecycle changes needed to give every TLS listener a verifiable identity.
@@ -79,17 +81,17 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 ## Workstream 4: Convert Inter-Container Traffic To TLS End-to-End
 
-- [ ] (SEC5-I-W4-01) Replace `http://` service-to-service URLs with `https://` or the equivalent TLS scheme for Redis/Postgres/S3 where applicable.
-- [ ] (SEC5-I-W4-02) Update callers, SDKs, and bootstrap logic to trust the origin service certificate instead of relying on a terminating proxy.
-- [ ] (SEC5-I-W4-03) Remove any fallback code paths that silently revert to plaintext when TLS is unavailable.
-- [ ] (SEC5-I-W4-04) Add or update service-specific trust env vars only where they point at the correct CA bundle for the origin service.
+- [x] (SEC5-I-W4-01) Replace `http://` service-to-service URLs with `https://` or the equivalent TLS scheme for Redis/Postgres/S3 where applicable.
+- [x] (SEC5-I-W4-02) Update callers, SDKs, and bootstrap logic to trust the origin service certificate instead of relying on a terminating proxy.
+- [x] (SEC5-I-W4-03) Remove any fallback code paths that silently revert to plaintext when TLS is unavailable.
+- [x] (SEC5-I-W4-04) Add or update service-specific trust env vars only where they point at the correct CA bundle for the origin service.
 
 ## Workstream 5: Health Checks Must Validate TLS
 
-- [ ] (SEC5-I-W5-01) Convert every health check that can use a TLS listener to HTTPS and certificate validation.
-- [ ] (SEC5-I-W5-02) Replace `http://127.0.0.1` probes with `https://127.0.0.1` or another validated TLS endpoint when the service supports it.
+- [x] (SEC5-I-W5-01) Convert every health check that can use a TLS listener to HTTPS and certificate validation.
+- [x] (SEC5-I-W5-02) Replace `http://127.0.0.1` probes with `https://127.0.0.1` or another validated TLS endpoint when the service supports it.
 - [ ] (SEC5-I-W5-03) Keep HTTP loopback probes only within a container instance when the service has no TLS listener yet, and retire them as part of the service migration.
-- [ ] (SEC5-I-W5-04) Align smoke tests and validation scripts with the TLS healthcheck model so regressions fail early.
+- [x] (SEC5-I-W5-04) Align smoke tests and validation scripts with the TLS healthcheck model so regressions fail early.
 
 ## Workstream 6: Replace TLS-Terminating Proxies With Transparent TLS Routing
 
@@ -99,9 +101,17 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 - [ ] (SEC5-I-W6-04) Keep upstream services TLS-native so the proxy can forward encrypted traffic without owning the certificate boundary.
 - [ ] (SEC5-I-W6-05) Document any proxy paths that cannot be made non-terminating as architecture gaps requiring a redesign.
 
+Exception: the Ollama-backed LLM front door uses an mTLS NGINX proxy as an approved TLS-termination boundary. Only dq-api may connect to that proxy.
+
+Current architecture gaps that remain outside this first W6 slice:
+
+- the edge renderer still renders browser-routing blocks that terminate TLS, but its support route now points at the HTTPS Zammad front door instead of the plain-HTTP `zammad-nginx` backend, as seen in `dq-edge/docker-entrypoint.d/40-render-edge-config.sh`,
+- the Zammad HTTPS front door still forwards to its internal `zammad-nginx` backend over plain HTTP, as seen in `docker/zammad/nginx-https.conf.template`,
+- and that backend hop still requires application-level or product-level redesign before it can become a transparent TLS relay; it is not fixable by a local compose-only or env-only change.
+
 ## Workstream 7: Validation, Observability, And Cutover
 
-- [ ] (SEC5-I-W7-01) Add a validation script that flags any remaining advertised HTTP port, browser HTTP default, healthcheck HTTP probe, or inter-container HTTP URL.
+- [x] (SEC5-I-W7-01) Add a validation script that flags any remaining advertised HTTP port, browser HTTP default, healthcheck HTTP probe, or inter-container HTTP URL.
 - [ ] (SEC5-I-W7-02) Add smoke coverage that proves the major browser, healthcheck, and service-to-service paths work over TLS without proxy termination.
 - [ ] (SEC5-I-W7-03) Add observability for certificate verification failures, listener mismatches, and proxy-routing regressions.
 - [ ] (SEC5-I-W7-04) Document the cutover sequence so HTTP is removed only after the TLS path has been verified end to end.

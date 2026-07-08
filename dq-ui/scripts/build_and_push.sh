@@ -7,12 +7,13 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-DOCKER_DIR="$ROOT_DIR"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SERVICE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$SERVICE_DIR"
+DOCKER_DIR="$SERVICE_DIR"
 
-source "$ROOT_DIR/../scripts/supporting/root_env_file.sh"
-init_root_env_file "$ROOT_DIR/.."
+source "$SERVICE_DIR/../scripts/supporting/root_env_file.sh"
+init_root_env_file "$SERVICE_DIR/.."
 
 # Preserve the exported canonical frontend tag if a parent script already set it.
 SAVED_DQ_FRONTEND_TAG="${DQ_FRONTEND_TAG:-}"
@@ -21,7 +22,7 @@ if ! source_selected_root_env_file; then
     exit 1
 fi
 
-source "$ROOT_DIR/../scripts/supporting/setup_env.sh"
+source "$SERVICE_DIR/../scripts/supporting/setup_env.sh"
 
 # Restore the canonical tag if it was previously set by a parent script.
 if [ -n "$SAVED_DQ_FRONTEND_TAG" ]; then
@@ -29,7 +30,7 @@ if [ -n "$SAVED_DQ_FRONTEND_TAG" ]; then
 fi
 
 echo "Preparing frontend assets locally before Docker packaging..."
-bash "$ROOT_DIR/../scripts/local_build_frontend.sh" --no-docker-build
+bash "$SERVICE_DIR/../scripts/local_build_frontend.sh" --no-docker-build
 
 NO_CACHE=""
 NO_PUSH=false

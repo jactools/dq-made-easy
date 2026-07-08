@@ -21,6 +21,7 @@ The only temporary HTTP allowances are:
 
 - local loopback probes that stay inside one container instance and do not represent supported runtime traffic,
 - startup-time checks for services that still lack a TLS listener,
+- the dedicated mTLS NGINX front door for the Ollama-backed LLM path, which is allowed to terminate TLS because it is the explicit model-access boundary and only dq-api may use it,
 - and documented compatibility exceptions that are explicitly called out in this note and in the related runbook.
 
 Anything else is a regression.
@@ -40,7 +41,7 @@ Anything else is a regression.
 
 ### Requires Service Redesign
 
-- Any proxy path that still depends on TLS termination before forwarding it upstream.
+- Any proxy path that still depends on TLS termination before forwarding upstream.
 - Any service that can only be reached through plain HTTP today and has no TLS listener yet.
 
 ## Enforcement Guidance

@@ -12,10 +12,14 @@ set -euo pipefail
 # Version: 1.0
 # Last modified: 2026-04-07
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
 init_root_env_file "$ROOT_DIR"
+
+if [[ -n "${ROOT_ENV_FILE:-}" && "$ROOT_ENV_FILE" != /* ]]; then
+  ROOT_ENV_FILE="$ROOT_DIR/$ROOT_ENV_FILE"
+fi
 
 PACKAGE_IMAGE=true
 

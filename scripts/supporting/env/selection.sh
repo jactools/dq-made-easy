@@ -9,8 +9,8 @@
 # Version: 1.0
 # Last modified: 2026-05-08
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-source "$ROOT_DIR/scripts/supporting/logging.sh"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+source "$REPO_ROOT/scripts/supporting/logging.sh"
 
 env_selector_values() {
   printf '%s' 'dev|test|prod'
