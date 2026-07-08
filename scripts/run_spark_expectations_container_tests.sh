@@ -11,12 +11,12 @@ EXTRA_PYTEST_ARGS=("$@")
 
 cd "$REPO_ROOT"
 
-export DQ_S3_ENDPOINT="${DQ_S3_ENDPOINT:-${AWS_ENDPOINT_URL:-http://aistor:9000}}"
+export DQ_S3_ENDPOINT="${DQ_S3_ENDPOINT:-${AWS_ENDPOINT_URL:-https://aistor:9000}}"
 export DQ_S3_ACCESS_KEY="${DQ_S3_ACCESS_KEY:-${AWS_ACCESS_KEY_ID:-aistoradmin}}"
 export DQ_S3_SECRET_KEY="${DQ_S3_SECRET_KEY:-${AWS_SECRET_ACCESS_KEY:-aistoradmin}}"
 export DQ_S3_REGION="${DQ_S3_REGION:-${AWS_REGION:-${AWS_DEFAULT_REGION:-us-east-1}}}"
 export DQ_S3_PATH_STYLE_ACCESS="${DQ_S3_PATH_STYLE_ACCESS:-true}"
-export DQ_S3_SSL_ENABLED="${DQ_S3_SSL_ENABLED:-false}"
+export DQ_S3_SSL_ENABLED="${DQ_S3_SSL_ENABLED:-true}"
 export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-$DQ_S3_ACCESS_KEY}"
 export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$DQ_S3_SECRET_KEY}"
 export AWS_REGION="${AWS_REGION:-$DQ_S3_REGION}"
@@ -62,10 +62,10 @@ for env_name in \
 done
 
 if [[ "$FORCE_REBUILD" == "1" ]]; then
-  docker build -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
+  docker build --build-arg "MKCERT_ROOT_CA=${MKCERT_ROOT_CA:-}" -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
 else
   if ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
-    docker build -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
+    docker build --build-arg "MKCERT_ROOT_CA=${MKCERT_ROOT_CA:-}" -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
   fi
 fi
 

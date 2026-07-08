@@ -55,6 +55,12 @@ assert_service_leaf_sans() {
       assert_dns_san "$cert_file" api
       assert_dns_san "$cert_file" localhost
       ;;
+    engine)
+      assert_dns_san "$cert_file" dq-made-easy-engine
+      assert_dns_san "$cert_file" dq-made-easy-engine.local
+      assert_dns_san "$cert_file" dq-made-easy-engine.jac.dot
+      assert_dns_san "$cert_file" localhost
+      ;;
     airflow-server)
       assert_dns_san "$cert_file" airflow-server
       assert_dns_san "$cert_file" localhost
@@ -64,6 +70,8 @@ assert_service_leaf_sans() {
       assert_dns_san "$cert_file" minio
       assert_dns_san "$cert_file" dq-made-easy-aistor
       assert_dns_san "$cert_file" localhost
+      require_file "$ROOT_DIR/tmp/certs/services/aistor/public.crt"
+      require_file "$ROOT_DIR/tmp/certs/services/aistor/private.key"
       ;;
     db)
       assert_dns_san "$cert_file" db
@@ -137,6 +145,7 @@ assert_service_leaf_sans() {
 
 for service_name in \
   api \
+  engine \
   airflow-server \
   aistor \
   db \

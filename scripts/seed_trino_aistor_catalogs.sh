@@ -47,7 +47,7 @@ Seed options:
   -h, --help               Show this help
 
 Environment overrides:
-  TRINO_AISTOR_SEED_S3_ENDPOINT       Default: http://aistor:9000
+  TRINO_AISTOR_SEED_S3_ENDPOINT       Default: https://aistor:9000
   TRINO_AISTOR_SEED_ACCESS_KEY        Default: AISTOR_ROOT_USER or aistoradmin
   TRINO_AISTOR_SEED_SECRET_KEY        Default: AISTOR_ROOT_PASSWORD or aistoradmin
   TRINO_AISTOR_SEED_REGION            Default: us-east-1
@@ -125,6 +125,7 @@ run_delivery_seed_container() {
     -e AWS_SECRET_ACCESS_KEY="$TRINO_AISTOR_SEED_SECRET_KEY" \
     -e AWS_REGION="$TRINO_AISTOR_SEED_REGION" \
     -e AWS_DEFAULT_REGION="$TRINO_AISTOR_SEED_REGION" \
+    -e DQ_S3_SSL_ENABLED=true \
     -e DQ_SPARK_DRIVER_HOST=127.0.0.1 \
     -e DQ_SPARK_DRIVER_BIND_ADDRESS=0.0.0.0 \
     delivery-seed "${seed_args[@]}"
@@ -191,7 +192,7 @@ set +a
 # shellcheck disable=SC1091
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 
-TRINO_AISTOR_SEED_S3_ENDPOINT="${TRINO_AISTOR_SEED_S3_ENDPOINT:-http://aistor:9000}"
+TRINO_AISTOR_SEED_S3_ENDPOINT="${TRINO_AISTOR_SEED_S3_ENDPOINT:-https://aistor:9000}"
 TRINO_AISTOR_SEED_ACCESS_KEY="${TRINO_AISTOR_SEED_ACCESS_KEY:-${AISTOR_ROOT_USER:-aistoradmin}}"
 TRINO_AISTOR_SEED_SECRET_KEY="${TRINO_AISTOR_SEED_SECRET_KEY:-${AISTOR_ROOT_PASSWORD:-aistoradmin}}"
 TRINO_AISTOR_SEED_REGION="${TRINO_AISTOR_SEED_REGION:-${AWS_REGION:-${AWS_DEFAULT_REGION:-us-east-1}}}"

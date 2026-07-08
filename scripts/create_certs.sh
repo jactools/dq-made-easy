@@ -76,10 +76,14 @@ write_internal_ca_bundle "$mkcert_root_ca"
 
 echo "internal service DNS: api"
 generate_service_cert "api" api localhost 127.0.0.1 ::1
+echo "internal service DNS: engine"
+generate_service_cert "engine" dq-made-easy-engine dq-made-easy-engine.local dq-made-easy-engine.jac.dot localhost 127.0.0.1 ::1
 echo "internal service DNS: airflow-server"
 generate_service_cert "airflow-server" airflow-server localhost 127.0.0.1 ::1
 echo "internal service DNS: aistor"
 generate_service_cert "aistor" aistor minio dq-made-easy-aistor localhost 127.0.0.1 ::1
+cp "$CERTS_DIR/services/aistor/tls.crt" "$CERTS_DIR/services/aistor/public.crt"
+cp "$CERTS_DIR/services/aistor/tls.key" "$CERTS_DIR/services/aistor/private.key"
 echo "internal service DNS: db"
 generate_service_cert "db" db localhost 127.0.0.1 ::1
 echo "internal service DNS: grafana"

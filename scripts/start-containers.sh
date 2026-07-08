@@ -60,15 +60,12 @@ if [ ! -f "$ROOT_ENV_FILE" ]; then
 fi
 
 validate_selected_root_env_file "$ROOT_DIR" full
-
 export ROOT_ENV_FILE
 
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
 
 # source repository-level .env
 source "$ROOT_ENV_FILE"
-source "$ROOT_DIR/scripts/supporting/setup_env.sh"
-source "$ROOT_DIR/scripts/supporting/keycloak_readiness.sh"
 cd "$ROOT_DIR"
 
 # Ensure canonical public Kong URL is present. Scripts expect this to be set
@@ -547,7 +544,7 @@ ensure_kong_seed_reconciliation() {
   sso_enabled="$(printf '%s' "$app_cfg" | jq -r '.ssoEnabled // false' 2>/dev/null || false)"
   sso_issuer="$(printf '%s' "$app_cfg" | jq -r '.ssoIssuer // empty' 2>/dev/null || true)"
 
-  if curl -s http://localhost:8001/services/dq-api/plugins \
+  if curl -s https://localhost:8001/services/dq-api/plugins \
     | jq -e '.data[]? | select(.name=="cors") | (.config.headers // []) | index("traceparent") != null' >/dev/null 2>&1; then
     cors_has_traceparent=true
   fi
@@ -818,6 +815,11 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1"; print_usage; exit 1 ;;
   esac
 done
+
+validate_selected_root_env_file "$ROOT_DIR" full
+
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+source "$ROOT_DIR/scripts/supporting/keycloak_readiness.sh"
 
 if [ "$START_ALL" = true ]; then
   START_BASE=true

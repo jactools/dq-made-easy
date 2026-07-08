@@ -530,6 +530,8 @@ services:
     volumes:
       - spark-jars:/home/appuser/.dq-spark-jars
       - ivy2_cache:/home/appuser/.ivy2
+      - ./tmp/certs/services/engine:/etc/engine/certs:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/engine/certs/trust/internal-ca-bundle.pem:ro
     environment:
       ENVIRONMENT: ${ENVIRONMENT}
       TZ: UTC
@@ -553,7 +555,7 @@ services:
       - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/docs')\" || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import ssl, urllib.request; ctx = ssl.create_default_context(cafile='/etc/engine/certs/trust/internal-ca-bundle.pem'); urllib.request.urlopen('https://localhost:8000/docs', context=ctx)\" || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -567,6 +569,7 @@ services:
       dockerfile: Dockerfile.trino
       args:
         TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:-trinodb/trino:482}
+        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
     container_name: dq-made-easy-trino
     ports:
       - "${TRINO_HOST_BIND:-127.0.0.1}:${TRINO_HOST_PORT:-8084}:8080"
@@ -1158,9 +1161,10 @@ services:
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_LISTEN: 0.0.0.0:8444 ssl
       KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-https://localhost:8002}
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+      CURL_CA_BUNDLE: /etc/kong/certs/trust/internal-ca-bundle.pem
       DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
       SSO_ENABLED: ${SSO_ENABLED?SSO_ENABLED is required}
       SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
@@ -1189,6 +1193,7 @@ services:
       - dq-network
     ports:
       - "${KONG_PROXY_HOST_BIND}:${KONG_PROXY_HOST_PORT}:8443"   # HTTPS proxy (public browser/API entrypoint)
+      - "${KONG_ADMIN_HOST_BIND}:${KONG_ADMIN_HOST_PORT}:8444"   # HTTPS admin API
     volumes:
       - ./tmp/certs:/etc/kong/certs:ro
     restart: unless-stopped
@@ -1856,10 +1861,12 @@ services:
     volumes:
       - aistor_data:/mnt/data
       - ${AISTOR_LICENSE_FILE:?AISTOR_LICENSE_FILE is required}:/minio.license:ro
-    command: ["minio", "server", "/mnt/data", "--console-address", ":9001", "--license", "/minio.license"]
+      - ./tmp/certs/services/aistor:/root/.minio/certs:ro
+      - ./tmp/certs/trust/internal-ca-bundle.pem:/root/.minio/certs/CAs/internal-ca-bundle.pem:ro
+    command: ["minio", "server", "/mnt/data", "--certs-dir", "/root/.minio/certs", "--console-address", ":9001", "--license", "/minio.license"]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      test: ["CMD", "curl", "-f", "--cacert", "/root/.minio/certs/CAs/internal-ca-bundle.pem", "https://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3

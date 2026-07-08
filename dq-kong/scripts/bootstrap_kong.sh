@@ -21,7 +21,7 @@ require_env() {
   printf '%s' "$value"
 }
 
-KONG_ADMIN_INTERNAL_URL="${KONG_ADMIN_INTERNAL_URL:-http://127.0.0.1:8001}"
+KONG_ADMIN_INTERNAL_URL="${KONG_ADMIN_INTERNAL_URL:-https://localhost:8444}"
 DQ_API_INTERNAL_URL="$(require_env DQ_API_INTERNAL_URL)"
 APP_CONFIG_INTERNAL_URL="${DQ_API_INTERNAL_URL%/}/api/system/v1/app-config"
 KONG_LUA_SSL_TRUSTED_CERTIFICATE="${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-/etc/kong/certs/trust/internal-ca-bundle.pem}"
