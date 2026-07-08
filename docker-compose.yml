@@ -1408,8 +1408,8 @@ services:
       AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-https://openmetadata.jac.dot:8585/callback}
       AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}
       AUTHENTICATION_RESPONSE_TYPE: ${OM_AUTHENTICATION_RESPONSE_TYPE:-code}
-      AIRFLOW_HOST: http://openmetadata-ingestion:8080
-      PIPELINE_SERVICE_CLIENT_ENDPOINT: http://openmetadata-ingestion:8080
+      AIRFLOW_HOST: https://openmetadata-ingestion:8080
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: https://openmetadata-ingestion:8080
       SECRET_MANAGER: db
       # OpenTelemetry (enabled when the image/runtime supports OTEL env wiring)
       OTEL_SERVICE_NAME: dq-made-easy-openmetadata
@@ -1418,7 +1418,10 @@ services:
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_EXPORTER_OTLP_CERTIFICATE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      OTEL_EXPORTER_OTLP_CERTIFICATE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
       OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT}
       OTEL_LOGS_EXPORTER: none
       JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
@@ -1436,7 +1439,7 @@ services:
       - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "base_path='${OPENMETADATA_BASE_PATH:-/}'; if [ \"$$base_path\" = \"/\" ]; then base_path=''; fi; wget --ca-certificate=/etc/openmetadata/certs/mkcert-rootCA.pem -q -O /dev/null \"https://127.0.0.1:8585$${base_path}/api/v1/system/version\" || exit 1"]
+      test: ["CMD-SHELL", "base_path='${OPENMETADATA_BASE_PATH:-/}'; if [ \"$$base_path\" = \"/\" ]; then base_path=''; fi; SSL_CERT_FILE=/etc/openmetadata/certs/mkcert-rootCA.pem wget -q -O /dev/null \"https://127.0.0.1:8585$${base_path}/api/v1/system/version\" || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 20
@@ -1504,6 +1507,9 @@ services:
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////tmp/airflow.db
+      AIRFLOW__API__BASE_URL: https://openmetadata-ingestion:8080
+      AIRFLOW__API__SSL_CERT: /etc/openmetadata/certs/openmetadata-ingestion/tls.crt
+      AIRFLOW__API__SSL_KEY: /etc/openmetadata/certs/openmetadata-ingestion/tls.key
       AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
       AIRFLOW__WEBSERVER__SECRET_KEY: ${OM_AIRFLOW_SECRET_KEY:-openmetadata_airflow_secret}
       OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:-https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api}
@@ -1516,16 +1522,17 @@ services:
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:-latest}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_CERTIFICATE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
       ENVIRONMENT: ${ENVIRONMENT}
-      OPENMETADATA_AIRFLOW_ADMIN_EMAIL: ${OPENMETADATA_OIDC_SEED_USERNAME:-${KEYCLOAK_JACCLOUD_USERNAME:-${SMOKE_LOGIN_EMAIL:-dq-admin@jaccloud.nl}}}
-      OPENMETADATA_AIRFLOW_ADMIN_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD:-${KEYCLOAK_JACCLOUD_PASSWORD:-${SMOKE_LOGIN_PASSWORD:-${KEYCLOAK_USER_PASSWORD:-password}}}}
     entrypoint: ["/bin/bash"]
-    command: ["-c", "airflow db migrate && airflow users create --username admin --firstname Open --lastname Metadata --role Admin --email \"$${OPENMETADATA_AIRFLOW_ADMIN_EMAIL}\" --password \"$${OPENMETADATA_AIRFLOW_ADMIN_PASSWORD}\" || true && airflow api-server -p 8080"]
+    command: ["-c", "airflow db migrate && airflow api-server -p 8080"]
     ports:
       - "${OPENMETADATA_INGESTION_HOST_BIND}:${OPENMETADATA_INGESTION_HOST_PORT}:8080"
     volumes:
+      - ./tmp/certs/services/openmetadata-ingestion/tls.crt:/etc/openmetadata/certs/openmetadata-ingestion/tls.crt:ro
+      - ./tmp/certs/services/openmetadata-ingestion/tls.key:/etc/openmetadata/certs/openmetadata-ingestion/tls.key:ro
       - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
@@ -1875,7 +1882,7 @@ services:
     command:
       - |
         echo "Waiting for Grafana to be ready..."
-        until curl -sf http://grafana:3000/api/health > /dev/null 2>&1; do
+        until curl -sf https://grafana:3000/api/health > /dev/null 2>&1; do
           echo "  Grafana not ready yet, waiting..."
           sleep 2
         done
@@ -1888,13 +1895,13 @@ services:
         VIEWER_RESPONSE=$$(curl -s -X POST \
           -u admin:changeme \
           -H "Content-Type: application/json" \
-          http://grafana:3000/api/teams \
+          https://grafana:3000/api/teams \
           -d '{"name": "Viewers", "email": "viewers@dq-rulebuilder.local"}')
         VIEWER_ID=$$(echo $$VIEWER_RESPONSE | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || echo "")
         if [ -z "$$VIEWER_ID" ]; then
           VIEWER_ID=$$(curl -s -X GET \
             -u admin:changeme \
-            'http://grafana:3000/api/teams/search?query=Viewers' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
+            'https://grafana:3000/api/teams/search?query=Viewers' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
         fi
         echo "✓ Viewers team ID: $$VIEWER_ID"
         
@@ -1902,13 +1909,13 @@ services:
         EDITOR_RESPONSE=$$(curl -s -X POST \
           -u admin:changeme \
           -H "Content-Type: application/json" \
-          http://grafana:3000/api/teams \
+          https://grafana:3000/api/teams \
           -d '{"name": "Editors", "email": "editors@dq-rulebuilder.local"}')
         EDITOR_ID=$$(echo $$EDITOR_RESPONSE | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || echo "")
         if [ -z "$$EDITOR_ID" ]; then
           EDITOR_ID=$$(curl -s -X GET \
             -u admin:changeme \
-            'http://grafana:3000/api/teams/search?query=Editors' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
+            'https://grafana:3000/api/teams/search?query=Editors' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
         fi
         echo "✓ Editors team ID: $$EDITOR_ID"
         
@@ -1916,13 +1923,13 @@ services:
         ADMIN_RESPONSE=$$(curl -s -X POST \
           -u admin:changeme \
           -H "Content-Type: application/json" \
-          http://grafana:3000/api/teams \
+          https://grafana:3000/api/teams \
           -d '{"name": "Admins", "email": "admins@dq-rulebuilder.local"}')
         ADMIN_ID=$$(echo $$ADMIN_RESPONSE | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || echo "")
         if [ -z "$$ADMIN_ID" ]; then
           ADMIN_ID=$$(curl -s -X GET \
             -u admin:changeme \
-            'http://grafana:3000/api/teams/search?query=Admins' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
+            'https://grafana:3000/api/teams/search?query=Admins' | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')
         fi
         echo "✓ Admins team ID: $$ADMIN_ID"
         
@@ -1932,7 +1939,7 @@ services:
         # Find execution monitoring dashboard by UID
         DASHBOARD_ID=$$(curl -s -X GET \
           -u admin:changeme \
-          "http://grafana:3000/api/search?type=dash-db&query=$$OBSERVABILITY_DASHBOARD_UID" \
+          "https://grafana:3000/api/search?type=dash-db&query=$$OBSERVABILITY_DASHBOARD_UID" \
           | sed -n 's/.*"id":\([0-9][0-9]*\).*/\1/p' | head -1)
        
          if [ -z "$$DASHBOARD_ID" ]; then
@@ -1945,7 +1952,7 @@ services:
           curl -s -X POST \
             -u admin:changeme \
             -H "Content-Type: application/json" \
-            http://grafana:3000/api/dashboards/id/$$DASHBOARD_ID/permissions \
+            https://grafana:3000/api/dashboards/id/$$DASHBOARD_ID/permissions \
             -d "{\"items\":[{\"teamId\": $$VIEWER_ID, \"permission\": 1},{\"teamId\": $$EDITOR_ID, \"permission\": 2},{\"teamId\": $$ADMIN_ID, \"permission\": 4}]}" > /dev/null 2>&1
           echo "✓ Viewers: Read-only access (permission: 1)"
           echo "✓ Editors: Edit access (permission: 2)"
@@ -1960,6 +1967,10 @@ services:
       TZ: UTC
       OBSERVABILITY_DASHBOARD_UID: ${OBSERVABILITY_DASHBOARD_UID:-dq-execution-monitoring}
       OBSERVABILITY_DASHBOARD_TITLE: ${OBSERVABILITY_DASHBOARD_TITLE:-Data Quality Made Easy - Execution Monitoring}
+      CURL_CA_BUNDLE: /etc/grafana-init/mkcert-rootCA.pem
+      SSL_CERT_FILE: /etc/grafana-init/mkcert-rootCA.pem
+    volumes:
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/grafana-init/mkcert-rootCA.pem:ro
     networks:
       - dq-network
     depends_on:

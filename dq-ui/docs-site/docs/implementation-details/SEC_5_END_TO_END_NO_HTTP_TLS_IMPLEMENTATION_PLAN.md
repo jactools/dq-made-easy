@@ -72,7 +72,7 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 ## Workstream 3: Remove Plain HTTP Browser Surfaces
 
-- [ ] (SEC5-I-W3-01) Replace any browser-facing `http://` defaults in `.env.*local` and related templates with HTTPS equivalents.
+- [ ] (SEC5-I-W3-01) Replace any browser-facing `http://` defaults in `.env.*local`, `.env.*example`, and related templates with HTTPS equivalents.
 - [ ] (SEC5-I-W3-02) Remove or rename browser-facing ports that imply unsupported HTTP exposure.
 - [ ] (SEC5-I-W3-03) Ensure local browser URLs align with the actual service listener and certificate pair, not with a proxy-side convenience URL.
 - [ ] (SEC5-I-W3-04) Keep browser-facing URLs stable enough for docs and smoke scripts, but only if they resolve over HTTPS.
@@ -86,9 +86,9 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 ## Workstream 5: Health Checks Must Validate TLS
 
-- [ ] (SEC5-I-W5-01) Convert every health check that can reach a TLS listener to HTTPS and certificate validation.
+- [ ] (SEC5-I-W5-01) Convert every health check that can use a TLS listener to HTTPS and certificate validation.
 - [ ] (SEC5-I-W5-02) Replace `http://127.0.0.1` probes with `https://127.0.0.1` or another validated TLS endpoint when the service supports it.
-- [ ] (SEC5-I-W5-03) Keep HTTP loopback probes only when the service has no TLS listener yet, and mark those as explicit exceptions that must be retired.
+- [ ] (SEC5-I-W5-03) Keep HTTP loopback probes only within a container instance when the service has no TLS listener yet, and retire them as part of the service migration.
 - [ ] (SEC5-I-W5-04) Align smoke tests and validation scripts with the TLS healthcheck model so regressions fail early.
 
 ## Workstream 6: Replace TLS-Terminating Proxies With Transparent TLS Routing
@@ -108,6 +108,15 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 - [ ] (SEC5-I-W7-05) Record remaining service-level exceptions explicitly, with a retirement plan for each one.
 
 ## Sequencing
+
+### First Implementation Slice
+
+1. Inventory every current `http://` occurrence in compose, env, edge, healthcheck, and validation surfaces.
+2. Classify each occurrence as must-fix, intentional local-only, or a service redesign gap.
+3. Update the no-HTTP policy and runbooks with the exception boundary before changing runtime wiring.
+4. Prioritize browser-facing URLs and TLS-capable health checks so the visible regressions disappear first.
+
+### Full Cutover Sequence
 
 1. Complete the no-HTTP inventory first so the scope is explicit.
 2. Give every TLS listener a verifiable certificate before switching callers.
