@@ -62,6 +62,9 @@ RUN useradd --create-home --shell /bin/bash appuser \
 # Copy shared utils package and install it (cached unless dq-utils changes)
 COPY --chown=appuser:appuser dq-utils/ /app/dq-utils/
 
+# Copy the local spark-expectations source so the editable dependency resolves during the image build.
+COPY --chown=appuser:appuser tmp/spark-expectations-2.10.1/ /app/tmp/spark-expectations-2.10.1/
+
 # Copy requirements first (cached unless requirements.txt changes)
 COPY --chown=appuser:appuser dq-engine/requirements.txt /app/requirements.txt
 

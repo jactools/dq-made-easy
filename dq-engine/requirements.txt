@@ -2,8 +2,7 @@ fastapi==0.139.0
 uvicorn[standard]==0.50.2
 requests==2.34.2
 great-expectations==1.18.2
---find-links ../tmp/vendor/spark-expectations-2.10.1/dist
-spark-expectations==2.10.1
+-e tmp/spark-expectations-2.10.1
 trino==0.326.0
 boto3==1.43.41
 python-dotenv==1.2.2
