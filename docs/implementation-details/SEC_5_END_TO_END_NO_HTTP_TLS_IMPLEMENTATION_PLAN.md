@@ -81,10 +81,10 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 ## Workstream 4: Convert Inter-Container Traffic To TLS End-to-End
 
-- [ ] (SEC5-I-W4-01) Replace `http://` service-to-service URLs with `https://` or the equivalent TLS scheme for Redis/Postgres/S3 where applicable.
-- [ ] (SEC5-I-W4-02) Update callers, SDKs, and bootstrap logic to trust the origin service certificate instead of relying on a terminating proxy.
-- [ ] (SEC5-I-W4-03) Remove any fallback code paths that silently revert to plaintext when TLS is unavailable.
-- [ ] (SEC5-I-W4-04) Add or update service-specific trust env vars only where they point at the correct CA bundle for the origin service.
+- [x] (SEC5-I-W4-01) Replace `http://` service-to-service URLs with `https://` or the equivalent TLS scheme for Redis/Postgres/S3 where applicable.
+- [x] (SEC5-I-W4-02) Update callers, SDKs, and bootstrap logic to trust the origin service certificate instead of relying on a terminating proxy.
+- [x] (SEC5-I-W4-03) Remove any fallback code paths that silently revert to plaintext when TLS is unavailable.
+- [x] (SEC5-I-W4-04) Add or update service-specific trust env vars only where they point at the correct CA bundle for the origin service.
 
 ## Workstream 5: Health Checks Must Validate TLS
 
@@ -105,7 +105,7 @@ Exception: the Ollama-backed LLM front door uses an mTLS NGINX proxy as an appro
 
 ## Workstream 7: Validation, Observability, And Cutover
 
-- [ ] (SEC5-I-W7-01) Add a validation script that flags any remaining advertised HTTP port, browser HTTP default, healthcheck HTTP probe, or inter-container HTTP URL.
+- [x] (SEC5-I-W7-01) Add a validation script that flags any remaining advertised HTTP port, browser HTTP default, healthcheck HTTP probe, or inter-container HTTP URL.
 - [ ] (SEC5-I-W7-02) Add smoke coverage that proves the major browser, healthcheck, and service-to-service paths work over TLS without proxy termination.
 - [ ] (SEC5-I-W7-03) Add observability for certificate verification failures, listener mismatches, and proxy-routing regressions.
 - [ ] (SEC5-I-W7-04) Document the cutover sequence so HTTP is removed only after the TLS path has been verified end to end.

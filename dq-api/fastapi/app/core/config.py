@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     ui_registry_manifest_version: str = Field(default="1.0.0", validation_alias="DQ_UI_REGISTRY_VERSION")
     ui_registry_cache_ttl_seconds: int = Field(default=300, validation_alias="DQ_UI_REGISTRY_CACHE_TTL_SECONDS")
     ui_registry_assets_dir: str = Field(default="tmp/ui-registry-assets", validation_alias="DQ_UI_REGISTRY_ASSETS_DIR")
-    llm_service_url: str = Field(default="http://dq-made-easy-llm:8000", validation_alias="DQ_LLM_BASE_URL")
+    llm_service_url: str = Field(default="https://ollama-nginx:8443", validation_alias="DQ_LLM_BASE_URL")
     gx_exception_storage_backend: str = "s3"
     gx_exception_storage_endpoint: str | None = None
     gx_exception_storage_bucket: str = "dq-gx-exceptions"

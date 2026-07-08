@@ -20,7 +20,7 @@ from app.domain.interfaces import ProfilingRepository
 SUPPORTED_SEARCH_SCOPES = frozenset({"current", "all", "all_across_workspaces"})
 SUPPORTED_CHECK_TYPES = frozenset({"UNIQUENESS", "PRESENT", "REGEX", "RANGE", "ALLOWLIST", "FRESHNESS"})
 SUPPORTED_ANALYSIS_PROVIDERS = frozenset({"rapidfuzz", "llm"})
-DEFAULT_LLM_SERVICE_URL = "http://dq-made-easy-llm:8000"
+DEFAULT_LLM_SERVICE_URL = "https://ollama-nginx:8443"
 LLM_MTLS_CA_BUNDLE_ENV = "DQ_LLM_MTLS_CA_BUNDLE"
 LLM_MTLS_CLIENT_CERT_ENV = "DQ_LLM_MTLS_CLIENT_CERT_FILE"
 LLM_MTLS_CLIENT_KEY_ENV = "DQ_LLM_MTLS_CLIENT_KEY_FILE"
