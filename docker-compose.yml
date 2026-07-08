@@ -447,7 +447,7 @@ services:
       UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
       ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
       OPENMETADATA_CALLBACK: ${OPENMETADATA_CALLBACK:-https://openmetadata.jac.dot:8585/callback}
-      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-http://observability.jac.dot:3000}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-https://observability.jac.dot:3000}
       GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
@@ -471,7 +471,7 @@ services:
       OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL?OIDC_REDIRECT_BASE_URL is required}
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
       ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
-      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-http://observability.jac.dot:3000}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-https://observability.jac.dot:3000}
       GRAFANA_OIDC_REALM_ROLE: ${GRAFANA_OIDC_REALM_ROLE:-dq:rules:read}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_REALM_ROLE: ${DQ_ENGINE_OIDC_REALM_ROLE:-dq:rules:write}
@@ -1674,6 +1674,9 @@ services:
       GF_SERVER_DOMAIN: ${GRAFANA_PUBLIC_DOMAIN?GRAFANA_PUBLIC_DOMAIN is required}
       GF_SERVER_HTTP_ADDR: "0.0.0.0"
       GF_SERVER_HTTP_PORT: "3000"
+      GF_SERVER_PROTOCOL: "https"
+      GF_SERVER_CERT_FILE: /etc/grafana/certs/grafana.jac.dot+3.pem
+      GF_SERVER_CERT_KEY: /etc/grafana/certs/grafana.jac.dot+3-key.pem
       GF_SERVER_ROOT_URL: ${GRAFANA_PUBLIC_URL?GRAFANA_PUBLIC_URL is required}
       GF_SERVER_SERVE_FROM_SUB_PATH: ${GRAFANA_SERVE_FROM_SUB_PATH?GRAFANA_SERVE_FROM_SUB_PATH is required}
       
@@ -1695,13 +1698,16 @@ services:
     secrets:
       - internal_corporate_root_ca
     volumes:
+      - ./tmp/certs/grafana.jac.dot+3.pem:/etc/grafana/certs/grafana.jac.dot+3.pem:ro
+      - ./tmp/certs/grafana.jac.dot+3-key.pem:/etc/grafana/certs/grafana.jac.dot+3-key.pem:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/grafana/certs/mkcert-rootCA.pem:ro
       - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
       - ./observability/grafana/grafana.ini:/etc/grafana/grafana.ini
       - grafana_data:/var/lib/grafana
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://grafana:3000/api/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--ca-certificate=/etc/grafana/certs/mkcert-rootCA.pem", "https://127.0.0.1:3000/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5

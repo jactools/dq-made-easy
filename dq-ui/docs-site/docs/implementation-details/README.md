@@ -15,6 +15,12 @@ Use this folder for implementation notes, phase reports, and deep-dive execution
 - [KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST.md](/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/) — File-by-file implementation checklist for moving public apps behind Kong and removing direct service exposure
 - [KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX.md](/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX/) — Application-by-application cutover matrix with break risks and verification tasks
 
+## Security & Transport
+
+- [SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/) — Internal service TLS migration plan covering service-to-service traffic, stateful transports, validation, and runbooks
+- [SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN/) — Deny-by-default container egress plan with approved external destinations and enforcement-plane requirements
+- [SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN/) — End-to-end no-HTTP plan for browser URLs, health checks, inter-container traffic, and non-terminating proxy routing
+
 ## Documentation Publishing
 
 - [USER_MANUALS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/USER_MANUALS_IMPLEMENTATION_PLAN/) — Checkable implementation plan for topic-focused user manuals, static HTML publishing, and UI navigation

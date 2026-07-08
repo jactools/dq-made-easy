@@ -179,7 +179,7 @@ EOF
 
   location / {
 EOF
-  append_http_proxy "http://grafana:3000"
+  append_https_proxy "https://grafana:3000" "grafana"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 }
@@ -306,7 +306,7 @@ EOF
   location /observability/ {
     proxy_set_header X-Forwarded-Prefix /observability;
 EOF
-  append_http_proxy "http://grafana:3000"
+  append_https_proxy "https://grafana:3000" "grafana"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 
