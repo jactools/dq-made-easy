@@ -29,6 +29,8 @@ This plan therefore treats the current stack as a mix of:
 
 The migration must preserve the repository no-fallback rule: once a service is moved to TLS, callers must fail fast on missing trust, incorrect listener configuration, or a proxy that attempts to downgrade or terminate TLS unexpectedly.
 
+The one documented exception is the dedicated mTLS NGINX front door for the Ollama-backed LLM path. That proxy is allowed to terminate client TLS because it is the explicit model-access boundary, and only dq-api may connect to it.
+
 ## Scope Definition
 
 ### In Scope
@@ -98,6 +100,8 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 - [ ] (SEC5-I-W6-03) Drop path-based routing assumptions wherever they require the proxy to inspect HTTP requests after decryption.
 - [ ] (SEC5-I-W6-04) Keep upstream services TLS-native so the proxy can forward encrypted traffic without owning the certificate boundary.
 - [ ] (SEC5-I-W6-05) Document any proxy paths that cannot be made non-terminating as architecture gaps requiring a redesign.
+
+Exception: the Ollama-backed LLM front door uses an mTLS NGINX proxy as an approved TLS-termination boundary. Only dq-api may connect to that proxy.
 
 ## Workstream 7: Validation, Observability, And Cutover
 

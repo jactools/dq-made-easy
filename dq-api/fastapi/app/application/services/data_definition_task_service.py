@@ -8,6 +8,7 @@ from typing import Any
 
 from app.application.services.business_term_guideline_validator import BusinessTermGuidelineViolation
 from app.application.services.business_term_guideline_validator import validate_business_term_definition
+from app.application.services.natural_language_rule_drafting import create_llm_service_client
 
 import httpx
 
@@ -212,7 +213,10 @@ async def fetch_data_definition_bundle(*, request_payload: dict[str, Any], llm_s
         raise DataDefinitionTaskError("LLM service URL is not configured", status_code=503)
 
     try:
-        async with httpx.AsyncClient(timeout=data_definition_llm_timeout_seconds()) as client:
+        async with create_llm_service_client(
+            base_url=normalized_service_url,
+            timeout_seconds=data_definition_llm_timeout_seconds(),
+        ) as client:
             response = await client.post(f"{normalized_service_url}/generate_data_definitions", json=request_payload)
     except httpx.TimeoutException as exc:
         raise DataDefinitionTaskError("The data-definition generation service timed out", status_code=503) from exc
