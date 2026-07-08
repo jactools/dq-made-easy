@@ -203,7 +203,7 @@ EOF
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   location / {
 EOF
-  append_http_proxy "http://zammad-nginx:8080"
+  append_https_proxy "https://zammad-https:443" "zammad-https"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 }
@@ -327,7 +327,7 @@ EOF
   location /support/ {
     proxy_set_header X-Forwarded-Prefix /support;
 EOF
-  append_http_proxy "http://zammad-nginx:8080"
+  append_https_proxy "https://zammad-https:443" "zammad-https"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 

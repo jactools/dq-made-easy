@@ -171,7 +171,7 @@ else
   assert_contains 'proxy_pass https://dq-made-easy-otel-collector:4318/;' "$rendered_config"
   assert_contains 'proxy_ssl_name dq-made-easy-otel-collector;' "$rendered_config"
   assert_contains 'set $upstream https://grafana:3000;' "$rendered_config"
-  assert_contains 'set $upstream http://zammad-nginx:8080;' "$rendered_config"
+  assert_contains 'set $upstream https://zammad-https:443;' "$rendered_config"
   if [[ -n "$EDGE_LOCAL_AIRFLOW_HOST" ]]; then
     assert_contains "server_name ${EDGE_LOCAL_AIRFLOW_HOST};" "$rendered_config"
     assert_contains 'set $upstream http://airflow:8080;' "$rendered_config"

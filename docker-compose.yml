@@ -950,6 +950,8 @@ services:
     volumes:
       - dq-made-easy-llm-hf-cache:/cache/huggingface:delegated
       - dq-made-easy-llm-model-cache:/hf_cache_temp:tmpfs
+      - ./tmp/certs/services/llm:/etc/dq-llm/certs:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/dq-llm/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     networks:
       - default
@@ -965,7 +967,7 @@ services:
           cpus: "${DQ_LLM_CPU_RES:-2}"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\" || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import ssl, urllib.request; ctx = ssl.create_default_context(cafile='/etc/dq-llm/mkcert-rootCA.pem'); urllib.request.urlopen('https://127.0.0.1:8000/health', context=ctx)\" || exit 1"]
       interval: 10s
       timeout: 30s
       retries: 10

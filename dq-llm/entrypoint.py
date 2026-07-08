@@ -58,6 +58,8 @@ OLLAMA_MODEL = os.getenv("DQ_LLM_OLLAMA_MODEL", "").strip()
 MAX_RETRIES = max(1, int(os.getenv("DQ_LLM_MAX_RETRIES", "3")))
 LOAD_IN_4BIT = os.getenv("DQ_LLM_LOAD_IN_4BIT", "false").strip().lower() in ("1", "true")
 OLLAMA_TIMEOUT_SECONDS = int(os.getenv("DQ_LLM_OLLAMA_TIMEOUT_SECONDS", "180"))
+TLS_CERT_FILE = os.getenv("DQ_LLM_TLS_CERT_FILE", "/etc/dq-llm/certs/tls.crt")
+TLS_KEY_FILE = os.getenv("DQ_LLM_TLS_KEY_FILE", "/etc/dq-llm/certs/tls.key")
 
 DEFAULT_APPROVAL_CRITERIA = [
     "Business meaning is unambiguous and aligns with the logical data model.",
@@ -2036,11 +2038,13 @@ async def metrics() -> Response:
 
 
 if __name__ == "__main__":
-    logger.info("Starting FastAPI server on 0.0.0.0:8000...")
+    logger.info("Starting FastAPI server on 0.0.0.0:8000 with TLS...")
     uvicorn.run(
         "entrypoint:app",
         host="0.0.0.0",
         port=8000,
         reload=False,
         log_config=None,
+        ssl_certfile=TLS_CERT_FILE,
+        ssl_keyfile=TLS_KEY_FILE,
     )

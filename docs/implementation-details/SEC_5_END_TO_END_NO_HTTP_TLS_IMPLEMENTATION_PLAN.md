@@ -88,10 +88,10 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 ## Workstream 5: Health Checks Must Validate TLS
 
-- [ ] (SEC5-I-W5-01) Convert every health check that can use a TLS listener to HTTPS and certificate validation.
-- [ ] (SEC5-I-W5-02) Replace `http://127.0.0.1` probes with `https://127.0.0.1` or another validated TLS endpoint when the service supports it.
+- [x] (SEC5-I-W5-01) Convert every health check that can use a TLS listener to HTTPS and certificate validation.
+- [x] (SEC5-I-W5-02) Replace `http://127.0.0.1` probes with `https://127.0.0.1` or another validated TLS endpoint when the service supports it.
 - [ ] (SEC5-I-W5-03) Keep HTTP loopback probes only within a container instance when the service has no TLS listener yet, and retire them as part of the service migration.
-- [ ] (SEC5-I-W5-04) Align smoke tests and validation scripts with the TLS healthcheck model so regressions fail early.
+- [x] (SEC5-I-W5-04) Align smoke tests and validation scripts with the TLS healthcheck model so regressions fail early.
 
 ## Workstream 6: Replace TLS-Terminating Proxies With Transparent TLS Routing
 
@@ -102,6 +102,12 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 - [ ] (SEC5-I-W6-05) Document any proxy paths that cannot be made non-terminating as architecture gaps requiring a redesign.
 
 Exception: the Ollama-backed LLM front door uses an mTLS NGINX proxy as an approved TLS-termination boundary. Only dq-api may connect to that proxy.
+
+Current architecture gaps that remain outside this first W6 slice:
+
+- the edge renderer still renders browser-routing blocks that terminate TLS, but its support route now points at the HTTPS Zammad front door instead of the plain-HTTP `zammad-nginx` backend, as seen in `dq-edge/docker-entrypoint.d/40-render-edge-config.sh`,
+- the Zammad HTTPS front door still forwards to its internal `zammad-nginx` backend over plain HTTP, as seen in `docker/zammad/nginx-https.conf.template`,
+- and that backend hop still requires application-level or product-level redesign before it can become a transparent TLS relay; it is not fixable by a local compose-only or env-only change.
 
 ## Workstream 7: Validation, Observability, And Cutover
 
