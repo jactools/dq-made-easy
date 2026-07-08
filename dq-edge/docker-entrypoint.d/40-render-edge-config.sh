@@ -72,6 +72,20 @@ append_http_proxy_with_uri() {
   } >> /etc/nginx/conf.d/default.conf
 }
 
+append_https_proxy_with_uri() {
+  upstream="$1"
+  server_name="$2"
+  {
+    append_common_proxy
+    printf '    proxy_ssl_server_name on;\n'
+    printf '    proxy_ssl_name %s;\n' "$server_name"
+    printf '    proxy_ssl_verify on;\n'
+    printf '    proxy_ssl_trusted_certificate /etc/nginx/certs/trust/internal-ca-bundle.pem;\n'
+    printf '    proxy_ssl_verify_depth 2;\n'
+    printf '    proxy_pass %s;\n' "$upstream"
+  } >> /etc/nginx/conf.d/default.conf
+}
+
 append_https_proxy() {
   upstream="$1"
   server_name="$2"
@@ -173,7 +187,7 @@ EOF
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   location /otlp/ {
 EOF
-  append_http_proxy_with_uri "http://dq-made-easy-otel-collector:4319/"
+  append_https_proxy_with_uri "https://dq-made-easy-otel-collector:4318/" "dq-made-easy-otel-collector"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 
@@ -299,7 +313,7 @@ EOF
 
   location /observability/otlp/ {
 EOF
-  append_http_proxy_with_uri "http://dq-made-easy-otel-collector:4319/"
+  append_https_proxy_with_uri "https://dq-made-easy-otel-collector:4318/" "dq-made-easy-otel-collector"
   cat >> /etc/nginx/conf.d/default.conf <<'EOF'
   }
 

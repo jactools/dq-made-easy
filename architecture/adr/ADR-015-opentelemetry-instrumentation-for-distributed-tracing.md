@@ -257,11 +257,11 @@ docker-compose --profile observability up -d
 curl http://observability.local:3100/ready         # Loki
 curl http://observability.local:9090/-/healthy     # Prometheus
 curl http://observability.local:3200/ready         # Tempo
-curl http://observability.local:3000/api/health    # Grafana
+curl https://observability.local:3000/api/health    # Grafana
 ```
 
 #### Access
-- **Grafana**: http://observability.local:3000 (admin/changeme)
+- **Grafana**: https://observability.local:3000 (admin/changeme)
 - **Prometheus**: http://observability.local:9090
 - **Tempo**: http://observability.local:3200/search
 - **Loki**: Via Grafana Explore

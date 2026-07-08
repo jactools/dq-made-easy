@@ -71,5 +71,11 @@ require_present './tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/cert
 require_present 'KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem' "$ROOT_DIR/docker-compose.yml"
 require_present 'generate_service_cert "kong-db" kong-db' "$ROOT_DIR/scripts/create_certs.sh"
 require_present 'DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem' "$ROOT_DIR/.env.dev.example"
+require_present 'DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem' "$ROOT_DIR/.env.dev.local"
+require_present 'DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem' "$ROOT_DIR/.env.prod.local"
+require_present 'DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem' "$ROOT_DIR/.env.test.local"
+require_present 'ZAMMAD_REDIS_URL=rediss://redis:6379/1?ssl_cert_reqs=required&ssl_ca_certs=/etc/zammad/certs/mkcert-rootCA.pem&ssl_check_hostname=true' "$ROOT_DIR/.env.dev.example"
+require_present 'ZAMMAD_REDIS_URL=rediss://redis:6379/1?ssl_cert_reqs=required&ssl_ca_certs=/etc/zammad/certs/mkcert-rootCA.pem&ssl_check_hostname=true' "$ROOT_DIR/.env.prod.example"
+require_present 'ZAMMAD_REDIS_URL=rediss://redis:6379/1?ssl_cert_reqs=required&ssl_ca_certs=/etc/zammad/certs/mkcert-rootCA.pem&ssl_check_hostname=true' "$ROOT_DIR/.env.test.example"
 
 success "$my_name" "internal TLS migration validation passed"

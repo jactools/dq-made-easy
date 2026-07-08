@@ -74,7 +74,7 @@ The plan below turns those gaps into explicit workstreams rather than letting th
 
 - [x] (SEC5-I-W3-01) Replace any browser-facing `http://` defaults in `.env.*local`, `.env.*example`, and related templates with HTTPS equivalents.
 - [x] (SEC5-I-W3-02) Remove or rename browser-facing ports that imply unsupported HTTP exposure.
-- [ ] (SEC5-I-W3-03) Ensure local browser URLs align with the actual service listener and certificate pair, not with a proxy-side convenience URL.
+- [x] (SEC5-I-W3-03) Ensure local browser URLs align with the actual service listener and certificate pair, not with a proxy-side convenience URL.
 - [x] (SEC5-I-W3-04) Keep browser-facing URLs stable enough for docs and smoke scripts, but only if they resolve over HTTPS.
 
 ## Workstream 4: Convert Inter-Container Traffic To TLS End-to-End

@@ -168,7 +168,8 @@ else
   assert_contains 'set $upstream http://kong:8000;' "$rendered_config"
   assert_contains 'set $upstream http://keycloak:8080;' "$rendered_config"
   assert_contains 'set $upstream https://openmetadata-server:8585;' "$rendered_config"
-  assert_contains 'proxy_pass http://dq-made-easy-otel-collector:4319/;' "$rendered_config"
+  assert_contains 'proxy_pass https://dq-made-easy-otel-collector:4318/;' "$rendered_config"
+  assert_contains 'proxy_ssl_name dq-made-easy-otel-collector;' "$rendered_config"
   assert_contains 'set $upstream https://grafana:3000;' "$rendered_config"
   assert_contains 'set $upstream http://zammad-nginx:8080;' "$rendered_config"
   if [[ -n "$EDGE_LOCAL_AIRFLOW_HOST" ]]; then

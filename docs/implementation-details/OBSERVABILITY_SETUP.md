@@ -118,7 +118,7 @@ docker-compose up -d loki prometheus tempo grafana
 ### 4. Access Grafana
 
 ```
-http://observability.local:3000
+https://observability.local:3000
 Username: admin
 Password: changeme  (CHANGE THIS IN PRODUCTION!)
 ```
@@ -211,7 +211,7 @@ log.info(
 import * as Sentry from "@sentry/react";
 
 Sentry.init({
-  dsn: "http://observability.local:3000/sentry",  // or use error tracking endpoint
+  dsn: "https://observability.local:3000/sentry",  // or use error tracking endpoint
   tracesSampleRate: 1.0,
   integrations: [
     new Sentry.Replay({

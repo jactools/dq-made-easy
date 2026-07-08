@@ -8,9 +8,9 @@
 - `Admin` — Full system access (requires Keycloak realm admin role)
 
 **URL model:**
-- Public/browser URL: `http://observability.local:3000`
+- Public/browser URL: `https://observability.local:3000`
 - Grafana container internal URL: `http://grafana:3000`
-- Keycloak browser URL: `http://keycloak.local:8080`
+- Keycloak browser URL: `https://keycloak.local:8443/admin`
 - Keycloak server-side URL from Grafana container: `${KEYCLOAK_SERVER_SIDE_URL:-http://host.docker.internal:8080}`
 
 **Internet hardening model:**
@@ -130,7 +130,7 @@ The Grafana OIDC client has been added to [dq-keycloak/jaccloud-realm.json](../.
 
 **Configuration Details:**
 - **Client ID:** `grafana`
-- **Redirect URI:** `http://observability.local:3000/login/generic_oauth`
+- **Redirect URI:** `https://observability.local:3000/login/generic_oauth`
 - **Protocol Mappers:**
   - `realm roles` — Maps Keycloak realm roles to `roles` claim
   - `grafana-roles` — Scripts role mapping: 
@@ -146,7 +146,7 @@ After Keycloak is running, verify the Grafana client was seeded:
 
 ```bash
 # 1. Access Keycloak Admin Console
-# http://keycloak.local:8080/admin → Login with admin/admin
+# https://keycloak.local:8443/admin → Login with admin/admin
 
 # 2. Navigate to Clients (left sidebar)
 # Select the "grafana" client
@@ -155,7 +155,7 @@ After Keycloak is running, verify the Grafana client was seeded:
 # - Client ID: grafana
 # - Enabled: ON
 # - Standard flow enabled: ON
-# - Redirect URI: http://observability.local:3000/login/generic_oauth
+# - Redirect URI: https://observability.local:3000/login/generic_oauth
 
 # 4. Check "Mappers" tab
 # Should see: realm roles, grafana-roles protocol mappers
@@ -240,17 +240,17 @@ EDITOR_ID=2  # Editors team
 ADMIN_ID=3   # Admins team
 
 # Set Viewers (read-only)
-curl -X POST http://admin:changeme@observability.local:3000/api/dashboards/id/$DASHBOARD_ID/permissions \
+curl -X POST https://admin:changeme@observability.local:3000/api/dashboards/id/$DASHBOARD_ID/permissions \
   -H "Content-Type: application/json" \
   -d "{\"teamId\": $VIEWER_ID, \"permission\": 1}"
 
 # Set Editors (edit)
-curl -X POST http://admin:changeme@observability.local:3000/api/dashboards/id/$DASHBOARD_ID/permissions \
+curl -X POST https://admin:changeme@observability.local:3000/api/dashboards/id/$DASHBOARD_ID/permissions \
   -H "Content-Type: application/json" \
   -d "{\"teamId\": $EDITOR_ID, \"permission\": 2}"
 
 # Set Admins (full access)
-curl -X POST http://admin:changeme@observability.local:3000/api/dashboards/id/$DASHBOARD_ID/permissions \
+curl -X POST https://admin:changeme@observability.local:3000/api/dashboards/id/$DASHBOARD_ID/permissions \
   -H "Content-Type: application/json" \
   -d "{\"teamId\": $ADMIN_ID, \"permission\": 4}"
 ```
@@ -319,12 +319,12 @@ level = info
 
 ```bash
 # Login as Viewer (read-only team)
-curl -X POST http://observability.local:3000/api/login/generic_oauth \
+curl -X POST https://observability.local:3000/api/login/generic_oauth \
   -H "Content-Type: application/json" \
   -d '{"access_token": "viewer_token"}'
 
 # Try to edit dashboard (should fail)
-curl -X PUT http://observability.local:3000/api/dashboards/db/dq-execution-monitoring \
+curl -X PUT https://observability.local:3000/api/dashboards/db/dq-execution-monitoring \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer viewer_token" \
   -d '{"dashboard": {...}}'  # Expected: 403 Forbidden
@@ -343,7 +343,7 @@ If implementing OIDC is not immediately feasible, here's a minimal role setup:
 
 ```bash
 # Create viewer user
-curl -X POST http://admin:changeme@observability.local:3000/api/admin/users \
+curl -X POST https://admin:changeme@observability.local:3000/api/admin/users \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Viewer User",
@@ -354,7 +354,7 @@ curl -X POST http://admin:changeme@observability.local:3000/api/admin/users \
   }'
 
 # Create editor user
-curl -X POST http://admin:changeme@observability.local:3000/api/admin/users \
+curl -X POST https://admin:changeme@observability.local:3000/api/admin/users \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Editor User",
@@ -415,7 +415,7 @@ curl -X POST http://admin:changeme@observability.local:3000/api/dashboards/id/1/
 
 ### Operational Runbook
 1. Start observability stack: `./scripts/observability.sh start`
-2. Access Grafana: `http://observability.local:3000`
+2. Access Grafana: `https://observability.local:3000`
 3. Validate SSO role mapping by logging in with representative users:
   - `viewer` role users should get Viewer access
   - `r01`/`r02`/`r11`/`r12`/`user`/`rule-approver` users should get Editor access
