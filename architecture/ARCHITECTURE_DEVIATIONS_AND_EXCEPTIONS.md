@@ -8,7 +8,7 @@ Use this file when a repository surface cannot currently comply with an accepted
 
 | Metric | Count |
 | --- | ---: |
-| Active entries | 7 |
+| Active entries | 9 |
 | Mitigated entries | 0 |
 | Closed entries | 2 |
 
@@ -82,6 +82,8 @@ Add an entry when all of the following are true:
 - [ARCH-EXC-0007: CRR and EMIR Reporting Evidence Baseline Is Not Yet Defined](./deviations/ARCH-EXC-0007-crr-and-emir-reporting-evidence-baseline-is-not-yet-defined.md)
 - [ARCH-EXC-0008: Synthetic/Test Object Storage Boundaries Are Not Yet Enforced](./deviations/ARCH-EXC-0008-synthetic-test-object-storage-boundaries-are-not-yet-enforced.md)
 - [ARCH-EXC-0009: OpenMetadata Javaagent Runtime Download Still Requires Public GitHub Egress](./deviations/ARCH-EXC-0009-openmetadata-javaagent-runtime-download-still-requires-public-github-egress.md)
+- [ARCH-EXC-0010: Airflow HTTP Listener (No TLS Support Yet)](./deviations/ARCH-EXC-0010-airflow-http-listener-no-tls-support-yet.md)
+- [ARCH-EXC-0011: Zammad-HTTPS TLS-Terminating Proxy (Deprecated for LOCAL Mode)](./deviations/ARCH-EXC-0011-zammad-https-tls-terminating-proxy-deprecated-for-local-mode.md)
 
 ## Active Entries
 
@@ -92,6 +94,8 @@ Add an entry when all of the following are true:
 - [ARCH-EXC-0005](./deviations/ARCH-EXC-0005-c3-observability-rbac-is-documented-but-not-yet-enforced.md) — `approved`, `compliance`, owner `ops-team-observability`, next review `2026-05-31`, target closure `2026-08-31`.
 - [ARCH-EXC-0006](./deviations/ARCH-EXC-0006-repository-wide-data-protection-and-data-access-policy-is-not-yet-defined.md) — `approved`, `compliance`, owner `Data Governance`, next review `2026-05-31`, target closure `2026-09-30`.
 - [ARCH-EXC-0008](./deviations/ARCH-EXC-0008-synthetic-test-object-storage-boundaries-are-not-yet-enforced.md) — `approved`, `data`, owner `Data Governance`, next review `2026-05-31`, target closure `2026-10-31`.
+- [ARCH-EXC-0010](./deviations/ARCH-EXC-0010-airflow-http-listener-no-tls-support-yet.md) — `approved`, `transport`, owner `Platform Engineering`, next review `2026-08-15`, target closure `2026-12-31`.
+- [ARCH-EXC-0011](./deviations/ARCH-EXC-0011-zammad-https-tls-terminating-proxy-deprecated-for-local-mode.md) — `approved`, `transport`, owner `Platform Engineering`, next review `2026-08-15`, target closure `2026-09-30`.
 
 ## Closed Entries
 

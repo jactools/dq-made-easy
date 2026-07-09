@@ -111,6 +111,16 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local needle="$1"
+  local haystack="$2"
+
+  if printf '%s' "$haystack" | grep -Fq "$needle"; then
+    error "$my_name" "did not expect rendered edge config to contain: $needle"
+    exit 1
+  fi
+}
+
 require_cmd docker
 
 if [ ! -f "$EDGE_CERT_FILE_PATH" ] || [ ! -f "$EDGE_KEY_FILE_PATH" ]; then
@@ -144,7 +154,7 @@ rendered_config="$(docker exec \
   -e EDGE_SSL_CERT_FILE="/etc/nginx/certs/$EDGE_SSL_CERT_FILE_NAME" \
   -e EDGE_SSL_KEY_FILE="/etc/nginx/certs/$EDGE_SSL_KEY_FILE_NAME" \
   "$edge_container_id" \
-  /bin/sh -c '/bin/sh /opt/edge/render-edge-config.sh && sed -n "1,360p" /etc/nginx/conf.d/default.conf')"
+  /bin/sh -c '/bin/sh /opt/edge/render-edge-config.sh && if [ "$EDGE_MODE" = public ]; then sed -n "1,360p" /etc/nginx/conf.d/default.conf; else sed -n "1,240p" /etc/nginx/nginx.conf; fi')"
 
 if [[ "$EDGE_MODE" == "public" ]]; then
   assert_contains "server_name ${EDGE_PUBLIC_APEX_HOST};" "$rendered_config"
@@ -157,25 +167,22 @@ if [[ "$EDGE_MODE" == "public" ]]; then
   assert_contains 'location /ops/kong/ {' "$rendered_config"
   success "$my_name" "public edge ingress renders expected path-prefix routes"
 else
-  assert_contains "server_name _ ${EDGE_LOCAL_APP_HOST};" "$rendered_config"
-  assert_contains "server_name ${EDGE_LOCAL_KONG_HOST};" "$rendered_config"
-  assert_contains "server_name ${EDGE_LOCAL_KEYCLOAK_HOST};" "$rendered_config"
-  assert_contains "server_name ${EDGE_LOCAL_OPENMETADATA_HOST};" "$rendered_config"
-  assert_contains "server_name ${EDGE_LOCAL_OBSERVABILITY_HOST};" "$rendered_config"
-  assert_contains "server_name ${EDGE_LOCAL_SUPPORT_HOST};" "$rendered_config"
-  assert_contains 'location /otlp/ {' "$rendered_config"
-  assert_contains 'set $upstream https://frontend:443;' "$rendered_config"
-  assert_contains 'set $upstream http://kong:8000;' "$rendered_config"
-  assert_contains 'set $upstream http://keycloak:8080;' "$rendered_config"
-  assert_contains 'set $upstream https://openmetadata-server:8585;' "$rendered_config"
-  assert_contains 'proxy_pass https://dq-made-easy-otel-collector:4318/;' "$rendered_config"
-  assert_contains 'proxy_ssl_name dq-made-easy-otel-collector;' "$rendered_config"
-  assert_contains 'set $upstream https://grafana:3000;' "$rendered_config"
-  assert_contains 'set $upstream https://zammad-https:443;' "$rendered_config"
+  assert_contains 'stream {' "$rendered_config"
+  assert_contains 'ssl_preread on;' "$rendered_config"
+  assert_contains 'map $ssl_preread_server_name $upstream {' "$rendered_config"
+  assert_contains "${EDGE_LOCAL_APP_HOST} frontend:443;" "$rendered_config"
+  assert_contains "${EDGE_LOCAL_KONG_HOST} kong:8443;" "$rendered_config"
+  assert_contains "${EDGE_LOCAL_KEYCLOAK_HOST} keycloak:8443;" "$rendered_config"
+  assert_contains "${EDGE_LOCAL_OPENMETADATA_HOST} openmetadata-server:8585;" "$rendered_config"
+  assert_contains "${EDGE_LOCAL_OBSERVABILITY_HOST} grafana:3000;" "$rendered_config"
+  assert_contains "${EDGE_LOCAL_SUPPORT_HOST} zammad-https:443;" "$rendered_config"
+  assert_contains 'listen 443;' "$rendered_config"
+  assert_contains 'proxy_pass $upstream;' "$rendered_config"
+  assert_not_contains 'proxy_set_header' "$rendered_config"
+  assert_not_contains 'location / {' "$rendered_config"
   if [[ -n "$EDGE_LOCAL_AIRFLOW_HOST" ]]; then
-    assert_contains "server_name ${EDGE_LOCAL_AIRFLOW_HOST};" "$rendered_config"
-    assert_contains 'set $upstream http://airflow:8080;' "$rendered_config"
+    assert_not_contains "$EDGE_LOCAL_AIRFLOW_HOST" "$rendered_config"
   fi
 
-  success "$my_name" "local edge ingress renders expected host-based routes"
+  success "$my_name" "local edge ingress renders expected transparent TLS routing"
 fi

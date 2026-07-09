@@ -136,90 +136,42 @@ render_local() {
   require_edge_setting "EDGE_LOCAL_OBSERVABILITY_HOST" "$observability_host"
   require_edge_setting "EDGE_LOCAL_SUPPORT_HOST" "$support_host"
 
-  append_server_header "_ ${app_host}"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  location / {
-EOF
-  append_https_proxy "https://frontend:443" "frontend"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-}
-EOF
-
-  append_server_header "${kong_host}"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  location /ops/kong/ {
-    proxy_set_header X-Forwarded-Prefix /ops/kong;
-EOF
-  append_http_proxy "http://kong:8002"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-
-  location / {
-EOF
-  append_http_proxy "http://kong:8000"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-}
-EOF
-
-  append_server_header "${keycloak_host}"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  location / {
-EOF
-  append_http_proxy "http://keycloak:8080"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-}
-EOF
-
-  append_server_header "${metadata_host}"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  location / {
-EOF
-  append_https_proxy "https://openmetadata-server:8585" "openmetadata-server"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-}
-EOF
-
-  append_server_header "${observability_host}"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  location /otlp/ {
-EOF
-  append_https_proxy_with_uri "https://dq-made-easy-otel-collector:4318/" "dq-made-easy-otel-collector"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-
-  location / {
-EOF
-  append_https_proxy "https://grafana:3000" "grafana"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-}
-EOF
-
-  append_server_header "${support_host}"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  location / {
-EOF
-  append_https_proxy "https://zammad-https:443" "zammad-https"
-  cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  }
-}
-EOF
-
   if [ -n "$airflow_host" ]; then
-    append_server_header "${airflow_host}"
-    cat >> /etc/nginx/conf.d/default.conf <<'EOF'
-  location / {
-EOF
-    append_http_proxy "http://airflow:8080"
-    cat >> /etc/nginx/conf.d/default.conf <<'EOF'
+    echo "Airflow is not routed through the transparent TLS edge; use its direct host bind instead." >&2
+  fi
+
+  cat > /etc/nginx/nginx.conf <<EOF
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log notice;
+pid /var/run/nginx.pid;
+load_module /usr/lib/nginx/modules/ngx_stream_module.so;
+
+events {
+  worker_connections 1024;
+}
+
+stream {
+  resolver 127.0.0.11 ipv6=off valid=10s;
+  map \$ssl_preread_server_name \$upstream {
+    ${app_host} frontend:443;
+    ${kong_host} kong:8443;
+    ${keycloak_host} keycloak:8443;
+    ${metadata_host} openmetadata-server:8585;
+    ${observability_host} grafana:3000;
+    ${support_host} zammad-railsserver:3000;
+    default 127.0.0.1:1;
+  }
+
+  server {
+    listen 443;
+    ssl_preread on;
+    proxy_connect_timeout 5s;
+    proxy_timeout 300s;
+    proxy_pass \$upstream;
   }
 }
 EOF
-  fi
 }
 
 render_public() {

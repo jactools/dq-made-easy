@@ -16,6 +16,7 @@ Additional instruction files (if they exist):
 - `.github/copilot/04-database.md` — Database migrations
 - `.github/copilot/05-versioning.md` — Versioning rules
 - `.github/copilot/06-internal-service-contracts.md` — Internal env, URL, and trust-bundle contracts
+- `.github/copilot/07-tls-transport-enforcement.md` — No-HTTP rule, edge routing model, certificate generation, healthcheck and exception registry conventions
 - `.github/instructions/python-test-module-boundary.instructions.md` — Every Python production module must have its own dedicated unit test module
 
 ## When you are about to create or modify a Python file

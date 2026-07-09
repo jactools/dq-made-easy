@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1.7
+
+ARG ZAMMAD_IMAGE=ghcr.io/zammad/zammad:7.0.1-0000
+FROM ${ZAMMAD_IMAGE}
+
+USER root
+
+COPY docker/zammad/origin-nginx.conf /opt/zammad/contrib/nginx/zammad.conf
+COPY docker/zammad/docker-entrypoint-origin.sh /opt/zammad/bin/docker-entrypoint-origin.sh
+
+RUN chmod 755 /opt/zammad/contrib/nginx/zammad.conf /opt/zammad/bin/docker-entrypoint-origin.sh
+
+USER 1000:1000
+
+ENTRYPOINT ["/opt/zammad/bin/docker-entrypoint-origin.sh"]
+CMD ["zammad-nginx"]

@@ -305,8 +305,20 @@ services:
       - "monitoring=true"
 
   zammad-railsserver:
+    # SEC-5 Compliance: This service is directly accessible from the edge via SNI passthrough.
+    # It owns its TLS listener and is not behind a TLS-terminating proxy.
+    # The edge routes to this service using SNI passthrough on port 3000.
+    # Certificate SAN includes both the service name (zammad-railsserver) and the user-facing
+    # support hostname (from EDGE_LOCAL_SUPPORT_HOST) to support direct edge routing.
     <<: *zammad-service
-    command: ["zammad-railsserver"]
+    command:
+      - bundle
+      - exec
+      - puma
+      - -e
+      - production
+      - -b
+      - ssl://[::]:3000?key=/etc/zammad/certs/tls.key&cert=/etc/zammad/certs/tls.crt
     depends_on:
       zammad-init:
         condition: service_completed_successfully
@@ -316,6 +328,14 @@ services:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
+    volumes:
+      - ./tmp/certs/services/zammad-railsserver:/etc/zammad/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS --cacert /etc/zammad/certs/mkcert-rootCA.pem https://127.0.0.1:3000/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     labels:
       - "monitoring=true"
 
@@ -335,8 +355,25 @@ services:
       - "monitoring=true"
 
   zammad-websocket:
+    # SEC-5 Compliance: This service owns its native TLS listener on port 6042.
+    # It is NOT behind the zammad-https TLS-terminating proxy for LOCAL mode.
+    # The edge may route certain paths to this service via the rails server (port 3000)
+    # which handles path-based routing (/ws, /cable, /).
     <<: *zammad-service
-    command: ["zammad-websocket"]
+    command:
+      - bundle
+      - exec
+      - script/websocket-server.rb
+      - start
+      - -b
+      - 0.0.0.0
+      - -p
+      - "6042"
+      - -s
+      - -k
+      - /etc/zammad/certs/tls.key
+      - -c
+      - /etc/zammad/certs/tls.crt
     depends_on:
       zammad-init:
         condition: service_completed_successfully
@@ -346,6 +383,14 @@ services:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
+    volumes:
+      - ./tmp/certs/services/zammad-websocket:/etc/zammad/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "echo | openssl s_client -connect 127.0.0.1:6042 -CAfile /etc/zammad/certs/mkcert-rootCA.pem 2>/dev/null | grep -q 'Verify return code: 0' && exit 0 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     labels:
       - "monitoring=true"
 
@@ -364,12 +409,24 @@ services:
     labels:
       - "monitoring=true"
 
+  # NOTE: zammad-https is optional and deprecated for SEC-5 compliance.
+  # LOCAL mode (edge with SNI passthrough) routes directly to zammad-railsserver:3000
+  # without going through this intermediate TLS termination proxy.
+  # This service may still be needed for PUBLIC mode (path-based routing) or
+  # backwards compatibility; it remains here but is not used by the default
+  # local edge configuration. See SEC_5_W6_IMPLEMENTATION_STRATEGY.md for details.
   zammad-https:
     profiles: ["support"]
-    image: nginx:stable-bookworm
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.zammad-origin
+      args:
+        ZAMMAD_IMAGE: ${ZAMMAD_IMAGE}
     restart: unless-stopped
     depends_on:
-      zammad-nginx:
+      zammad-railsserver:
+        condition: service_started
+      zammad-websocket:
         condition: service_started
     environment:
       ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
@@ -377,7 +434,6 @@ services:
       ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME}
     volumes:
       - ${EDGE_SSL_CERTS_DIR}:/etc/nginx/certs:ro
-      - ./docker/zammad/nginx-https.conf.template:/etc/nginx/templates/default.conf.template:ro
     ports:
       - "${ZAMMAD_HOST_BIND}:${ZAMMAD_EXPOSE_PORT}:443"
     networks:
@@ -1340,15 +1396,28 @@ services:
     image: ${DOCKER_DOMAIN:-docker.io}/library/elasticsearch:8.11.4
     environment:
       discovery.type: single-node
-      xpack.security.enabled: "false"
+      ELASTIC_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:-openmetadata}
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.http.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
       ES_JAVA_OPTS: -Xms1g -Xmx1g
     ports:
       - "${OPENMETADATA_SEARCH_HOST_BIND}:${OPENMETADATA_SEARCH_HOST_PORT}:9200"
     volumes:
+      - ./tmp/certs/services/openmetadata-search/tls.crt:/usr/share/elasticsearch/config/certs/tls.crt:ro
+      - ./tmp/certs/services/openmetadata-search/tls.key:/usr/share/elasticsearch/config/certs/tls.key:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/usr/share/elasticsearch/config/certs/mkcert-rootCA.pem:ro
       - openmetadata_search_data:/usr/share/elasticsearch/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS --cacert /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem -u elastic:$$ELASTIC_PASSWORD https://127.0.0.1:9200/_cluster/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 20
@@ -1359,13 +1428,26 @@ services:
     image: ${OPENMETADATA_SEARCH_IMAGE:-docker.io/library/elasticsearch}:${OPENMETADATA_SEARCH_TAG:-8.11.4}
     environment:
       discovery.type: single-node
-      xpack.security.enabled: "false"
+      ELASTIC_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:-openmetadata}
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.http.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
       ES_JAVA_OPTS: -Xms1g -Xmx1g
     volumes:
+      - ./tmp/certs/services/openmetadata-search-v9/tls.crt:/usr/share/elasticsearch/config/certs/tls.crt:ro
+      - ./tmp/certs/services/openmetadata-search-v9/tls.key:/usr/share/elasticsearch/config/certs/tls.key:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/usr/share/elasticsearch/config/certs/mkcert-rootCA.pem:ro
       - openmetadata_search_v9_data:/usr/share/elasticsearch/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS --cacert /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem -u elastic:$$ELASTIC_PASSWORD https://127.0.0.1:9200/_cluster/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 20
@@ -1433,6 +1515,9 @@ services:
       OM_SEARCH_TYPE: elasticsearch
       ELASTICSEARCH_HOST: openmetadata-search-v9
       ELASTICSEARCH_PORT: 9200
+      ELASTICSEARCH_SCHEME: https
+      ELASTICSEARCH_USER: elastic
+      ELASTICSEARCH_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:-openmetadata}
       AUTHORIZER_CLASS_NAME: org.openmetadata.service.security.DefaultAuthorizer
       AUTHORIZER_REQUEST_FILTER: org.openmetadata.service.security.JwtFilter
       AUTHORIZER_ADMIN_PRINCIPALS: ${OM_AUTHORIZER_ADMIN_PRINCIPALS:-[dq-admin]}

@@ -115,6 +115,10 @@ assert_service_leaf_sans() {
       assert_dns_san "$cert_file" openmetadata-ingestion
       assert_dns_san "$cert_file" localhost
       ;;
+    openmetadata-search)
+      assert_dns_san "$cert_file" openmetadata-search
+      assert_dns_san "$cert_file" localhost
+      ;;
     openmetadata-search-v9)
       assert_dns_san "$cert_file" openmetadata-search-v9
       assert_dns_san "$cert_file" localhost
@@ -158,6 +162,7 @@ for service_name in \
   observability \
   openmetadata-db \
   openmetadata-ingestion \
+  openmetadata-search \
   openmetadata-search-v9 \
   openmetadata-server \
   otel-collector \

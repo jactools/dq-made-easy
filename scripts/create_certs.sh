@@ -5,6 +5,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Support hostname for Zammad backend certificates (from edge SNI)
+EDGE_LOCAL_SUPPORT_HOST="${EDGE_LOCAL_SUPPORT_HOST:-itsm.jac.dot}"
+
 require_cmd() {
 	local cmd="$1"
 	if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -111,6 +114,8 @@ echo "internal service DNS: openmetadata-db"
 generate_service_cert "openmetadata-db" openmetadata-db localhost 127.0.0.1 ::1
 echo "internal service DNS: openmetadata-ingestion"
 generate_service_cert "openmetadata-ingestion" openmetadata-ingestion localhost 127.0.0.1 ::1
+echo "internal service DNS: openmetadata-search"
+generate_service_cert "openmetadata-search" openmetadata-search localhost 127.0.0.1 ::1
 echo "internal service DNS: openmetadata-search-v9"
 generate_service_cert "openmetadata-search-v9" openmetadata-search-v9 localhost 127.0.0.1 ::1
 echo "internal service DNS: openmetadata-server"
@@ -121,6 +126,10 @@ echo "internal service DNS: redis"
 generate_service_cert "redis" redis localhost 127.0.0.1 ::1
 echo "internal service DNS: support"
 generate_service_cert "support" support localhost 127.0.0.1 ::1
+echo "internal service DNS: zammad-railsserver (with edge SNI: ${EDGE_LOCAL_SUPPORT_HOST})"
+generate_service_cert "zammad-railsserver" zammad-railsserver "${EDGE_LOCAL_SUPPORT_HOST}" localhost 127.0.0.1 ::1
+echo "internal service DNS: zammad-websocket (with edge SNI: ${EDGE_LOCAL_SUPPORT_HOST})"
+generate_service_cert "zammad-websocket" zammad-websocket "${EDGE_LOCAL_SUPPORT_HOST}" localhost 127.0.0.1 ::1
 
 echo "kafka.jac.dot"
 generate_cert "$CERTS_DIR/kafka.jac.dot+3.pem" "$CERTS_DIR/kafka.jac.dot+3-key.pem" "kafka.jac.dot" localhost 127.0.0.1 ::1
