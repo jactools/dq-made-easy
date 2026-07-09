@@ -438,10 +438,10 @@ Create a dashboard with:
 
 Link to incident response playbooks:
 
-- [TLS Certificate Verification Failed](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/#certificate-verification-failures)
-- [Connection Refused on TLS Port](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/#connection-refused)
-- [Healthcheck Latency Spike](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/#timeout-connecting-to-tls-service)
-- [HTTP Regression Detected](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/#incident-response-tls-related-issues)
+- [TLS Certificate Verification Failed](#symptom-certificate-verification-failed)
+- [Connection Refused on TLS Port](#symptom-connection-refused)
+- [Healthcheck Latency Spike](#symptom-healthcheck-latency-spike)
+- [HTTP Regression Detected](#symptom-http-regression-detected)
 
 ---
 
