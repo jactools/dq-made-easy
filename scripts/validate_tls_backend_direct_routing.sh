@@ -262,9 +262,9 @@ run_all_tests() {
   
   for test in "${tests[@]}"; do
     if $test; then
-      ((passed++))
+      passed=$((passed+1))
     else
-      ((failed++))
+      failed=$((failed+1))
     fi
   done
   

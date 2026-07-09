@@ -155,13 +155,20 @@ Remaining architecture gaps (documented for Phase 2):
 
 ## Acceptance Criteria
 
-- [ ] (SEC5-I-AC-01) No supported service advertises a plain HTTP host port.
-- [ ] (SEC5-I-AC-02) No browser-facing runtime URL in the supported stack defaults to `http://`.
-- [ ] (SEC5-I-AC-03) No health check or smoke check uses `http://` when the target service supports TLS.
-- [ ] (SEC5-I-AC-04) No inter-container runtime call uses plaintext HTTP when an HTTPS/TLS equivalent exists.
-- [ ] (SEC5-I-AC-05) Any proxy in the request path forwards TLS without terminating it.
-- [ ] (SEC5-I-AC-06) Validation fails fast on any new HTTP regression in compose, env, bootstrap, or proxy configuration.
-- [ ] (SEC5-I-AC-07) Operators have a documented way to generate certs, diagnose trust failures, and distinguish intentional exceptions from regressions.
+- [x] (SEC5-I-AC-01) No supported service advertises a plain HTTP host port.
+  - Verified: no `:80` or `:8080` port bindings in compose (Trino's 8080 is an internal container port, not a host-advertised HTTP port; Airflow is under ARCH-EXC-0010)
+- [x] (SEC5-I-AC-02) No browser-facing runtime URL in the supported stack defaults to `http://`.
+  - Verified: frontend exposes port 443 only; all `.env.*local` browser URLs use HTTPS
+- [x] (SEC5-I-AC-03) No health check or smoke check uses `http://` when the target service supports TLS.
+  - Verified: Loki, Prometheus, Tempo, and Pushgateway still use HTTP healthchecks — but none of these services have a TLS listener configured. Criterion is satisfied: HTTP loopback probes are permitted only where there is no TLS listener (W5-03).
+- [x] (SEC5-I-AC-04) No inter-container runtime call uses plaintext HTTP when an HTTPS/TLS equivalent exists.
+  - Verified: Kong, Redis, Postgres, OpenMetadata, Keycloak, Zammad backends all use TLS. Observability services (Loki, Prometheus, Tempo) have no TLS listener yet — covered by ARCH-EXC-0001.
+- [x] (SEC5-I-AC-05) Any proxy in the request path forwards TLS without terminating it.
+  - Verified: LOCAL mode edge uses `ssl_preread on` (stream module, no termination). Approved exception: PUBLIC mode edge terminates at edge only; Ollama mTLS front door is approved TLS-termination boundary.
+- [x] (SEC5-I-AC-06) Validation fails fast on any new HTTP regression in compose, env, bootstrap, or proxy configuration.
+  - Verified: `scripts/validate_tls_backend_direct_routing.sh` (10 tests) and `scripts/validate_tls_service_paths.sh` (12 tests) both pass. `scripts/validation/validate_w6_transparent_tls_routing.sh` confirms edge SNI passthrough.
+- [x] (SEC5-I-AC-07) Operators have a documented way to generate certs, diagnose trust failures, and distinguish intentional exceptions from regressions.
+  - Verified: `scripts/create_certs.sh` (cert generation); `docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md` (diagnosis); `architecture/ARCHITECTURE_DEVIATIONS_AND_EXCEPTIONS.md` (exception registry); `.github/copilot/07-tls-transport-enforcement.md` (agent guidance).
 
 ## Related Documents
 
