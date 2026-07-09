@@ -1,6 +1,10 @@
 # Data Quality Made Easy - Features
 
-Deprecated rollup document. Use the split feature files under [docs/features](https://github.com/jactools/dq-rulebuilder/blob/main/docs/features) and the roadmap overview in [docs/features/FEATURE_ROADMAP_OVERVIEW.md](/docs/features/FEATURE_ROADMAP_OVERVIEW/) for current planning.
+**FEATURES.md is the authoritative reference for all platform capabilities and features.**
+
+For implementation status (which features are Done vs Planned) and detailed planning, see [README.md](/docs/features/).
+
+For detailed workstream sequencing and roadmap, see [FEATURE_ROADMAP_OVERVIEW.md](/docs/features/FEATURE_ROADMAP_OVERVIEW/).
 
 ## Overview
 

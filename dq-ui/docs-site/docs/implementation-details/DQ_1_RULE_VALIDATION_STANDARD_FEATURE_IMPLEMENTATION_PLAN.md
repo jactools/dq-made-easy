@@ -5,10 +5,10 @@ Last updated: 2026-04-27
 Owner: Product + UI + API
 
 Related documents:
-- [Management feature summary](/docs/features/current/MANAGEMENT_FEATURE_SUMMARY/)
+- [Management feature summary](https://github.com/jactools/dq-rulebuilder/blob/main/features/MANAGEMENT_FEATURE_SUMMARY.md)
 - [DQ-1 Rule Validation User Guide](/docs/user-manuals/DQ-1_RULE_VALIDATION_USER_GUIDE/)
 - [DQ-1 Enhanced Rule Validation Logic — Implementation Progress](https://github.com/jactools/dq-rulebuilder/blob/main/DQ_1_ENHANCED_RULE_VALIDATION_PROGRESS.md)
-- [API-7 Real DQ Rule Execution](/docs/features/current/API_7_REAL_DQ_RULE_EXECUTION/)
+- [API-7 Real DQ Rule Execution](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/)
 
 ## Goal
 

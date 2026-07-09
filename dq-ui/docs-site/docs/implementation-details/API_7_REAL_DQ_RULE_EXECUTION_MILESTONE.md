@@ -2,7 +2,7 @@
 
 Build a real rule-running pipeline that executes compiled DQ rules against source data, not just generated mock data. Keep generated-data testing intact, but make it a separate path from real source execution.
 
-Related feature plan: [API-7 Real DQ Rule Execution](/docs/features/current/API_7_REAL_DQ_RULE_EXECUTION/)
+Related feature plan: [API-7 Real DQ Rule Execution](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/)
 
 ## Phase 1: Contract
 - [x] (API7-P1-01) Define the runtime chain: rule version -> compiled artifact -> GX suite envelope -> source target.

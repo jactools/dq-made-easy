@@ -228,7 +228,7 @@ The second increment should take the registered artifacts and make them executab
    - Use one PySpark session per execution batch where possible.
    - Avoid repeated runtime spin-up and spin-down overhead.
 
-   Implemented by the grouped planner and PySpark executor in [API7 Real DQ Rule Execution Milestone](/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/) and [API-7 Real DQ Rule Execution](/docs/features/current/API_7_REAL_DQ_RULE_EXECUTION/), which both batch compatible suites by `dataObjectVersionId` and run grouped batches in one Spark session where possible.
+   Implemented by the grouped planner and PySpark executor in [API7 Real DQ Rule Execution Milestone](/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/) and [API-7 Real DQ Rule Execution](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/), which both batch compatible suites by `dataObjectVersionId` and run grouped batches in one Spark session where possible.
 
 5. [x] (ABS1-GX-05) Add pluggable data source adapters.
    - Support Spark DataFrames, JDBC-backed sources, and file-based readers.
@@ -268,7 +268,7 @@ Current status: the persistence split is in place, and the exception-storage pat
    - Store exception records in a dedicated exception store.
    - Preserve the ABS-1.6 separation model.
 
-   Implemented by API-7 Phase 4 persistence in [API_7_REAL_DQ_RULE_EXECUTION_MILESTONE.md](/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/) and [API_7_REAL_DQ_RULE_EXECUTION.md](/docs/features/current/API_7_REAL_DQ_RULE_EXECUTION/), which store run metadata in the rule/result store and row-level violations in a separate exception store scoped to `dataObjectVersionId`.
+   Implemented by API-7 Phase 4 persistence in [API_7_REAL_DQ_RULE_EXECUTION_MILESTONE.md](/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/) and [API_7_REAL_DQ_RULE_EXECUTION.md](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/), which store run metadata in the rule/result store and row-level violations in a separate exception store scoped to `dataObjectVersionId`.
 
 7. [x] (ABS1-GX-07) Enforce minimal exception record schema.
    - Persist only primary key, ruleId, and violation reason in the base exception record.

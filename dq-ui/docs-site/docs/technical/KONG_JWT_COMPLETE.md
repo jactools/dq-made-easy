@@ -314,8 +314,8 @@ curl -H "Authorization: Bearer <TOKEN>" \
 | [KONG_GATEWAY_SETUP.md](https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_GATEWAY_SETUP.md) | Kong deployment & architecture | Complete |
 | [KONG_QUICKSTART.md](https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_QUICKSTART.md) | Quick reference guide | Complete |
 | [KONG_JWT_SETUP.md](https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_JWT_SETUP.md) | JWT implementation guide | Complete |
-| [JWT_END_TO_END_TEST_RESULTS.md](/docs/features/current/JWT_END_TO_END_TEST_RESULTS/) | Test validation report | Complete |
-| [PHASE7_SUMMARY.md](/docs/features/current/PHASE7_SUMMARY/) | Session progress summary | Complete |
+| [JWT_END_TO_END_TEST_RESULTS.md](/docs/features/JWT_END_TO_END_TEST_RESULTS/) | Test validation report | Complete |
+| [PHASE7_SUMMARY.md](/docs/features/PHASE7_SUMMARY/) | Session progress summary | Complete |
 
 ---
 

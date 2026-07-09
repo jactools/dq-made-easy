@@ -10,7 +10,7 @@
 
 Related contract: [DQ-7 Rule DSL Contract](/docs/technical/DQ-7_RULE_DSL_CONTRACT/)
 Current-state references:
-- [DQ-7 Executable Rule Transformation](/docs/features/current/DQ-7_EXECUTABLE_RULE_TRANSFORMATION/)
+- [DQ-7 Executable Rule Transformation](/docs/features/DQ-7_EXECUTABLE_RULE_TRANSFORMATION/)
 Related rollout policy: [DQ-7 DSL Rollout Policy](/docs/implementation-details/DQ_7_DSL_ROLLOUT_POLICY/)
 Related implementation plan: [DQ-7 Engine-Independent DSL Implementation Plan](/docs/implementation-details/DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN/)
 

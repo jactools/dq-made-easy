@@ -185,8 +185,8 @@ Expose execution status, delivery-note retrieval, and end-to-end validation.
 
 ## Related references
 
-- [ABS-1 definition](/docs/features/current/ABSTRACTION_FEATURES/)
-- [ABS-2 definition](/docs/features/current/ABS_2_DATA_CATALOG_MATERIALIZATION/)
+- [ABS-1 definition](/docs/features/ABSTRACTION_FEATURES/)
+- [ABS-2 definition](/docs/features/ABS_2_DATA_CATALOG_MATERIALIZATION/)
 - [ABS-2 implementation details](/docs/implementation-details/ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS/)
 - [API-7 Data Delivery Resolution Plan](/docs/implementation-details/API_7_DATA_DELIVERY_RESOLUTION/)
 - [DQ-7.4 GX suite orchestration](/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/)

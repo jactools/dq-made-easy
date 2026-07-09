@@ -2,7 +2,7 @@
 
 Goal: Enable onboarding of external data platforms through a consistent connector framework for metadata discovery, profiling, and rule execution readiness.
 
-Related work: [API-7 Real DQ Rule Execution](/docs/features/current/API_7_REAL_DQ_RULE_EXECUTION/)
+Related work: [API-7 Real DQ Rule Execution](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/)
 
 ## Phase 1: Connector Framework
 
