@@ -339,7 +339,7 @@ class AgentAuditLogger:
 - [API-1 Connectors Security](../features/API_1_CONNECTORS.md)
 - [API-1.2 Secure Config Contract](../features/API_1_CONNECTORS.md)
 - [SEC-4 Controlled Container Egress](./SEC_4_CONTROLLED_CONTAINER_EGRESS_AND_APPROVED_EXTERNAL_DESTINATIONS.md)
-- [WF-1.5 Connector Audit Trail](../status/current/API_1_CONNECTORS.md)
+- [WF-1.5 Connector Audit Trail](../features/current/API_1_CONNECTORS.md)
 - [Pi Agent Security Documentation](https://pi.dev/docs/security)
 - [OWASP LLM Security Top 10](https://owasp.org/www-project-llm-security-top-10/)
 

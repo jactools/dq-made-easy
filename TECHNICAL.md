@@ -24,7 +24,7 @@
 
 ### v0.10.4 (May 17, 2026)
 
-- **DQ-10 completion:** The natural-language rule drafting preview is now captured in the current-state docs, with the current-state snapshot moved under `docs/status/current`.
+- **DQ-10 completion:** The natural-language rule drafting preview is now captured in the current-state docs, with the current-state snapshot moved under `docs/features/current`.
 - **Versioning and docs sync:** `dq-ui` and `dq-api` were bumped to `0.10.4`, the tracked manifest components were updated for `Authentication`, `Infrastructure`, `DataCatalog`, `Documentation`, and `Testautomation`, and the release, deployment, and versioning docs were advanced to the `0.10.4` release line.
 
 ### v0.10.3 (May 13, 2026)

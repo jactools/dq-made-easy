@@ -6,7 +6,7 @@
 
 **Related Work**:
 - [API-1 New Data Source Connectors](/docs/features/API_1_CONNECTORS/)
-- [API-7 Real DQ Rule Execution](/docs/status/current/API_7_REAL_DQ_RULE_EXECUTION/)
+- [API-7 Real DQ Rule Execution](/docs/features/current/API_7_REAL_DQ_RULE_EXECUTION/)
 - [AGENTIC_AI_ECOSYSTEM_FEATURES.md](/docs/features/AGENTIC_AI_ECOSYSTEM_FEATURES/)
 
 ---
@@ -796,7 +796,7 @@ sales performance tracking and financial reporting.
 - [Pi Agent Harness GitHub](https://github.com/earendil-works/pi)
 - [Pi Documentation](https://pi.dev/)
 - [API-1 New Data Source Connectors](/docs/features/API_1_CONNECTORS/)
-- [API-7 Real DQ Rule Execution](/docs/status/current/API_7_REAL_DQ_RULE_EXECUTION/)
+- [API-7 Real DQ Rule Execution](/docs/features/current/API_7_REAL_DQ_RULE_EXECUTION/)
 - [Connector Onboarding Runbook](/docs/technical/CONNECTOR_ONBOARDING_RUNBOOK/)
 - [AGENTIC_AI_ECOSYSTEM_FEATURES.md](/docs/features/AGENTIC_AI_ECOSYSTEM_FEATURES/)
 - [Agent Harness Security Model](/docs/technical/AGENT_HARNESS_SECURITY/) - **NEW**

@@ -130,6 +130,6 @@ ABS-2 is now complete. Future work can still expand the public request contract 
 
 ## Related references
 
-- [ABS-2 definition](/docs/status/current/ABS_2_DATA_CATALOG_MATERIALIZATION/)
+- [ABS-2 definition](/docs/features/current/ABS_2_DATA_CATALOG_MATERIALIZATION/)
 - [API-7 Data Delivery Resolution Plan](/docs/implementation-details/API_7_DATA_DELIVERY_RESOLUTION/)
 - [API-7 Real DQ Rule Execution Milestone](/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/)

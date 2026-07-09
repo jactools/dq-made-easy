@@ -13,7 +13,7 @@ This release finalizes the DQ-10 natural-language rule drafting preview and move
 - UI package metadata is aligned to `0.10.4`
 - API package metadata is aligned to `0.10.4`
 - Version markers in `VERSION_MANIFEST.json` are aligned for the changed tracked components: `Authentication`, `Infrastructure`, `DataCatalog`, `Documentation`, and `Testautomation`
-- The DQ-10 current-state snapshot now lives under `docs/status/current`
+- The DQ-10 current-state snapshot now lives under `docs/features/current`
 - The preview flow remains inside Suggestions with ranked candidate attributes, explicit confirmation, and fail-fast ambiguity handling
 - Release, deployment, and versioning docs now point at the `v0.10.4` release line
 
@@ -30,10 +30,10 @@ This release finalizes the DQ-10 natural-language rule drafting preview and move
 - [dq-ui/package.json](../../dq-ui/package.json)
 - [dq-api/fastapi/pyproject.toml](../../dq-api/fastapi/pyproject.toml)
 - [dq-api/fastapi/contracts/current/openapi-fastapi-v1.json](../../dq-api/fastapi/contracts/current/openapi-fastapi-v1.json)
-- [docs/status/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md](../../docs/status/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
+- [docs/features/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md](../../docs/features/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
 - [docs/features/DQ_FEATURES.md](../../docs/features/DQ_FEATURES.md)
-- [docs/status/current/README.md](../../docs/status/current/README.md)
-- [docs/status/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../../docs/status/roadmap/FEATURE_ROADMAP_OVERVIEW.md)
+- [docs/features/current/README.md](../../docs/features/current/README.md)
+- [docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../../docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md)
 - [docs/technical/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_ROLLOUT_AND_OPERATOR_NOTES.md](../../docs/technical/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_ROLLOUT_AND_OPERATOR_NOTES.md)
 - [docs/implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS.md](../../docs/implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS.md)
 

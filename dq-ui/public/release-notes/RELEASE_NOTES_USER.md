@@ -48,7 +48,7 @@
 
 ### ✅ New and Improved
 
-- The DQ-10 natural-language rule drafting preview is now captured in the current-state docs under `docs/status/current`
+- The DQ-10 natural-language rule drafting preview is now captured in the current-state docs under `docs/features/current`
 - The preview flow remains inside Suggestions, with ranked candidate attributes, explicit steward confirmation, and fail-fast ambiguity handling
 - Release, deployment, and versioning docs now point at the `v0.10.4` release line
 

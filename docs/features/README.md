@@ -1,24 +1,75 @@
 # Features
 
-Use this folder for feature catalogs, feature plans, and scope definitions.
+`docs/features` is the single source of truth for all feature scopes, implementation status, and roadmap. The previous `docs/status/` tree has been merged here.
 
-## Current feature sources
+## Feature plans and scope definitions
 
 - [DQ_FEATURES.md](./DQ_FEATURES.md)
 - [UX_FEATURES.md](./UX_FEATURES.md)
 - [API_FEATURES.md](./API_FEATURES.md)
 - [SEC_FEATURES.md](./SEC_FEATURES.md)
 - [WORKFLOW_FEATURES.md](./WORKFLOW_FEATURES.md)
-- [WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md](./WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md)
-- [WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md](./WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md)
-- [WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md](./WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md)
-- [FRONTEND_UI_PORTABILITY_FEATURES.md](./FRONTEND_UI_PORTABILITY_FEATURES.md)
 - [ANALYTICS_REPORTING_FEATURES.md](./ANALYTICS_REPORTING_FEATURES.md)
 - [DOCUMENTATION_FEATURES.md](./DOCUMENTATION_FEATURES.md)
 - [ONBOARDING_FEATURES.md](./ONBOARDING_FEATURES.md)
 - [AGENTIC_AI_ECOSYSTEM_FEATURES.md](./AGENTIC_AI_ECOSYSTEM_FEATURES.md)
+- [FRONTEND_UI_PORTABILITY_FEATURES.md](./FRONTEND_UI_PORTABILITY_FEATURES.md)
+- [DATA_ASSETS_FEATURES.md](./DATA_ASSETS_FEATURES.md)
 
-Completed feature docs now live in [docs/status/current](../status/current/README.md).
+## Split planning documents (feature-level detail)
+
+- [ABS_1_EXECUTION_ABSTRACTION.md](./ABS_1_EXECUTION_ABSTRACTION.md)
+- [BUSINESS_KEYS.md](./BUSINESS_KEYS.md)
+- [LLM_1_AGENT_HARNESS.md](./LLM_1_AGENT_HARNESS.md)
+- [CONFIG_DRIVEN_UI_REGISTRY.md](./CONFIG_DRIVEN_UI_REGISTRY.md)
+- [DQ_19_MULTI_RUNTIME_LOWERERS.md](./DQ_19_MULTI_RUNTIME_LOWERERS.md)
+- [API_1_CONNECTORS.md](./API_1_CONNECTORS.md)
+- [API_2_WEBHOOK_NOTIFICATIONS.md](./API_2_WEBHOOK_NOTIFICATIONS.md)
+- [API_3_RATE_LIMITING.md](./API_3_RATE_LIMITING.md)
+- [API_4_AUTHENTICATION_OPTIONS.md](./API_4_AUTHENTICATION_OPTIONS.md)
+- [API_4_ENTRA_KEYCLOAK_BROKERING.md](./API_4_ENTRA_KEYCLOAK_BROKERING.md)
+- [WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md](./WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md)
+- [WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md](./WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md)
+- [WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md](./WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md)
+- [WF_8_AZURE_PIPELINE_VERIFICATION_HARNESS.md](./WF_8_AZURE_PIPELINE_VERIFICATION_HARNESS.md)
+- [SEC_1_INTERNAL_SERVICE_TLS.md](./SEC_1_INTERNAL_SERVICE_TLS.md)
+- [SEC_2_POST_QUANTUM_READINESS.md](./SEC_2_POST_QUANTUM_READINESS.md)
+- [SEC_3_SYNTHETIC_TEST_BUCKET_AND_EVIDENCE_BOUNDARIES.md](./SEC_3_SYNTHETIC_TEST_BUCKET_AND_EVIDENCE_BOUNDARIES.md)
+- [SEC_4_CONTROLLED_CONTAINER_EGRESS_AND_APPROVED_EXTERNAL_DESTINATIONS.md](./SEC_4_CONTROLLED_CONTAINER_EGRESS_AND_APPROVED_EXTERNAL_DESTINATIONS.md)
+- [SEC_5_SENSITIVE_DATA_ENCRYPTION_AND_KEY_SEGREGATION.md](./SEC_5_SENSITIVE_DATA_ENCRYPTION_AND_KEY_SEGREGATION.md)
+
+## Current implementation status
+
+Completion summaries and status snapshots for shipped features live in [current/](./current/README.md).
+
+Quick links:
+- [DQ-5 Advanced Data Profiling](./current/DQ-5_ADVANCED_DATA_PROFILING.md)
+- [DQ-6 Batch Rule Execution](./current/DQ-6_BATCH_RULE_EXECUTION_IMPROVEMENTS.md)
+- [DQ-7 Executable Rule Transformation](./current/DQ-7_EXECUTABLE_RULE_TRANSFORMATION.md)
+- [DQ-10 Natural Language Rule Drafting](./current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
+- [API-5 Metadata Integration](./current/API_5_METADATA_INTEGRATION.md)
+- [API-7 Real DQ Rule Execution](./current/API_7_REAL_DQ_RULE_EXECUTION.md)
+- [Internal Service TLS Migration Matrix](./current/INTERNAL_SERVICE_TLS_MIGRATION_MATRIX.md)
+- [All current status docs →](./current/README.md)
+
+## Roadmap
+
+Forward-looking plans and milestones live in [roadmap/](./roadmap/README.md).
+
+Quick links:
+- [Feature Roadmap Overview](./roadmap/FEATURE_ROADMAP_OVERVIEW.md)
+- [DQ Platform Gap Closure Plan](./roadmap/DQ_PLATFORM_GAP_CLOSURE_PLAN.md)
+- [All roadmap docs →](./roadmap/README.md)
+
+## Versioned governance references
+
+- Open Data Product Specification 4.1 is the product-spec direction for data products.
+- ODCS 3.1 is the contract-spec direction for data-quality and delivery contracts.
+
+## Legacy
+
+- [FEATURES.md](./FEATURES.md) — legacy rollup, kept for backward compatibility only.
+
 
 ## Versioned governance references
 
@@ -32,7 +83,7 @@ Completed feature docs now live in [docs/status/current](../status/current/READM
 ## Legacy compatibility trackers
 
 - [FEATURES.md](./FEATURES.md) - legacy rollup kept for backward compatibility
-- Older notes may still mention `planned_features.md`; use [../status/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../status/roadmap/FEATURE_ROADMAP_OVERVIEW.md) as the canonical replacement.
+- Older notes may still mention `planned_features.md`; use [../features/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../features/roadmap/FEATURE_ROADMAP_OVERVIEW.md) as the canonical replacement.
 
 ## Split planning documents
 

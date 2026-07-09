@@ -172,8 +172,8 @@ HTTP Status: 200
 
 ### New Documentation
 - ✅ `dq-api/KONG_JWT_SETUP.md` (400+ lines, complete JWT guide)
-- ✅ `docs/status/current/JWT_END_TO_END_TEST_RESULTS.md` (comprehensive test report)
-- ✅ `docs/status/current/PHASE7_SUMMARY.md` (session progress)
+- ✅ `docs/features/current/JWT_END_TO_END_TEST_RESULTS.md` (comprehensive test report)
+- ✅ `docs/features/current/PHASE7_SUMMARY.md` (session progress)
 
 ### New Test Script
 - ✅ `scripts/test_jwt_flow.sh` (automated JWT validation)
@@ -299,8 +299,8 @@ curl -H "Authorization: Bearer <TOKEN>" \
 | [KONG_GATEWAY_SETUP.md](dq-api/KONG_GATEWAY_SETUP.md) | Kong deployment & architecture | Complete |
 | [KONG_QUICKSTART.md](dq-api/KONG_QUICKSTART.md) | Quick reference guide | Complete |
 | [KONG_JWT_SETUP.md](dq-api/KONG_JWT_SETUP.md) | JWT implementation guide | Complete |
-| [JWT_END_TO_END_TEST_RESULTS.md](docs/status/current/JWT_END_TO_END_TEST_RESULTS.md) | Test validation report | Complete |
-| [PHASE7_SUMMARY.md](docs/status/current/PHASE7_SUMMARY.md) | Session progress summary | Complete |
+| [JWT_END_TO_END_TEST_RESULTS.md](docs/features/current/JWT_END_TO_END_TEST_RESULTS.md) | Test validation report | Complete |
+| [PHASE7_SUMMARY.md](docs/features/current/PHASE7_SUMMARY.md) | Session progress summary | Complete |
 
 ---
 

@@ -2,7 +2,7 @@
 
 This note records the DQ-10 implementation backlog and completion status.
 
-For the current-state snapshot, see [DQ-10 Natural-Language Rule Drafting Preview](../status/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md).
+For the current-state snapshot, see [DQ-10 Natural-Language Rule Drafting Preview](../features/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md).
 
 ## Problem Statement
 
@@ -111,6 +111,6 @@ The first implementation slice should stay deliberately narrow:
 
 ## Related References
 
-- [DQ-10 current-state snapshot](../status/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
+- [DQ-10 current-state snapshot](../features/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
 - [DQ-10 in the feature catalog](../features/DQ_FEATURES.md)
 - [Suggestions workflow](../features/DQ_FEATURES.md)

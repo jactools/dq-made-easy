@@ -2,7 +2,7 @@
 
 Goal: Enforce consistent, configurable API request limits to protect service stability while preserving usability for legitimate workloads.
 
-Related work: [API-7 Real DQ Rule Execution](../status/current/API_7_REAL_DQ_RULE_EXECUTION.md)
+Related work: [API-7 Real DQ Rule Execution](../features/current/API_7_REAL_DQ_RULE_EXECUTION.md)
 
 Current overlap assessment as of 2026-05-25:
 

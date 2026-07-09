@@ -5,8 +5,8 @@
 **Date**: March 12, 2026
 
 Current-state references:
-- [API-5 Business Metadata Integration](/docs/status/current/API_5_METADATA_INTEGRATION/)
-- [Management feature summary](/docs/status/current/MANAGEMENT_FEATURE_SUMMARY/)
+- [API-5 Business Metadata Integration](/docs/features/current/API_5_METADATA_INTEGRATION/)
+- [Management feature summary](/docs/features/current/MANAGEMENT_FEATURE_SUMMARY/)
 
 ---
 
