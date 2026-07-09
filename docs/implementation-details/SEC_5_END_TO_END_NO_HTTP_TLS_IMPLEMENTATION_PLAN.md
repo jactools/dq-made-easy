@@ -103,7 +103,7 @@ That work is larger than the current compose slice because it changes the Zammad
   - Backend certificates updated with user-facing SNI in SAN for direct edge routing
 - [x] (SEC5-I-W6-05) Document any proxy paths that cannot be made non-terminating as architecture gaps requiring a redesign.
 
-Exception: the Ollama-backed LLM front door uses an mTLS NGINX proxy as an approved TLS-termination boundary. Only dq-api may connect to that proxy.
+Exception: the Ollama mTLS front door has been retired. `dq-made-easy-llm` serves HTTPS directly via uvicorn; `dq-api` connects using standard TLS certificate verification with no intermediate proxy.
 
 Implemented slice: local edge ingress now uses SNI/TCP passthrough for the TLS-native local browser hosts. Airflow remains a direct host-bind exception outside the transparent edge because it does not yet own a TLS browser listener.
 
@@ -164,7 +164,7 @@ Remaining architecture gaps (documented for Phase 2):
 - [x] (SEC5-I-AC-04) No inter-container runtime call uses plaintext HTTP when an HTTPS/TLS equivalent exists.
   - Verified: Kong, Redis, Postgres, OpenMetadata, Keycloak, Zammad backends all use TLS. Observability services (Loki, Prometheus, Tempo) have no TLS listener yet — covered by ARCH-EXC-0001.
 - [x] (SEC5-I-AC-05) Any proxy in the request path forwards TLS without terminating it.
-  - Verified: LOCAL mode edge uses `ssl_preread on` (stream module, no termination). Approved exception: PUBLIC mode edge terminates at edge only; Ollama mTLS front door is approved TLS-termination boundary.
+  - Verified: LOCAL mode edge uses `ssl_preread on` (stream module, no termination). PUBLIC mode terminates at edge only — documented as Phase 2 gap.
 - [x] (SEC5-I-AC-06) Validation fails fast on any new HTTP regression in compose, env, bootstrap, or proxy configuration.
   - Verified: `scripts/validate_tls_backend_direct_routing.sh` (10 tests) and `scripts/validate_tls_service_paths.sh` (12 tests) both pass. `scripts/validation/validate_w6_transparent_tls_routing.sh` confirms edge SNI passthrough.
 - [x] (SEC5-I-AC-07) Operators have a documented way to generate certs, diagnose trust failures, and distinguish intentional exceptions from regressions.

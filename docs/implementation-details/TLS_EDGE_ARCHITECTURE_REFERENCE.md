@@ -119,7 +119,7 @@ For SNI passthrough: uses stream module (LOCAL mode only), not HTTP location blo
 | grafana | 3000 | ✅ | Both | TLS native |
 | zammad-railsserver | 3000 | ✅ | LOCAL | Direct via SNI (W6) |
 | zammad-websocket | 6042 | ✅ | Both | TLS native (W6) |
-| Ollama (mTLS) | 8443 | ✅ | Both | Approved TLS termination boundary |
+| Ollama (retired mTLS proxy) | — | Removed | — | `dq-made-easy-llm` is TLS-native; direct access via dq-network |
 | Airflow | 8080 | ❌ HTTP | — | Host-bind exception (ARCH-EXC-0010) |
 | Postgres | 5432 | ✅ | Both | sslmode=verify-full |
 | Redis | 6379 | ✅ | Both | rediss:// with CA bundle |

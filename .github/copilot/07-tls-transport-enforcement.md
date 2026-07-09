@@ -9,7 +9,7 @@ Once a service is on a TLS listener, all callers must use TLS. There is no fallb
 - No `http://` service-to-service URLs in compose, env, or code (verified by `scripts/validate_tls_service_paths.sh`)
 - No browser-facing URLs that default to `http://`
 - No healthcheck that probes `http://127.0.0.1` when the service has a TLS listener
-- No proxy that terminates TLS unless it is the approved Ollama mTLS front door
+- No proxy that terminates TLS (the Ollama mTLS front door has been retired — `dq-made-easy-llm` serves HTTPS natively via uvicorn)
 
 ## Edge Routing Model
 

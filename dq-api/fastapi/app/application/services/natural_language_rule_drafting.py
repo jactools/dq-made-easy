@@ -20,10 +20,8 @@ from app.domain.interfaces import ProfilingRepository
 SUPPORTED_SEARCH_SCOPES = frozenset({"current", "all", "all_across_workspaces"})
 SUPPORTED_CHECK_TYPES = frozenset({"UNIQUENESS", "PRESENT", "REGEX", "RANGE", "ALLOWLIST", "FRESHNESS"})
 SUPPORTED_ANALYSIS_PROVIDERS = frozenset({"rapidfuzz", "llm"})
-DEFAULT_LLM_SERVICE_URL = "https://ollama-nginx:8443"
-LLM_MTLS_CA_BUNDLE_ENV = "DQ_LLM_MTLS_CA_BUNDLE"
-LLM_MTLS_CLIENT_CERT_ENV = "DQ_LLM_MTLS_CLIENT_CERT_FILE"
-LLM_MTLS_CLIENT_KEY_ENV = "DQ_LLM_MTLS_CLIENT_KEY_FILE"
+DEFAULT_LLM_SERVICE_URL = "https://dq-made-easy-llm:8000"
+LLM_CA_BUNDLE_ENV = "DQ_LLM_CA_BUNDLE"
 
 CHECK_TYPE_LABELS = {
     "UNIQUENESS": "Uniqueness",
@@ -297,28 +295,13 @@ def _llm_service_client_kwargs(base_url: str) -> dict[str, Any]:
     if not normalized_base_url.lower().startswith("https://"):
         return {}
 
-    ca_bundle = str(os.getenv(LLM_MTLS_CA_BUNDLE_ENV, "")).strip()
-    client_cert = str(os.getenv(LLM_MTLS_CLIENT_CERT_ENV, "")).strip()
-    client_key = str(os.getenv(LLM_MTLS_CLIENT_KEY_ENV, "")).strip()
-
-    missing_envs = [
-        env_name
-        for env_name, value in (
-            (LLM_MTLS_CA_BUNDLE_ENV, ca_bundle),
-            (LLM_MTLS_CLIENT_CERT_ENV, client_cert),
-            (LLM_MTLS_CLIENT_KEY_ENV, client_key),
-        )
-        if not value
-    ]
-    if missing_envs:
+    ca_bundle = str(os.getenv(LLM_CA_BUNDLE_ENV, "")).strip()
+    if not ca_bundle:
         raise NaturalLanguageDraftingProviderUnavailableError(
-            f"HTTPS LLM service URLs require {', '.join(missing_envs)} to be configured."
+            f"HTTPS LLM service URLs require {LLM_CA_BUNDLE_ENV} to be configured."
         )
 
-    return {
-        "verify": ca_bundle,
-        "cert": (client_cert, client_key),
-    }
+    return {"verify": ca_bundle}
 
 
 def create_llm_service_client(*, base_url: str, timeout_seconds: float) -> httpx.AsyncClient:

@@ -1131,6 +1131,58 @@ class HuggingFaceChatClient:
         )
 
 
+class LlamaCppChatClient:
+    """Inference provider backed by llama-cpp-python (GGUF model files).
+
+    Requires DQ_LLM_LLAMA_CPP_MODEL_PATH to point to a local GGUF file.
+    Optional env vars:
+        DQ_LLM_LLAMA_CPP_N_CTX  — context window size (default: 4096)
+        DQ_LLM_LLAMA_CPP_N_GPU_LAYERS — layers offloaded to GPU (default: 0)
+    """
+
+    def __init__(self, *, model_path: str, n_ctx: int, n_gpu_layers: int, max_new_tokens: int) -> None:
+        self._model_path = model_path
+        self._n_ctx = n_ctx
+        self._n_gpu_layers = n_gpu_layers
+        self._max_new_tokens = max_new_tokens
+        self._model = None
+
+    def _ensure_loaded(self) -> None:
+        if self._model is not None:
+            return
+        try:
+            llama_cpp = importlib.import_module("llama_cpp")
+        except ImportError as exc:
+            raise LLMServiceUnavailableError(
+                "llama-cpp-python is required for DQ_LLM_CHAT_PROVIDER=llama_cpp but is not installed in this runtime."
+            ) from exc
+        logger.info(
+            "Loading llama.cpp GGUF model path=%s n_ctx=%d n_gpu_layers=%d",
+            self._model_path,
+            self._n_ctx,
+            self._n_gpu_layers,
+        )
+        self._model = llama_cpp.Llama(
+            model_path=self._model_path,
+            n_ctx=self._n_ctx,
+            n_gpu_layers=self._n_gpu_layers,
+            verbose=False,
+        )
+        logger.info("llama.cpp model loaded successfully.")
+
+    def generate(self, prompt: str, *, max_new_tokens: int | None = None) -> str:
+        self._ensure_loaded()
+        assert self._model is not None
+        response = self._model.create_chat_completion(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=max_new_tokens or self._max_new_tokens,
+        )
+        content = str((response["choices"][0]["message"].get("content") or "")).strip()
+        if not content:
+            raise LLMServiceResponseError("llama.cpp returned an empty response payload.")
+        return content
+
+
 class OllamaChatClient:
     def __init__(self, *, base_url: str, model: str, timeout_seconds: int, max_new_tokens: int) -> None:
         if not base_url:
@@ -1192,6 +1244,18 @@ def get_chat_client() -> Any:
             base_url=os.getenv("DQ_LLM_OLLAMA_BASE_URL", OLLAMA_BASE_URL).strip().rstrip("/"),
             model=os.getenv("DQ_LLM_OLLAMA_MODEL", OLLAMA_MODEL).strip(),
             timeout_seconds=int(os.getenv("DQ_LLM_OLLAMA_TIMEOUT_SECONDS", str(OLLAMA_TIMEOUT_SECONDS))),
+            max_new_tokens=int(os.getenv("DQ_LLM_MAX_NEW_TOKENS", str(MAX_NEW_TOKENS))),
+        )
+    if provider == "llama_cpp":
+        model_path = os.getenv("DQ_LLM_LLAMA_CPP_MODEL_PATH", "").strip()
+        if not model_path:
+            raise LLMServiceUnavailableError(
+                "DQ_LLM_LLAMA_CPP_MODEL_PATH must be set when DQ_LLM_CHAT_PROVIDER=llama_cpp."
+            )
+        return LlamaCppChatClient(
+            model_path=model_path,
+            n_ctx=int(os.getenv("DQ_LLM_LLAMA_CPP_N_CTX", "4096")),
+            n_gpu_layers=int(os.getenv("DQ_LLM_LLAMA_CPP_N_GPU_LAYERS", "0")),
             max_new_tokens=int(os.getenv("DQ_LLM_MAX_NEW_TOKENS", str(MAX_NEW_TOKENS))),
         )
     if provider != "huggingface":

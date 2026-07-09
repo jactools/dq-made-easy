@@ -10,6 +10,10 @@ pydantic>=2.5.0
 pydantic-settings>=2.1.0
 accelerate>=0.27.0
 
+# llama.cpp Python bindings (GGUF inference, DQ_LLM_CHAT_PROVIDER=llama_cpp)
+# Built with OpenSSL support; see Dockerfile for CMAKE_ARGS
+llama-cpp-python>=0.3.9
+
 # HTTP client for API calls
 httpx>=0.26.0
 
