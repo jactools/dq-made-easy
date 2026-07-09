@@ -47,7 +47,7 @@ module.exports = {
           { type: 'doc', docId: 'technical-references', label: 'Technical', position: 'left' },
           { type: 'doc', docId: 'release-notes', label: 'Releases', position: 'left' },
           { type: 'doc', docId: 'user-manuals', label: 'Manuals', position: 'left' },
-          { label: 'Status', to: '/status/current/', position: 'left' },
+          { type: 'doc', docId: 'features/', label: 'Status & Roadmap', position: 'left' },
           { label: 'EDRs', to: '/engineering-decisions/', position: 'left' },
           { label: 'Architecture', to: '/architecture/', position: 'left' },
           { type: 'doc', docId: 'api-reference', label: 'API', position: 'right' },
