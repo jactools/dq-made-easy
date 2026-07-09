@@ -18,13 +18,8 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Current Status',
-      items: buildSidebarItems(docsRoot, 'status/current'),
-    },
-    {
-      type: 'category',
-      label: 'Roadmap',
-      items: buildSidebarItems(docsRoot, 'status/roadmap'),
+      label: 'Features',
+      items: buildSidebarItems(docsRoot, 'features'),
     },
     {
       type: 'category',
@@ -40,11 +35,6 @@ module.exports = {
       type: 'category',
       label: 'Architecture',
       items: buildSidebarItems(docsRoot, 'architecture'),
-    },
-    {
-      type: 'category',
-      label: 'Features',
-      items: buildSidebarItems(docsRoot, 'features'),
     },
     {
       type: 'category',
