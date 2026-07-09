@@ -1,5 +1,7 @@
 # Management Summary — Planned & Future Work (as of 2026-04-15)
 
+Status: Planned
+
 This is a forward-looking snapshot of **planned** work items captured in the roadmap and feature-plan documents under `docs/`. It is intentionally grouped into **UI**, **Interfaces**, and **Background processes** only.
 
 ## UI

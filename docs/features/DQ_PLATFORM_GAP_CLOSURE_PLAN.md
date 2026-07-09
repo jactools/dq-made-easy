@@ -1,6 +1,6 @@
 # dq-made-easy Platform Gap Closure Plan
 
-**Status**: Merged into canonical roadmap
+Status: Planned
 **Date**: 2026-05-26
 
 The platform gap closure plan has been merged into the single actionable roadmap:

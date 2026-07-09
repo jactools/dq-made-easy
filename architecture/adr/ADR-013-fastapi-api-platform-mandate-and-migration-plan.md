@@ -61,5 +61,5 @@ Phase 4: Legacy Decommission
 4. Observability parity is mandatory before production traffic shift.
 
 ### Implementation Notes
-- This ADR is reflected in planning under `API-6` in `docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md`.
+- This ADR is reflected in planning under `API-6` in `docs/features/FEATURE_ROADMAP_OVERVIEW.md`.
 - API automation alignment should follow FastAPI defaults (`pytest` + `httpx`) as tracked in `WF-4.10`.

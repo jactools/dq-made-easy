@@ -1,6 +1,6 @@
 # Data Quality Made Easy - Features
 
-Deprecated rollup document. Use the split feature files under [docs/features](./docs/features) and the roadmap overview in [docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md](./docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md) for current planning.
+Deprecated rollup document. Use the split feature files under [docs/features](./docs/features) and the roadmap overview in [docs/features/FEATURE_ROADMAP_OVERVIEW.md](./docs/features/FEATURE_ROADMAP_OVERVIEW.md) for current planning.
 
 ## Overview
 

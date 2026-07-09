@@ -6,7 +6,7 @@ Create a small, topic-focused user manuals system under `docs/user-manuals/`, pu
 ## Roadmap-facing feature backlog
 
 - Canonical feature backlog: [../features/DOCUMENTATION_FEATURES.md](../features/DOCUMENTATION_FEATURES.md)
-- Canonical roadmap summary: [../features/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../features/roadmap/FEATURE_ROADMAP_OVERVIEW.md)
+- Canonical roadmap summary: [../features/FEATURE_ROADMAP_OVERVIEW.md](../features/FEATURE_ROADMAP_OVERVIEW.md)
 
 ## Scope
 - Source of truth: one Markdown file per topic under `docs/user-manuals/`

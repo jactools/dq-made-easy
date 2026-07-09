@@ -75,4 +75,4 @@ This decision does not cover:
 - [Documentation Ownership and Source-Of-Truth Policy](../technical/DOCUMENTATION_OWNERSHIP_AND_SOURCE_OF_TRUTH.md)
 - [dq-ui docs-site](../../dq-ui/docs-site/docusaurus.config.js)
 - [build-public-docs.sh](../../dq-ui/scripts/build-public-docs.sh)
-- `WS9-A03` in [FEATURE_ROADMAP_OVERVIEW.md](../features/roadmap/FEATURE_ROADMAP_OVERVIEW.md)
+- `WS9-A03` in [FEATURE_ROADMAP_OVERVIEW.md](../features/FEATURE_ROADMAP_OVERVIEW.md)

@@ -33,7 +33,7 @@ This release finalizes the DQ-10 natural-language rule drafting preview and move
 - [docs/features/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md](../../docs/features/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
 - [docs/features/DQ_FEATURES.md](../../docs/features/DQ_FEATURES.md)
 - [docs/features/README.md](../../docs/features/README.md)
-- [docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../../docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md)
+- [docs/features/FEATURE_ROADMAP_OVERVIEW.md](../../docs/features/FEATURE_ROADMAP_OVERVIEW.md)
 - [docs/technical/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_ROLLOUT_AND_OPERATOR_NOTES.md](../../docs/technical/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_ROLLOUT_AND_OPERATOR_NOTES.md)
 - [docs/implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS.md](../../docs/implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS.md)
 

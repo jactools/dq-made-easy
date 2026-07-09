@@ -11,7 +11,7 @@ This one-pager summarizes dq-made-easy at the highest level for executives, spli
 For deeper detail, see:
 
 - Implemented features (management summary): [MANAGEMENT_FEATURE_SUMMARY.md](./MANAGEMENT_FEATURE_SUMMARY.md)
-- Planned & future work (management summary): [../roadmap/MANAGEMENT_FUTURE_WORK_SUMMARY.md](../roadmap/MANAGEMENT_FUTURE_WORK_SUMMARY.md)
+- Planned & future work (management summary): [../MANAGEMENT_FUTURE_WORK_SUMMARY.md](../MANAGEMENT_FUTURE_WORK_SUMMARY.md)
 
 ## UI (What users can do)
 

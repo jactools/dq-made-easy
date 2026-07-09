@@ -443,7 +443,7 @@ Acceptance Criteria
 
 Goal: close feature gaps highlighted by the public Ataccama ONE platform surface, especially business glossary, reference data management, master data management, autonomous AI stewardship, and governed data protection workflows.
 
-Roadmap alignment: `DQ-19.9` is tracked in `WS-10` as the Agentic AI Ecosystem workstream in [docs/features/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../features/roadmap/FEATURE_ROADMAP_OVERVIEW.md).
+Roadmap alignment: `DQ-19.9` is tracked in `WS-10` as the Agentic AI Ecosystem workstream in [docs/features/FEATURE_ROADMAP_OVERVIEW.md](../features/FEATURE_ROADMAP_OVERVIEW.md).
 
 Tracked Work Items
 - [x] `DQ-19.1` Business glossary with stewarded terms, hierarchies, synonyms, and rule bindings. Note: this is intentionally OpenMetadata-backed and not Postgres-backed.

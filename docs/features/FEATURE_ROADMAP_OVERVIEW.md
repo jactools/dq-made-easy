@@ -1,5 +1,7 @@
 # dq-made-easy Actionable Feature Roadmap Overview
 
+Status: Planned
+
 This is the single canonical roadmap document for product and platform work that is still planned or partially open.
 
 Use this document to answer four questions:

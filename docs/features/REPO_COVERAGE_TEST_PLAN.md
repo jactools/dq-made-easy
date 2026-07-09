@@ -1,6 +1,6 @@
 # Repo Coverage Test Plan
 
-**Status**: Active
+Status: Planned
 **Owner**: Test coverage uplift
 **Target**: 90% repo-wide line coverage, 100% branch coverage
 **Baseline**: 29% overall line coverage, 2% branch coverage from `test-results/coverage.json`
