@@ -60,7 +60,7 @@ export default function DocsHomePage() {
         <h2>What do you want to do today?</h2>
 
         <div className="docs-home-card-grid">
-          <Link className="docs-home-card" to="/status/current">
+          <Link className="docs-home-card" to="/features">
             <span className="docs-home-card__eyebrow">Current status</span>
             <h3>Status and roadmap</h3>
             <p>See the latest summary, work in progress, and planning context.</p>
@@ -129,7 +129,7 @@ export default function DocsHomePage() {
               <span>Cross-cutting decisions and numbered deviation records.</span>
             </li>
             <li>
-              <Link to="/status/current">Current status</Link>
+              <Link to="/features">Current status</Link>
               <span>Live summaries, milestones, and work-in-progress context.</span>
             </li>
             <li>
