@@ -68,6 +68,7 @@ Repo scope (repo) builds the core set plus auxiliary repo-managed images:
  19) dq-made-easy-trino
  20) dq-made-easy-edge
  21) dq-made-easy-airflow
+ 22) dq-made-easy-zammad-origin
 
 Options:
   --scope <core|repo>  Select image scope (default: core)
@@ -439,6 +440,10 @@ DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker.io/}"
 DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
 DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
+DQ_ZAMMAD_ORIGIN_REGISTRY="${DQ_ZAMMAD_ORIGIN_REGISTRY:-docker.io/}"
+DQ_ZAMMAD_ORIGIN_NAMESPACE="${DQ_ZAMMAD_ORIGIN_NAMESPACE:-jacbeekers/}"
+DQ_ZAMMAD_ORIGIN_IMAGE="${DQ_ZAMMAD_ORIGIN_IMAGE:-dq-made-easy-zammad-origin}"
+
 export DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE
 export DQ_KEYCLOAK_SEED_REGISTRY DQ_KEYCLOAK_SEED_NAMESPACE DQ_KEYCLOAK_SEED_IMAGE
 export DQ_KAFKA_REGISTRY DQ_KAFKA_NAMESPACE DQ_KAFKA_IMAGE
@@ -452,6 +457,7 @@ export DQ_OPENMETADATA_SERVER_REGISTRY DQ_OPENMETADATA_SERVER_NAMESPACE DQ_OPENM
 export DQ_METADATA_CONFIGURE_REGISTRY DQ_METADATA_CONFIGURE_NAMESPACE DQ_METADATA_CONFIGURE_IMAGE
 export DQ_CONTAINER_METRICS_REGISTRY DQ_CONTAINER_METRICS_NAMESPACE DQ_CONTAINER_METRICS_IMAGE
 export DQ_ZAMMAD_SEED_REGISTRY DQ_ZAMMAD_SEED_NAMESPACE DQ_ZAMMAD_SEED_IMAGE
+export DQ_ZAMMAD_ORIGIN_REGISTRY DQ_ZAMMAD_ORIGIN_NAMESPACE DQ_ZAMMAD_ORIGIN_IMAGE
 
 if [ -z "$VERSION_TAG" ]; then
   source "$ROOT_DIR/scripts/calculate_versions.sh"
@@ -680,6 +686,16 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "${DQ_AIRFLOW_REGISTRY}${DQ_AIRFLOW_NAMESPACE}${DQ_AIRFLOW_IMAGE}" \
       "$ROOT_DIR/docker/airflow/Dockerfile.airflow" \
       "$ROOT_DIR"
+  fi
+
+  if image_selected "dq-made-easy-zammad-origin"; then
+    run_direct_build_step \
+      "dq-made-easy-zammad-origin" \
+      "DQ_ZAMMAD_ORIGIN_TAG" \
+      "${DQ_ZAMMAD_ORIGIN_REGISTRY}${DQ_ZAMMAD_ORIGIN_NAMESPACE}${DQ_ZAMMAD_ORIGIN_IMAGE}" \
+      "$ROOT_DIR/docker/Dockerfile.zammad-origin" \
+      "$ROOT_DIR" \
+      "ZAMMAD_IMAGE=${ZAMMAD_IMAGE:-ghcr.io/zammad/zammad:7.0.1-0000}"
   fi
 fi
 
