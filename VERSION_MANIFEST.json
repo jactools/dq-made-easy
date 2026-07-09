@@ -52,10 +52,10 @@
     "Sampling": "0.9.0",
     "Monitoring": "0.9.0",
     "Alerting": "0.9.0",
-    "Infrastructure": "0.10.5",
+    "Infrastructure": "0.11.5",
     "DataSources": "0.9.0",
     "Authentication": "0.10.4",
     "Telemetry": "0.9.0",
-    "Testautomation": "0.11.0"
+    "Testautomation": "0.11.5"
   }
 }

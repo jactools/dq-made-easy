@@ -4,6 +4,18 @@
 
 ## Changelog
 
+### v0.11.5 (July 9, 2026)
+
+- **SEC-5 end-to-end TLS enforcement (W6–W7):** The local edge now uses SNI/TCP passthrough (`ssl_preread on`) for all browser-facing hostnames, eliminating the double-termination path that previously ran through `zammad-https`. The Zammad Rails server and WebSocket server both own native TLS listeners with certificates that include the user-facing SNI hostname as a SAN.
+- **TLS-verified healthchecks:** `zammad-railsserver` and `zammad-websocket` gained `healthcheck` blocks that verify the CA bundle on every probe rather than just testing connectivity.
+- **Transparent proxy routing:** `dq-edge` LOCAL mode SNI map updated to route support traffic directly to `zammad-railsserver:3000`; `zammad-https` retained as an optional backwards-compat container for PUBLIC mode only (see ARCH-EXC-0011).
+- **Certificate SAN expansion:** `scripts/create_certs.sh` now injects `EDGE_LOCAL_SUPPORT_HOST` into the Zammad backend certificate SANs so the edge can pass through encrypted traffic without a certificate mismatch.
+- **Validation suite:** `scripts/validate_tls_backend_direct_routing.sh` (10 tests) and `scripts/validate_tls_service_paths.sh` (12 tests) verify no-proxy-termination compliance; all seven SEC-5 acceptance criteria confirmed met.
+- **Cutover runbook and observability guide:** `docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK.md` documents the per-service migration sequence, rollback procedure, and incident response. `docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md` documents Prometheus alerts, Loki query patterns, and manual TLS troubleshooting steps.
+- **Exception registry updated:** ARCH-EXC-0010 (Airflow HTTP listener) and ARCH-EXC-0011 (zammad-https deprecation) added with owner and retirement dates.
+- **Agent guidance:** `.github/copilot/07-tls-transport-enforcement.md` captures the no-HTTP rule, edge routing model, certificate generation constraints, and exception registry so future contributors preserve the TLS contract.
+- **Versioning and docs sync:** tracked manifest components `Infrastructure` and `Testautomation` bumped to `0.11.5`; release and deployment docs advanced to the `0.11.5` release line.
+
 ### v0.10.5 (May 22, 2026)
 
 - **Public documentation portal:** The UI build now publishes a Docusaurus public docs portal at `/docs/`, keeping documentation available outside authenticated application routes.
