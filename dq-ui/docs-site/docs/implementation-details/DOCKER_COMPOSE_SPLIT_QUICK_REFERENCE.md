@@ -63,7 +63,7 @@ docker-compose/
 | openmetadata-* | metadata.yml | metadata |
 | keycloak | auth.yml | auth, gateway |
 | kong, edge | gateway.yml | gateway |
-| dq-made-easy-llm, ollama-nginx | llm.yml | llm |
+| dq-made-easy-llm | llm.yml | llm |
 | db-seed, delivery-seed | seed.yml | seed |
 | trino | trino.yml | trino |
 | airflow | airflow.yml | airflow |

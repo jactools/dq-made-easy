@@ -50,7 +50,7 @@ class DQAgentConfig(BaseSettings):
     )
     llm_chat_provider: str = Field(
         default="huggingface",
-        description="LLM provider: huggingface, openai, anthropic, grok, ollama"
+        description="LLM provider: huggingface, openai, anthropic, grok, llama_cpp"
     )
     
     # Agent Configuration
@@ -179,11 +179,6 @@ class DQAgentConfig(BaseSettings):
     def effective_api_key(self) -> Optional[str]:
         """Get the API key, preferring explicit value over file-based."""
         return self.get_api_key()
-    
-    @property
-    def is_ollama_provider(self) -> bool:
-        """Check if using Ollama provider."""
-        return self.llm_chat_provider.lower() == "ollama"
     
     @property
     def is_huggingface_provider(self) -> bool:

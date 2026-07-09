@@ -28,7 +28,7 @@ def test_build_natural_language_draft_queue_worker_initializes_thread(monkeypatc
     worker = worker_module.build_natural_language_draft_queue_worker(
         queue_key="dq-natural-language-draft:queue",
         redis_url="redis://redis:6379/0",
-        llm_service_url="https://ollama-nginx:8443",
+        llm_service_url="https://dq-made-easy-llm:8000",
     )
 
     assert isinstance(worker._thread, _FakeThread)

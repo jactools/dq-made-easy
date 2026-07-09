@@ -84,8 +84,6 @@ echo "internal service DNS: api"
 generate_service_cert "api" api localhost 127.0.0.1 ::1
 echo "internal service DNS: llm"
 generate_service_cert "llm" dq-made-easy-llm localhost 127.0.0.1 ::1
-echo "internal service DNS: ollama-nginx"
-generate_service_cert "ollama-nginx" ollama-nginx localhost 127.0.0.1 ::1
 echo "internal service DNS: engine"
 generate_service_cert "engine" dq-made-easy-engine dq-made-easy-engine.local dq-made-easy-engine.jac.dot localhost 127.0.0.1 ::1
 echo "internal service DNS: airflow-server"
