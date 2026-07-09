@@ -2,7 +2,7 @@
 
 Goal: Provide reliable outbound webhook delivery for key platform events (rule lifecycle, approvals, test execution, and data-quality outcomes) with secure subscription management and operational visibility.
 
-Related work: [API-7 Real DQ Rule Execution](../features/current/API_7_REAL_DQ_RULE_EXECUTION.md)
+Related work: [API-7 Real DQ Rule Execution](../features/API_7_REAL_DQ_RULE_EXECUTION.md)
 
 Current overlap assessment as of 2026-05-25:
 

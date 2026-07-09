@@ -1,5 +1,7 @@
 # Phase 7 Summary
 
+Status: Done
+
 ## Current Browser Auth
 
 The supported browser auth path now goes directly through Kong.

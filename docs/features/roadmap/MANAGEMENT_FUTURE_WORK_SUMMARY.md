@@ -4,7 +4,7 @@ This is a forward-looking snapshot of **planned** work items captured in the roa
 
 ## UI
 
-- DQ-10 natural-language rule drafting preview has moved to the implemented/current-state docs at [docs/features/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md](../current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md) and is no longer future work.
+- DQ-10 natural-language rule drafting preview has moved to the implemented/current-state docs at [docs/features/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md](../DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md) and is no longer future work.
 
 - **Connector onboarding and health (API-1)**
   - UI flows for connector setup, validation, and discovery.

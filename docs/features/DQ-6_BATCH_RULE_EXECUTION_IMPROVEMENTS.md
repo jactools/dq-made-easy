@@ -1,6 +1,6 @@
 # DQ-6 Batch Rule Execution Improvements
 
-Status: Complete
+Status: Done
 
 Goal: improve grouped rule test execution so batch requests are created, run, and tracked through the same repository-backed FastAPI boundary used by the rest of the application.
 

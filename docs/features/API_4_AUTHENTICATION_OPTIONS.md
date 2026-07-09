@@ -2,7 +2,7 @@
 
 Goal: Expand authentication capabilities to support enterprise integration scenarios while preserving current gateway/auth compatibility.
 
-Related work: [API-7 Real DQ Rule Execution](../features/current/API_7_REAL_DQ_RULE_EXECUTION.md)
+Related work: [API-7 Real DQ Rule Execution](../features/API_7_REAL_DQ_RULE_EXECUTION.md)
 
 Related architecture note: [API-4 Entra ID + Keycloak Brokering Architecture](./API_4_ENTRA_KEYCLOAK_BROKERING.md)
 

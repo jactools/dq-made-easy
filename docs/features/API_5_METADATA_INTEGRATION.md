@@ -1,5 +1,7 @@
 # API-5 Business Metadata Integration (Source for Business Terms)
 
+Status: Done
+
 Goal: Use an external business catalog as the authoritative source for business terms used in rule expressions.
 
 Related work: [API-7 Real DQ Rule Execution](./API_7_REAL_DQ_RULE_EXECUTION.md)

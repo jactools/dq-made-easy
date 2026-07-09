@@ -1,5 +1,7 @@
 # JWT End-to-End Test Results
 
+Status: Done
+
 ## Current State
 
 Browser authentication now uses Kong directly as the browser entrypoint.

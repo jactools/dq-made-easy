@@ -1,5 +1,7 @@
 # dq-made-easy — Executive One-Pager (Implemented + Planned)
 
+Status: Done
+
 _Date: 2026-04-16_
 
 ## What’s in scope

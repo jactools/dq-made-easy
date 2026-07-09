@@ -1,5 +1,7 @@
 # Rule Status Transitions
 
+Status: Done
+
 This document lists the allowed lifecycle transitions for rules, rule lifecycle, and approvals in the FastAPI backend.
 
 The backend source of truth is the governance model at `/api/v1/governance/status-models/rule`, `/api/v1/governance/status-models/rule_lifecycle`, and `/api/v1/governance/status-models/approval`.

@@ -1,6 +1,6 @@
 # DQ-7 Executable Rule Transformation
 
-Status: Complete
+Status: Done
 
 Goal: transform stored rule expressions into executable artifacts and route activated GX runs through a traceable adapter/runtime boundary.
 

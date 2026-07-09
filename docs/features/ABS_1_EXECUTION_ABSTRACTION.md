@@ -58,7 +58,7 @@ Soda remains a separate follow-on expansion path, but it is not the only intende
 ## Related implementation note
 
 - [ABS-1 implementation details](../implementation-details/ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS.md)
-- [ABS-3 definition](../features/current/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
+- [ABS-3 definition](../features/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
 - [DQ_7_4 GX suite orchestration](../implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS.md)
 
 ## Preview Track: Multi-Runtime Expansion (Self-Built PySpark + Soda)
@@ -177,4 +177,4 @@ This is a preview track to ABS-1, not a change to the completed ABS-1 acceptance
 ### Related References
 
 - [ADR-011: Executable Rule Transformation Strategy](../../architecture/adr/ADR-011-executable-rule-transformation-strategy-dsl-first-with-great-expectations-adapter.md)
-- [API-7 Real DQ Rule Execution](../features/current/API_7_REAL_DQ_RULE_EXECUTION.md)
+- [API-7 Real DQ Rule Execution](../features/API_7_REAL_DQ_RULE_EXECUTION.md)

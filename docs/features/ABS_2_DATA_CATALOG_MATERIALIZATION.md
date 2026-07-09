@@ -1,5 +1,7 @@
 # ABS-2 Data Catalog Materialization and Data Delivery Notes
 
+Status: Done
+
 Goal: provide a foundational service that lets users select items from the data catalog, materialize generated output into AIStor or another S3-compatible storage target, and persist a Data Delivery Note that identifies the result by Data Delivery Id and Data Delivery Location.
 
 ## Current status

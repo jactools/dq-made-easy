@@ -1,5 +1,7 @@
 # Abstraction Features
 
+Status: Done
+
 - [x] #ABS-1 Abstract from technicalities like databases by introducing an ORM or DSL
 - [x] #ABS-2 Data catalog materialization and Data Delivery Notes
 - [x] #ABS-3 Delivery-linked rule execution and result notes

@@ -1,6 +1,6 @@
 # DQ-5 Advanced Data Profiling and Suggestions API Boundary
 
-Status: Complete
+Status: Done
 
 Goal: strengthen advanced profiling and AI-powered suggestions by moving the suggestions feature onto the internal app API pattern used elsewhere in FastAPI, so the endpoint no longer depends directly on PostgreSQL/SQLAlchemy details.
 

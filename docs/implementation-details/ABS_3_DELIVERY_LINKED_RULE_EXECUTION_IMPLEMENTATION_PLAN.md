@@ -4,11 +4,11 @@
 **Target**: Delivery-linked execution over ABS-2 materialized data
 **Date**: 2026-04-15
 
-Related feature plan: [ABS-3 Delivery-Linked Rule Execution and Result Notes](../features/current/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
+Related feature plan: [ABS-3 Delivery-Linked Rule Execution and Result Notes](../features/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
 
 Current-state references:
-- [ABS-3 Delivery-Linked Rule Execution and Result Notes](../features/current/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
-- [Abstraction features summary](../features/current/ABSTRACTION_FEATURES.md)
+- [ABS-3 Delivery-Linked Rule Execution and Result Notes](../features/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
+- [Abstraction features summary](../features/ABSTRACTION_FEATURES.md)
 
 ## Overview
 
@@ -144,7 +144,7 @@ ABS-3 is the composition layer that connects ABS-2 materialized deliveries with 
 
 ## Dependencies
 
-- [ABS-1 Execution Abstraction](../features/current/ABSTRACTION_FEATURES.md#abs-1-execution-abstraction-gx--pyspark)
-- [ABS-2 Data Catalog Materialization](../features/current/ABS_2_DATA_CATALOG_MATERIALIZATION.md)
-- [ABS-3 definition](../features/current/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
+- [ABS-1 Execution Abstraction](../features/ABSTRACTION_FEATURES.md#abs-1-execution-abstraction-gx--pyspark)
+- [ABS-2 Data Catalog Materialization](../features/ABS_2_DATA_CATALOG_MATERIALIZATION.md)
+- [ABS-3 definition](../features/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
 - [DQ-7.4 GX suite orchestration](./DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS.md)

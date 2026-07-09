@@ -40,17 +40,26 @@
 
 ## Current implementation status
 
-Completion summaries and status snapshots for shipped features live in [current/](./current/README.md).
+Completed features live directly in this folder alongside their plans. Each has `Status: Done` in the header.
 
-Quick links:
-- [DQ-5 Advanced Data Profiling](./current/DQ-5_ADVANCED_DATA_PROFILING.md)
-- [DQ-6 Batch Rule Execution](./current/DQ-6_BATCH_RULE_EXECUTION_IMPROVEMENTS.md)
-- [DQ-7 Executable Rule Transformation](./current/DQ-7_EXECUTABLE_RULE_TRANSFORMATION.md)
-- [DQ-10 Natural Language Rule Drafting](./current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
-- [API-5 Metadata Integration](./current/API_5_METADATA_INTEGRATION.md)
-- [API-7 Real DQ Rule Execution](./current/API_7_REAL_DQ_RULE_EXECUTION.md)
-- [Internal Service TLS Migration Matrix](./current/INTERNAL_SERVICE_TLS_MIGRATION_MATRIX.md)
-- [All current status docs →](./current/README.md)
+- [DQ-5 Advanced Data Profiling](./DQ-5_ADVANCED_DATA_PROFILING.md)
+- [DQ-6 Batch Rule Execution](./DQ-6_BATCH_RULE_EXECUTION_IMPROVEMENTS.md)
+- [DQ-7 Executable Rule Transformation](./DQ-7_EXECUTABLE_RULE_TRANSFORMATION.md)
+- [DQ-10 Natural Language Rule Drafting](./DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
+- [API-5 Metadata Integration](./API_5_METADATA_INTEGRATION.md)
+- [API-7 Real DQ Rule Execution](./API_7_REAL_DQ_RULE_EXECUTION.md)
+- [Abstraction Features](./ABSTRACTION_FEATURES.md)
+- [ABS-2 Data Catalog Materialization](./ABS_2_DATA_CATALOG_MATERIALIZATION.md)
+- [ABS-3 Delivery Linked Rule Execution](./ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
+- [FastAPI Migration Baseline](./FASTAPI_MIGRATION_SCOPE_BASELINE.md)
+- [Internal Service TLS Migration Matrix](./INTERNAL_SERVICE_TLS_MIGRATION_MATRIX.md)
+- [JWT End-to-End Test Results](./JWT_END_TO_END_TEST_RESULTS.md)
+- [Management Feature Summary](./MANAGEMENT_FEATURE_SUMMARY.md)
+- [Management One-Pager](./MANAGEMENT_ONE_PAGER.md)
+- [Phase 7 Summary](./PHASE7_SUMMARY.md)
+- [Profiling Request Generator Changelog](./PROFILING_REQUEST_GENERATOR_CHANGELOG.md)
+- [Rule Status Transitions](./RULE_STATUS_TRANSITIONS.md)
+- [WF-3 Comprehensive Summary](./WF3_COMPREHENSIVE_SUMMARY.md)
 
 ## Roadmap
 

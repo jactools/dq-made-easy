@@ -1,6 +1,6 @@
 # DQ-10 Natural-Language Rule Drafting Preview
 
-Status: Complete
+Status: Done
 
 Goal: allow data stewards to describe a desired check in plain language, review ranked candidate attributes with parent context, and create a typed rule draft only after explicit confirmation.
 

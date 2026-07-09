@@ -1,5 +1,7 @@
 # ABS-3 Delivery-Linked Rule Execution and Result Notes
 
+Status: Done
+
 Goal: combine ABS-2 materialized deliveries with existing rule execution features so a selected delivery can be executed against GX suites and run plans, while the resulting execution summary is captured on the same Data Delivery Note.
 
 ## Why this exists

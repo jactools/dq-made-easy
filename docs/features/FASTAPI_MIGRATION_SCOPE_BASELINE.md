@@ -2,7 +2,7 @@
 
 Date: 2026-03-29
 Owner: API migration stream
-Status: Baseline finalized
+Status: Done
 
 ## Purpose
 

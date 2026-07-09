@@ -1,5 +1,7 @@
 # API-7 Real DQ Rule Execution
 
+Status: Done
+
 Goal: Execute compiled DQ rules against real source data, not just generated mock data, by introducing a source-execution contract, a grouped PySpark executor, separate violation persistence, and explicit scheduling/dispatch.
 
 Milestone doc: [API-7 Real DQ Rule Execution Milestone](../implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE.md)

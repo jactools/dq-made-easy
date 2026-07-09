@@ -1,5 +1,7 @@
 # Internal Service TLS Migration Matrix
 
+Status: Done
+
 This matrix summarizes the secure internal transport surfaces covered by SEC-1.
 
 | Surface | Status | Validation entrypoint | Notes |

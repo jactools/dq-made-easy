@@ -9,7 +9,7 @@ Use this document to answer four questions:
 3. Which acceptance criteria make each workstream releasable?
 4. Which detailed markdown files hold the supporting backlog and implementation context?
 
-Completed work is tracked separately in [../current/MANAGEMENT_FEATURE_SUMMARY.md](../current/MANAGEMENT_FEATURE_SUMMARY.md) and in the current-state documents under [../current/README.md](../current/README.md).
+Completed work is tracked separately in [../MANAGEMENT_FEATURE_SUMMARY.md](../MANAGEMENT_FEATURE_SUMMARY.md) and in the current-state documents under [../README.md](../README.md).
 
 ## Goal
 
@@ -427,11 +427,11 @@ Use these checkpoints to track implementation progress at the epic level.
 
 This plan should explicitly build on these existing repository foundations:
 
-- [API_5_METADATA_INTEGRATION.md](../current/API_5_METADATA_INTEGRATION.md)
-- [API_7_REAL_DQ_RULE_EXECUTION.md](../current/API_7_REAL_DQ_RULE_EXECUTION.md)
-- [RULE_STATUS_TRANSITIONS.md](../current/RULE_STATUS_TRANSITIONS.md)
+- [API_5_METADATA_INTEGRATION.md](../API_5_METADATA_INTEGRATION.md)
+- [API_7_REAL_DQ_RULE_EXECUTION.md](../API_7_REAL_DQ_RULE_EXECUTION.md)
+- [RULE_STATUS_TRANSITIONS.md](../RULE_STATUS_TRANSITIONS.md)
 - [EXECUTION_MONITORING_METRIC_TAXONOMY.md](../../technical/EXECUTION_MONITORING_METRIC_TAXONOMY.md)
-- [MANAGEMENT_FEATURE_SUMMARY.md](../current/MANAGEMENT_FEATURE_SUMMARY.md)
+- [MANAGEMENT_FEATURE_SUMMARY.md](../MANAGEMENT_FEATURE_SUMMARY.md)
 - [Frontend UI portability](../../features/FRONTEND_UI_PORTABILITY_FEATURES.md)
 
 The implementation principle is simple: extend the existing platform seams, do not create a second platform beside them.
@@ -449,5 +449,5 @@ The implementation principle is simple: extend the existing platform seams, do n
 - [Documentation improvements](../../features/DOCUMENTATION_FEATURES.md)
 - [Onboarding](../../features/ONBOARDING_FEATURES.md)
 - [Agentic AI ecosystem capabilities](../../features/AGENTIC_AI_ECOSYSTEM_FEATURES.md)
-- [Current-state summary](../current/MANAGEMENT_FEATURE_SUMMARY.md)
+- [Current-state summary](../MANAGEMENT_FEATURE_SUMMARY.md)
 - [Management future work summary](./MANAGEMENT_FUTURE_WORK_SUMMARY.md)

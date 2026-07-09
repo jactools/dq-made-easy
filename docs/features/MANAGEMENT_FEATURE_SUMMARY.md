@@ -1,5 +1,7 @@
 # Management Summary — Implemented Features (as of 2026-04-27)
 
+Status: Done
+
 This is a **current-state** snapshot of what is implemented in the repository (code + runtime wiring). It is intentionally grouped into **UI**, **Interfaces**, and **Background processes** only.
 
 ## UI

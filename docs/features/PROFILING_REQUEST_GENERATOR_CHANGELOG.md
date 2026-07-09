@@ -1,5 +1,7 @@
 # Profiling Request Generator Changelog
 
+Status: Done
+
 ## 2026-04-05
 
 - Added a separate repeatable profiling request generator at `scripts/generate_profiling_requests.sh`.
