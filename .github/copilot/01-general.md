@@ -1,5 +1,22 @@
 # General Rules
 
+## Error Handling and Validation (Fundamental)
+
+**NEVER disable, suppress, or work around errors to make them go away.** Errors are signals that indicate:
+- Configuration or structural problems that need fixing
+- Invalid assumptions about code or data  
+- Broken contracts or dependencies
+
+**When an error appears:**
+1. **Analyze** — Understand the root cause. Is it a missing file? Invalid configuration? Broken link? Logic error?
+2. **Fix** — Address the underlying issue, not the symptom. For example:
+   - If a build system reports broken links, find and fix the links (don't change error level to 'warn')
+   - If validation fails, correct the invalid state (don't skip the validation)
+   - If a dependency is missing, install it (don't remove the dependency declaration)
+3. **Verify** — Re-run the tool/test/build to confirm the fix works
+
+**Exception:** Only suppress or work around errors if you've **explicitly asked the user** and received **explicit approval** for that approach. Document the decision and the justification in code comments or commit messages.
+
 ## Python File Size (Enforced)
 
 - **Every new or modified Python file must have fewer than 1000 non-empty lines.**

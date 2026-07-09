@@ -19,6 +19,23 @@ Additional instruction files (if they exist):
 - `.github/copilot/07-tls-transport-enforcement.md` — No-HTTP rule, edge routing model, certificate generation, healthcheck and exception registry conventions
 - `.github/instructions/python-test-module-boundary.instructions.md` — Every Python production module must have its own dedicated unit test module
 
+## Error handling and validation rules
+
+**NEVER disable, suppress, or work around errors to make them go away.** Errors are signals that indicate:
+- Configuration or structural problems that need fixing
+- Invalid assumptions about code or data
+- Broken contracts or dependencies
+
+**When an error appears:**
+1. **Analyze** — Understand the root cause. Is it a missing file? Invalid configuration? Broken link? Logic error?
+2. **Fix** — Address the underlying issue, not the symptom. For example:
+   - If a build system reports broken links, find and fix the links (don't change error level to 'warn')
+   - If validation fails, correct the invalid state (don't skip the validation)
+   - If a dependency is missing, install it (don't remove the dependency declaration)
+3. **Verify** — Re-run the tool/test/build to confirm the fix works
+
+**Exception:** Only suppress or work around errors if you've **explicitly asked the user** and received **explicit approval** for that approach. Document the decision and the justification in code comments or commit messages.
+
 ## When you are about to create or modify a Python file
 
 1. Check if the file already exists and how many lines it has.
