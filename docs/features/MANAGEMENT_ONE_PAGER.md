@@ -10,8 +10,11 @@ This one-pager summarizes dq-made-easy at the highest level for executives, spli
 
 For deeper detail, see:
 
-- Implemented features (management summary): [MANAGEMENT_FEATURE_SUMMARY.md](./MANAGEMENT_FEATURE_SUMMARY.md)
-- Planned & future work (management summary): [../MANAGEMENT_FUTURE_WORK_SUMMARY.md](../MANAGEMENT_FUTURE_WORK_SUMMARY.md)
+- **All platform capabilities**: [FEATURES.md](./FEATURES.md) — authoritative feature reference
+- **Implementation status** (Done vs Planned): [README.md](./README.md) — status tracking and split feature files
+- **Management summary** of what's shipped: [MANAGEMENT_FEATURE_SUMMARY.md](./MANAGEMENT_FEATURE_SUMMARY.md)
+- **Planned & future work**: [MANAGEMENT_FUTURE_WORK_SUMMARY.md](./MANAGEMENT_FUTURE_WORK_SUMMARY.md)
+- **Workstream roadmap & sequencing**: [FEATURE_ROADMAP_OVERVIEW.md](./FEATURE_ROADMAP_OVERVIEW.md)
 
 ## UI (What users can do)
 
