@@ -10,6 +10,7 @@ module.exports = {
   organizationName: 'dq-rulebuilder',
   projectName: 'dq-ui-docs-site',
   onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
   markdown: {
     hooks: {
       onBrokenMarkdownLinks: 'throw',
