@@ -2,20 +2,27 @@
 
 > **For developers and admins:** See [TECHNICAL.md](./TECHNICAL.md) for API reference, architecture, and deployment details.
 
-## v0.11.5 - Version Alignment and Documentation Refresh (June 28, 2026)
+## v0.11.5 - TLS Security Hardening and Documentation Refresh (July 9, 2026)
 
 ### ✅ What's Updated
 
 - UI package version bumped to `0.11.5`
 - Docs-site package version bumped to `0.11.5`
-- API app marker remains `0.11.0` because this release changes the documentation publishing surface rather than API runtime code
-- Version manifest markers updated for the changed tracked component: `Documentation`
+- Version manifest markers updated for the changed tracked components: `Infrastructure`, `Testautomation`, `Documentation`
+- Release, deployment, and versioning docs now point at the `v0.11.5` release line
 
 ### ✅ New and Improved
 
 - The Definition Mappings user manual now explains the AI-assisted data-definition workflow end to end
 - The manual covers draft generation, steward review, board approval, validation, and OpenMetadata import
-- Release, deployment, and versioning docs now point at the `v0.11.5` release line
+
+### ✅ Security and Infrastructure
+
+- Internal transport is now fully TLS end-to-end for the local development stack: no browser request passes through more than one TLS-terminating proxy
+- The Zammad support stack (ITSM) now uses native TLS listeners; the support browser path is verified over HTTPS with certificate validation at each hop
+- Healthchecks for all TLS-capable services now verify the certificate rather than just testing connectivity
+- Automated validation suite confirms no plaintext HTTP regressions across compose, edge, and bootstrap configuration
+- Operators have a documented cert-generation workflow, TLS troubleshooting guide, and exception registry to distinguish approved deviations from regressions
 
 ## v0.10.5 - Public Documentation Portal (May 22, 2026)
 

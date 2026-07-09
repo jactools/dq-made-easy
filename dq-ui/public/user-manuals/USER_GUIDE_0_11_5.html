@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Agent Workflow Examples and Templates</title>
+  <title>User Guide — v0.11.5</title>
   <script>
     (() => {
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -405,43 +405,37 @@
       </section>
       
       <article>
-<h1 id="agent-workflow-examples-and-templates">Agent Workflow Examples and Templates</h1>
-<p>&gt; <strong>Feature:</strong> DOC-1.11 Agent workflow examples and templates &gt; <strong>Audience:</strong> analysts, data stewards, and developers using the dq-llm agent harness &gt; <strong>Use it with:</strong> Suggestions, Connector Workbench, and Data Asset Studio</p>
-<h2 id="purpose">Purpose</h2>
-<p>This guide gives you ready-to-copy agent prompts and practical workflow patterns for the dq-llm assistant surfaces already available in the UI. It is meant to reduce time-to-first-answer and make the assistant easier to reuse across connector setup, rule drafting, and metadata review.</p>
-<h2 id="common-workflow-patterns">Common workflow patterns</h2>
-<h3 id="1-connector-onboarding">1. Connector onboarding</h3>
-<p>Use this when you need fast, reviewable guidance before validating, discovering, or syncing a connector.</p>
-<p>Example prompt:</p>
-<p>&gt; Help me configure this connector for the current workspace. Explain the required fields, recommend safe secret handling, and outline the validation steps I should run before a discovery or sync operation.</p>
-<p>Best when:</p>
-<ul><li>you are setting up a new provider</li><li>you want a quick checklist before running connector actions</li><li>you need a non-destructive explanation of the current configuration</li></ul>
-<h3 id="2-rule-drafting">2. Rule drafting</h3>
-<p>Use this when you want to turn plain language into a precise rule suggestion.</p>
-<p>Example prompt:</p>
-<p>&gt; Turn this natural-language requirement into a testable data quality rule. Suggest candidate attributes, explain the expected condition, and provide a safe validation plan before I save a draft suggestion.</p>
-<p>Best when:</p>
-<ul><li>you are authoring a new quality rule from a business statement</li><li>you want a structured suggestion before the rule is persisted</li><li>you need to validate attribute match quality first</li></ul>
-<h3 id="3-metadata-and-governance-review">3. Metadata and governance review</h3>
-<p>Use this when you are reviewing data assets, lineage, or governance context before publication or handoff.</p>
-<p>Example prompt:</p>
-<p>&gt; Review the current metadata and lineage for this asset. Identify the most important governance gaps, protection checks, and missing context that should be resolved before I save or publish this asset.</p>
-<p>Best when:</p>
-<ul><li>you are preparing an asset for downstream consumption</li><li>you want a plain-language summary of metadata quality</li><li>you need support for stewardship and contract review</li></ul>
-<h2 id="copy-ready-prompt-templates">Copy-ready prompt templates</h2>
-<table><thead><tr><th>Scenario</th><th>Prompt template</th><th>Expected value</th></tr></thead><tbody><tr><td>Connector setup</td><td>Help me configure this connector for the current workspace. Explain the required fields, the safest secret-handling approach, and the validation steps I should run before syncing.</td><td>A concise checklist and configuration guidance</td></tr><tr><td>Rule authoring</td><td>Turn this requirement into a precise, testable data quality rule. Suggest candidate attributes, the primary condition, and a safe validation plan.</td><td>A draft-ready recommendation with context</td></tr><tr><td>Metadata review</td><td>Review this metadata record and its lineage. Highlight missing governance context, protection concerns, and the top next actions to improve quality.</td><td>A review summary and prioritised fixes</td></tr><tr><td>Policy check</td><td>Explain whether this asset is ready for consumer use. Call out gaps in ownership, purpose, glossary context, and protection readiness.</td><td>An explainable readiness assessment</td></tr></tbody></table>
-<h2 id="suggested-prompt-structure">Suggested prompt structure</h2>
-<p>For the best responses, keep prompts in this order:</p>
-<ol><li>State the task clearly.</li><li>Name the target surface or asset.</li><li>Ask for the output format you want.</li><li>Add the quality bar you care about.</li></ol>
-<p>Example:</p>
-<p>&gt; Review this data asset for governance readiness. Highlight the top three gaps, suggest the safest next actions, and explain why each one matters for downstream consumers.</p>
-<h2 id="workflow-checklist">Workflow checklist</h2>
-<p>Before you run a prompt, ask:</p>
-<ul><li>What outcome do I want from the agent?</li><li>Which UI surface is the best match for this question?</li><li>What context must be included to avoid vague guidance?</li><li>What would make the answer actionable for my next step?</li></ul>
-<h2 id="operational-notes">Operational notes</h2>
-<ul><li>Treat the agent response as an assistant, not an automatic authority.</li><li>Review any recommendation that affects secrets, rules, contracts, or production operations.</li><li>Use specific prompts so the model can act on the current workspace or connector context instead of guessing.</li></ul>
-<h2 id="summary">Summary</h2>
-<p>These workflow examples and prompt templates are designed to help you get reliable, reviewable assistance from the agent harness in the existing UI flows. Use the most specific prompt possible, and keep the output focused on the next action you need to take.</p>
+<h1 id="user-guide-v0-11-5">User Guide — v0.11.5</h1>
+<p>This guide covers what changed for operators and developers in the v0.11.5 release.</p>
+<h2 id="what-changed-in-0-11-5">What changed in 0.11.5</h2>
+<p>The v0.11.5 release completes the SEC-5 end-to-end TLS enforcement initiative. The stack now routes all local browser traffic to its origin service over a single encrypted path, with no intermediate proxy terminating and re-wrapping TLS.</p>
+<p>For end users, the ITSM support portal (Zammad) continues to work at the same browser URL. The difference is invisible at the browser level but removes a security boundary from the internal architecture.</p>
+<p>For operators, this release provides:</p>
+<ul><li>Automated validation that prevents new HTTP regressions</li><li>A cutover runbook for migrating remaining services</li><li>A troubleshooting guide for diagnosing TLS failures</li><li>An updated exception registry with retirement dates for each documented deviation</li></ul>
+<h2 id="for-operators-what-you-need-to-know">For operators: what you need to know</h2>
+<h3 id="certificate-generation">Certificate generation</h3>
+<p>If you regenerate certificates after this release, the Zammad backend certificates will automatically include the user-facing support hostname (<code>EDGE_LOCAL_SUPPORT_HOST</code>) as a Subject Alternative Name. No manual steps required.</p>
+<p>```bash</p>
+<h1 id="regenerate-all-service-certificates">Regenerate all service certificates</h1>
+<p>./scripts/create_certs.sh ```</p>
+<h3 id="validating-the-tls-posture">Validating the TLS posture</h3>
+<p>Two validation scripts confirm the transport posture is intact:</p>
+<p>```bash</p>
+<h1 id="verify-backend-direct-routing-and-no-intermediate-proxy">Verify backend direct routing and no intermediate proxy</h1>
+<p>bash scripts/validate_tls_backend_direct_routing.sh</p>
+<h1 id="verify-all-major-service-and-browser-paths-over-tls">Verify all major service and browser paths over TLS</h1>
+<p>bash scripts/validate_tls_service_paths.sh ```</p>
+<p>Run these after any change to compose services, edge configuration, or certificate generation.</p>
+<h3 id="known-exceptions">Known exceptions</h3>
+<p>Two transport deviations are actively tracked with retirement dates:</p>
+<table><thead><tr><th>Exception</th><th>Service</th><th>Target closure</th></tr></thead><tbody><tr><td>ARCH-EXC-0010</td><td>Airflow (HTTP, port 8080)</td><td>2026-12-31</td></tr><tr><td>ARCH-EXC-0011</td><td><code>zammad-https</code> TLS-terminating proxy (retained for PUBLIC mode)</td><td>2026-09-30</td></tr></tbody></table>
+<p>See <code>architecture/ARCHITECTURE_DEVIATIONS_AND_EXCEPTIONS.md</code> for the full registry.</p>
+<h3 id="troubleshooting-tls-failures">Troubleshooting TLS failures</h3>
+<p>If a service reports certificate verification failures or connection timeouts after startup, see the <a href="../implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md">TLS Observability Guide</a> for diagnosis steps, or the <a href="../implementation-details/SEC_5_W7_CUTOVER_RUNBOOK.md">Cutover Runbook</a> for rollback procedures.</p>
+<p>Common causes:</p>
+<ul><li>Certificates not yet generated: run <code>scripts/create_certs.sh</code></li><li>CA bundle mount missing: check the service&#x27;s <code>volumes:</code> block in <code>docker-compose.yml</code></li><li>SAN mismatch: verify the edge SNI name matches a SAN in the backend cert</li></ul>
+<h2 id="related-guides">Related guides</h2>
+<ul><li><a href="../implementation-details/TLS_EDGE_ARCHITECTURE_REFERENCE.md">TLS Edge Architecture Reference</a></li><li><a href="../implementation-details/TLS_VALIDATION_INFRASTRUCTURE.md">TLS Validation Infrastructure</a></li><li><a href="../implementation-details/SEC_5_W7_CUTOVER_RUNBOOK.md">SEC-5 Cutover Runbook</a></li><li><a href="../implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md">SEC-5 TLS Observability Guide</a></li></ul>
       </article>
       <footer class="manuals-footer" aria-label="Publication details">
         <p>Generated on 2026-07-09 19:52 UTC by the dq-ui manuals publisher.</p>

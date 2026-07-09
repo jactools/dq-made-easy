@@ -36,11 +36,16 @@ Note: The lists below use stable IDs so tasks and acceptance criteria can be ref
 
 ## Phase 4: Operations and Validation
 
-- [ ] (SEC1-F-P4-01) Add validation tooling that detects plaintext internal URLs, disabled TLS flags, and missing trust mounts in supported stack profiles.
-- [ ] (SEC1-F-P4-02) Add runbooks for certificate generation, trust debugging, and local rotation workflows.
-- [ ] (SEC1-F-P4-03) Add smoke-test coverage for at least one secure path per migrated transport family.
-- [ ] (SEC1-F-P4-04) Ensure observability surfaces expose clear diagnostics when TLS negotiation or trust validation fails.
-- [ ] (SEC1-F-P4-05) Make rollout state visible by documenting which internal surfaces are migrated, pending, or explicitly deferred.
+- [x] (SEC1-F-P4-01) Add validation tooling that detects plaintext internal URLs, disabled TLS flags, and missing trust mounts in supported stack profiles.
+  - Delivered: `scripts/validate_tls_backend_direct_routing.sh`, `scripts/validate_tls_service_paths.sh`, `scripts/validation/validate_w6_transparent_tls_routing.sh`
+- [x] (SEC1-F-P4-02) Add runbooks for certificate generation, trust debugging, and local rotation workflows.
+  - Delivered: `docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK.md`, `docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md`
+- [x] (SEC1-F-P4-03) Add smoke-test coverage for at least one secure path per migrated transport family.
+  - Delivered: 22 tests across two validation scripts covering edge, backend, browser, and service paths
+- [x] (SEC1-F-P4-04) Ensure observability surfaces expose clear diagnostics when TLS negotiation or trust validation fails.
+  - Delivered: Prometheus alert rules and Loki queries in `SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md`
+- [x] (SEC1-F-P4-05) Make rollout state visible by documenting which internal surfaces are migrated, pending, or explicitly deferred.
+  - Delivered: `TLS_EDGE_ARCHITECTURE_REFERENCE.md` service TLS status table; ARCH-EXC-0010, ARCH-EXC-0011 in exception registry
 
 ## Acceptance Criteria
 
