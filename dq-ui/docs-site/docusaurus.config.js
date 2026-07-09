@@ -9,10 +9,10 @@ module.exports = {
   baseUrl: '/docs/',
   organizationName: 'dq-rulebuilder',
   projectName: 'dq-ui-docs-site',
-  onBrokenLinks: 'warn',
+  onBrokenLinks: 'throw',
   markdown: {
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
   trailingSlash: true,
