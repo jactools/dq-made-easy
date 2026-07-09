@@ -1,8 +1,10 @@
 # Features
 
-`docs/features` is the single source of truth for all feature scopes, implementation status, and roadmap.
+**Status tracking and roadmap** for Data Quality Made Easy.
 
-Each file carries a `Status:` header line — `Done`, `Planned`, or an in-progress label.
+For complete feature definitions and capabilities, see [FEATURES.md](./FEATURES.md) — the authoritative reference.
+
+This README tracks implementation status (`Status: Done` or `Status: Planned`) and split feature files. Each file carries a `Status:` header line.
 
 ## Planned features (Status: Planned)
 
