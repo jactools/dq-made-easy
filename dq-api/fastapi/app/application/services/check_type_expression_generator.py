@@ -136,6 +136,53 @@ def _build_cross_object_comparison_clause(
     )
 
 
+def _build_actuality_date_tolerance_clause(
+    actuality_date: dict[str, Any],
+    *,
+    context_label: str = "CROSS_OBJECT_ACTUALITY",
+) -> str:
+    """Build the actuality-date tolerance SQL clause for cross-object rules."""
+    left_attr = str(actuality_date.get("leftAttribute") or "").strip()
+    right_attr = str(actuality_date.get("rightAttribute") or "").strip()
+    resolved_tolerance = actuality_date.get("resolvedToleranceValue")
+    resolved_unit = actuality_date.get("resolvedToleranceUnit")
+
+    if not left_attr or not right_attr:
+        raise ValueError(
+            f"{context_label} actualityDate requires 'leftAttribute' and 'rightAttribute'"
+        )
+    if resolved_tolerance is None:
+        raise ValueError(
+            f"{context_label} actualityDate requires 'resolvedToleranceValue'"
+        )
+    if resolved_unit is None:
+        raise ValueError(
+            f"{context_label} actualityDate requires 'resolvedToleranceUnit'"
+        )
+
+    tolerance_unit = _join_consistency_tolerance_unit(str(resolved_unit))
+    return (
+        f"ABS(TIMESTAMPDIFF({tolerance_unit}, {left_attr}, rhs.{right_attr})) <= {resolved_tolerance}"
+    )
+
+
+def _maybe_append_actuality_clause(
+    clauses: list[str],
+    params: dict[str, Any],
+    *,
+    context_label: str,
+) -> None:
+    """Append actuality-date clause to *clauses* when configured."""
+    actuality_date = params.get("actualityDate")
+    if not isinstance(actuality_date, dict) or not actuality_date:
+        return
+    if not actuality_date.get("resolvedToleranceValue"):
+        return
+    clauses.append(_build_actuality_date_tolerance_clause(
+        actuality_date, context_label=context_label
+    ))
+
+
 # ---------------------------------------------------------------------------
 # Per-check-type generators
 # ---------------------------------------------------------------------------
@@ -368,9 +415,11 @@ def _generate_correct(params: dict[str, Any]) -> str:
     if not isinstance(comparison, dict):
         raise ValueError("CORRECT check requires 'comparison'")
 
-    join_clauses = _build_join_clauses(join_keys, context_label="CORRECT")
-    comparison_clause = _build_cross_object_comparison_clause(comparison, context_label="CORRECT")
-    return " AND ".join(join_clauses + [comparison_clause])
+    clauses: list[str] = []
+    clauses.extend(_build_join_clauses(join_keys, context_label="CORRECT"))
+    clauses.append(_build_cross_object_comparison_clause(comparison, context_label="CORRECT"))
+    _maybe_append_actuality_clause(clauses, params, context_label="CORRECT")
+    return " AND ".join(clauses)
 
 
 def _generate_reconcile(params: dict[str, Any]) -> str:
@@ -388,12 +437,14 @@ def _generate_reconcile(params: dict[str, Any]) -> str:
     if not comparisons:
         raise ValueError("RECONCILE check requires at least one entry in 'comparisons'")
 
-    join_clauses = _build_join_clauses(join_keys, context_label="RECONCILE")
-    comparison_clauses = [
+    clauses: list[str] = []
+    clauses.extend(_build_join_clauses(join_keys, context_label="RECONCILE"))
+    clauses.extend(
         _build_cross_object_comparison_clause(item, context_label="RECONCILE")
         for item in comparisons
-    ]
-    return " AND ".join(join_clauses + comparison_clauses)
+    )
+    _maybe_append_actuality_clause(clauses, params, context_label="RECONCILE")
+    return " AND ".join(clauses)
 
 
 def _generate_plausible(params: dict[str, Any]) -> str:
@@ -473,16 +524,18 @@ def _generate_transfer_match(params: dict[str, Any]) -> str:
     if not join_keys:
         raise ValueError("TRANSFER_MATCH check requires at least one entry in 'joinKeys'")
 
-    join_clauses = _build_join_clauses(join_keys, context_label="TRANSFER_MATCH")
+    clauses: list[str] = []
+    clauses.extend(_build_join_clauses(join_keys, context_label="TRANSFER_MATCH"))
     if mode == "row_value_match":
         comparisons: list[dict[str, Any]] = list(params.get("comparisons") or [])
         if not comparisons:
             raise ValueError("TRANSFER_MATCH row_value_match mode requires at least one entry in 'comparisons'")
-        comparison_clauses = [
+        clauses.extend(
             _build_cross_object_comparison_clause(item, context_label="TRANSFER_MATCH")
             for item in comparisons
-        ]
-        return " AND ".join(join_clauses + comparison_clauses)
+        )
+        _maybe_append_actuality_clause(clauses, params, context_label="TRANSFER_MATCH")
+        return " AND ".join(clauses)
 
     if mode == "payload_hash_match":
         left_hash = str(params.get("leftHashAttribute") or "").strip()
@@ -491,7 +544,9 @@ def _generate_transfer_match(params: dict[str, Any]) -> str:
             raise ValueError(
                 "TRANSFER_MATCH payload_hash_match mode requires both 'leftHashAttribute' and 'rightHashAttribute'"
             )
-        return " AND ".join(join_clauses + [f"{left_hash} = rhs.{right_hash}"])
+        clauses.append(f"{left_hash} = rhs.{right_hash}")
+        _maybe_append_actuality_clause(clauses, params, context_label="TRANSFER_MATCH")
+        return " AND ".join(clauses)
 
     raise ValueError("TRANSFER_MATCH mode must be one of: row_value_match, payload_hash_match")
 

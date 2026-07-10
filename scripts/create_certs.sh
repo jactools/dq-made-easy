@@ -59,6 +59,7 @@ generate_service_cert() {
 
 	local service_dir="$CERTS_DIR/services/$service_name"
 	mkdir -p "$service_dir"
+	cp "$CERTS_DIR/mkcert-rootCA.pem" "$service_dir/mkcert-rootCA.pem"
 	generate_cert "$service_dir/tls.crt" "$service_dir/tls.key" "$@"
 }
 
@@ -129,8 +130,8 @@ generate_service_cert "zammad-railsserver" zammad-railsserver "${EDGE_LOCAL_SUPP
 echo "internal service DNS: zammad-websocket (with edge SNI: ${EDGE_LOCAL_SUPPORT_HOST})"
 generate_service_cert "zammad-websocket" zammad-websocket "${EDGE_LOCAL_SUPPORT_HOST}" localhost 127.0.0.1 ::1
 
-echo "kafka.jac.dot"
-generate_cert "$CERTS_DIR/kafka.jac.dot+3.pem" "$CERTS_DIR/kafka.jac.dot+3-key.pem" "kafka.jac.dot" localhost 127.0.0.1 ::1
+echo "${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required}"
+generate_cert "$CERTS_DIR/${KAFKA_CERT_HOST}+3.pem" "$CERTS_DIR/${KAFKA_CERT_HOST}+3-key.pem" "${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required}" localhost 127.0.0.1 ::1
 echo "itsm.jac.dot"
 generate_cert "$CERTS_DIR/itsm.jac.dot+3.pem" "$CERTS_DIR/itsm.jac.dot+3-key.pem" "itsm.jac.dot" localhost 127.0.0.1 ::1
 echo "support.jac.dot"

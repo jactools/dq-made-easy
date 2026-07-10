@@ -230,6 +230,9 @@ if [[ -n "$REPO_IMAGE" ]]; then
   "$ROOT_DIR/scripts/build_and_push_all.sh" "${repo_script_args[@]}" "${SCRIPT_ARGS[@]}"
 else
   "$STEP_SCRIPT" "${SCRIPT_ARGS[@]}"
+  if [[ "$NO_PUSH" == false ]]; then
+    bash "$ROOT_DIR/scripts/update_docker_hub.sh" --image "$SERVICE"
+  fi
 fi
 
 info "$my_name" ""

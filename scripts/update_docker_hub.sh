@@ -5,7 +5,7 @@ set -euo pipefail
 # Purpose: Update Docker Hub repository descriptions via API.
 #
 # What it does:
-# - Reads Docker Hub credentials (env/.env) and iterates known repos.
+# - Reads Docker Hub credentials (env/.env) and iterates all description files.
 # - Uploads short/full descriptions (supports dry-run).
 # - Fails fast when required credentials are missing.
 #
@@ -19,23 +19,14 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 
-# Source .env file if it exists (for DOCKER_HUB_TOKEN)
-if [ -f "$ROOT_DIR/.env" ]; then
-    # Only source specific variables we need
-    if [ -z "${DOCKER_HUB_TOKEN:-}" ]; then
-        DOCKER_HUB_TOKEN=$(grep "^DOCKER_HUB_TOKEN=" "$ROOT_DIR/.env" 2>/dev/null | cut -d'=' -f2- || echo "")
-    fi
-    if [ -z "${DOCKER_HUB_USERNAME:-}" ]; then
-        DOCKER_HUB_USERNAME=$(grep "^DOCKER_HUB_USERNAME=" "$ROOT_DIR/.env" 2>/dev/null | cut -d'=' -f2- || echo "jacbeekers")
-    fi
-fi
-
 # Configuration
 DOCKER_HUB_USERNAME="${DOCKER_HUB_USERNAME:-jacbeekers}"
 DOCKER_HUB_TOKEN="${DOCKER_HUB_TOKEN:-}"
 DRY_RUN="${DRY_RUN:-false}"
 
 my_name="update_docker_hub.sh"
+
+REQUESTED_IMAGES=()
 
 usage() {
     cat <<EOF
@@ -46,6 +37,7 @@ Update Docker Hub repository descriptions for all Data Quality Made Easy images.
 Options:
   --username <name>    Docker Hub username (default: $DOCKER_HUB_USERNAME)
   --token <token>      Docker Hub access token (required)
+    --image <name>       Update only the named image (repeatable)
   --dry-run            Show what would be updated without making changes
   -h, --help           Show this help message
 
@@ -83,6 +75,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --token)
             DOCKER_HUB_TOKEN="$2"
+            shift 2
+            ;;
+        --image)
+            REQUESTED_IMAGES+=("$2")
             shift 2
             ;;
         --dry-run)
@@ -258,8 +254,69 @@ info "$my_name" "========================================"
 SUCCESS_COUNT=0
 FAIL_COUNT=0
 
-# Define repositories to update
-declare -a REPOSITORIES=("npm-base" "dq-api" "dq-engine" "dq-profiling" "dq-frontend" "dq-kong" "dq-db" "dq-keycloak")
+discover_repositories() {
+    local desc_dir="$ROOT_DIR/docker-hub-descriptions"
+    local short_file
+
+    for short_file in "$desc_dir"/*-short.txt; do
+        [ -e "$short_file" ] || continue
+        basename "${short_file%-short.txt}"
+    done | sort
+}
+
+normalize_repository_name() {
+    case "$1" in
+        npm-base|dq-base) printf '%s' 'npm-base' ;;
+        dq-api|dq-made-easy-api) printf '%s' 'dq-api' ;;
+        dq-engine|dq-made-easy-engine) printf '%s' 'dq-engine' ;;
+        dq-profiling|dq-made-easy-profiling) printf '%s' 'dq-profiling' ;;
+        dq-frontend|dq-made-easy-frontend) printf '%s' 'dq-frontend' ;;
+        dq-kong|dq-made-easy-kong) printf '%s' 'dq-kong' ;;
+        dq-db|dq-made-easy-db) printf '%s' 'dq-db' ;;
+        dq-keycloak|dq-made-easy-keycloak) printf '%s' 'dq-keycloak' ;;
+        dq-kafka|dq-made-easy-kafka) printf '%s' 'dq-kafka' ;;
+        dq-kafka-consumer|dq-made-easy-kafka-consumer) printf '%s' 'dq-kafka-consumer' ;;
+        dq-trino|dq-made-easy-trino) printf '%s' 'dq-trino' ;;
+        dq-edge|dq-made-easy-edge) printf '%s' 'dq-edge' ;;
+        dq-airflow|dq-made-easy-airflow) printf '%s' 'dq-airflow' ;;
+        dq-llm|dq-made-easy-llm) printf '%s' 'dq-llm' ;;
+        dq-db-seed|dq-made-easy-db-seed) printf '%s' 'dq-db-seed' ;;
+        dq-keycloak-seed-artifacts|dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-keycloak-seed-artifacts' ;;
+        dq-openmetadata-db|dq-made-easy-openmetadata-db) printf '%s' 'dq-openmetadata-db' ;;
+        dq-openmetadata-server|dq-made-easy-openmetadata-server) printf '%s' 'dq-openmetadata-server' ;;
+        dq-metadata-configure|dq-made-easy-metadata-configure) printf '%s' 'dq-metadata-configure' ;;
+        dq-container-metrics|dq-made-easy-container-metrics) printf '%s' 'dq-container-metrics' ;;
+        dq-zammad-seed|dq-made-easy-zammad-seed) printf '%s' 'dq-zammad-seed' ;;
+        dq-zammad-origin|dq-made-easy-zammad-origin) printf '%s' 'dq-zammad-origin' ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+resolve_repositories() {
+    local requested_image normalized_name
+
+    if [ "${#REQUESTED_IMAGES[@]}" -eq 0 ]; then
+        discover_repositories
+        return 0
+    fi
+
+    for requested_image in "${REQUESTED_IMAGES[@]}"; do
+        if ! normalized_name=$(normalize_repository_name "$requested_image"); then
+            error "$my_name" "Unknown image name: $requested_image"
+            return 1
+        fi
+        printf '%s\n' "$normalized_name"
+    done | sort -u
+}
+
+mapfile -t REPOSITORIES < <(resolve_repositories)
+
+if [ "${#REPOSITORIES[@]}" -eq 0 ]; then
+    error "$my_name" "No repository description files were found"
+    exit 1
+fi
 
 # Update each repository
 for repo in "${REPOSITORIES[@]}"; do

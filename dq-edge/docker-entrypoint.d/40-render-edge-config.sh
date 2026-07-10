@@ -145,7 +145,17 @@ user nginx;
 worker_processes auto;
 error_log /var/log/nginx/error.log notice;
 pid /var/run/nginx.pid;
+
+EOF
+
+  if [ -f /usr/lib/nginx/modules/ngx_stream_module.so ]; then
+    cat >> /etc/nginx/nginx.conf <<'EOF'
 load_module /usr/lib/nginx/modules/ngx_stream_module.so;
+
+EOF
+  fi
+
+  cat >> /etc/nginx/nginx.conf <<'EOF'
 
 events {
   worker_connections 1024;
@@ -153,7 +163,7 @@ events {
 
 stream {
   resolver 127.0.0.11 ipv6=off valid=10s;
-  map \$ssl_preread_server_name \$upstream {
+  map $ssl_preread_server_name $upstream {
     ${app_host} frontend:443;
     ${kong_host} kong:8443;
     ${keycloak_host} keycloak:8443;
@@ -168,7 +178,7 @@ stream {
     ssl_preread on;
     proxy_connect_timeout 5s;
     proxy_timeout 300s;
-    proxy_pass \$upstream;
+    proxy_pass $upstream;
   }
 }
 EOF

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="/workspace"
 FASTAPI_DIR="$ROOT_DIR/dq-api/fastapi"
-WORK_DIR="${ZAMMAD_SEED_WORK_DIR:-/tmp/zammad-seed}"
+WORK_DIR="${ZAMMAD_SEED_WORK_DIR:-$ROOT_DIR/tmp/zammad-seed}"
 AUTO_WIZARD_FILE="$WORK_DIR/zammad-auto-wizard.json"
 GENERATED_USERS_FILE="$WORK_DIR/zammad-generated-users.csv"
 SUPPORT_TOKEN_FILE="$WORK_DIR/zammad-support-token.txt"

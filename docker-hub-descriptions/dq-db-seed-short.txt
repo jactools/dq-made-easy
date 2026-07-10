@@ -1,0 +1,1 @@
+Seed image that initializes the dq PostgreSQL database contents

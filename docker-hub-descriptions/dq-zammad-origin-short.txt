@@ -1,0 +1,1 @@
+TLS-aware Zammad origin image with custom entrypoint and cert handling

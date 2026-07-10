@@ -1,0 +1,318 @@
+# ============================================================================
+# SUPPORT: Zammad support stack
+# ============================================================================
+
+x-zammad-service: &zammad-service
+  profiles: ["support"]
+  image: ${ZAMMAD_IMAGE}
+  restart: unless-stopped
+  environment:
+    MEMCACHE_SERVERS: ${ZAMMAD_MEMCACHE_SERVERS}
+    POSTGRESQL_DB: ${ZAMMAD_POSTGRES_DB}
+    POSTGRESQL_HOST: ${ZAMMAD_POSTGRES_HOST}
+    POSTGRESQL_USER: ${ZAMMAD_POSTGRES_USER}
+    POSTGRESQL_PASS: ${ZAMMAD_POSTGRES_PASSWORD}
+    POSTGRESQL_PORT: ${ZAMMAD_POSTGRES_PORT}
+    POSTGRESQL_OPTIONS: ${ZAMMAD_POSTGRESQL_OPTIONS}
+    REDIS_URL: ${ZAMMAD_REDIS_URL}
+    ELASTICSEARCH_ENABLED: ${ZAMMAD_ELASTICSEARCH_ENABLED}
+    ELASTICSEARCH_HOST: ${ZAMMAD_ELASTICSEARCH_HOST}
+    ELASTICSEARCH_PORT: ${ZAMMAD_ELASTICSEARCH_PORT}
+    ELASTICSEARCH_SCHEMA: ${ZAMMAD_ELASTICSEARCH_SCHEMA}
+    ELASTICSEARCH_NAMESPACE: ${ZAMMAD_ELASTICSEARCH_NAMESPACE}
+    ELASTICSEARCH_SSL_VERIFY: ${ZAMMAD_ELASTICSEARCH_SSL_VERIFY}
+    AUTOWIZARD_JSON: ${AUTOWIZARD_JSON:-}
+    AUTOWIZARD_RELATIVE_PATH: ${AUTOWIZARD_RELATIVE_PATH:-tmp/auto_wizard.json}
+    NGINX_PORT: ${ZAMMAD_NGINX_PORT}
+    NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
+    NGINX_SERVER_SCHEME: ${ZAMMAD_NGINX_SERVER_SCHEME}
+    RAILS_TRUSTED_PROXIES: ${ZAMMAD_RAILS_TRUSTED_PROXIES}
+    ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE}
+    ZAMMAD_FQDN: ${ZAMMAD_FQDN}
+    ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
+    ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
+    KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
+    SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL:-}
+    SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
+    CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
+    TZ: ${TZ}
+  volumes:
+    - zammad_backup:/var/tmp/zammad:ro
+    - zammad_storage:/opt/zammad/storage
+    - ../tmp/certs/mkcert-rootCA.pem:/usr/lib/ssl/cert.pem:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/zammad/certs/mkcert-rootCA.pem:ro
+    - ../docker/zammad/wait-for-redis.sh:/usr/local/bin/wait-for-redis.sh:ro
+    - ../docker/zammad/initializers/99-openid-connect-server-side-url.rb:/opt/zammad/config/initializers/99-openid-connect-server-side-url.rb:ro
+  networks:
+    - dq-network
+
+services:
+  zammad-postgresql:
+    profiles: ["support"]
+    image: postgres:${ZAMMAD_POSTGRES_VERSION}
+    environment:
+      POSTGRES_DB: ${ZAMMAD_POSTGRES_DB}
+      POSTGRES_USER: ${ZAMMAD_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ZAMMAD_POSTGRES_PASSWORD}
+    volumes:
+      - zammad_postgresql_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    labels:
+      - "monitoring=true"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ZAMMAD_POSTGRES_USER} -d ${ZAMMAD_POSTGRES_DB} -h localhost || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - dq-network
+
+  zammad-redis:
+    profiles: ["zammad-legacy"]
+    image: redis:${ZAMMAD_REDIS_VERSION}
+    command: redis-server --appendonly yes
+    volumes:
+      - zammad_redis_data:/data
+    restart: unless-stopped
+    labels:
+      - "monitoring=true"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - dq-network
+
+  zammad-memcached:
+    profiles: ["support"]
+    image: memcached:${ZAMMAD_MEMCACHE_VERSION}
+    command: memcached -m 256M
+    restart: unless-stopped
+    labels:
+      - "monitoring=true"
+    networks:
+      - dq-network
+
+  zammad-init:
+    <<: *zammad-service
+    command: ["sh", "/usr/local/bin/wait-for-redis.sh", "zammad-init"]
+    depends_on:
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    restart: on-failure
+    user: 0:0
+    labels:
+      - "monitoring=true"
+
+  zammad-railsserver:
+    # SEC-5 Compliance: This service is directly accessible from the edge via SNI passthrough.
+    <<: *zammad-service
+    command:
+      - sh
+      - /usr/local/bin/wait-for-redis.sh
+      - bundle
+      - exec
+      - puma
+      - -e
+      - production
+      - -b
+      - ssl://[::]:3000?key=/etc/zammad/certs/tls.key&cert=/etc/zammad/certs/tls.crt
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    volumes:
+      - ../tmp/certs/services/zammad-railsserver:/etc/zammad/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS --cacert /etc/zammad/certs/mkcert-rootCA.pem https://127.0.0.1:3000/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "monitoring=true"
+
+  zammad-scheduler:
+    <<: *zammad-service
+    command: ["sh", "/usr/local/bin/wait-for-redis.sh", "zammad-scheduler"]
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    labels:
+      - "monitoring=true"
+
+  zammad-websocket:
+    # SEC-5 Compliance: This service owns its native TLS listener on port 6042.
+    <<: *zammad-service
+    command:
+      - sh
+      - /usr/local/bin/wait-for-redis.sh
+      - bundle
+      - exec
+      - script/websocket-server.rb
+      - start
+      - -b
+      - 0.0.0.0
+      - -p
+      - "6042"
+      - -s
+      - -k
+      - /etc/zammad/certs/tls.key
+      - -c
+      - /etc/zammad/certs/tls.crt
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+    volumes:
+      - ../tmp/certs/services/zammad-websocket:/etc/zammad/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "echo | openssl s_client -connect 127.0.0.1:6042 -CAfile /etc/zammad/certs/mkcert-rootCA.pem 2>/dev/null | grep -q 'Verify return code: 0' && exit 0 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "monitoring=true"
+
+  zammad-nginx:
+    <<: *zammad-service
+    command: ["zammad-nginx"]
+    depends_on:
+      zammad-init:
+        condition: service_completed_successfully
+      zammad-railsserver:
+        condition: service_started
+      zammad-scheduler:
+        condition: service_started
+      zammad-websocket:
+        condition: service_started
+    labels:
+      - "monitoring=true"
+
+  # NOTE: zammad-https is optional and deprecated for SEC-5 compliance.
+  zammad-https:
+    profiles: ["support"]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.zammad-origin
+      args:
+        ZAMMAD_IMAGE: ${ZAMMAD_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      zammad-railsserver:
+        condition: service_started
+      zammad-websocket:
+        condition: service_started
+    environment:
+      ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
+      ZAMMAD_SSL_CERT_FILE_NAME: ${ZAMMAD_SSL_CERT_FILE_NAME}
+      ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME}
+    volumes:
+      - ${EDGE_SSL_CERTS_DIR}:/etc/nginx/certs:ro
+    ports:
+      - "${ZAMMAD_HOST_BIND}:${ZAMMAD_EXPOSE_PORT}:443"
+    networks:
+      - dq-network
+    labels:
+      - "monitoring=true"
+
+  zammad-seed:
+    profiles: ["support"]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.zammad.seed
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+      secrets:
+        - internal_corporate_root_ca
+    depends_on:
+      zammad-postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zammad-memcached:
+        condition: service_started
+      zammad-railsserver:
+        condition: service_started
+    env_file:
+      - ${ROOT_ENV_FILE:-.env}
+    environment:
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
+      APP_CONFIG_ENCRYPTION_KEY: ${APP_CONFIG_ENCRYPTION_KEY?APP_CONFIG_ENCRYPTION_KEY is required}
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM?KEYCLOAK_ADMIN_REALM is required}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER?KEYCLOAK_ADMIN_USER is required}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS?KEYCLOAK_ADMIN_PASS is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
+      KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
+      ZAMMAD_SUPPORT_TOKEN_NAME: ${ZAMMAD_SUPPORT_TOKEN_NAME:-dq-made-easy support integration}
+      ZAMMAD_SUPPORT_TOKEN_PERMISSION: ${ZAMMAD_SUPPORT_TOKEN_PERMISSION:-ticket.agent}
+      CURL_CA_BUNDLE: /workspace-tmp/certs/mkcert-rootCA.pem
+      SSL_CERT_FILE: /workspace-tmp/certs/mkcert-rootCA.pem
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../tmp/certs/mkcert-rootCA.pem:/workspace-tmp/certs/mkcert-rootCA.pem:ro
+    networks:
+      - dq-network
+    restart: "no"
+
+  # Legacy shared search node for the support stack (Zammad Elasticsearch)
+  openmetadata-search:
+    profiles: ["support"]
+    image: ${DOCKER_DOMAIN:-docker.io}/library/elasticsearch:8.11.4
+    environment:
+      discovery.type: single-node
+      ELASTIC_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:-openmetadata}
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.http.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+    ports:
+      - "${OPENMETADATA_SEARCH_HOST_BIND}:${OPENMETADATA_SEARCH_HOST_PORT}:9200"
+    volumes:
+      - ../tmp/certs/services/openmetadata-search/tls.crt:/usr/share/elasticsearch/config/certs/tls.crt:ro
+      - ../tmp/certs/services/openmetadata-search/tls.key:/usr/share/elasticsearch/config/certs/tls.key:ro
+      - ../tmp/certs/mkcert-rootCA.pem:/usr/share/elasticsearch/config/certs/mkcert-rootCA.pem:ro
+      - openmetadata_search_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS --cacert /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem -u elastic:$$ELASTIC_PASSWORD https://127.0.0.1:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    networks:
+      - dq-network

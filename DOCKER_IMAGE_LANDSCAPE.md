@@ -172,7 +172,7 @@ The dq-made-easy system consists of **22+ actively maintained Docker images** or
 | **TLS** | Mkcert certificates |
 | **Health Check** | Keycloak version check (`kc.sh --version`) |
 | **Volumes** | Realm import artifacts from seed service |
-| **Environment Variables** | `KEYCLOAK_ADMIN`, `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_REALM`, `KEYCLOAK_HTTP_RELATIVE_PATH`, `KEYCLOAK_HTTPS_*` |
+| **Environment Variables** | `KEYCLOAK_ADMIN`, `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_REALM`, `KEYCLOAK_HTTPS_RELATIVE_PATH`, `KEYCLOAK_HTTPS_*` |
 | **Startup Command** | `start-dev --import-realm` |
 | **Status** | **Active** — Authentication backbone, published regularly |
 

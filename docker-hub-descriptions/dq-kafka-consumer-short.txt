@@ -1,0 +1,1 @@
+Lightweight Kafka consumer worker for asynchronous background processing

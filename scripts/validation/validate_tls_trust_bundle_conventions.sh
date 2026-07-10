@@ -19,7 +19,12 @@ my_name="validate_tls_trust_bundle_conventions.sh"
 require_present() {
   local needle="$1"
   local file_path="$2"
-  if ! grep -Fq "$needle" "$file_path"; then
+  if [ -d "$file_path" ]; then
+    if ! grep -rFq "$needle" "$file_path"; then
+      error "$my_name" "missing '${needle}' in ${file_path}"
+      exit 1
+    fi
+  elif ! grep -Fq "$needle" "$file_path"; then
     error "$my_name" "missing '${needle}' in ${file_path}"
     exit 1
   fi
@@ -28,13 +33,18 @@ require_present() {
 require_absent() {
   local needle="$1"
   local file_path="$2"
-  if grep -Fq "$needle" "$file_path"; then
+  if [ -d "$file_path" ]; then
+    if grep -rFq "$needle" "$file_path"; then
+      error "$my_name" "found forbidden '${needle}' in ${file_path}"
+      exit 1
+    fi
+  elif grep -Fq "$needle" "$file_path"; then
     error "$my_name" "found forbidden '${needle}' in ${file_path}"
     exit 1
   fi
 }
 
-compose_file="$ROOT_DIR/docker-compose.yml"
+compose_file="$ROOT_DIR/docker-compose/"
 
 require_present './tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro' "$compose_file"
 require_present './tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro' "$compose_file"

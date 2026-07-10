@@ -38,12 +38,12 @@ exec_kc="/opt/keycloak/bin/kc.sh $*"
 /opt/keycloak/bin/kc.sh "$@" &
 KC_PID=$!
 
-keycloak_http_relative_path="${KEYCLOAK_HTTP_RELATIVE_PATH:-${KC_HTTP_RELATIVE_PATH:-}}"
-if [ -n "$keycloak_http_relative_path" ]; then
-      keycloak_http_relative_path="/${keycloak_http_relative_path#/}"
-      keycloak_http_relative_path="${keycloak_http_relative_path%/}"
+keycloak_https_relative_path="${KEYCLOAK_HTTPS_RELATIVE_PATH:-${KC_HTTPS_RELATIVE_PATH:-}}"
+if [ -n "$keycloak_https_relative_path" ]; then
+      keycloak_https_relative_path="/${keycloak_https_relative_path#/}"
+      keycloak_https_relative_path="${keycloak_https_relative_path%/}"
 fi
-keycloak_admin_base_url="http://127.0.0.1:8080${keycloak_http_relative_path}"
+keycloak_admin_base_url="https://127.0.0.1:8443${keycloak_https_relative_path}"
 
 seed_credentials_file="/opt/keycloak/realm-import/keycloak_seed_user_credentials.csv"
 if [ ! -f "$seed_credentials_file" ]; then

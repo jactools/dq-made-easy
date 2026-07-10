@@ -14,17 +14,12 @@ set -euo pipefail
 # Last modified: 2026-05-01
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-OBS_COMPOSE="${ROOT_DIR}/docker-compose.yml"
-APP_COMPOSE="${ROOT_DIR}/docker-compose.yml"
+OBS_COMPOSE="${ROOT_DIR}/docker-compose/"
+APP_COMPOSE="${ROOT_DIR}/docker-compose/"
 
-# Load repo defaults when available so hostnames/ports match local stack.
-# (Do not source setup_env.sh here; it may perform docker login and other side-effects.)
-if [ -f "${ROOT_DIR}/.env" ]; then
-  set +u
-  # shellcheck disable=SC1091
-  . "${ROOT_DIR}/.env"
-  set -u
-fi
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+init_root_env_file "$ROOT_DIR"
+source_selected_root_env_file
 
 # shellcheck disable=SC1091
 # shellcheck disable=SC1091

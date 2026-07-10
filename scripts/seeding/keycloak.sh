@@ -242,7 +242,7 @@ EOF
 
 seed_keycloak_in_docker() {
   local keycloak_container_id
-  local keycloak_local_base keycloak_ready_url keycloak_http_relative_path keycloak_admin_base_url
+  local keycloak_local_base keycloak_ready_url keycloak_https_relative_path keycloak_admin_base_url
   local seed_credentials_file rotated_password_count credential_line email password user_json user_id
 
   info "$my_name" "Reseeding Keycloak in the existing Docker stack (no container restart, no volume deletion)..."
@@ -273,12 +273,12 @@ seed_keycloak_in_docker() {
 
   generate_keycloak_seed_artifacts || exit 33
 
-  keycloak_http_relative_path="${KEYCLOAK_HTTP_RELATIVE_PATH:-}"
-  if [ -n "$keycloak_http_relative_path" ]; then
-    keycloak_http_relative_path="/${keycloak_http_relative_path#/}"
-    keycloak_http_relative_path="${keycloak_http_relative_path%/}"
+  keycloak_https_relative_path="${KEYCLOAK_HTTPS_RELATIVE_PATH:-}"
+  if [ -n "$keycloak_https_relative_path" ]; then
+    keycloak_https_relative_path="/${keycloak_https_relative_path#/}"
+    keycloak_https_relative_path="${keycloak_https_relative_path%/}"
   fi
-  keycloak_admin_base_url="http://127.0.0.1:8080${keycloak_http_relative_path}"
+  keycloak_admin_base_url="https://127.0.0.1:8443${keycloak_https_relative_path}"
 
   local login_attempt login_max_attempts login_output
   login_max_attempts=5

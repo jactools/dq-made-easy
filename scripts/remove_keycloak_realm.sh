@@ -17,7 +17,9 @@ cd "$ROOT_DIR"
 
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 set_log_level DEBUG
-source "$ROOT_DIR/.env"
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+init_root_env_file "$ROOT_DIR"
+source_selected_root_env_file
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 my_name="remove_keycloak_realm.sh"
 

@@ -34,6 +34,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$SCRIPT_DIR/supporting/logging.sh"
+source "$ROOT_DIR/scripts/supporting/audit_summary.sh"
 source "$ROOT_DIR/scripts/supporting/auth.sh"
 source "$ROOT_DIR/scripts/supporting/openmetadata.sh"
 source "$ROOT_DIR/scripts/supporting/env/selection.sh"
@@ -46,6 +47,42 @@ PYTHON_BIN="$ROOT_DIR/venv/bin/python"
 if [ ! -x "$PYTHON_BIN" ]; then
   PYTHON_BIN="python3"
 fi
+STARTUP_SUMMARY_FILE="$ROOT_DIR/audit/start-containers-summary.json"
+STARTUP_STARTED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+STARTUP_CURRENT_STAGE="initialization"
+STARTUP_ORIGINAL_ARGS=("$@")
+
+write_startup_summary() {
+  local exit_code="$1"
+  local failed_command="${2:-}"
+  local outcome="succeeded"
+  local finished_at
+  local args_text
+  local env_selection
+
+  if [ "$exit_code" -ne 0 ]; then
+    outcome="failed"
+  fi
+
+  finished_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  args_text="${STARTUP_ORIGINAL_ARGS[*]:-}"
+  env_selection="$(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE")"
+
+  write_audit_summary_json "$STARTUP_SUMMARY_FILE" \
+    started_at "$STARTUP_STARTED_AT" \
+    finished_at "$finished_at" \
+    status "$outcome" \
+    exit_code "$exit_code" \
+    env_file "$ROOT_ENV_FILE" \
+    env_selection "$env_selection" \
+    current_stage "$STARTUP_CURRENT_STAGE" \
+    failed_command "$failed_command" \
+    args "$args_text" \
+    script "start-containers.sh"
+}
+
+trap 'exit_code=$?; write_startup_summary "$exit_code" "${BASH_COMMAND:-}"' EXIT
+
 init_root_env_file "$ROOT_DIR"
 
 if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
@@ -65,7 +102,9 @@ export ROOT_ENV_FILE
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
 
 # source repository-level .env
+set -a
 source "$ROOT_ENV_FILE"
+set +a
 cd "$ROOT_DIR"
 
 # Ensure canonical public Kong URL is present. Scripts expect this to be set
@@ -865,6 +904,7 @@ if [ "$SEED_ZAMMAD" = true ]; then
 fi
 
 if [ "$RESET_VENV" = true ]; then
+  STARTUP_CURRENT_STAGE="rebuild root virtual environment"
   info "$my_name" "virtual environment will be reset"
   rebuild_root_venv || exit 1
 fi
@@ -1019,6 +1059,7 @@ fi
 build_schema_owner_images_if_needed
 
 if [ "$PRESEED_BEFORE_STACK" = true ]; then
+  STARTUP_CURRENT_STAGE="pre-stack database seeding"
   info "$my_name" "Running pre-stack seeding for Postgres so startup never races stale persisted state"
   ./scripts/seed_stack.sh "${PRESEED_ARGS[@]}" || {
     warning "$my_name" "Database seeding failed before stack startup"
@@ -1028,12 +1069,15 @@ if [ "$PRESEED_BEFORE_STACK" = true ]; then
 fi
 
 if [ "$SEED_ALL" = true ]; then
+  STARTUP_CURRENT_STAGE="start docker stack with --seed-all follow-up"
   SKIP_FRONTEND_START=true SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh "${STACK_ARGS[@]}"
 else
+  STARTUP_CURRENT_STAGE="start docker stack"
   SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh "${STACK_ARGS[@]}"
 fi
 
 if [ "${#POSTSTACK_SEED_ARGS[@]}" -gt 0 ]; then
+  STARTUP_CURRENT_STAGE="post-stack seeding"
   info "$my_name" "Running post-stack seeding after stack startup..."
   ./scripts/seed_stack.sh "${POSTSTACK_SEED_ARGS[@]}" || {
     warning "$my_name" "Stack seeding failed during start-containers.sh execution"
@@ -1043,6 +1087,7 @@ if [ "${#POSTSTACK_SEED_ARGS[@]}" -gt 0 ]; then
 fi
 
 if [ "$SEED_ALL" = true ] && [ "$SEED_DELIVERIES" = true ]; then
+  STARTUP_CURRENT_STAGE="trino aiStor catalog seed"
   trino_seed_args=(--env-file "$ROOT_ENV_FILE")
   if [ "$FORCE_BUILD" = true ]; then
     trino_seed_args+=(--force-build)
@@ -1056,24 +1101,29 @@ if [ "$SEED_ALL" = true ] && [ "$SEED_DELIVERIES" = true ]; then
 fi
 
 if [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then
+  STARTUP_CURRENT_STAGE="keycloak reconciliation"
   ensure_kong_seed_reconciliation || exit 1
   enforce_keycloak_username_prompt_after_logout || true
 fi
 
 if [ "$START_WORKERS" = true ]; then
+  STARTUP_CURRENT_STAGE="worker secret reconciliation"
   ensure_keycloak_engine_worker_client_secret_matches_env || exit 1
 fi
 
 if [ "$START_AUTH" = true ] || [ "$START_METADATA" = true ] || [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then
+  STARTUP_CURRENT_STAGE="openmetadata redirect reconciliation"
   ensure_keycloak_openmetadata_client_redirect_matches_env || exit 1
 fi
 
 if [ "$SEED_ALL" = true ]; then
+  STARTUP_CURRENT_STAGE="regenerate openapi swagger assets"
   info "$my_name" "--seed-all requested: regenerating OpenAPI + Swagger assets after stack startup"
   regenerate_oas_and_swagger_assets_for_seed_all || exit 1
 fi
 
 if [ "$START_METADATA" = true ]; then
+  STARTUP_CURRENT_STAGE="openmetadata post-start configuration"
   info "$my_name" "Running OpenMetadata post-start configuration in Docker..."
   if [ "$SEED_ALL" = true ]; then
     if ! dq_source_seeded_user_credentials --quiet; then
@@ -1102,6 +1152,7 @@ fi
 
 info "$my_name" "Smoke validation is separate: run ./scripts/smoke_stack.sh after startup if you need post-start smoke checks."
 
+STARTUP_CURRENT_STAGE="completed"
 info "$my_name" "✓ Start containers script completed successfully"
 
 exit 0

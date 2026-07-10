@@ -11,6 +11,7 @@ import csv
 import json
 import os
 import ssl
+import time
 import urllib.parse
 import urllib.request
 import shlex
@@ -66,17 +67,18 @@ def _keycloak_token(
         print("Keycloak token request failed: insufficient credentials (provide client secret or username/password)")
         return None
 
-    # only use token_url for now, but could add more attempts with different hostnames/ports if needed
-    attempts = [token_url]
-
-    print("Attempting direct HTTP request to Keycloak for token.")
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 
-    for attempt in attempts:
-        data = "&".join(data_pairs).encode()
-        req = urllib.request.Request(attempt, data=data, method="POST")
+    max_attempts = 10
+    sleep_seconds = 2
+    data = "&".join(data_pairs).encode()
+
+    for attempt_number in range(1, max_attempts + 1):
+        if attempt_number == 1:
+            print("Attempting direct HTTP request to Keycloak for token.")
+        req = urllib.request.Request(token_url, data=data, method="POST")
         req.add_header("Content-Type", "application/x-www-form-urlencoded")
         try:
             with urllib.request.urlopen(req, timeout=15, context=ssl_context) as resp:
@@ -85,20 +87,22 @@ def _keycloak_token(
                     payload = json.loads(body)
                     token = payload.get("access_token")
                     if token:
-                        print(f"Successfully obtained Keycloak token from {attempt}")
+                        print(f"Successfully obtained Keycloak token from {token_url}")
                         return token
-                    else:
-                        print(f"Keycloak token response from {attempt} contained no access_token; response: {body}")
+                    print(f"Keycloak token response from {token_url} contained no access_token; response: {body}")
                 except json.JSONDecodeError:
-                    print(f"Keycloak token response from {attempt} was not JSON: {body}")
+                    print(f"Keycloak token response from {token_url} was not JSON: {body}")
         except urllib.error.HTTPError as he:
             try:
                 body = he.read().decode()
             except Exception:
                 body = str(he)
-            print(f"Keycloak token request to {attempt} failed: HTTP {he.code} {body}")
+            print(f"Keycloak token request to {token_url} failed: HTTP {he.code} {body}")
         except Exception as exc:
-            print(f"Keycloak token request to {attempt} failed: {exc}")
+            print(f"Keycloak token request to {token_url} failed: {exc}")
+
+        if attempt_number < max_attempts:
+            time.sleep(sleep_seconds)
 
     if shutil.which("docker") is None:
         return None

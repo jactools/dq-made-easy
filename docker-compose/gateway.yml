@@ -1,0 +1,155 @@
+# ============================================================================
+# GATEWAY: Kong API Gateway + Edge proxy
+# ============================================================================
+
+services:
+  kong-db:
+    profiles: ["gateway", "observability"]
+    image: postgres:17-bookworm
+    container_name: dq-made-easy-kong-db
+    command: ["postgres", "-c", "ssl=on", "-c", "ssl_cert_file=/etc/postgresql/certs/tls.crt", "-c", "ssl_key_file=/etc/postgresql/certs/tls.key"]
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kongpass
+    volumes:
+      - ../tmp/certs/services/kong-db:/etc/postgresql/certs:ro
+      - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
+      - kong-db-data-v17:/var/lib/postgresql/data
+    networks:
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "PGPASSWORD=kongpass psql 'host=localhost port=5432 dbname=kong user=kong sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kong-migrations:
+    profiles: ["gateway"]
+    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
+    container_name: dq-made-easy-kong-migrations
+    entrypoint: ["kong"]
+    command: ["migrations", "bootstrap"]
+    depends_on:
+      kong-db:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_DATABASE: kong
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+      KONG_PG_SSL: on
+      KONG_PG_SSL_REQUIRED: on
+      KONG_PG_SSL_VERIFY: on
+      KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
+    volumes:
+      - ../tmp/certs/services/kong-db:/etc/postgresql/certs:ro
+      - ../tmp/certs/mkcert-rootCA.pem:/etc/kong/certs/trust/internal-ca-bundle.pem:ro
+    networks:
+      - dq-network
+    restart: "no"
+
+  kong:
+    profiles: ["gateway"]
+    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
+    build:
+      context: ../dq-kong
+      dockerfile: Dockerfile.kong
+      secrets:
+        - internal_corporate_root_ca
+    container_name: dq-made-easy-kong
+    depends_on:
+      kong-db:
+        condition: service_healthy
+      kong-migrations:
+        condition: service_completed_successfully
+      api:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_DATABASE: kong
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpass
+      KONG_PG_SSL: on
+      KONG_PG_SSL_REQUIRED: on
+      KONG_PG_SSL_VERIFY: on
+      KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8444 ssl
+      KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-https://localhost:8002}
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+      CURL_CA_BUNDLE: /etc/kong/certs/trust/internal-ca-bundle.pem
+      DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
+      SSO_ENABLED: ${SSO_ENABLED?SSO_ENABLED is required}
+      SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      TRUST_PROXY_AUTH: ${TRUST_PROXY_AUTH?TRUST_PROXY_AUTH is required}
+      UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
+      UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
+      KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM?KEYCLOAK_ADMIN_REALM is required}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER?KEYCLOAK_ADMIN_USER is required}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS?KEYCLOAK_ADMIN_PASS is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      KONG_DNS_VALID_TTL: 1
+      KONG_DNS_STALE_TTL: 0
+      KONG_TRACING_INSTRUMENTATIONS: ${KONG_TRACING_INSTRUMENTATIONS?KONG_TRACING_INSTRUMENTATIONS is required}
+      KONG_TRACING_SAMPLING_RATE: ${KONG_TRACING_SAMPLING_RATE?KONG_TRACING_SAMPLING_RATE is required}
+      KONG_OTEL_ENDPOINT: https://dq-made-easy-otel-collector:4318/v1/traces
+      KONG_SSL_CERT: /etc/kong/certs/kong.jac.dot+3.pem
+      KONG_SSL_CERT_KEY: /etc/kong/certs/kong.jac.dot+3-key.pem
+    networks:
+      - dq-network
+    ports:
+      - "${KONG_PROXY_HOST_BIND}:${KONG_PROXY_HOST_PORT}:8443"
+      - "${KONG_ADMIN_HOST_BIND}:${KONG_ADMIN_HOST_PORT}:8444"
+    volumes:
+      - ../tmp/certs:/etc/kong/certs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  edge:
+    profiles: ["edge"]
+    build:
+      context: ../dq-edge
+      dockerfile: Dockerfile.edge
+    container_name: dq-made-easy-edge
+    entrypoint:
+      - /bin/sh
+      - -c
+      - /bin/sh /opt/edge/render-edge-config.sh && exec /docker-entrypoint.sh nginx -g 'daemon off;'
+    environment:
+      EDGE_MODE: ${EDGE_MODE:-local}
+      EDGE_LOCAL_APP_HOST: ${EDGE_LOCAL_APP_HOST:-__MISSING_EDGE_LOCAL_APP_HOST__}
+      EDGE_LOCAL_KONG_HOST: ${EDGE_LOCAL_KONG_HOST:-__MISSING_EDGE_LOCAL_KONG_HOST__}
+      EDGE_LOCAL_KEYCLOAK_HOST: ${EDGE_LOCAL_KEYCLOAK_HOST:-__MISSING_EDGE_LOCAL_KEYCLOAK_HOST__}
+      EDGE_LOCAL_OPENMETADATA_HOST: ${EDGE_LOCAL_OPENMETADATA_HOST:-__MISSING_EDGE_LOCAL_OPENMETADATA_HOST__}
+      EDGE_LOCAL_OBSERVABILITY_HOST: ${EDGE_LOCAL_OBSERVABILITY_HOST:-__MISSING_EDGE_LOCAL_OBSERVABILITY_HOST__}
+      EDGE_LOCAL_SUPPORT_HOST: ${EDGE_LOCAL_SUPPORT_HOST:-__MISSING_EDGE_LOCAL_SUPPORT_HOST__}
+      EDGE_LOCAL_AIRFLOW_HOST: ${EDGE_LOCAL_AIRFLOW_HOST:-}
+      EDGE_PUBLIC_APEX_HOST: ${PUBLIC_APEX_HOST:-__MISSING_PUBLIC_APEX_HOST__}
+      EDGE_PUBLIC_CANONICAL_HOST: ${PUBLIC_CANONICAL_HOST:-__MISSING_PUBLIC_CANONICAL_HOST__}
+      EDGE_SSL_CERT_FILE: /etc/nginx/certs/${EDGE_SSL_CERT_FILE_NAME:-__MISSING_EDGE_SSL_CERT_FILE_NAME__}
+      EDGE_SSL_KEY_FILE: /etc/nginx/certs/${EDGE_SSL_KEY_FILE_NAME:-__MISSING_EDGE_SSL_KEY_FILE_NAME__}
+    ports:
+      - "${EDGE_BIND_HOST:-0.0.0.0}:${EDGE_PUBLIC_PORT:-443}:443"
+    volumes:
+      - type: bind
+        source: ${EDGE_SSL_CERTS_DIR:-__MISSING_EDGE_SSL_CERTS_DIR__}
+        target: /etc/nginx/certs
+        read_only: true
+    networks:
+      - dq-network
+    restart: unless-stopped

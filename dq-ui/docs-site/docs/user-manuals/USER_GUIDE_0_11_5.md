@@ -52,7 +52,7 @@ See `architecture/ARCHITECTURE_DEVIATIONS_AND_EXCEPTIONS.md` for the full regist
 
 ### Troubleshooting TLS failures
 
-If a service reports certificate verification failures or connection timeouts after startup, see the [TLS Observability Guide](/docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE/) for diagnosis steps, or the [Cutover Runbook](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/) for rollback procedures.
+If a service reports certificate verification failures or connection timeouts after startup, see the [TLS Observability Guide](https://github.com/jactools/dq-rulebuilder/blob/main/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md) for diagnosis steps, or the [Cutover Runbook](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/) for rollback procedures.
 
 Common causes:
 - Certificates not yet generated: run `scripts/create_certs.sh`
@@ -64,4 +64,4 @@ Common causes:
 - [TLS Edge Architecture Reference](/docs/implementation-details/TLS_EDGE_ARCHITECTURE_REFERENCE/)
 - [TLS Validation Infrastructure](/docs/implementation-details/TLS_VALIDATION_INFRASTRUCTURE/)
 - [SEC-5 Cutover Runbook](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/)
-- [SEC-5 TLS Observability Guide](/docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE/)
+- [SEC-5 TLS Observability Guide](https://github.com/jactools/dq-rulebuilder/blob/main/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md)

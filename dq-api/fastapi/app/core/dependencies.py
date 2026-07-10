@@ -113,6 +113,8 @@ from app.infrastructure.repositories import (
     PostgresSlaSloRepository,
     InMemoryIncidentRepository,
     PostgresIncidentRepository,
+    PostgresConnectorSyncJobRepository,
+    PostgresConnectorSyncScheduleRepository,
 )
 from app.infrastructure.repositories.postgres_dq_plan_template_repository import PostgresDQPlanTemplateRepository
 
@@ -787,3 +789,34 @@ def get_dq_plan_template_repository() -> DQPlanTemplateRepository:
         service="dq-plan-template-repository", display_name="DQ Plan template repository"
     )
     return _get_postgres_dq_plan_template_repository(database_url)
+
+
+# ---------------------------------------------------------------------------
+# Connector sync tracking repositories (API-1 gap closure)
+# ---------------------------------------------------------------------------
+
+
+@lru_cache
+def _get_postgres_connector_sync_job_repository(database_url: str) -> PostgresConnectorSyncJobRepository:
+    return PostgresConnectorSyncJobRepository(database_url)
+
+
+def get_connector_sync_job_repository() -> "ConnectorSyncJobRepository":
+    database_url = _require_database_url(
+        service="connector-sync-job-repository",
+        display_name="Connector sync job repository",
+    )
+    return _get_postgres_connector_sync_job_repository(database_url)
+
+
+@lru_cache
+def _get_postgres_connector_sync_schedule_repository(database_url: str) -> PostgresConnectorSyncScheduleRepository:
+    return PostgresConnectorSyncScheduleRepository(database_url)
+
+
+def get_connector_sync_schedule_repository() -> "ConnectorSyncScheduleRepository":
+    database_url = _require_database_url(
+        service="connector-sync-schedule-repository",
+        display_name="Connector sync schedule repository",
+    )
+    return _get_postgres_connector_sync_schedule_repository(database_url)

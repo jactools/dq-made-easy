@@ -37,9 +37,9 @@ x-zammad-service: &zammad-service
     - zammad_storage:/opt/zammad/storage
     - ./tmp/certs/mkcert-rootCA.pem:/usr/lib/ssl/cert.pem:ro
     - ./tmp/certs/mkcert-rootCA.pem:/etc/zammad/certs/mkcert-rootCA.pem:ro
+    - ./docker/zammad/wait-for-redis.sh:/usr/local/bin/wait-for-redis.sh:ro
     - ./docker/zammad/initializers/99-openid-connect-server-side-url.rb:/opt/zammad/config/initializers/99-openid-connect-server-side-url.rb:ro
   networks:
-    - default
     - dq-network
 
 services:
@@ -55,6 +55,8 @@ services:
         NODE_NAMESPACE: ${NODE_NAMESPACE}
         NODE_IMAGE: "${NODE_IMAGE}"
         NODE_TAG: ${NODE_TAG}
+    networks:
+      - dq-network
 
   db:
     profiles: ["core","gateway","engine","profiling","observability"]
@@ -76,6 +78,8 @@ services:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
       - pgdata_v18:/var/lib/postgresql
     restart: unless-stopped
+    networks:
+      - dq-network
     healthcheck:
       test: ["CMD-SHELL", "PGPASSWORD=postgres psql 'host=localhost port=5432 dbname=dq user=postgres sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null"]
       interval: 10s
@@ -98,8 +102,8 @@ services:
       KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL?KEYCLOAK_PUBLIC_URL is required}
       SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
-      CURL_CA_BUNDLE: /workspace-tmp/certs/mkcert-rootCA.pem
-      SSL_CERT_FILE: /workspace-tmp/certs/mkcert-rootCA.pem
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
     build:
       context: .
       dockerfile: dq-db/Dockerfile.dq-db.seed
@@ -112,6 +116,8 @@ services:
         - internal_ca_bundle
     env_file: ${ROOT_ENV_FILE:-.env}
     entrypoint: ["/bin/bash", "/workspace/dq-db/scripts/run_db_seed_container.sh"]
+    networks:
+      - dq-network
 
     volumes:
       - ./dq-utils:/workspace/dq-utils:ro
@@ -124,7 +130,7 @@ services:
       - ./VERSION_MANIFEST.json:/workspace/VERSION_MANIFEST.json:ro
       - ./docs/contracts/internal-api:/workspace/dq-api/fastapi/docs/contracts/internal-api:ro
       - ./data_sources/contracts:/workspace/dq-api/fastapi/data_sources/contracts:ro
-      - ./tmp/certs/mkcert-rootCA.pem:/workspace-tmp/certs/mkcert-rootCA.pem:ro
+      - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     restart: "no"
 
   dq-made-easy-db-postgres-exporter:
@@ -142,7 +148,6 @@ services:
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
-      - default
       - dq-network
     labels:
       - "monitoring=true"
@@ -165,6 +170,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5s
+    networks:
+      - dq-network
 
   kafka:
     profiles: ["engine", "core", "gateway", "observability"]
@@ -178,7 +185,8 @@ services:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: SSL://:9092,BROKER://:9094,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: SSL://${KAFKA_ADVERTISED_HOST:-kafka.jac.dot}:${KAFKA_HOST_PORT:-9092},BROKER://kafka:9094
+      KAFKA_ADVERTISED_LISTENERS: SSL://${KAFKA_ADVERTISED_HOST}:${KAFKA_HOST_PORT},BROKER://kafka:9094
+      KAFKA_CERT_HOST: ${KAFKA_CERT_HOST?KAFKA_CERT_HOST is required}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -193,32 +201,24 @@ services:
       KAFKA_SSL_KEY_CREDENTIALS: kafka_key_creds
       KAFKA_SSL_KEYSTORE_TYPE: PKCS12
       KAFKA_SSL_CLIENT_AUTH: none
-      KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED:-true}
-      KAFKA_TLS_CERT_FILE: ${KAFKA_TLS_CERT_FILE:-/etc/kafka/certs/kafka.jac.dot+3.pem}
-      KAFKA_TLS_KEY_FILE: ${KAFKA_TLS_KEY_FILE:-/etc/kafka/certs/kafka.jac.dot+3-key.pem}
-      KAFKA_TLS_KEYSTORE_PASSWORD: ${KAFKA_TLS_KEYSTORE_PASSWORD:-changeit}
+      KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED}
+      KAFKA_TLS_KEYSTORE_PASSWORD: ${KAFKA_TLS_KEYSTORE_PASSWORD}
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
     command: ["/opt/kafka/bin/start-kafka.sh"]
     ports:
-      - "${KAFKA_HOST_BIND:-127.0.0.1}:${KAFKA_HOST_PORT:-9092}:9092"
+      - "${KAFKA_HOST_BIND}:${KAFKA_HOST_PORT}:9092"
     volumes:
       - kafka_data:/var/lib/kafka/data
       - ./tmp/certs:/etc/kafka/certs:ro
+    networks:
+      - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "echo | openssl s_client -connect 127.0.0.1:9092 -servername kafka.jac.dot -CAfile /etc/kafka/certs/mkcert-rootCA.pem >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "echo | openssl s_client -connect ${KAFKA_HEALTHCHECK_HOST}:${KAFKA_HOST_PORT} -servername ${KAFKA_CERT_HOST} -CAfile /etc/kafka/certs/mkcert-rootCA.pem >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 15s
-    networks:
-      default:
-        aliases:
-          - kafka.jac.dot
-      dq-network:
-        aliases:
-          - kafka.jac.dot
-
   redis-exporter:
     profiles: ["observability"]
     image: oliver006/redis_exporter:v1.67.0
@@ -231,7 +231,6 @@ services:
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
-      - default
       - dq-network
     labels:
       - "monitoring=true"
@@ -256,7 +255,6 @@ services:
       retries: 5
       start_period: 20s
     networks:
-      - default
       - dq-network
 
   zammad-redis:
@@ -275,7 +273,6 @@ services:
       retries: 5
       start_period: 5s
     networks:
-      - default
       - dq-network
 
   zammad-memcached:
@@ -286,12 +283,11 @@ services:
     labels:
       - "monitoring=true"
     networks:
-      - default
       - dq-network
 
   zammad-init:
     <<: *zammad-service
-    command: ["zammad-init"]
+    command: ["sh", "/usr/local/bin/wait-for-redis.sh", "zammad-init"]
     depends_on:
       zammad-postgresql:
         condition: service_healthy
@@ -312,6 +308,8 @@ services:
     # support hostname (from EDGE_LOCAL_SUPPORT_HOST) to support direct edge routing.
     <<: *zammad-service
     command:
+      - sh
+      - /usr/local/bin/wait-for-redis.sh
       - bundle
       - exec
       - puma
@@ -341,7 +339,7 @@ services:
 
   zammad-scheduler:
     <<: *zammad-service
-    command: ["zammad-scheduler"]
+    command: ["sh", "/usr/local/bin/wait-for-redis.sh", "zammad-scheduler"]
     depends_on:
       zammad-init:
         condition: service_completed_successfully
@@ -361,6 +359,8 @@ services:
     # which handles path-based routing (/ws, /cable, /).
     <<: *zammad-service
     command:
+      - sh
+      - /usr/local/bin/wait-for-redis.sh
       - bundle
       - exec
       - script/websocket-server.rb
@@ -437,7 +437,6 @@ services:
     ports:
       - "${ZAMMAD_HOST_BIND}:${ZAMMAD_EXPOSE_PORT}:443"
     networks:
-      - default
       - dq-network
     labels:
       - "monitoring=true"
@@ -480,6 +479,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./tmp/certs/mkcert-rootCA.pem:/workspace-tmp/certs/mkcert-rootCA.pem:ro
+    networks:
+      - dq-network
     restart: "no"
 
   keycloak-seed-artifacts:
@@ -510,6 +511,8 @@ services:
     volumes:
       - keycloak_seed_artifacts:/seed-data
       - ./tmp:/workspace-tmp
+    networks:
+      - dq-network
     restart: "no"
 
   keycloak:
@@ -537,12 +540,12 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM}
-      KEYCLOAK_HTTP_RELATIVE_PATH: ${KEYCLOAK_HTTP_RELATIVE_PATH}
+      KEYCLOAK_HTTPS_RELATIVE_PATH: ${KEYCLOAK_HTTPS_RELATIVE_PATH}
       KEYCLOAK_HTTPS_CERT_FILE: /opt/keycloak/certs/keycloak.jac.dot+3.pem
       KEYCLOAK_HTTPS_KEY_FILE: /opt/keycloak/certs/keycloak.jac.dot+3-key.pem
       KEYCLOAK_HTTPS_KEYSTORE_FILE: /opt/keycloak/keystore/keycloak.p12
       KEYCLOAK_HTTPS_KEYSTORE_PASSWORD: ${KEYCLOAK_HTTPS_KEYSTORE_PASSWORD:-changeit}
-    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTP_RELATIVE_PATH}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME}", "--hostname-strict=false"]
+    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME}", "--hostname-strict=false"]
     ports:
       - "${KEYCLOAK_HTTPS_HOST_BIND}:${KEYCLOAK_HTTPS_HOST_PORT}:8443"
     volumes:
@@ -551,7 +554,6 @@ services:
       - ./tmp/certs/keycloak.jac.dot+3.pem:/opt/keycloak/certs/keycloak.jac.dot+3.pem:ro
       - ./tmp/certs/keycloak.jac.dot+3-key.pem:/opt/keycloak/certs/keycloak.jac.dot+3-key.pem:ro
     networks:
-      - default
       - dq-network
     restart: unless-stopped
     healthcheck:
@@ -607,7 +609,6 @@ services:
       DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
     networks:
-      - default
       - dq-network
     restart: unless-stopped
     healthcheck:
@@ -673,7 +674,6 @@ services:
       DQ_DELIVERY_OUTPUT_BUCKET: ${DQ_DELIVERY_OUTPUT_BUCKET:-}
       TZ: UTC
     networks:
-      - default
       - dq-network
     restart: "no"
 
@@ -689,7 +689,6 @@ services:
       - spark-jars:/home/appuser/.dq-spark-jars
       - ivy2_cache:/home/appuser/.ivy2
     networks:
-      - default
       - dq-network
     restart: "no"
 
@@ -741,7 +740,6 @@ services:
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
     networks:
-      - default
       - dq-network
     restart: unless-stopped
 
@@ -783,7 +781,6 @@ services:
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
     networks:
-      - default
       - dq-network
     restart: unless-stopped
 
@@ -822,7 +819,6 @@ services:
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
     networks:
-      - default
       - dq-network
     restart: unless-stopped
 
@@ -860,7 +856,6 @@ services:
       KAFKA_CONSUMER_DB_URL: ${KAFKA_CONSUMER_DB_URL:-${DQ_DB_INTERNAL_URL}}
       DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-INFO}
     networks:
-      - default
       - dq-network
     restart: unless-stopped
 
@@ -885,7 +880,7 @@ services:
     command: ["cd /app && python -m alembic -c alembic.ini upgrade heads"]
     env_file: ${ROOT_ENV_FILE:-.env}
     networks:
-      - default
+      - dq-network
     restart: "no"
 
   api:
@@ -979,7 +974,6 @@ services:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/api/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
-      - default
       - dq-network
     restart: unless-stopped
     healthcheck:
@@ -1007,7 +1001,6 @@ services:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/dq-llm/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
     networks:
-      - default
       - dq-network
     deploy:
       resources:
@@ -1067,7 +1060,6 @@ services:
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: "1.0"
     networks:
-      - default
       - dq-network
     volumes:
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
@@ -1116,7 +1108,6 @@ services:
     volumes:
       - ./tmp/certs:/etc/nginx/certs:ro
     networks:
-      - default
       - dq-network
     restart: unless-stopped
     healthcheck:
@@ -1140,6 +1131,8 @@ services:
       - ./tmp/certs/services/kong-db:/etc/postgresql/certs:ro
       - ./tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
       - kong-db-data-v17:/var/lib/postgresql/data
+    networks:
+      - dq-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "PGPASSWORD=kongpass psql 'host=localhost port=5432 dbname=kong user=kong sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null"]
@@ -1162,7 +1155,6 @@ services:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
-      - default
       - dq-network
     labels:
       - "monitoring=true"
@@ -1189,6 +1181,8 @@ services:
     volumes:
       - ./tmp/certs/services/kong-db:/etc/postgresql/certs:ro
       - ./tmp/certs/mkcert-rootCA.pem:/etc/kong/certs/trust/internal-ca-bundle.pem:ro
+    networks:
+      - dq-network
     restart: "no"
 
   kong:
@@ -1249,7 +1243,6 @@ services:
       KONG_SSL_CERT: /etc/kong/certs/kong.jac.dot+3.pem
       KONG_SSL_CERT_KEY: /etc/kong/certs/kong.jac.dot+3-key.pem
     networks:
-      - default
       - dq-network
     ports:
       - "${KONG_PROXY_HOST_BIND}:${KONG_PROXY_HOST_PORT}:8443"   # HTTPS proxy (public browser/API entrypoint)
@@ -1294,6 +1287,8 @@ services:
       DQ_AIRFLOW_POLL_INTERVAL_SECONDS: ${DQ_AIRFLOW_POLL_INTERVAL_SECONDS:-5}
     ports:
       - "${AIRFLOW_HOST_BIND:-127.0.0.1}:${AIRFLOW_HOST_PORT:-8088}:8080"
+    networks:
+      - dq-network
     restart: unless-stopped
 
   # OpenMetadata stack (optional)
@@ -1337,7 +1332,6 @@ services:
       retries: 10
       start_period: 30s
     networks:
-      - default
       - dq-network
 
   openmetadata-db-postgres-exporter:
@@ -1355,7 +1349,6 @@ services:
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
     restart: unless-stopped
     networks:
-      - default
       - dq-network
     labels:
       - "monitoring=true"
@@ -1394,6 +1387,8 @@ services:
       timeout: 5s
       retries: 20
       start_period: 40s
+    networks:
+      - dq-network
 
   openmetadata-search-v9:
     profiles: ["metadata"]
@@ -1424,6 +1419,8 @@ services:
       timeout: 5s
       retries: 20
       start_period: 40s
+    networks:
+      - dq-network
 
   openmetadata-migrate:
     profiles: ["metadata"]
@@ -1450,6 +1447,8 @@ services:
     volumes:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    networks:
+      - dq-network
     restart: "no"
 
   openmetadata-server:
@@ -1529,7 +1528,6 @@ services:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
-      - default
       - dq-network
     restart: unless-stopped
     healthcheck:
@@ -1590,6 +1588,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    networks:
+      - dq-network
     restart: "no"
 
   openmetadata-ingestion:
@@ -1630,7 +1630,6 @@ services:
       - ./tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
       - ./tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
-      - default
       - dq-network
     restart: unless-stopped
 
@@ -1854,7 +1853,6 @@ services:
         target: /etc/nginx/certs
         read_only: true
     networks:
-      - default
       - dq-network
     restart: unless-stopped
 

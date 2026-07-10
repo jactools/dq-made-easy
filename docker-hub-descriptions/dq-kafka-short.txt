@@ -1,0 +1,1 @@
+Apache Kafka broker image for event streaming and background pipelines

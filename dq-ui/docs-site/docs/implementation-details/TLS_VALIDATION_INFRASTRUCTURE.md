@@ -167,5 +167,5 @@ PUBLIC mode still uses path-based HTTP routing with TLS termination at the edge.
 
 - [SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN/)
 - [SEC_5_W7_CUTOVER_RUNBOOK.md](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/)
-- [SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md](/docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE/)
+- [SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md](https://github.com/jactools/dq-rulebuilder/blob/main/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md)
 - [TLS_EDGE_ARCHITECTURE_REFERENCE.md](/docs/implementation-details/TLS_EDGE_ARCHITECTURE_REFERENCE/)

@@ -1,0 +1,1 @@
+OpenMetadata server image with OpenTelemetry agent and HTTPS startup wrapper

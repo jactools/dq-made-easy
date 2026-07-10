@@ -15,8 +15,8 @@ set -euo pipefail
 # Last modified: 2026-05-01
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-OBS_COMPOSE="${ROOT_DIR}/docker-compose.yml"
-APP_COMPOSE="${ROOT_DIR}/docker-compose.yml"
+OBS_COMPOSE="${ROOT_DIR}/docker-compose/"
+APP_COMPOSE="${ROOT_DIR}/docker-compose/"
 
 LOG_LEVEL=0
 . "$ROOT_DIR/scripts/supporting/setup_env.sh"

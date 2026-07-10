@@ -106,8 +106,8 @@ test_backend_cert_ssan() {
 test_healthchecks_use_tls() {
   log_test "Healthcheck TLS Verification"
   
-  local rails_hc=$(grep -A5 "zammad-railsserver:" "$REPO_ROOT/docker-compose.yml" | grep -c "healthcheck:" || true)
-  local ws_hc=$(grep -A5 "zammad-websocket:" "$REPO_ROOT/docker-compose.yml" | grep -c "healthcheck:" || true)
+  local rails_hc=$(grep -rA5 "zammad-railsserver:" "$REPO_ROOT/docker-compose/" | grep -c "healthcheck:" || true)
+  local ws_hc=$(grep -rA5 "zammad-websocket:" "$REPO_ROOT/docker-compose/" | grep -c "healthcheck:" || true)
   
   if [ "$rails_hc" -gt 0 ]; then
     verbose_output "✓ zammad-railsserver has healthcheck"
@@ -121,7 +121,7 @@ test_healthchecks_use_tls() {
     log_warn "zammad-websocket healthcheck not found"
   fi
   
-  if grep -q "cacert.*rootCA.pem" "$REPO_ROOT/docker-compose.yml"; then
+  if grep -rq "cacert.*rootCA.pem" "$REPO_ROOT/docker-compose/"; then
     verbose_output "✓ Healthchecks verify TLS with mkcert CA bundle"
     log_info "PASS: Healthchecks use TLS certificate verification"
     return 0
@@ -136,7 +136,7 @@ test_no_http_fallback() {
   log_test "No HTTP Fallback Paths"
   
   # Check that backends don't advertise HTTP ports
-  if grep -q "listen 80" "$REPO_ROOT/docker-compose.yml" | grep -q "zammad"; then
+  if grep -rq "listen 80" "$REPO_ROOT/docker-compose/" | grep -q "zammad"; then
     log_error "Zammad backends expose HTTP port 80"
     return 1
   fi
@@ -155,12 +155,12 @@ test_no_http_fallback() {
 test_compose_valid() {
   log_test "Docker Compose YAML Validity"
   
-  if ruby -e "require 'yaml'; YAML.load_file('$REPO_ROOT/docker-compose.yml')" 2>/dev/null; then
-    verbose_output "✓ docker-compose.yml parses successfully"
+  if ruby -e "require 'yaml'; YAML.load_file('$REPO_ROOT/docker-compose/core.yml')" 2>/dev/null; then
+    verbose_output "✓ docker-compose modules parse successfully"
     log_info "PASS: Compose file is valid YAML"
     return 0
   else
-    log_error "docker-compose.yml is invalid"
+    log_error "docker-compose modules are invalid"
     return 1
   fi
 }
@@ -169,11 +169,11 @@ test_compose_valid() {
 test_zammad_https_optional() {
   log_test "zammad-https Service Status"
   
-  if grep -q "SEC-5 Compliance" "$REPO_ROOT/docker-compose.yml"; then
+  if grep -rq "SEC-5 Compliance" "$REPO_ROOT/docker-compose/"; then
     verbose_output "✓ zammad-https has SEC-5 compliance documentation"
   fi
   
-  if grep -q "zammad-https is optional" "$REPO_ROOT/docker-compose.yml"; then
+  if grep -rq "zammad-https is optional" "$REPO_ROOT/docker-compose/"; then
     verbose_output "✓ zammad-https is documented as optional for SEC-5 LOCAL mode"
     log_info "PASS: zammad-https deprecation documented"
     return 0

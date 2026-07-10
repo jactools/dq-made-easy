@@ -132,4 +132,4 @@ For SNI passthrough: uses stream module (LOCAL mode only), not HTTP location blo
 - [SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN/)
 - [SEC_5_W6_IMPLEMENTATION_STRATEGY.md](/docs/implementation-details/SEC_5_W6_IMPLEMENTATION_STRATEGY/)
 - [SEC_5_W7_CUTOVER_RUNBOOK.md](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/)
-- [SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md](/docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE/)
+- [SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md](https://github.com/jactools/dq-rulebuilder/blob/main/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md)

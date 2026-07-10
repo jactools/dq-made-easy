@@ -1,4 +1,5 @@
 from app.domain.entities.admin import AdminRoleEntity, AdminUserEntity, ExceptionFactAccessRequestEntity
+from app.domain.entities.actuality_date_contract import ActualityDateContract, JoinConsistencyActualityDateParams
 from app.domain.entities.app_config import AppConfigEntity
 from app.domain.entities.approvals import ApprovalAuditEntity, ApprovalEntity, build_approval_audit_entity
 from app.domain.entities.catalog_governance import (
@@ -295,6 +296,8 @@ from app.domain.entities.federated_metadata_registry import FederatedMetadataReg
 from app.domain.entities.federated_metadata_registry import FederatedMetadataRegistryGoverningScopeEntity
 
 __all__ = [
+	"ActualityDateContract",
+	"JoinConsistencyActualityDateParams",
 	"AttributeProtectionPolicyEntity",
 	"DataEncryptionKeyEntity",
 	"AddRuleAttributesResultEntity",

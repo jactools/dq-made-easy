@@ -1,0 +1,1 @@
+Seed image that prepares Zammad support data and demo content

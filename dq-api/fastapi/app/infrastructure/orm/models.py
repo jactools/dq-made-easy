@@ -2044,3 +2044,105 @@ class DQPlanTemplateVersionRow(Base):
         UniqueConstraint("template_id", "template_version", name="uq_template_version"),
     )
 
+
+# ---------------------------------------------------------------------------
+# Connector Sync Jobs (API-1 gap closure)
+# ---------------------------------------------------------------------------
+
+class ConnectorSyncJobRow(Base):
+    """Background sync job tracking for connector instances."""
+
+    __tablename__ = "connector_sync_jobs"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    connector_instance_id: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    kind: Mapped[str] = mapped_column(Text, nullable=False, server_default="full_sync")
+    trigger: Mapped[str] = mapped_column(Text, nullable=False, server_default="manual")
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="pending")
+    retry_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    max_retries: Mapped[int] = mapped_column(Integer, nullable=False, server_default="3")
+    synced_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    added_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    updated_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    removed_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    error_code: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_details: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    result_snapshot: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    workspace_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tenant_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        Index("ix_connector_sync_jobs_instance", "connector_instance_id"),
+        Index("ix_connector_sync_jobs_provider", "provider"),
+        Index("ix_connector_sync_jobs_status", "status"),
+        Index("ix_connector_sync_jobs_created_at", "created_at"),
+        Index("ix_connector_sync_jobs_workspace", "workspace_id"),
+    )
+
+
+class ConnectorSyncScheduleRow(Base):
+    """Periodic sync schedule configuration for connector instances."""
+
+    __tablename__ = "connector_sync_schedules"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    connector_instance_id: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    frequency: Mapped[str] = mapped_column(Text, nullable=False, server_default="day")
+    cron_expression: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    interval_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    next_run_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_run_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_job_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    timezone: Mapped[str] = mapped_column(Text, nullable=False, server_default="UTC")
+    workspace_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tenant_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        Index("ix_connector_sync_schedules_instance", "connector_instance_id"),
+        Index("ix_connector_sync_schedules_provider", "provider"),
+        Index("ix_connector_sync_schedules_next_run", "next_run_at"),
+        Index("ix_connector_sync_schedules_active", "is_active"),
+    )
+
+
+class ConnectorAssetSnapshotRow(Base):
+    """Asset metadata snapshots for incremental sync drift detection."""
+
+    __tablename__ = "connector_asset_snapshots"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    connector_instance_id: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    asset_identifier: Mapped[str] = mapped_column(Text, nullable=False)
+    asset_kind: Mapped[str] = mapped_column(Text, nullable=False)
+    asset_metadata: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    checksum: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        Index("ix_connector_asset_snapshots_instance", "connector_instance_id"),
+        Index("ix_connector_asset_snapshots_provider", "provider"),
+        Index(
+            "ix_connector_asset_snapshots_lookup",
+            "connector_instance_id",
+            "asset_identifier",
+        ),
+        UniqueConstraint(
+            "connector_instance_id",
+            "asset_identifier",
+            name="uq_connector_asset_snapshot_lookup",
+        ),
+    )
+

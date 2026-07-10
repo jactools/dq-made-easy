@@ -26,7 +26,12 @@ require_file() {
 require_present() {
   local needle="$1"
   local file_path="$2"
-  if ! grep -Fq "$needle" "$file_path"; then
+  if [ -d "$file_path" ]; then
+    if ! grep -rFq "$needle" "$file_path"; then
+      error "$my_name" "Missing '${needle}' in ${file_path}"
+      exit 1
+    fi
+  elif ! grep -Fq "$needle" "$file_path"; then
     error "$my_name" "Missing '${needle}' in ${file_path}"
     exit 1
   fi
@@ -35,13 +40,18 @@ require_present() {
 require_absent() {
   local needle="$1"
   local file_path="$2"
-  if grep -Fq "$needle" "$file_path"; then
+  if [ -d "$file_path" ]; then
+    if grep -rFq "$needle" "$file_path"; then
+      error "$my_name" "Found forbidden '${needle}' in ${file_path}"
+      exit 1
+    fi
+  elif grep -Fq "$needle" "$file_path"; then
     error "$my_name" "Found forbidden '${needle}' in ${file_path}"
     exit 1
   fi
 }
 
-require_file "$ROOT_DIR/docker-compose.yml"
+require_file "$ROOT_DIR/docker-compose/docker-compose.yml"
 require_file "$ROOT_DIR/.env.dev.example"
 require_file "$ROOT_DIR/.env.test.example"
 require_file "$ROOT_DIR/.env.prod.example"
@@ -49,7 +59,7 @@ require_file "$ROOT_DIR/.env.deployment.example"
 require_file "$ROOT_DIR/scripts/create_certs.sh"
 
 for file_path in \
-  "$ROOT_DIR/docker-compose.yml" \
+  "$ROOT_DIR/docker-compose/" \
   "$ROOT_DIR/.env.dev.example" \
   "$ROOT_DIR/.env.test.example" \
   "$ROOT_DIR/.env.prod.example" \
@@ -58,22 +68,22 @@ do
   require_absent 'sslmode=disable' "$file_path"
 done
 
-require_present 'sslmode=verify-full' "$ROOT_DIR/docker-compose.yml"
-require_present 'sslrootcert=' "$ROOT_DIR/docker-compose.yml"
-require_present 'KONG_PG_SSL: on' "$ROOT_DIR/docker-compose.yml"
-require_present 'KONG_PG_SSL_REQUIRED: on' "$ROOT_DIR/docker-compose.yml"
-require_present 'KONG_PG_SSL_VERIFY: on' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/services/db:/etc/postgresql/certs:ro' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/services/kong-db:/etc/postgresql/certs:ro' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/services/openmetadata-db:/etc/postgresql/certs:ro' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro' "$ROOT_DIR/docker-compose.yml"
-require_present 'KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem' "$ROOT_DIR/docker-compose.yml"
-require_present 'KONG_ADMIN_LISTEN: 0.0.0.0:8444 ssl' "$ROOT_DIR/docker-compose.yml"
-require_present 'CURL_CA_BUNDLE: /etc/kong/certs/trust/internal-ca-bundle.pem' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/services/engine:/etc/engine/certs:ro' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/services/llm:/etc/dq-llm/certs:ro' "$ROOT_DIR/docker-compose.yml"
-require_present './tmp/certs/services/aistor:/root/.minio/certs:ro' "$ROOT_DIR/docker-compose.yml"
+require_present 'sslmode=verify-full' "$ROOT_DIR/docker-compose/"
+require_present 'sslrootcert=' "$ROOT_DIR/docker-compose/"
+require_present 'KONG_PG_SSL: on' "$ROOT_DIR/docker-compose/"
+require_present 'KONG_PG_SSL_REQUIRED: on' "$ROOT_DIR/docker-compose/"
+require_present 'KONG_PG_SSL_VERIFY: on' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/services/db:/etc/postgresql/certs:ro' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/services/kong-db:/etc/postgresql/certs:ro' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/services/openmetadata-db:/etc/postgresql/certs:ro' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro' "$ROOT_DIR/docker-compose/"
+require_present 'KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem' "$ROOT_DIR/docker-compose/"
+require_present 'KONG_ADMIN_LISTEN: 0.0.0.0:8444 ssl' "$ROOT_DIR/docker-compose/"
+require_present 'CURL_CA_BUNDLE: /etc/kong/certs/trust/internal-ca-bundle.pem' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/services/engine:/etc/engine/certs:ro' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/services/llm:/etc/dq-llm/certs:ro' "$ROOT_DIR/docker-compose/"
+require_present './tmp/certs/services/aistor:/root/.minio/certs:ro' "$ROOT_DIR/docker-compose/"
 require_present 'generate_service_cert "kong-db" kong-db' "$ROOT_DIR/scripts/create_certs.sh"
 require_present 'generate_service_cert "engine" dq-made-easy-engine dq-made-easy-engine.local dq-made-easy-engine.jac.dot localhost 127.0.0.1 ::1' "$ROOT_DIR/scripts/create_certs.sh"
 require_present 'generate_service_cert "llm" dq-made-easy-llm localhost 127.0.0.1 ::1' "$ROOT_DIR/scripts/create_certs.sh"

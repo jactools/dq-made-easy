@@ -17,6 +17,7 @@ Additional instruction files (if they exist):
 - `.github/copilot/05-versioning.md` — Versioning rules
 - `.github/copilot/06-internal-service-contracts.md` — Internal env, URL, and trust-bundle contracts
 - `.github/copilot/07-tls-transport-enforcement.md` — No-HTTP rule, edge routing model, certificate generation, healthcheck and exception registry conventions
+- `.github/instructions/env-only-connection.instructions.md` — Enforce env-file-only service connectivity; no script-local service defaults or fallback paths
 - `.github/instructions/python-test-module-boundary.instructions.md` — Every Python production module must have its own dedicated unit test module
 - `.github/instructions/commit-validation-gate.instructions.md` — All commits must pass relevant build/test validation before being created; if a script can't be run, the commit is blocked
 

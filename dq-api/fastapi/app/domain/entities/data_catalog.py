@@ -173,6 +173,8 @@ class DataDeliveryNoteEntity(EntityModel):
     delivery_status: str = ""
     delivery_format: str | None = None
     delivery_format_warning: str | None = None
+    actuality_date: str | None = None
+    actuality_date_attribute: str | None = None
     record_count: int = 0
     size_bytes: int = 0
     attributes_count: int = 0

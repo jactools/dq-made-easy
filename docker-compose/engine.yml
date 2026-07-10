@@ -1,0 +1,282 @@
+# ============================================================================
+# ENGINE: Engine services and workers
+# ============================================================================
+
+services:
+  dq-made-easy-engine:
+    profiles: ["engine"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: dq-engine/Dockerfile.engine
+      args:
+        PYTHON_REGISTRY: ${PYTHON_REGISTRY:-}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-library/python}
+        PYTHON_TAG: ${PYTHON_TAG:-3.13-slim-bookworm}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
+        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:-false}
+        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
+        INTERNAL_ROOT_CA: ${INTERNAL_ROOT_CA:-}
+      secrets:
+        - internal_corporate_root_ca
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8003:8000"
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+      - ../tmp/certs/services/engine:/etc/engine/certs:ro
+      - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/engine/trust/internal-ca-bundle.pem:ro
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      TZ: UTC
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-made-easy-engine
+      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_CONSOLE_EXPORT: "1"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: "1.0"
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
+    networks:
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import ssl, urllib.request; ctx = ssl.create_default_context(cafile='/etc/engine/trust/internal-ca-bundle.pem'); urllib.request.urlopen('https://localhost:8000/docs', context=ctx)\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  dq-made-easy-engine-warmup:
+    profiles: ["engine"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    env_file:
+      - ${ROOT_ENV_FILE:-.env}
+    command: ["python", "scripts/warmup_spark_jars.py", "--ivy-dir", "/home/appuser/.ivy2", "--jar-dir", "/home/appuser/.dq-spark-jars"]
+    environment:
+      MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+    networks:
+      - dq-network
+    restart: "no"
+
+  dq-made-easy-engine-gx-worker:
+    profiles: ["workers"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    depends_on:
+      kong:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["python", "-u", "gx_dispatch_worker.py"]
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+      - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
+    environment:
+      TZ: UTC
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-made-easy-engine
+      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
+      OTEL_CONSOLE_EXPORT: "1"
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      GX_EXECUTION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+      GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-gx-worker
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    networks:
+      - dq-network
+    restart: unless-stopped
+
+  dq-made-easy-engine-join-pair-etl-worker:
+    profiles: ["workers"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    depends_on:
+      kong:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["python", "-u", "join_pair_materialization_worker.py"]
+    volumes:
+      - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
+    environment:
+      TZ: UTC
+      REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+      GX_JOIN_PAIR_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-join-pair-etl-worker
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    networks:
+      - dq-network
+    restart: unless-stopped
+
+  dq-made-easy-engine-test-data-worker:
+    profiles: ["workers"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["python", "-u", "test_data_materialization_worker.py"]
+    volumes:
+      - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
+      - ../tmp/certs/mkcert-rootCA.pem:/etc/test-data-worker/certs/mkcert-rootCA.pem:ro
+    environment:
+      TZ: UTC
+      TEST_DATA_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/test-data-worker/certs/mkcert-rootCA.pem&ssl_check_hostname=true
+      TEST_DATA_MATERIALIZATION_QUEUE_KEY: ${TEST_DATA_MATERIALIZATION_QUEUE_KEY:-dq-test-data:materialize}
+      TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-test-data-worker
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_TEST_DATA_OUTPUT_PREFIX: ${DQ_TEST_DATA_OUTPUT_PREFIX:-}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    networks:
+      - dq-network
+    restart: unless-stopped
+
+  kafka-consumer:
+    profiles: ["workers"]
+    image: ${DQ_KAFKA_CONSUMER_REGISTRY:-}${DQ_KAFKA_CONSUMER_NAMESPACE:-}${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}:${DQ_KAFKA_CONSUMER_TAG:-latest}
+    build:
+      context: ../dq-kafka-consumer
+      dockerfile: Dockerfile.kafka-consumer
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      TZ: UTC
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9094
+      KAFKA_TOPIC: ${KAFKA_CONSUMER_TOPIC:-dq-made-easy.gx.violations}
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID:-dq-consumer-violations}
+      KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS: ${KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS:-5}
+      KAFKA_CONSUMER_MAX_POLL_RECORDS: ${KAFKA_CONSUMER_MAX_POLL_RECORDS:-500}
+      KAFKA_CONSUMER_LOOP_DELAY_SECONDS: ${KAFKA_CONSUMER_LOOP_DELAY_SECONDS:-30}
+      KAFKA_CONSUMER_BATCH_SIZE: ${KAFKA_CONSUMER_BATCH_SIZE:-1000}
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
+      DQ_S3_REGION: ${DQ_S3_REGION:-}
+      KAFKA_CONSUMER_S3_BUCKET: ${KAFKA_CONSUMER_S3_BUCKET:-dq-gx-exceptions}
+      KAFKA_CONSUMER_S3_PREFIX: ${KAFKA_CONSUMER_S3_PREFIX:-gx-exceptions}
+      KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS: ${KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS:-true}
+      KAFKA_CONSUMER_DB_URL: ${KAFKA_CONSUMER_DB_URL:-${DQ_DB_INTERNAL_URL}}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-INFO}
+    networks:
+      - dq-network
+    restart: unless-stopped
+
+  profiling-worker:
+    profiles: ["workers", "profiling", "observability"]
+    image: ${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:${DQ_PROFILING_TAG:-latest}
+    build:
+      args:
+        DQ_BASE_REGISTRY: ${DQ_BASE_REGISTRY}
+        DQ_BASE_NAMESPACE: ${DQ_BASE_NAMESPACE}
+        DQ_BASE_IMAGE: ${DQ_BASE_IMAGE}
+        DQ_BASE_TAG: ${DQ_BASE_TAG}
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+      context: ../dq-profiling
+      dockerfile: Dockerfile.profiling
+    depends_on:
+      redis:
+        condition: service_healthy
+      kong:
+        condition: service_healthy
+    environment:
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+      PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
+      DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
+      ENVIRONMENT: ${ENVIRONMENT}
+      TZ: UTC
+      PROFILING_WORKER_CONCURRENCY: 2
+      PROFILING_METRICS_PORT: 8001
+      # OpenTelemetry
+      OTEL_SERVICE_NAME: dq-made-easy-profiling
+      OTEL_SERVICE_VERSION: ${DQ_PROFILING_TAG:-dev}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_FORCE: "1"
+      OTEL_CONSOLE_EXPORT: "1"
+      OTEL_TRACE_EXPORT_DEBUG: "1"
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: "1.0"
+    networks:
+      - dq-network
+    volumes:
+      - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
+    restart: unless-stopped
+    healthcheck:
+      disable: true

@@ -84,7 +84,7 @@ if [ "$PACKAGE_IMAGE" = true ]; then
   source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
   # Build docker image for frontend using local dist
   info "local_build_frontend.sh" "Building Docker image for frontend using local dist"
-  DOCKER_BUILDKIT=1 docker_compose --progress=plain -f "$ROOT_DIR/docker-compose.yml" build frontend
+  DOCKER_BUILDKIT=1 docker_compose --progress=plain build frontend
 fi
 
 if [ "$PACKAGE_IMAGE" = true ]; then

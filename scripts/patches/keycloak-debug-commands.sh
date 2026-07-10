@@ -37,15 +37,10 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [ -f .env ]; then
-  echo "Sourcing .env..."
-  set -a
-  # shellcheck disable=SC1091
-  source .env
-  set +a
-else
-  echo "Warning: .env not found in cwd; ensure relevant env vars are set." >&2
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$SCRIPT_DIR/scripts/supporting/env/selection.sh"
+init_root_env_file "$SCRIPT_DIR"
+source_selected_root_env_file
 
 command -v jq >/dev/null 2>&1 || { echo "ERROR: jq is required (install it)" >&2; exit 2; }
 

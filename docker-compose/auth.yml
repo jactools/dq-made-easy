@@ -1,0 +1,83 @@
+# ============================================================================
+# AUTH: Authentication (Keycloak)
+# ============================================================================
+
+services:
+  keycloak-seed-artifacts:
+    profiles: ["auth", "gateway"]
+    build:
+      context: ..
+      dockerfile: dq-keycloak/Dockerfile.keycloak.seed
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT?ENVIRONMENT is required}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
+      KEYCLOAK_REALM_DISPLAY_NAME: ${KEYCLOAK_REALM_DISPLAY_NAME}
+      KEYCLOAK_JACCLOUD_USERNAME: ${KEYCLOAK_JACCLOUD_USERNAME?KEYCLOAK_JACCLOUD_USERNAME is required}
+      SMOKE_LOGIN_EMAIL: ${SMOKE_LOGIN_EMAIL?SMOKE_LOGIN_EMAIL is required}
+      OPERATOR_LOGIN_EMAIL: ${OPERATOR_LOGIN_EMAIL:-operator@jaccloud.nl}
+      AUDITOR_LOGIN_EMAIL: ${AUDITOR_LOGIN_EMAIL:-auditor@jaccloud.nl}
+      REGULATOR_LOGIN_EMAIL: ${REGULATOR_LOGIN_EMAIL:-regulator@jaccloud.nl}
+      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:-${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}}
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      EDGE_LOCAL_SUPPORT_HOST: ${EDGE_LOCAL_SUPPORT_HOST?EDGE_LOCAL_SUPPORT_HOST is required}
+      UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
+      UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
+      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
+      OPENMETADATA_CALLBACK: ${OPENMETADATA_CALLBACK:-https://openmetadata.jac.dot:8585/callback}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-https://observability.jac.dot:3000}
+      GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+    volumes:
+      - keycloak_seed_artifacts:/seed-data
+      - ../tmp:/workspace-tmp
+    networks:
+      - dq-network
+    restart: "no"
+
+  keycloak:
+    profiles: ["auth", "gateway"]
+    image: ${DQ_KEYCLOAK_REGISTRY:-}${DQ_KEYCLOAK_NAMESPACE:-}${DQ_KEYCLOAK_IMAGE:-dq-made-easy-keycloak}:${DQ_KEYCLOAK_TAG:-latest}
+    build:
+      context: ../dq-keycloak
+      dockerfile: Dockerfile.keycloak
+    depends_on:
+      keycloak-seed-artifacts:
+        condition: service_completed_successfully
+    environment:
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}
+      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL?OIDC_REDIRECT_BASE_URL is required}
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-https://observability.jac.dot:3000}
+      GRAFANA_OIDC_REALM_ROLE: ${GRAFANA_OIDC_REALM_ROLE:-dq:rules:read}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_REALM_ROLE: ${DQ_ENGINE_OIDC_REALM_ROLE:-dq:rules:write}
+      UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
+      UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_HTTPS_RELATIVE_PATH: ${KEYCLOAK_HTTPS_RELATIVE_PATH}
+      KEYCLOAK_HTTPS_CERT_FILE: /opt/keycloak/certs/keycloak.jac.dot+3.pem
+      KEYCLOAK_HTTPS_KEY_FILE: /opt/keycloak/certs/keycloak.jac.dot+3-key.pem
+      KEYCLOAK_HTTPS_KEYSTORE_FILE: /opt/keycloak/keystore/keycloak.p12
+      KEYCLOAK_HTTPS_KEYSTORE_PASSWORD: ${KEYCLOAK_HTTPS_KEYSTORE_PASSWORD:-changeit}
+    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME}", "--hostname-strict=false"]
+    ports:
+      - "${KEYCLOAK_HTTPS_HOST_BIND}:${KEYCLOAK_HTTPS_HOST_PORT}:8443"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - keycloak_seed_artifacts:/opt/keycloak/realm-import:ro
+      - ../tmp/certs/keycloak.jac.dot+3.pem:/opt/keycloak/certs/keycloak.jac.dot+3.pem:ro
+      - ../tmp/certs/keycloak.jac.dot+3-key.pem:/opt/keycloak/certs/keycloak.jac.dot+3-key.pem:ro
+    networks:
+      - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/keycloak/bin/kc.sh --version >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s

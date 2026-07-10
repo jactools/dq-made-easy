@@ -314,6 +314,17 @@ emit_step_header() {
   info "$my_name" "========================================"
 }
 
+refresh_docker_hub_description() {
+  local image_name="$1"
+
+  if [ "$NO_PUSH" = true ]; then
+    return 0
+  fi
+
+  info "$my_name" "Refreshing Docker Hub description for $image_name..."
+  bash "$ROOT_DIR/scripts/update_docker_hub.sh" --image "$image_name"
+}
+
 run_script_step() {
   local step_name="$1"
   local step_script="$2"
@@ -338,6 +349,8 @@ run_script_step() {
 
   export "$tag_var=$tag_value"
   "$step_script" "${SCRIPT_ARGS[@]}"
+
+  refresh_docker_hub_description "$step_name"
 }
 
 run_direct_build_step() {
@@ -383,6 +396,8 @@ run_direct_build_step() {
 
   if [ "$NO_PUSH" = true ]; then
     info "$my_name" "Skipping push (--no-push specified); loaded local image for platform ${build_platform}"
+  else
+    refresh_docker_hub_description "$step_name"
   fi
 }
 

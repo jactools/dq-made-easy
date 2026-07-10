@@ -22,8 +22,10 @@ cd "$ROOT_DIR"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 my_name="apply_external_id_patch.sh"
 
-. .env
-. ./scripts/supporting/setup_env.sh
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+init_root_env_file "$ROOT_DIR"
+source_selected_root_env_file
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 
 DQ_DB_LOCAL_URL="${DQ_DB_LOCAL_URL:?DQ_DB_LOCAL_URL is required}"
 

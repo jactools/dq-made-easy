@@ -175,7 +175,7 @@ Remaining architecture gaps (documented for Phase 2):
 - [SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY.md](/docs/implementation-details/SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY/)
 - [SEC_5_W6_IMPLEMENTATION_STRATEGY.md](/docs/implementation-details/SEC_5_W6_IMPLEMENTATION_STRATEGY/)
 - [SEC_5_W7_CUTOVER_RUNBOOK.md](/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/)
-- [SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md](/docs/implementation-details/SEC_5_W7_TLS_OBSERVABILITY_GUIDE/)
+- [SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md](https://github.com/jactools/dq-rulebuilder/blob/main/SEC_5_W7_TLS_OBSERVABILITY_GUIDE.md)
 - [TLS_EDGE_ARCHITECTURE_REFERENCE.md](/docs/implementation-details/TLS_EDGE_ARCHITECTURE_REFERENCE/)
 - [TLS_VALIDATION_INFRASTRUCTURE.md](/docs/implementation-details/TLS_VALIDATION_INFRASTRUCTURE/)
 - [SEC-1 Internal Service TLS Implementation Plan](/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/)

@@ -1,0 +1,1 @@
+Trino query engine image for federated SQL access across platform data sources

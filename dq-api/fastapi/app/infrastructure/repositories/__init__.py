@@ -67,6 +67,8 @@ from app.infrastructure.repositories.in_memory_incident_repository import InMemo
 from app.infrastructure.repositories.postgres_incident_repository import PostgresIncidentRepository
 from app.infrastructure.repositories.in_memory_sla_slo_repository import InMemorySlaSloRepository
 from app.infrastructure.repositories.postgres_sla_slo_repository import PostgresSlaSloRepository
+from app.infrastructure.repositories.postgres_connector_sync_job_repository import PostgresConnectorSyncJobRepository
+from app.infrastructure.repositories.postgres_connector_sync_schedule_repository import PostgresConnectorSyncScheduleRepository
 
 __all__ = [
 	"InMemoryAdminRepository",
@@ -138,4 +140,6 @@ __all__ = [
 	"InMemoryProfilingRepository",
 	"RedisProfilingRepository",
 	"PostgresProfilingRepository",
+	"PostgresConnectorSyncJobRepository",
+	"PostgresConnectorSyncScheduleRepository",
 ]

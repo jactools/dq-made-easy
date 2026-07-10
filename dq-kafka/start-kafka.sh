@@ -2,8 +2,9 @@
 set -euo pipefail
 
 if [[ "${KAFKA_TLS_ENABLED:-true}" == "true" ]]; then
-  cert_file="${KAFKA_TLS_CERT_FILE:-/etc/kafka/certs/kafka.jac.dot+3.pem}"
-  key_file="${KAFKA_TLS_KEY_FILE:-/etc/kafka/certs/kafka.jac.dot+3-key.pem}"
+  cert_host="${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required}"
+  cert_file="${KAFKA_TLS_CERT_FILE:-/etc/kafka/certs/${cert_host}+3.pem}"
+  key_file="${KAFKA_TLS_KEY_FILE:-/etc/kafka/certs/${cert_host}+3-key.pem}"
   keystore_password="${KAFKA_TLS_KEYSTORE_PASSWORD:-changeit}"
   keystore_file="/etc/kafka/secrets/kafka.keystore.p12"
   keystore_creds_file="/etc/kafka/secrets/kafka_keystore_creds"

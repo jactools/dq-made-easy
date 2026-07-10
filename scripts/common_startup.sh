@@ -70,6 +70,9 @@ if [[ ! -f "$ROOT_ENV_FILE" ]]; then
   exit 1
 fi
 
+info "$my_name" "Validating selected env file before startup..."
+validate_selected_root_env_file "$ROOT_DIR" full
+
 export ROOT_ENV_FILE
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
 info "$my_name" "Starting container stack orchestration..."

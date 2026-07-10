@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DB_NAME="${DB_NAME:-dq}"
-DB_USER="${DB_USER:-postgres}"
+DQ_DB_INTERNAL_URL="${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}"
 SEED_ROOT="${SEED_ROOT:-/opt/dq-db/init}"
 
 echo "== Apply seed data in running container =="
-echo "Database: ${DB_NAME}"
+echo "Database: ${DQ_DB_INTERNAL_URL}"
 
 if [ ! -d "$SEED_ROOT" ]; then
   echo "ERROR: seed root not found: $SEED_ROOT"
@@ -22,7 +21,7 @@ for file in "$SEED_ROOT"/generated_seed_*.sql; do
     continue
   fi
   echo "Applying generated seed: $base"
-  psql -v ON_ERROR_STOP=1 -U "$DB_USER" -d "$DB_NAME" -f "$file"
+  psql "$DQ_DB_INTERNAL_URL" -v ON_ERROR_STOP=1 -f "$file"
 done
 shopt -u nullglob
 
@@ -70,7 +69,7 @@ WHERE NOT EXISTS (
 SQL
 
 echo "Applying post-seed file: $(basename "$rule_version_metadata_sql")"
-psql -v ON_ERROR_STOP=1 -U "$DB_USER" -d "$DB_NAME" -f "$rule_version_metadata_sql"
+psql "$DQ_DB_INTERNAL_URL" -v ON_ERROR_STOP=1 -f "$rule_version_metadata_sql"
 rm -f "$rule_version_metadata_sql"
 
 echo "Seed data applied"
@@ -118,7 +117,7 @@ done
 
 # Query database for actual counts
 declare -A actual_counts
-query_result=$(psql -v ON_ERROR_STOP=0 -t -U "$DB_USER" -d "$DB_NAME" \
+query_result=$(psql "$DQ_DB_INTERNAL_URL" -v ON_ERROR_STOP=0 -t \
   -c "SELECT COALESCE(workspace_id, 'default'), COUNT(*) FROM data_sets WHERE workspace_id IS NOT NULL AND workspace_id != '' GROUP BY workspace_id ORDER BY workspace_id;" 2>&1 || true)
 
 while IFS='|' read -r ws count; do

@@ -11,6 +11,9 @@
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 
+# Modular docker-compose entry point (include file that pulls in all modules)
+COMPOSE_FILE="${COMPOSE_FILE:-$ROOT_DIR/docker-compose/docker-compose.yml}"
+
 IMAGE_TAG_VARS=(
   DQ_BASE_TAG
   DQ_API_TAG
@@ -160,7 +163,7 @@ docker_compose() {
   effective_env_file="$generated_effective_env_file"
 
   local compose_exit_code=0
-  if docker compose --env-file "$effective_env_file" "$@"; then
+  if docker compose -f "$COMPOSE_FILE" --env-file "$effective_env_file" "$@"; then
     compose_exit_code=0
   else
     compose_exit_code=$?

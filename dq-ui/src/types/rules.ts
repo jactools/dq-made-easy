@@ -83,6 +83,7 @@ export interface CorrectParams {
   referenceDataObjectVersionId: string;
   joinKeys: CrossObjectJoinKey[];
   comparison: CrossObjectComparison;
+  actualityDate?: ActualityDateContract;
 }
 export interface ReconcileParams {
   checkType: 'RECONCILE';
@@ -90,6 +91,7 @@ export interface ReconcileParams {
   rightDataObjectVersionId: string;
   joinKeys: CrossObjectJoinKey[];
   comparisons: CrossObjectComparison[];
+  actualityDate?: ActualityDateContract;
 }
 export interface PlausibleContextualRange {
   contextValue: string;
@@ -119,6 +121,7 @@ export interface TransferMatchParams {
   comparisons?: CrossObjectComparison[];
   leftHashAttribute?: string;
   rightHashAttribute?: string;
+  actualityDate?: ActualityDateContract;
 }
 export interface JoinConsistencyJoinKey {
   leftAttribute: string;
@@ -129,20 +132,29 @@ export interface JoinConsistencyComparison {
   rightAttribute: string;
   mode: 'exact' | 'case_insensitive';
 }
-export interface JoinConsistencyActualityDate {
+// Shared across CORRECT, RECONCILE, TRANSFER_MATCH, and JOIN_CONSISTENCY.
+// Matches backend ActualityDateContract Pydantic model.
+export type ActualityDateToleranceSource = 'DELIVERY_CONTRACT' | 'DELIVERY_METADATA' | 'EXPLICIT';
+export type ActualityDateToleranceUnit = 'minutes' | 'hours' | 'days';
+
+export interface ActualityDateContract {
   leftAttribute: string;
   rightAttribute: string;
-  toleranceSource: 'DELIVERY_CONTRACT';
+  toleranceSource: ActualityDateToleranceSource;
   contractId: string;
   contractVersion?: string;
   resolvedToleranceValue?: number;
-  resolvedToleranceUnit?: 'minutes' | 'hours' | 'days';
+  resolvedToleranceUnit?: ActualityDateToleranceUnit;
   overrideToleranceValue?: number;
-  overrideToleranceUnit?: 'minutes' | 'hours' | 'days';
+  overrideToleranceUnit?: ActualityDateToleranceUnit;
   overrideAllowed?: boolean;
   maxOverrideToleranceValue?: number;
-  maxOverrideToleranceUnit?: 'minutes' | 'hours' | 'days';
+  maxOverrideToleranceUnit?: ActualityDateToleranceUnit;
+  autoResolve?: boolean;
 }
+
+/** @deprecated use ActualityDateContract; kept for backward-compat with persisted rules. */
+export type JoinConsistencyActualityDate = ActualityDateContract;
 export interface JoinConsistencyParams {
   checkType: 'JOIN_CONSISTENCY';
   leftDataObjectVersionId: string;

@@ -606,7 +606,7 @@ def _build_correct_expectations(*, params: Mapping[str, Any], meta: Mapping[str,
         raise GxExpectationBuildError("CORRECT check type requires 'comparison'")
     left_column = _require_text(comparison, "leftAttribute", check_type="CORRECT")
     right_column = _rhs_column(_require_text(comparison, "rightAttribute", check_type="CORRECT"))
-    return [
+    expectations: list[dict[str, Any]] = [
         _comparison_expectation(
             left_column=left_column,
             right_column=right_column,
@@ -616,6 +616,8 @@ def _build_correct_expectations(*, params: Mapping[str, Any], meta: Mapping[str,
             check_type="CORRECT",
         )
     ]
+    _maybe_append_actuality_expectation(expectations, params, meta, check_type="CORRECT")
+    return expectations
 
 
 def _build_reconcile_expectations(*, params: Mapping[str, Any], meta: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -634,14 +636,16 @@ def _build_reconcile_expectations(*, params: Mapping[str, Any], meta: Mapping[st
                 check_type="RECONCILE",
             )
         )
+    _maybe_append_actuality_expectation(expectations, params, meta, check_type="RECONCILE")
     return expectations
 
 
 def _build_transfer_match_expectations(*, params: Mapping[str, Any], meta: Mapping[str, Any]) -> list[dict[str, Any]]:
     mode = str(params.get("mode") or "row_value_match").strip().lower()
+    expectations: list[dict[str, Any]] = []
+
     if mode == "row_value_match":
         comparisons = _require_list(params, "comparisons", check_type="TRANSFER_MATCH")
-        expectations: list[dict[str, Any]] = []
         for comparison in comparisons:
             if not isinstance(comparison, Mapping):
                 raise GxExpectationBuildError("TRANSFER_MATCH comparisons entries must be objects")
@@ -655,21 +659,57 @@ def _build_transfer_match_expectations(*, params: Mapping[str, Any], meta: Mappi
                     check_type="TRANSFER_MATCH",
                 )
             )
+        _maybe_append_actuality_expectation(expectations, params, meta, check_type="TRANSFER_MATCH")
         return expectations
 
     if mode == "payload_hash_match":
         left_hash = _require_text(params, "leftHashAttribute", check_type="TRANSFER_MATCH")
         right_hash = _rhs_column(_require_text(params, "rightHashAttribute", check_type="TRANSFER_MATCH"))
-        return [
+        expectations.append(
             {
                 "expectation_type": "expect_column_pair_values_to_be_equal",
                 "kwargs": {"column_A": left_hash, "column_B": right_hash, "ignore_row_if": "neither"},
                 "meta": dict(meta),
             }
-        ]
+        )
+        _maybe_append_actuality_expectation(expectations, params, meta, check_type="TRANSFER_MATCH")
+        return expectations
 
     raise GxExpectationBuildError(
         f"TRANSFER_MATCH GX auto-publish does not support mode '{mode}'"
+    )
+
+
+def _maybe_append_actuality_expectation(
+    expectations: list[dict[str, Any]],
+    params: Mapping[str, Any],
+    meta: Mapping[str, Any],
+    *,
+    check_type: str,
+) -> None:
+    """Append actuality-date tolerance expectation when configured."""
+    actuality_date = params.get("actualityDate")
+    if not isinstance(actuality_date, Mapping) or not actuality_date:
+        return
+    resolved_tolerance_value = actuality_date.get("resolvedToleranceValue")
+    resolved_tolerance_unit = str(actuality_date.get("resolvedToleranceUnit") or "").strip().lower()
+    if resolved_tolerance_value is None or not resolved_tolerance_unit:
+        return
+    left_attr = str(actuality_date.get("leftAttribute") or "").strip()
+    right_attr = str(actuality_date.get("rightAttribute") or "").strip()
+    if not left_attr or not right_attr:
+        return
+    expectations.append(
+        {
+            "expectation_type": "expect_column_timestamps_to_be_within_tolerance_of_other_column",
+            "kwargs": {
+                "column": left_attr,
+                "other_column": f"rhs.{right_attr}",
+                "max_difference": int(resolved_tolerance_value),
+                "difference_unit": resolved_tolerance_unit,
+            },
+            "meta": dict(meta),
+        }
     )
 
 
