@@ -1,38 +1,38 @@
 x-zammad-service:
   profiles: &id001
   - support
-  image: ${ZAMMAD_IMAGE:-}
+  image: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
   restart: unless-stopped
   environment: &id002
-    MEMCACHE_SERVERS: ${ZAMMAD_MEMCACHE_SERVERS:-}
-    POSTGRESQL_DB: ${ZAMMAD_POSTGRES_DB:-}
-    POSTGRESQL_HOST: ${ZAMMAD_POSTGRES_HOST:-}
-    POSTGRESQL_USER: ${ZAMMAD_POSTGRES_USER:-}
-    POSTGRESQL_PASS: ${ZAMMAD_POSTGRES_PASSWORD:-}
-    POSTGRESQL_PORT: ${ZAMMAD_POSTGRES_PORT:-}
-    POSTGRESQL_OPTIONS: ${ZAMMAD_POSTGRESQL_OPTIONS:-}
-    REDIS_URL: ${ZAMMAD_REDIS_URL:-}
-    ELASTICSEARCH_ENABLED: ${ZAMMAD_ELASTICSEARCH_ENABLED:-}
-    ELASTICSEARCH_HOST: ${ZAMMAD_ELASTICSEARCH_HOST:-}
-    ELASTICSEARCH_PORT: ${ZAMMAD_ELASTICSEARCH_PORT:-}
-    ELASTICSEARCH_SCHEMA: ${ZAMMAD_ELASTICSEARCH_SCHEMA:-}
-    ELASTICSEARCH_NAMESPACE: ${ZAMMAD_ELASTICSEARCH_NAMESPACE:-}
-    ELASTICSEARCH_SSL_VERIFY: ${ZAMMAD_ELASTICSEARCH_SSL_VERIFY:-}
+    MEMCACHE_SERVERS: ${ZAMMAD_MEMCACHE_SERVERS:?ZAMMAD_MEMCACHE_SERVERS is required}
+    POSTGRESQL_DB: ${ZAMMAD_POSTGRES_DB:?ZAMMAD_POSTGRES_DB is required}
+    POSTGRESQL_HOST: ${ZAMMAD_POSTGRES_HOST:?ZAMMAD_POSTGRES_HOST is required}
+    POSTGRESQL_USER: ${ZAMMAD_POSTGRES_USER:?ZAMMAD_POSTGRES_USER is required}
+    POSTGRESQL_PASS: ${ZAMMAD_POSTGRES_PASSWORD:?ZAMMAD_POSTGRES_PASSWORD is required}
+    POSTGRESQL_PORT: ${ZAMMAD_POSTGRES_PORT:?ZAMMAD_POSTGRES_PORT is required}
+    POSTGRESQL_OPTIONS: ${ZAMMAD_POSTGRESQL_OPTIONS:?ZAMMAD_POSTGRESQL_OPTIONS is required}
+    REDIS_URL: ${ZAMMAD_REDIS_URL:?ZAMMAD_REDIS_URL is required}
+    ELASTICSEARCH_ENABLED: ${ZAMMAD_ELASTICSEARCH_ENABLED:?ZAMMAD_ELASTICSEARCH_ENABLED is required}
+    ELASTICSEARCH_HOST: ${ZAMMAD_ELASTICSEARCH_HOST:?ZAMMAD_ELASTICSEARCH_HOST is required}
+    ELASTICSEARCH_PORT: ${ZAMMAD_ELASTICSEARCH_PORT:?ZAMMAD_ELASTICSEARCH_PORT is required}
+    ELASTICSEARCH_SCHEMA: ${ZAMMAD_ELASTICSEARCH_SCHEMA:?ZAMMAD_ELASTICSEARCH_SCHEMA is required}
+    ELASTICSEARCH_NAMESPACE: ${ZAMMAD_ELASTICSEARCH_NAMESPACE:?ZAMMAD_ELASTICSEARCH_NAMESPACE is required}
+    ELASTICSEARCH_SSL_VERIFY: ${ZAMMAD_ELASTICSEARCH_SSL_VERIFY:?ZAMMAD_ELASTICSEARCH_SSL_VERIFY is required}
     AUTOWIZARD_JSON: ${AUTOWIZARD_JSON:-}
-    AUTOWIZARD_RELATIVE_PATH: ${AUTOWIZARD_RELATIVE_PATH:-tmp/auto_wizard.json}
-    NGINX_PORT: ${ZAMMAD_NGINX_PORT:-}
-    NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME:-}
-    NGINX_SERVER_SCHEME: ${ZAMMAD_NGINX_SERVER_SCHEME:-}
-    RAILS_TRUSTED_PROXIES: ${ZAMMAD_RAILS_TRUSTED_PROXIES:-}
-    ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE:-}
-    ZAMMAD_FQDN: ${ZAMMAD_FQDN:-}
-    ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
-    ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY:-}
-    KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
-    SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL:-}
+    AUTOWIZARD_RELATIVE_PATH: ${AUTOWIZARD_RELATIVE_PATH:?AUTOWIZARD_RELATIVE_PATH is required}
+    NGINX_PORT: ${ZAMMAD_NGINX_PORT:?ZAMMAD_NGINX_PORT is required}
+    NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME:?ZAMMAD_NGINX_SERVER_NAME is required}
+    NGINX_SERVER_SCHEME: ${ZAMMAD_NGINX_SERVER_SCHEME:?ZAMMAD_NGINX_SERVER_SCHEME is required}
+    RAILS_TRUSTED_PROXIES: ${ZAMMAD_RAILS_TRUSTED_PROXIES:?ZAMMAD_RAILS_TRUSTED_PROXIES is required}
+    ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE:?ZAMMAD_HTTP_TYPE is required}
+    ZAMMAD_FQDN: ${ZAMMAD_FQDN:?ZAMMAD_FQDN is required}
+    ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:?ZAMMAD_PUBLIC_URL is required}
+    ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY:?ZAMMAD_WEB_CONCURRENCY is required}
+    KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:?KEYCLOAK_SERVER_SIDE_URL is required}
+    SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL:?SSO_PUBLIC_ISSUER_URL is required}
     SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
     CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
-    TZ: ${TZ:-}
+    TZ: ${TZ:?TZ is required}
   volumes: &id003
   - zammad_backup:/var/tmp/zammad:ro
   - zammad_storage:/opt/zammad/storage
@@ -49,11 +49,11 @@ services:
         condition: service_completed_successfully
     profiles:
     - support
-    image: postgres:${ZAMMAD_POSTGRES_VERSION:-}
+    image: postgres:${ZAMMAD_POSTGRES_VERSION:?ZAMMAD_POSTGRES_VERSION is required}
     environment:
-      POSTGRES_DB: ${ZAMMAD_POSTGRES_DB:-}
-      POSTGRES_USER: ${ZAMMAD_POSTGRES_USER:-}
-      POSTGRES_PASSWORD: ${ZAMMAD_POSTGRES_PASSWORD:-}
+      POSTGRES_DB: ${ZAMMAD_POSTGRES_DB:?ZAMMAD_POSTGRES_DB is required}
+      POSTGRES_USER: ${ZAMMAD_POSTGRES_USER:?ZAMMAD_POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${ZAMMAD_POSTGRES_PASSWORD:?ZAMMAD_POSTGRES_PASSWORD is required}
     volumes:
     - zammad_postgresql_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -62,7 +62,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - pg_isready -U ${ZAMMAD_POSTGRES_USER:-} -d ${ZAMMAD_POSTGRES_DB:-} -h localhost
+      - pg_isready -U ${ZAMMAD_POSTGRES_USER:?ZAMMAD_POSTGRES_USER is required} -d ${ZAMMAD_POSTGRES_DB:?ZAMMAD_POSTGRES_DB is required} -h localhost
         || exit 1
       interval: 10s
       timeout: 5s
@@ -76,7 +76,7 @@ services:
         condition: service_completed_successfully
     profiles:
     - zammad-legacy
-    image: redis:${ZAMMAD_REDIS_VERSION:-}
+    image: redis:${ZAMMAD_REDIS_VERSION:?ZAMMAD_REDIS_VERSION is required}
     command: redis-server --appendonly yes
     volumes:
     - zammad_redis_data:/data
@@ -100,7 +100,7 @@ services:
         condition: service_completed_successfully
     profiles:
     - support
-    image: memcached:${ZAMMAD_MEMCACHE_VERSION:-}
+    image: memcached:${ZAMMAD_MEMCACHE_VERSION:?ZAMMAD_MEMCACHE_VERSION is required}
     command: memcached -m 256M
     restart: unless-stopped
     labels:
@@ -109,7 +109,7 @@ services:
     - dq-network
   zammad-init:
     profiles: *id001
-    image: ${ZAMMAD_IMAGE:-}
+    image: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
     restart: on-failure
     environment: *id002
     volumes: *id003
@@ -132,7 +132,7 @@ services:
     - monitoring=true
   zammad-railsserver:
     profiles: *id001
-    image: ${ZAMMAD_IMAGE:-}
+    image: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
     restart: unless-stopped
     environment: *id002
     volumes:
@@ -172,7 +172,7 @@ services:
     - monitoring=true
   zammad-scheduler:
     profiles: *id001
-    image: ${ZAMMAD_IMAGE:-}
+    image: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
     restart: unless-stopped
     environment: *id002
     volumes: *id003
@@ -196,7 +196,7 @@ services:
     - monitoring=true
   zammad-websocket:
     profiles: *id001
-    image: ${ZAMMAD_IMAGE:-}
+    image: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
     restart: unless-stopped
     environment: *id002
     volumes:
@@ -242,7 +242,7 @@ services:
     - monitoring=true
   zammad-nginx:
     profiles: *id001
-    image: ${ZAMMAD_IMAGE:-}
+    image: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
     restart: unless-stopped
     environment: *id002
     volumes: *id003
@@ -276,16 +276,16 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.zammad-origin
       args:
-        ZAMMAD_IMAGE: ${ZAMMAD_IMAGE:-}
+        ZAMMAD_IMAGE: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
     restart: unless-stopped
     environment:
-      ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME:-}
-      ZAMMAD_SSL_CERT_FILE_NAME: ${ZAMMAD_SSL_CERT_FILE_NAME:-}
-      ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME:-}
+      ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME:?ZAMMAD_NGINX_SERVER_NAME is required}
+      ZAMMAD_SSL_CERT_FILE_NAME: ${ZAMMAD_SSL_CERT_FILE_NAME:?ZAMMAD_SSL_CERT_FILE_NAME is required}
+      ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME:?ZAMMAD_SSL_KEY_FILE_NAME is required}
     volumes:
-    - ${EDGE_SSL_CERTS_DIR:-}:/etc/nginx/certs:ro
+    - ${EDGE_SSL_CERTS_DIR:?EDGE_SSL_CERTS_DIR is required}:/etc/nginx/certs:ro
     ports:
-    - ${ZAMMAD_HOST_BIND:-}:${ZAMMAD_EXPOSE_PORT:-}:443
+    - ${ZAMMAD_HOST_BIND:?ZAMMAD_HOST_BIND is required}:${ZAMMAD_EXPOSE_PORT:?ZAMMAD_EXPOSE_PORT is required}:443
     networks:
     - dq-network
     labels:
@@ -325,11 +325,10 @@ services:
         is required}
       KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD
         is required}
-      KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
+      KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:?KEYCLOAK_SERVER_SIDE_URL is required}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
-      ZAMMAD_SUPPORT_TOKEN_NAME: ${ZAMMAD_SUPPORT_TOKEN_NAME:-dq-made-easy support
-        integration}
-      ZAMMAD_SUPPORT_TOKEN_PERMISSION: ${ZAMMAD_SUPPORT_TOKEN_PERMISSION:-ticket.agent}
+      ZAMMAD_SUPPORT_TOKEN_NAME: ${ZAMMAD_SUPPORT_TOKEN_NAME:?ZAMMAD_SUPPORT_TOKEN_NAME is required}
+      ZAMMAD_SUPPORT_TOKEN_PERMISSION: ${ZAMMAD_SUPPORT_TOKEN_PERMISSION:?ZAMMAD_SUPPORT_TOKEN_PERMISSION is required}
       CURL_CA_BUNDLE: /workspace-tmp/certs/mkcert-rootCA.pem
       SSL_CERT_FILE: /workspace-tmp/certs/mkcert-rootCA.pem
     volumes:
@@ -344,10 +343,10 @@ services:
         condition: service_completed_successfully
     profiles:
     - support
-    image: ${DOCKER_DOMAIN:-docker.io}/library/elasticsearch:8.11.4
+    image: ${DOCKER_DOMAIN:?DOCKER_DOMAIN is required}/library/elasticsearch:8.11.4
     environment:
       discovery.type: single-node
-      ELASTIC_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:-openmetadata}
+      ELASTIC_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:?OPENMETADATA_SEARCH_PASSWORD is required}
       xpack.security.enabled: 'true'
       xpack.security.http.ssl.enabled: 'true'
       xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
@@ -360,7 +359,7 @@ services:
       xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
       ES_JAVA_OPTS: -Xms1g -Xmx1g
     ports:
-    - ${OPENMETADATA_SEARCH_HOST_BIND:-}:${OPENMETADATA_SEARCH_HOST_PORT:-}:9200
+    - ${OPENMETADATA_SEARCH_HOST_BIND:?OPENMETADATA_SEARCH_HOST_BIND is required}:${OPENMETADATA_SEARCH_HOST_PORT:?OPENMETADATA_SEARCH_HOST_PORT is required}:9200
     volumes:
     - ../tmp/certs/services/openmetadata-search/tls.crt:/usr/share/elasticsearch/config/certs/tls.crt:ro
     - ../tmp/certs/services/openmetadata-search/tls.key:/usr/share/elasticsearch/config/certs/tls.key:ro
