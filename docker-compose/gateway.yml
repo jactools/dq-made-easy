@@ -100,7 +100,7 @@ services:
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8444 ssl
-      KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-https://localhost:8002}
+      KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:?KONG_MANAGER_PUBLIC_URL is required}
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
       CURL_CA_BUNDLE: /etc/kong/certs/trust/internal-ca-bundle.pem
       DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL:-}
@@ -126,9 +126,9 @@ services:
         is required}
       KONG_TRACING_SAMPLING_RATE: ${KONG_TRACING_SAMPLING_RATE?KONG_TRACING_SAMPLING_RATE
         is required}
-      KONG_OTEL_ENDPOINT: https://dq-made-easy-otel-collector:4318/v1/traces
-      KONG_SSL_CERT: /etc/kong/certs/kong.jac.dot+3.pem
-      KONG_SSL_CERT_KEY: /etc/kong/certs/kong.jac.dot+3-key.pem
+      KONG_OTEL_ENDPOINT: ${KONG_OTEL_ENDPOINT:?KONG_OTEL_ENDPOINT is required}
+      KONG_SSL_CERT: /etc/kong/certs/${KONG_CERT_FILE:?KONG_CERT_FILE is required}
+      KONG_SSL_CERT_KEY: /etc/kong/certs/${KONG_KEY_FILE:?KONG_KEY_FILE is required}
     networks:
     - dq-network
     ports:

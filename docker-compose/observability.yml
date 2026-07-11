@@ -198,9 +198,9 @@ services:
       GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
       GF_AUTH_GENERIC_OAUTH_SCOPES: openid profile email roles
       GF_AUTH_GENERIC_OAUTH_AUTH_URL: ${KEYCLOAK_PUBLIC_URL:-}/realms/${KEYCLOAK_REALM:?KEYCLOAK_REALM
-        is required}}/protocol/openid-connect/auth
+        is required}/protocol/openid-connect/auth
       GF_AUTH_GENERIC_OAUTH_TOKEN_URL: ${SSO_INTERNAL_ISSUER_URL:?SSO_INTERNAL_ISSUER_URL
-        is required}}/protocol/openid-connect/token
+        is required}/protocol/openid-connect/token
       GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH: email
       GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH: email
       GF_AUTH_GENERIC_OAUTH_NAME_ATTRIBUTE_PATH: email
@@ -215,8 +215,8 @@ services:
       GF_SERVER_HTTP_ADDR: 0.0.0.0
       GF_SERVER_HTTP_PORT: '3000'
       GF_SERVER_PROTOCOL: https
-      GF_SERVER_CERT_FILE: /etc/grafana/certs/grafana.jac.dot+3.pem
-      GF_SERVER_CERT_KEY: /etc/grafana/certs/grafana.jac.dot+3-key.pem
+      GF_SERVER_CERT_FILE: /etc/grafana/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE is required}
+      GF_SERVER_CERT_KEY: /etc/grafana/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE is required}
       GF_SERVER_ROOT_URL: ${GRAFANA_PUBLIC_URL?GRAFANA_PUBLIC_URL is required}
       GF_SERVER_SERVE_FROM_SUB_PATH: ${GRAFANA_SERVE_FROM_SUB_PATH?GRAFANA_SERVE_FROM_SUB_PATH
         is required}
@@ -233,8 +233,8 @@ services:
     secrets:
     - internal_corporate_root_ca
     volumes:
-    - ../tmp/certs/grafana.jac.dot+3.pem:/etc/grafana/certs/grafana.jac.dot+3.pem:ro
-    - ../tmp/certs/grafana.jac.dot+3-key.pem:/etc/grafana/certs/grafana.jac.dot+3-key.pem:ro
+    - ../tmp/certs/${GRAFANA_CERT_FILE:-grafana.pem}:/etc/grafana/certs/grafana.pem:ro
+    - ../tmp/certs/${GRAFANA_KEY_FILE:-grafana-key.pem}:/etc/grafana/certs/grafana-key.pem:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/grafana/certs/mkcert-rootCA.pem:ro
     - ../observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     - ../observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards

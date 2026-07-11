@@ -181,10 +181,10 @@ services:
     - observability
     image: ${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:${DQ_API_TAG:-latest}
     environment:
-      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}}
-      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
       TZ: UTC
-      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}}
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
       REQUIRE_DATABASE: 'true'
     build:
       context: ..
@@ -216,10 +216,10 @@ services:
     - observability
     image: ${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:${DQ_API_TAG:-latest}
     environment:
-      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}}
-      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
       TZ: UTC
-      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}}
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
       APP_CONFIG_ENCRYPTION_KEY: ${APP_CONFIG_ENCRYPTION_KEY?APP_CONFIG_ENCRYPTION_KEY
         is required}
       REQUIRE_DATABASE: 'true'
@@ -232,12 +232,12 @@ services:
       DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
       SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
       KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME
-        is required}}
+        is required}
       KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD
-        is required}}
+        is required}
       SSO_PROVIDER: ${SSO_PROVIDER:-}
       SSO_ISSUER: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
-      SSO_CLIENT_ID: ${SSO_CLIENT_ID:?SSO_CLIENT_ID is required}}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:?SSO_CLIENT_ID is required}
       SSO_ALLOWED_CLIENT_IDS: ${SSO_ALLOWED_CLIENT_IDS:-dq-rules-ui,dq-made-easy-engine-gx-worker,grafana}
       SSO_ENABLED: ${SSO_ENABLED:-true}
       ALLOW_LOCAL_AUTH: ${ALLOW_LOCAL_AUTH:-}
@@ -325,7 +325,7 @@ services:
         NGINX_TAG: ${NGINX_TAG:-}
         VITE_OTEL_ENABLED: ${VITE_OTEL_ENABLED:-false}
         VITE_OTEL_ENDPOINT: ${VITE_OTEL_ENDPOINT:-}
-        VITE_ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+        VITE_ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
         VITE_SERVICE_VERSION: ${DQ_FRONTEND_TAG:-dev}
       secrets:
       - repo_npmrc
@@ -340,7 +340,7 @@ services:
       VITE_OTEL_ENDPOINT: ${VITE_OTEL_ENDPOINT:-}
       OTEL_SERVICE_NAME: dq-ui
       OTEL_SERVICE_VERSION: ${DQ_FRONTEND_TAG:-dev}
-      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
     volumes:
     - ../tmp/certs:/etc/nginx/certs:ro
     networks:

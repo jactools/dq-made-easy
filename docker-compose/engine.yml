@@ -30,7 +30,7 @@ services:
     - ../tmp/certs/services/engine:/etc/engine/certs:ro
     - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/engine/trust/internal-ca-bundle.pem:ro
     environment:
-      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
       TZ: UTC
       OTEL_SERVICE_NAME: dq-made-easy-engine
       OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
@@ -293,7 +293,7 @@ services:
       REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
       PROFILING_QUEUE_KEY: ${PROFILING_QUEUE_KEY:-}
       DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
-      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
       TZ: UTC
       PROFILING_WORKER_CONCURRENCY: 2
       PROFILING_METRICS_PORT: 8001

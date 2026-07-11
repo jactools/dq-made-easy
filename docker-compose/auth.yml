@@ -21,14 +21,14 @@ services:
       OPERATOR_LOGIN_EMAIL: ${OPERATOR_LOGIN_EMAIL:-operator@jaccloud.nl}
       AUDITOR_LOGIN_EMAIL: ${AUDITOR_LOGIN_EMAIL:-auditor@jaccloud.nl}
       REGULATOR_LOGIN_EMAIL: ${REGULATOR_LOGIN_EMAIL:-regulator@jaccloud.nl}
-      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:-${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}}
+      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:-${KONG_PUBLIC_URL:?KONG_PUBLIC_URL is required}
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
       EDGE_LOCAL_SUPPORT_HOST: ${EDGE_LOCAL_SUPPORT_HOST?EDGE_LOCAL_SUPPORT_HOST is required}
       UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
       UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
       ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
-      OPENMETADATA_CALLBACK: ${OPENMETADATA_CALLBACK:-https://openmetadata.jac.dot:8585/callback}
-      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-https://observability.jac.dot:3000}
+      OPENMETADATA_CALLBACK: ${OPENMETADATA_CALLBACK:?OPENMETADATA_CALLBACK is required}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:?GRAFANA_PUBLIC_URL is required}
       GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
@@ -51,12 +51,12 @@ services:
       trust-bundle:
         condition: service_completed_successfully
     environment:
-      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}}
-      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
       OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL?OIDC_REDIRECT_BASE_URL is required}
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
       ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
-      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:-https://observability.jac.dot:3000}
+      GRAFANA_PUBLIC_URL: ${GRAFANA_PUBLIC_URL:?GRAFANA_PUBLIC_URL is required}
       GRAFANA_OIDC_REALM_ROLE: ${GRAFANA_OIDC_REALM_ROLE:-dq:rules:read}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
       DQ_ENGINE_OIDC_REALM_ROLE: ${DQ_ENGINE_OIDC_REALM_ROLE:-dq:rules:write}
@@ -64,20 +64,20 @@ services:
       UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS:-}
-      KEYCLOAK_REALM: ${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}
       KEYCLOAK_HTTPS_RELATIVE_PATH: ${KEYCLOAK_HTTPS_RELATIVE_PATH:-}
-      KEYCLOAK_HTTPS_CERT_FILE: /opt/keycloak/certs/keycloak.jac.dot+3.pem
-      KEYCLOAK_HTTPS_KEY_FILE: /opt/keycloak/certs/keycloak.jac.dot+3-key.pem
+      KEYCLOAK_HTTPS_CERT_FILE: ${KEYCLOAK_HTTPS_CERT_FILE:?KEYCLOAK_HTTPS_CERT_FILE is required}
+      KEYCLOAK_HTTPS_KEY_FILE: ${KEYCLOAK_HTTPS_KEY_FILE:?KEYCLOAK_HTTPS_KEY_FILE is required}
       KEYCLOAK_HTTPS_KEYSTORE_FILE: /opt/keycloak/keystore/keycloak.p12
       KEYCLOAK_HTTPS_KEYSTORE_PASSWORD: ${KEYCLOAK_HTTPS_KEYSTORE_PASSWORD:-changeit}
-    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH:-}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME:-}", "--hostname-strict=false"]
+    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=${KEYCLOAK_HTTPS_CERT_FILE}", "--https-certificate-key-file=${KEYCLOAK_HTTPS_KEY_FILE}", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH:-}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME:?KEYCLOAK_PUBLIC_HOSTNAME is required}", "--hostname-strict=false"]
     ports:
       - "${KEYCLOAK_HTTPS_HOST_BIND:-}:${KEYCLOAK_HTTPS_HOST_PORT:-}:8443"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - keycloak_seed_artifacts:/opt/keycloak/realm-import:ro
-      - ../tmp/certs/keycloak.jac.dot+3.pem:/opt/keycloak/certs/keycloak.jac.dot+3.pem:ro
-      - ../tmp/certs/keycloak.jac.dot+3-key.pem:/opt/keycloak/certs/keycloak.jac.dot+3-key.pem:ro
+      - ../tmp/certs/${KEYCLOAK_HTTPS_CERT_FILE:-keycloak.pem}:/opt/keycloak/certs/keycloak.pem:ro
+      - ../tmp/certs/${KEYCLOAK_HTTPS_KEY_FILE:-keycloak-key.pem}:/opt/keycloak/certs/keycloak-key.pem:ro
     networks:
       - dq-network
     restart: unless-stopped

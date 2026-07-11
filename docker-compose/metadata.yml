@@ -168,7 +168,7 @@ services:
       SERVER_PORT: 8585
       BASE_PATH: ${OPENMETADATA_BASE_PATH:-/}
       SERVER_USE_FORWARDED_HEADERS: ${OPENMETADATA_USE_FORWARDED_HEADERS:-false}
-      OPENMETADATA_SERVER_URL: ${OPENMETADATA_PUBLIC_URL:-https://openmetadata.jac.dot:8585}
+      OPENMETADATA_SERVER_URL: ${OPENMETADATA_PUBLIC_URL:?OPENMETADATA_PUBLIC_URL is required}
       DB_DRIVER_CLASS: org.postgresql.Driver
       DB_SCHEME: postgresql
       DB_HOST: openmetadata-db
@@ -190,10 +190,10 @@ services:
       AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:-custom-oidc}
       CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:-Keycloak}
       AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[https://keycloak:8443/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
-      AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:-https://keycloak.jac.dot:9444/realms/jaccloud}
+      AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:?OM_AUTHENTICATION_AUTHORITY is required}
       AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}
-      AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-https://openmetadata.jac.dot:8585/callback}
-      AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}
+      AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:?OM_AUTHENTICATION_CALLBACK_URL is required}
+      AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:?OM_AUTHENTICATION_DISCOVERY_URI is required}
       AUTHENTICATION_RESPONSE_TYPE: ${OM_AUTHENTICATION_RESPONSE_TYPE:-code}
       AIRFLOW_HOST: https://openmetadata-ingestion:8080
       PIPELINE_SERVICE_CLIENT_ENDPOINT: https://openmetadata-ingestion:8080
@@ -209,10 +209,10 @@ services:
       CURL_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
       SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
       OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT:?ENVIRONMENT
-        is required}}
+        is required}
       OTEL_LOGS_EXPORTER: none
       JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
-      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
     entrypoint:
     - /bin/bash
     command:
@@ -260,13 +260,13 @@ services:
       OM_DB_NAME: ${OM_DB_NAME:-openmetadata_db}
       OM_DB_SSL_MODE: ${OM_DB_SSL_MODE:-disable}
       OPENMETADATA_BASE_PATH: ${OPENMETADATA_BASE_PATH:-/}
-      OPENMETADATA_PUBLIC_URL: ${OPENMETADATA_PUBLIC_URL:-https://openmetadata.jac.dot:8585}
+      OPENMETADATA_PUBLIC_URL: ${OPENMETADATA_PUBLIC_URL:?OPENMETADATA_PUBLIC_URL is required}
       OM_AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:-custom-oidc}
       OM_OIDC_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:-Keycloak}
-      OM_AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:-https://keycloak.jac.dot:9444/realms/jaccloud}
+      OM_AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:?OM_AUTHENTICATION_AUTHORITY is required}
       OM_AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}
-      OM_AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:-${OPENMETADATA_PUBLIC_URL:-https://openmetadata.jac.dot:8585}/callback}
-      OM_AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:-https://keycloak.jac.dot:9444/realms/jaccloud/.well-known/openid-configuration}
+      OM_AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:?OM_AUTHENTICATION_CALLBACK_URL is required}
+      OM_AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:?OM_AUTHENTICATION_DISCOVERY_URI is required}
       OM_AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:-[https://keycloak:8443/realms/jaccloud/protocol/openid-connect/certs,https://openmetadata-server:8585${OPENMETADATA_BASE_PATH:-/}/api/v1/system/config/jwks]}
       OM_ENABLE_AUTO_REDIRECT: ${OM_ENABLE_AUTO_REDIRECT:-false}
       OM_TOKEN: ${OM_TOKEN:-}
@@ -320,7 +320,7 @@ services:
       OTEL_EXPORTER_OTLP_CERTIFICATE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
-      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
     entrypoint:
     - /bin/bash
     command:
