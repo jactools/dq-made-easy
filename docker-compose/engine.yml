@@ -18,7 +18,7 @@ services:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
         SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:?SKIP_SPARK_WARMUP is required}
-        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
+        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:?MKCERT_ROOT_CA is required}
         INTERNAL_ROOT_CA: ${INTERNAL_ROOT_CA:-}
       secrets:
       - internal_corporate_root_ca

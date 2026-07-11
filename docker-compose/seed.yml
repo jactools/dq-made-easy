@@ -29,7 +29,7 @@ services:
       dockerfile: dq-db/Dockerfile.dq-db.seed
       args:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
-        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
+        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:?INTERNAL_CORPORATE_ROOT_CA is required}
       secrets:
         - internal_mkcert_root_ca
         - internal_root_ca
@@ -58,16 +58,16 @@ services:
         condition: service_completed_successfully
 
     profiles: ["seed"]
-    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
     build:
       context: ..
       dockerfile: dq-engine/Dockerfile.engine
       args:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
-        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:-true}
-        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
-        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
+        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:?SKIP_SPARK_WARMUP is required}
+        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:?MKCERT_ROOT_CA is required}
+        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:?INTERNAL_CORPORATE_ROOT_CA is required}
     env_file:
       - ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     working_dir: /app
@@ -76,20 +76,20 @@ services:
       - ivy2_cache:/home/appuser/.ivy2
     entrypoint: ["python", "scripts/seed_delivery_objects.py"]
     environment:
-      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
-      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
-      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
-      DQ_S3_REGION: ${DQ_S3_REGION:-}
-      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
-      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
-      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:?DQ_S3_ENDPOINT is required}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:?DQ_S3_ACCESS_KEY is required}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:?DQ_S3_SECRET_KEY is required}
+      DQ_S3_REGION: ${DQ_S3_REGION:?DQ_S3_REGION is required}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:?DQ_S3_SSL_ENABLED is required}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:?DQ_S3_PATH_STYLE_ACCESS is required}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:?DQ_SPARK_MASTER is required}
       DQ_SPARK_DRIVER_HOST: 127.0.0.1
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
-      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
-      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
-      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
-      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
-      DQ_DELIVERY_OUTPUT_BUCKET: ${DQ_DELIVERY_OUTPUT_BUCKET:-}
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:?DQ_SPARK_DRIVER_MEMORY is required}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:?DQ_SPARK_EXECUTOR_MEMORY is required}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:?DQ_SPARK_DRIVER_MAX_RESULT_SIZE is required}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:?JAVA_TOOL_OPTIONS is required}
+      DQ_DELIVERY_OUTPUT_BUCKET: ${DQ_DELIVERY_OUTPUT_BUCKET:?DQ_DELIVERY_OUTPUT_BUCKET is required}
       TZ: UTC
     networks:
       - dq-network

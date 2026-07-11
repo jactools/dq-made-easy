@@ -1,11 +1,15 @@
-ARG TRINO_BASE_IMAGE=trinodb/trino:482
-ARG MKCERT_ROOT_CA
 FROM ${TRINO_BASE_IMAGE}
+
+ARG MKCERT_ROOT_CA
 
 RUN mkdir -p /tmp/trino-hive-metastore && chown trino:trino /tmp/trino-hive-metastore
 
 RUN if [ -n "${MKCERT_ROOT_CA:-}" ]; then \
-	echo "$MKCERT_ROOT_CA" | base64 -d > /tmp/mkcert-rootCA.crt; \
+	if [ -f "${MKCERT_ROOT_CA}" ]; then \
+		cp "${MKCERT_ROOT_CA}" /tmp/mkcert-rootCA.crt; \
+	else \
+		echo "$MKCERT_ROOT_CA" | base64 -d > /tmp/mkcert-rootCA.crt; \
+	fi; \
 	keytool -importcert -noprompt -storepass changeit -cacerts -alias mkcert-root-ca -file /tmp/mkcert-rootCA.crt; \
 	rm -f /tmp/mkcert-rootCA.crt; \
 	fi

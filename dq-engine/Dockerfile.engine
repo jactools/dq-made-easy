@@ -40,10 +40,13 @@ RUN set -eux; \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Optionally import a mkcert root CA provided as a base64-encoded build-arg
-# Usage: docker build --build-arg MKCERT_ROOT_CA="$(base64 -w0 tmp/certs/mkcert-rootCA.pem)" ...
 RUN if [ -n "${MKCERT_ROOT_CA:-}" ]; then \
 	echo "Importing mkcert root CA into system truststore"; \
-	echo "$MKCERT_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
+	if [ -f "${MKCERT_ROOT_CA}" ]; then \
+		cp "${MKCERT_ROOT_CA}" /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
+	else \
+		echo "$MKCERT_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
+	fi; \
 	update-ca-certificates || true; \
 	fi
 
