@@ -111,6 +111,52 @@ services:
       start_period: 5s
     networks:
     - dq-network
+  db-postgres-exporter:
+    depends_on:
+      db:
+        condition: service_healthy
+      trust-bundle:
+        condition: service_completed_successfully
+    profiles:
+    - core
+    - gateway
+    - observability
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+    container_name: dq-made-easy-db-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+    volumes:
+    - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
+    restart: unless-stopped
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  redis-exporter:
+    depends_on:
+      redis:
+        condition: service_healthy
+      trust-bundle:
+        condition: service_completed_successfully
+    profiles:
+    - redis
+    - core
+    - gateway
+    - observability
+    - support
+    image: oliver006/redis_exporter:v1.67.0
+    container_name: dq-made-easy-redis-exporter
+    environment:
+      REDIS_ADDR: rediss://redis:6379?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+    volumes:
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
+    restart: unless-stopped
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
   kafka:
     depends_on:
       trust-bundle:

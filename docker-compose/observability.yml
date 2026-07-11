@@ -1,64 +1,4 @@
 services:
-  dq-made-easy-db-postgres-exporter:
-    depends_on:
-      db:
-        condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
-    profiles:
-    - observability
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
-    container_name: dq-made-easy-db-postgres-exporter
-    environment:
-      DATA_SOURCE_NAME: postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
-      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
-    volumes:
-    - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
-    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
-    restart: unless-stopped
-    networks:
-    - dq-network
-    labels:
-    - monitoring=true
-  redis-exporter:
-    depends_on:
-      redis:
-        condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
-    profiles:
-    - observability
-    image: oliver006/redis_exporter:v1.67.0
-    environment:
-      REDIS_ADDR: rediss://redis:6379?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
-    volumes:
-    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
-    restart: unless-stopped
-    networks:
-    - dq-network
-    labels:
-    - monitoring=true
-  kong-postgres-exporter:
-    depends_on:
-      kong-db:
-        condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
-    profiles:
-    - observability
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
-    container_name: dq-made-easy-kong-postgres-exporter
-    environment:
-      DATA_SOURCE_NAME: postgresql://kong:kongpass@kong-db:5432/kong?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
-      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
-    volumes:
-    - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
-    - ../tmp/certs/mkcert-rootCA.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
-    restart: unless-stopped
-    networks:
-    - dq-network
-    labels:
-    - monitoring=true
   loki:
     depends_on:
       trust-bundle:
@@ -68,7 +8,8 @@ services:
     image: grafana/loki:3.6.4
     container_name: dq-made-easy-loki
     ports:
-    - ${LOKI_HOST_BIND:-0.0.0.0}:${LOKI_HOST_PORT:-3100}:3100
+    - ${LOKI_HOST_BIND:?LOKI_HOST_BIND is required}:${LOKI_HOST_PORT:?LOKI_HOST_PORT
+      is required}:3100
     environment:
       LOKI_CONFIG_FILE: /etc/loki/local-config.yml
     volumes:
@@ -99,7 +40,8 @@ services:
     container_name: dq-made-easy-prometheus
     user: 0:0
     ports:
-    - ${PROMETHEUS_HOST_BIND:-0.0.0.0}:${PROMETHEUS_HOST_PORT:-9090}:9090
+    - ${PROMETHEUS_HOST_BIND:?PROMETHEUS_HOST_BIND is required}:${PROMETHEUS_HOST_PORT:?PROMETHEUS_HOST_PORT
+      is required}:9090
     environment:
     - TZ=UTC
     - SSO_INTERNAL_ISSUER_URL=${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is
@@ -148,7 +90,8 @@ services:
     container_name: dq-made-easy-tempo
     user: 0:0
     ports:
-    - ${TEMPO_HOST_BIND:-0.0.0.0}:${TEMPO_HOST_PORT:-3200}:3200
+    - ${TEMPO_HOST_BIND:?TEMPO_HOST_BIND is required}:${TEMPO_HOST_PORT:?TEMPO_HOST_PORT
+      is required}:3200
     environment:
     - TZ=UTC
     volumes:
@@ -184,21 +127,26 @@ services:
     image: grafana/grafana:12.3
     container_name: dq-made-easy-grafana
     ports:
-    - ${GRAFANA_HOST_BIND:-0.0.0.0}:${GRAFANA_HTTPS_HOST_PORT:-3000}:3000
+    - ${GRAFANA_HOST_BIND:?GRAFANA_HOST_BIND is required}:${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT
+      is required}:${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT is required}
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-changeme}
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_AUTH_BASIC_ENABLED: ${GRAFANA_AUTH_BASIC_ENABLED:-true}
-      GF_AUTH_DISABLE_LOGIN_FORM: ${GRAFANA_AUTH_DISABLE_LOGIN_FORM:-false}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD
+        is required}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_AUTH_BASIC_ENABLED: ${GRAFANA_AUTH_BASIC_ENABLED:?GRAFANA_AUTH_BASIC_ENABLED
+        is required}
+      GF_AUTH_DISABLE_LOGIN_FORM: ${GRAFANA_AUTH_DISABLE_LOGIN_FORM:?GRAFANA_AUTH_DISABLE_LOGIN_FORM
+        is required}
       GF_USERS_ALLOW_SIGN_UP: 'true'
       GF_AUTH_GENERIC_OAUTH_ENABLED: 'true'
       GF_AUTH_GENERIC_OAUTH_NAME: Keycloak
       GF_AUTH_GENERIC_OAUTH_CLIENT_ID: grafana
-      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
-      GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: ${GRAFANA_OIDC_SECRET:?GRAFANA_OIDC_SECRET
+        is required}
+      GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:?GRAFANA_OIDC_SECRET is required}
       GF_AUTH_GENERIC_OAUTH_SCOPES: openid profile email roles
-      GF_AUTH_GENERIC_OAUTH_AUTH_URL: ${KEYCLOAK_PUBLIC_URL:-}/realms/${KEYCLOAK_REALM:?KEYCLOAK_REALM
-        is required}/protocol/openid-connect/auth
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: ${KEYCLOAK_PUBLIC_URL:?KEYCLOAK_PUBLIC_URL is
+        required}/realms/${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}/protocol/openid-connect/auth
       GF_AUTH_GENERIC_OAUTH_TOKEN_URL: ${SSO_INTERNAL_ISSUER_URL:?SSO_INTERNAL_ISSUER_URL
         is required}/protocol/openid-connect/token
       GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH: email
@@ -210,13 +158,16 @@ services:
       GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: 'true'
       GF_AUTH_GENERIC_OAUTH_SKIP_ORG_ROLE_SYNC: 'true'
       GF_AUTH_GENERIC_OAUTH_ALLOW_ASSIGN_GRAFANA_ADMIN: 'true'
-      GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN: ${GRAFANA_AUTH_GENERIC_OAUTH_AUTO_LOGIN:-false}
+      GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN: ${GRAFANA_AUTH_GENERIC_OAUTH_AUTO_LOGIN:?GRAFANA_AUTH_GENERIC_OAUTH_AUTO_LOGIN
+        is required}
       GF_SERVER_DOMAIN: ${GRAFANA_PUBLIC_DOMAIN?GRAFANA_PUBLIC_DOMAIN is required}
       GF_SERVER_HTTP_ADDR: 0.0.0.0
-      GF_SERVER_HTTP_PORT: '3000'
+      GF_SERVER_HTTP_PORT: ${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT is required}
       GF_SERVER_PROTOCOL: https
-      GF_SERVER_CERT_FILE: /etc/grafana/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE is required}
-      GF_SERVER_CERT_KEY: /etc/grafana/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE is required}
+      GF_SERVER_CERT_FILE: /etc/grafana/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE
+        is required}
+      GF_SERVER_CERT_KEY: /etc/grafana/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE
+        is required}
       GF_SERVER_ROOT_URL: ${GRAFANA_PUBLIC_URL?GRAFANA_PUBLIC_URL is required}
       GF_SERVER_SERVE_FROM_SUB_PATH: ${GRAFANA_SERVE_FROM_SUB_PATH?GRAFANA_SERVE_FROM_SUB_PATH
         is required}
@@ -233,8 +184,8 @@ services:
     secrets:
     - internal_corporate_root_ca
     volumes:
-    - ../tmp/certs/${GRAFANA_CERT_FILE:-grafana.pem}:/etc/grafana/certs/grafana.pem:ro
-    - ../tmp/certs/${GRAFANA_KEY_FILE:-grafana-key.pem}:/etc/grafana/certs/grafana-key.pem:ro
+    - ../tmp/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE is required}:/etc/grafana/certs/grafana.pem:ro
+    - ../tmp/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE is required}:/etc/grafana/certs/grafana-key.pem:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/grafana/certs/mkcert-rootCA.pem:ro
     - ../observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     - ../observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
@@ -286,7 +237,8 @@ services:
       NEXUSCLOUD_DNS: ${NEXUSCLOUD_DNS:-}
       NEXUSCLOUD_PYPI_GROUP_REPO: ${NEXUSCLOUD_PYPI_GROUP_REPO:-}
     ports:
-    - ${CONTAINER_METRICS_HOST_BIND:-0.0.0.0}:${CONTAINER_METRICS_HOST_PORT:-8881}:8000
+    - ${CONTAINER_METRICS_HOST_BIND:?CONTAINER_METRICS_HOST_BIND is required}:${CONTAINER_METRICS_HOST_PORT:?CONTAINER_METRICS_HOST_PORT
+      is required}:8000
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
@@ -304,7 +256,8 @@ services:
     image: prom/pushgateway:v1.11.2
     container_name: dq-made-easy-pushgateway
     ports:
-    - ${PUSHGATEWAY_HOST_BIND:-0.0.0.0}:${PUSHGATEWAY_HOST_PORT:-9091}:9091
+    - ${PUSHGATEWAY_HOST_BIND:?PUSHGATEWAY_HOST_BIND is required}:${PUSHGATEWAY_HOST_PORT:?PUSHGATEWAY_HOST_PORT
+      is required}:9091
     restart: unless-stopped
     healthcheck:
       test:
@@ -330,10 +283,14 @@ services:
     command:
     - --config=/etc/otel-collector-config.yml
     ports:
-    - ${OTEL_GRPC_HOST_BIND:-0.0.0.0}:${OTEL_GRPC_HOST_PORT:-4317}:4317
-    - ${OTEL_HTTP_HOST_BIND:-0.0.0.0}:${OTEL_HTTP_HOST_PORT:-4318}:4318
-    - ${OTEL_JAEGER_HOST_BIND:-0.0.0.0}:${OTEL_JAEGER_HOST_PORT:-14250}:14250
-    - ${OTEL_ZIPKIN_HOST_BIND:-0.0.0.0}:${OTEL_ZIPKIN_HOST_PORT:-9411}:9411
+    - ${OTEL_GRPC_HOST_BIND:?OTEL_GRPC_HOST_BIND is required}:${OTEL_GRPC_HOST_PORT:?OTEL_GRPC_HOST_PORT
+      is required}:4317
+    - ${OTEL_HTTP_HOST_BIND:?OTEL_HTTP_HOST_BIND is required}:${OTEL_HTTP_HOST_PORT:?OTEL_HTTP_HOST_PORT
+      is required}:4318
+    - ${OTEL_JAEGER_HOST_BIND:?OTEL_JAEGER_HOST_BIND is required}:${OTEL_JAEGER_HOST_PORT:?OTEL_JAEGER_HOST_PORT
+      is required}:14250
+    - ${OTEL_ZIPKIN_HOST_BIND:?OTEL_ZIPKIN_HOST_BIND is required}:${OTEL_ZIPKIN_HOST_PORT:?OTEL_ZIPKIN_HOST_PORT
+      is required}:9411
     volumes:
     - ../observability/otel-collector/config.yml:/etc/otel-collector-config.yml
     - ../tmp/certs:/etc/otel/certs:ro
@@ -359,8 +316,10 @@ services:
     image: quay.io/minio/aistor/minio:latest
     container_name: dq-made-easy-aistor
     ports:
-    - ${AISTOR_API_HOST_BIND:-0.0.0.0}:${AISTOR_API_HOST_PORT:-9222}:9000
-    - ${AISTOR_CONSOLE_HOST_BIND:-0.0.0.0}:${AISTOR_CONSOLE_HOST_PORT:-9001}:9001
+    - ${AISTOR_API_HOST_BIND:?AISTOR_API_HOST_BIND is required}:${AISTOR_API_HOST_PORT:?AISTOR_API_HOST_PORT
+      is required}:9000
+    - ${AISTOR_CONSOLE_HOST_BIND:?AISTOR_CONSOLE_HOST_BIND is required}:${AISTOR_CONSOLE_HOST_PORT:?AISTOR_CONSOLE_HOST_PORT
+      is required}:9001
     environment:
       MINIO_ROOT_USER: ${AISTOR_ROOT_USER?AISTOR_ROOT_USER is required}
       MINIO_ROOT_PASSWORD: ${AISTOR_ROOT_PASSWORD?AISTOR_ROOT_PASSWORD is required}
@@ -407,62 +366,28 @@ services:
     - observability
     image: curlimages/curl:latest
     container_name: dq-made-easy-grafana-init
-    entrypoint: sh -c
-    command:
-    - "echo \"Waiting for Grafana to be ready...\"\nuntil curl --fail --silent --show-error\
-      \ --cacert /etc/grafana-init/mkcert-rootCA.pem https://grafana:3000/api/health\
-      \ > /dev/null 2>&1; do\n  echo \"  Grafana not ready yet, waiting...\"\n  sleep\
-      \ 2\ndone\n\necho \"Grafana is ready!\"\necho \"Setting up teams and dashboard\
-      \ permissions...\"\necho \"\"\n\n# Create Viewers team\nVIEWER_RESPONSE=$$(curl\
-      \ -s -X POST \\\n  -u admin:changeme \\\n  -H \"Content-Type: application/json\"\
-      \ \\\n  https://grafana:3000/api/teams \\\n  -d '{\"name\": \"Viewers\", \"\
-      email\": \"viewers@dq-rulebuilder.local\"}')\nVIEWER_ID=$$(echo $$VIEWER_RESPONSE\
-      \ | grep -o '\"id\":[0-9]*' | head -1 | grep -o '[0-9]*' || echo \"\")\nif [\
-      \ -z \"$$VIEWER_ID\" ]; then\n  VIEWER_ID=$$(curl -s -X GET \\\n    -u admin:changeme\
-      \ \\\n    'https://grafana:3000/api/teams/search?query=Viewers' | grep -o '\"\
-      id\":[0-9]*' | head -1 | grep -o '[0-9]*')\nfi\necho \"\u2713 Viewers team ID:\
-      \ $$VIEWER_ID\"\n\n# Create Editors team\nEDITOR_RESPONSE=$$(curl -s -X POST\
-      \ \\\n  -u admin:changeme \\\n  -H \"Content-Type: application/json\" \\\n \
-      \ https://grafana:3000/api/teams \\\n  -d '{\"name\": \"Editors\", \"email\"\
-      : \"editors@dq-rulebuilder.local\"}')\nEDITOR_ID=$$(echo $$EDITOR_RESPONSE |\
-      \ grep -o '\"id\":[0-9]*' | head -1 | grep -o '[0-9]*' || echo \"\")\nif [ -z\
-      \ \"$$EDITOR_ID\" ]; then\n  EDITOR_ID=$$(curl -s -X GET \\\n    -u admin:changeme\
-      \ \\\n    'https://grafana:3000/api/teams/search?query=Editors' | grep -o '\"\
-      id\":[0-9]*' | head -1 | grep -o '[0-9]*')\nfi\necho \"\u2713 Editors team ID:\
-      \ $$EDITOR_ID\"\n\n# Create Admins team\nADMIN_RESPONSE=$$(curl -s -X POST \\\
-      \n  -u admin:changeme \\\n  -H \"Content-Type: application/json\" \\\n  https://grafana:3000/api/teams\
-      \ \\\n  -d '{\"name\": \"Admins\", \"email\": \"admins@dq-rulebuilder.local\"\
-      }')\nADMIN_ID=$$(echo $$ADMIN_RESPONSE | grep -o '\"id\":[0-9]*' | head -1 |\
-      \ grep -o '[0-9]*' || echo \"\")\nif [ -z \"$$ADMIN_ID\" ]; then\n  ADMIN_ID=$$(curl\
-      \ -s -X GET \\\n    -u admin:changeme \\\n    'https://grafana:3000/api/teams/search?query=Admins'\
-      \ | grep -o '\"id\":[0-9]*' | head -1 | grep -o '[0-9]*')\nfi\necho \"\u2713\
-      \ Admins team ID: $$ADMIN_ID\"\n\n echo \"\"\n echo \"Setting dashboard permissions...\"\
-      \n\nDASHBOARD_ID=$$(curl -s -X GET \\\n  -u admin:changeme \\\n  \"https://grafana:3000/api/search?type=dash-db&query=$$OBSERVABILITY_DASHBOARD_UID\"\
-      \ \\\n  | sed -n 's/.*\"id\":\\([0-9][0-9]*\\).*/\\1/p' | head -1)\n\n if [\
-      \ -z \"$$DASHBOARD_ID\" ]; then\n   echo \"\u26A0 Dashboard '$$OBSERVABILITY_DASHBOARD_TITLE'\
-      \ (uid=$$OBSERVABILITY_DASHBOARD_UID) not found. Skipping permissions setup.\"\
-      \n   echo \"  You can set permissions manually after the dashboard is available.\"\
-      \n else\n   echo \"\u2713 Found dashboard ID: $$DASHBOARD_ID\"\n \n  curl -s\
-      \ -X POST \\\n    -u admin:changeme \\\n    -H \"Content-Type: application/json\"\
-      \ \\\n    https://grafana:3000/api/dashboards/id/$$DASHBOARD_ID/permissions\
-      \ \\\n    -d \"{\\\"items\\\":[{\\\"teamId\\\": $$VIEWER_ID, \\\"permission\\\
-      \": 1},{\\\"teamId\\\": $$EDITOR_ID, \\\"permission\\\": 2},{\\\"teamId\\\"\
-      : $$ADMIN_ID, \\\"permission\\\": 4}]}\" > /dev/null 2>&1\n  echo \"\u2713 Viewers:\
-      \ Read-only access (permission: 1)\"\n  echo \"\u2713 Editors: Edit access (permission:\
-      \ 2)\"\n  echo \"\u2713 Admins: Admin access (permission: 4)\"\n fi\n\n echo\
-      \ \"\"\n echo \"\u2705 Grafana provisioning complete!\"\n echo \"   Teams: Viewers,\
-      \ Editors, Admins\"\n echo \"   Ready for OIDC + permission enforcement\"\n"
     environment:
       TZ: UTC
-      OBSERVABILITY_DASHBOARD_UID: ${OBSERVABILITY_DASHBOARD_UID:-dq-execution-monitoring}
-      OBSERVABILITY_DASHBOARD_TITLE: ${OBSERVABILITY_DASHBOARD_TITLE:-Data Quality
-        Made Easy - Execution Monitoring}
+      GRAFANA_HOST: ${GRAFANA_HOST:?GRAFANA_HOST is required}
+      GRAFANA_HTTPS_HOST_PORT: ${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT
+        is required}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD
+        is required}
+      OBSERVABILITY_DASHBOARD_UID: ${OBSERVABILITY_DASHBOARD_UID:?OBSERVABILITY_DASHBOARD_UID
+        is required}
+      OBSERVABILITY_DASHBOARD_TITLE: ${OBSERVABILITY_DASHBOARD_TITLE:?OBSERVABILITY_DASHBOARD_TITLE
+        is required}
       CURL_CA_BUNDLE: /etc/grafana-init/mkcert-rootCA.pem
       SSL_CERT_FILE: /etc/grafana-init/mkcert-rootCA.pem
     volumes:
+    - ../observability/grafana/grafana-init.sh:/grafana-init/grafana-init.sh:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/grafana-init/mkcert-rootCA.pem:ro
     networks:
     - dq-network
     restart: 'no'
     labels:
     - monitoring=false
+    entrypoint:
+    - /bin/sh
+    - /grafana-init/grafana-init.sh

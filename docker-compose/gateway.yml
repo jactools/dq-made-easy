@@ -145,6 +145,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  kong-postgres-exporter:
+    depends_on:
+      kong-db:
+        condition: service_healthy
+      trust-bundle:
+        condition: service_completed_successfully
+    profiles:
+    - gateway
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+    container_name: dq-made-easy-kong-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://kong:kongpass@kong-db:5432/kong?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+    volumes:
+    - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
+    restart: unless-stopped
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
   edge:
     depends_on:
       trust-bundle:
