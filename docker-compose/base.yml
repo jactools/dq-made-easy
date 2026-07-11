@@ -3,6 +3,21 @@
 # ============================================================================
 
 # ============================================================================
+# SERVICES: Foundation services
+# ============================================================================
+services:
+  trust-bundle:
+    profiles: ["trust", "auth", "gateway", "core", "observability", "support", "airflow"]
+    build:
+      context: ..
+      dockerfile: docker/trust-bundle/Dockerfile
+    volumes:
+      - ../tmp:/workspace-tmp
+    networks:
+      - dq-network
+    restart: "no"
+
+# ============================================================================
 # VOLUMES: Persistent storage for all services
 # ============================================================================
 volumes:

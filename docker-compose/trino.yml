@@ -4,6 +4,10 @@
 
 services:
   trino:
+    depends_on:
+      trust-bundle:
+        condition: service_completed_successfully
+
     profiles: ["trino"]
     image: ${DQ_TRINO_REGISTRY:-}${DQ_TRINO_NAMESPACE:-}${DQ_TRINO_IMAGE:-dq-made-easy-trino}:${DQ_TRINO_TAG:-latest}
     build:

@@ -1,65 +1,72 @@
-# ============================================================================
-# GATEWAY: Kong API Gateway + Edge proxy
-# ============================================================================
-
 services:
   kong-db:
-    profiles: ["gateway", "observability"]
+    depends_on:
+      trust-bundle:
+        condition: service_completed_successfully
+    profiles:
+    - gateway
+    - observability
     image: postgres:17-bookworm
     container_name: dq-made-easy-kong-db
-    command: ["postgres", "-c", "ssl=on", "-c", "ssl_cert_file=/etc/postgresql/certs/tls.crt", "-c", "ssl_key_file=/etc/postgresql/certs/tls.key"]
+    command:
+    - postgres
+    - -c
+    - ssl=on
+    - -c
+    - ssl_cert_file=/etc/postgresql/certs/tls.crt
+    - -c
+    - ssl_key_file=/etc/postgresql/certs/tls.key
     environment:
       POSTGRES_DB: kong
       POSTGRES_USER: kong
       POSTGRES_PASSWORD: kongpass
     volumes:
-      - ../tmp/certs/services/kong-db:/etc/postgresql/certs:ro
-      - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
-      - kong-db-data-v17:/var/lib/postgresql/data
+    - ../tmp/certs/services/kong-db:/etc/postgresql/certs:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
+    - kong-db-data-v17:/var/lib/postgresql/data
     networks:
-      - dq-network
+    - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=kongpass psql 'host=localhost port=5432 dbname=kong user=kong sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null"]
+      test:
+      - CMD-SHELL
+      - PGPASSWORD=kongpass psql 'host=localhost port=5432 dbname=kong user=kong sslmode=verify-full
+        sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null
       interval: 10s
       timeout: 5s
       retries: 5
-
   kong-migrations:
-    profiles: ["gateway"]
-    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
-    container_name: dq-made-easy-kong-migrations
-    entrypoint: ["kong"]
-    command: ["migrations", "bootstrap"]
     depends_on:
       kong-db:
         condition: service_healthy
+      trust-bundle:
+        condition: service_completed_successfully
+    profiles:
+    - gateway
+    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
+    container_name: dq-made-easy-kong-migrations
+    entrypoint:
+    - kong
+    command:
+    - migrations
+    - bootstrap
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-db
       KONG_PG_DATABASE: kong
       KONG_PG_USER: kong
       KONG_PG_PASSWORD: kongpass
-      KONG_PG_SSL: on
-      KONG_PG_SSL_REQUIRED: on
-      KONG_PG_SSL_VERIFY: on
+      KONG_PG_SSL: true
+      KONG_PG_SSL_REQUIRED: true
+      KONG_PG_SSL_VERIFY: true
       KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
     volumes:
-      - ../tmp/certs/services/kong-db:/etc/postgresql/certs:ro
-      - ../tmp/certs/mkcert-rootCA.pem:/etc/kong/certs/trust/internal-ca-bundle.pem:ro
+    - ../tmp/certs/services/kong-db:/etc/postgresql/certs:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/kong/certs/trust/internal-ca-bundle.pem:ro
     networks:
-      - dq-network
-    restart: "no"
-
+    - dq-network
+    restart: 'no'
   kong:
-    profiles: ["gateway"]
-    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
-    build:
-      context: ../dq-kong
-      dockerfile: Dockerfile.kong
-      secrets:
-        - internal_corporate_root_ca
-    container_name: dq-made-easy-kong
     depends_on:
       kong-db:
         condition: service_healthy
@@ -67,15 +74,26 @@ services:
         condition: service_completed_successfully
       api:
         condition: service_healthy
+      trust-bundle:
+        condition: service_completed_successfully
+    profiles:
+    - gateway
+    image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:-latest}
+    build:
+      context: ../dq-kong
+      dockerfile: Dockerfile.kong
+      secrets:
+      - internal_corporate_root_ca
+    container_name: dq-made-easy-kong
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-db
       KONG_PG_DATABASE: kong
       KONG_PG_USER: kong
       KONG_PG_PASSWORD: kongpass
-      KONG_PG_SSL: on
-      KONG_PG_SSL_REQUIRED: on
-      KONG_PG_SSL_VERIFY: on
+      KONG_PG_SSL: true
+      KONG_PG_SSL_REQUIRED: true
+      KONG_PG_SSL_VERIFY: true
       KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -95,41 +113,53 @@ services:
       KEYCLOAK_ADMIN_REALM: ${KEYCLOAK_ADMIN_REALM?KEYCLOAK_ADMIN_REALM is required}
       KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER?KEYCLOAK_ADMIN_USER is required}
       KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS?KEYCLOAK_ADMIN_PASS is required}
-      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
-      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME?KEYCLOAK_SYSTEM_ADMIN_USERNAME
+        is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD?KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+        is required}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
-      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID is required}
+      DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID
+        is required}
       KONG_DNS_VALID_TTL: 1
       KONG_DNS_STALE_TTL: 0
-      KONG_TRACING_INSTRUMENTATIONS: ${KONG_TRACING_INSTRUMENTATIONS?KONG_TRACING_INSTRUMENTATIONS is required}
-      KONG_TRACING_SAMPLING_RATE: ${KONG_TRACING_SAMPLING_RATE?KONG_TRACING_SAMPLING_RATE is required}
+      KONG_TRACING_INSTRUMENTATIONS: ${KONG_TRACING_INSTRUMENTATIONS?KONG_TRACING_INSTRUMENTATIONS
+        is required}
+      KONG_TRACING_SAMPLING_RATE: ${KONG_TRACING_SAMPLING_RATE?KONG_TRACING_SAMPLING_RATE
+        is required}
       KONG_OTEL_ENDPOINT: https://dq-made-easy-otel-collector:4318/v1/traces
       KONG_SSL_CERT: /etc/kong/certs/kong.jac.dot+3.pem
       KONG_SSL_CERT_KEY: /etc/kong/certs/kong.jac.dot+3-key.pem
     networks:
-      - dq-network
+    - dq-network
     ports:
-      - "${KONG_PROXY_HOST_BIND:-}:${KONG_PROXY_HOST_PORT:-}:8443"
-      - "${KONG_ADMIN_HOST_BIND:-}:${KONG_ADMIN_HOST_PORT:-}:8444"
+    - ${KONG_PROXY_HOST_BIND:-}:${KONG_PROXY_HOST_PORT:-}:8443
+    - ${KONG_ADMIN_HOST_BIND:-}:${KONG_ADMIN_HOST_PORT:-}:8444
     volumes:
-      - ../tmp/certs:/etc/kong/certs:ro
+    - ../tmp/certs:/etc/kong/certs:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "kong", "health"]
+      test:
+      - CMD
+      - kong
+      - health
       interval: 10s
       timeout: 5s
       retries: 5
-
   edge:
-    profiles: ["edge"]
+    depends_on:
+      trust-bundle:
+        condition: service_completed_successfully
+    profiles:
+    - edge
     build:
       context: ../dq-edge
       dockerfile: Dockerfile.edge
     container_name: dq-made-easy-edge
     entrypoint:
-      - /bin/sh
-      - -c
-      - /bin/sh /opt/edge/render-edge-config.sh && exec /docker-entrypoint.sh nginx -g 'daemon off;'
+    - /bin/sh
+    - -c
+    - /bin/sh /opt/edge/render-edge-config.sh && exec /docker-entrypoint.sh nginx
+      -g 'daemon off;'
     environment:
       EDGE_MODE: ${EDGE_MODE:-local}
       EDGE_LOCAL_APP_HOST: ${EDGE_LOCAL_APP_HOST:-__MISSING_EDGE_LOCAL_APP_HOST__}
@@ -144,13 +174,12 @@ services:
       EDGE_SSL_CERT_FILE: /etc/nginx/certs/${EDGE_SSL_CERT_FILE_NAME:-__MISSING_EDGE_SSL_CERT_FILE_NAME__}
       EDGE_SSL_KEY_FILE: /etc/nginx/certs/${EDGE_SSL_KEY_FILE_NAME:-__MISSING_EDGE_SSL_KEY_FILE_NAME__}
     ports:
-      - "${EDGE_BIND_HOST:-0.0.0.0}:${EDGE_PUBLIC_PORT:-443}:443"
+    - ${EDGE_BIND_HOST:-0.0.0.0}:${EDGE_PUBLIC_PORT:-443}:443
     volumes:
-      - type: bind
-        source: ${EDGE_SSL_CERTS_DIR:-__MISSING_EDGE_SSL_CERTS_DIR__}
-        target: /etc/nginx/certs
-        read_only: true
+    - type: bind
+      source: ${EDGE_SSL_CERTS_DIR:-__MISSING_EDGE_SSL_CERTS_DIR__}
+      target: /etc/nginx/certs
+      read_only: true
     networks:
-      - dq-network
+    - dq-network
     restart: unless-stopped
-
