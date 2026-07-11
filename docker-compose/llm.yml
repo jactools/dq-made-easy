@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile.llm
       args:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
-    env_file: ../${ROOT_ENV_FILE:-.env}
+    env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     ports:
       - "${DQ_LLM_HOST_BIND:-127.0.0.1}:${DQ_LLM_HOST_PORT:-8123}:8000"
     volumes:

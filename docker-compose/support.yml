@@ -312,7 +312,7 @@ services:
       secrets:
       - internal_corporate_root_ca
     env_file:
-    - ../${ROOT_ENV_FILE:-.env}
+    - ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     environment:
       DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
       APP_CONFIG_ENCRYPTION_KEY: ${APP_CONFIG_ENCRYPTION_KEY?APP_CONFIG_ENCRYPTION_KEY

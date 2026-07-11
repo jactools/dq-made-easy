@@ -34,7 +34,7 @@ services:
         - internal_mkcert_root_ca
         - internal_root_ca
         - internal_ca_bundle
-    env_file: ../${ROOT_ENV_FILE:-.env}
+    env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     entrypoint: ["/bin/bash", "/workspace/dq-db/scripts/run_db_seed_container.sh"]
     networks:
       - dq-network
@@ -69,7 +69,7 @@ services:
         MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
         INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:-}
     env_file:
-      - ../${ROOT_ENV_FILE:-.env}
+      - ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     working_dir: /app
     volumes:
       - spark-jars:/home/appuser/.dq-spark-jars

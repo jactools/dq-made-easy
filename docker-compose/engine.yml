@@ -67,7 +67,7 @@ services:
     - engine
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
     env_file:
-    - ../${ROOT_ENV_FILE:-.env}
+    - ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     command:
     - python
     - scripts/warmup_spark_jars.py

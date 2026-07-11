@@ -196,7 +196,7 @@ services:
     - -lc
     command:
     - cd /app && python -m alembic -c alembic.ini upgrade heads
-    env_file: ../${ROOT_ENV_FILE:-.env}
+    env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     networks:
     - dq-network
     restart: 'no'
@@ -284,7 +284,7 @@ services:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
     ports:
     - ${API_HOST_BIND:-}:${API_HOST_PORT:-}:4010
-    env_file: ../${ROOT_ENV_FILE:-.env}
+    env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     volumes:
     - ../tmp/certs/services/api:/etc/api/certs:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/api/mkcert-rootCA.pem:ro
