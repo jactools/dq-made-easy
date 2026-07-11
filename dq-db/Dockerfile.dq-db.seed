@@ -42,7 +42,11 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
     fi; \
     if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ]; then \
         echo "Importing internal corporate root CA into system truststore"; \
-        printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+        if [ -f "${INTERNAL_CORPORATE_ROOT_CA}" ]; then \
+            cp "${INTERNAL_CORPORATE_ROOT_CA}" /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+        else \
+            printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+        fi; \
     fi; \
     if [ -f /run/secrets/internal_ca_bundle ]; then \
         echo "Importing internal certificate bundle into system truststore"; \
