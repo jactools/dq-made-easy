@@ -40,19 +40,15 @@ RUN set -eux; \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Optionally import a mkcert root CA provided as a base64-encoded build-arg
-RUN if [ -n "${MKCERT_ROOT_CA:-}" ]; then \
+RUN if [ -n "${MKCERT_ROOT_CA:-}" ] && [ -f "${MKCERT_ROOT_CA}" ]; then \
 	echo "Importing mkcert root CA into system truststore"; \
-	if [ -f "${MKCERT_ROOT_CA}" ]; then \
-		cp "${MKCERT_ROOT_CA}" /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
-	else \
-		echo "$MKCERT_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
-	fi; \
+	cp "${MKCERT_ROOT_CA}" /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
 	update-ca-certificates || true; \
 	fi
 
-RUN if [ -n "${INTERNAL_ROOT_CA:-}" ]; then \
+RUN if [ -n "${INTERNAL_ROOT_CA:-}" ] && [ -f "${INTERNAL_ROOT_CA}" ]; then \
 	echo "Importing internal root CA into system truststore"; \
-	echo "$INTERNAL_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
+	cp "${INTERNAL_ROOT_CA}" /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
 	update-ca-certificates || true; \
 	fi
 

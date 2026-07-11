@@ -40,13 +40,9 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
         echo "Importing internal root CA into system truststore"; \
         import_ca_file /run/secrets/internal_root_ca /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
     fi; \
-    if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ]; then \
+    if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ] && [ -f "${INTERNAL_CORPORATE_ROOT_CA}" ]; then \
         echo "Importing internal corporate root CA into system truststore"; \
-        if [ -f "${INTERNAL_CORPORATE_ROOT_CA}" ]; then \
-            cp "${INTERNAL_CORPORATE_ROOT_CA}" /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
-        else \
-            printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
-        fi; \
+        cp "${INTERNAL_CORPORATE_ROOT_CA}" /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
     fi; \
     if [ -f /run/secrets/internal_ca_bundle ]; then \
         echo "Importing internal certificate bundle into system truststore"; \

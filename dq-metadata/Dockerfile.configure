@@ -11,12 +11,8 @@ ARG PIP_INDEX_URL
 ARG INTERNAL_CORPORATE_ROOT_CA
 
 RUN set -eux; \
-    if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ]; then \
-        if [ -f "${INTERNAL_CORPORATE_ROOT_CA}" ]; then \
-            cp "${INTERNAL_CORPORATE_ROOT_CA}" /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
-        else \
-            printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
-        fi; \
+    if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ] && [ -f "${INTERNAL_CORPORATE_ROOT_CA}" ]; then \
+        cp "${INTERNAL_CORPORATE_ROOT_CA}" /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
     fi; \
     update-ca-certificates; \
     for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
