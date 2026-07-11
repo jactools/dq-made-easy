@@ -44,10 +44,16 @@ ADMIN_ONLY_GROUPS='["admin"]'
 
 REALM_CONSUMERS_SYNCED=false
 
+CURL_CA_BUNDLE="${CURL_CA_BUNDLE:-${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-}}"
+KONG_ADMIN_CURL_ARGS=(-s -f -k)
+if [ -n "$CURL_CA_BUNDLE" ] && [ -f "$CURL_CA_BUNDLE" ]; then
+  KONG_ADMIN_CURL_ARGS=(-s -f --cacert "$CURL_CA_BUNDLE")
+fi
+
 echo "[kong-bootstrap] waiting for Kong Admin API at ${KONG_ADMIN_INTERNAL_URL}"
 export KONG_LUA_SSL_TRUSTED_CERTIFICATE
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
-  if curl -s -f "$KONG_ADMIN_INTERNAL_URL/" >/dev/null 2>&1; then
+  if curl "${KONG_ADMIN_CURL_ARGS[@]}" "$KONG_ADMIN_INTERNAL_URL/" >/dev/null 2>&1; then
     break
   fi
   RETRY_COUNT=$((RETRY_COUNT + 1))

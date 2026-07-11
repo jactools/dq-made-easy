@@ -181,8 +181,8 @@ services:
       GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "${GRAFANA_OIDC_SECRET:-changeme}"
       GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:-changeme}
       GF_AUTH_GENERIC_OAUTH_SCOPES: "openid profile email roles"
-      GF_AUTH_GENERIC_OAUTH_AUTH_URL: "${KEYCLOAK_PUBLIC_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/auth"
-      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "${SSO_INTERNAL_ISSUER_URL}/protocol/openid-connect/token"
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: "${KEYCLOAK_PUBLIC_URL:-}/realms/${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}}/protocol/openid-connect/auth"
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "${SSO_INTERNAL_ISSUER_URL:?SSO_INTERNAL_ISSUER_URL is required}}/protocol/openid-connect/token"
       GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH: "email"
       GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH: "email"
       GF_AUTH_GENERIC_OAUTH_NAME_ATTRIBUTE_PATH: "email"
@@ -450,3 +450,4 @@ services:
     restart: "no"
     labels:
       - "monitoring=false"
+

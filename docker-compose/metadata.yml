@@ -30,7 +30,7 @@ services:
       POSTGRES_PASSWORD: ${OM_DB_PASSWORD:-openmetadata_pass}
       POSTGRES_DB: ${OM_DB_NAME:-openmetadata_db}
     ports:
-      - "${OPENMETADATA_DB_HOST_BIND}:${OPENMETADATA_DB_HOST_PORT}:5432"
+      - "${OPENMETADATA_DB_HOST_BIND:-}:${OPENMETADATA_DB_HOST_PORT:-}:5432"
     volumes:
       - ../tmp/certs/services/openmetadata-db:/etc/postgresql/certs:ro
       - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
@@ -188,10 +188,10 @@ services:
       OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
       CURL_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
       SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
-      OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT:?ENVIRONMENT is required}}
       OTEL_LOGS_EXPORTER: none
       JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
-      ENVIRONMENT: ${ENVIRONMENT}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
     entrypoint: ["/bin/bash"]
     command: ["/openmetadata-https-start.sh"]
     ports:
@@ -285,11 +285,11 @@ services:
       OTEL_EXPORTER_OTLP_CERTIFICATE: ${OPENMETADATA_CA_BUNDLE:-/etc/openmetadata/certs/mkcert-rootCA.pem}
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
-      ENVIRONMENT: ${ENVIRONMENT}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
     entrypoint: ["/bin/bash"]
     command: ["-c", "airflow db migrate && airflow api-server -p 8080"]
     ports:
-      - "${OPENMETADATA_INGESTION_HOST_BIND}:${OPENMETADATA_INGESTION_HOST_PORT}:8080"
+      - "${OPENMETADATA_INGESTION_HOST_BIND:-}:${OPENMETADATA_INGESTION_HOST_PORT:-}:8080"
     volumes:
       - ../tmp/certs/services/openmetadata-ingestion/tls.crt:/etc/openmetadata/certs/openmetadata-ingestion/tls.crt:ro
       - ../tmp/certs/services/openmetadata-ingestion/tls.key:/etc/openmetadata/certs/openmetadata-ingestion/tls.key:ro
@@ -298,3 +298,4 @@ services:
     networks:
       - dq-network
     restart: unless-stopped
+

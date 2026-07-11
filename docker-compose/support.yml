@@ -4,38 +4,38 @@
 
 x-zammad-service: &zammad-service
   profiles: ["support"]
-  image: ${ZAMMAD_IMAGE}
+  image: ${ZAMMAD_IMAGE:-}
   restart: unless-stopped
   environment:
-    MEMCACHE_SERVERS: ${ZAMMAD_MEMCACHE_SERVERS}
-    POSTGRESQL_DB: ${ZAMMAD_POSTGRES_DB}
-    POSTGRESQL_HOST: ${ZAMMAD_POSTGRES_HOST}
-    POSTGRESQL_USER: ${ZAMMAD_POSTGRES_USER}
-    POSTGRESQL_PASS: ${ZAMMAD_POSTGRES_PASSWORD}
-    POSTGRESQL_PORT: ${ZAMMAD_POSTGRES_PORT}
-    POSTGRESQL_OPTIONS: ${ZAMMAD_POSTGRESQL_OPTIONS}
-    REDIS_URL: ${ZAMMAD_REDIS_URL}
-    ELASTICSEARCH_ENABLED: ${ZAMMAD_ELASTICSEARCH_ENABLED}
-    ELASTICSEARCH_HOST: ${ZAMMAD_ELASTICSEARCH_HOST}
-    ELASTICSEARCH_PORT: ${ZAMMAD_ELASTICSEARCH_PORT}
-    ELASTICSEARCH_SCHEMA: ${ZAMMAD_ELASTICSEARCH_SCHEMA}
-    ELASTICSEARCH_NAMESPACE: ${ZAMMAD_ELASTICSEARCH_NAMESPACE}
-    ELASTICSEARCH_SSL_VERIFY: ${ZAMMAD_ELASTICSEARCH_SSL_VERIFY}
+    MEMCACHE_SERVERS: ${ZAMMAD_MEMCACHE_SERVERS:-}
+    POSTGRESQL_DB: ${ZAMMAD_POSTGRES_DB:-}
+    POSTGRESQL_HOST: ${ZAMMAD_POSTGRES_HOST:-}
+    POSTGRESQL_USER: ${ZAMMAD_POSTGRES_USER:-}
+    POSTGRESQL_PASS: ${ZAMMAD_POSTGRES_PASSWORD:-}
+    POSTGRESQL_PORT: ${ZAMMAD_POSTGRES_PORT:-}
+    POSTGRESQL_OPTIONS: ${ZAMMAD_POSTGRESQL_OPTIONS:-}
+    REDIS_URL: ${ZAMMAD_REDIS_URL:-}
+    ELASTICSEARCH_ENABLED: ${ZAMMAD_ELASTICSEARCH_ENABLED:-}
+    ELASTICSEARCH_HOST: ${ZAMMAD_ELASTICSEARCH_HOST:-}
+    ELASTICSEARCH_PORT: ${ZAMMAD_ELASTICSEARCH_PORT:-}
+    ELASTICSEARCH_SCHEMA: ${ZAMMAD_ELASTICSEARCH_SCHEMA:-}
+    ELASTICSEARCH_NAMESPACE: ${ZAMMAD_ELASTICSEARCH_NAMESPACE:-}
+    ELASTICSEARCH_SSL_VERIFY: ${ZAMMAD_ELASTICSEARCH_SSL_VERIFY:-}
     AUTOWIZARD_JSON: ${AUTOWIZARD_JSON:-}
     AUTOWIZARD_RELATIVE_PATH: ${AUTOWIZARD_RELATIVE_PATH:-tmp/auto_wizard.json}
-    NGINX_PORT: ${ZAMMAD_NGINX_PORT}
-    NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
-    NGINX_SERVER_SCHEME: ${ZAMMAD_NGINX_SERVER_SCHEME}
-    RAILS_TRUSTED_PROXIES: ${ZAMMAD_RAILS_TRUSTED_PROXIES}
-    ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE}
-    ZAMMAD_FQDN: ${ZAMMAD_FQDN}
+    NGINX_PORT: ${ZAMMAD_NGINX_PORT:-}
+    NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME:-}
+    NGINX_SERVER_SCHEME: ${ZAMMAD_NGINX_SERVER_SCHEME:-}
+    RAILS_TRUSTED_PROXIES: ${ZAMMAD_RAILS_TRUSTED_PROXIES:-}
+    ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE:-}
+    ZAMMAD_FQDN: ${ZAMMAD_FQDN:-}
     ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
-    ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
+    ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY:-}
     KEYCLOAK_SERVER_SIDE_URL: ${KEYCLOAK_SERVER_SIDE_URL:-}
     SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL:-}
     SSL_CERT_FILE: /etc/zammad/certs/mkcert-rootCA.pem
     CURL_CA_BUNDLE: /etc/zammad/certs/mkcert-rootCA.pem
-    TZ: ${TZ}
+    TZ: ${TZ:-}
   volumes:
     - zammad_backup:/var/tmp/zammad:ro
     - zammad_storage:/opt/zammad/storage
@@ -49,18 +49,18 @@ x-zammad-service: &zammad-service
 services:
   zammad-postgresql:
     profiles: ["support"]
-    image: postgres:${ZAMMAD_POSTGRES_VERSION}
+    image: postgres:${ZAMMAD_POSTGRES_VERSION:-}
     environment:
-      POSTGRES_DB: ${ZAMMAD_POSTGRES_DB}
-      POSTGRES_USER: ${ZAMMAD_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${ZAMMAD_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${ZAMMAD_POSTGRES_DB:-}
+      POSTGRES_USER: ${ZAMMAD_POSTGRES_USER:-}
+      POSTGRES_PASSWORD: ${ZAMMAD_POSTGRES_PASSWORD:-}
     volumes:
       - zammad_postgresql_data:/var/lib/postgresql/data
     restart: unless-stopped
     labels:
       - "monitoring=true"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${ZAMMAD_POSTGRES_USER} -d ${ZAMMAD_POSTGRES_DB} -h localhost || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U ${ZAMMAD_POSTGRES_USER:-} -d ${ZAMMAD_POSTGRES_DB:-} -h localhost || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -70,7 +70,7 @@ services:
 
   zammad-redis:
     profiles: ["zammad-legacy"]
-    image: redis:${ZAMMAD_REDIS_VERSION}
+    image: redis:${ZAMMAD_REDIS_VERSION:-}
     command: redis-server --appendonly yes
     volumes:
       - zammad_redis_data:/data
@@ -88,7 +88,7 @@ services:
 
   zammad-memcached:
     profiles: ["support"]
-    image: memcached:${ZAMMAD_MEMCACHE_VERSION}
+    image: memcached:${ZAMMAD_MEMCACHE_VERSION:-}
     command: memcached -m 256M
     restart: unless-stopped
     labels:
@@ -220,7 +220,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.zammad-origin
       args:
-        ZAMMAD_IMAGE: ${ZAMMAD_IMAGE}
+        ZAMMAD_IMAGE: ${ZAMMAD_IMAGE:-}
     restart: unless-stopped
     depends_on:
       zammad-railsserver:
@@ -228,13 +228,13 @@ services:
       zammad-websocket:
         condition: service_started
     environment:
-      ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME}
-      ZAMMAD_SSL_CERT_FILE_NAME: ${ZAMMAD_SSL_CERT_FILE_NAME}
-      ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME}
+      ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME:-}
+      ZAMMAD_SSL_CERT_FILE_NAME: ${ZAMMAD_SSL_CERT_FILE_NAME:-}
+      ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME:-}
     volumes:
-      - ${EDGE_SSL_CERTS_DIR}:/etc/nginx/certs:ro
+      - ${EDGE_SSL_CERTS_DIR:-}:/etc/nginx/certs:ro
     ports:
-      - "${ZAMMAD_HOST_BIND}:${ZAMMAD_EXPOSE_PORT}:443"
+      - "${ZAMMAD_HOST_BIND:-}:${ZAMMAD_EXPOSE_PORT:-}:443"
     networks:
       - dq-network
     labels:
@@ -301,7 +301,7 @@ services:
       xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
       ES_JAVA_OPTS: -Xms1g -Xmx1g
     ports:
-      - "${OPENMETADATA_SEARCH_HOST_BIND}:${OPENMETADATA_SEARCH_HOST_PORT}:9200"
+      - "${OPENMETADATA_SEARCH_HOST_BIND:-}:${OPENMETADATA_SEARCH_HOST_PORT:-}:9200"
     volumes:
       - ../tmp/certs/services/openmetadata-search/tls.crt:/usr/share/elasticsearch/config/certs/tls.crt:ro
       - ../tmp/certs/services/openmetadata-search/tls.key:/usr/share/elasticsearch/config/certs/tls.key:ro
@@ -316,3 +316,4 @@ services:
       start_period: 40s
     networks:
       - dq-network
+

@@ -11,7 +11,7 @@ services:
     environment:
       ENVIRONMENT: ${ENVIRONMENT?ENVIRONMENT is required}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}
-      KEYCLOAK_REALM_DISPLAY_NAME: ${KEYCLOAK_REALM_DISPLAY_NAME}
+      KEYCLOAK_REALM_DISPLAY_NAME: ${KEYCLOAK_REALM_DISPLAY_NAME:-}
       KEYCLOAK_JACCLOUD_USERNAME: ${KEYCLOAK_JACCLOUD_USERNAME?KEYCLOAK_JACCLOUD_USERNAME is required}
       SMOKE_LOGIN_EMAIL: ${SMOKE_LOGIN_EMAIL?SMOKE_LOGIN_EMAIL is required}
       OPERATOR_LOGIN_EMAIL: ${OPERATOR_LOGIN_EMAIL:-operator@jaccloud.nl}
@@ -45,8 +45,8 @@ services:
       keycloak-seed-artifacts:
         condition: service_completed_successfully
     environment:
-      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME}
-      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}}
       OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL?OIDC_REDIRECT_BASE_URL is required}
       KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
       ZAMMAD_PUBLIC_URL: ${ZAMMAD_PUBLIC_URL:-}
@@ -56,17 +56,17 @@ services:
       DQ_ENGINE_OIDC_REALM_ROLE: ${DQ_ENGINE_OIDC_REALM_ROLE:-dq:rules:write}
       UI_VITE_LOCAL_URL: ${UI_VITE_LOCAL_URL?UI_VITE_LOCAL_URL is required}
       UI_NGINX_LOCAL_URL: ${UI_NGINX_LOCAL_URL?UI_NGINX_LOCAL_URL is required}
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS}
-      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
-      KEYCLOAK_HTTPS_RELATIVE_PATH: ${KEYCLOAK_HTTPS_RELATIVE_PATH}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASS:-}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}}
+      KEYCLOAK_HTTPS_RELATIVE_PATH: ${KEYCLOAK_HTTPS_RELATIVE_PATH:-}
       KEYCLOAK_HTTPS_CERT_FILE: /opt/keycloak/certs/keycloak.jac.dot+3.pem
       KEYCLOAK_HTTPS_KEY_FILE: /opt/keycloak/certs/keycloak.jac.dot+3-key.pem
       KEYCLOAK_HTTPS_KEYSTORE_FILE: /opt/keycloak/keystore/keycloak.p12
       KEYCLOAK_HTTPS_KEYSTORE_PASSWORD: ${KEYCLOAK_HTTPS_KEYSTORE_PASSWORD:-changeit}
-    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME}", "--hostname-strict=false"]
+    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.jac.dot+3.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak.jac.dot+3-key.pem", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH:-}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME:-}", "--hostname-strict=false"]
     ports:
-      - "${KEYCLOAK_HTTPS_HOST_BIND}:${KEYCLOAK_HTTPS_HOST_PORT}:8443"
+      - "${KEYCLOAK_HTTPS_HOST_BIND:-}:${KEYCLOAK_HTTPS_HOST_PORT:-}:8443"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - keycloak_seed_artifacts:/opt/keycloak/realm-import:ro
@@ -81,3 +81,4 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+

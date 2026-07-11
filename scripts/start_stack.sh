@@ -253,6 +253,10 @@ ensure_edge_cert_assets() {
     ./*)
       edge_certs_dir="$ROOT_DIR/${edge_certs_dir#./}"
       ;;
+    ../*)
+      # ../tmp/certs → $ROOT_DIR/tmp/certs (Compose bind-mount relative paths)
+      edge_certs_dir="$ROOT_DIR/${edge_certs_dir#../}"
+      ;;
     /*)
       ;;
     *)

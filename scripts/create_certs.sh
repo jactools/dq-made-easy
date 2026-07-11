@@ -129,6 +129,8 @@ echo "internal service DNS: zammad-railsserver (with edge SNI: ${EDGE_LOCAL_SUPP
 generate_service_cert "zammad-railsserver" zammad-railsserver "${EDGE_LOCAL_SUPPORT_HOST}" localhost 127.0.0.1 ::1
 echo "internal service DNS: zammad-websocket (with edge SNI: ${EDGE_LOCAL_SUPPORT_HOST})"
 generate_service_cert "zammad-websocket" zammad-websocket "${EDGE_LOCAL_SUPPORT_HOST}" localhost 127.0.0.1 ::1
+echo "internal service DNS: zammad-postgresql"
+generate_service_cert "zammad-postgresql" zammad-postgresql localhost 127.0.0.1 ::1
 
 echo "${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required}"
 generate_cert "$CERTS_DIR/${KAFKA_CERT_HOST}+3.pem" "$CERTS_DIR/${KAFKA_CERT_HOST}+3-key.pem" "${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required}" localhost 127.0.0.1 ::1

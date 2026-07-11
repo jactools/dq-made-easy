@@ -86,3 +86,4 @@ services:
     networks:
       - dq-network
     restart: "no"
+

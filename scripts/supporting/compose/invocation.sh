@@ -5,14 +5,17 @@
 # - Fails fast when the env file has not been selected yet.
 # - Keeps compose invocation consistent across startup and seeding scripts.
 #
-# Version: 1.0
-# Last modified: 2026-05-08
+# Version: 1.1
+# Last modified: 2026-07-10
+# Changelog:
+# - 1.1 (2026-07-10): Added --project-directory so compose resolves relative
+#   env_file paths (e.g. .env.dev.local) from repo root, not compose directory.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 
 # Modular docker-compose entry point (include file that pulls in all modules)
-COMPOSE_FILE="${COMPOSE_FILE:-$ROOT_DIR/docker-compose/docker-compose.yml}"
+COMPOSE_FILE="${COMPOSE_FILE:-$ROOT_DIR/docker-compose.yml}"
 
 IMAGE_TAG_VARS=(
   DQ_BASE_TAG
@@ -113,6 +116,14 @@ build_effective_compose_env_file() {
     printf '%s=%s\n' "$key" "$value" >> "$effective_env_file"
   done
 
+  # Force ROOT_ENV_FILE to its original relative form so compose service-level
+  # env_file directives (../ROOT_ENV_FILE) resolve correctly from included
+  # files in docker-compose/ regardless of the shell's absolute ROOT_ENV_FILE.
+  local relative_env_file="${source_env_file##*/}"
+  awk -F= '$1 != "ROOT_ENV_FILE" { print }' "$effective_env_file" > "${effective_env_file}.tmp"
+  mv "${effective_env_file}.tmp" "$effective_env_file"
+  printf '%s=%s\n' "ROOT_ENV_FILE" "$relative_env_file" >> "$effective_env_file"
+
   printf '%s' "$effective_env_file"
 }
 
@@ -121,6 +132,12 @@ docker_compose() {
     error "compose/invocation.sh" "ROOT_ENV_FILE must be set before calling docker_compose"
     return 1
   fi
+
+  # Force ROOT_ENV_FILE to relative for compose variable interpolation.
+  # Compose uses process environment variables before --env-file values,
+  # and inherited ROOT_ENV_FILE may be absolute from parent scripts.
+  local relative_root_env_file="${ROOT_ENV_FILE##*/}"
+  export ROOT_ENV_FILE="$relative_root_env_file"
 
   # Enforce the single Nexus->PIP_INDEX_URL contract for image builds.
   # If Nexus is configured, setup_env.sh must have derived PIP_INDEX_URL before

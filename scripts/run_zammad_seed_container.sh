@@ -41,6 +41,23 @@ source "$ROOT_DIR/scripts/supporting/keycloak_readiness.sh"
 
 my_name="run_zammad_seed_container.sh"
 
+_assert_zammad_railsserver_running() {
+  local container_id="$1"
+  local caller_name="${2:-$my_name}"
+  local container_state
+
+  if [ -z "$container_id" ]; then
+    error "$caller_name" "zammad-railsserver is not running"
+    exit 36
+  fi
+
+  container_state="$(docker inspect -f '{{.State.Status}}' "$container_id" 2>/dev/null || true)"
+  if [ "$container_state" != "running" ]; then
+    error "$caller_name" "zammad-railsserver is in state '${container_state}' (expected 'running'). Check container logs with: docker logs $container_id"
+    exit 36
+  fi
+}
+
 generate_seed_artifacts() {
   local keycloak_ready_url
 
@@ -68,10 +85,7 @@ seed_zammad_auto_wizard() {
   local encoded_payload
 
   railsserver_id="$(find_running_container_id zammad-railsserver)"
-  if [ -z "$railsserver_id" ]; then
-    error "$my_name" "zammad-railsserver is not running"
-    exit 36
-  fi
+  _assert_zammad_railsserver_running "$railsserver_id" "$my_name"
 
   image_name="$(docker inspect -f '{{.Config.Image}}' "$railsserver_id")"
   env_file="$WORK_DIR/zammad-service.env"
@@ -99,6 +113,7 @@ seed_zammad_organizations() {
   local seed_script
 
   railsserver_id="$(find_running_container_id zammad-railsserver)"
+  _assert_zammad_railsserver_running "$railsserver_id" "$my_name"
   seed_script="$WORK_DIR/seed_zammad_organizations.rb"
 
   docker cp "$GENERATED_USERS_FILE" "${railsserver_id}:/tmp/zammad-generated-users.csv"
@@ -142,6 +157,7 @@ seed_zammad_generated_users() {
   local import_script
 
   railsserver_id="$(find_running_container_id zammad-railsserver)"
+  _assert_zammad_railsserver_running "$railsserver_id" "$my_name"
   import_script="$WORK_DIR/import_zammad_users.rb"
 
   cat > "$import_script" <<'RUBY'
@@ -233,6 +249,7 @@ provision_zammad_support_token() {
   local admin_email
 
   railsserver_id="$(find_running_container_id zammad-railsserver)"
+  _assert_zammad_railsserver_running "$railsserver_id" "$my_name"
   token_script="$WORK_DIR/provision_zammad_support_token.rb"
   admin_email="$(read_zammad_admin_email)"
 
@@ -276,10 +293,7 @@ configure_zammad_openid_connect() {
   local callback_url
 
   railsserver_id="$(find_running_container_id zammad-railsserver)"
-  if [ -z "$railsserver_id" ]; then
-    error "$my_name" "zammad-railsserver is not running"
-    exit 36
-  fi
+  _assert_zammad_railsserver_running "$railsserver_id" "$my_name"
 
   callback_url="${ZAMMAD_PUBLIC_URL%/}/auth/openid_connect/callback"
   oidc_script="$WORK_DIR/configure_zammad_openid_connect.rb"
@@ -343,10 +357,7 @@ reconcile_zammad_system_setup_state() {
   local setup_script
 
   railsserver_id="$(find_running_container_id zammad-railsserver)"
-  if [ -z "$railsserver_id" ]; then
-    error "$my_name" "zammad-railsserver is not running"
-    exit 36
-  fi
+  _assert_zammad_railsserver_running "$railsserver_id" "$my_name"
 
   setup_script="$WORK_DIR/reconcile_zammad_system_setup_state.rb"
 

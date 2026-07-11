@@ -55,9 +55,7 @@ fi
 
 PLAYWRIGHT_BROWSER_EXECUTABLE_PATH="${PLAYWRIGHT_BROWSER_EXECUTABLE_PATH:-${GOOGLE_CHROME_PATH:-}}"
 if [[ -z "$PLAYWRIGHT_BROWSER_EXECUTABLE_PATH" ]]; then
-  if [[ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]]; then
-    PLAYWRIGHT_BROWSER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-  elif command -v google-chrome >/dev/null 2>&1; then
+  if command -v google-chrome >/dev/null 2>&1; then
     PLAYWRIGHT_BROWSER_EXECUTABLE_PATH="$(command -v google-chrome)"
   elif command -v chromium >/dev/null 2>&1; then
     PLAYWRIGHT_BROWSER_EXECUTABLE_PATH="$(command -v chromium)"

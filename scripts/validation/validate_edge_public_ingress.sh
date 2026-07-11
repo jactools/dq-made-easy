@@ -54,6 +54,10 @@ resolve_path() {
     ./*)
       printf '%s/%s' "$ROOT_DIR" "${path#./}"
       ;;
+    ../*)
+      # ../tmp/certs → $ROOT_DIR/tmp/certs (Compose bind-mount relative paths)
+      printf '%s/%s' "$ROOT_DIR" "${path#../}"
+      ;;
     *)
       printf '%s/%s' "$ROOT_DIR" "$path"
       ;;

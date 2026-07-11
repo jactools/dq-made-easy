@@ -255,8 +255,10 @@ Implementation checklist:
 - [x] `WS5-A04` Add orchestration hooks for schedule, pipeline-run, and data-arrival triggers.
 - [x] `WS5-A05` Publish GitHub Actions and Azure DevOps templates for validation and fail-fast enforcement.
 - [x] `WS5-A06` Add first-party integration patterns for one orchestrator path such as Airflow, ADF, or Fabric.
-- [ ] `WS5-A07` Define connector strategy and plugin contracts for warehouses and pipeline systems.
-- [ ] `WS5-A08` Complete `API-1` to `API-4` connector, webhook, rate-limit, and advanced-auth work.
+- [x] `WS5-A07` Define connector strategy and plugin contracts for warehouses and pipeline systems.
+	- Status: Connector plugin contracts, registry, 5 providers, and sync orchestrator with background jobs, retry/backoff, scheduling, incremental sync, and staleness monitoring implemented.
+- [x] `WS5-A08` Complete `API-1` to `API-4` connector, webhook, rate-limit, and advanced-auth work.
+	- Status: API-1 connector framework fully operational with async sync jobs, job status polling, schedule management, retry policy, and staleness health endpoint.
 - [ ] `WS5-A09` Complete `API-6` namespace cleanup so authenticated session/profile reads are outside `/admin/v1`.
 - [x] `WS5-A10` Add external orchestration support so external DAGs can trigger runs and fail fast on API or run failure.
 

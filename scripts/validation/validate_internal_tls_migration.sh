@@ -51,7 +51,7 @@ require_absent() {
   fi
 }
 
-require_file "$ROOT_DIR/docker-compose/docker-compose.yml"
+require_file "$ROOT_DIR/docker-compose.yml"
 require_file "$ROOT_DIR/.env.dev.example"
 require_file "$ROOT_DIR/.env.test.example"
 require_file "$ROOT_DIR/.env.prod.example"

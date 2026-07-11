@@ -85,7 +85,7 @@ services:
       KONG_ADMIN_GUI_URL: ${KONG_MANAGER_PUBLIC_URL:-https://localhost:8002}
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
       CURL_CA_BUNDLE: /etc/kong/certs/trust/internal-ca-bundle.pem
-      DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL}
+      DQ_API_INTERNAL_URL: ${DQ_API_INTERNAL_URL:-}
       SSO_ENABLED: ${SSO_ENABLED?SSO_ENABLED is required}
       SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
       TRUST_PROXY_AUTH: ${TRUST_PROXY_AUTH?TRUST_PROXY_AUTH is required}
@@ -109,8 +109,8 @@ services:
     networks:
       - dq-network
     ports:
-      - "${KONG_PROXY_HOST_BIND}:${KONG_PROXY_HOST_PORT}:8443"
-      - "${KONG_ADMIN_HOST_BIND}:${KONG_ADMIN_HOST_PORT}:8444"
+      - "${KONG_PROXY_HOST_BIND:-}:${KONG_PROXY_HOST_PORT:-}:8443"
+      - "${KONG_ADMIN_HOST_BIND:-}:${KONG_ADMIN_HOST_PORT:-}:8444"
     volumes:
       - ../tmp/certs:/etc/kong/certs:ro
     restart: unless-stopped
@@ -153,3 +153,4 @@ services:
     networks:
       - dq-network
     restart: unless-stopped
+

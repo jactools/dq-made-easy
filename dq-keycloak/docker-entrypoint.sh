@@ -1,6 +1,22 @@
 #!/bin/bash
 set -e
 
+# ==========================================================================
+# Trust-bundle initialization
+# ==========================================================================
+# The trust-bundle container generates:
+#   /certs/trust/trust-bundle.pem      — CA bundle for curl/Python/etc.
+#   /certs/trust/trust-bundle.jks      — Java keystore with all CAs.
+#   /certs/trust/java-truststore-env.sh — JAVA_OPTS / KC_OPTS for JVMs.
+TRUST_ENV="/certs/trust/java-truststore-env.sh"
+if [ -f "$TRUST_ENV" ]; then
+  . "$TRUST_ENV"
+  echo "[entrypoint] sourced trust-bundle env from ${TRUST_ENV}"
+else
+  echo "[entrypoint] WARNING: trust-bundle env not found at ${TRUST_ENV}" >&2
+  echo "[entrypoint] using system truststore" >&2
+fi
+
 # Ensure the realm JSON is always present in data/import/ before Keycloak
 # starts, regardless of what the named volume contains.  The source file lives
 # outside /opt/keycloak/data so the volume mount can never shadow it.
@@ -32,7 +48,6 @@ fi
 
 # Start Keycloak in background so we can perform an initial admin tweak
 # (disable master realm SSL requirement for local/dev convenience).
-exec_kc="/opt/keycloak/bin/kc.sh $*"
 
 # Start Keycloak
 /opt/keycloak/bin/kc.sh "$@" &

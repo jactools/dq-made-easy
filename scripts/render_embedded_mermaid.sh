@@ -46,19 +46,13 @@ detect_puppeteer_executable_path() {
   fi
 
   local browser_candidates=(
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    "/Applications/Chromium.app/Contents/MacOS/Chromium"
+    google-chrome
+    chromium
+    chromium-browser
   )
 
   local browser_path
   for browser_path in "${browser_candidates[@]}"; do
-    if [[ -x "$browser_path" ]]; then
-      printf '%s\n' "$browser_path"
-      return 0
-    fi
-  done
-
-  for browser_path in google-chrome chromium chromium-browser; do
     if command -v "$browser_path" >/dev/null 2>&1; then
       command -v "$browser_path"
       return 0

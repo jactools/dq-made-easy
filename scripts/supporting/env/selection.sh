@@ -66,7 +66,11 @@ init_root_env_file() {
   local default_env_file
 
   default_env_file="$(named_root_env_file_path "$root_dir" dev)"
-  ROOT_ENV_FILE="${ROOT_ENV_FILE:-$default_env_file}"
+  if [ -n "${ROOT_ENV_FILE:-}" ]; then
+    ROOT_ENV_FILE="$(resolve_env_file_path "$root_dir" "$ROOT_ENV_FILE")"
+  else
+    ROOT_ENV_FILE="$default_env_file"
+  fi
 }
 
 ensure_selected_root_env_file_exists() {
@@ -79,10 +83,14 @@ ensure_selected_root_env_file_exists() {
 source_selected_root_env_file() {
   ensure_selected_root_env_file_exists || return 1
 
+  local selected_root_env_file="$ROOT_ENV_FILE"
   set -a
   # shellcheck disable=SC1090
-  source "$ROOT_ENV_FILE"
+  source "$selected_root_env_file"
   set +a
+
+  ROOT_ENV_FILE="$selected_root_env_file"
+  export ROOT_ENV_FILE
 }
 
 validate_selected_root_env_file() {

@@ -1,0 +1,34 @@
+# Docker Compose - Modular Configuration
+# Main entry point: includes all service modules via docker compose include.
+#
+# Usage:
+#   docker compose config
+#   docker compose --profile core up -d
+#
+# File structure:
+#   docker-compose/base.yml            - Shared configurations (volumes, networks, secrets)
+#   docker-compose/core.yml            - Core infrastructure (base, db, redis, kafka, api, frontend)
+#   docker-compose/engine.yml          - Engine services (engine, workers, kafka-consumer)
+#   docker-compose/observability.yml   - Monitoring stack (loki, prometheus, tempo, grafana, etc.)
+#   docker-compose/support.yml         - Zammad support stack
+#   docker-compose/metadata.yml        - OpenMetadata stack
+#   docker-compose/auth.yml            - Authentication (Keycloak)
+#   docker-compose/gateway.yml         - API Gateway (Kong) + Edge
+#   docker-compose/llm.yml             - LLM services
+#   docker-compose/seed.yml            - Initialization/seed services
+#   docker-compose/trino.yml           - Trino
+#   docker-compose/airflow.yml         - Airflow
+
+include:
+  - docker-compose/base.yml
+  - docker-compose/core.yml
+  - docker-compose/engine.yml
+  - docker-compose/observability.yml
+  - docker-compose/support.yml
+  - docker-compose/metadata.yml
+  - docker-compose/auth.yml
+  - docker-compose/gateway.yml
+  - docker-compose/llm.yml
+  - docker-compose/seed.yml
+  - docker-compose/trino.yml
+  - docker-compose/airflow.yml

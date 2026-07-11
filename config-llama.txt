@@ -1,0 +1,10 @@
+
+# on vast.ai I had:
+#LLAMA_MODEL="unsloth/Qwen3.6-27B-GGUF:Q5_K_M"
+#LLAMA_ARGS="--no-mmap --port 18000 --jinja -c 170000 -t 5 -lv 4 -ngl 64" 
+#LLAMA_CPP_DIR="/opt/llama.cpp/cuda-12.8"
+
+LLAMA_MODEL="unsloth/Qwen3.6-27B-GGUF:Q5_K_M"
+LLAMA_ARGS="--no-mmap --port 8181 --jinja -c 170000 -t 5 -lv 4 -ngl 64" 
+
+

@@ -31,12 +31,12 @@ services:
       - ../tmp/certs/services/engine:/etc/engine/certs:ro
       - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/engine/trust/internal-ca-bundle.pem:ro
     environment:
-      ENVIRONMENT: ${ENVIRONMENT}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
       TZ: UTC
       # OpenTelemetry
       OTEL_SERVICE_NAME: dq-made-easy-engine
       OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
       OTEL_CONSOLE_EXPORT: "1"
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
@@ -95,7 +95,7 @@ services:
       OTEL_CONSOLE_EXPORT: "1"
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       GX_EXECUTION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
-      GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY}
+      GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY:-}
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-gx-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
@@ -109,9 +109,9 @@ services:
       DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
       DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
-      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS:-}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
@@ -136,7 +136,7 @@ services:
       TZ: UTC
       REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
       GX_JOIN_PAIR_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
-      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY}
+      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY:-}
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-join-pair-etl-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
@@ -150,9 +150,9 @@ services:
       DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
       DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS}
-      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS:-}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
@@ -176,7 +176,7 @@ services:
       TZ: UTC
       TEST_DATA_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/test-data-worker/certs/mkcert-rootCA.pem&ssl_check_hostname=true
       TEST_DATA_MATERIALIZATION_QUEUE_KEY: ${TEST_DATA_MATERIALIZATION_QUEUE_KEY:-dq-test-data:materialize}
-      TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS}
+      TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS:-}
       DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-test-data-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
@@ -188,8 +188,8 @@ services:
       DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
       DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
       DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL}
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
@@ -238,10 +238,10 @@ services:
     image: ${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:${DQ_PROFILING_TAG:-latest}
     build:
       args:
-        DQ_BASE_REGISTRY: ${DQ_BASE_REGISTRY}
-        DQ_BASE_NAMESPACE: ${DQ_BASE_NAMESPACE}
-        DQ_BASE_IMAGE: ${DQ_BASE_IMAGE}
-        DQ_BASE_TAG: ${DQ_BASE_TAG}
+        DQ_BASE_REGISTRY: ${DQ_BASE_REGISTRY:-}
+        DQ_BASE_NAMESPACE: ${DQ_BASE_NAMESPACE:-}
+        DQ_BASE_IMAGE: ${DQ_BASE_IMAGE:-}
+        DQ_BASE_TAG: ${DQ_BASE_TAG:-}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
       context: ../dq-profiling
       dockerfile: Dockerfile.profiling
@@ -251,15 +251,15 @@ services:
       kong:
         condition: service_healthy
     environment:
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
-      PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY}"
+      PROFILING_QUEUE_KEY: "${PROFILING_QUEUE_KEY:-}"
       DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
-      ENVIRONMENT: ${ENVIRONMENT}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}}
       TZ: UTC
       PROFILING_WORKER_CONCURRENCY: 2
       PROFILING_METRICS_PORT: 8001
@@ -280,3 +280,4 @@ services:
     restart: unless-stopped
     healthcheck:
       disable: true
+
