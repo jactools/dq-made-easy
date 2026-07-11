@@ -7,17 +7,17 @@ services:
         condition: service_completed_successfully
     profiles:
     - engine
-    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
     build:
       context: ..
       dockerfile: dq-engine/Dockerfile.engine
       args:
         PYTHON_REGISTRY: ${PYTHON_REGISTRY:-}
-        PYTHON_IMAGE: ${PYTHON_IMAGE:-library/python}
-        PYTHON_TAG: ${PYTHON_TAG:-3.13-slim-bookworm}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:?PYTHON_IMAGE is required}
+        PYTHON_TAG: ${PYTHON_TAG:?PYTHON_TAG is required}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
-        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:-false}
+        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:?SKIP_SPARK_WARMUP is required}
         MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:-}
         INTERNAL_ROOT_CA: ${INTERNAL_ROOT_CA:-}
       secrets:
@@ -33,18 +33,18 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
       TZ: UTC
       OTEL_SERVICE_NAME: dq-made-easy-engine
-      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?OTEL_EXPORTER_OTLP_ENDPOINT is required}
       OTEL_CONSOLE_EXPORT: '1'
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: '1.0'
-      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:?DQ_SPARK_MASTER is required}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
-      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
-      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
-      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:?DQ_SPARK_DRIVER_MEMORY is required}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:?DQ_SPARK_EXECUTOR_MEMORY is required}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:?DQ_SPARK_DRIVER_MAX_RESULT_SIZE is required}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
     networks:
     - dq-network
@@ -65,7 +65,7 @@ services:
         condition: service_completed_successfully
     profiles:
     - engine
-    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
     env_file:
     - ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     command:
@@ -93,7 +93,7 @@ services:
         condition: service_completed_successfully
     profiles:
     - workers
-    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
     command:
     - python
     - -u
@@ -105,34 +105,34 @@ services:
     environment:
       TZ: UTC
       OTEL_SERVICE_NAME: dq-made-easy-engine
-      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:-dev}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
+      OTEL_SERVICE_VERSION: ${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?OTEL_EXPORTER_OTLP_ENDPOINT is required}
       OTEL_CONSOLE_EXPORT: '1'
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       GX_EXECUTION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
-      GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY:-}
-      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY:?GX_EXECUTION_QUEUE_KEY is required}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:?DQ_SPARK_MASTER is required}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-gx-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
-      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
-      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
-      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
-      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
-      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
-      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
-      DQ_S3_REGION: ${DQ_S3_REGION:-}
-      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
-      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:?DQ_SPARK_DRIVER_MEMORY is required}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:?DQ_SPARK_EXECUTOR_MEMORY is required}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:?DQ_SPARK_DRIVER_MAX_RESULT_SIZE is required}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:?DQ_S3_ENDPOINT is required}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:?DQ_S3_ACCESS_KEY is required}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:?DQ_S3_SECRET_KEY is required}
+      DQ_S3_REGION: ${DQ_S3_REGION:?DQ_S3_REGION is required}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:?DQ_S3_PATH_STYLE_ACCESS is required}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:?DQ_S3_SSL_ENABLED is required}
       DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS:-}
-      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-}
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS:?DQ_ENGINE_MAX_ROWS is required}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:?DQ_LOG_LEVEL is required}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:?KONG_INTERNAL_URL is required}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:?DQ_ENGINE_OIDC_ISSUER is required}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID
         is required}
-      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:?DQ_ENGINE_OIDC_CLIENT_SECRET is required}
     networks:
     - dq-network
     restart: unless-stopped
@@ -146,7 +146,7 @@ services:
         condition: service_completed_successfully
     profiles:
     - workers
-    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
     command:
     - python
     - -u
@@ -157,29 +157,29 @@ services:
       TZ: UTC
       REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
       GX_JOIN_PAIR_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
-      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY:-}
-      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY:?GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY is required}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:?DQ_SPARK_MASTER is required}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-join-pair-etl-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
-      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:-2g}
-      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:-2g}
-      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:-512m}
-      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
-      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
-      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
-      DQ_S3_REGION: ${DQ_S3_REGION:-}
-      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
-      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:?DQ_SPARK_DRIVER_MEMORY is required}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:?DQ_SPARK_EXECUTOR_MEMORY is required}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:?DQ_SPARK_DRIVER_MAX_RESULT_SIZE is required}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:?DQ_S3_ENDPOINT is required}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:?DQ_S3_ACCESS_KEY is required}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:?DQ_S3_SECRET_KEY is required}
+      DQ_S3_REGION: ${DQ_S3_REGION:?DQ_S3_REGION is required}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:?DQ_S3_PATH_STYLE_ACCESS is required}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:?DQ_S3_SSL_ENABLED is required}
       DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS:-}
-      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-}
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
+      DQ_ENGINE_MAX_ROWS: ${DQ_ENGINE_MAX_ROWS:?DQ_ENGINE_MAX_ROWS is required}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:?DQ_LOG_LEVEL is required}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:?KONG_INTERNAL_URL is required}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:?DQ_ENGINE_OIDC_ISSUER is required}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID
         is required}
-      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:?DQ_ENGINE_OIDC_CLIENT_SECRET is required}
     networks:
     - dq-network
     restart: unless-stopped
@@ -191,7 +191,7 @@ services:
         condition: service_completed_successfully
     profiles:
     - workers
-    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:-latest}
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
     command:
     - python
     - -u
@@ -202,27 +202,27 @@ services:
     environment:
       TZ: UTC
       TEST_DATA_MATERIALIZATION_REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/test-data-worker/certs/mkcert-rootCA.pem&ssl_check_hostname=true
-      TEST_DATA_MATERIALIZATION_QUEUE_KEY: ${TEST_DATA_MATERIALIZATION_QUEUE_KEY:-dq-test-data:materialize}
-      TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS:-}
-      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:-local[*]}
+      TEST_DATA_MATERIALIZATION_QUEUE_KEY: ${TEST_DATA_MATERIALIZATION_QUEUE_KEY:?TEST_DATA_MATERIALIZATION_QUEUE_KEY is required}
+      TEST_DATA_MATERIALIZATION_MAX_ROWS: ${TEST_DATA_MATERIALIZATION_MAX_ROWS:?TEST_DATA_MATERIALIZATION_MAX_ROWS is required}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:?DQ_SPARK_MASTER is required}
       DQ_SPARK_DRIVER_HOST: dq-made-easy-engine-test-data-worker
       DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
-      DQ_TEST_DATA_OUTPUT_PREFIX: ${DQ_TEST_DATA_OUTPUT_PREFIX:-}
-      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
-      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
-      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
-      DQ_S3_REGION: ${DQ_S3_REGION:-}
-      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:-true}
-      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:-false}
+      DQ_TEST_DATA_OUTPUT_PREFIX: ${DQ_TEST_DATA_OUTPUT_PREFIX:?DQ_TEST_DATA_OUTPUT_PREFIX is required}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:?DQ_S3_ENDPOINT is required}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:?DQ_S3_ACCESS_KEY is required}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:?DQ_S3_SECRET_KEY is required}
+      DQ_S3_REGION: ${DQ_S3_REGION:?DQ_S3_REGION is required}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:?DQ_S3_PATH_STYLE_ACCESS is required}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:?DQ_S3_SSL_ENABLED is required}
       DQ_S3_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-}
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:?DQ_LOG_LEVEL is required}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:?KONG_INTERNAL_URL is required}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
-      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:-}
+      DQ_ENGINE_OIDC_ISSUER: ${DQ_ENGINE_OIDC_ISSUER:?DQ_ENGINE_OIDC_ISSUER is required}
       DQ_ENGINE_OIDC_CLIENT_ID: ${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID
         is required}
-      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:-}
+      DQ_ENGINE_OIDC_CLIENT_SECRET: ${DQ_ENGINE_OIDC_CLIENT_SECRET:?DQ_ENGINE_OIDC_CLIENT_SECRET is required}
     networks:
     - dq-network
     restart: unless-stopped
@@ -234,7 +234,7 @@ services:
         condition: service_completed_successfully
     profiles:
     - workers
-    image: ${DQ_KAFKA_CONSUMER_REGISTRY:-}${DQ_KAFKA_CONSUMER_NAMESPACE:-}${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}:${DQ_KAFKA_CONSUMER_TAG:-latest}
+    image: ${DQ_KAFKA_CONSUMER_REGISTRY:?DQ_KAFKA_CONSUMER_REGISTRY is required}${DQ_KAFKA_CONSUMER_NAMESPACE:-}${DQ_KAFKA_CONSUMER_IMAGE:?DQ_KAFKA_CONSUMER_IMAGE is required}:${DQ_KAFKA_CONSUMER_TAG:?DQ_KAFKA_CONSUMER_TAG is required}
     build:
       context: ../dq-kafka-consumer
       dockerfile: Dockerfile.kafka-consumer
@@ -243,22 +243,22 @@ services:
     environment:
       TZ: UTC
       KAFKA_BOOTSTRAP_SERVERS: kafka:9094
-      KAFKA_TOPIC: ${KAFKA_CONSUMER_TOPIC:-dq-made-easy.gx.violations}
-      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID:-dq-consumer-violations}
-      KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS: ${KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS:-5}
-      KAFKA_CONSUMER_MAX_POLL_RECORDS: ${KAFKA_CONSUMER_MAX_POLL_RECORDS:-500}
-      KAFKA_CONSUMER_LOOP_DELAY_SECONDS: ${KAFKA_CONSUMER_LOOP_DELAY_SECONDS:-30}
-      KAFKA_CONSUMER_BATCH_SIZE: ${KAFKA_CONSUMER_BATCH_SIZE:-1000}
-      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest}
-      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:-}
-      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:-}
-      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:-}
-      DQ_S3_REGION: ${DQ_S3_REGION:-}
-      KAFKA_CONSUMER_S3_BUCKET: ${KAFKA_CONSUMER_S3_BUCKET:-dq-gx-exceptions}
-      KAFKA_CONSUMER_S3_PREFIX: ${KAFKA_CONSUMER_S3_PREFIX:-gx-exceptions}
-      KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS: ${KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS:-true}
-      KAFKA_CONSUMER_DB_URL: ${KAFKA_CONSUMER_DB_URL:-${DQ_DB_INTERNAL_URL}}
-      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:-INFO}
+      KAFKA_TOPIC: ${KAFKA_CONSUMER_TOPIC:?KAFKA_CONSUMER_TOPIC is required}
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID:?KAFKA_CONSUMER_GROUP_ID is required}
+      KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS: ${KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS:?KAFKA_CONSUMER_POLL_TIMEOUT_SECONDS is required}
+      KAFKA_CONSUMER_MAX_POLL_RECORDS: ${KAFKA_CONSUMER_MAX_POLL_RECORDS:?KAFKA_CONSUMER_MAX_POLL_RECORDS is required}
+      KAFKA_CONSUMER_LOOP_DELAY_SECONDS: ${KAFKA_CONSUMER_LOOP_DELAY_SECONDS:?KAFKA_CONSUMER_LOOP_DELAY_SECONDS is required}
+      KAFKA_CONSUMER_BATCH_SIZE: ${KAFKA_CONSUMER_BATCH_SIZE:?KAFKA_CONSUMER_BATCH_SIZE is required}
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:?KAFKA_AUTO_OFFSET_RESET is required}
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:?DQ_S3_ENDPOINT is required}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:?DQ_S3_ACCESS_KEY is required}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:?DQ_S3_SECRET_KEY is required}
+      DQ_S3_REGION: ${DQ_S3_REGION:?DQ_S3_REGION is required}
+      KAFKA_CONSUMER_S3_BUCKET: ${KAFKA_CONSUMER_S3_BUCKET:?KAFKA_CONSUMER_S3_BUCKET is required}
+      KAFKA_CONSUMER_S3_PREFIX: ${KAFKA_CONSUMER_S3_PREFIX:?KAFKA_CONSUMER_S3_PREFIX is required}
+      KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS: ${KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS:?KAFKA_CONSUMER_S3_PATH_STYLE_ACCESS is required}
+      KAFKA_CONSUMER_DB_URL: ${KAFKA_CONSUMER_DB_URL:?KAFKA_CONSUMER_DB_URL is required}
+      DQ_LOG_LEVEL: ${DQ_LOG_LEVEL:?DQ_LOG_LEVEL is required}
     networks:
     - dq-network
     restart: unless-stopped
@@ -274,32 +274,32 @@ services:
     - workers
     - profiling
     - observability
-    image: ${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:${DQ_PROFILING_TAG:-latest}
+    image: ${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:${DQ_PROFILING_TAG:?DQ_PROFILING_TAG is required}
     build:
       args:
-        DQ_BASE_REGISTRY: ${DQ_BASE_REGISTRY:-}
+        DQ_BASE_REGISTRY: ${DQ_BASE_REGISTRY:?DQ_BASE_REGISTRY is required}
         DQ_BASE_NAMESPACE: ${DQ_BASE_NAMESPACE:-}
-        DQ_BASE_IMAGE: ${DQ_BASE_IMAGE:-}
-        DQ_BASE_TAG: ${DQ_BASE_TAG:-}
+        DQ_BASE_IMAGE: ${DQ_BASE_IMAGE:?DQ_BASE_IMAGE is required}
+        DQ_BASE_TAG: ${DQ_BASE_TAG:?DQ_BASE_TAG is required}
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
       context: ../dq-profiling
       dockerfile: Dockerfile.profiling
     environment:
-      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:-}
+      KONG_INTERNAL_URL: ${KONG_INTERNAL_URL:?KONG_INTERNAL_URL is required}
       REQUESTS_CA_BUNDLE: /etc/internal-certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/internal-certs/internal-ca-bundle.pem
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
-      PROFILING_QUEUE_KEY: ${PROFILING_QUEUE_KEY:-}
+      PROFILING_QUEUE_KEY: ${PROFILING_QUEUE_KEY:?PROFILING_QUEUE_KEY is required}
       DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
       ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
       TZ: UTC
       PROFILING_WORKER_CONCURRENCY: 2
       PROFILING_METRICS_PORT: 8001
       OTEL_SERVICE_NAME: dq-made-easy-profiling
-      OTEL_SERVICE_VERSION: ${DQ_PROFILING_TAG:-dev}
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-https://dq-made-easy-otel-collector:4318}
+      OTEL_SERVICE_VERSION: ${DQ_PROFILING_TAG:?DQ_PROFILING_TAG is required}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?OTEL_EXPORTER_OTLP_ENDPOINT is required}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_EXPORTER_OTLP_FORCE: '1'
       OTEL_CONSOLE_EXPORT: '1'
