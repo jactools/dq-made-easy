@@ -9,16 +9,16 @@ services:
         condition: service_completed_successfully
 
     profiles: ["trino"]
-    image: ${DQ_TRINO_REGISTRY:-}${DQ_TRINO_NAMESPACE:-}${DQ_TRINO_IMAGE:-dq-made-easy-trino}:${DQ_TRINO_TAG:-latest}
+    image: ${DQ_TRINO_REGISTRY:?DQ_TRINO_REGISTRY is required}${DQ_TRINO_NAMESPACE:-}${DQ_TRINO_IMAGE:?DQ_TRINO_IMAGE is required}:${DQ_TRINO_TAG:?DQ_TRINO_TAG is required}
     build:
       context: ../dq-trino
       dockerfile: Dockerfile.trino
       args:
-        TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:-trinodb/trino:482}
+        TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:?TRINO_BASE_IMAGE is required}
         MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:?MKCERT_ROOT_CA is required}
     container_name: dq-made-easy-trino
     ports:
-      - "${TRINO_HOST_BIND:-127.0.0.1}:${TRINO_HOST_PORT:-8084}:8080"
+      - "${TRINO_HOST_BIND:?TRINO_HOST_BIND is required}:${TRINO_HOST_PORT:?TRINO_HOST_PORT is required}:8080"
     environment:
       TZ: UTC
     networks:
