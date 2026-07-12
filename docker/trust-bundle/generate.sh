@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SOURCE_DIR="/certs/certs"
-OUTPUT_DIR="/certs/trust"
+OUTPUT_DIR="/certs/certs/trust"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -12,7 +12,7 @@ echo "[trust-bundle] collecting certificates from ${SOURCE_DIR}..."
 PEM_FILES=()
 while IFS= read -r -d '' cert; do
   PEM_FILES+=("$cert")
-done < <(find "$SOURCE_DIR" -type f \( -name '*.pem' -o -name '*.crt' \) \
+done < <(find "$SOURCE_DIR" -maxdepth 1 -type f \( -name '*.pem' -o -name '*.crt' \) \
   ! -name '*-key.pem' ! -name '*-key.crt' -print0 | sort -z)
 
 if [ ${#PEM_FILES[@]} -eq 0 ]; then

@@ -78,6 +78,7 @@ services:
       - keycloak_seed_artifacts:/opt/keycloak/realm-import:ro
       - ../tmp/certs/${KEYCLOAK_HTTPS_CERT_FILE:?KEYCLOAK_HTTPS_CERT_FILE is required}:/opt/keycloak/certs/keycloak.pem:ro
       - ../tmp/certs/${KEYCLOAK_HTTPS_KEY_FILE:?KEYCLOAK_HTTPS_KEY_FILE is required}:/opt/keycloak/certs/keycloak-key.pem:ro
+      - ../tmp/certs/trust:/certs/trust:ro
     networks:
       - dq-network
     restart: unless-stopped
