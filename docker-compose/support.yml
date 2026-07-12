@@ -50,11 +50,20 @@ services:
     profiles:
     - support
     image: postgres:${ZAMMAD_POSTGRES_VERSION:?ZAMMAD_POSTGRES_VERSION is required}
+    command:
+    - postgres
+    - -c
+    - ssl=on
+    - -c
+    - ssl_cert_file=/etc/postgresql/certs/tls.crt
+    - -c
+    - ssl_key_file=/etc/postgresql/certs/tls.key
     environment:
       POSTGRES_DB: ${ZAMMAD_POSTGRES_DB:?ZAMMAD_POSTGRES_DB is required}
       POSTGRES_USER: ${ZAMMAD_POSTGRES_USER:?ZAMMAD_POSTGRES_USER is required}
       POSTGRES_PASSWORD: ${ZAMMAD_POSTGRES_PASSWORD:?ZAMMAD_POSTGRES_PASSWORD is required}
     volumes:
+    - ../tmp/certs/services/zammad-db:/etc/postgresql/certs:ro
     - zammad_postgresql_data:/var/lib/postgresql/data
     restart: unless-stopped
     labels:
@@ -126,6 +135,7 @@ services:
     command:
     - sh
     - /opt/zammad/init.sh
+    - zammad-init
     user: 0:0
     labels:
     - monitoring=true
@@ -136,6 +146,7 @@ services:
     environment: *id002
     volumes:
     - ../tmp/certs/services/zammad-railsserver:/etc/zammad/certs:ro
+    - ../docker/zammad/init.sh:/opt/zammad/init.sh:ro
     networks: *id004
     depends_on:
       zammad-init:
@@ -150,18 +161,12 @@ services:
         condition: service_completed_successfully
     command:
     - sh
-    - /usr/local/bin/wait-for-redis.sh
-    - bundle
-    - exec
-    - puma
-    - -e
-    - production
-    - -b
-    - ssl://[::]:3000?key=/etc/zammad/certs/tls.key&cert=/etc/zammad/certs/tls.crt
+    - /opt/zammad/init.sh
+    - zammad-railsserver
     healthcheck:
       test:
       - CMD-SHELL
-      - curl -fsS --cacert /etc/zammad/certs/mkcert-rootCA.pem https://127.0.0.1:3000/health
+      - curl -fsS http://127.0.0.1:3000/
         >/dev/null 2>&1 || exit 1
       interval: 10s
       timeout: 5s
@@ -189,7 +194,7 @@ services:
         condition: service_completed_successfully
     command:
     - sh
-    - /usr/local/bin/wait-for-redis.sh
+    - /opt/zammad/init.sh
     - zammad-scheduler
     labels:
     - monitoring=true
@@ -200,6 +205,7 @@ services:
     environment: *id002
     volumes:
     - ../tmp/certs/services/zammad-websocket:/etc/zammad/certs:ro
+    - ../docker/zammad/init.sh:/opt/zammad/init.sh:ro
     networks: *id004
     depends_on:
       zammad-init:
@@ -214,20 +220,8 @@ services:
         condition: service_completed_successfully
     command:
     - sh
-    - /usr/local/bin/wait-for-redis.sh
-    - bundle
-    - exec
-    - script/websocket-server.rb
-    - start
-    - -b
-    - 0.0.0.0
-    - -p
-    - '6042'
-    - -s
-    - -k
-    - /etc/zammad/certs/tls.key
-    - -c
-    - /etc/zammad/certs/tls.crt
+    - /opt/zammad/init.sh
+    - zammad-websocket
     healthcheck:
       test:
       - CMD-SHELL
