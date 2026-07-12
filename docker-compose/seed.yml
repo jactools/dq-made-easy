@@ -29,7 +29,7 @@ services:
       dockerfile: dq-db/Dockerfile.dq-db.seed
       args:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
-        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:?INTERNAL_CORPORATE_ROOT_CA is required}
+        INTERNAL_CORPORATE_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
       secrets:
         - internal_mkcert_root_ca
         - internal_root_ca
@@ -66,8 +66,8 @@ services:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
         SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:?SKIP_SPARK_WARMUP is required}
-        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:?MKCERT_ROOT_CA is required}
-        INTERNAL_CORPORATE_ROOT_CA: ${INTERNAL_CORPORATE_ROOT_CA:?INTERNAL_CORPORATE_ROOT_CA is required}
+        MKCERT_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+        INTERNAL_CORPORATE_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
     env_file:
       - ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     working_dir: /app

@@ -1,6 +1,19 @@
 # ============================================================================
-# BASE: Shared configurations (volumes, networks, secrets)
+# BASE: Shared configurations (volumes, networks, secrets, TLS)
 # ============================================================================
+
+# ============================================================================
+# TLS: Common TLS configuration for all services
+# ============================================================================
+x-tls-volumes: &tls-volumes
+  - ../tmp/certs:/etc/tls/certs:ro
+  - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/tls/internal-ca-bundle.pem:ro
+  - ../tmp/certs/mkcert-rootCA.pem:/etc/tls/mkcert-rootCA.pem:ro
+
+x-tls-env: &tls-env
+  CURL_CA_BUNDLE: /etc/tls/internal-ca-bundle.pem
+  SSL_CERT_FILE: /etc/tls/internal-ca-bundle.pem
+  REQUESTS_CA_BUNDLE: /etc/tls/internal-ca-bundle.pem
 
 # ============================================================================
 # SERVICES: Foundation services
@@ -54,15 +67,15 @@ volumes:
 # ============================================================================
 secrets:
   repo_npmrc:
-    file: ${REPO_NPMRC_FILE:-./.npmrc}
+    file: ${REPO_NPMRC_FILE:?REPO_NPMRC_FILE is required}
   internal_mkcert_root_ca:
-    file: ./tmp/certs/trust/internal-ca-bundle.pem
+    file: ../tmp/certs/trust/internal-ca-bundle.pem
   internal_root_ca:
-    file: ${INTERNAL_ROOT_CA_FILE:-./tmp/certs/trust/internal-ca-bundle.pem}
+    file: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
   internal_corporate_root_ca:
-    file: ${INTERNAL_CORPORATE_ROOT_CA_FILE:-./tmp/certs/trust/internal-ca-bundle.pem}
+    file: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
   internal_ca_bundle:
-    file: ${INTERNAL_CA_BUNDLE_FILE:-./tmp/certs/trust/internal-ca-bundle.pem}
+    file: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
 
 # ==============================================================================
 # NETWORK: Shared network for all services

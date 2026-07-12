@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile.trino
       args:
         TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:?TRINO_BASE_IMAGE is required}
-        MKCERT_ROOT_CA: ${MKCERT_ROOT_CA:?MKCERT_ROOT_CA is required}
+        MKCERT_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
     container_name: dq-made-easy-trino
     ports:
       - "${TRINO_HOST_BIND:?TRINO_HOST_BIND is required}:${TRINO_HOST_PORT:?TRINO_HOST_PORT is required}:8080"

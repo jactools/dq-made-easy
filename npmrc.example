@@ -1,0 +1,24 @@
+# Use strict peer dependency checks (recommended)
+strict-peer-dependencies=false
+
+# Save exact versions in package.json (avoids ^ ranges)
+save-exact=true
+
+# Always use the latest npm
+engine-strict=true
+
+# Disable telemetry (privacy)
+npm-config-telemetry=false
+
+# Cache settings (optional)
+cache=/tmp/cache  # e.g., ~/.npm-cache
+cache-lock-stale=604800     # 7 days (in seconds)
+cache-lock-wait=10000       # 10 seconds
+
+# Registry (default is https://registry.npmjs.org/)
+# registry=https://registry.npmjs.org/
+
+# Scoped registries (e.g., for private packages)
+# @your-org:registry=https://npm.pkg.github.com
+# //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+
