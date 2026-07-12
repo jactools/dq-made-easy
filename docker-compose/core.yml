@@ -42,9 +42,9 @@ services:
     - -c
     - ssl_key_file=/etc/postgresql/certs/tls.key
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: dq
+      POSTGRES_USER: ${DQ_DB_USER:?DQ_DB_USER is required}
+      POSTGRES_PASSWORD: ${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required}
+      POSTGRES_DB: ${DQ_DB_NAME:?DQ_DB_NAME is required}
       TZ: UTC
     ports:
     - ${DB_HOST_BIND:?DB_HOST_BIND is required}:${DB_HOST_PORT:?DB_HOST_PORT is required}:5432
@@ -58,7 +58,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - PGPASSWORD=postgres psql 'host=localhost port=5432 dbname=dq user=postgres
+      - PGPASSWORD=${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required} psql 'host=localhost port=5432 dbname=${DQ_DB_NAME:?DQ_DB_NAME is required} user=${DQ_DB_USER:?DQ_DB_USER is required}
         sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c
         'select 1' >/dev/null
       interval: 10s
@@ -124,7 +124,7 @@ services:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
     container_name: dq-made-easy-db-postgres-exporter
     environment:
-      DATA_SOURCE_NAME: postgresql://postgres:postgres@db:5432/dq?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
+      DATA_SOURCE_NAME: postgresql://${DQ_DB_USER:?DQ_DB_USER is required}:${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required}@db:5432/${DQ_DB_NAME:?DQ_DB_NAME is required}?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
     volumes:
     - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro

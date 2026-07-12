@@ -181,7 +181,7 @@ services:
       ELASTICSEARCH_HOST: openmetadata-search-v9
       ELASTICSEARCH_PORT: 9200
       ELASTICSEARCH_SCHEME: https
-      ELASTICSEARCH_USER: elastic
+      ELASTICSEARCH_USER: ${OPENMETADATA_SEARCH_USER:?OPENMETADATA_SEARCH_USER is required}
       ELASTICSEARCH_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:?OPENMETADATA_SEARCH_PASSWORD is required}
       AUTHORIZER_CLASS_NAME: org.openmetadata.service.security.DefaultAuthorizer
       AUTHORIZER_REQUEST_FILTER: org.openmetadata.service.security.JwtFilter

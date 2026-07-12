@@ -17,9 +17,9 @@ services:
     - -c
     - ssl_key_file=/etc/postgresql/certs/tls.key
     environment:
-      POSTGRES_DB: kong
-      POSTGRES_USER: kong
-      POSTGRES_PASSWORD: kongpass
+      POSTGRES_DB: ${KONG_DB_NAME:?KONG_DB_NAME is required}
+      POSTGRES_USER: ${KONG_DB_USER:?KONG_DB_USER is required}
+      POSTGRES_PASSWORD: ${KONG_DB_PASSWORD:?KONG_DB_PASSWORD is required}
     volumes:
     - ../tmp/certs/services/kong-db:/etc/postgresql/certs:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
@@ -30,7 +30,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - PGPASSWORD=kongpass psql 'host=localhost port=5432 dbname=kong user=kong sslmode=verify-full
+      - PGPASSWORD=${KONG_DB_PASSWORD:?KONG_DB_PASSWORD is required} psql 'host=localhost port=5432 dbname=${KONG_DB_NAME:?KONG_DB_NAME is required} user=${KONG_DB_USER:?KONG_DB_USER is required} sslmode=verify-full
         sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c 'select 1' >/dev/null
       interval: 10s
       timeout: 5s
@@ -53,9 +53,9 @@ services:
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-db
-      KONG_PG_DATABASE: kong
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kongpass
+      KONG_PG_DATABASE: ${KONG_DB_NAME:?KONG_DB_NAME is required}
+      KONG_PG_USER: ${KONG_DB_USER:?KONG_DB_USER is required}
+      KONG_PG_PASSWORD: ${KONG_DB_PASSWORD:?KONG_DB_PASSWORD is required}
       KONG_PG_SSL: true
       KONG_PG_SSL_REQUIRED: true
       KONG_PG_SSL_VERIFY: true
@@ -88,9 +88,9 @@ services:
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-db
-      KONG_PG_DATABASE: kong
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kongpass
+      KONG_PG_DATABASE: ${KONG_DB_NAME:?KONG_DB_NAME is required}
+      KONG_PG_USER: ${KONG_DB_USER:?KONG_DB_USER is required}
+      KONG_PG_PASSWORD: ${KONG_DB_PASSWORD:?KONG_DB_PASSWORD is required}
       KONG_PG_SSL: true
       KONG_PG_SSL_REQUIRED: true
       KONG_PG_SSL_VERIFY: true
@@ -156,7 +156,7 @@ services:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
     container_name: dq-made-easy-kong-postgres-exporter
     environment:
-      DATA_SOURCE_NAME: postgresql://kong:kongpass@kong-db:5432/kong?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
+      DATA_SOURCE_NAME: postgresql://${KONG_DB_USER:?KONG_DB_USER is required}:${KONG_DB_PASSWORD:?KONG_DB_PASSWORD is required}@kong-db:5432/${KONG_DB_NAME:?KONG_DB_NAME is required}?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
     volumes:
     - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro

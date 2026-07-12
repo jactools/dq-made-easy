@@ -957,14 +957,19 @@ if [ "$WIPE_AISTOR" = true ]; then SEED_ARGS+=(--wipe-aistor); fi
 if [ "$REMOVE_ORPHANS" = true ]; then STACK_ARGS+=(--remove-orphans); fi
 if [ "$INIT_DB" = true ]; then SEED_ARGS+=(--init-db); fi
 
-if [ "$SEED_POSTGRES" = true ] || [ "$INIT_DB" = true ]; then
-  PRESEED_BEFORE_STACK=true
-  PRESEED_ARGS+=(--seed-postgres)
-  if [ "$INIT_DB" = true ]; then PRESEED_ARGS+=(--init-db); fi
-fi
-
 if [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then
+  # When keycloak is also seeded, db-seed must run AFTER keycloak is up.
+  # db-seed calls wait_for_keycloak_ready and needs keycloak to verify users.
   POSTSTACK_SEED_ARGS+=(--seed-keycloak)
+  POSTSTACK_SEED_ARGS+=(--seed-postgres)
+  if [ "$INIT_DB" = true ]; then POSTSTACK_SEED_ARGS+=(--init-db); fi
+else
+  # No keycloak dependency — seed postgres before stack to avoid stale state.
+  if [ "$SEED_POSTGRES" = true ] || [ "$INIT_DB" = true ]; then
+    PRESEED_BEFORE_STACK=true
+    PRESEED_ARGS+=(--seed-postgres)
+    if [ "$INIT_DB" = true ]; then PRESEED_ARGS+=(--init-db); fi
+  fi
 fi
 
 if [ "$SEED_ZAMMAD" = true ]; then
