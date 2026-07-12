@@ -122,6 +122,8 @@ def test_build_token_provider_from_env_prefers_static(monkeypatch):
         client_id_env_var="CID",
         client_secret_env_var="CS",
         scope_env_var="S",
+        max_startup_retries=0,
+        retry_backoff_seconds=5.0,
     )
     assert isinstance(p, auth_utils.StaticTokenProvider)
     assert p.get_token(correlation_id="c") == "s1"
@@ -140,4 +142,6 @@ def test_build_oidc_token_provider_from_env_raises_when_missing(monkeypatch):
             client_id_env_var="CID",
             client_secret_env_var="CS",
             scope_env_var="S",
+            max_startup_retries=0,
+            retry_backoff_seconds=5.0,
         )

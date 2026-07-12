@@ -85,6 +85,8 @@ services:
     restart: 'no'
   dq-made-easy-engine-gx-worker:
     depends_on:
+      keycloak:
+        condition: service_healthy
       kong:
         condition: service_healthy
       redis:
@@ -138,6 +140,8 @@ services:
     restart: unless-stopped
   dq-made-easy-engine-join-pair-etl-worker:
     depends_on:
+      keycloak:
+        condition: service_healthy
       kong:
         condition: service_healthy
       redis:
@@ -185,6 +189,8 @@ services:
     restart: unless-stopped
   dq-made-easy-engine-test-data-worker:
     depends_on:
+      keycloak:
+        condition: service_healthy
       redis:
         condition: service_healthy
       trust-bundle:

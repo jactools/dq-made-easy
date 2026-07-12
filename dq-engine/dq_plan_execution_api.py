@@ -23,8 +23,20 @@ from dq_plan_execution_types import DqWorkerConfig, DqWorkerConfigError, DqWorke
 
 def build_token_provider() -> TokenProvider:
     """Build an OIDC token provider from environment variables."""
+    import os as _os
+
     try:
-        return build_oidc_token_provider_from_env()
+        max_retries = int(_os.getenv("DQ_ENGINE_MAX_RETRIES", "0"))
+        backoff_ms = int(_os.getenv("DQ_ENGINE_RETRY_BACKOFF_MS", "5000"))
+        return build_oidc_token_provider_from_env(
+            issuer_env_var="DQ_ENGINE_OIDC_ISSUER",
+            token_url_env_var="DQ_ENGINE_OIDC_TOKEN_URL",
+            client_id_env_var="DQ_ENGINE_OIDC_CLIENT_ID",
+            client_secret_env_var="DQ_ENGINE_OIDC_CLIENT_SECRET",
+            scope_env_var="DQ_ENGINE_OIDC_SCOPE",
+            max_startup_retries=max_retries,
+            retry_backoff_seconds=backoff_ms / 1000.0,
+        )
     except Exception:
         raise DqWorkerConfigError("Failed to initialize API token provider") from None
 

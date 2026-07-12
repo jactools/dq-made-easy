@@ -463,12 +463,16 @@ def _build_token_provider() -> TokenProvider:
         )
 
     try:
+        max_retries = int(os.getenv("DQ_ENGINE_MAX_RETRIES", "0"))
+        backoff_ms = int(os.getenv("DQ_ENGINE_RETRY_BACKOFF_MS", "5000"))
         return build_oidc_token_provider_from_env(
             issuer_env_var="DQ_ENGINE_OIDC_ISSUER",
             token_url_env_var="DQ_ENGINE_OIDC_TOKEN_URL",
             client_id_env_var="DQ_ENGINE_OIDC_CLIENT_ID",
             client_secret_env_var="DQ_ENGINE_OIDC_CLIENT_SECRET",
             scope_env_var="DQ_ENGINE_OIDC_SCOPE",
+            max_startup_retries=max_retries,
+            retry_backoff_seconds=backoff_ms / 1000.0,
         )
     except AuthConfigError as exc:
         raise RuntimeError(str(exc)) from exc

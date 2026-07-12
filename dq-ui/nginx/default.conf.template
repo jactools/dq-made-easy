@@ -11,8 +11,8 @@ server {
   server_name _;
   absolute_redirect off;
 
-  ssl_certificate /etc/nginx/certs/dq-made-easy.jac.dot+3.pem;
-  ssl_certificate_key /etc/nginx/certs/dq-made-easy.jac.dot+3-key.pem;
+  ssl_certificate /etc/nginx/certs/{{FRONTEND_CERT_FILE}};
+  ssl_certificate_key /etc/nginx/certs/{{FRONTEND_KEY_FILE}};
   ssl_protocols TLSv1.2 TLSv1.3;
   ssl_prefer_server_ciphers off;
 
@@ -70,7 +70,7 @@ server {
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header Connection "";
     proxy_ssl_server_name on;
-    proxy_ssl_name kong.jac.dot;
+    proxy_ssl_name {{KONG_SERVICE_FQDN}};
     proxy_ssl_verify on;
     proxy_ssl_trusted_certificate /etc/nginx/certs/trust/internal-ca-bundle.pem;
     proxy_ssl_verify_depth 2;
@@ -87,15 +87,19 @@ server {
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header Connection "";
     proxy_ssl_server_name on;
-    proxy_ssl_name kong.jac.dot;
+    proxy_ssl_name {{KONG_SERVICE_FQDN}};
     proxy_ssl_verify on;
     proxy_ssl_trusted_certificate /etc/nginx/certs/trust/internal-ca-bundle.pem;
     proxy_ssl_verify_depth 2;
   }
 
   # proxy browser OTLP exports to the local collector without exposing its port to the UI
+  # uses deferred DNS resolution (resolver + variable) so nginx starts even when
+  # the otel-collector service is not present (observability profile not active)
   location ^~ /observability/otlp/ {
-    proxy_pass https://dq-made-easy-otel-collector:4318/;
+    resolver 127.0.0.11 valid=10s;
+    set $otel_collector https://dq-made-easy-otel-collector:4318/;
+    proxy_pass $otel_collector;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;

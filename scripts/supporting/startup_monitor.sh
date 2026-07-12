@@ -13,9 +13,13 @@
 # - Watches docker compose container state and aborts if a container exits non-zero.
 # - Cleans up automatically when the startup process exits.
 #
-# Version: 2.5
+# Version: 2.7
 # Last modified: 2026-07-12
 # Changelog:
+# - 2.7: Added "Restarting*" to error states — containers that crash-loop
+#   abort immediately instead of waiting for the stuck threshold.
+# - 2.6: Added Running to terminal states so healthy containers without health
+#   checks are not falsely flagged as stuck.
 # - 2.5: Kill entire process tree on error + write abort flag file for parent
 #   script to check after wait().
 # - 2.4: Added fail-fast on Error states and "dependency failed to start" lines.
@@ -145,7 +149,7 @@ startup_monitor_run() {
   _is_terminal_state() {
     local status="$1"
     case "$status" in
-      Exited|Healthy|Exited*|Completed|Completed*) return 0 ;;
+      Exited|Healthy|Running|Exited*|Completed*|Running*) return 0 ;;
       *) return 1 ;;
     esac
   }
@@ -155,6 +159,7 @@ startup_monitor_run() {
     local status="$1"
     case "$status" in
       Error*|error*) return 0 ;;
+      Restarting*) return 0 ;;
       *) return 1 ;;
     esac
   }

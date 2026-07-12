@@ -218,6 +218,7 @@ _test_detect_error() {
     local status="${BASH_REMATCH[2]}"
     case "$status" in
       Error*|error*) return 0 ;;
+      Restarting*) return 0 ;;
     esac
   elif [[ "$line" =~ dependency\ failed\ to\ start ]]; then
     return 0
@@ -235,6 +236,16 @@ test_fail_fast_on_error_state() {
   _test_detect_error "Container dq-made-easy-db Exited" && { echo "FAIL: Exited state falsely flagged"; exit 1; } || true
 
   echo "PASS: test_fail_fast_on_error_state"
+}
+
+test_fail_fast_on_restarting_state() {
+  # Restarting states should trigger fail-fast
+  _test_detect_error "Container dq-made-easy-dev-frontend-1 Restarting (1) 57 seconds ago" || { echo "FAIL: Restarting state not detected"; exit 1; }
+  _test_detect_error "Container dq-made-easy-dev-frontend-1 Restarting (2) 2 seconds ago" || { echo "FAIL: Restarting state not detected"; exit 1; }
+  # Running state should NOT trigger fail-fast
+  _test_detect_error "Container dq-made-easy-dev-frontend-1 Running" && { echo "FAIL: Running state falsely flagged"; exit 1; } || true
+
+  echo "PASS: test_fail_fast_on_restarting_state"
 }
 
 test_fail_fast_on_dependency_failure() {
@@ -259,5 +270,6 @@ test_terminal_states
 test_error_state_not_terminal
 test_stuck_container_detection_logic
 test_fail_fast_on_error_state
+test_fail_fast_on_restarting_state
 test_fail_fast_on_dependency_failure
 echo "All startup_monitor.sh tests passed."

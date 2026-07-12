@@ -44,6 +44,8 @@ class OidcClientCredentialsTokenProvider:
         scope: str | None = None,
         refresh_skew_seconds: int = 60,
         timeout_seconds: int = 10,
+        max_startup_retries: int,
+        retry_backoff_seconds: float,
     ) -> None:
         token_url = str(token_url or "").strip()
         client_id = str(client_id or "").strip()
@@ -63,7 +65,41 @@ class OidcClientCredentialsTokenProvider:
         self._scope = scope
         self._refresh_skew_seconds = int(refresh_skew_seconds)
         self._timeout_seconds = int(timeout_seconds)
+        self._max_startup_retries = int(max_startup_retries)
+        self._retry_backoff_seconds = float(retry_backoff_seconds)
         self._cached: TokenBundle | None = None
+
+    def _request_token(self, data: dict[str, str], correlation_id: str) -> requests.Response:
+        """Issue a single token request with optional retry on connection errors."""
+        max_attempts = 1 + self._max_startup_retries
+        last_exc: Exception | None = None
+
+        for attempt in range(max_attempts):
+            try:
+                response = requests.post(
+                    self._token_url,
+                    data=data,
+                    headers={"X-Correlation-ID": correlation_id},
+                    timeout=self._timeout_seconds,
+                )
+                # Auth errors (4xx/5xx) are never retried — they signal misconfiguration
+                return response
+            except requests.exceptions.ConnectionError as exc:
+                last_exc = exc
+                if attempt < self._max_startup_retries:
+                    backoff = self._retry_backoff_seconds * (attempt + 1)
+                    print(
+                        f"Warning: OIDC token endpoint unreachable at '{self._token_url}' "
+                        f"(attempt {attempt + 1}/{max_attempts}); retrying in {backoff:.0f}s...",
+                        flush=True,
+                    )
+                    time.sleep(backoff)
+                continue
+
+        raise AuthConfigError(
+            f"Unable to obtain OIDC access token (token endpoint unreachable at "
+            f"'{self._token_url}' after {max_attempts} attempt(s))"
+        ) from last_exc  # type: ignore[arg-type]
 
     def get_token(self, *, correlation_id: str) -> str:
         now = time.time()
@@ -78,17 +114,7 @@ class OidcClientCredentialsTokenProvider:
         if self._scope:
             data["scope"] = self._scope
 
-        try:
-            response = requests.post(
-                self._token_url,
-                data=data,
-                headers={"X-Correlation-ID": correlation_id},
-                timeout=self._timeout_seconds,
-            )
-        except Exception as exc:
-            raise AuthConfigError(
-                f"Unable to obtain OIDC access token (token endpoint unreachable at '{self._token_url}')"
-            ) from exc
+        response = self._request_token(data, correlation_id)
 
         if response.status_code >= 400:
             raise AuthConfigError(
@@ -131,6 +157,8 @@ class OidcPasswordTokenProvider:
         scope: str | None = None,
         refresh_skew_seconds: int = 60,
         timeout_seconds: int = 10,
+        max_startup_retries: int,
+        retry_backoff_seconds: float,
     ) -> None:
         token_url = str(token_url or "").strip()
         client_id = str(client_id or "").strip()
@@ -156,7 +184,41 @@ class OidcPasswordTokenProvider:
         self._scope = scope
         self._refresh_skew_seconds = int(refresh_skew_seconds)
         self._timeout_seconds = int(timeout_seconds)
+        self._max_startup_retries = int(max_startup_retries)
+        self._retry_backoff_seconds = float(retry_backoff_seconds)
         self._cached: TokenBundle | None = None
+
+    def _request_token(self, data: dict[str, str], correlation_id: str) -> requests.Response:
+        """Issue a single token request with optional retry on connection errors."""
+        max_attempts = 1 + self._max_startup_retries
+        last_exc: Exception | None = None
+
+        for attempt in range(max_attempts):
+            try:
+                response = requests.post(
+                    self._token_url,
+                    data=data,
+                    headers={"X-Correlation-ID": correlation_id},
+                    timeout=self._timeout_seconds,
+                )
+                # Auth errors (4xx/5xx) are never retried — they signal misconfiguration
+                return response
+            except requests.exceptions.ConnectionError as exc:
+                last_exc = exc
+                if attempt < self._max_startup_retries:
+                    backoff = self._retry_backoff_seconds * (attempt + 1)
+                    print(
+                        f"Warning: OIDC token endpoint unreachable at '{self._token_url}' "
+                        f"(attempt {attempt + 1}/{max_attempts}); retrying in {backoff:.0f}s...",
+                        flush=True,
+                    )
+                    time.sleep(backoff)
+                continue
+
+        raise AuthConfigError(
+            f"Unable to obtain OIDC access token (token endpoint unreachable at "
+            f"'{self._token_url}' after {max_attempts} attempt(s))"
+        ) from last_exc  # type: ignore[arg-type]
 
     def get_token(self, *, correlation_id: str) -> str:
         now = time.time()
@@ -174,17 +236,7 @@ class OidcPasswordTokenProvider:
         if self._scope:
             data["scope"] = self._scope
 
-        try:
-            response = requests.post(
-                self._token_url,
-                data=data,
-                headers={"X-Correlation-ID": correlation_id},
-                timeout=self._timeout_seconds,
-            )
-        except Exception as exc:
-            raise AuthConfigError(
-                f"Unable to obtain OIDC access token (token endpoint unreachable at '{self._token_url}')"
-            ) from exc
+        response = self._request_token(data, correlation_id)
 
         if response.status_code >= 400:
             raise AuthConfigError(
@@ -236,6 +288,8 @@ def build_token_provider_from_env(
     client_secret_env_var: str,
     scope_env_var: str,
     refresh_skew_seconds: int = 60,
+    max_startup_retries: int,
+    retry_backoff_seconds: float,
 ) -> TokenProvider:
     static_token = str(os.getenv(static_token_env_var) or "").strip()
     if static_token:
@@ -256,6 +310,8 @@ def build_token_provider_from_env(
             client_secret=client_secret,
             scope=scope,
             refresh_skew_seconds=refresh_skew_seconds,
+            max_startup_retries=max_startup_retries,
+            retry_backoff_seconds=retry_backoff_seconds,
         )
 
     raise AuthConfigError(
@@ -273,6 +329,8 @@ def build_oidc_token_provider_from_env(
     client_secret_env_var: str,
     scope_env_var: str,
     refresh_skew_seconds: int = 60,
+    max_startup_retries: int,
+    retry_backoff_seconds: float,
 ) -> TokenProvider:
     """Build an OIDC client-credentials token provider from env.
 
@@ -295,6 +353,8 @@ def build_oidc_token_provider_from_env(
             client_secret=client_secret,
             scope=scope,
             refresh_skew_seconds=refresh_skew_seconds,
+            max_startup_retries=max_startup_retries,
+            retry_backoff_seconds=retry_backoff_seconds,
         )
 
     raise AuthConfigError(
