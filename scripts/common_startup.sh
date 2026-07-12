@@ -6,7 +6,7 @@
 # - Optionally includes observability components.
 # - Restarts the local Vite UI processes.
 #
-# Version: 2.0
+# Version: 2.1
 # Last modified: 2026-07-12
 # Changelog:
 # - 1.2 (2026-04-26): Added env-file selection flags and propagated ROOT_ENV_FILE through the common startup chain.
@@ -19,6 +19,8 @@
 # - 1.9 (2026-07-12): Move startup progress monitoring into a dedicated helper.
 # - 2.0 (2026-07-12): Check monitor abort flag after wait() so error-triggered
 #   aborts propagate even when the child process tree survives kill.
+# - 2.1 (2026-07-12): Rotate env-file passwords on each startup; store result in
+#   tmp/env_passwords/<env>.env and source before starting containers.
 
 set -euo pipefail
 
@@ -79,6 +81,36 @@ validate_selected_root_env_file "$ROOT_DIR" full
 
 export ROOT_ENV_FILE
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
+
+# Rotate env-file passwords and store in tmp/env_passwords/<env>.env
+info "$my_name" "Rotating env-file passwords..."
+ENV_PASSWORD_ROTATION_OUTPUT=$(python "$ROOT_DIR/scripts/supporting/seed_password_rotation.py" \
+    --env-file "$ROOT_ENV_FILE" \
+    --output-dir "$ROOT_DIR/tmp/env_passwords" 2>&1)
+if [ $? -ne 0 ]; then
+  error "$my_name" "Failed to rotate env-file passwords"
+  error "$my_name" "$ENV_PASSWORD_ROTATION_OUTPUT"
+  exit 1
+fi
+info "$my_name" "$ENV_PASSWORD_ROTATION_OUTPUT"
+
+# Derive env name from ROOT_ENV_FILE for the rotated file path
+_env_name="$ROOT_ENV_FILE"
+_env_name="${_env_name##*/}"            # strip directory
+_env_name="${_env_name%.local}"        # strip .local suffix
+_env_name="${_env_name#.env.}"         # strip .env. prefix
+[ -z "$_env_name" ] && _env_name="local"
+ENV_PASSWORDS_FILE="$ROOT_DIR/tmp/env_passwords/${_env_name}.env"
+if [ -f "$ENV_PASSWORDS_FILE" ]; then
+  info "$my_name" "Sourcing rotated passwords from $ENV_PASSWORDS_FILE"
+  set -a  # export all subsequent assignments
+  source "$ENV_PASSWORDS_FILE"
+  set +a
+else
+  error "$my_name" "Rotated env file not found: $ENV_PASSWORDS_FILE"
+  exit 1
+fi
+
 info "$my_name" "Starting container stack orchestration..."
 
 START_ARGS=(--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --seed-all --init-db)

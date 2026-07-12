@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+import seed_password_rotation
 
 from scripts.supporting.seed_password_rotation import (
     ALLOWED_PASSWORD_CHARS,
@@ -335,3 +336,178 @@ def test_generate_and_write_creates_parent_dirs(sample_users_csv: Path, tmp_path
     assert (tmp_path / "deep" / "nested" / "rotated.csv").exists()
     assert (tmp_path / "deep" / "nested" / "creds.csv").exists()
     assert (tmp_path / "deep" / "nested" / "creds.env").exists()
+
+
+# ---------------------------------------------------------------------------
+# Env file password rotation tests
+# ---------------------------------------------------------------------------
+
+def _is_password_var() -> None:
+    """Test password variable detection."""
+    assert seed_password_rotation._is_password_var("DB_PASSWORD")
+    assert seed_password_rotation._is_password_var("MY_SECRET")
+    assert seed_password_rotation._is_password_var("CLIENT_SECRET")
+    assert seed_password_rotation._is_password_var("API_KEY")
+    assert not seed_password_rotation._is_password_var("DB_HOST")
+    assert not seed_password_rotation._is_password_var("REGISTRY")
+    assert not seed_password_rotation._is_password_var("DQ_LLM_MAX_NEW_TOKENS")
+
+
+def _is_var_reference() -> None:
+    """Test variable reference detection."""
+    assert seed_password_rotation._is_var_reference("${SOME_VAR}")
+    assert seed_password_rotation._is_var_reference("${KEYCLOAK_PASSWORD}")
+    assert seed_password_rotation._is_var_reference("$SOME_VAR")
+    assert not seed_password_rotation._is_var_reference("postgres")
+    assert not seed_password_rotation._is_var_reference("changeme")
+
+
+def _should_rotate() -> None:
+    """Test rotation decision logic."""
+    # Hardcoded passwords should be rotated
+    assert seed_password_rotation._should_rotate("DB_PASSWORD", "postgres")
+    assert seed_password_rotation._should_rotate("KONG_PASSWORD", "kongpass")
+    assert seed_password_rotation._should_rotate("MY_SECRET", "changeme")
+
+    # Empty values should NOT be rotated (sentinels)
+    assert not seed_password_rotation._should_rotate("DB_PASSWORD", "")
+    assert not seed_password_rotation._should_rotate("DB_PASSWORD", "change-me")
+
+    # Variable references should NOT be rotated
+    assert not seed_password_rotation._should_rotate("DB_PASSWORD", "${OTHER_VAR}")
+    assert not seed_password_rotation._should_rotate("DB_PASSWORD", "$OTHER_VAR")
+
+    # External credentials should NOT be rotated
+    assert not seed_password_rotation._should_rotate("DOCKER_HUB_TOKEN", "abc123")
+    assert not seed_password_rotation._should_rotate("DQ_MCP_API_TOKEN", "abc123")
+
+    # Non-password vars should NOT be rotated
+    assert not seed_password_rotation._should_rotate("DB_HOST", "postgres")
+
+
+def _parse_env_line() -> None:
+    """Test env line parsing."""
+    # Simple key=value
+    key, value = seed_password_rotation._parse_env_line("DB_PASSWORD=postgres")
+    assert key == "DB_PASSWORD"
+    assert value == "postgres"
+
+    # Double-quoted value
+    key, value = seed_password_rotation._parse_env_line('DB_PASSWORD="postgres"')
+    assert key == "DB_PASSWORD"
+    assert value == "postgres"
+
+    # Single-quoted value
+    key, value = seed_password_rotation._parse_env_line("DB_PASSWORD='postgres'")
+    assert key == "DB_PASSWORD"
+    assert value == "postgres"
+
+    # Comment lines return None
+    assert seed_password_rotation._parse_env_line("# comment") is None
+
+    # Blank lines return None
+    assert seed_password_rotation._parse_env_line("") is None
+
+
+def _env_name_from_path() -> None:
+    """Test env name extraction."""
+    assert seed_password_rotation._env_name_from_path(Path(".env.dev.local")) == "dev"
+    assert seed_password_rotation._env_name_from_path(Path(".env.test.local")) == "test"
+    assert seed_password_rotation._env_name_from_path(Path(".env.prod.local")) == "prod"
+    assert seed_password_rotation._env_name_from_path(Path(".env.local")) == "local"
+
+
+def test_rotate_env_passwords_hardcoded_values(tmp_path: Path) -> None:
+    """Test rotating hardcoded password values in env file."""
+    env_file = tmp_path / ".env.dev.local"
+    env_file.write_text(
+        "DB_HOST=localhost\n"
+        'DB_PASSWORD=postgres\n'
+        'KONG_PASSWORD="kongpass"\n'
+        'MY_SECRET=${OTHER_VAR}\n'
+        "REGISTRY=docker.io\n",
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "env_passwords"
+    output_path, rotated = seed_password_rotation.rotate_env_passwords(
+        env_file, output_dir=output_dir
+    )
+
+    # Should have rotated DB_PASSWORD and KONG_PASSWORD, not MY_SECRET (ref)
+    assert len(rotated) == 2
+    rotated_names = {name for name, _ in rotated}
+    assert "DB_PASSWORD" in rotated_names
+    assert "KONG_PASSWORD" in rotated_names
+
+    # Output file should exist and contain all original keys
+    assert output_path.exists()
+    content = output_path.read_text(encoding="utf-8")
+    assert "DB_HOST=localhost" in content
+    assert "MY_SECRET=${OTHER_VAR}" in content
+    assert "REGISTRY=docker.io" in content
+
+    # Rotated values should be different from originals
+    for name, new_value in rotated:
+        assert new_value not in ("postgres", "kongpass")
+        assert len(new_value) == PASSWORD_LENGTH
+
+
+def test_rotate_env_passwords_preserves_comments(tmp_path: Path) -> None:
+    """Test that comments are preserved in rotated env file."""
+    env_file = tmp_path / ".env.dev.local"
+    env_file.write_text(
+        "# This is a comment\n"
+        "DB_HOST=localhost\n"
+        "# DB_PASSWORD comment\n"
+        "DB_PASSWORD=postgres\n",
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "env_passwords"
+    output_path, _ = seed_password_rotation.rotate_env_passwords(
+        env_file, output_dir=output_dir
+    )
+
+    content = output_path.read_text(encoding="utf-8")
+    assert "# This is a comment" in content
+    assert "# DB_PASSWORD comment" in content
+
+
+def test_rotate_env_passwords_creates_default_output_dir(tmp_path: Path) -> None:
+    """Test that default output directory is created if it doesn't exist."""
+    env_file = tmp_path / ".env.dev.local"
+    env_file.write_text("DB_PASSWORD=postgres", encoding="utf-8")
+
+    output_path, _ = seed_password_rotation.rotate_env_passwords(env_file)
+
+    # Should create tmp/env_passwords/dev.env
+    assert output_path.exists()
+    assert output_path.name == "dev.env"
+
+
+def test_rotate_env_passwords_rejects_missing_file() -> None:
+    """Test that missing env file raises SystemExit."""
+    with pytest.raises(SystemExit, match="Env file not found"):
+        seed_password_rotation.rotate_env_passwords("/nonexistent/.env.dev.local")
+
+
+def test_rotate_env_passwords_with_sentinels(tmp_path: Path) -> None:
+    """Test that sentinel values are not rotated."""
+    env_file = tmp_path / ".env.dev.local"
+    env_file.write_text(
+        "DB_PASSWORD=\n"          # empty
+        "KONG_PASSWORD=changeme\n"  # sentinel
+        "REAL_PASSWORD=secret123\n",  # should be rotated
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "env_passwords"
+    _, rotated = seed_password_rotation.rotate_env_passwords(
+        env_file, output_dir=output_dir
+    )
+
+    # Only REAL_PASSWORD should be rotated
+    assert len(rotated) == 1
+    assert rotated[0][0] == "REAL_PASSWORD"
+
