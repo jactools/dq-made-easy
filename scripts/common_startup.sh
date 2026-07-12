@@ -6,8 +6,8 @@
 # - Optionally includes observability components.
 # - Restarts the local Vite UI processes.
 #
-# Version: 1.8
-# Last modified: 2026-06-30
+# Version: 1.9
+# Last modified: 2026-07-12
 # Changelog:
 # - 1.2 (2026-04-26): Added env-file selection flags and propagated ROOT_ENV_FILE through the common startup chain.
 # - 1.3 (2026-04-29): Switched startup env selection to the canonical dev/test/prod contract.
@@ -16,6 +16,7 @@
 # - 1.6 (2026-05-30): Include the Airflow profile in the default common startup chain.
 # - 1.7 (2026-06-02): Allow the distributed Spark cluster profile to be opt-in via --with-spark.
 # - 1.8 (2026-06-30): Avoid Bash nounset failures when --env consumes all CLI arguments.
+# - 1.9 (2026-07-12): Move startup progress monitoring into a dedicated helper.
 
 set -euo pipefail
 
@@ -28,6 +29,7 @@ START_SPARK=false
 FORCE_BUILD=false
 
 source "$ROOT_DIR/scripts/supporting/logging.sh"
+source "$ROOT_DIR/scripts/supporting/startup_monitor.sh"
 set_log_level INFO
 my_name="common_startup.sh"
 
@@ -91,10 +93,23 @@ fi
 # Disable deliveries seeding for local startup
 START_ARGS+=(--no-seed-deliveries)
 
-./scripts/start-containers.sh "${START_ARGS[@]}" || {
+# Start the startup process in the background
+./scripts/start-containers.sh "${START_ARGS[@]}" &
+startup_pid=$!
+
+startup_monitor_start "$startup_pid"
+
+# Wait for startup to complete
+wait "$startup_pid"
+startup_exit_code=$?
+
+# Stop monitoring
+startup_monitor_cleanup
+
+if [ "$startup_exit_code" -ne 0 ]; then
   error "Failed to start containers. Aborting startup."
   exit 2
-}
+fi
 
 info "$my_name" "Container stack startup completed; refreshing local UI..."
 
