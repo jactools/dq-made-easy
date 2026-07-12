@@ -2,11 +2,11 @@
 # Purpose: Background monitoring helper for the common startup flow.
 #
 # What it does:
-# - Launches a detached monitor for the startup process.
-# - Polls docker compose status and prints grouped progress.
-# - Cleans up the monitor automatically on exit.
+# - Tails the startup log and prints new output (minus ANSI codes).
+# - Watches docker compose container state and aborts if a container exits non-zero.
+# - Cleans up automatically when the startup process exits.
 #
-# Version: 1.0
+# Version: 2.1
 # Last modified: 2026-07-12
 
 set -euo pipefail
@@ -14,31 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-# shellcheck disable=SC1091
-source "$ROOT_DIR/scripts/supporting/logging.sh"
-
 startup_monitor_pid=0
-
-startup_monitor_build_service_profiles() {
-  python3 -c "
-import yaml, os, glob
-mapping = {}
-for path in [os.path.join('$ROOT_DIR', 'docker-compose.yml')] + glob.glob(os.path.join('$ROOT_DIR', 'docker-compose', '*.yml')):
-    try:
-        with open(path) as fh:
-            for doc in yaml.safe_load_all(fh):
-                if not doc:
-                    continue
-                for svc, cfg in (doc.get('services') or {}).items():
-                    profiles = cfg.get('profiles', [])
-                    if isinstance(profiles, list):
-                        mapping[svc] = profiles
-    except Exception:
-        pass
-for svc, profiles in sorted(mapping.items()):
-    print(f'{svc} -> {\" + \".join(profiles)}')
-" 2>/dev/null
-}
 
 startup_monitor_cleanup() {
   if [ "${startup_monitor_pid:-0}" -ne 0 ]; then
@@ -48,74 +24,87 @@ startup_monitor_cleanup() {
   fi
 }
 
+startup_monitor_detect_failed_containers() {
+  local compose_output
+  compose_output="$(docker compose -f "$ROOT_DIR/docker-compose.yml" --env-file "$ROOT_ENV_FILE" ps --all --format json 2>/dev/null || true)"
+
+  if [ -z "$compose_output" ]; then
+    return 0
+  fi
+
+  python3 - "$compose_output" <<'PY'
+import json
+import sys
+
+raw = sys.argv[1]
+if not raw.strip():
+    raise SystemExit(0)
+
+try:
+    items = json.loads(raw)
+except json.JSONDecodeError:
+    raise SystemExit(0)
+
+if isinstance(items, dict):
+    items = [items]
+
+for item in items:
+    service = item.get("Service") or item.get("Name") or "unknown"
+    exit_code = item.get("ExitCode")
+    health = str(item.get("Health") or "").lower()
+    status = str(item.get("Status") or "").lower()
+
+    if exit_code is None:
+        continue
+
+    try:
+        exit_code_int = int(exit_code)
+    except (TypeError, ValueError):
+        continue
+
+    if exit_code_int != 0:
+        print(f"startup_monitor: container '{service}' failed with exit code {exit_code_int}", file=sys.stderr)
+        raise SystemExit(1)
+
+    if health == "unhealthy" or ("unhealthy" in status and "healthy" not in status):
+        print(f"startup_monitor: container '{service}' reported unhealthy status", file=sys.stderr)
+        raise SystemExit(2)
+PY
+}
+
 startup_monitor_run() {
   local target_pid="$1"
-  local last_output=""
-  local poll_interval=5
-  local start_time
-  start_time=$(date +%s)
-  local service_profiles
-  service_profiles="$(startup_monitor_build_service_profiles)"
+  local last_log_size=0
+  local log_file="$ROOT_DIR/tmp/startup.log"
+
+  set +e +o pipefail
 
   while kill -0 "$target_pid" 2>/dev/null; do
-    local current_output
-    current_output="$(docker compose -f "$ROOT_DIR/docker-compose.yml" --env-file "$ROOT_ENV_FILE" ps --format 'table {{.Service}}\t{{.Status}}' 2>/dev/null | tail -n +2 | sort)"
-
-    if [ "$current_output" != "$last_output" ]; then
-      last_output="$current_output"
-      local now
-      now=$(date +%s)
-      local elapsed=$((now - start_time))
-      local mins=$((elapsed / 60))
-      local secs=$((elapsed % 60))
-
-      local running=0 healthy=0 starting=0 exited=0 restarting=0 unhealthy=0
-      while IFS=$'\t' read -r service status; do
-        [ -z "$service" ] && continue
-        case "$status" in
-          *healthy) healthy=$((healthy + 1)) ;;
-          *starting) starting=$((starting + 1)) ;;
-          *restarting) restarting=$((restarting + 1)) ;;
-          *unhealthy) unhealthy=$((unhealthy + 1)) ;;
-          *exited*) exited=$((exited + 1)) ;;
-          *) running=$((running + 1)) ;;
-        esac
-      done <<< "$current_output"
-
-      printf '\n\033[2K\r[%s] [%02d:%02d] Startup progress:\n' "$(date -u '+%H:%M:%S')" "$mins" "$secs"
-      printf '  healthy=%-3d  starting=%-3d  running=%-3d  exited=%-3d  restarting=%-3d  unhealthy=%-3d\n' \
-        "$healthy" "$starting" "$running" "$exited" "$restarting" "$unhealthy"
-
-      local prev_profile=""
-      while IFS=$'\t' read -r service status; do
-        [ -z "$service" ] && continue
-        local profile
-        profile="$(printf '%s\n' "$service_profiles" | grep "^${service} ->" | sed 's/.* -> //')"
-        [ -z "$profile" ] && profile="(none)"
-
-        if [ "$profile" != "$prev_profile" ]; then
-          printf '\n  [Profile: %s]\n' "$profile"
-          prev_profile="$profile"
+    if [ -f "$log_file" ]; then
+      local current_log_size
+      current_log_size=$(stat -f%z "$log_file" 2>/dev/null || stat -c%s "$log_file" 2>/dev/null || echo 0)
+      if [ "$current_log_size" -gt "$last_log_size" ] && [ "$current_log_size" -gt 0 ]; then
+        local new_lines
+        new_lines=$(tail -c +$((last_log_size + 1)) "$log_file" 2>/dev/null | \
+          sed 's/\x1b\[[0-9;]*m//g' || true)
+        if [ -n "$new_lines" ]; then
+          printf '%s\n' "$new_lines"
         fi
-
-        local color=""
-        case "$status" in
-          *healthy) color="\033[32m" ;;
-          *starting) color="\033[33m" ;;
-          *restarting) color="\033[31m" ;;
-          *unhealthy) color="\033[31m" ;;
-          *exited*) color="\033[36m" ;;
-        esac
-        local reset="\033[0m"
-
-        printf '    %s%s %s %-60s %s%s\n' "$color" "$status" "$reset" "$service" "$color" "$reset"
-      done <<< "$current_output"
-
-      printf '\n'
+        last_log_size=$current_log_size
+      fi
     fi
 
-    sleep "$poll_interval"
+    if ! startup_monitor_detect_failed_containers; then
+      echo "startup_monitor: detected a failed container; aborting startup" >&2
+      kill "$target_pid" 2>/dev/null || true
+      break
+    fi
+
+    sleep 1
   done
+
+  set +e
+  set -o pipefail
 }
 
 startup_monitor_start() {

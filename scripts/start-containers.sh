@@ -498,7 +498,9 @@ regenerate_oas_and_swagger_assets_for_seed_all() {
     return 1
   }
 
-  info "$my_name" "Restarting frontend container..."
+  info "$my_name" "Stopping frontend container..."
+  docker compose down -v frontend >/dev/null || true
+  info "$my_name" "Starting frontend container with regenerated OpenAPI JSON and Swagger UI assets..."
   docker_compose up -d frontend >/dev/null || {
     error "$my_name" "Frontend start failed."
     return 1
@@ -1135,23 +1137,50 @@ if [ "$START_METADATA" = true ]; then
       error "$my_name" "Unable to load seeded Keycloak credentials for OpenMetadata configuration"
       exit 1
     fi
-    docker_compose up -d openmetadata-server openmetadata-ingestion || exit 1
-    prepare_openmetadata_access_token || exit 1
-    docker_compose --profile metadata run --rm openmetadata-configure --seed-all || exit 1
+    info "$my_name" "Stopping any existing OpenMetadata ingestion container to avoid stale state..."
+    docker compose down -v openmetadata-ingestion >/dev/null || true
+    info "$my_name" "Starting OpenMetadata server and ingestion containers..."
+    docker_compose up -d openmetadata-server openmetadata-ingestion || {
+      error "$my_name" "OpenMetadata server/ingestion startup failed"
+      exit 2
+    }
+    prepare_openmetadata_access_token || {
+      error "$my_name" "Unable to prepare OpenMetadata access token for post-start configuration"
+      exit 3
+    }
+    docker_compose --profile metadata run --rm openmetadata-configure --seed-all || {
+      error "$my_name" "OpenMetadata post-start configuration failed"
+      exit 4
+    }
   else
-    docker_compose up -d openmetadata-server || exit 1
+    info "$my_name" "Stopping any existing OpenMetadata server container to avoid stale state..."
+    docker compose down -v openmetadata-server >/dev/null || true
+    info "$my_name" "Starting OpenMetadata server container for post-start configuration..."
+    docker_compose up -d openmetadata-server || {
+      error "$my_name" "OpenMetadata server startup failed"
+      exit 5
+    }
     if [ "$SEED_KEYCLOAK" != true ] && [ "$SEED_ALL" != true ]; then
       info "$my_name" "Reseeding Keycloak so OpenMetadata can mint tokens with the current generated credentials"
-      ./scripts/seed_stack.sh --seed-keycloak || exit 1
+      ./scripts/seed_stack.sh --seed-keycloak || {
+        error "$my_name" "Keycloak reseeding failed during OpenMetadata post-start configuration"
+        exit 6
+      }
     fi
     if ! dq_source_seeded_user_credentials --quiet; then
       error "$my_name" "Unable to load seeded Keycloak credentials for OpenMetadata configuration"
       exit 1
     fi
     if [ "$SEED_OPENMETADATA" = true ] || [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then
-      prepare_openmetadata_access_token || exit 1
+      prepare_openmetadata_access_token || {
+        error "$my_name" "Unable to prepare OpenMetadata access token for post-start configuration"
+        exit 3
+      }
     fi
-    docker_compose --profile metadata run --rm openmetadata-configure || exit 1
+    docker_compose --profile metadata run --rm openmetadata-configure || {
+      error "$my_name" "OpenMetadata post-start configuration failed"
+      exit 4
+    }
   fi
 fi
 

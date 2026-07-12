@@ -93,10 +93,19 @@ fi
 # Disable deliveries seeding for local startup
 START_ARGS+=(--no-seed-deliveries)
 
-# Start the startup process in the background
-./scripts/start-containers.sh "${START_ARGS[@]}" &
+# Suppress the docker compose spinner so output is readable alongside the monitor.
+export COMPOSE_PROGRESS=plain
+
+# Start the startup process in the background, capturing output to a log file
+# so it doesn't mix with the monitoring grid.
+STARTUP_LOG="$ROOT_DIR/tmp/startup.log"
+export STARTUP_LOG
+mkdir -p "$ROOT_DIR/tmp"
+> "$STARTUP_LOG"
+./scripts/start-containers.sh "${START_ARGS[@]}" >> "$STARTUP_LOG" 2>&1 &
 startup_pid=$!
 
+# Launch the background monitor that tails the log and prints the grid.
 startup_monitor_start "$startup_pid"
 
 # Wait for startup to complete

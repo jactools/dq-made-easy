@@ -243,6 +243,8 @@ services:
     command:
     - cd /app && python -m alembic -c alembic.ini upgrade heads
     env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
+    volumes:
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
     networks:
     - dq-network
     restart: 'no'
