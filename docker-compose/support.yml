@@ -75,7 +75,7 @@ services:
       trust-bundle:
         condition: service_completed_successfully
     profiles:
-    - zammad-legacy
+    - support
     image: redis:${ZAMMAD_REDIS_VERSION:?ZAMMAD_REDIS_VERSION is required}
     command: redis-server --appendonly yes
     volumes:
@@ -117,7 +117,7 @@ services:
     depends_on:
       zammad-postgresql:
         condition: service_healthy
-      redis:
+      zammad-redis:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
@@ -142,7 +142,7 @@ services:
         condition: service_completed_successfully
       zammad-postgresql:
         condition: service_healthy
-      redis:
+      zammad-redis:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
@@ -181,7 +181,7 @@ services:
         condition: service_completed_successfully
       zammad-postgresql:
         condition: service_healthy
-      redis:
+      zammad-redis:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
@@ -206,7 +206,7 @@ services:
         condition: service_completed_successfully
       zammad-postgresql:
         condition: service_healthy
-      redis:
+      zammad-redis:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
@@ -293,7 +293,7 @@ services:
     depends_on:
       zammad-postgresql:
         condition: service_healthy
-      redis:
+      zammad-redis:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
