@@ -210,6 +210,43 @@ EOF
   echo "PASS: test_stuck_container_detection_logic"
 }
 
+# Fail-fast helper: simulates the error detection logic from startup_monitor_run
+# Returns: 0 if error detected, 1 if not
+_test_detect_error() {
+  local line="$1"
+  if [[ "$line" =~ ^\ *Container\ ([^\ ]+)\ (.+)$ ]]; then
+    local status="${BASH_REMATCH[2]}"
+    case "$status" in
+      Error*|error*) return 0 ;;
+    esac
+  elif [[ "$line" =~ dependency\ failed\ to\ start ]]; then
+    return 0
+  fi
+  return 1
+}
+
+test_fail_fast_on_error_state() {
+  # Error state should trigger fail-fast
+  _test_detect_error "Container dq-made-easy-dev-api-1 Error dependency api failed to start" || { echo "FAIL: Error state not detected"; exit 1; }
+  _test_detect_error "Container dq-made-easy-dev-api-1 error something went wrong" || { echo "FAIL: lowercase error not detected"; exit 1; }
+  # Non-error states should not trigger fail-fast
+  _test_detect_error "Container dq-made-easy-db Healthy" && { echo "FAIL: Healthy state falsely flagged"; exit 1; } || true
+  _test_detect_error "Container dq-made-easy-db Waiting" && { echo "FAIL: Waiting state falsely flagged"; exit 1; } || true
+  _test_detect_error "Container dq-made-easy-db Exited" && { echo "FAIL: Exited state falsely flagged"; exit 1; } || true
+
+  echo "PASS: test_fail_fast_on_error_state"
+}
+
+test_fail_fast_on_dependency_failure() {
+  # Dependency failure lines should trigger fail-fast
+  _test_detect_error "dependency failed to start: container dq-made-easy-dev-openmetadata-server-1 is unhealthy" || { echo "FAIL: dependency failure not detected"; exit 1; }
+  # Normal lines should not trigger fail-fast
+  _test_detect_error "Container dq-made-easy-db Healthy" && { echo "FAIL: normal line falsely flagged"; exit 1; } || true
+  _test_detect_error "[2026-07-12T19:31:15Z] [INFO] [start_stack.sh] Stack startup completed successfully" && { echo "FAIL: info line falsely flagged"; exit 1; } || true
+
+  echo "PASS: test_fail_fast_on_dependency_failure"
+}
+
 # ---- Run all tests ----
 echo "Running startup_monitor.sh tests..."
 test_deduplicates_unchanged_state
@@ -221,4 +258,6 @@ test_full_lifecycle
 test_terminal_states
 test_error_state_not_terminal
 test_stuck_container_detection_logic
+test_fail_fast_on_error_state
+test_fail_fast_on_dependency_failure
 echo "All startup_monitor.sh tests passed."
