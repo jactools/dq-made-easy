@@ -38,7 +38,7 @@ x-zammad-service:
   - zammad_storage:/opt/zammad/storage
   - ../tmp/certs/mkcert-rootCA.pem:/usr/lib/ssl/cert.pem:ro
   - ../tmp/certs/mkcert-rootCA.pem:/etc/zammad/certs/mkcert-rootCA.pem:ro
-  - ../docker/zammad/wait-for-redis.sh:/usr/local/bin/wait-for-redis.sh:ro
+  - ../docker/zammad/init.sh:/opt/zammad/init.sh:ro
   - ../docker/zammad/initializers/99-openid-connect-server-side-url.rb:/opt/zammad/config/initializers/99-openid-connect-server-side-url.rb:ro
   networks: &id004
   - dq-network
@@ -110,7 +110,7 @@ services:
   zammad-init:
     profiles: *id001
     image: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
-    restart: on-failure
+    restart: "no"
     environment: *id002
     volumes: *id003
     networks: *id004
@@ -125,8 +125,7 @@ services:
         condition: service_completed_successfully
     command:
     - sh
-    - /usr/local/bin/wait-for-redis.sh
-    - zammad-init
+    - /opt/zammad/init.sh
     user: 0:0
     labels:
     - monitoring=true
