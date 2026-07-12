@@ -75,6 +75,8 @@ def test_oidc_client_credentials_get_token_success_and_errors(monkeypatch):
         scope=None,
         refresh_skew_seconds=60,
         timeout_seconds=1,
+        max_startup_retries=0,
+        retry_backoff_seconds=5.0,
     )
 
     # network success
@@ -106,15 +108,46 @@ def test_oidc_client_credentials_get_token_success_and_errors(monkeypatch):
 
     # network exception
     def fake_post_exc(*a, **k):
-        raise RuntimeError("boom")
+        raise auth_utils.requests.exceptions.ConnectionError("boom")
 
     monkeypatch.setattr(auth_utils.requests, "post", fake_post_exc)
     with pytest.raises(auth_utils.AuthConfigError):
         provider.get_token(correlation_id="cid")
 
 
+def _resolve_retry_params() -> tuple[int, float]:
+    """Read retry params from the same env vars the real callers use."""
+    max_retries = int(os.getenv("DQ_ENGINE_MAX_RETRIES", "0"))
+    backoff_ms = int(os.getenv("DQ_ENGINE_RETRY_BACKOFF_MS", "5000"))
+    return max_retries, backoff_ms / 1000.0
+
+
+def test_build_oidc_provider_wires_retry_params_from_env(monkeypatch):
+    """Verify retry params are read from the same env vars callers use."""
+    monkeypatch.setenv("TEST_OISSUER", "https://keycloak:8443/realms/test")
+    monkeypatch.setenv("TEST_CLIENT_ID", "test-client")
+    monkeypatch.setenv("TEST_CLIENT_SECRET", "test-secret")
+    monkeypatch.setenv("DQ_ENGINE_MAX_RETRIES", "3")
+    monkeypatch.setenv("DQ_ENGINE_RETRY_BACKOFF_MS", "2000")
+
+    provider = auth_utils.build_oidc_token_provider_from_env(
+        issuer_env_var="TEST_OISSUER",
+        token_url_env_var="TEST_TOKEN_URL",
+        client_id_env_var="TEST_CLIENT_ID",
+        client_secret_env_var="TEST_CLIENT_SECRET",
+        scope_env_var="TEST_SCOPE",
+        max_startup_retries=int(os.getenv("DQ_ENGINE_MAX_RETRIES", "0")),
+        retry_backoff_seconds=int(os.getenv("DQ_ENGINE_RETRY_BACKOFF_MS", "5000")) / 1000.0,
+    )
+
+    assert isinstance(provider, auth_utils.OidcClientCredentialsTokenProvider)
+    assert provider._max_startup_retries == 3
+    assert provider._retry_backoff_seconds == 2.0
+
+
 def test_build_token_provider_from_env_prefers_static(monkeypatch):
     monkeypatch.setenv("MY_STATIC_TOKEN", "s1")
+    max_retries, backoff = _resolve_retry_params()
     p = auth_utils.build_token_provider_from_env(
         static_token_env_var="MY_STATIC_TOKEN",
         issuer_env_var="ISS",
@@ -122,8 +155,8 @@ def test_build_token_provider_from_env_prefers_static(monkeypatch):
         client_id_env_var="CID",
         client_secret_env_var="CS",
         scope_env_var="S",
-        max_startup_retries=0,
-        retry_backoff_seconds=5.0,
+        max_startup_retries=max_retries,
+        retry_backoff_seconds=backoff,
     )
     assert isinstance(p, auth_utils.StaticTokenProvider)
     assert p.get_token(correlation_id="c") == "s1"
@@ -134,6 +167,7 @@ def test_build_oidc_token_provider_from_env_raises_when_missing(monkeypatch):
     monkeypatch.delenv("T", raising=False)
     monkeypatch.delenv("CID", raising=False)
     monkeypatch.delenv("CS", raising=False)
+    max_retries, backoff = _resolve_retry_params()
 
     with pytest.raises(auth_utils.AuthConfigError):
         auth_utils.build_oidc_token_provider_from_env(
@@ -142,6 +176,6 @@ def test_build_oidc_token_provider_from_env_raises_when_missing(monkeypatch):
             client_id_env_var="CID",
             client_secret_env_var="CS",
             scope_env_var="S",
-            max_startup_retries=0,
-            retry_backoff_seconds=5.0,
+            max_startup_retries=max_retries,
+            retry_backoff_seconds=backoff,
         )

@@ -211,6 +211,7 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT:?ENVIRONMENT
         is required}
       OTEL_LOGS_EXPORTER: none
+      OPENMETADATA_HEAP_OPTS: ${OPENMETADATA_HEAP_OPTS:-Xms1g -Xmx1g}
       JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
       ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
     entrypoint:
