@@ -134,7 +134,7 @@ startup_monitor_run() {
 
   _startup_monitor_print_change() {
     local name="$1"
-    local status="$2"
+    local status="${2% }"   # strip trailing whitespace from docker output
     local prev="${container_state[$name]:-}"
     if [ -z "$prev" ] || [ "$prev" != "$status" ]; then
       container_state["$name"]="$status"
@@ -147,7 +147,7 @@ startup_monitor_run() {
 
   # Terminal states that don't count as stuck
   _is_terminal_state() {
-    local status="$1"
+    local status="${1% }"   # strip trailing whitespace from docker output
     case "$status" in
       Exited|Healthy|Running|Exited*|Completed*|Running*) return 0 ;;
       *) return 1 ;;
@@ -156,7 +156,7 @@ startup_monitor_run() {
 
   # Error states that should trigger immediate abort (fail-fast)
   _is_error_state() {
-    local status="$1"
+    local status="${1% }"   # strip trailing whitespace from docker output
     case "$status" in
       Error*|error*) return 0 ;;
       Restarting*) return 0 ;;

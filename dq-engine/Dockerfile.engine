@@ -73,10 +73,9 @@ RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir --upgrad
 	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -e /app/dq-utils \
 	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -r requirements.txt
 
-# Copy application code last (changes frequently)
-COPY --chown=appuser:appuser dq-engine/ /app/
-COPY --chown=appuser:appuser scripts/ /app/scripts/
-COPY --chown=appuser:appuser dq-db/mock-data/ /app/dq-db/mock-data/
+# -- Spark jar warmup (runs BEFORE app-code copy so the download layer is cached --)
+# Copy only the warmup script; the rest of scripts/ is copied later with app code.
+COPY --chown=appuser:appuser scripts/warmup_spark_jars.py /app/scripts/warmup_spark_jars.py
 
 RUN mkdir -p /home/appuser/.cache/tmp /home/appuser/.cache/spark-local /home/appuser/.dq-spark-jars
 
@@ -87,6 +86,7 @@ ENV SPARK_LOCAL_DIRS=/home/appuser/.cache/spark-local
 ENV JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/home/appuser/.cache/tmp
 
 # Warm the Spark package cache so runtime seeding does not depend on network access.
+# This layer is cached as long as the warmup script and package list do not change.
 RUN [ "${SKIP_SPARK_WARMUP:-false}" = "true" ] || python scripts/warmup_spark_jars.py \
 	--ivy-dir /home/appuser/.ivy2 \
 	--jar-dir /home/appuser/.dq-spark-jars \
@@ -107,6 +107,11 @@ if not jar_paths:
 for jar_path in jar_paths:
     shutil.copy2(jar_path, target_dir / jar_path.name)
 PY
+
+# -- Application code (changes frequently, invalidates only from here down) --
+COPY --chown=appuser:appuser dq-engine/ /app/
+COPY --chown=appuser:appuser scripts/ /app/scripts/
+COPY --chown=appuser:appuser dq-db/mock-data/ /app/dq-db/mock-data/
 
 ENV PORT=8000
 EXPOSE 8000
