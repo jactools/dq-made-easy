@@ -8,12 +8,16 @@
 #   "dependency ... failed to start").
 # - Warns when a container is stuck in a non-terminal state for too long.
 # - Enforces a global startup timeout and aborts if exceeded.
+# - Writes an abort flag file so the parent script can react even if the child
+#   process tree is hard to kill.
 # - Watches docker compose container state and aborts if a container exits non-zero.
 # - Cleans up automatically when the startup process exits.
 #
-# Version: 2.4
+# Version: 2.5
 # Last modified: 2026-07-12
 # Changelog:
+# - 2.5: Kill entire process tree on error + write abort flag file for parent
+#   script to check after wait().
 # - 2.4: Added fail-fast on Error states and "dependency failed to start" lines.
 # - 2.3: Added global timeout (STARTUP_MONITOR_TIMEOUT_SECONDS) and per-container
 #   stuck detection (STARTUP_MONITOR_STUCK_THRESHOLD_SECONDS).
@@ -24,6 +28,30 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 startup_monitor_pid=0
+
+# Abort flag file: written by the monitor on error so the parent script
+# can detect the abort even if kill/wait doesn't propagate properly.
+startup_monitor_abort_file=""
+
+# Recursively kill a PID and all its descendants.
+# Uses pgrep on macOS/Linux to walk the process tree.
+_startup_monitor_kill_tree() {
+  local pid="$1"
+  # Kill all direct children first, then recurse into them
+  local children
+  children=$(pgrep -P "$pid" 2>/dev/null || true)
+  for child in $children; do
+    _startup_monitor_kill_tree "$child"
+  done
+  kill "$pid" 2>/dev/null || true
+}
+
+# Write the abort flag so the parent script can detect the failure.
+_startup_monitor_write_abort() {
+  if [ -n "$startup_monitor_abort_file" ] && [ -d "$(dirname "$startup_monitor_abort_file")" ]; then
+    echo "$1" > "$startup_monitor_abort_file" 2>/dev/null || true
+  fi
+}
 
 startup_monitor_cleanup() {
   if [ "${startup_monitor_pid:-0}" -ne 0 ]; then
@@ -149,7 +177,8 @@ startup_monitor_run() {
           echo "  $cname: $cstatus" >&2
         fi
       done
-      kill "$target_pid" 2>/dev/null || true
+      _startup_monitor_kill_tree "$target_pid"
+      _startup_monitor_write_abort "global timeout"
       break
     fi
 
@@ -184,7 +213,8 @@ startup_monitor_run() {
             echo "" >&2
             echo "startup_monitor: container error detected — aborting startup" >&2
             echo "startup_monitor: $error_hit" >&2
-            kill "$target_pid" 2>/dev/null || true
+            _startup_monitor_kill_tree "$target_pid"
+            _startup_monitor_write_abort "$error_hit"
             break
           fi
         fi
@@ -217,7 +247,8 @@ startup_monitor_run() {
 
     if ! startup_monitor_detect_failed_containers; then
       echo "startup_monitor: detected a failed container; aborting startup" >&2
-      kill "$target_pid" 2>/dev/null || true
+      _startup_monitor_kill_tree "$target_pid"
+      _startup_monitor_write_abort "failed container"
       break
     fi
 
@@ -230,6 +261,8 @@ startup_monitor_run() {
 
 startup_monitor_start() {
   local target_pid="$1"
+  startup_monitor_abort_file="$ROOT_DIR/tmp/startup_monitor.abort"
+  rm -f "$startup_monitor_abort_file" 2>/dev/null || true
   startup_monitor_run "$target_pid" &
   startup_monitor_pid=$!
   trap startup_monitor_cleanup EXIT

@@ -6,7 +6,7 @@
 # - Optionally includes observability components.
 # - Restarts the local Vite UI processes.
 #
-# Version: 1.9
+# Version: 2.0
 # Last modified: 2026-07-12
 # Changelog:
 # - 1.2 (2026-04-26): Added env-file selection flags and propagated ROOT_ENV_FILE through the common startup chain.
@@ -17,6 +17,8 @@
 # - 1.7 (2026-06-02): Allow the distributed Spark cluster profile to be opt-in via --with-spark.
 # - 1.8 (2026-06-30): Avoid Bash nounset failures when --env consumes all CLI arguments.
 # - 1.9 (2026-07-12): Move startup progress monitoring into a dedicated helper.
+# - 2.0 (2026-07-12): Check monitor abort flag after wait() so error-triggered
+#   aborts propagate even when the child process tree survives kill.
 
 set -euo pipefail
 
@@ -121,8 +123,18 @@ startup_exit_code=$?
 info "$my_name" "Stopping startup monitor..."
 startup_monitor_cleanup
 
+# Check if the monitor triggered an abort (e.g. error state, timeout)
+# This catches cases where kill/wait doesn't propagate cleanly.
+abort_file="${ROOT_DIR}/tmp/startup_monitor.abort"
+if [ -f "$abort_file" ]; then
+  abort_reason="$(cat "$abort_file" 2>/dev/null || echo 'unknown')"
+  error "$my_name" "Startup monitor aborted: $abort_reason"
+  rm -f "$abort_file"
+  exit 2
+fi
+
 if [ "$startup_exit_code" -ne 0 ]; then
-  error "$my_name" "Failed to start containers. Aborting startup."
+  error "$my_name" "Failed to start containers (exit $startup_exit_code). Aborting startup."
   exit 2
 fi
 
