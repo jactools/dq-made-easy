@@ -146,6 +146,7 @@ SKIP_FRONTEND_START="${SKIP_FRONTEND_START:-false}"
 SKIP_POST_STACK_KONG_REFRESH="${SKIP_POST_STACK_KONG_REFRESH:-false}"
 START_OBSERVABILITY="${START_OBSERVABILITY:-false}"
 NO_BUILD=false
+FORCE_BUILD=false
 
 print_usage() {
   printf '%s\n' \
@@ -207,7 +208,7 @@ while [[ $# -gt 0 ]]; do
     --with-support) START_SUPPORT=true; shift ;;
     --remove-orphans) REMOVE_ORPHANS=true; shift ;;
     --no-build) NO_BUILD=true; shift ;;
-    --force-build) NO_BUILD=false; shift ;;
+    --force-build) NO_BUILD=false; FORCE_BUILD=true; shift ;;
     -h|--help) print_usage; exit 0 ;;
     *) error "$my_name" "Unknown arg: $1"; print_usage; exit 1 ;;
   esac
@@ -413,7 +414,12 @@ if [ "$NO_BUILD" = false ]; then
   fi
 
   info "$my_name" "Running docker compose build with BuildKit (shows BuildKit output)..."
-  if ! COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker_compose --progress=plain "${PROFILE_ARGS[@]}" build; then
+  BUILD_ARGS=()
+  if [ "$FORCE_BUILD" = true ]; then
+    BUILD_ARGS+=(--no-cache)
+    info "$my_name" "Cache policy: --no-cache (forced by --force-build)"
+  fi
+  if ! COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker_compose --progress=plain "${PROFILE_ARGS[@]}" build "${BUILD_ARGS[@]}"; then
     error "$my_name" "docker compose build failed; aborting startup"
     exit 1
   fi
@@ -423,6 +429,10 @@ fi
 
 info "$my_name" "Starting docker-compose stack (bringing containers up)..."
 UP_ARGS=(up -d)
+if [ "$FORCE_BUILD" = true ]; then
+  UP_ARGS+=(--force-recreate)
+  info "$my_name" "Recreate policy: --force-recreate (forced by --force-build)"
+fi
 if [ "$REMOVE_ORPHANS" = "true" ]; then
   info "$my_name" "Explicit orphan cleanup enabled for this run"
   UP_ARGS+=(--remove-orphans)

@@ -94,7 +94,8 @@ Browser ──TLS (encrypted)──► Edge (SNI preread, pass-through) ──TL
 - Never decrypt, never inspect HTTP payloads, never terminate TLS
 
 **Bypass paths** (edge routes directly, not via BFF):
-- SNI `ops.jac.dot` → Kong admin (`kong:8002`) — operator access
+- SNI `ops.jac.dot` → Kong admin (`kon
+g:8002`) — operator access
 - No edge-level health endpoint needed — edge health is TCP port check
 
 **Kong responsibilities:**

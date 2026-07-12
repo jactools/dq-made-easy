@@ -272,11 +272,13 @@ services:
         ZAMMAD_IMAGE: ${ZAMMAD_IMAGE:?ZAMMAD_IMAGE is required}
     restart: unless-stopped
     environment:
-      ZAMMAD_NGINX_SERVER_NAME: ${ZAMMAD_NGINX_SERVER_NAME:?ZAMMAD_NGINX_SERVER_NAME is required}
+      <<: *id002
       ZAMMAD_SSL_CERT_FILE_NAME: ${ZAMMAD_SSL_CERT_FILE_NAME:?ZAMMAD_SSL_CERT_FILE_NAME is required}
       ZAMMAD_SSL_KEY_FILE_NAME: ${ZAMMAD_SSL_KEY_FILE_NAME:?ZAMMAD_SSL_KEY_FILE_NAME is required}
     volumes:
     - ${EDGE_SSL_CERTS_DIR:?EDGE_SSL_CERTS_DIR is required}:/etc/nginx/certs:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/zammad/certs/mkcert-rootCA.pem:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/usr/lib/ssl/cert.pem:ro
     ports:
     - ${ZAMMAD_HOST_BIND:?ZAMMAD_HOST_BIND is required}:${ZAMMAD_EXPOSE_PORT:?ZAMMAD_EXPOSE_PORT is required}:443
     networks:

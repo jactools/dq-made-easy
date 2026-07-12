@@ -5,8 +5,8 @@
   "env_selection": "custom (.env.dev.local)",
   "exit_code": "1",
   "failed_command": "SKIP_FRONTEND_START=true SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh \"${STACK_ARGS[@]}\"",
-  "finished_at": "2026-07-12T22:47:40Z",
+  "finished_at": "2026-07-12T23:38:29Z",
   "script": "start-containers.sh",
-  "started_at": "2026-07-12T22:23:49Z",
+  "started_at": "2026-07-12T23:26:00Z",
   "status": "failed"
 }
