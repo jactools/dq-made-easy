@@ -4,14 +4,17 @@
 # What it does:
 # - Tails the startup log and prints container state changes (first appearance or
 #   status transition), suppressing repeated identical lines.
+# - Fails fast when a container enters an error state (docker compose "Error ..." or
+#   "dependency ... failed to start").
 # - Warns when a container is stuck in a non-terminal state for too long.
 # - Enforces a global startup timeout and aborts if exceeded.
 # - Watches docker compose container state and aborts if a container exits non-zero.
 # - Cleans up automatically when the startup process exits.
 #
-# Version: 2.3
+# Version: 2.4
 # Last modified: 2026-07-12
 # Changelog:
+# - 2.4: Added fail-fast on Error states and "dependency failed to start" lines.
 # - 2.3: Added global timeout (STARTUP_MONITOR_TIMEOUT_SECONDS) and per-container
 #   stuck detection (STARTUP_MONITOR_STUCK_THRESHOLD_SECONDS).
 
@@ -119,6 +122,15 @@ startup_monitor_run() {
     esac
   }
 
+  # Error states that should trigger immediate abort (fail-fast)
+  _is_error_state() {
+    local status="$1"
+    case "$status" in
+      Error*|error*) return 0 ;;
+      *) return 1 ;;
+    esac
+  }
+
   local start_epoch
   start_epoch=$(date +%s)
 
@@ -149,15 +161,32 @@ startup_monitor_run() {
         new_lines=$(tail -c +$((last_log_size + 1)) "$log_file" | \
           sed 's/\x1b\[[0-9;]*m//g' || true)
         if [ -n "$new_lines" ]; then
+          local error_hit=""
           # Parse "Container <name> <status>" lines and deduplicate by state change
           while IFS= read -r line; do
             if [[ "$line" =~ ^\ *Container\ ([^\ ]+)\ (.+)$ ]]; then
               _startup_monitor_print_change "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+              # Fail-fast: abort on any Error state
+              if _is_error_state "${BASH_REMATCH[2]}"; then
+                error_hit="${BASH_REMATCH[1]}: ${BASH_REMATCH[2]}"
+              fi
             else
               # Non-container lines (timestamps, errors, etc.): pass through
               printf '%s\n' "$line"
+              # Fail-fast: abort on docker compose dependency errors
+              if [[ "$line" =~ dependency\ failed\ to\ start ]]; then
+                error_hit="dependency failure: $line"
+              fi
             fi
           done <<< "$new_lines"
+
+          if [ -n "$error_hit" ]; then
+            echo "" >&2
+            echo "startup_monitor: container error detected — aborting startup" >&2
+            echo "startup_monitor: $error_hit" >&2
+            kill "$target_pid" 2>/dev/null || true
+            break
+          fi
         fi
         last_log_size=$current_log_size
       fi
