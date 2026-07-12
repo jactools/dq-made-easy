@@ -29,6 +29,7 @@ wait_for_openmetadata_public_ready() {
     return 1
   fi
 
+  info "openmetadata.sh" "Waiting for OpenMetadata public API to become ready at $api_base_url..."
   ready_url="${api_base_url%/}/api/v1/system/version"
 
   host="$(printf '%s' "$api_base_url" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^/:]+).*$#\1#')"

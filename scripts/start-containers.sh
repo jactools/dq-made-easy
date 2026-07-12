@@ -1076,9 +1076,11 @@ if [ "$PRESEED_BEFORE_STACK" = true ]; then
 fi
 
 if [ "$SEED_ALL" = true ]; then
+  info "$my_name" "--seed-all requested: starting stack with --seed-all follow-up to regenerate OpenAPI + Swagger assets"
   STARTUP_CURRENT_STAGE="start docker stack with --seed-all follow-up"
   SKIP_FRONTEND_START=true SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh "${STACK_ARGS[@]}"
 else
+  info "$my_name" "Starting stack without --seed-all follow-up"
   STARTUP_CURRENT_STAGE="start docker stack"
   SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh "${STACK_ARGS[@]}"
 fi

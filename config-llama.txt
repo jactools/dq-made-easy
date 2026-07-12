@@ -8,3 +8,9 @@ LLAMA_MODEL="unsloth/Qwen3.6-27B-GGUF:Q5_K_M"
 LLAMA_ARGS="--no-mmap --port 8181 --jinja -c 170000 -t 5 -lv 4 -ngl 64" 
 
 
+MODEL_NAME="unsloth/Qwen3.6-27B-GGUF:Q6_K"
+LLAMA_MODEL="unsloth/Qwen3.6-27B-GGUF:Q6_K"
+LLAMA_MODEL_WORKS="unsloth/Qwen3.6-27B-GGUF:UD-Q4_K_XL"
+LLAMA_MODEL_NOTWORKING="unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q5_K_M"
+LLAMA_ARGS="--no-mmap --port 8181 --jinja -c 120000 -ngl 90 -t 5 -lv 4"
+

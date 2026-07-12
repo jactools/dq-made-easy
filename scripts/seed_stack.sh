@@ -133,12 +133,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ "$SEED_ALL" = "true" ]; then
-    SEED_POSTGRES=true
-    SEED_KEYCLOAK=true
+  info "$my_name" "--seed-all requested: enabling all seeding operations"
+  SEED_POSTGRES=true
+  SEED_KEYCLOAK=true
   SEED_OPENMETADATA=true
 fi
 
 if [ "$INIT_DB" = "true" ]; then
+  info "$my_name" "Init-db requested: enabling Postgres seeding to initialize schema"
   SEED_POSTGRES=true
 fi
 
@@ -154,26 +156,32 @@ if [ "$SEED_POSTGRES" = "false" ] && [ "$SEED_KEYCLOAK" = "false" ] && [ "$SEED_
 fi
 
 if [ "$SEED_KEYCLOAK" = "true" ]; then
+  info "$my_name" "Starting Keycloak seeding..."
   seed_keycloak_in_docker
 fi
 
 if [ "$SEED_ZAMMAD" = "true" ]; then
+  info "$my_name" "Starting Zammad seeding..."
   seed_zammad_in_docker
 fi
 
 if [ "$SEED_POSTGRES" = "true" ]; then
-    seed_postgres_in_docker
+  info "$my_name" "Starting Postgres seeding..."
+  seed_postgres_in_docker
 fi
 
 if [ "$SEED_OPENMETADATA" = "true" ]; then
+  info "$my_name" "Starting OpenMetadata seeding..."
   seed_openmetadata_in_docker
 fi
 
 if [ "$SEED_DELIVERIES" = "true" ] || [ "$WIPE_AISTOR" = "true" ]; then
+  info "$my_name" "Starting delivery objects seeding..."
   seed_delivery_objects_in_docker
 fi
 
 if [ "$START_LLM" = "true" ]; then
+  info "$my_name" "Starting LLM..."
   start_llm_in_docker
 fi
 

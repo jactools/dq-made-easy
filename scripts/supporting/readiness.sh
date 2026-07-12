@@ -146,6 +146,7 @@ wait_for_zammad_support_services_ready() {
     return 127
   fi
 
+  info "readiness.sh" "Waiting for Zammad support services to become ready..."
   for attempt in $(seq 1 "$max_attempts"); do
     zammad_postgres_id="$(find_running_container_id zammad-postgresql)"
     redis_id="$(find_running_container_id redis)"
@@ -193,6 +194,7 @@ wait_for_zammad_app_database_ready() {
     return 127
   fi
 
+  info "readiness.sh" "Waiting for Zammad application database to become ready..."
   for attempt in $(seq 1 "$max_attempts"); do
     if DQ_DB_INTERNAL_URL="$database_url" python - <<'PY' >/dev/null 2>&1
 import os

@@ -102,30 +102,38 @@ STARTUP_LOG="$ROOT_DIR/tmp/startup.log"
 export STARTUP_LOG
 mkdir -p "$ROOT_DIR/tmp"
 > "$STARTUP_LOG"
+
+info "$my_name" "Starting containers with args: ${START_ARGS[*]}"
 ./scripts/start-containers.sh "${START_ARGS[@]}" >> "$STARTUP_LOG" 2>&1 &
 startup_pid=$!
+info "$my_name" "Startup process PID: $startup_pid"
 
 # Launch the background monitor that tails the log and prints the grid.
+info "$my_name" "Launching startup monitor..."
 startup_monitor_start "$startup_pid"
 
 # Wait for startup to complete
+info "$my_name" "Waiting for startup to complete..."
 wait "$startup_pid"
 startup_exit_code=$?
 
 # Stop monitoring
+info "$my_name" "Stopping startup monitor..."
 startup_monitor_cleanup
 
 if [ "$startup_exit_code" -ne 0 ]; then
-  error "Failed to start containers. Aborting startup."
+  error "$my_name" "Failed to start containers. Aborting startup."
   exit 2
 fi
 
 info "$my_name" "Container stack startup completed; refreshing local UI..."
 
 # Stop and restart the UI
+info "$my_name" "Stopping local UI..."
 ./dq-ui/scripts/stop_local.sh
 
+info "$my_name" "Starting local UI..."
 ./dq-ui/scripts/start_local.sh || {
-  error "Failed to start UI. Aborting startup."
+  error "$my_name" "Failed to start UI. Aborting startup."
   exit 3
 }

@@ -231,7 +231,10 @@ if [ "$START_ALL" = "true" ]; then
 fi
 
 if [ "$START_WORKERS" = "true" ] && [ "$START_GATEWAY" != "true" ]; then
+  info "$my_name" "Enabling gateway profile because workers require it"
   START_GATEWAY=true
+else
+  info "$my_name" "Gateway profile is not required by the selected startup profiles"
 fi
 
 if ! write_prometheus_oauth2_client_secret_file; then
@@ -430,6 +433,8 @@ fi
 if ! docker_compose "${PROFILE_ARGS[@]}" "${UP_ARGS[@]}" --quiet-pull; then
   error "$my_name" "docker compose up failed"
   exit 1
+else
+  info "$my_name" "docker compose up completed successfully"
 fi
 
 
