@@ -17,7 +17,11 @@ import requests
 
 from dq_utils.logging_utils import log_event
 from dq_utils.auth_utils import TokenProvider
-from dq_plan_execution import report_run as _async_report_run
+from dq_plan_execution import (
+    build_execution_progress,
+    coerce_str,
+    report_run as _async_report_run,
+)
 
 from dq_plan_execution_types import GxWorkerConfig
 from dq_plan_execution_types import GxWorkerExecutionError
@@ -314,7 +318,7 @@ def _api_report_execution_progress(
     total_steps: int,
     label: str,
 ) -> None:
-    report_run(
+    _run_report_run(
         config,
         token_provider,
         run_id=run_id,

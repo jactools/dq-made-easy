@@ -1,12 +1,12 @@
 {
   "args": "--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --with-observability --force-build",
-  "current_stage": "start docker stack",
+  "current_stage": "completed",
   "env_file": ".env.dev.local",
   "env_selection": "custom (.env.dev.local)",
-  "exit_code": "1",
-  "failed_command": "exit 1",
-  "finished_at": "2026-07-13T20:37:32Z",
+  "exit_code": "0",
+  "failed_command": "exit 0",
+  "finished_at": "2026-07-13T21:11:26Z",
   "script": "start-containers.sh",
-  "started_at": "2026-07-13T20:30:58Z",
-  "status": "failed"
+  "started_at": "2026-07-13T21:04:38Z",
+  "status": "succeeded"
 }
