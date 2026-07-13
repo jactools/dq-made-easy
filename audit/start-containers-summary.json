@@ -1,12 +1,12 @@
 {
-  "args": "--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --seed-all --init-db --with-observability --force-build --no-seed-deliveries",
-  "current_stage": "start docker stack with --seed-all follow-up",
+  "args": "--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --with-observability --force-build",
+  "current_stage": "start docker stack",
   "env_file": ".env.dev.local",
   "env_selection": "custom (.env.dev.local)",
-  "exit_code": "1",
-  "failed_command": "SKIP_FRONTEND_START=true SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh \"${STACK_ARGS[@]}\"",
-  "finished_at": "2026-07-13T16:44:26Z",
+  "exit_code": "127",
+  "failed_command": "SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh \"${STACK_ARGS[@]}\"",
+  "finished_at": "2026-07-13T20:27:17Z",
   "script": "start-containers.sh",
-  "started_at": "2026-07-13T16:29:38Z",
+  "started_at": "2026-07-13T20:21:13Z",
   "status": "failed"
 }

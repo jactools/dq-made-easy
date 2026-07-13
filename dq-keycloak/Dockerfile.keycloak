@@ -3,6 +3,7 @@ FROM quay.io/keycloak/keycloak:26.6.2
 # Store the realm JSON OUTSIDE /opt/keycloak/data so the named volume mount
 # cannot shadow it.  The entrypoint copies it into data/import/ at every start.
 COPY --chmod=755 docker-entrypoint.sh /opt/keycloak/docker-entrypoint.sh
+COPY --chmod=755 kcadm-trust.sh /opt/keycloak/kcadm-trust.sh
 # COPY jaccloud-realm.json /opt/keycloak/realm-import/jaccloud-realm.json
 
 ENTRYPOINT ["/opt/keycloak/docker-entrypoint.sh"]

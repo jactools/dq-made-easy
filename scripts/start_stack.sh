@@ -419,7 +419,7 @@ if [ "$NO_BUILD" = false ]; then
     BUILD_ARGS+=(--no-cache)
     info "$my_name" "Cache policy: --no-cache (forced by --force-build)"
   fi
-  if ! COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker_compose --progress=plain "${PROFILE_ARGS[@]}" build "${BUILD_ARGS[@]}"; then
+  if ! COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker_compose "${PROFILE_ARGS[@]}" build "${BUILD_ARGS[@]}" ; then
     error "$my_name" "docker compose build failed; aborting startup"
     exit 1
   fi
@@ -440,7 +440,46 @@ else
   info "$my_name" "Preserving unrelated running services (no orphan cleanup)"
 fi
 
-if ! docker_compose "${PROFILE_ARGS[@]}" "${UP_ARGS[@]}" --quiet-pull; then
+info "$my_name" "docker compose up command: docker compose ${PROFILE_ARGS[*]} ${UP_ARGS[*]}"
+# Run compose in background and enforce a timeout to avoid hanging indefinitely.
+# Compose can get stuck after all containers are started (large profile sets).
+COMPOSE_TIMEOUT=300
+COMPOSE_PID=""
+
+docker_compose "${PROFILE_ARGS[@]}" "${UP_ARGS[@]}" --quiet-pull --timestamps &
+COMPOSE_PID=$!
+
+# Wait with polling timeout
+elapsed=0
+while kill -0 "$COMPOSE_PID" 2>/dev/null; do
+  sleep 5
+  elapsed=$((elapsed + 5))
+  if [ "$elapsed" -ge "$COMPOSE_TIMEOUT" ]; then
+    warning "$my_name" "docker compose up timed out after ${COMPOSE_TIMEOUT}s — checking if containers are running..."
+    kill "$COMPOSE_PID" 2>/dev/null
+    wait "$COMPOSE_PID" 2>/dev/null || true
+    sleep 5
+    stuck=$(docker ps -a --filter "name=dq-made-easy" --filter "status=created" --format '{{.Name}}' 2>/dev/null || true)
+    if [ -n "$stuck" ]; then
+      info "$my_name" "Starting containers left in Created state by compose timeout:"
+      for c in $stuck; do
+        info "$my_name" "  starting $c"
+        if ! docker start "$c" >/dev/null 2>&1; then
+          if ! docker inspect "$c" >/dev/null 2>&1; then
+            info "$my_name" "  $c no longer exists (removed by compose), skipping"
+          else
+            warning "$my_name" "  failed to start $c"
+          fi
+        fi
+      done
+    fi
+    break
+  fi
+done
+wait "$COMPOSE_PID" 2>/dev/null || true
+rc=$?
+
+if [ "$rc" -ne 0 ] && [ "$elapsed" -lt "$COMPOSE_TIMEOUT" ]; then
   error "$my_name" "docker compose up failed"
   exit 1
 else

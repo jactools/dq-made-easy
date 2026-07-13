@@ -20,6 +20,7 @@ x-tls-env: &tls-env
 # ============================================================================
 services:
   trust-bundle:
+    profiles: ["auth", "gateway", "core", "observability", "support", "airflow", "redis", "engine", "workers", "trino", "profiling", "metadata", "metadata_ingestion", "llm"]
     build:
       context: ..
       dockerfile: docker/trust-bundle/Dockerfile

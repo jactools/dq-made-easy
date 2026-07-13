@@ -1,4 +1,4 @@
-ROOT_DIR=$(dirname "$(dirname "$(realpath "$0")")")
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 PYTHON_RUNNER="$ROOT_DIR/scripts/python_arm64.sh"

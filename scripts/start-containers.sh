@@ -149,14 +149,14 @@ ensure_keycloak_engine_worker_client_secret_matches_env() {
 
   info "$my_name" "Reconciling Keycloak secret for service client '$client_id' (if needed)..."
 
-  if ! docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  if ! docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh config credentials \
     --server http://127.0.0.1:8080 --realm master --user "$KEYCLOAK_SYSTEM_ADMIN_USERNAME" --password "$KEYCLOAK_SYSTEM_ADMIN_PASSWORD" >/dev/null 2>&1; then
     error "$my_name" "Unable to authenticate to Keycloak via kcadm"
     return 1
   fi
 
   local client_uuid
-  client_uuid="$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get clients -r "$KEYCLOAK_REALM" -q "clientId=$client_id" | \
+  client_uuid="$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get clients -r "$KEYCLOAK_REALM" -q "clientId=$client_id" | \
     jq -r '.[0].id // empty')"
 
   if [ -z "$client_uuid" ]; then
@@ -165,7 +165,7 @@ ensure_keycloak_engine_worker_client_secret_matches_env() {
   fi
 
   local service_account_user_id
-  service_account_user_id="$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get "clients/${client_uuid}/service-account-user" -r "$KEYCLOAK_REALM" | \
+  service_account_user_id="$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get "clients/${client_uuid}/service-account-user" -r "$KEYCLOAK_REALM" | \
     jq -r '.id // empty')"
 
   if [ -z "$service_account_user_id" ]; then
@@ -174,7 +174,7 @@ ensure_keycloak_engine_worker_client_secret_matches_env() {
   fi
 
   local keycloak_secret
-  keycloak_secret="$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get "clients/${client_uuid}/client-secret" -r "$KEYCLOAK_REALM" | \
+  keycloak_secret="$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get "clients/${client_uuid}/client-secret" -r "$KEYCLOAK_REALM" | \
     jq -r '.value // empty')"
 
   if [ -z "$keycloak_secret" ]; then
@@ -190,7 +190,7 @@ ensure_keycloak_engine_worker_client_secret_matches_env() {
     info "$my_name" "✓ Keycloak secret already matches configured worker auth env"
   else
     warning "$my_name" "Keycloak stored secret differs from configured worker auth env; updating Keycloak client secret"
-    if ! docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh update "clients/${client_uuid}" -r "$KEYCLOAK_REALM" -s "secret=${client_secret}" >/dev/null; then
+    if ! docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh update "clients/${client_uuid}" -r "$KEYCLOAK_REALM" -s "secret=${client_secret}" >/dev/null; then
       error "$my_name" "Failed to update Keycloak client secret for '$client_id'"
       return 1
     fi
@@ -199,12 +199,12 @@ ensure_keycloak_engine_worker_client_secret_matches_env() {
   fi
 
   local has_required_role
-  has_required_role="$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get "users/${service_account_user_id}/role-mappings/realm" -r "$KEYCLOAK_REALM" | \
+  has_required_role="$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get "users/${service_account_user_id}/role-mappings/realm" -r "$KEYCLOAK_REALM" | \
     jq -r --arg role "$required_role" 'any(.[]?; (.name // empty) == $role) | tostring')"
 
   if [ "$has_required_role" != "true" ]; then
     warning "$my_name" "Assigning realm role '$required_role' to Keycloak service account for '$client_id'"
-    if ! docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh add-roles -r "$KEYCLOAK_REALM" --uid "$service_account_user_id" --rolename "$required_role" >/dev/null; then
+    if ! docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh add-roles -r "$KEYCLOAK_REALM" --uid "$service_account_user_id" --rolename "$required_role" >/dev/null; then
       error "$my_name" "Failed to assign realm role '$required_role' to Keycloak client '$client_id'"
       return 1
     fi
@@ -241,13 +241,13 @@ ensure_keycloak_openmetadata_client_redirect_matches_env() {
   fi
   KEYCLOAK_READY_ALREADY_CONFIRMED=true
 
-  if ! docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  if ! docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh config credentials \
     --server http://127.0.0.1:8080 --realm master --user "$admin_user" --password "$admin_password" >/dev/null 2>&1; then
     error "$my_name" "Unable to authenticate to Keycloak via kcadm for OpenMetadata client reconciliation"
     return 1
   fi
 
-  client_uuid="$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get clients -r "$KEYCLOAK_REALM" -q "clientId=openmetadata" \
+  client_uuid="$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get clients -r "$KEYCLOAK_REALM" -q "clientId=openmetadata" \
     | jq -r '.[0].id // empty')"
 
   if [ -z "$client_uuid" ]; then
@@ -751,13 +751,13 @@ enforce_keycloak_username_prompt_after_logout() {
     KEYCLOAK_READY_ALREADY_CONFIRMED=true
   fi
 
-  if ! docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  if ! docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh config credentials \
     --server http://localhost:8080 --realm master --user "$admin_user" --password "$admin_password" >/dev/null 2>&1; then
     warning "$my_name" "⚠ Unable to authenticate kcadm for Keycloak username prompt enforcement"
     return 0
   fi
 
-  cookie_execution_id="$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get authentication/flows/browser/executions -r "$KEYCLOAK_REALM" \
+  cookie_execution_id="$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get authentication/flows/browser/executions -r "$KEYCLOAK_REALM" \
     | jq -r '.[] | select(.providerId=="auth-cookie") | .id' | head -1)"
 
   if [ -z "$cookie_execution_id" ]; then
@@ -765,7 +765,7 @@ enforce_keycloak_username_prompt_after_logout() {
     return 0
   fi
 
-  cookie_requirement="$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get authentication/flows/browser/executions -r "$KEYCLOAK_REALM" \
+  cookie_requirement="$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get authentication/flows/browser/executions -r "$KEYCLOAK_REALM" \
     | jq -r '.[] | select(.providerId=="auth-cookie") | .requirement' | head -1)"
 
   if [ "$cookie_requirement" = "DISABLED" ]; then
@@ -1068,7 +1068,7 @@ build_schema_owner_images_if_needed
 if [ "$PRESEED_BEFORE_STACK" = true ]; then
   STARTUP_CURRENT_STAGE="pre-stack database seeding"
   info "$my_name" "Running pre-stack seeding for Postgres so startup never races stale persisted state"
-  ./scripts/seed_stack.sh "${PRESEED_ARGS[@]}" || {
+  ./scripts/seed_containers.sh "${PRESEED_ARGS[@]}" || {
     warning "$my_name" "Database seeding failed before stack startup"
     exit 1
   }
@@ -1087,106 +1087,22 @@ fi
 
 if [ "${#POSTSTACK_SEED_ARGS[@]}" -gt 0 ]; then
   STARTUP_CURRENT_STAGE="post-stack seeding"
-  info "$my_name" "Running post-stack seeding after stack startup..."
-  ./scripts/seed_stack.sh "${POSTSTACK_SEED_ARGS[@]}" || {
+  info "$my_name" "Running post-stack seeding after stack startup via seed_containers.sh..."
+  ./scripts/seed_containers.sh "${POSTSTACK_SEED_ARGS[@]}" || {
     warning "$my_name" "Stack seeding failed during start-containers.sh execution"
     exit 1
   }
   info "$my_name" "Post-stack seeding completed successfully"
 fi
 
-if [ "$SEED_ALL" = true ] && [ "$SEED_DELIVERIES" = true ]; then
-  STARTUP_CURRENT_STAGE="trino aiStor catalog seed"
-  trino_seed_args=(--env-file "$ROOT_ENV_FILE")
-  if [ "$FORCE_BUILD" = true ]; then
-    trino_seed_args+=(--force-build)
-  fi
-  info "$my_name" "Running Trino AIStor catalog seed after --seed-all delivery seeding..."
-  ./scripts/seed_trino_aistor_catalogs.sh "${trino_seed_args[@]}" || {
-    warning "$my_name" "Trino AIStor catalog seeding failed during start-containers.sh --seed-all execution"
-    exit 1
-  }
-  info "$my_name" "Trino AIStor catalog seed completed successfully"
-fi
-
-if [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then
-  STARTUP_CURRENT_STAGE="keycloak reconciliation"
-  ensure_kong_seed_reconciliation || exit 1
-  enforce_keycloak_username_prompt_after_logout || true
-fi
-
-if [ "$START_WORKERS" = true ]; then
-  STARTUP_CURRENT_STAGE="worker secret reconciliation"
-  ensure_keycloak_engine_worker_client_secret_matches_env || exit 1
-fi
-
-if [ "$START_AUTH" = true ] || [ "$START_METADATA" = true ] || [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then
-  STARTUP_CURRENT_STAGE="openmetadata redirect reconciliation"
-  ensure_keycloak_openmetadata_client_redirect_matches_env || exit 1
-fi
-
-if [ "$SEED_ALL" = true ]; then
-  STARTUP_CURRENT_STAGE="regenerate openapi swagger assets"
-  info "$my_name" "--seed-all requested: regenerating OpenAPI + Swagger assets after stack startup"
-  regenerate_oas_and_swagger_assets_for_seed_all || exit 1
-fi
-
-if [ "$START_METADATA" = true ]; then
-  STARTUP_CURRENT_STAGE="openmetadata post-start configuration"
-  info "$my_name" "Running OpenMetadata post-start configuration in Docker..."
-  if [ "$SEED_ALL" = true ]; then
-    if ! dq_source_seeded_user_credentials --quiet; then
-      error "$my_name" "Unable to load seeded Keycloak credentials for OpenMetadata configuration"
-      exit 1
-    fi
-    info "$my_name" "Stopping any existing OpenMetadata ingestion container to avoid stale state..."
-    docker compose down -v openmetadata-ingestion >/dev/null || true
-    info "$my_name" "Starting OpenMetadata server and ingestion containers..."
-    docker_compose up -d openmetadata-server openmetadata-ingestion || {
-      error "$my_name" "OpenMetadata server/ingestion startup failed"
-      exit 2
-    }
-    prepare_openmetadata_access_token || {
-      error "$my_name" "Unable to prepare OpenMetadata access token for post-start configuration"
-      exit 3
-    }
-    docker_compose --profile metadata run --rm openmetadata-configure --seed-all || {
-      error "$my_name" "OpenMetadata post-start configuration failed"
-      exit 4
-    }
-  else
-    info "$my_name" "Stopping any existing OpenMetadata server container to avoid stale state..."
-    docker compose down -v openmetadata-server >/dev/null || true
-    info "$my_name" "Starting OpenMetadata server container for post-start configuration..."
-    docker_compose up -d openmetadata-server || {
-      error "$my_name" "OpenMetadata server startup failed"
-      exit 5
-    }
-    if [ "$SEED_KEYCLOAK" != true ] && [ "$SEED_ALL" != true ]; then
-      info "$my_name" "Reseeding Keycloak so OpenMetadata can mint tokens with the current generated credentials"
-      ./scripts/seed_stack.sh --seed-keycloak || {
-        error "$my_name" "Keycloak reseeding failed during OpenMetadata post-start configuration"
-        exit 6
-      }
-    fi
-    if ! dq_source_seeded_user_credentials --quiet; then
-      error "$my_name" "Unable to load seeded Keycloak credentials for OpenMetadata configuration"
-      exit 1
-    fi
-    if [ "$SEED_OPENMETADATA" = true ] || [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_ALL" = true ]; then
-      prepare_openmetadata_access_token || {
-        error "$my_name" "Unable to prepare OpenMetadata access token for post-start configuration"
-        exit 3
-      }
-    fi
-    docker_compose --profile metadata run --rm openmetadata-configure || {
-      error "$my_name" "OpenMetadata post-start configuration failed"
-      exit 4
-    }
-  fi
-fi
-
 info "$my_name" "Smoke validation is separate: run ./scripts/smoke_stack.sh after startup if you need post-start smoke checks."
+
+# Build frontend assets after seeding (includes any refreshed OpenAPI files)
+info "$my_name" "Building frontend assets..."
+"$ROOT_DIR/scripts/local_build_frontend.sh" || {
+  error "$my_name" "Frontend build failed — aborting startup"
+  exit 1
+}
 
 STARTUP_CURRENT_STAGE="completed"
 info "$my_name" "✓ Start containers script completed successfully"

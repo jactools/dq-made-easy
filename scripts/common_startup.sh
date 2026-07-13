@@ -47,9 +47,19 @@ print_usage() {
     "  --env dev|test|prod      Use .env.dev.local, .env.test.local, or .env.prod.local" \
     "  --env-file PATH          Use an explicit env file for CI, /etc, or diagnostics" \
     "" \
-    "Other options:" \
-    "  --with-observability" \
+    "Profile options:" \
     "  --with-spark" \
+    "" \
+    "Seeding options:" \
+    "  --seed-postgres" \
+    "  --seed-keycloak" \
+    "  --seed-zammad" \
+    "  --seed-deliveries" \
+    "  --seed-all" \
+    "  --init-db" \
+    "  --no-seed-deliveries" \
+    "" \
+    "Other options:" \
     "  --force-build" \
     "  -h, --help"
 }
@@ -61,11 +71,17 @@ fi
 
 set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
+CONTAINER_ARGS=()
+SEED_ARGS=()
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --with-observability) START_OBSERVABILITY=true; shift ;;
     --with-spark) START_SPARK=true; shift ;;
     --force-build) FORCE_BUILD=true; shift ;;
+    # Pass through profile flags to start-containers.sh
+    --with-*|--all) CONTAINER_ARGS+=("$1"); shift ;;
+    # Pass through seeding flags to seed_containers.sh
+    --seed-*|--no-seed-*|--init-db|--purge-bucket|--wipe-aistor) SEED_ARGS+=("$1"); shift ;;
     -h|--help) print_usage; exit 0 ;;
     *) error "Unknown arg: $1"; print_usage; exit 1 ;;
   esac
@@ -113,62 +129,69 @@ fi
 
 info "$my_name" "Starting container stack orchestration..."
 
-START_ARGS=(--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --seed-all --init-db)
+# Build container startup args (profiles + force-build)
+CONTAINER_START_ARGS=(--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --with-observability)
 if [ "$START_SPARK" = true ]; then
-  START_ARGS+=(--with-spark)
-fi
-if [ "$START_OBSERVABILITY" = true ]; then
-  START_ARGS+=(--with-observability)
+  CONTAINER_START_ARGS+=(--with-spark)
 fi
 if [ "$FORCE_BUILD" = true ]; then
-  START_ARGS+=(--force-build)
+  CONTAINER_START_ARGS+=(--force-build)
 fi
+# Append any additional profile flags from CLI
+CONTAINER_START_ARGS+=("${CONTAINER_ARGS[@]}")
 
-# Disable deliveries seeding for local startup
-START_ARGS+=(--no-seed-deliveries)
+# Build seeding args (default: seed all and init db if no seeding flags provided)
+if [ ${#SEED_ARGS[@]} -eq 0 ]; then
+  SEED_ARGS=(--seed-all --init-db --no-seed-deliveries)
+fi
 
 # Suppress the docker compose spinner so output is readable alongside the monitor.
 export COMPOSE_PROGRESS=plain
 
-# Start the startup process in the background, capturing output to a log file
-# so it doesn't mix with the monitoring grid.
-STARTUP_LOG="$ROOT_DIR/tmp/startup.log"
-export STARTUP_LOG
-mkdir -p "$ROOT_DIR/tmp"
-> "$STARTUP_LOG"
+# Start containers
+info "$my_name" "Starting containers with args: ${CONTAINER_START_ARGS[*]}"
+./scripts/start-containers.sh "${CONTAINER_START_ARGS[@]}" || {
+  error "$my_name" "Failed to start containers. Aborting startup."
+  exit 2
+}
 
-info "$my_name" "Starting containers with args: ${START_ARGS[*]}"
-./scripts/start-containers.sh "${START_ARGS[@]}" >> "$STARTUP_LOG" 2>&1 &
-startup_pid=$!
-info "$my_name" "Startup process PID: $startup_pid"
+# Run seeding
+info "$my_name" "Running seeding with args: ${SEED_ARGS[*]}"
+./scripts/seed_containers.sh "${SEED_ARGS[@]}" || {
+  error "$my_name" "Failed to seed containers. Aborting startup."
+  exit 2
+}
+
+# startup_pid=$!
+# info "$my_name" "Startup process PID: $startup_pid"
 
 # Launch the background monitor that tails the log and prints the grid.
-info "$my_name" "Launching startup monitor..."
-startup_monitor_start "$startup_pid"
+# info "$my_name" "Launching startup monitor..."
+# startup_monitor_start "$startup_pid"
 
-# Wait for startup to complete
-info "$my_name" "Waiting for startup to complete..."
-wait "$startup_pid"
-startup_exit_code=$?
+# # Wait for startup to complete
+# info "$my_name" "Waiting for startup to complete..."
+# wait "$startup_pid"
+# startup_exit_code=$?
 
 # Stop monitoring
-info "$my_name" "Stopping startup monitor..."
-startup_monitor_cleanup
+# info "$my_name" "Stopping startup monitor..."
+# startup_monitor_cleanup
 
 # Check if the monitor triggered an abort (e.g. error state, timeout)
 # This catches cases where kill/wait doesn't propagate cleanly.
-abort_file="${ROOT_DIR}/tmp/startup_monitor.abort"
-if [ -f "$abort_file" ]; then
-  abort_reason="$(cat "$abort_file" 2>/dev/null || echo 'unknown')"
-  error "$my_name" "Startup monitor aborted: $abort_reason"
-  rm -f "$abort_file"
-  exit 2
-fi
+# abort_file="${ROOT_DIR}/tmp/startup_monitor.abort"
+# if [ -f "$abort_file" ]; then
+#   abort_reason="$(cat "$abort_file" 2>/dev/null || echo 'unknown')"
+#   error "$my_name" "Startup monitor aborted: $abort_reason"
+#   rm -f "$abort_file"
+#   exit 2
+# fi
 
-if [ "$startup_exit_code" -ne 0 ]; then
-  error "$my_name" "Failed to start containers (exit $startup_exit_code). Aborting startup."
-  exit 2
-fi
+# if [ "$startup_exit_code" -ne 0 ]; then
+#   error "$my_name" "Failed to start containers (exit $startup_exit_code). Aborting startup."
+#   exit 2
+# fi
 
 info "$my_name" "Container stack startup completed; refreshing local UI..."
 

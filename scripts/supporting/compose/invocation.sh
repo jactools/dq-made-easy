@@ -179,8 +179,10 @@ docker_compose() {
   generated_effective_env_file="$(build_effective_compose_env_file "$ROOT_ENV_FILE")"
   effective_env_file="$generated_effective_env_file"
 
+  # Use --project-directory to ensure compose resolves relative env_file paths from repo root.
+  # This is important for included compose files that reference the selected env file.
   local compose_exit_code=0
-  if docker compose -f "$COMPOSE_FILE" --env-file "$effective_env_file" "$@"; then
+  if docker compose -f "$COMPOSE_FILE" --env-file "$effective_env_file" "$@" ; then
     compose_exit_code=0
   else
     compose_exit_code=$?

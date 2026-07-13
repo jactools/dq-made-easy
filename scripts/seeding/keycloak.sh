@@ -53,7 +53,7 @@ run_keycloak_kcadm() {
 
   attempt=1
   while [ "$attempt" -le "$max_attempts" ]; do
-    if output="$(docker exec "$keycloak_container_id" /opt/keycloak/bin/kcadm.sh "$@" 2>&1)"; then
+    if output="$(docker exec "$keycloak_container_id" /opt/keycloak/kcadm-trust.sh "$@" 2>&1)"; then
       printf '%s' "$output"
       return 0
     fi
@@ -186,7 +186,7 @@ sync_keycloak_seed_user_profiles() {
           exit 33
         }
 
-      user_json="$(docker exec "$keycloak_container_id" /opt/keycloak/bin/kcadm.sh get users -r "${KEYCLOAK_REALM}" -q "username=${username}" --fields id)"
+      user_json="$(docker exec "$keycloak_container_id" /opt/keycloak/kcadm-trust.sh get users -r "${KEYCLOAK_REALM}" -q "username=${username}" --fields id)"
       user_id="$(printf '%s\n' "$user_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
       if [ -z "$user_id" ]; then
         error "$my_name" "Seeded Keycloak user still missing after create: ${username}"

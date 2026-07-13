@@ -201,15 +201,6 @@ services:
       start_period: 120s
     networks:
     - dq-network
-    depends_on:
-      loki:
-        condition: service_completed_successfully
-      prometheus:
-        condition: service_completed_successfully
-      tempo:
-        condition: service_completed_successfully
-      trust-bundle:
-        condition: service_completed_successfully
     labels:
     - monitoring=true
   container-metrics:
@@ -357,8 +348,6 @@ services:
   grafana-init:
     depends_on:
       grafana:
-        condition: service_started
-      trust-bundle:
         condition: service_started
     profiles:
     - observability
