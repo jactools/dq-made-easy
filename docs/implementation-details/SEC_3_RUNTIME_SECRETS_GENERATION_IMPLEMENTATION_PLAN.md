@@ -89,12 +89,12 @@
 
 ### Phase 2: Startup Script Integration
 
-- [ ] **SEC-3-03:** Update `scripts/common_startup.sh`
+- [x] **SEC-3-03:** Update `scripts/common_startup.sh`
   - Call `generate_secrets.sh` before any compose or seed step
   - Source `tmp/secrets.{env}.env` into the environment
   - Acceptance: secrets are available in `$SECRETS_ENV` or equivalent variable
 
-- [ ] **SEC-3-04:** Update `scripts/start_stack.sh` / `scripts/start-containers.sh`
+- [x] **SEC-3-04:** Update `scripts/start_stack.sh` / `scripts/start-containers.sh`
   - Pass `--env-file tmp/secrets.{env}.env` to `docker compose` commands
   - Acceptance: `docker compose` resolves all `${SECRET:?required}` env vars
 

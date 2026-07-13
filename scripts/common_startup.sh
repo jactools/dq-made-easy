@@ -98,6 +98,24 @@ validate_selected_root_env_file "$ROOT_DIR" full
 export ROOT_ENV_FILE
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
 
+# Generate runtime secrets (DB passwords, encryption keys, tokens)
+info "$my_name" "Generating runtime secrets..."
+$ROOT_DIR/scripts/generate_secrets.sh --env-file "$ROOT_ENV_FILE" || {
+  error "$my_name" "Failed to generate runtime secrets"
+  exit 1
+}
+
+# Source the generated secrets
+if [ -f "$SECRETS_ENV_FILE" ]; then
+  info "$my_name" "Sourcing generated secrets from $SECRETS_ENV_FILE"
+  set -a
+  source "$SECRETS_ENV_FILE"
+  set +a
+else
+  error "$my_name" "Secrets file not found after generation"
+  exit 1
+fi
+
 # Rotate env-file passwords and store in tmp/env_passwords/<env>.env
 info "$my_name" "Rotating env-file passwords..."
 ENV_PASSWORD_ROTATION_OUTPUT=$($ROOT_DIR/scripts/python_arm64.sh "$ROOT_DIR/scripts/supporting/seed_password_rotation.py" \

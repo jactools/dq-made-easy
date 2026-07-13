@@ -124,6 +124,22 @@ build_effective_compose_env_file() {
   mv "${effective_env_file}.tmp" "$effective_env_file"
   printf '%s=%s\n' "ROOT_ENV_FILE" "$relative_env_file" >> "$effective_env_file"
 
+  # Merge generated secrets if available (overwrites any defaults)
+  if [ -n "${SECRETS_ENV_FILE:-}" ] && [ -f "$SECRETS_ENV_FILE" ]; then
+    while IFS= read -r line; do
+      # Skip comments and blank lines
+      [[ "$line" =~ ^[[:space:]]*# ]] && continue
+      [[ -z "$line" ]] && continue
+      local secret_key="${line%%=*}"
+      local secret_value="${line#*=}"
+      # Remove the key from the effective env file if it exists
+      awk -v env_key="$secret_key" -F= '$1 != env_key { print }' "$effective_env_file" > "${effective_env_file}.tmp"
+      mv "${effective_env_file}.tmp" "$effective_env_file"
+      # Append the secret
+      printf '%s=%s\n' "$secret_key" "$secret_value" >> "$effective_env_file"
+    done < "$SECRETS_ENV_FILE"
+  fi
+
   printf '%s' "$effective_env_file"
 }
 
