@@ -100,7 +100,7 @@ info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROO
 
 # Generate runtime secrets (DB passwords, encryption keys, tokens)
 info "$my_name" "Generating runtime secrets..."
-$ROOT_DIR/scripts/generate_secrets.sh --env-file "$ROOT_ENV_FILE" || {
+$ROOT_DIR/scripts/generate_secrets.sh --env-file "$ROOT_ENV_FILE" --force || {
   error "$my_name" "Failed to generate runtime secrets"
   exit 1
 }

@@ -101,6 +101,24 @@ export ROOT_ENV_FILE
 
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
 
+# Generate runtime secrets (always regenerate on container startup)
+info "$my_name" "Generating runtime secrets..."
+$ROOT_DIR/scripts/generate_secrets.sh --env-file "$ROOT_ENV_FILE" --force || {
+  error "$my_name" "Failed to generate runtime secrets"
+  exit 1
+}
+
+# Source the generated secrets
+if [ -f "$SECRETS_ENV_FILE" ]; then
+  info "$my_name" "Sourcing generated secrets from $SECRETS_ENV_FILE"
+  set -a
+  source "$SECRETS_ENV_FILE"
+  set +a
+else
+  error "$my_name" "Secrets file not found after generation"
+  exit 1
+fi
+
 # source repository-level .env
 set -a
 source "$ROOT_ENV_FILE"
