@@ -182,8 +182,8 @@ services:
     secrets:
     - internal_corporate_root_ca
     volumes:
-    - ../tmp/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE is required}:/etc/grafana/certs/grafana.pem:ro
-    - ../tmp/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE is required}:/etc/grafana/certs/grafana-key.pem:ro
+    - ../tmp/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE is required}:/etc/grafana/certs/${GRAFANA_CERT_FILE}:ro
+    - ../tmp/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE is required}:/etc/grafana/certs/${GRAFANA_KEY_FILE}:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/grafana/certs/mkcert-rootCA.pem:ro
     - ../observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     - ../observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
