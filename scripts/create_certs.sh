@@ -143,7 +143,7 @@ generate_cert "$CERTS_DIR/dq-made-easy.jac.dot+3.pem" "$CERTS_DIR/dq-made-easy.j
 echo "keycloak.jac.dot"
 generate_cert "$CERTS_DIR/keycloak.jac.dot+3.pem" "$CERTS_DIR/keycloak.jac.dot+3-key.pem" "keycloak.jac.dot" keycloak "host.docker.internal" localhost 127.0.0.1 ::1
 echo "kong.jac.dot"
-generate_cert "$CERTS_DIR/kong.jac.dot+3.pem" "$CERTS_DIR/kong.jac.dot+3-key.pem" "kong.jac.dot" localhost 127.0.0.1 ::1
+generate_cert "$CERTS_DIR/kong.jac.dot+3.pem" "$CERTS_DIR/kong.jac.dot+3-key.pem" "kong.jac.dot" kong localhost 127.0.0.1 ::1
 echo "observability.jac.dot"
 generate_cert "$CERTS_DIR/observability.jac.dot+3.pem" "$CERTS_DIR/observability.jac.dot+3-key.pem" "observability.jac.dot" localhost 127.0.0.1 ::1
 echo "api.jac.dot"

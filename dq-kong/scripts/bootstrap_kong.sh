@@ -45,10 +45,11 @@ ADMIN_ONLY_GROUPS='["admin"]'
 REALM_CONSUMERS_SYNCED=false
 
 CURL_CA_BUNDLE="${CURL_CA_BUNDLE:-${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-}}"
+# Admin API uses Kong's default self-signed cert; always use -k
 KONG_ADMIN_CURL_ARGS=(-s -f -k)
-if [ -n "$CURL_CA_BUNDLE" ] && [ -f "$CURL_CA_BUNDLE" ]; then
-  KONG_ADMIN_CURL_ARGS=(-s -f --cacert "$CURL_CA_BUNDLE")
-fi
+# All curl calls to KONG_ADMIN_INTERNAL_URL use -k for the default admin cert
+# Do NOT override with --cacert for admin API; the admin listener uses Kong's
+# default self-signed cert, not our internal CA cert. Keep -k for admin API access.
 
 echo "[kong-bootstrap] waiting for Kong Admin API at ${KONG_ADMIN_INTERNAL_URL}"
 export KONG_LUA_SSL_TRUSTED_CERTIFICATE
@@ -68,14 +69,14 @@ create_service() {
   local name="$1"
   local url="$2"
   local code
-  code=$(curl -s -o /dev/null -w "%{http_code}" "$KONG_ADMIN_INTERNAL_URL/services/$name")
+  code=$(curl -s -k -o /dev/null -w "%{http_code}" "$KONG_ADMIN_INTERNAL_URL/services/$name")
   if [ "$code" = "200" ]; then
     # Keep existing services aligned with the desired upstream target.
-    curl -s -X PATCH "$KONG_ADMIN_INTERNAL_URL/services/$name" \
+    curl -s -k -X PATCH "$KONG_ADMIN_INTERNAL_URL/services/$name" \
       -H 'Content-Type: application/json' \
       -d "{\"url\":\"$url\"}" >/dev/null
   else
-    curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/services" \
+    curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/services" \
       -H 'Content-Type: application/json' \
       -d "{\"name\":\"$name\",\"url\":\"$url\"}" >/dev/null
   fi
@@ -86,8 +87,8 @@ create_route() {
   local route_name="$2"
   local path="$3"
   local methods_json="${4:-[\"GET\",\"POST\",\"PUT\",\"DELETE\",\"PATCH\",\"OPTIONS\"]}"
-  if ! curl -s "$KONG_ADMIN_INTERNAL_URL/services/$service/routes" | grep -q "\"name\":\"$route_name\""; then
-    curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/services/$service/routes" \
+  if ! curl -s -k "$KONG_ADMIN_INTERNAL_URL/services/$service/routes" | grep -q "\"name\":\"$route_name\""; then
+    curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/services/$service/routes" \
       -H 'Content-Type: application/json' \
       -d "{\"name\":\"$route_name\",\"paths\":[\"$path\"],\"methods\":$methods_json,\"strip_path\":false}" >/dev/null
   fi
@@ -99,12 +100,12 @@ upsert_plugin_for_route() {
   local payload="$3"
   local plugin_id
 
-  plugin_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/routes/$route/plugins" | jq -r --arg p "$plugin" '.data[]? | select(.name==$p) | .id // empty' 2>/dev/null | head -1)
+  plugin_id=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/routes/$route/plugins" | jq -r --arg p "$plugin" '.data[]? | select(.name==$p) | .id // empty' 2>/dev/null | head -1)
   if [ -n "$plugin_id" ]; then
-    curl -s -X DELETE "$KONG_ADMIN_INTERNAL_URL/plugins/$plugin_id" >/dev/null || true
+    curl -s -k -X DELETE "$KONG_ADMIN_INTERNAL_URL/plugins/$plugin_id" >/dev/null || true
   fi
 
-  curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/routes/$route/plugins" \
+  curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/routes/$route/plugins" \
     -H 'Content-Type: application/json' \
     -d "$payload" >/dev/null
 }
@@ -114,12 +115,12 @@ set_route_regex_priority() {
   local priority="$2"
   local route_id
 
-  route_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" | jq -r '.id // empty' 2>/dev/null || true)
+  route_id=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" | jq -r '.id // empty' 2>/dev/null || true)
   if [ -z "$route_id" ]; then
     return 0
   fi
 
-  curl -s -X PATCH "$KONG_ADMIN_INTERNAL_URL/routes/$route_id" \
+  curl -s -k -X PATCH "$KONG_ADMIN_INTERNAL_URL/routes/$route_id" \
     -H 'Content-Type: application/json' \
     -d "{\"regex_priority\":$priority}" >/dev/null || true
 }
@@ -128,8 +129,8 @@ enable_plugin_if_missing() {
   local service="$1"
   local plugin="$2"
   local payload="$3"
-  if ! curl -s "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" | grep -q "\"name\":\"$plugin\""; then
-    curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" \
+  if ! curl -s -k "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" | grep -q "\"name\":\"$plugin\""; then
+    curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" \
       -H 'Content-Type: application/json' \
       -d "$payload" >/dev/null
   fi
@@ -141,12 +142,12 @@ upsert_plugin_for_service() {
   local payload="$3"
   local plugin_id
 
-  plugin_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" | jq -r --arg p "$plugin" '.data[]? | select(.name==$p) | .id // empty' | head -1)
+  plugin_id=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" | jq -r --arg p "$plugin" '.data[]? | select(.name==$p) | .id // empty' | head -1)
   if [ -n "$plugin_id" ]; then
-    curl -s -X DELETE "$KONG_ADMIN_INTERNAL_URL/plugins/$plugin_id" >/dev/null || true
+    curl -s -k -X DELETE "$KONG_ADMIN_INTERNAL_URL/plugins/$plugin_id" >/dev/null || true
   fi
 
-  curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" \
+  curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/services/$service/plugins" \
     -H 'Content-Type: application/json' \
     -d "$payload" >/dev/null
 }
@@ -432,10 +433,10 @@ ensure_consumer() {
   local consumer="$1"
   local consumer_path current_username
   consumer_path=$(urlencode "$consumer")
-  current_username=$(curl -s "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path" | jq -r '.username // empty' 2>/dev/null || true)
+  current_username=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path" | jq -r '.username // empty' 2>/dev/null || true)
 
   if [ "$current_username" != "$consumer" ]; then
-    curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/consumers" \
+    curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/consumers" \
       -H 'Content-Type: application/json' \
       -d "{\"username\":$(printf '%s' "$consumer" | jq -sRr @json),\"custom_id\":$(printf '%s' "$consumer" | jq -sRr @json)}" >/dev/null
   fi
@@ -448,12 +449,12 @@ ensure_jwt_credential() {
   local consumer_path jwt_id
 
   consumer_path=$(urlencode "$consumer")
-  jwt_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/jwt" | jq -r --arg k "$credential_key" '.data[]? | select(.key==$k) | .id // empty' 2>/dev/null | head -1 || true)
+  jwt_id=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/jwt" | jq -r --arg k "$credential_key" '.data[]? | select(.key==$k) | .id // empty' 2>/dev/null | head -1 || true)
   if [ -n "$jwt_id" ]; then
-    curl -s -X DELETE "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/jwt/$jwt_id" >/dev/null || true
+    curl -s -k -X DELETE "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/jwt/$jwt_id" >/dev/null || true
   fi
 
-  curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/jwt" \
+  curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/jwt" \
     --data "key=$credential_key" \
     --data algorithm=RS256 \
     --data-urlencode "rsa_public_key=$rsa_public_key" >/dev/null
@@ -465,11 +466,11 @@ ensure_acl_group_for_consumer() {
   local consumer_path
 
   consumer_path=$(urlencode "$consumer")
-  if curl -s "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/acls" | jq -e --arg g "$group" '.data[]? | select(.group==$g)' >/dev/null 2>&1; then
+  if curl -s -k "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/acls" | jq -e --arg g "$group" '.data[]? | select(.group==$g)' >/dev/null 2>&1; then
     return 0
   fi
 
-  curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/acls" \
+  curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/consumers/$consumer_path/acls" \
     -H 'Content-Type: application/json' \
     -d "{\"group\":\"$group\"}" >/dev/null
 }
@@ -506,7 +507,7 @@ enable_jwt_for_route() {
   fi
 
   local route_id
-  route_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" | jq -r '.id // empty' 2>/dev/null || true)
+  route_id=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" | jq -r '.id // empty' 2>/dev/null || true)
   if [ -z "$route_id" ]; then
     echo "[kong-bootstrap] route id not found for $route_name"
     return 0
@@ -549,13 +550,13 @@ enable_jwt_for_route() {
 disable_jwt_for_route() {
   local route_name="$1"
   local route_id
-  route_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" | jq -r '.id // empty' 2>/dev/null || true)
+  route_id=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" | jq -r '.id // empty' 2>/dev/null || true)
   if [ -z "$route_id" ]; then
     return 0
   fi
 
-  curl -s "$KONG_ADMIN_INTERNAL_URL/routes/$route_id/plugins" | jq -r '.data[]? | select(.name=="jwt") | .id // empty' 2>/dev/null | while IFS= read -r plugin_id; do
-    [ -n "$plugin_id" ] && curl -s -X DELETE "$KONG_ADMIN_INTERNAL_URL/plugins/$plugin_id" >/dev/null || true
+  curl -s -k "$KONG_ADMIN_INTERNAL_URL/routes/$route_id/plugins" | jq -r '.data[]? | select(.name=="jwt") | .id // empty' 2>/dev/null | while IFS= read -r plugin_id; do
+    [ -n "$plugin_id" ] && curl -s -k -X DELETE "$KONG_ADMIN_INTERNAL_URL/plugins/$plugin_id" >/dev/null || true
   done
 }
 
@@ -659,19 +660,19 @@ KONG_OTEL_ENDPOINT="$(require_env KONG_OTEL_ENDPOINT)"
 
 setup_opentelemetry_plugin() {
   local existing_id
-  existing_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/plugins" | jq -r '.data[]? | select(.name=="opentelemetry") | .id // empty' 2>/dev/null | head -1 || true)
+  existing_id=$(curl -s -k "$KONG_ADMIN_INTERNAL_URL/plugins" | jq -r '.data[]? | select(.name=="opentelemetry") | .id // empty' 2>/dev/null | head -1 || true)
 
   local payload
   payload=$(printf '{"name":"opentelemetry","config":{"endpoint":"%s","resource_attributes":{"service.name":"dq-kong"},"batch_flush_delay":2}}' "$KONG_OTEL_ENDPOINT")
 
   if [ -n "$existing_id" ]; then
     # Update endpoint in case it changed; leave other fields intact.
-    curl -s -X PATCH "$KONG_ADMIN_INTERNAL_URL/plugins/$existing_id" \
+    curl -s -k -X PATCH "$KONG_ADMIN_INTERNAL_URL/plugins/$existing_id" \
       -H 'Content-Type: application/json' \
       -d "$payload" >/dev/null
     echo "[kong-bootstrap] opentelemetry plugin updated (id=$existing_id)"
   else
-    curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/plugins" \
+    curl -s -k -X POST "$KONG_ADMIN_INTERNAL_URL/plugins" \
       -H 'Content-Type: application/json' \
       -d "$payload" >/dev/null
     echo "[kong-bootstrap] opentelemetry plugin enabled (endpoint=$KONG_OTEL_ENDPOINT)"

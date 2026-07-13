@@ -3,10 +3,10 @@
   "current_stage": "start docker stack with --seed-all follow-up",
   "env_file": ".env.dev.local",
   "env_selection": "custom (.env.dev.local)",
-  "exit_code": "1",
+  "exit_code": "0",
   "failed_command": "SKIP_FRONTEND_START=true SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh \"${STACK_ARGS[@]}\"",
-  "finished_at": "2026-07-12T23:38:29Z",
+  "finished_at": "2026-07-13T00:11:16Z",
   "script": "start-containers.sh",
-  "started_at": "2026-07-12T23:26:00Z",
-  "status": "failed"
+  "started_at": "2026-07-12T23:41:15Z",
+  "status": "succeeded"
 }
