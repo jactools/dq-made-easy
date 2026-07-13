@@ -166,7 +166,7 @@
 
 ### Phase 6: Validation & Testing
 
-- [ ] **SEC-3-18:** Create `scripts/validation/validate_no_secrets_in_env.py`
+- [x] **SEC-3-18:** Create `scripts/validation/validate_no_secrets_in_env.py`
   - Scan all `.env.*.local` files for password/secret patterns
   - Fail if any hardcoded value is found
   - Acceptance: validation script passes on clean env files
@@ -188,9 +188,9 @@
 | 3 — `.env.*.local` Cleanup | SEC-3-07 through SEC-3-10 | ✅ Complete |
 | 4 — Container & Compose Wiring | SEC-3-11 through SEC-3-13 | ✅ Complete |
 | 5 — Script Credential Sourcing | SEC-3-14 through SEC-3-17 | ✅ Complete |
-| 6 — Validation & Testing | SEC-3-18, SEC-3-19 | 🔄 In Progress |
+| 6 — Validation & Testing | SEC-3-18, SEC-3-19 | 🔄 18/19 complete |
 
-**Total: 17/19 items complete**
+**Total: 18/19 items complete**
 
 ## Dependencies
 
