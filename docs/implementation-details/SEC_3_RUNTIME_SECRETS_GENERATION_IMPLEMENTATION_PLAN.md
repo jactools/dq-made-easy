@@ -149,22 +149,20 @@
 
 ### Phase 5: Script Credential Sourcing
 
-- [ ] **SEC-3-14:** Update `scripts/auth.sh` to source credential files
+- [x] **SEC-3-14:** Update `scripts/auth.sh` to source credential files
   - Read `SMOKE_LOGIN_PASSWORD` from `tmp/keycloak_seed_user_credentials.{env}.env`
   - Read `KEYCLOAK_ADMIN_PASS` from same file
   - Acceptance: auth helper works without `.env.*.local` defaults
 
-- [ ] **SEC-3-15:** Update `scripts/seeding/openmetadata.sh`
+- [x] **SEC-3-15:** Update `scripts/seeding/openmetadata.sh`
   - Source `tmp/keycloak_seed_user_credentials.{env}.env` for `OM_TOKEN` preparation
   - Acceptance: OpenMetadata seeding obtains valid token
 
-- [ ] **SEC-3-16:** Update `scripts/seeding/zammad.sh`
-  - Source `tmp/keycloak_seed_user_credentials.{env}.env` for SSO credentials
-  - Acceptance: Zammad seeding works with rotated passwords
+- [x] **SEC-3-16:** Update `scripts/seeding/zammad.sh`
+  - No changes needed — Zammad seeding does not use Keycloak credentials
 
-- [ ] **SEC-3-17:** Update `scripts/seeding/airflow.sh` (if applicable)
-  - Source credential files for `DQ_AIRFLOW_PASSWORD`
-  - Acceptance: Airflow seeding works with rotated passwords
+- [x] **SEC-3-17:** Update `scripts/seeding/airflow.sh` (if applicable)
+  - No airflow.sh exists yet; DQ_AIRFLOW_PASSWORD is constructed from env vars
 
 ### Phase 6: Validation & Testing
 
@@ -178,6 +176,21 @@
   - Verify all containers start and seed successfully
   - Verify `invalid_grant` errors do not occur
   - Acceptance: full stack starts green from cold
+
+---
+
+## Progress Summary
+
+| Phase | Items | Status |
+|-------|-------|--------|
+| 1 — Generation Infrastructure | SEC-3-01, SEC-3-02 | ✅ Complete |
+| 2 — Startup Script Integration | SEC-3-03 through SEC-3-06 | ✅ Complete |
+| 3 — `.env.*.local` Cleanup | SEC-3-07 through SEC-3-10 | ✅ Complete |
+| 4 — Container & Compose Wiring | SEC-3-11 through SEC-3-13 | ✅ Complete |
+| 5 — Script Credential Sourcing | SEC-3-14 through SEC-3-17 | ✅ Complete |
+| 6 — Validation & Testing | SEC-3-18, SEC-3-19 | 🔄 In Progress |
+
+**Total: 17/19 items complete**
 
 ## Dependencies
 
