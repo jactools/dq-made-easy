@@ -41,7 +41,7 @@ fi
 
 export DQ_RULEBUILDER_ROOT="$ROOT_DIR"
 
-python3 - <<'PY'
+$ROOT_DIR/scripts/python_arm64.sh --python-bin python3 - <<'PY'
 from __future__ import annotations
 
 import csv

@@ -86,7 +86,7 @@ decode_base64_json() {
     return 1
   fi
 
-  python3 - "$normalized" <<'PY'
+  "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 - "$normalized" <<'PY'
 import base64
 import binascii
 import sys

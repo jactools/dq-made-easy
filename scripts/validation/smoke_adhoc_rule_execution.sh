@@ -62,7 +62,6 @@ require_cmd() {
 
 require_cmd curl
 require_cmd jq
-require_cmd python3
 
 if ! command -v grep >/dev/null 2>&1; then
   error "$my_name" "Missing required command: grep"
@@ -122,7 +121,7 @@ smoke_started_at_epoch="$(date +%s)"
 
 iso8601_to_epoch() {
   local value="$1"
-  python3 - "$value" <<'PY'
+  "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 - "$value" <<'PY'
 from datetime import datetime
 import sys
 

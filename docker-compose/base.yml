@@ -25,7 +25,7 @@ services:
       context: ..
       dockerfile: docker/trust-bundle/Dockerfile
     volumes:
-      - ../tmp:/certs
+      - ../tmp/certs:/certs
     networks:
       - dq-network
     restart: "no"

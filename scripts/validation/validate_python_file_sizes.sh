@@ -23,6 +23,6 @@ set -euo pipefail
 # Last modified: 2026-07-05
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-exec python3 "$ROOT_DIR/scripts/validation/validate_python_file_sizes.py" \
+exec "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 "$ROOT_DIR/scripts/validation/validate_python_file_sizes.py" \
     --allow-list "$ROOT_DIR/scripts/validation/python-file-allow-list.txt" \
     "$@"

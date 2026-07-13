@@ -287,6 +287,8 @@ services:
     - monitoring=true
   zammad-seed:
     depends_on:
+      keycloak:
+        condition: service_healthy
       zammad-postgresql:
         condition: service_healthy
       zammad-redis:

@@ -70,7 +70,7 @@ services:
       KEYCLOAK_HTTPS_KEY_FILE: ${KEYCLOAK_HTTPS_KEY_FILE:?KEYCLOAK_HTTPS_KEY_FILE is required}
       KEYCLOAK_HTTPS_KEYSTORE_FILE: /opt/keycloak/keystore/keycloak.p12
       KEYCLOAK_HTTPS_KEYSTORE_PASSWORD: ${KEYCLOAK_HTTPS_KEYSTORE_PASSWORD:?KEYCLOAK_HTTPS_KEYSTORE_PASSWORD is required}
-    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=${KEYCLOAK_HTTPS_CERT_FILE}", "--https-certificate-key-file=${KEYCLOAK_HTTPS_KEY_FILE}", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH:?KEYCLOAK_HTTPS_RELATIVE_PATH is required}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME:?KEYCLOAK_PUBLIC_HOSTNAME is required}", "--hostname-strict=false"]
+    command: ["start-dev", "--import-realm", "--https-port=8443", "--https-certificate-file=/opt/keycloak/certs/keycloak.pem", "--https-certificate-key-file=/opt/keycloak/certs/keycloak-key.pem", "--http-relative-path=${KEYCLOAK_HTTPS_RELATIVE_PATH:?KEYCLOAK_HTTPS_RELATIVE_PATH is required}", "--hostname=${KEYCLOAK_PUBLIC_HOSTNAME:?KEYCLOAK_PUBLIC_HOSTNAME is required}", "--hostname-strict=false"]
     ports:
       - "${KEYCLOAK_HTTPS_HOST_BIND:?KEYCLOAK_HTTPS_HOST_BIND is required}:${KEYCLOAK_HTTPS_HOST_PORT:?KEYCLOAK_HTTPS_HOST_PORT is required}:8443"
     volumes:

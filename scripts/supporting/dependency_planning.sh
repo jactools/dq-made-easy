@@ -8,6 +8,7 @@
 # - 1.1 (2026-06-30): Made service-only planning safe under set -u.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="${ROOT_DIR:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 source "$SCRIPT_DIR/logging.sh"
 source "$SCRIPT_DIR/compose/invocation.sh"
 
@@ -51,7 +52,7 @@ stack_dependency_plan_services() {
   if ! planned_services="$(SELECTED_PROFILES_CSV="$selected_profiles_csv" \
     SELECTED_SERVICES_CSV="$selected_services_csv" \
     PLAN_MODE="$mode" \
-    python3 -c '
+    $ROOT_DIR/scripts/python_arm64.sh --python-bin python3 -c '
 import json
 import os
 import sys
