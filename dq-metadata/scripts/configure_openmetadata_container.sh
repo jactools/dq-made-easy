@@ -43,26 +43,46 @@ openmetadata_base_path_prefix() {
 }
 
 resolve_openmetadata_login_email() {
-  local seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
+  # Prefer mounted seed credentials file (fresh from keycloak-seed-artifacts)
+  # over env var (which may be stale from a previous startup run).
+  local seed_creds_file="/etc/openmetadata/seed-credentials.env"
+  local seed_username=""
+  if [ -f "$seed_creds_file" ]; then
+    seed_username="$(grep '^SMOKE_LOGIN_EMAIL=' "$seed_creds_file" 2>/dev/null | cut -d= -f2- || true)"
+  fi
+  # Fallback to env var if file not available
+  if [ -z "$seed_username" ]; then
+    seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
+  fi
 
   if [ -n "$seed_username" ]; then
     printf '%s\n' "$seed_username"
     return 0
   fi
 
-  echo "ERROR: OPENMETADATA_OIDC_SEED_USERNAME is required" >&2
+  echo "ERROR: OPENMETADATA_OIDC_SEED_USERNAME is required and not found in seed credentials" >&2
   return 1
 }
 
 resolve_openmetadata_seed_password() {
-  local seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
+  # Prefer mounted seed credentials file (fresh from keycloak-seed-artifacts)
+  # over env var (which may be stale from a previous startup run).
+  local seed_creds_file="/etc/openmetadata/seed-credentials.env"
+  local seed_password=""
+  if [ -f "$seed_creds_file" ]; then
+    seed_password="$(grep '^SMOKE_LOGIN_PASSWORD=' "$seed_creds_file" 2>/dev/null | cut -d= -f2- || true)"
+  fi
+  # Fallback to env var if file not available
+  if [ -z "$seed_password" ]; then
+    seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
+  fi
 
   if [ -n "$seed_password" ]; then
     printf '%s' "$seed_password"
     return 0
   fi
 
-  echo "ERROR: OPENMETADATA_OIDC_SEED_PASSWORD is required" >&2
+  echo "ERROR: OPENMETADATA_OIDC_SEED_PASSWORD is required and not found in seed credentials" >&2
   return 1
 }
 
@@ -286,9 +306,13 @@ prepare_openmetadata_access_token() {
   token_endpoint="${kc_realm_url}/protocol/openid-connect/token"
 
   local realm_probe_code
+  local ca_bundle="/etc/openmetadata/certs/internal-ca-bundle.pem"
+  if [ ! -f "$ca_bundle" ]; then
+    ca_bundle="/etc/openmetadata/certs/mkcert-rootCA.pem"
+  fi
   echo "Waiting for Keycloak realm at ${kc_realm_url}..."
   for i in $(seq 1 20); do
-    realm_probe_code="$(curl -s -o /dev/null -w '%{http_code}' \
+    realm_probe_code="$(curl -s --cacert "$ca_bundle" -o /dev/null -w '%{http_code}' \
       "${kc_realm_url}/.well-known/openid-configuration" || true)"
     if [ "$realm_probe_code" = "200" ]; then
       break
@@ -301,7 +325,7 @@ prepare_openmetadata_access_token() {
     return 1
   fi
 
-  if ! OM_TOKEN="$(curl -fsS -X POST "$token_endpoint" \
+  if ! OM_TOKEN="$(curl -fsS --cacert "$ca_bundle" -X POST "$token_endpoint" \
     -H 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode 'grant_type=password' \
     --data-urlencode "client_id=$om_client_id" \

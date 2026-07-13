@@ -1,10 +1,15 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-GRAFANA_HOST="${GRAFANA_HOST:?GRAFANA_HOST is required}"
-GRAFANA_PORT="${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT is required}"
-GRAFANA_USER="${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}"
-GRAFANA_PASS="${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}"
+GRAFANA_HOST="${GRAFANA_HOST:-}"
+GRAFANA_PORT="${GRAFANA_HTTPS_HOST_PORT:-}"
+GRAFANA_USER="${GRAFANA_ADMIN_USER:-}"
+GRAFANA_PASS="${GRAFANA_ADMIN_PASSWORD:-}"
+
+if [ -z "$GRAFANA_HOST" ]; then echo "GRAFANA_HOST is required"; exit 1; fi
+if [ -z "$GRAFANA_PORT" ]; then echo "GRAFANA_HTTPS_HOST_PORT is required"; exit 1; fi
+if [ -z "$GRAFANA_USER" ]; then echo "GRAFANA_ADMIN_USER is required"; exit 1; fi
+if [ -z "$GRAFANA_PASS" ]; then echo "GRAFANA_ADMIN_PASSWORD is required"; exit 1; fi
 
 echo "Waiting for Grafana to be ready..."
 until curl --fail --silent --show-error \
@@ -19,55 +24,62 @@ echo "Setting up teams and dashboard permissions..."
 echo ""
 
 create_team() {
-  local name="$1" email="$2"
-  local response id
-  response="$(curl -s -X POST \
+  _name="$1"
+  _email="$2"
+  _response=""
+  _id=""
+  
+  _response=$(curl -s -X POST \
     -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
     -H "Content-Type: application/json" \
     "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/teams" \
-    -d "{\"name\": \"${name}\", \"email\": \"${email}\"}')"
-  id="$(echo "$response" | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*' || echo "")"
-  if [ -z "$id" ]; then
-    id="$(curl -s -X GET \
+    -d "{\"name\": \"${_name}\", \"email\": \"${_email}\"}")
+  
+  _id=$(echo "$_response" | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*') || _id=""
+  
+  if [ -z "$_id" ]; then
+    _id=$(curl -s -X GET \
       -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
-      "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/teams/search?query=${name}" \
-      | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')"
+      "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/teams/search?query=${_name}" \
+      | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*') || _id=""
   fi
-  echo "✓ ${name} team ID: ${id}"
+  
+  echo "OK ${_name} team ID: ${_id}"
+  return 0
 }
 
 # Create teams
 create_team "Viewers" "viewers@dq-rulebuilder.local"
-VIEWER_ID="$(curl -s -X GET \
+VIEWER_ID=$(curl -s -X GET \
   -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
   "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/teams/search?query=Viewers" \
-  | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')"
+  | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*') || VIEWER_ID=""
 
 create_team "Editors" "editors@dq-rulebuilder.local"
-EDITOR_ID="$(curl -s -X GET \
+EDITOR_ID=$(curl -s -X GET \
   -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
   "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/teams/search?query=Editors" \
-  | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')"
+  | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*') || EDITOR_ID=""
 
 create_team "Admins" "admins@dq-rulebuilder.local"
-ADMIN_ID="$(curl -s -X GET \
+ADMIN_ID=$(curl -s -X GET \
   -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
   "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/teams/search?query=Admins" \
-  | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*')"
+  | grep -o '"id":[0-9]*' | head -1 | grep -o '[0-9]*') || ADMIN_ID=""
 
 echo ""
 echo "Setting dashboard permissions..."
 
-DASHBOARD_ID="$(curl -s -X GET \
+DASHBOARD_ID=$(curl -s -X GET \
   -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
   "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/search?type=dash-db&query=${OBSERVABILITY_DASHBOARD_UID}" \
-  | sed -n 's/.*"id":\([0-9][0-9]*\).*/\1/p' | head -1)"
+  | sed -n 's/.*"id":\([0-9][0-9]*\).*/\1/p' | head -1) || DASHBOARD_ID=""
 
 if [ -z "$DASHBOARD_ID" ]; then
-  echo "⚠ Dashboard '${OBSERVABILITY_DASHBOARD_TITLE}' (uid=${OBSERVABILITY_DASHBOARD_UID}) not found. Skipping permissions setup."
+  echo "WARNING Dashboard not found. Skipping permissions setup."
   echo "  You can set permissions manually after the dashboard is available."
 else
-  echo "✓ Found dashboard ID: ${DASHBOARD_ID}"
+  echo "OK Found dashboard ID: ${DASHBOARD_ID}"
 
   curl -s -X POST \
     -u "${GRAFANA_USER}:${GRAFANA_PASS}" \
@@ -75,12 +87,12 @@ else
     "https://${GRAFANA_HOST}:${GRAFANA_PORT}/api/dashboards/id/${DASHBOARD_ID}/permissions" \
     -d "{\"items\":[{\"teamId\": ${VIEWER_ID}, \"permission\": 1},{\"teamId\": ${EDITOR_ID}, \"permission\": 2},{\"teamId\": ${ADMIN_ID}, \"permission\": 4}]}" \
     > /dev/null 2>&1
-  echo "✓ Viewers: Read-only access (permission: 1)"
-  echo "✓ Editors: Edit access (permission: 2)"
-  echo "✓ Admins: Admin access (permission: 4)"
+  echo "OK Viewers: Read-only access (permission: 1)"
+  echo "OK Editors: Edit access (permission: 2)"
+  echo "OK Admins: Admin access (permission: 4)"
 fi
 
 echo ""
-echo "✅ Grafana provisioning complete!"
+echo "DONE Grafana provisioning complete!"
 echo "   Teams: Viewers, Editors, Admins"
 echo "   Ready for OIDC + permission enforcement"

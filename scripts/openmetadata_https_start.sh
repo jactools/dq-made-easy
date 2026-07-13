@@ -5,12 +5,30 @@ set -euo pipefail
 # What it does:
 # - Verifies the OpenMetadata keystore exists inside the container.
 # - Rewrites the stock OpenMetadata server config to use HTTPS.
+# - Configures JVM truststore for outgoing TLS (Keycloak, Elasticsearch).
+# - Sources truststore password for Elasticsearch TLS.
 # - Launches the upstream OpenMetadata server startup script.
-# Version: 1.1
-# Last modified: 2026-04-16
+# Version: 1.3
+# Last modified: 2026-07-13
 
 CONFIG_FILE="${OPENMETADATA_CONFIG_FILE:-/opt/openmetadata/conf/openmetadata.yaml}"
 KEYSTORE_PATH="${OPENMETADATA_KEYSTORE_PATH:-/opt/openmetadata/conf/openmetadata.p12}"
+
+# Configure JVM-level truststore for all outgoing HTTPS connections
+# (Keycloak JWKS fetch, Elasticsearch, etc.)
+TRUSTSTORE_PATH="/etc/openmetadata/certs/trust/trust-bundle.jks"
+if [ -f "$TRUSTSTORE_PATH" ]; then
+  TRUSTSTORE_PASSWORD="${ELASTICSEARCH_TRUST_STORE_PASSWORD:-}"
+  truststore_password_file="/certs/trust/truststore-password.txt"
+  if [ -z "$TRUSTSTORE_PASSWORD" ] && [ -f "$truststore_password_file" ]; then
+    TRUSTSTORE_PASSWORD="$(cat "$truststore_password_file")"
+    export ELASTICSEARCH_TRUST_STORE_PASSWORD="$TRUSTSTORE_PASSWORD"
+  fi
+  if [ -n "$TRUSTSTORE_PASSWORD" ]; then
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${TRUSTSTORE_PATH} -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -Djavax.net.ssl.trustStoreType=JKS"
+    echo "[om-https-start] configured JVM truststore at ${TRUSTSTORE_PATH}"
+  fi
+fi
 
 if [ ! -f "$KEYSTORE_PATH" ]; then
   echo "Missing OpenMetadata keystore: $KEYSTORE_PATH" >&2

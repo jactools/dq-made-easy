@@ -145,7 +145,7 @@ generate_cert "$CERTS_DIR/keycloak.jac.dot+3.pem" "$CERTS_DIR/keycloak.jac.dot+3
 echo "kong.jac.dot"
 generate_cert "$CERTS_DIR/kong.jac.dot+3.pem" "$CERTS_DIR/kong.jac.dot+3-key.pem" "kong.jac.dot" kong localhost 127.0.0.1 ::1
 echo "observability.jac.dot"
-generate_cert "$CERTS_DIR/observability.jac.dot+3.pem" "$CERTS_DIR/observability.jac.dot+3-key.pem" "observability.jac.dot" localhost 127.0.0.1 ::1
+generate_cert "$CERTS_DIR/observability.jac.dot+3.pem" "$CERTS_DIR/observability.jac.dot+3-key.pem" "observability.jac.dot" grafana localhost 127.0.0.1 ::1
 echo "api.jac.dot"
 generate_cert "$CERTS_DIR/api.jac.dot+3.pem" "$CERTS_DIR/api.jac.dot+3-key.pem" "api.jac.dot" localhost 127.0.0.1 ::1
 echo "grafana.jac.dot"

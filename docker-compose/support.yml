@@ -331,6 +331,8 @@ services:
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - ../tmp/certs/mkcert-rootCA.pem:/workspace-tmp/certs/mkcert-rootCA.pem:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    - ../tmp/keycloak_seed_user_credentials.${ENVIRONMENT:-dev}.env:/etc/openmetadata/seed-credentials.env:ro
     networks:
     - dq-network
     restart: 'no'

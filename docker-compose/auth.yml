@@ -83,9 +83,9 @@ services:
       - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "/opt/keycloak/bin/kc.sh --version >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", ". /certs/trust/java-truststore-env.sh 2>/dev/null; /opt/keycloak/bin/kcadm.sh config credentials --server https://127.0.0.1:8443 --realm master --user admin --password admin >/dev/null 2>&1 && /opt/keycloak/bin/kcadm.sh get realms/master >/dev/null 2>&1"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 5s
+      start_period: 60s
 

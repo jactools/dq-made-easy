@@ -363,6 +363,7 @@ services:
     profiles:
     - observability
     image: curlimages/curl:latest
+    command: ["/bin/sh", "/grafana-init/grafana-init.sh"]
     container_name: dq-made-easy-grafana-init
     environment:
       TZ: UTC
@@ -371,6 +372,9 @@ services:
         is required}
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD
+        is required}
+      GRAFANA_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GRAFANA_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD
         is required}
       OBSERVABILITY_DASHBOARD_UID: ${OBSERVABILITY_DASHBOARD_UID:?OBSERVABILITY_DASHBOARD_UID
         is required}

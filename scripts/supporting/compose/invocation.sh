@@ -105,7 +105,7 @@ build_effective_compose_env_file() {
 
   # Compose interpolation with --env-file prefers the file values. Keep the
   # selected root env file as baseline, but inject derived runtime values.
-  for key in PIP_INDEX_URL MAVEN_REPOSITORIES; do
+  for key in PIP_INDEX_URL MAVEN_REPOSITORIES OPENMETADATA_OIDC_SEED_USERNAME OPENMETADATA_OIDC_SEED_PASSWORD DQ_AIRFLOW_USERNAME DQ_AIRFLOW_PASSWORD; do
     value="${!key:-}"
     if [ -z "$value" ]; then
       continue
