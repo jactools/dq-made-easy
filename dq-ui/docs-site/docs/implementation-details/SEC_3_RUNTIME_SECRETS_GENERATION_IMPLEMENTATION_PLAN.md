@@ -8,12 +8,12 @@
 
 | Layer | Mechanism | Source |
 |-------|-----------|--------|
-| **Secret generation** | `generate_secrets.sh` | `tmp/secrets.{env}.env` |
-| **Compose / containers** | `--env-file .env.*.local` + `--env-file tmp/secrets.{env}.env` | sourced at startup |
-| **Host scripts** | `source tmp/secrets.{env}.env` | sourced from `tmp/` |
-| **Seed credentials** | `keycloak-seed-artifacts` | `tmp/keycloak_seed_user_credentials.{env}.env` |
+| **Secret generation** | `generate_secrets.sh` | `tmp/secrets.&#123;env&#125;.env` |
+| **Compose / containers** | `--env-file .env.*.local` + `--env-file tmp/secrets.&#123;env&#125;.env` | sourced at startup |
+| **Host scripts** | `source tmp/secrets.&#123;env&#125;.env` | sourced from `tmp/` |
+| **Seed credentials** | `keycloak-seed-artifacts` | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
 | **Trust-bundle** | `trust-bundle` container | `tmp/certs/trust/truststore-password.txt` |
-| **OIDC client secrets** | generated or seed-artifacts | `tmp/dq_engine_oidc.{env}.env` |
+| **OIDC client secrets** | generated or seed-artifacts | `tmp/dq_engine_oidc.&#123;env&#125;.env` |
 
 ## Secret Inventory
 
@@ -55,13 +55,13 @@
 
 | Variable | Current Value | Source |
 |----------|---------------|--------|
-| `KEYCLOAK_JACCLOUD_PASSWORD` | `"password"` | `tmp/keycloak_seed_user_credentials.{env}.env` |
-| `KEYCLOAK_ADMIN_PASS` | `admin` | `tmp/keycloak_seed_user_credentials.{env}.env` |
-| `KEYCLOAK_SYSTEM_ADMIN_PASSWORD` | `admin` | `tmp/keycloak_seed_user_credentials.{env}.env` |
-| `SMOKE_LOGIN_PASSWORD` | `password` | `tmp/keycloak_seed_user_credentials.{env}.env` |
-| `OPERATOR_LOGIN_PASSWORD` | (unset) | `tmp/keycloak_seed_user_credentials.{env}.env` |
-| `OPENMETADATA_OIDC_SEED_PASSWORD` | (unset) | `tmp/keycloak_seed_user_credentials.{env}.env` |
-| `CATALOG_OIDC_PASSWORD` | `password` | `tmp/keycloak_seed_user_credentials.{env}.env` |
+| `KEYCLOAK_JACCLOUD_PASSWORD` | `"password"` | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
+| `KEYCLOAK_ADMIN_PASS` | `admin` | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
+| `KEYCLOAK_SYSTEM_ADMIN_PASSWORD` | `admin` | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
+| `SMOKE_LOGIN_PASSWORD` | `password` | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
+| `OPERATOR_LOGIN_PASSWORD` | (unset) | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
+| `OPENMETADATA_OIDC_SEED_PASSWORD` | (unset) | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
+| `CATALOG_OIDC_PASSWORD` | `password` | `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` |
 
 ### E. URLs with Embedded Credentials
 
@@ -76,7 +76,7 @@
 ### Phase 1: Secret Generation Infrastructure
 
 - [x] **SEC-3-01:** Create `scripts/generate_secrets.sh`
-  - Generates `tmp/secrets.{env}.env` with all non-user secrets (inventory A, B, C)
+  - Generates `tmp/secrets.&#123;env&#125;.env` with all non-user secrets (inventory A, B, C)
   - Uses `openssl rand` for passwords, `cryptography.Fernet` for encryption keys
   - Only generates if file is missing or `--force` flag is set
   - Idempotent: does not regenerate existing secrets on subsequent runs
@@ -91,20 +91,20 @@
 
 - [x] **SEC-3-03:** Update `scripts/common_startup.sh`
   - Call `generate_secrets.sh` before any compose or seed step
-  - Source `tmp/secrets.{env}.env` into the environment
+  - Source `tmp/secrets.&#123;env&#125;.env` into the environment
   - Acceptance: secrets are available in `$SECRETS_ENV` or equivalent variable
 
 - [ ] **SEC-3-04:** Update `scripts/start_stack.sh` / `scripts/start-containers.sh`
-  - Pass `--env-file tmp/secrets.{env}.env` to `docker compose` commands
-  - Acceptance: `docker compose` resolves all `${SECRET:?required}` env vars
+  - Pass `--env-file tmp/secrets.&#123;env&#125;.env` to `docker compose` commands
+  - Acceptance: `docker compose` resolves all `$&#123;SECRET:?required}` env vars
 
 - [x] **SEC-3-05:** Update `scripts/seed_containers.sh` / `scripts/seed_stack.sh`
-  - Source `tmp/secrets.{env}.env` before seeding
-  - Source `tmp/keycloak_seed_user_credentials.{env}.env` for user passwords
+  - Source `tmp/secrets.&#123;env&#125;.env` before seeding
+  - Source `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` for user passwords
   - Acceptance: seed scripts use generated secrets, not env defaults
 
 - [x] **SEC-3-06:** Update `scripts/auth.sh` (shared auth helper)
-  - Read credentials from `tmp/keycloak_seed_user_credentials.{env}.env`
+  - Read credentials from `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env`
   - Acceptance: `auth.sh` obtains OIDC token without hardcoded passwords
 
 ### Phase 3: `.env.*.local` Cleanup
@@ -125,13 +125,13 @@
   - Acceptance: file contains zero passwords, secrets, or tokens
 
 - [x] **SEC-3-10:** Update `.env.*.example` files
-  - Replace all secrets with `<<GENERATED>>` or `<<SECRET>>` placeholders
+  - Replace all secrets with `<&lt;GENERATED&gt;>` or `<&lt;SECRET&gt;>` placeholders
   - Add comments pointing to `generate_secrets.sh`
   - Acceptance: example files are safe to commit with no real secrets
 
 ### Phase 4: Container & Compose Wiring
 
-- [x] **SEC-3-11:** Verify compose files use `${VAR:?required}` pattern
+- [x] **SEC-3-11:** Verify compose files use `$&#123;VAR:?required}` pattern
   - All secrets in compose files already use `:?required` syntax
   - No fallback defaults that bypass the `:?required` guard
   - Acceptance: `docker compose config` fails fast if any secret is missing
@@ -150,12 +150,12 @@
 ### Phase 5: Script Credential Sourcing
 
 - [x] **SEC-3-14:** Update `scripts/auth.sh` to source credential files
-  - Read `SMOKE_LOGIN_PASSWORD` from `tmp/keycloak_seed_user_credentials.{env}.env`
+  - Read `SMOKE_LOGIN_PASSWORD` from `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env`
   - Read `KEYCLOAK_ADMIN_PASS` from same file
   - Acceptance: auth helper works without `.env.*.local` defaults
 
 - [x] **SEC-3-15:** Update `scripts/seeding/openmetadata.sh`
-  - Source `tmp/keycloak_seed_user_credentials.{env}.env` for `OM_TOKEN` preparation
+  - Source `tmp/keycloak_seed_user_credentials.&#123;env&#125;.env` for `OM_TOKEN` preparation
   - Acceptance: OpenMetadata seeding obtains valid token
 
 - [x] **SEC-3-16:** Update `scripts/seeding/zammad.sh`
@@ -205,7 +205,7 @@
 
 ## Notes
 
-- **Idempotency:** `generate_secrets.sh` must be safe to re-run. Existing secrets in `tmp/secrets.{env}.env` are preserved unless `--force` is used. This ensures that a restart does not break running services that depend on stable DB passwords.
+- **Idempotency:** `generate_secrets.sh` must be safe to re-run. Existing secrets in `tmp/secrets.&#123;env&#125;.env` are preserved unless `--force` is used. This ensures that a restart does not break running services that depend on stable DB passwords.
 - **User secrets vs. service secrets:** User passwords (inventory D) rotate on every seed. Service passwords (inventory A, B, C) are stable across restarts but generated fresh on first startup.
 - **No image-baked secrets:** All Dockerfiles must source secrets from runtime environment or mounted volumes. No `ARG PASSWORD=...` or `ENV PASSWORD=...` with real values.
 - **Trust-bundle password:** Already generated per-startup and written to `tmp/certs/trust/truststore-password.txt`. No change needed for this one.

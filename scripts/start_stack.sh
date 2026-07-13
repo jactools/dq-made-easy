@@ -486,6 +486,13 @@ else
   info "$my_name" "docker compose up completed successfully"
 fi
 
+# Validate critical services have healthchecks passing
+# This catches failures that docker compose up -d doesn't report
+wait_for_compose_service_healthy keycloak Keycloak 60 5 || {
+  error "$my_name" "Keycloak did not become healthy after startup"
+  docker_compose logs --no-color --tail 50 keycloak || true
+  exit 1
+}
 
 # All seeding logic has been moved to seed_stack.sh
 

@@ -92,21 +92,23 @@ if [[ ! -f "$ROOT_ENV_FILE" ]]; then
   exit 1
 fi
 
-info "$my_name" "Validating selected env file before startup..."
-validate_selected_root_env_file "$ROOT_DIR" full
-
 export ROOT_ENV_FILE
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
 
-# Generate runtime secrets (DB passwords, encryption keys, tokens)
+# Generate runtime secrets (DB passwords, encryption keys, tokens) — must happen before validation
 info "$my_name" "Generating runtime secrets..."
-$ROOT_DIR/scripts/generate_secrets.sh --env-file "$ROOT_ENV_FILE" --force || {
+SECRETS_OUTPUT=$($ROOT_DIR/scripts/generate_secrets.sh --env-file "$ROOT_ENV_FILE" --force 2>&1) || {
   error "$my_name" "Failed to generate runtime secrets"
+  error "$my_name" "$SECRETS_OUTPUT"
   exit 1
 }
+info "$my_name" "$SECRETS_OUTPUT"
 
-# Source the generated secrets
-if [ -f "$SECRETS_ENV_FILE" ]; then
+# Extract SECRETS_ENV_FILE from output
+SECRETS_ENV_FILE="$(echo "$SECRETS_OUTPUT" | grep '^SECRETS_ENV_FILE=' | cut -d= -f2-)"
+
+# Source the generated secrets so downstream scripts and compose see them
+if [ -n "$SECRETS_ENV_FILE" ] && [ -f "$SECRETS_ENV_FILE" ]; then
   info "$my_name" "Sourcing generated secrets from $SECRETS_ENV_FILE"
   set -a
   source "$SECRETS_ENV_FILE"
@@ -115,6 +117,26 @@ else
   error "$my_name" "Secrets file not found after generation"
   exit 1
 fi
+
+# Source keycloak seed credentials if available (needed for env validation)
+# Derive env suffix from ROOT_ENV_FILE
+_env_name="$ROOT_ENV_FILE"
+_env_name="${_env_name##*/}"
+_env_name="${_env_name%.local}"
+_env_name="${_env_name#.env.}"
+[ -z "$_env_name" ] && _env_name="local"
+KEYCLOAK_CREDENTIALS_FILE="$ROOT_DIR/tmp/keycloak_seed_user_credentials.${_env_name}.env"
+if [ -f "$KEYCLOAK_CREDENTIALS_FILE" ]; then
+  info "$my_name" "Sourcing keycloak seed credentials from $KEYCLOAK_CREDENTIALS_FILE"
+  set -a
+  source "$KEYCLOAK_CREDENTIALS_FILE"
+  set +a
+else
+  info "$my_name" "Keycloak seed credentials not found (will be generated during seeding)"
+fi
+
+info "$my_name" "Validating selected env file before startup..."
+validate_selected_root_env_file "$ROOT_DIR" full
 
 # Rotate env-file passwords and store in tmp/env_passwords/<env>.env
 info "$my_name" "Rotating env-file passwords..."
