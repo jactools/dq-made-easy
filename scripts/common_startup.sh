@@ -84,9 +84,9 @@ info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROO
 
 # Rotate env-file passwords and store in tmp/env_passwords/<env>.env
 info "$my_name" "Rotating env-file passwords..."
-ENV_PASSWORD_ROTATION_OUTPUT=$(python "$ROOT_DIR/scripts/supporting/seed_password_rotation.py" \
+ENV_PASSWORD_ROTATION_OUTPUT=$($ROOT_DIR/scripts/python_arm64.sh "$ROOT_DIR/scripts/supporting/seed_password_rotation.py" \
     --env-file "$ROOT_ENV_FILE" \
-    --output-dir "$ROOT_DIR/tmp/env_passwords" 2>&1)
+    --output-dir "$ROOT_DIR/tmp/env_passwords")
 if [ $? -ne 0 ]; then
   error "$my_name" "Failed to rotate env-file passwords"
   error "$my_name" "$ENV_PASSWORD_ROTATION_OUTPUT"
