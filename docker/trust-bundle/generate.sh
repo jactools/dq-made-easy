@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SOURCE_DIR="/certs/certs"
-OUTPUT_DIR="/certs/certs/trust"
+SOURCE_DIR="/certs"
+OUTPUT_DIR="/certs/trust"
 
 mkdir -p "$OUTPUT_DIR"
 
