@@ -94,22 +94,22 @@
   - Source `tmp/secrets.{env}.env` into the environment
   - Acceptance: secrets are available in `$SECRETS_ENV` or equivalent variable
 
-- [x] **SEC-3-04:** Update `scripts/start_stack.sh` / `scripts/start-containers.sh`
+- [ ] **SEC-3-04:** Update `scripts/start_stack.sh` / `scripts/start-containers.sh`
   - Pass `--env-file tmp/secrets.{env}.env` to `docker compose` commands
   - Acceptance: `docker compose` resolves all `${SECRET:?required}` env vars
 
-- [ ] **SEC-3-05:** Update `scripts/seed_containers.sh` / `scripts/seed_stack.sh`
+- [x] **SEC-3-05:** Update `scripts/seed_containers.sh` / `scripts/seed_stack.sh`
   - Source `tmp/secrets.{env}.env` before seeding
   - Source `tmp/keycloak_seed_user_credentials.{env}.env` for user passwords
   - Acceptance: seed scripts use generated secrets, not env defaults
 
-- [ ] **SEC-3-06:** Update `scripts/auth.sh` (shared auth helper)
+- [x] **SEC-3-06:** Update `scripts/auth.sh` (shared auth helper)
   - Read credentials from `tmp/keycloak_seed_user_credentials.{env}.env`
   - Acceptance: `auth.sh` obtains OIDC token without hardcoded passwords
 
 ### Phase 3: `.env.*.local` Cleanup
 
-- [ ] **SEC-3-07:** Remove hardcoded secrets from `.env.dev.local`
+- [x] **SEC-3-07:** Remove hardcoded secrets from `.env.dev.local`
   - Remove all entries from inventory A, B, C
   - Remove user password entries from inventory D
   - Replace embedded-credential URLs (inventory E) with constructed forms
