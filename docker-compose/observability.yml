@@ -359,7 +359,7 @@ services:
       grafana:
         condition: service_started
       trust-bundle:
-        condition: service_completed_successfully
+        condition: service_started
     profiles:
     - observability
     image: curlimages/curl:latest
