@@ -189,14 +189,9 @@ wait_for_zammad_app_database_ready() {
     return 1
   fi
 
-  if ! command -v python >/dev/null 2>&1; then
-    error "readiness.sh" "python is required for Zammad database readiness checks"
-    return 127
-  fi
-
   info "readiness.sh" "Waiting for Zammad application database to become ready..."
   for attempt in $(seq 1 "$max_attempts"); do
-    if DQ_DB_INTERNAL_URL="$database_url" python - <<'PY' >/dev/null 2>&1
+    if DQ_DB_INTERNAL_URL="$database_url" ${ROOTDIR}/scripts/python_arm64.sh - <<'PY' >/dev/null 2>&1
 import os
 import psycopg
 

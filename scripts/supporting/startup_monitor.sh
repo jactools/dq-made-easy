@@ -149,7 +149,7 @@ startup_monitor_run() {
   _is_terminal_state() {
     local status="${1% }"   # strip trailing whitespace from docker output
     case "$status" in
-      Exited|Healthy|Running|Exited*|Completed*|Running*) return 0 ;;
+      Exited|Healthy|Running|Started|Exited*|Completed*|Running*) return 0 ;;
       *) return 1 ;;
     esac
   }

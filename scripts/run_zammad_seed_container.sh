@@ -375,12 +375,8 @@ RUBY
 }
 
 info "$my_name" "Containerized Zammad seed starting"
-if ! wait_for_zammad_support_services_ready 60 2; then
+if ! wait_for_zammad_support_services_ready 120 2; then
   error "$my_name" "Zammad support services did not become ready in time"
-  exit 36
-fi
-if ! wait_for_zammad_app_database_ready "$DQ_DB_INTERNAL_URL" 60 2; then
-  error "$my_name" "Application database did not become ready in time"
   exit 36
 fi
 generate_seed_artifacts
