@@ -73,7 +73,7 @@ startup_monitor_detect_failed_containers() {
     return 0
   fi
 
-  python3 - "$compose_output" <<'PY'
+  "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 - "$compose_output" <<'PY'
 import json
 import sys
 
@@ -134,7 +134,7 @@ startup_monitor_run() {
 
   _startup_monitor_print_change() {
     local name="$1"
-    local status="${2% }"   # strip trailing whitespace from docker output
+    local status="$2"
     local prev="${container_state[$name]:-}"
     if [ -z "$prev" ] || [ "$prev" != "$status" ]; then
       container_state["$name"]="$status"
@@ -149,14 +149,14 @@ startup_monitor_run() {
   _is_terminal_state() {
     local status="${1% }"   # strip trailing whitespace from docker output
     case "$status" in
-      Exited|Healthy|Running|Started|Exited*|Completed*|Running*) return 0 ;;
+      Exited|Healthy|Running|Exited*|Completed*|Running*) return 0 ;;
       *) return 1 ;;
     esac
   }
 
   # Error states that should trigger immediate abort (fail-fast)
   _is_error_state() {
-    local status="${1% }"   # strip trailing whitespace from docker output
+    local status="$1"
     case "$status" in
       Error*|error*) return 0 ;;
       Restarting*) return 0 ;;
