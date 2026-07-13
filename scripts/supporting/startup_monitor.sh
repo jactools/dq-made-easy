@@ -73,44 +73,7 @@ startup_monitor_detect_failed_containers() {
     return 0
   fi
 
-  "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 - "$compose_output" <<'PY'
-import json
-import sys
-
-raw = sys.argv[1]
-if not raw.strip():
-    raise SystemExit(0)
-
-try:
-    items = json.loads(raw)
-except json.JSONDecodeError:
-    raise SystemExit(0)
-
-if isinstance(items, dict):
-    items = [items]
-
-for item in items:
-    service = item.get("Service") or item.get("Name") or "unknown"
-    exit_code = item.get("ExitCode")
-    health = str(item.get("Health") or "").lower()
-    status = str(item.get("Status") or "").lower()
-
-    if exit_code is None:
-        continue
-
-    try:
-        exit_code_int = int(exit_code)
-    except (TypeError, ValueError):
-        continue
-
-    if exit_code_int != 0:
-        print(f"startup_monitor: container '{service}' failed with exit code {exit_code_int}", file=sys.stderr)
-        raise SystemExit(1)
-
-    if health == "unhealthy" or ("unhealthy" in status and "healthy" not in status):
-        print(f"startup_monitor: container '{service}' reported unhealthy status", file=sys.stderr)
-        raise SystemExit(2)
-PY
+  "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 "$ROOT_DIR/scripts/supporting/startup_helpers.py" check-containers "$compose_output"
 }
 
 startup_monitor_run() {
@@ -124,6 +87,47 @@ startup_monitor_run() {
   declare -A container_last_change
   # Associative array: container_name -> stuck warning already printed (1=yes)
   declare -A container_stuck_warned
+
+  # Periodically refresh container states from docker to correct stale
+  # compose-output-only states (Waiting, Created, Starting, Started) that never
+  # appear in the log again once compose up moves on.
+  _startup_monitor_refresh_live_states() {
+    local container_names
+    container_names="$(docker ps -aq 2>/dev/null || true)"
+    [ -z "$container_names" ] && return 0
+
+    local ps_output
+    ps_output="$(docker ps --no-trunc -a --format '{{.Names}}\t{{.Status}}' 2>/dev/null || true)"
+    [ -z "$ps_output" ] && return 0
+
+    while IFS=$'\t' read -r name status; do
+      [ -z "$name" ] && continue
+      # Only update containers we already know about
+      [ -z "${container_state[$name]:-}" ] && continue
+      # Strip "Up N minutes" prefix to get health tag: "Up 8 minutes (healthy)" -> "healthy"
+      local live_status="$status"
+      if [[ "$live_status" =~ Up\ .* ]]; then
+        if [[ "$live_status" =~ \((healthy)\) ]]; then
+          live_status="Healthy"
+        elif [[ "$live_status" =~ \((health:\ starting)\) ]]; then
+          live_status="Starting (health)"
+        elif [[ "$live_status" =~ \((unhealthy)\) ]]; then
+          live_status="Unhealthy"
+        else
+          live_status="Running"
+        fi
+      fi
+      # Docker ps "Exited (0)" / "Exited (1)" etc.
+      if [[ "$live_status" =~ ^Exited ]]; then
+        live_status="Exited"
+      fi
+      # Container never started yet
+      if [[ "$live_status" == "Created" ]]; then
+        live_status="Created"
+      fi
+      _startup_monitor_print_change "$name" "$live_status"
+    done <<< "$ps_output"
+  }
 
   # Global timeout (env: STARTUP_MONITOR_TIMEOUT_SECONDS, default: 1800 = 30 min)
   local global_timeout="${STARTUP_MONITOR_TIMEOUT_SECONDS:-1800}"
@@ -149,7 +153,7 @@ startup_monitor_run() {
   _is_terminal_state() {
     local status="${1% }"   # strip trailing whitespace from docker output
     case "$status" in
-      Exited|Healthy|Running|Exited*|Completed*|Running*) return 0 ;;
+      Exited|Healthy|Running|Started|Exited*|Completed*|Running*) return 0 ;;
       *) return 1 ;;
     esac
   }
@@ -166,6 +170,8 @@ startup_monitor_run() {
 
   local start_epoch
   start_epoch=$(date +%s)
+  local last_live_refresh_epoch=$start_epoch
+  local live_refresh_interval=30
 
   while kill -0 "$target_pid" 2>/dev/null; do
     # Global timeout check
@@ -225,6 +231,13 @@ startup_monitor_run() {
         fi
         last_log_size=$current_log_size
       fi
+    fi
+
+    # Periodic live docker state refresh to correct stale compose-output states
+    # (Waiting, Created, Starting, Started) that never appear in the log again.
+    if [ $(( now_epoch - last_live_refresh_epoch )) -ge $live_refresh_interval ]; then
+      last_live_refresh_epoch=$now_epoch
+      _startup_monitor_refresh_live_states
     fi
 
     # Stuck container check

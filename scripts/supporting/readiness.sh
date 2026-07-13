@@ -191,14 +191,7 @@ wait_for_zammad_app_database_ready() {
 
   info "readiness.sh" "Waiting for Zammad application database to become ready..."
   for attempt in $(seq 1 "$max_attempts"); do
-    if DQ_DB_INTERNAL_URL="$database_url" ${ROOTDIR}/scripts/python_arm64.sh - <<'PY' >/dev/null 2>&1
-import os
-import psycopg
-
-conn = psycopg.connect(os.environ["DQ_DB_INTERNAL_URL"])
-conn.close()
-PY
-    then
+    if DQ_DB_INTERNAL_URL="$database_url" "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 "$ROOT_DIR/scripts/supporting/startup_helpers.py" check-database >/dev/null 2>&1; then
       return 0
     fi
 
