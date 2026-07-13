@@ -15,6 +15,7 @@ source "$ROOT_DIR/scripts/supporting/logging.sh"
 source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
 source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
 source "$ROOT_DIR/scripts/supporting/dependency_planning.sh"
+source "$ROOT_DIR/scripts/supporting/stay_awake.sh"
 source "$ROOT_DIR/scripts/stack_catalog.sh"
 init_root_env_file "$ROOT_DIR"
 
@@ -442,5 +443,8 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 validate_selected_root_env_file "$ROOT_DIR" full
+start_stay_awake
+trap stop_stay_awake EXIT INT TERM
 resolve_services_for_status
 show_status
+stop_stay_awake

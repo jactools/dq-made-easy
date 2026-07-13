@@ -47,6 +47,7 @@ The canonical named env files are:
 | [scripts/supporting/logging.sh](../../scripts/supporting/logging.sh) and [scripts/supporting/logging/core.sh](../../scripts/supporting/logging/core.sh) | Canonical logging entrypoint and logging implementation. |
 | [scripts/supporting/env/selection.sh](../../scripts/supporting/env/selection.sh) | Canonical `--env` / `--env-file` parsing, env-file resolution, and validation dispatch. |
 | [scripts/supporting/compose/invocation.sh](../../scripts/supporting/compose/invocation.sh) | Canonical `docker compose` wrapper bound to the selected env file. |
+| [scripts/supporting/stay_awake.sh](../../scripts/supporting/stay_awake.sh) | macOS display-awake helper used by long-running operator scripts. | Uses `caffeinate` when available, can be sourced by other scripts, and can also be run directly with `--duration` plus an optional arrow-key press to keep the screen awake for a fixed time. |
 | [scripts/supporting/auth.sh](../../scripts/supporting/auth.sh) | Seeded credential loading and Keycloak password-grant token minting. |
 | [scripts/supporting/readiness.sh](../../scripts/supporting/readiness.sh) | HTTP, Kong, Zammad, and database readiness helpers. |
 | [scripts/supporting/dependency_planning.sh](../../scripts/supporting/dependency_planning.sh) | Dependency closure planning and runtime health validation. |

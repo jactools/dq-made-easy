@@ -197,6 +197,9 @@ Examples:
 # Inspect the detailed container status for the core profile
 ./scripts/stack_status.sh --per-container --profile core
 
+# Keep the screen awake for 30 minutes
+./scripts/supporting/stay_awake.sh --duration 30m --key left
+
 # Build and push selected images
 ./scripts/stack_ctl.sh push --image dq-api --image dq-kong
 ```
