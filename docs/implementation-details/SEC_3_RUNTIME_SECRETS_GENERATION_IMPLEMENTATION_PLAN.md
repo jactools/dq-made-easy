@@ -116,33 +116,33 @@
   - Keep non-secret values (hosts, ports, image refs)
   - Acceptance: file contains zero passwords, secrets, or tokens
 
-- [ ] **SEC-3-08:** Remove hardcoded secrets from `.env.test.local`
+- [x] **SEC-3-08:** Remove hardcoded secrets from `.env.test.local`
   - Same treatment as dev
   - Acceptance: file contains zero passwords, secrets, or tokens
 
-- [ ] **SEC-3-09:** Remove hardcoded secrets from `.env.prod.local`
+- [x] **SEC-3-09:** Remove hardcoded secrets from `.env.prod.local`
   - Same treatment as dev
   - Acceptance: file contains zero passwords, secrets, or tokens
 
-- [ ] **SEC-3-10:** Update `.env.*.example` files
+- [x] **SEC-3-10:** Update `.env.*.example` files
   - Replace all secrets with `<<GENERATED>>` or `<<SECRET>>` placeholders
   - Add comments pointing to `generate_secrets.sh`
   - Acceptance: example files are safe to commit with no real secrets
 
 ### Phase 4: Container & Compose Wiring
 
-- [ ] **SEC-3-11:** Verify compose files use `${VAR:?required}` pattern
+- [x] **SEC-3-11:** Verify compose files use `${VAR:?required}` pattern
   - All secrets in compose files already use `:?required` syntax
   - No fallback defaults that bypass the `:?required` guard
   - Acceptance: `docker compose config` fails fast if any secret is missing
 
-- [ ] **SEC-3-12:** Fix `DQ_DB_INTERNAL_URL` / `DQ_DB_LOCAL_URL` construction
+- [x] **SEC-3-12:** Fix `DQ_DB_INTERNAL_URL` / `DQ_DB_LOCAL_URL` construction
   - Remove hardcoded `postgres:postgres` from URL templates
   - Construct URLs from `DQ_DB_USER` and `DQ_DB_PASSWORD` variables
   - Same for `KAFKA_CONSUMER_DB_URL`
   - Acceptance: URLs resolve correctly at compose time
 
-- [ ] **SEC-3-13:** Verify no secrets are baked into Docker images
+- [x] **SEC-3-13:** Verify no secrets are baked into Docker images
   - Audit all `Dockerfile.*` for `ARG` or `ENV` that reference passwords
   - Ensure trust-bundle, keycloak, kong Dockerfiles use runtime mounts
   - Acceptance: no `RUN echo "password"` in any Dockerfile
