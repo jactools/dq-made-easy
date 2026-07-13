@@ -8,7 +8,7 @@ services:
       trust-bundle:
         condition: service_completed_successfully
 
-    profiles: ["auth", "gateway"]
+    profiles: ["auth", "gateway", "support"]
     build:
       context: ..
       dockerfile: dq-keycloak/Dockerfile.keycloak.seed
@@ -41,7 +41,7 @@ services:
     restart: "no"
 
   keycloak:
-    profiles: ["auth", "gateway"]
+    profiles: ["auth", "gateway", "support"]
     image: ${DQ_KEYCLOAK_REGISTRY:?DQ_KEYCLOAK_REGISTRY is required}${DQ_KEYCLOAK_NAMESPACE:?DQ_KEYCLOAK_NAMESPACE is required}${DQ_KEYCLOAK_IMAGE:?DQ_KEYCLOAK_IMAGE is required}:${DQ_KEYCLOAK_TAG:?DQ_KEYCLOAK_TAG is required}
     build:
       context: ../dq-keycloak
