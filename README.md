@@ -191,6 +191,12 @@ Examples:
 # Seed only Postgres and delivery objects
 ./scripts/stack_ctl.sh seed --seed-target postgres --seed-target deliveries --wipe-aistor
 
+# Inspect the status of the core profile
+./scripts/stack_status.sh --profile core
+
+# Inspect the detailed container status for the core profile
+./scripts/stack_status.sh --per-container --profile core
+
 # Build and push selected images
 ./scripts/stack_ctl.sh push --image dq-api --image dq-kong
 ```

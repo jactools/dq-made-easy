@@ -30,6 +30,7 @@ The canonical named env files are:
 | Script | Responsibility | Contract Notes |
 | --- | --- | --- |
 | [scripts/stack_ctl.sh](../../scripts/stack_ctl.sh) | Unified operator entrypoint for build, pull, push, start, restart, stop, reconcile, seed, and list-targets. | Uses canonical env selection and dependency planning. `stop` now uses the shared teardown helpers so service shutdown follows the dependency graph. |
+| [scripts/stack_status.sh](../../scripts/stack_status.sh) | Status reporter for compose services resolved from profiles and explicit services. | Uses the canonical env selection contract, resolves the same dependency-ordered service set as the lifecycle scripts, and reports grouped service status by default with `--per-container` for detailed container-level output. |
 | [scripts/start_stack.sh](../../scripts/start_stack.sh) | Compose startup entrypoint for runtime profiles. | Slices startup into named startup blocks under `scripts/startup/`. It does not perform seed or smoke work. |
 | [scripts/stop_stack.sh](../../scripts/stop_stack.sh) | Full-stack teardown wrapper with optional volume removal. | Delegates service shutdown to `stack_ctl.sh stop --all` and then handles `compose down` / volume cleanup. |
 | [scripts/stop-all.sh](../../scripts/stop-all.sh) | Stops the local frontend and then the stack. | Wrapper around `stop_stack.sh` for operator convenience. |
