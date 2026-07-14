@@ -169,6 +169,10 @@ success "$my_name" "Stack started using pulled images only."
 
 if $SEED_DB; then
   info "$my_name" "Seeding database..."
+  remove_compose_postgres_volume || {
+    error "$my_name" "Failed to remove the PostgreSQL data volume before seeding"
+    exit 1
+  }
   docker_compose up -d db keycloak
   wait_for_compose_service_healthy db "Postgres database" 60 2 || {
     error "$my_name" "Postgres database did not become healthy before seeding"

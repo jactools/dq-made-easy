@@ -428,7 +428,17 @@ else
 fi
 
 info "$my_name" "Starting docker-compose stack (bringing containers up)..."
+
+# Remove stale Postgres state before stack teardown so the db container can be
+# detached cleanly and the regenerated password is applied to a fresh volume.
+if ! remove_compose_postgres_volume; then
+  error "$my_name" "Failed to remove the PostgreSQL data volume before startup"
+  exit 1
+fi
+
 docker_compose down --remove-orphans 2>/dev/null || true
+
+docker_compose rm -fs openmetadata-db >/dev/null 2>&1 || true
 
 # Remove stale volumes after the containers are stopped so the regenerated
 # passwords can be applied to fresh database state.
@@ -436,7 +446,7 @@ docker_compose down --remove-orphans 2>/dev/null || true
 # volumes would otherwise keep the previous credentials.
 info "$my_name" "Removing stale database volumes for fresh initialization with new passwords..."
 PROJECT_PREFIX="${COMPOSE_PROJECT_NAME:-dq-made-easy-dev}"
-for vol_name in pgdata_v18 kong-db-data-v17 openmetadata_pgdata_v18 \
+for vol_name in kong-db-data-v17 openmetadata_pgdata_v18 \
   zammad_postgresql_data openmetadata_search_data openmetadata_search_v9_data; do
   docker volume rm "${PROJECT_PREFIX}_$vol_name" 2>/dev/null || true
 done

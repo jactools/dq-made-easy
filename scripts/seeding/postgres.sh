@@ -3,6 +3,11 @@
 seed_postgres_in_docker() {
   info "$my_name" "Reseeding Postgres in Docker (SQL generation, Alembic, Keycloak external-id mapping)..."
 
+  if ! remove_compose_postgres_volume; then
+    error "$my_name" "Failed to remove the PostgreSQL data volume before reseeding"
+    exit 34
+  fi
+
   docker_compose up -d db keycloak || {
     error "$my_name" "Failed to start db/keycloak for Postgres seeding"
     exit 34
