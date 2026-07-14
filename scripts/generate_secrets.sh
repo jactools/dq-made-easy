@@ -151,14 +151,26 @@ generate_password() {
 
 generate_encryption_key() {
   # Use python_arm64.sh if available, otherwise fall back to openssl
+  # Fernet keys must be exactly 32 url-safe base64-encoded bytes (44 chars with padding)
   local python_runner="$ROOT_DIR/scripts/python_arm64.sh"
-  if [[ -x "$python_runner" ]]; then
-    "$python_runner" -c "
-import base64, os
-print(base64.urlsafe_b64encode(os.urandom(32)).decode().rstrip('='))
-" 2>/dev/null || openssl rand -base64 32 | tr -d '\n='
-  else
-    openssl rand -base64 32 | tr -d '\n='
+  local python_bin=""
+
+  # Try to find a python with cryptography module
+  if [[ -x "$ROOT_DIR/venv/bin/python" ]]; then
+    python_bin="$ROOT_DIR/venv/bin/python"
+  elif [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
+    python_bin="$ROOT_DIR/.venv/bin/python"
+  fi
+
+  if [[ -x "$python_runner" && -n "$python_bin" ]]; then
+    "$python_runner" --python-bin "$python_bin" -c "
+from cryptography.fernet import Fernet
+print(Fernet.generate_key().decode())
+" 2>/dev/null
+  elif command -v openssl >/dev/null 2>&1; then
+    # Fallback: generate 32 random bytes and base64url encode them
+    # The padding '=' is required for Fernet to work
+    openssl rand -base64 32 | tr '+/' '-_'
   fi
 }
 

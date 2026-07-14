@@ -428,10 +428,27 @@ else
 fi
 
 info "$my_name" "Starting docker-compose stack (bringing containers up)..."
+# Remove stale volumes so databases initialize with fresh passwords.
+# generate_secrets.sh --force always regenerates passwords, so old data
+# volumes would have mismatched credentials.
+# docker compose down -v only removes volumes when stopping containers.
+# If containers are already down, orphaned volumes persist, so we remove
+# the database volumes explicitly using the project name prefix.
+info "$my_name" "Removing stale database volumes for fresh initialization with new passwords..."
+PROJECT_PREFIX="${COMPOSE_PROJECT_NAME:-dq-made-easy-dev}"
+for vol_name in pgdata_v18 kong-db-data-v17 openmetadata_pgdata_v18 \
+  zammad_postgresql_data openmetadata_search_data openmetadata_search_v9_data; do
+  docker volume rm "${PROJECT_PREFIX}_$vol_name" 2>/dev/null || true
+done
+docker_compose down --remove-orphans 2>/dev/null || true
+
 UP_ARGS=(up -d)
+# Always recreate containers because generate_secrets.sh --force regenerates
+# passwords, so old containers would have stale credentials.
+UP_ARGS+=(--force-recreate)
+info "$my_name" "Recreate policy: --force-recreate (passwords always regenerated)"
 if [ "$FORCE_BUILD" = true ]; then
-  UP_ARGS+=(--force-recreate)
-  info "$my_name" "Recreate policy: --force-recreate (forced by --force-build)"
+  info "$my_name" "Build policy: rebuilding images (forced by --force-build)"
 fi
 if [ "$REMOVE_ORPHANS" = "true" ]; then
   info "$my_name" "Explicit orphan cleanup enabled for this run"

@@ -113,6 +113,8 @@ if [ -n "$SECRETS_ENV_FILE" ] && [ -f "$SECRETS_ENV_FILE" ]; then
   set -a
   source "$SECRETS_ENV_FILE"
   set +a
+  # Export SECRETS_ENV_FILE so subprocesses (start_stack.sh, seed scripts) see it
+  export SECRETS_ENV_FILE
 else
   error "$my_name" "Secrets file not found after generation"
   exit 1
