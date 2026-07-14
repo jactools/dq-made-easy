@@ -459,6 +459,8 @@ def test_request_json_uses_dynamic_password_token_provider(monkeypatch: pytest.M
     assert captured_init["client_id"] == "openmetadata"
     assert captured_init["username"] == "dq-admin@example.com"
     assert captured_init["password"] == "secret-password"
+    assert captured_init["max_startup_retries"] == 3
+    assert captured_init["retry_backoff_seconds"] == 2.0
     assert captured_headers["Authorization"] == "Bearer dynamic-token"
     assert captured_headers["X-correlation-id"]
 
