@@ -3,14 +3,15 @@ import subprocess
 from pathlib import Path
 
 
-def test_source_runtime_env_dependencies_primes_root_env_before_sourcing(tmp_path):
+def test_source_selected_root_env_file_keeps_generated_secrets_after_root_env(tmp_path):
     repo_root = Path(__file__).resolve().parents[1]
     temp_root = tmp_path / "repo"
     (temp_root / "tmp").mkdir(parents=True)
     (temp_root / "scripts" / "supporting").mkdir(parents=True)
 
     (temp_root / ".env.dev.local").write_text(
-        "COMPOSED_VALUE=${KEYCLOAK_JACCLOUD_PASSWORD}-${OPERATOR_LOGIN_PASSWORD}\n",
+        "COMPOSED_VALUE=${KEYCLOAK_JACCLOUD_PASSWORD}-${OPERATOR_LOGIN_PASSWORD}\n"
+        "KEYCLOAK_JACCLOUD_PASSWORD=from-root\n",
         encoding="utf-8",
     )
     (temp_root / "tmp" / "secrets.dev.env").write_text(
@@ -32,9 +33,9 @@ def test_source_runtime_env_dependencies_primes_root_env_before_sourcing(tmp_pat
             (
                 "set -euo pipefail; "
                 f"source {repo_root}/scripts/supporting/root_env_file.sh; "
-                "source_runtime_env_dependencies \"$ROOT_DIR/.env.dev.local\"; "
-                "set -a; source \"$ROOT_DIR/.env.dev.local\"; set +a; "
-                'printf "%s\\n" "$COMPOSED_VALUE"'
+                "ROOT_ENV_FILE=\"$ROOT_DIR/.env.dev.local\"; "
+                "source_selected_root_env_file; "
+                'printf "%s\\n%s\\n" "$COMPOSED_VALUE" "$KEYCLOAK_JACCLOUD_PASSWORD"'
             ),
         ],
         cwd=str(repo_root),
@@ -44,4 +45,4 @@ def test_source_runtime_env_dependencies_primes_root_env_before_sourcing(tmp_pat
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == "from-secrets-from-credentials"
+    assert result.stdout.splitlines() == ["from-secrets-from-credentials", "from-secrets"]

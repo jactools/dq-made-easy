@@ -53,8 +53,8 @@ Actions:
   build         Build local repo-managed images
   pull          Pull repo-managed images from the configured registry
   push          Build and push repo-managed images
-  start         Start compose services
-  restart       Restart compose services
+  start         Start or recreate compose services
+  restart       Recreate compose services
   stop          Stop compose services without removing containers
   reconcile     Run explicit post-start reconciliation actions
   seed          Run seed actions
@@ -353,13 +353,13 @@ show_resolved_plan() {
       planned_args=(docker compose --env-file "$ROOT_ENV_FILE")
       case "$ACTION" in
         start)
-          planned_args+=(up -d)
+          planned_args+=(up -d --force-recreate)
           if [ "$REMOVE_ORPHANS" = true ]; then
             planned_args+=(--remove-orphans)
           fi
           ;;
         restart)
-          planned_args+=(restart)
+          planned_args+=(up -d --force-recreate)
           ;;
         stop)
           planned_args+=(stop)
@@ -631,10 +631,9 @@ case "$ACTION" in
     resolve_services_from_profiles
     stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
     start_args=()
+    start_args+=(up -d --force-recreate)
     if [ "$REMOVE_ORPHANS" = true ]; then
-      start_args+=(up -d --remove-orphans)
-    else
-      start_args+=(up -d)
+      start_args+=(--remove-orphans)
     fi
     start_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
     docker_compose "${start_args[@]}"
@@ -647,7 +646,9 @@ case "$ACTION" in
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_services_from_profiles
     stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
-    docker_compose restart ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
+    restart_args=(up -d --force-recreate)
+    restart_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
+    docker_compose "${restart_args[@]}"
     ;;
   stop)
     if [ "$DRY_RUN" = true ]; then

@@ -50,9 +50,9 @@ validate_selected_root_env_file "$ROOT_DIR" full
 
 export ROOT_ENV_FILE
 
-set -a
-source "$ROOT_ENV_FILE"
-set +a
+if ! source_selected_root_env_file; then
+  exit 1
+fi
 
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 source "$ROOT_DIR/scripts/supporting/readiness.sh"

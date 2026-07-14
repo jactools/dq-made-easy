@@ -217,8 +217,6 @@ mkdir -p "$SECRETS_DIR"
   echo "# ============================================================"
   echo "KAFKA_TLS_KEYSTORE_PASSWORD=\"$(generate_password)\""
   echo "KEYCLOAK_HTTPS_KEYSTORE_PASSWORD=\"$(generate_password)\""
-  # Keycloak admin password: must be the same for KEYCLOAK_ADMIN_PASS and KEYCLOAK_SYSTEM_ADMIN_PASSWORD
-  # KEYCLOAK_ADMIN_PASS is used by the healthcheck, KEYCLOAK_SYSTEM_ADMIN_PASSWORD by the entrypoint
   _KEYCLOAK_ADMIN_PASS="$(generate_password)"
   echo "KEYCLOAK_ADMIN_PASS=\"${_KEYCLOAK_ADMIN_PASS}\""
   echo "KEYCLOAK_SYSTEM_ADMIN_PASSWORD=\"${_KEYCLOAK_ADMIN_PASS}\""

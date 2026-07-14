@@ -21,12 +21,5 @@ LLAMA_MODEL="unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q6_K_XL"
 LLAMA_MODEL_WORKS_JUST_FINE="unsloth/Qwen3.6-27B-GGUF:Q6_K"
 VAST_CONTAINERLABEL="C.44720753"
 VAST_TCP_PORT_1111="40142"
-LLAMA_ARGS="--no-mmap --port 8181 --jinja -c 262144 -t 8 -lv 4 \
-  -hf unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q6_K_XL \
-  -ngl 99 --device CUDA0,CUDA1 \
-  -sm tensor --tensor-split 50,50 \
-  -fa on \
-  --cache-type-k q8_0 --cache-type-v q8_0 \
-  --spec-type draft-mtp --spec-draft-n-max 3 --cache-reuse 256 \
-  -b 1024 -ub 512"
+LLAMA_ARGS="--no-mmap --port 8181 --jinja -c 262144 -t 8 -lv 4 -hf unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q6_K_XL -ngl 99 --device CUDA0,CUDA1 -sm tensor --tensor-split 50,50 -fa on --cache-type-k q8_0 --cache-type-v q8_0 --spec-type draft-mtp --spec-draft-n-max 3 --cache-reuse 256 -b 1024 -ub 512"
 LLAMA_ARGS_OLD_WORKS_JUST_FINE="--no-mmap --port 8181 --jinja -c 262144 -t 5 -lv 4 -ngl 99"

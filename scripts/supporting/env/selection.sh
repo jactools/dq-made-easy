@@ -112,6 +112,8 @@ source_runtime_env_dependencies() {
       ;;
     post-root)
       dependency_files=(
+        "$root_dir/tmp/secrets.${env_name}.env"
+        "$root_dir/tmp/keycloak_seed_user_credentials.${env_name}.env"
         "$root_dir/tmp/env_passwords/${env_name}.env"
       )
       ;;
