@@ -1,0 +1,16 @@
+{
+  "app_version": "0.11.6",
+  "mode": "infra",
+  "label": "password-rotation",
+  "timestamp_utc": "20260714T120001Z",
+  "cwd": "/Users/jacbeekers/gitrepos/dq-made-easy",
+  "evidence_directory": "test-results/evidence/0.11.6/infra/20260714T120001Z-password-rotation",
+  "status": 0,
+  "command": "python3 import + unit assertions on seed_password_rotation.py",
+  "results": {
+    "tests_passed": 12,
+    "admin_var_count": 8,
+    "skip_admin_test": "passed",
+    "unique_password_test": "passed"
+  }
+}

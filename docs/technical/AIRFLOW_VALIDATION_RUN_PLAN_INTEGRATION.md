@@ -53,7 +53,7 @@ scripts/build_dq_airflow_dag_artifact.sh
 docker compose --env-file .env.dev.local --profile gateway --profile airflow up airflow
 ```
 
-If you start the repo-managed stack through `scripts/start_stack.sh`, the script already sources `scripts/load_seeded_user_credentials.sh` and exports the rotated operator credentials into `DQ_AIRFLOW_USERNAME` and `DQ_AIRFLOW_PASSWORD` before the Airflow profile is rendered.
+If you start the repo-managed stack through `scripts/stack_start.sh` (or `scripts/stack.sh dev start --seed`), the script already sources `scripts/load_seeded_user_credentials.sh` and exports the rotated operator credentials into `DQ_AIRFLOW_USERNAME` and `DQ_AIRFLOW_PASSWORD` before the Airflow profile is rendered.
 
 The bundled service exposes the Airflow UI on `${AIRFLOW_HOST_PORT:-8088}` and authenticates the browser UI through Keycloak-backed FAB OAuth. The browser login uses the seeded `airflow` OIDC client, while the DQ operator credentials remain separate on `DQ_AIRFLOW_USERNAME` and `DQ_AIRFLOW_PASSWORD`.
 

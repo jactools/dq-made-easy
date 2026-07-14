@@ -108,7 +108,7 @@ Remove `render_local()` and `render_public()` functions. Replace with a single `
 The edge no longer needs TLS certificates (it's pure pass-through). Remove:
 
 - Edge cert/key volume mounts from `docker-compose/gateway.yml`
-- `ensure_edge_cert_assets()` calls from `scripts/start_stack.sh`
+- `ensure_edge_cert_assets()` calls from `scripts/stack_start.sh`
 - Edge cert generation logic from startup scripts
 - Any edge-specific `mkcert` invocations that produce edge certs
 
@@ -166,7 +166,7 @@ Other backends (Keycloak, Grafana, OpenMetadata, Zammad) can be lazy-loaded via 
 
 **WS-3.4: Update startup scripts**
 
-- Remove `ensure_edge_cert_assets()` from `scripts/start_stack.sh`
+- Remove `ensure_edge_cert_assets()` from `scripts/stack_start.sh`
 - Remove edge cert generation from any other startup script
 - Ensure the trust bundle is still generated (frontend needs it for proxy SSL verification)
 
@@ -260,7 +260,7 @@ Map to the acceptance criteria in [ARCH_1_FRONTEND_BFF.md](../features/ARCH_1_FR
 | `dq-edge/docker-entrypoint.d/40-render-edge-config.sh` | Replace `render_local`/`render_public` with `render_stream` |
 | `docker-compose/gateway.yml` | Add `env_file` to edge; remove edge cert mounts; update edge healthcheck; remove Kong port exposure |
 | `docker-compose/core.yml` | Update frontend healthcheck and `depends_on` |
-| `scripts/start_stack.sh` | Remove `ensure_edge_cert_assets()` |
+| `scripts/stack_start.sh` | Remove `ensure_edge_cert_assets()` |
 | `.env.dev.local`, `.env.test.local`, `.env.prod.local` | Add missing service FQDN env vars |
 | `dq-edge/README.md` | Document TLS pass-through model |
 

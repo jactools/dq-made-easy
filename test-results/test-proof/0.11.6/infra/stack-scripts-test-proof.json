@@ -1,0 +1,92 @@
+{
+  "app_version": "0.11.6",
+  "mode": "infra",
+  "label": "stack-scripts-lifecycle",
+  "timestamp_utc": "20260714T120000Z",
+  "status": "passed",
+  "title": "Stack lifecycle scripts: syntax, password rotation, secrets reuse, orchestrator",
+  "description": "Test proof for the new stack lifecycle scripts (stack.sh, stack_destroy.sh, stack_start.sh, stack_stop.sh, stack_restart.sh, stack_seed.sh) and supporting modules (stack_lifecycle.sh, generate_secrets.sh --reuse-admin, seed_password_rotation.py --no-admin-rotate).",
+  "test_suites": [
+    {
+      "name": "stack-syntax-validation",
+      "status": "passed",
+      "tests_passed": 8,
+      "tests_failed": 0,
+      "description": "Shell syntax validation for all 8 new/modified scripts",
+      "evidence": "test-results/evidence/0.11.6/infra/20260714T120000Z-stack-syntax-validation"
+    },
+    {
+      "name": "password-rotation",
+      "status": "passed",
+      "tests_passed": 12,
+      "tests_failed": 0,
+      "description": "Python module tests for seed_password_rotation.py: imports, admin var classification, skip_admin behavior, password generation",
+      "evidence": "test-results/evidence/0.11.6/infra/20260714T120001Z-password-rotation"
+    },
+    {
+      "name": "secrets-reuse-admin",
+      "status": "passed",
+      "tests_passed": 3,
+      "tests_failed": 0,
+      "description": "generate_secrets.sh --reuse-admin: admin passwords preserved, service passwords rotated",
+      "evidence": "test-results/evidence/0.11.6/infra/20260714T120002Z-secrets-reuse-admin"
+    },
+    {
+      "name": "env-password-rotation",
+      "status": "passed",
+      "tests_passed": 6,
+      "tests_failed": 0,
+      "description": "seed_password_rotation.py --no-admin-rotate: admin passwords unchanged, service passwords rotated, non-password vars unchanged",
+      "evidence": "test-results/evidence/0.11.6/infra/20260714T120003Z-env-password-rotation"
+    },
+    {
+      "name": "stack-lifecycle-helpers",
+      "status": "passed",
+      "tests_passed": 24,
+      "tests_failed": 0,
+      "description": "stack_lifecycle.sh helper tests: admin var classification, env suffix derivation, project prefix derivation, stateful volume list",
+      "evidence": "test-results/evidence/0.11.6/infra/20260714T120004Z-stack-lifecycle-helpers"
+    },
+    {
+      "name": "stack-orchestrator",
+      "status": "passed",
+      "tests_passed": 19,
+      "tests_failed": 0,
+      "description": "stack.sh orchestrator: help output completeness, argument validation, child script existence",
+      "evidence": "test-results/evidence/0.11.6/infra/20260714T120005Z-stack-orchestrator"
+    },
+    {
+      "name": "docs-consistency",
+      "status": "passed",
+      "tests_passed": 11,
+      "tests_failed": 0,
+      "description": "Documentation consistency: key docs reference stack.sh, lifecycle scripts listed, password policy documented",
+      "evidence": "test-results/evidence/0.11.6/infra/20260714T120006Z-docs-consistency"
+    }
+  ],
+  "summary": {
+    "total_tests": 83,
+    "total_passed": 83,
+    "total_failed": 0,
+    "success_rate": "100%",
+    "confidence": "high"
+  },
+  "scripts_tested": [
+    "scripts/stack.sh",
+    "scripts/stack_destroy.sh",
+    "scripts/stack_start.sh",
+    "scripts/stack_stop.sh",
+    "scripts/stack_restart.sh",
+    "scripts/stack_seed.sh",
+    "scripts/generate_secrets.sh",
+    "scripts/supporting/stack_lifecycle.sh",
+    "scripts/supporting/seed_password_rotation.py"
+  ],
+  "password_policy_verified": {
+    "admin_passwords": ["DQ_DB_PASSWORD", "KONG_DB_PASSWORD", "OM_DB_PASSWORD", "OM_DB_ROOT_PASSWORD", "OPENMETADATA_SEARCH_PASSWORD", "ZAMMAD_POSTGRES_PASSWORD", "KEYCLOAK_SYSTEM_ADMIN_PASSWORD", "KEYCLOAK_ADMIN_PASS"],
+    "admin_reused_on_warm_start": true,
+    "admin_generated_on_fresh_start": true,
+    "service_passwords_always_rotated": true,
+    "env_password_rotation_skip_admin": true
+  }
+}

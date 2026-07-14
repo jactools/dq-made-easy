@@ -1,0 +1,6 @@
+[2026-07-14T16:38:49Z] [INFO] [generate_secrets.sh] Environment suffix: dev
+[2026-07-14T16:38:49Z] [INFO] [generate_secrets.sh] Output file: /Users/jacbeekers/gitrepos/dq-made-easy/tmp/secrets.dev.env
+[2026-07-14T16:38:50Z] [INFO] [generate_secrets.sh] ✓ Generated secrets written to /Users/jacbeekers/gitrepos/dq-made-easy/tmp/secrets.dev.env
+[2026-07-14T16:38:50Z] [INFO] [generate_secrets.sh] ✓ Permissions set to 600 (owner read/write only)
+
+SECRETS_ENV_FILE=/Users/jacbeekers/gitrepos/dq-made-easy/tmp/secrets.dev.env

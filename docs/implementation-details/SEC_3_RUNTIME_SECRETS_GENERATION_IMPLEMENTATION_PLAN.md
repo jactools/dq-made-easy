@@ -94,14 +94,24 @@
   - Source `tmp/secrets.{env}.env` into the environment
   - Acceptance: secrets are available in `$SECRETS_ENV` or equivalent variable
 
-- [ ] **SEC-3-04:** Update `scripts/start_stack.sh` / `scripts/start-containers.sh`
-  - Pass `--env-file tmp/secrets.{env}.env` to `docker compose` commands
+- [x] **SEC-3-04:** Update `scripts/stack_start.sh` / `scripts/stack_restart.sh`
+  - Call `generate_secrets.sh --force` (fresh start) or `generate_secrets.sh --force --reuse-admin` (warm restart)
+  - Pass `--env-file tmp/secrets.{env}.env` to `docker compose` commands via the compose invocation helper
   - Acceptance: `docker compose` resolves all `${SECRET:?required}` env vars
 
-- [x] **SEC-3-05:** Update `scripts/seed_containers.sh` / `scripts/seed_stack.sh`
+- [x] **SEC-3-05:** Update `scripts/stack_seed.sh`
   - Source `tmp/secrets.{env}.env` before seeding
   - Source `tmp/keycloak_seed_user_credentials.{env}.env` for user passwords
   - Acceptance: seed scripts use generated secrets, not env defaults
+
+- [x] **SEC-3-12:** Add admin password reuse to `generate_secrets.sh`
+  - Add `--reuse-admin` flag to preserve admin passwords from existing secrets file
+  - Admin password vars (`DQ_DB_PASSWORD`, `KEYCLOAK_SYSTEM_ADMIN_PASSWORD`, etc.) are reused when `--reuse-admin` is set
+  - Acceptance: `generate_secrets.sh --force --reuse-admin` keeps admin passwords, rotates service/user passwords
+
+- [x] **SEC-3-13:** Add admin password skip to `seed_password_rotation.py`
+  - Add `--no-admin-rotate` flag to skip admin password variables during env rotation
+  - Acceptance: `seed_password_rotation.py --no-admin-rotate` preserves admin passwords in the rotated env file
 
 - [x] **SEC-3-06:** Update `scripts/auth.sh` (shared auth helper)
   - Read credentials from `tmp/keycloak_seed_user_credentials.{env}.env`
@@ -172,12 +182,13 @@
   - Acceptance: validation script passes on clean env files
 
 - [ ] **SEC-3-19:** End-to-end validation
-  - Requires manual run: `./scripts/common_startup.sh --env dev --seed-all`
+  - Requires manual run: `./scripts/stack.sh dev init`
   - Takes ~5+ minutes to complete
   - Verify: all containers healthy, no `invalid_grant` errors
-  - `./scripts/common_startup.sh --env dev --seed-all` with fresh `tmp/` directory
+  - `./scripts/stack.sh dev init` with fresh `tmp/` directory
   - Verify all containers start and seed successfully
   - Verify `invalid_grant` errors do not occur
+  - Verify admin passwords are reused on `./scripts/stack.sh dev start --seed` (warm start)
   - Acceptance: full stack starts green from cold
 
 ---

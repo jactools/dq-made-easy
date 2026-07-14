@@ -447,13 +447,15 @@ Complete application-wide configuration:
 - ✅ **Health Checks**: Service availability monitoring
 
 ### Scripts & Automation
-- `common_startup.sh` - Start the usual local stack and Vite UI, with `--env local|deployment` or `--env-file PATH`
-- `start-containers.sh` - Start selected Docker profile groups (`--with-*` or `--all`)
-- `stop-all.sh` - Stop all services
+- `stack.sh` - Orchestrator: `stack.sh <env> <action>` (init, start, restart, stop, seed, destroy)
+- `stack_destroy.sh` - Full teardown (containers, volumes, artifacts)
+- `stack_start.sh` - Start containers (fresh or warm start)
+- `stack_stop.sh` - Stop containers (keeps volumes)
+- `stack_restart.sh` - Restart (reuse admin passwords, rotate service/user)
+- `stack_seed.sh` - Seed running stack
+- `stack_ctl.sh` - Image build/pull/push and status reporting
 - `smoke_test.sh` - Validate running services
 - `build_images.sh` - Build Docker images
-- `start_stack.sh` - Docker Compose up
-- `stop_stack.sh` - Docker Compose down
 - `seed_local_postgres.sh` - Initialize database
 
 ---

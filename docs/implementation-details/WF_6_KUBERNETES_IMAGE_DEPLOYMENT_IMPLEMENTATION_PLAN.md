@@ -125,7 +125,7 @@ Validation additions:
   - Existing references: `docs/features/WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md`, `docs/technical/KONG_DEPLOYMENT.md`
 - [x] WF6-F-P1-04 Define migration and seed job lifecycle behavior per environment.
   - Files: `infra/k8s/base/jobs/*`, `scripts/k8s/deploy.sh`
-  - Existing references: `scripts/start-containers.sh`, `scripts/seed_stack.sh`, `scripts/start_stack.sh`
+  - Existing references: `scripts/stack.sh dev start`, `scripts/stack.sh dev seed`, `scripts/stack_start.sh`
 - [x] WF6-F-P1-05 Define required labels and annotations for traceability.
   - Files: `infra/k8s/base/metadata/labels.yaml`, `infra/k8s/base/services/*`
   - Existing references: `VERSION_MANIFEST.json`

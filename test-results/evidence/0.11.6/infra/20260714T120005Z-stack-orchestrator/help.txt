@@ -1,0 +1,35 @@
+Usage: stack.sh <env> <action> [OPTIONS]
+
+Orchestrator for the compose stack lifecycle.
+
+Environments:
+  dev         Use .env.dev.local
+  test        Use .env.test.local
+  prod        Use .env.prod.local
+
+Actions:
+  destroy     Full teardown (containers, volumes, all generated artifacts)
+  stop        Stop containers only (keeps volumes, secrets, credentials)
+  start       Start stack (generate secrets, start containers)
+  restart     Stop then start (reuse admin passwords, rotate service/user)
+  init        Destroy → start → seed (full clean reset)
+  seed        Seed the running stack
+
+Options:
+  --seed          Also run seeding after start/restart/init
+  --force-build   Build images from scratch (no cache)
+  --no-build      Skip image builds
+  --init-db       Initialize DB schema (implies postgres seeding)
+  -h, --help      Show this help
+
+Password policy:
+  Admin passwords  (DB, Keycloak admin):  reused when volumes exist
+  Service passwords (OIDC secrets, keys): rotated on every start/restart
+  User passwords:                         rotated on every seed
+
+Examples:
+  stack.sh dev init
+  stack.sh dev start --seed
+  stack.sh test restart
+  stack.sh prod stop
+  stack.sh dev seed

@@ -167,8 +167,8 @@ The repo does not currently show obvious path-prefix support settings for Keyclo
 ### Files
 
 - `scripts/create_certs.sh`
-- `scripts/start_stack.sh`
-- `scripts/start-containers.sh`
+- `scripts/stack_start.sh`
+- `scripts/stack.sh dev start`
 - docs that explain local setup
 
 ### Plan

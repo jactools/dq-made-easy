@@ -60,7 +60,7 @@ The migration must preserve the repository no-fallback rule: once a dependency i
 	- Current service-specific trust hooks that need to stay aligned with the canonical bundle path include Zammad's `SSL_CERT_FILE`/`CURL_CA_BUNDLE`, OpenMetadata's `OPENMETADATA_CA_BUNDLE`/`SSL_CERT_FILE`/`CURL_CA_BUNDLE`, and the host-side bootstrap secret files for internal CA material in `docker-compose.yml`.
 	- The documented contract should make clear that service-specific hooks consume the bundle path exported by repo bootstrap, while the repo still keeps a root-level alias for older host-side consumers.
 - [x] (SEC1-I-W1-05) Add fail-fast checks in startup scripts or entrypoints for required certificate and trust artifacts.
-	- `scripts/start_stack.sh` now refuses to start TLS-aware profile sets when the internal root CA or canonical internal trust bundle is missing.
+	- `scripts/stack_start.sh` now refuses to start TLS-aware profile sets when the internal root CA or canonical internal trust bundle is missing.
 	- The existing edge startup preflight still fails fast on missing edge leaf certificate material before Compose is launched.
 
 ## Workstream 2: Compose and Environment Canonicalization
