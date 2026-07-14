@@ -22,6 +22,9 @@ from pathlib import Path
 
 
 ALLOWED_PASSWORD_CHARS = string.ascii_letters + string.digits + "-_"
+# Passwords must not start with '-' or '_' because kcadm's argument parser
+# treats them as option flags, making it impossible to set via --new-password.
+_PASSWORD_FIRST_CHARS = string.ascii_letters + string.digits
 PASSWORD_LENGTH = 32
 
 # Regex patterns that identify password / secret / token env var names.
@@ -59,8 +62,14 @@ _ADMIN_PASSWORD_VARS = frozenset({
 
 
 def generate_password() -> str:
-    """Return a cryptographically random password."""
-    return "".join(secrets.choice(ALLOWED_PASSWORD_CHARS) for _ in range(PASSWORD_LENGTH))
+    """Return a cryptographically random password.
+
+    The first character is never '-' or '_' because kcadm's argument parser
+    treats them as option flags, making it impossible to set via --new-password.
+    """
+    first = secrets.choice(_PASSWORD_FIRST_CHARS)
+    rest = "".join(secrets.choice(ALLOWED_PASSWORD_CHARS) for _ in range(PASSWORD_LENGTH - 1))
+    return first + rest
 
 
 def _shell_quote(value: str) -> str:

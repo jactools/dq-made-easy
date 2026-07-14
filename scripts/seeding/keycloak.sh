@@ -395,9 +395,10 @@ seed_keycloak_in_docker() {
       exit 33
     fi
 
-    # Use "--new-password=${password}" (no space around =) to avoid kcadm
-    # argument parsing issues when the password starts with '-'.
-    if ! run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=${password}" >/dev/null 2>&1; then
+    # Generated passwords never start with '-' or '_' (see seed_password_rotation.py)
+    # so kcadm argument parsing is safe with "--new-password=${password}".
+    if ! run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" \
+      --userid "$user_id" "--new-password=${password}" >/dev/null 2>&1; then
       error "$my_name" "Failed to set password for ${email}"
       exit 33
     fi

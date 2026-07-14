@@ -28,7 +28,7 @@ seed_openmetadata_in_docker() {
     exit 35
   }
 
-  docker_compose --profile metadata run --rm openmetadata-configure --seed-all || {
+  docker_compose --profile metadata --profile auth run --rm openmetadata-configure --seed-all || {
     error "$my_name" "OpenMetadata Docker seed container failed"
     exit 35
   }

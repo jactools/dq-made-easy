@@ -273,9 +273,9 @@ services:
         is required}
       OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:?OPENMETADATA_SERVER_URL is required}/api}
       OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:?OPENMETADATA_VERIFY_SSL is required}
-      OPENMETADATA_CA_BUNDLE: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
-      SSL_CERT_FILE: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
-      CURL_CA_BUNDLE: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
       SEED_ALL: ${SEED_ALL:?SEED_ALL is required}
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
@@ -302,14 +302,14 @@ services:
       AIRFLOW__WEBSERVER__SECRET_KEY: ${OM_AIRFLOW_SECRET_KEY:?OM_AIRFLOW_SECRET_KEY is required}
       OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:?OPENMETADATA_SERVER_URL is required}/api}
       OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:?OPENMETADATA_VERIFY_SSL is required}
-      OPENMETADATA_CA_BUNDLE: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
-      REQUESTS_CA_BUNDLE: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
-      SSL_CERT_FILE: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      REQUESTS_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
       OTEL_SERVICE_NAME: dq-made-easy-openmetadata-ingestion
       OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?OTEL_EXPORTER_OTLP_ENDPOINT is required}
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_EXPORTER_OTLP_CERTIFICATE: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+      OTEL_EXPORTER_OTLP_CERTIFICATE: /etc/openmetadata/certs/internal-ca-bundle.pem
       OTEL_TRACES_SAMPLER: parentbased_traceidratio
       OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:?OTEL_TRACES_SAMPLER_ARG is required}
       ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}

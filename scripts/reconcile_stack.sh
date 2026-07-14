@@ -120,7 +120,7 @@ if [ "$ACTION_METADATA" = true ]; then
   if ! dq_source_seeded_user_credentials --quiet; then
     fail "Unable to load seeded credentials for OpenMetadata reconciliation"
   fi
-  docker_compose --profile metadata run --rm openmetadata-configure
+  docker_compose --profile metadata --profile auth run --rm openmetadata-configure
 fi
 
 success "reconcile_stack.sh" "Reconciliation completed successfully"

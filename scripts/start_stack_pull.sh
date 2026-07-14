@@ -189,5 +189,5 @@ if $SEED_OPENMETADATA; then
     info "$my_name" "--seed-openmetadata requested without --seed-keycloak: reseeding Keycloak first so the live realm matches the generated credentials"
     ./scripts/seed_stack.sh --seed-keycloak
   fi
-  docker_compose --profile metadata run --rm openmetadata-configure --seed-all
+  docker_compose --profile metadata --profile auth run --rm openmetadata-configure --seed-all
 fi
