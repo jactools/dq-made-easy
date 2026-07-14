@@ -145,8 +145,9 @@ fi
 # ---------------------------------------------------------------------------
 # Step 5: Ensure TLS certs
 # ---------------------------------------------------------------------------
-"$ROOT_DIR/scripts/create_certs.sh" 2>/dev/null || {
-  warning "stack_restart.sh" "Certificate generation failed; certs may already exist"
+"$ROOT_DIR/scripts/create_certs.sh" --env-file "$ROOT_ENV_FILE" || {
+  error "stack_restart.sh" "Certificate generation failed (create_certs.sh)"
+  exit 1
 }
 
 # ---------------------------------------------------------------------------
@@ -154,13 +155,13 @@ fi
 # ---------------------------------------------------------------------------
 if [ "$FORCE_BUILD" = true ]; then
   info "stack_restart.sh" "Building images (--force-build)..."
-  docker compose build --no-cache || {
+  docker_compose build --no-cache || {
     error "stack_restart.sh" "Image build failed"
     exit 1
   }
 elif [ "$NO_BUILD" != true ]; then
   info "stack_restart.sh" "Building images..."
-  docker compose build || {
+  docker_compose build || {
     error "stack_restart.sh" "Image build failed"
     exit 1
   }
@@ -173,7 +174,16 @@ fi
 # ---------------------------------------------------------------------------
 info "stack_restart.sh" "Starting containers..."
 export COMPOSE_PROGRESS=plain
-docker_compose up -d --force-recreate --remove-orphans || {
+# Build profile args for compose up — include all default profiles
+PROFILE_ARGS=()
+source "$ROOT_DIR/scripts/stack_catalog.sh" 2>/dev/null || true
+while IFS= read -r profile; do
+  [ -z "$profile" ] && continue
+  PROFILE_ARGS+=(--profile "$profile")
+done < <(default_runtime_profile_values)
+PROFILE_ARGS+=(--profile airflow --profile llm --profile seed --profile spark --profile metadata_ingestion)
+
+docker_compose "${PROFILE_ARGS[@]}" up -d --force-recreate --remove-orphans || {
   error "stack_restart.sh" "docker compose up failed"
   exit 1
 }
@@ -181,14 +191,14 @@ docker_compose up -d --force-recreate --remove-orphans || {
 # ---------------------------------------------------------------------------
 # Step 8: Wait for critical services
 # ---------------------------------------------------------------------------
-wait_for_compose_service_healthy keycloak "Keycloak" 120 5 || {
+wait_for_compose_service_healthy keycloak "Keycloak (service=keycloak)" 120 5 || {
   error "stack_restart.sh" "Keycloak did not become healthy"
   docker_compose logs --no-color --tail 80 keycloak || true
   exit 1
 }
 
-wait_for_compose_service_healthy db "Postgres" 120 5 || {
-  error "stack_restart.sh" "Postgres did not become healthy"
+wait_for_compose_service_healthy db "Postgres (service=db)" 120 5 || {
+  error "stack_restart.sh" "Postgres (service=db) did not become healthy"
   docker_compose logs --no-color --tail 80 db || true
   exit 1
 }

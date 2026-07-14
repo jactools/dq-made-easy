@@ -144,7 +144,7 @@ done
 # ---------------------------------------------------------------------------
 if [ "$SEED_OPENMETADATA" = true ]; then
   info "stack_seed.sh" "Ensuring TLS certificates..."
-  "$ROOT_DIR/scripts/create_certs.sh" 2>/dev/null || {
+  "$ROOT_DIR/scripts/create_certs.sh" --env-file "$ROOT_ENV_FILE" 2>/dev/null || {
     warning "stack_seed.sh" "Certificate generation failed; certs may already exist"
   }
 fi

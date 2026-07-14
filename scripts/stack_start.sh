@@ -181,11 +181,15 @@ if [ "$VOLUMES_EXIST" = true ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Step 4: Ensure TLS certificates
+# Step 4: Ensure TLS certificates and trust directory
+# The trust-bundle container creates JKS at runtime, but compose validates
+# all bind mounts before starting any containers. create_certs.sh creates
+# the host-side CA bundle and placeholder JKS files so validation passes.
 # ---------------------------------------------------------------------------
 info "stack_start.sh" "Ensuring TLS certificates..."
-"$ROOT_DIR/scripts/create_certs.sh" 2>/dev/null || {
-  warning "stack_start.sh" "Certificate generation failed; certs may already exist"
+"$ROOT_DIR/scripts/create_certs.sh" --env-file "$ROOT_ENV_FILE" || {
+  error "stack_start.sh" "Certificate generation failed (create_certs.sh)"
+  exit 1
 }
 
 # ---------------------------------------------------------------------------
@@ -193,13 +197,13 @@ info "stack_start.sh" "Ensuring TLS certificates..."
 # ---------------------------------------------------------------------------
 if [ "$FORCE_BUILD" = true ]; then
   info "stack_start.sh" "Building images (--force-build)..."
-  docker compose build --no-cache || {
+  docker_compose build --no-cache || {
     error "stack_start.sh" "Image build failed"
     exit 1
   }
 elif [ "$NO_BUILD" != true ]; then
   info "stack_start.sh" "Building images..."
-  docker compose build || {
+  docker_compose build || {
     error "stack_start.sh" "Image build failed"
     exit 1
   }
@@ -212,7 +216,17 @@ fi
 # ---------------------------------------------------------------------------
 info "stack_start.sh" "Starting containers..."
 export COMPOSE_PROGRESS=plain
-docker_compose up -d --force-recreate --remove-orphans || {
+# Build profile args for compose up — include all default profiles
+PROFILE_ARGS=()
+source "$ROOT_DIR/scripts/stack_catalog.sh" 2>/dev/null || true
+while IFS= read -r profile; do
+  [ -z "$profile" ] && continue
+  PROFILE_ARGS+=(--profile "$profile")
+done < <(default_runtime_profile_values)
+# Also include optional profiles that are commonly needed
+PROFILE_ARGS+=(--profile airflow --profile llm --profile seed --profile spark --profile metadata_ingestion)
+
+docker_compose "${PROFILE_ARGS[@]}" up -d --force-recreate --remove-orphans || {
   error "stack_start.sh" "docker compose up failed"
   exit 1
 }
@@ -221,15 +235,15 @@ docker_compose up -d --force-recreate --remove-orphans || {
 # Step 7: Wait for critical services
 # ---------------------------------------------------------------------------
 info "stack_start.sh" "Waiting for Keycloak..."
-wait_for_compose_service_healthy keycloak "Keycloak" 120 5 || {
+wait_for_compose_service_healthy keycloak "Keycloak (service=keycloak)" 120 5 || {
   error "stack_start.sh" "Keycloak did not become healthy"
   docker_compose logs --no-color --tail 80 keycloak || true
   exit 1
 }
 
-info "stack_start.sh" "Waiting for Postgres..."
-wait_for_compose_service_healthy db "Postgres" 120 5 || {
-  error "stack_start.sh" "Postgres did not become healthy"
+info "stack_start.sh" "Waiting for Postgres (service=db)..."
+wait_for_compose_service_healthy db "Postgres (service=db)" 120 5 || {
+  error "stack_start.sh" "Postgres (service=db) did not become healthy"
   docker_compose logs --no-color --tail 80 db || true
   exit 1
 }

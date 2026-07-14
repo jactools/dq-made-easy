@@ -286,6 +286,15 @@ _emit_admin_password() {
   _emit_admin_password KEYCLOAK_SYSTEM_ADMIN_PASSWORD
   echo "KEYCLOAK_USER_PASSWORD=\"$(generate_password)\""
   echo "OPENMETADATA_OIDC_SEED_PASSWORD=\"$(generate_password)\""
+  echo ""
+  echo "# ============================================================"
+  echo "# Seeded User Credentials (initial values, rotated during seed)"
+  echo "# ============================================================"
+  echo "KEYCLOAK_JACCLOUD_PASSWORD=\"$(generate_password)\""
+  echo "SMOKE_LOGIN_PASSWORD=\"$(generate_password)\""
+  echo "OPERATOR_LOGIN_PASSWORD=\"$(generate_password)\""
+  echo "AUDITOR_LOGIN_PASSWORD=\"$(generate_password)\""
+  echo "REGULATOR_LOGIN_PASSWORD=\"$(generate_password)\""
 } > "$SECRETS_FILE"
 
 # Restrict permissions on the secrets file

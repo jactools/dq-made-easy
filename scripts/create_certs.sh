@@ -1,12 +1,9 @@
 # Create certs for local development and testing. These are used by the local Kong and Keycloak instances, and can be trusted by the local browser to avoid SSL warnings.
-# Version: 1.4
-# Last modified: 2026-04-25
-# Usage: ./scripts/create_certs.sh
+# Version: 1.5
+# Last modified: 2026-07-14
+# Usage: ./scripts/create_certs.sh [--env-file PATH]
 #!/usr/bin/env bash
 set -euo pipefail
-
-# Support hostname for Zammad backend certificates (from edge SNI)
-EDGE_LOCAL_SUPPORT_HOST="${EDGE_LOCAL_SUPPORT_HOST:-itsm.jac.dot}"
 
 require_cmd() {
 	local cmd="$1"
@@ -35,6 +32,13 @@ write_internal_ca_bundle() {
 	cp "$source_file" "$CERTS_DIR/internal-ca-bundle.pem"
 	cp "$source_file" "$trust_dir/internal-ca-bundle.pem"
 	cp "$source_file" "$aistor_trust_dir/internal-ca-bundle.pem"
+
+	# Create placeholder files for the trust-bundle container to overwrite.
+	# Compose validates bind mounts before containers start, so these files
+	# must exist on the host. The trust-bundle container (runs first via
+	# depends_on) will overwrite them with the real JKS/P12 at runtime.
+	touch "$trust_dir/trust-bundle.jks"
+	touch "$trust_dir/truststore-password.txt"
 }
 
 create_openmetadata_keystore() {
@@ -64,6 +68,50 @@ generate_service_cert() {
 }
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Parse --env-file if given; default to dev env
+EXPLICIT_ENV_FILE=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --env-file)
+      EXPLICIT_ENV_FILE="$2"; shift 2 ;;
+    --env)
+      EXPLICIT_ENV_FILE="$ROOT_DIR/.env.${2}.local"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+
+# Load hostname configuration from the selected env file (or use defaults)
+if [ -n "$EXPLICIT_ENV_FILE" ] && [ -f "$EXPLICIT_ENV_FILE" ]; then
+  set -a
+  source "$EXPLICIT_ENV_FILE"
+  set +a
+fi
+
+# Env-driven hostnames (fall back to known defaults so the script still works standalone)
+EDGE_LOCAL_APP_HOST="${EDGE_LOCAL_APP_HOST:-dq-made-easy.local}"
+EDGE_LOCAL_KONG_HOST="${EDGE_LOCAL_KONG_HOST:-kong.local}"
+EDGE_LOCAL_KEYCLOAK_HOST="${EDGE_LOCAL_KEYCLOAK_HOST:-keycloak.local}"
+EDGE_LOCAL_OPENMETADATA_HOST="${EDGE_LOCAL_OPENMETADATA_HOST:-openmetadata.local}"
+EDGE_LOCAL_OBSERVABILITY_HOST="${EDGE_LOCAL_OBSERVABILITY_HOST:-observability.local}"
+EDGE_LOCAL_SUPPORT_HOST="${EDGE_LOCAL_SUPPORT_HOST:-support.local}"
+EDGE_LOCAL_AIRFLOW_HOST="${EDGE_LOCAL_AIRFLOW_HOST:-airflow.local}"
+EDGE_LOCAL_API_HOST="${EDGE_LOCAL_API_HOST:-api.local}"
+EDGE_LOCAL_GRAFANA_HOST="${EDGE_LOCAL_GRAFANA_HOST:-grafana.local}"
+DQ_ENGINE_EDGE_HOST="${DQ_ENGINE_EDGE_HOST:-engine.local}"
+DQ_LLM_EDGE_HOST="${DQ_LLM_EDGE_HOST:-llm.local}"
+PUBLIC_CANONICAL_HOST="${PUBLIC_CANONICAL_HOST:-dq-made-easy.local}"
+KAFKA_CERT_HOST="${KAFKA_CERT_HOST:-kafka.local}"
+DQ_DB_HOST="${DQ_DB_HOST:-db.local}"
+
+# Derive the wildcard domain from the canonical host (e.g. sub.example.com → *.example.com)
+EDGE_WILDCARD_HOST="${EDGE_WILDCARD_HOST:-}"
+if [ -z "$EDGE_WILDCARD_HOST" ]; then
+  # Extract the last two domain parts from PUBLIC_CANONICAL_HOST
+  # e.g. "sub.domain.example" → "*.domain.example"
+  EDGE_WILDCARD_HOST="*.${PUBLIC_CANONICAL_HOST#*.}"
+fi
+
 CERTS_DIR="$ROOT_DIR/tmp/certs"
 mkdir -p "$CERTS_DIR"
 
@@ -81,12 +129,13 @@ fi
 cp "$mkcert_root_ca" "$CERTS_DIR/mkcert-rootCA.pem"
 write_internal_ca_bundle "$mkcert_root_ca"
 
+# Internal service certificates (DNS names used inside the Docker network)
 echo "internal service DNS: api"
 generate_service_cert "api" api localhost 127.0.0.1 ::1
 echo "internal service DNS: llm"
 generate_service_cert "llm" dq-made-easy-llm localhost 127.0.0.1 ::1
 echo "internal service DNS: engine"
-generate_service_cert "engine" dq-made-easy-engine dq-made-easy-engine.local dq-made-easy-engine.jac.dot localhost 127.0.0.1 ::1
+generate_service_cert "engine" dq-made-easy-engine dq-made-easy-engine.local "$DQ_ENGINE_EDGE_HOST" localhost 127.0.0.1 ::1
 echo "internal service DNS: airflow-server"
 generate_service_cert "airflow-server" airflow-server localhost 127.0.0.1 ::1
 echo "internal service DNS: aistor"
@@ -104,7 +153,7 @@ generate_service_cert "kafka" kafka localhost 127.0.0.1 ::1
 echo "internal service DNS: kong-db"
 generate_service_cert "kong-db" kong-db localhost 127.0.0.1 ::1
 echo "internal service DNS: keycloak"
-generate_service_cert "keycloak" keycloak keycloak.jac.dot host.docker.internal localhost 127.0.0.1 ::1
+generate_service_cert "keycloak" keycloak "$EDGE_LOCAL_KEYCLOAK_HOST" host.docker.internal localhost 127.0.0.1 ::1
 echo "internal service DNS: kong"
 generate_service_cert "kong" kong localhost 127.0.0.1 ::1
 echo "internal service DNS: observability"
@@ -132,31 +181,40 @@ generate_service_cert "zammad-websocket" zammad-websocket "${EDGE_LOCAL_SUPPORT_
 echo "internal service DNS: zammad-postgresql"
 generate_service_cert "zammad-postgresql" zammad-postgresql localhost 127.0.0.1 ::1
 
-echo "${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required}"
-generate_cert "$CERTS_DIR/${KAFKA_CERT_HOST}+3.pem" "$CERTS_DIR/${KAFKA_CERT_HOST}+3-key.pem" "${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required}" localhost 127.0.0.1 ::1
-echo "itsm.jac.dot"
-generate_cert "$CERTS_DIR/itsm.jac.dot+3.pem" "$CERTS_DIR/itsm.jac.dot+3-key.pem" "itsm.jac.dot" localhost 127.0.0.1 ::1
-echo "support.jac.dot"
-generate_cert "$CERTS_DIR/support.jac.dot+3.pem" "$CERTS_DIR/support.jac.dot+3-key.pem" "support.jac.dot" localhost 127.0.0.1 ::1
-echo "dq-made-easy.jac.dot"
-generate_cert "$CERTS_DIR/dq-made-easy.jac.dot+3.pem" "$CERTS_DIR/dq-made-easy.jac.dot+3-key.pem" "dq-made-easy.jac.dot" localhost 127.0.0.1 ::1
-echo "keycloak.jac.dot"
-generate_cert "$CERTS_DIR/keycloak.jac.dot+3.pem" "$CERTS_DIR/keycloak.jac.dot+3-key.pem" "keycloak.jac.dot" keycloak "host.docker.internal" localhost 127.0.0.1 ::1
-echo "kong.jac.dot"
-generate_cert "$CERTS_DIR/kong.jac.dot+3.pem" "$CERTS_DIR/kong.jac.dot+3-key.pem" "kong.jac.dot" kong localhost 127.0.0.1 ::1
-echo "observability.jac.dot"
-generate_cert "$CERTS_DIR/observability.jac.dot+3.pem" "$CERTS_DIR/observability.jac.dot+3-key.pem" "observability.jac.dot" grafana localhost 127.0.0.1 ::1
-echo "api.jac.dot"
-generate_cert "$CERTS_DIR/api.jac.dot+3.pem" "$CERTS_DIR/api.jac.dot+3-key.pem" "api.jac.dot" localhost 127.0.0.1 ::1
-echo "grafana.jac.dot"
-generate_cert "$CERTS_DIR/grafana.jac.dot+3.pem" "$CERTS_DIR/grafana.jac.dot+3-key.pem" "grafana.jac.dot" grafana localhost 127.0.0.1 ::1
-echo "openmetadata.jac.dot"
-generate_cert "$CERTS_DIR/openmetadata.jac.dot+3.pem" "$CERTS_DIR/openmetadata.jac.dot+3-key.pem" "openmetadata.jac.dot" "openmetadata-server" localhost 127.0.0.1 ::1
-create_openmetadata_keystore "$CERTS_DIR/openmetadata.jac.dot+3.pem" "$CERTS_DIR/openmetadata.jac.dot+3-key.pem"
-echo "airflow.jac.dot"
-generate_cert "$CERTS_DIR/airflow.jac.dot+3.pem" "$CERTS_DIR/airflow.jac.dot+3-key.pem" "airflow.jac.dot" "airflow-server" localhost 127.0.0.1 ::1
+# The compose file mounts ../tmp/certs/services/zammad-db but the cert
+# script creates services/zammad-postgresql. Bridge the gap with a symlink.
+ZAMMAD_DB_DIR="$CERTS_DIR/services/zammad-db"
+if [ ! -e "$ZAMMAD_DB_DIR" ]; then
+  ln -s "$(cd "$CERTS_DIR/services/zammad-postgresql" && pwd)" "$ZAMMAD_DB_DIR" 2>/dev/null || true
+  echo "Created symlink $ZAMMAD_DB_DIR -> services/zammad-postgresql"
+fi
 
-echo "*.jac.dot"
-generate_cert "$CERTS_DIR/jac.dot-wildcard.pem" "$CERTS_DIR/jac.dot-wildcard-key.pem" "*.jac.dot" "jac.dot" localhost 127.0.0.1 ::1
+# Edge-facing certificates (public-facing hostnames, env-driven)
+echo "edge DNS: ${KAFKA_CERT_HOST}"
+generate_cert "$CERTS_DIR/${KAFKA_CERT_HOST}+3.pem" "$CERTS_DIR/${KAFKA_CERT_HOST}+3-key.pem" "${KAFKA_CERT_HOST}" localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_SUPPORT_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_SUPPORT_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_SUPPORT_HOST}+3-key.pem" "${EDGE_LOCAL_SUPPORT_HOST}" localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_APP_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_APP_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_APP_HOST}+3-key.pem" "${EDGE_LOCAL_APP_HOST}" localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_KEYCLOAK_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_KEYCLOAK_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_KEYCLOAK_HOST}+3-key.pem" "${EDGE_LOCAL_KEYCLOAK_HOST}" keycloak "host.docker.internal" localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_KONG_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_KONG_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_KONG_HOST}+3-key.pem" "${EDGE_LOCAL_KONG_HOST}" kong localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_OBSERVABILITY_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_OBSERVABILITY_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_OBSERVABILITY_HOST}+3-key.pem" "${EDGE_LOCAL_OBSERVABILITY_HOST}" grafana localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_API_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_API_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_API_HOST}+3-key.pem" "${EDGE_LOCAL_API_HOST}" localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_GRAFANA_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_GRAFANA_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_GRAFANA_HOST}+3-key.pem" "${EDGE_LOCAL_GRAFANA_HOST}" grafana localhost 127.0.0.1 ::1
+echo "edge DNS: ${EDGE_LOCAL_OPENMETADATA_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_OPENMETADATA_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_OPENMETADATA_HOST}+3-key.pem" "${EDGE_LOCAL_OPENMETADATA_HOST}" "openmetadata-server" localhost 127.0.0.1 ::1
+create_openmetadata_keystore "$CERTS_DIR/${EDGE_LOCAL_OPENMETADATA_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_OPENMETADATA_HOST}+3-key.pem"
+echo "edge DNS: ${EDGE_LOCAL_AIRFLOW_HOST}"
+generate_cert "$CERTS_DIR/${EDGE_LOCAL_AIRFLOW_HOST}+3.pem" "$CERTS_DIR/${EDGE_LOCAL_AIRFLOW_HOST}+3-key.pem" "${EDGE_LOCAL_AIRFLOW_HOST}" "airflow-server" localhost 127.0.0.1 ::1
+
+echo "wildcard: ${EDGE_WILDCARD_HOST}"
+# Wildcard cert filename uses the base domain (strip the leading *. prefix)
+_WILDCARD_BASE="${EDGE_WILDCARD_HOST#*.}"
+generate_cert "$CERTS_DIR/${_WILDCARD_BASE}-wildcard.pem" "$CERTS_DIR/${_WILDCARD_BASE}-wildcard-key.pem" "${EDGE_WILDCARD_HOST}" "${_WILDCARD_BASE}" localhost 127.0.0.1 ::1
 
 echo "Certificates created in $CERTS_DIR."
