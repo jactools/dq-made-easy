@@ -329,6 +329,19 @@ seed_keycloak_in_docker() {
 
   sync_keycloak_seed_user_profiles "$keycloak_container_id"
 
+  # Refresh kcadm token before the password loop — the config-credentials
+  # call above happened before generate_keycloak_seed_artifacts() and
+  # sync_keycloak_seed_user_profiles(), so the token may have expired by now.
+  info "$my_name" "Refreshing kcadm admin token for password rotation..."
+  if ! run_keycloak_kcadm "$keycloak_container_id" config credentials \
+    --server "$keycloak_admin_base_url" \
+    --realm master \
+    --user "${kc_admin_user:?kc admin username required}" \
+    --password "${kc_admin_pass:?kc admin password required}" >/dev/null 2>&1; then
+    error "$my_name" "Unable to re-authenticate kcadm for password rotation"
+    exit 33
+  fi
+
   rotated_password_count=0
   while IFS= read -r credential_line || [ -n "$credential_line" ]; do
     credential_line="${credential_line%$'\r'}"
@@ -358,9 +371,13 @@ seed_keycloak_in_docker() {
       exit 33
     fi
 
-    echo "${password}" | docker exec -i "$keycloak_container_id" /opt/keycloak/kcadm-trust.sh set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=/dev/stdin"
-
-    # run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=${password}"
+    # Use "--new-password=${password}" (no space around =) to avoid kcadm
+    # argument parsing issues when the password starts with '-'.
+    if ! run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=${password}" >/dev/null 2>&1; then
+      error "$my_name" "Failed to set password for ${email}"
+      exit 33
+    fi
+    rotated_password_count=$((rotated_password_count + 1))
   done <<EOF
 $(docker exec "$keycloak_container_id" cat "$seed_credentials_file")
 EOF
