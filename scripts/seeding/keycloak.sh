@@ -111,12 +111,23 @@ sync_keycloak_seed_user_profiles() {
     exit 33
   fi
 
+  # Validate the realm file is parseable JSON before proceeding.
+  # Docker exec can return error messages (e.g. stale container ID) that jq
+  # will happily try to parse and fail on with "Invalid numeric literal".
+  local realm_file_content
+  realm_file_content="$(docker exec "$keycloak_container_id" cat "$realm_import_file" 2>&1)"
+  if ! printf '%s' "$realm_file_content" | jq empty >/dev/null 2>&1; then
+    error "$my_name" "Realm import file is not valid JSON (container may have been recreated)"
+    error "$my_name" "File content preview: $(printf '%s' "$realm_file_content" | head -c 120)"
+    exit 33
+  fi
+
   operator_email="${OPERATOR_LOGIN_EMAIL:-${SMOKE_LOGIN_EMAIL:-}}"
   if [ -z "$operator_email" ]; then
     error "$my_name" "OPERATOR_LOGIN_EMAIL or SMOKE_LOGIN_EMAIL is required for Keycloak profile reconciliation"
     exit 33
   fi
-  operator_payload="$(docker exec "$keycloak_container_id" cat "$realm_import_file" | jq -c --arg operator_email "$operator_email" '.users[] | select((.username // .email // empty) == $operator_email) | {
+  operator_payload="$(printf '%s' "$realm_file_content" | jq -c --arg operator_email "$operator_email" '.users[] | select((.username // .email // empty) == $operator_email) | {
     username: (.username // .email // empty),
     email: (.email // empty),
     first_name: (.firstName // empty),
@@ -146,7 +157,7 @@ sync_keycloak_seed_user_profiles() {
     }
   fi
 
-  user_payloads="$(docker exec "$keycloak_container_id" cat "$realm_import_file" | jq -c '.users[] | {
+  user_payloads="$(printf '%s' "$realm_file_content" | jq -c '.users[] | {
     username: (.username // .email // empty),
     email: (.email // empty),
     first_name: (.firstName // empty),
@@ -273,6 +284,19 @@ seed_keycloak_in_docker() {
   fi
 
   generate_keycloak_seed_artifacts || exit 33
+
+  # Re-resolve the container ID after seed-artifacts build/run in case
+  # docker compose recreated the keycloak container.
+  local fresh_keycloak_container_id
+  fresh_keycloak_container_id="$(docker_compose ps -q keycloak 2>/dev/null | tr -d '[:space:]' || true)"
+  if [ -n "$fresh_keycloak_container_id" ] && [ "$fresh_keycloak_container_id" != "$keycloak_container_id" ]; then
+    info "$my_name" "Keycloak container was recreated during seed-artifacts build (old: ${keycloak_container_id:0:12}... new: ${fresh_keycloak_container_id:0:12}...), re-resolving"
+    keycloak_container_id="$fresh_keycloak_container_id"
+  fi
+  if [ -z "$keycloak_container_id" ] || [ "$(docker inspect -f '{{.State.Running}}' "$keycloak_container_id" 2>/dev/null || true)" != "true" ]; then
+    error "$my_name" "Keycloak container is not running after seed-artifacts build; cannot proceed with seeding"
+    exit 33
+  fi
 
   keycloak_https_relative_path="${KEYCLOAK_HTTPS_RELATIVE_PATH:-}"
   if [ -n "$keycloak_https_relative_path" ]; then
