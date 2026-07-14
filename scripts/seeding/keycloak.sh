@@ -358,10 +358,9 @@ seed_keycloak_in_docker() {
       exit 33
     fi
 
-    # Use kcadm to set the password.  "--new-password=${password}" (double-quoted,
-    # no space around =) avoids kcadm argument parsing issues when the password
-    # starts with '-'.
-    run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=\"$password\""
+    echo "${password}" | docker exec -i "$keycloak_container_id" /opt/keycloak/kcadm-trust.sh set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=/dev/stdin"
+
+    # run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=${password}"
   done <<EOF
 $(docker exec "$keycloak_container_id" cat "$seed_credentials_file")
 EOF
