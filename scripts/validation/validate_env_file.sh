@@ -13,6 +13,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
 validate_no_http_urls() {
   local forbidden_values=()
   local variable_name=""
@@ -47,6 +48,12 @@ validate_no_http_urls() {
 
 init_root_env_file "$ROOT_DIR"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
+source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
+set -a
+# shellcheck disable=SC1090
+source "$ROOT_ENV_FILE"
+set +a
+source_runtime_env_dependencies "$ROOT_ENV_FILE" post-root
 
 my_name="validate_env_file.sh"
 

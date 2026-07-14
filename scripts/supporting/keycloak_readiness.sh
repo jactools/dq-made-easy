@@ -6,9 +6,10 @@
 # - Exposes wait_for_keycloak_ready(url, [label]).
 # - Polls an OpenID configuration/readiness URL with retries.
 # - Logs classified curl failures to help diagnose startup issues.
+# - Uses the repo CA bundle for local mkcert TLS traffic when available.
 #
-# Version: 1.0
-# Last modified: 2026-04-07
+# Version: 1.1
+# Last modified: 2026-07-14
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
@@ -18,14 +19,20 @@ my_name="keycloak_readiness.sh"
 wait_for_keycloak_ready() {
   local ready_url="$1"
   local service_label="${2:-Keycloak}"
-  local max_attempts=10
-  local sleep_seconds=3
+  local max_attempts="${KEYCLOAK_READINESS_MAX_ATTEMPTS:-10}"
+  local sleep_seconds="${KEYCLOAK_READINESS_SLEEP_SECONDS:-3}"
   local connect_timeout=10
   local max_time=20
   local is_ready=false
   local curl_status=0
   local curl_error_output=""
   local last_failure_kind="unknown"
+  local curl_args=(--connect-timeout "$connect_timeout" --max-time "$max_time" -fsS -o /dev/null)
+  local ca_bundle="${CURL_CA_BUNDLE:-${SSL_CERT_FILE:-}}"
+
+  if [ -n "$ca_bundle" ] && [ -f "$ca_bundle" ]; then
+    curl_args+=(--cacert "$ca_bundle")
+  fi
 
   classify_curl_failure() {
     local status="$1"
@@ -65,7 +72,7 @@ wait_for_keycloak_ready() {
 
   for attempt in $(seq 1 "$max_attempts"); do
     curl_status=0
-    if curl_error_output="$(curl --connect-timeout "$connect_timeout" --max-time "$max_time" -fsS -o /dev/null "$ready_url" 2>&1)"; then
+    if curl_error_output="$(curl "${curl_args[@]}" "$ready_url" 2>&1)"; then
       is_ready=true
       break
     else
@@ -80,7 +87,9 @@ wait_for_keycloak_ready() {
       info "$my_name" "  waiting for ${service_label}... (${attempt}/${max_attempts})"
       info "$my_name" "  last curl failure: kind=${last_failure_kind} exit=${curl_status} url=${ready_url}"
     fi
-    sleep "$sleep_seconds"
+    if [ "$sleep_seconds" != "0" ]; then
+      sleep "$sleep_seconds"
+    fi
   done
 
   if [ "$is_ready" = true ]; then

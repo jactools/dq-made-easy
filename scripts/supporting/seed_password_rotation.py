@@ -166,6 +166,14 @@ def _restrict_permissions(path: Path) -> None:
         pass
 
 
+def _make_readable(path: Path, *, mode: int = 0o644) -> None:
+    """Best-effort permission adjustment so generated artifacts are readable by containers."""
+    try:
+        os.chmod(path, mode)
+    except OSError:
+        pass
+
+
 # ---------------------------------------------------------------------------
 # Env-file password rotation
 # ---------------------------------------------------------------------------
@@ -313,8 +321,8 @@ def generate_and_write(
     write_credentials_csv(rows, credentials_csv_path)
     write_credentials_env(rows, credentials_env_path, credential_aliases)
 
-    _restrict_permissions(credentials_csv_path)
-    _restrict_permissions(credentials_env_path)
+    _make_readable(credentials_csv_path)
+    _make_readable(credentials_env_path)
 
 
 def main() -> None:

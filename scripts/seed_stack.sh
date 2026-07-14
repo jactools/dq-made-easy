@@ -56,9 +56,11 @@ my_name="seed_stack.sh"
 info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
 
 # Export repo env values so child processes such as the Python generators see them.
+source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
 set -a
 source "$ROOT_ENV_FILE"
 set +a
+source_runtime_env_dependencies "$ROOT_ENV_FILE" post-root
 
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 
