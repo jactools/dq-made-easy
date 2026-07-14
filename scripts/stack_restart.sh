@@ -83,15 +83,9 @@ docker_compose stop 2>/dev/null || true
 docker_compose down --remove-orphans 2>/dev/null || true
 
 # ---------------------------------------------------------------------------
-# Step 2: Load env for compose operations
-# ---------------------------------------------------------------------------
-source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
-set -a
-source "$ROOT_ENV_FILE"
-set +a
-
-# ---------------------------------------------------------------------------
-# Step 3: Generate secrets (reuse admin, rotate service/user)
+# Step 2: Generate secrets (BEFORE sourcing env file)
+# The env file references ${DQ_DB_PASSWORD} etc. in URL construction,
+# so secrets must be sourced first.
 # ---------------------------------------------------------------------------
 info "stack_restart.sh" "Generating secrets (--reuse-admin)..."
 SECRETS_OUTPUT=$("$ROOT_DIR/scripts/generate_secrets.sh" --env-file "$ROOT_ENV_FILE" --force --reuse-admin 2>&1) || {
@@ -111,6 +105,12 @@ else
   error "stack_restart.sh" "Secrets file not found after generation"
   exit 1
 fi
+
+# Now source the env file (password references are now resolved)
+source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
+set -a
+source "$ROOT_ENV_FILE"
+set +a
 
 # ---------------------------------------------------------------------------
 # Step 4: Rotate env-file passwords (skip admin)

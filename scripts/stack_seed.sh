@@ -122,15 +122,14 @@ fi
 
 export ROOT_ENV_FILE
 
-# Load environment
+# Load generated secrets FIRST — the env file references ${DQ_DB_PASSWORD} etc.
+# in URL construction, so secrets must be sourced before the env file.
+load_generated_env "$ROOT_ENV_FILE" "$ROOT_DIR"
 source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
 set -a
 source "$ROOT_ENV_FILE"
 set +a
 source_runtime_env_dependencies "$ROOT_ENV_FILE" post-root
-
-# Load generated env
-load_generated_env "$ROOT_ENV_FILE" "$ROOT_DIR"
 
 # Source seed block modules
 my_name="stack_seed.sh"

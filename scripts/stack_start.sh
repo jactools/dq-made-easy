@@ -74,13 +74,10 @@ if [[ ! -f "$ROOT_ENV_FILE" ]]; then
 fi
 
 export ROOT_ENV_FILE
-source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
-set -a
-source "$ROOT_ENV_FILE"
-set +a
 
 # ---------------------------------------------------------------------------
 # Determine start mode: fresh (no volumes) vs warm (volumes exist)
+# Must happen before sourcing env because env file references generated passwords.
 # ---------------------------------------------------------------------------
 VOLUMES_EXIST=false
 if stateful_volumes_exist; then
@@ -91,7 +88,9 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 1: Generate secrets
+# Step 1: Generate secrets (BEFORE sourcing env file)
+# The env file references ${DQ_DB_PASSWORD} etc. in URL construction,
+# so secrets must be sourced first.
 # ---------------------------------------------------------------------------
 info "stack_start.sh" "Generating secrets..."
 if [ "$VOLUMES_EXIST" = true ]; then
@@ -123,6 +122,12 @@ else
   error "stack_start.sh" "Secrets file not found after generation"
   exit 1
 fi
+
+# Now source the env file (password references are now resolved)
+source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
+set -a
+source "$ROOT_ENV_FILE"
+set +a
 
 # ---------------------------------------------------------------------------
 # Step 2: Rotate env-file passwords

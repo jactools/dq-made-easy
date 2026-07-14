@@ -479,9 +479,10 @@ fi
 export DQ_SPARK_DRIVER_MEMORY
 export DQ_SPARK_EXECUTOR_MEMORY
 
-# Prefer explicit DOCKER_DOMAIN, otherwise derive it from NEXUSCLOUD_DNS.
+# Prefer explicit DOCKER_DOMAIN, otherwise derive it from NEXUSCLOUD_HOSTNAME.
+# NEXUSCLOUD_HOSTNAME is only set in corporate environments; use :- default for portability.
 if [ -z "${DOCKER_DOMAIN:-}" ]; then
-    DOCKER_DOMAIN="${NEXUSCLOUD_HOSTNAME}"
+    DOCKER_DOMAIN="${NEXUSCLOUD_HOSTNAME:-}"
 fi
 if [ -n "${DOCKER_DOMAIN:-}" ]; then
     export DOCKER_DOMAIN
