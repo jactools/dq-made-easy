@@ -63,3 +63,17 @@ info()    { if [ "$LOG_LEVEL" -le 1 ]; then log_message INFO "$@"; fi }
 warning() { if [ "$LOG_LEVEL" -le 2 ]; then log_message WARNING "$@"; fi }
 error()   { if [ "$LOG_LEVEL" -le 3 ]; then log_message ERROR "$@"; fi }
 success() { if [ "$LOG_LEVEL" -le 4 ]; then log_message SUCCESS "$@"; fi }
+
+# require_cmd: check that an external command is available on PATH.
+# Emits a clear error with installation hint and exits 1 if missing.
+require_cmd() {
+  local cmd="$1"
+  local hint="${2:-}"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    error "require_cmd" "Missing required command: $cmd"
+    if [ -n "$hint" ]; then
+      info "require_cmd" "Installation hint: $hint"
+    fi
+    exit 1
+  fi
+}

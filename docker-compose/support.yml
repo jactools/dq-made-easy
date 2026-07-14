@@ -44,9 +44,6 @@ x-zammad-service:
   - dq-network
 services:
   zammad-postgresql:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - support
     image: postgres:${ZAMMAD_POSTGRES_VERSION:?ZAMMAD_POSTGRES_VERSION is required}
@@ -80,9 +77,6 @@ services:
     networks:
     - dq-network
   zammad-redis:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - support
     image: redis:${ZAMMAD_REDIS_VERSION:?ZAMMAD_REDIS_VERSION is required}
@@ -104,9 +98,6 @@ services:
     networks:
     - dq-network
   zammad-memcached:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - support
     image: memcached:${ZAMMAD_MEMCACHE_VERSION:?ZAMMAD_MEMCACHE_VERSION is required}
@@ -130,8 +121,6 @@ services:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     command:
     - sh
     - /opt/zammad/init.sh
@@ -157,8 +146,6 @@ services:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     command:
     - sh
     - /opt/zammad/init.sh
@@ -190,8 +177,6 @@ services:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     command:
     - sh
     - /opt/zammad/init.sh
@@ -216,8 +201,6 @@ services:
         condition: service_healthy
       zammad-memcached:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     command:
     - sh
     - /opt/zammad/init.sh
@@ -249,8 +232,6 @@ services:
         condition: service_started
       zammad-websocket:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     command:
     - zammad-nginx
     labels:
@@ -261,8 +242,6 @@ services:
         condition: service_started
       zammad-websocket:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - support
     build:
@@ -297,8 +276,6 @@ services:
         condition: service_started
       zammad-railsserver:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - support
     build:
@@ -337,9 +314,6 @@ services:
     - dq-network
     restart: 'no'
   openmetadata-search:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - support
     image: ${DOCKER_DOMAIN:?DOCKER_DOMAIN is required}/library/elasticsearch:8.11.4

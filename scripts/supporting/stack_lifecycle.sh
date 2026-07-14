@@ -127,6 +127,43 @@ remove_stateful_volumes() {
   fi
 }
 
+# Remove only the main Postgres (pgdata_v18) volume
+remove_compose_postgres_volume() {
+  local prefix
+  prefix="$(_get_project_prefix)"
+  local vol_name="${prefix}_pgdata_v18"
+
+  if ! docker volume ls -q --filter "name=${vol_name}$" 2>/dev/null | grep -q .; then
+    info "stack_lifecycle" "Postgres volume $vol_name does not exist (fresh)"
+    return 0
+  fi
+
+  # Stop the db container so the volume can be removed
+  local db_container
+  db_container="$(docker ps -q --filter name=dq-made-easy-db 2>/dev/null || true)"
+  if [ -n "$db_container" ]; then
+    info "stack_lifecycle" "Stopping db container before removing volume"
+    docker stop "$db_container" 2>/dev/null || true
+    docker rm "$db_container" 2>/dev/null || true
+  fi
+
+  info "stack_lifecycle" "Removing Postgres volume: $vol_name"
+  if docker volume rm "$vol_name" 2>/dev/null; then
+    info "stack_lifecycle" "Removed $vol_name"
+    return 0
+  fi
+
+  # Volume may still be in use; try with --force
+  warning "stack_lifecycle" "Could not remove $vol_name normally, trying with force"
+  if docker volume rm -f "$vol_name" 2>/dev/null; then
+    info "stack_lifecycle" "Force-removed $vol_name"
+    return 0
+  fi
+
+  error "stack_lifecycle" "Failed to remove Postgres volume $vol_name (may be in use by another container)"
+  return 1
+}
+
 # ---------------------------------------------------------------------------
 # Generated artifact cleanup
 # ---------------------------------------------------------------------------

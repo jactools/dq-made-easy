@@ -45,6 +45,7 @@ Groups:
   profiling      Profiling worker lifecycle validations (docker)
   observability  Monitoring/observability validations (docker)
   openmetadata   OpenMetadata OTel smoke validation (docker)
+  security       Local vulnerability assessment (SAST, deps, IaC, images)
   other          Untagged validate_*.sh scripts
 
 Options:
@@ -199,7 +200,7 @@ has_group() {
 
 list_groups() {
   local groups
-  groups="all smoke repo governance api regression ui engine profiling observability openmetadata other"
+  groups="all smoke repo governance api regression ui engine profiling observability openmetadata security other"
 
   info "$my_name" "Groups:"
   for g in $groups; do

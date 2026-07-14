@@ -134,7 +134,6 @@ _ADMIN_PASSWORD_VARS=(
   OPENMETADATA_SEARCH_PASSWORD
   ZAMMAD_POSTGRES_PASSWORD
   KEYCLOAK_SYSTEM_ADMIN_PASSWORD
-  KEYCLOAK_ADMIN_PASS
 )
 
 # Load admin passwords from existing secrets file (--reuse-admin mode)
@@ -282,8 +281,15 @@ _emit_admin_password() {
   echo "# ============================================================"
   echo "KAFKA_TLS_KEYSTORE_PASSWORD=\"$(generate_password)\""
   echo "KEYCLOAK_HTTPS_KEYSTORE_PASSWORD=\"$(generate_password)\""
-  _emit_admin_password KEYCLOAK_ADMIN_PASS
-  _emit_admin_password KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+  # KEYCLOAK_SYSTEM_ADMIN_PASSWORD must equal KEYCLOAK_ADMIN_PASS so that
+  # the Keycloak entrypoint (which uses KEYCLOAK_ADMIN* for initial setup)
+  # and the seeding scripts (which use KEYCLOAK_SYSTEM_ADMIN*) agree.
+  _kc_admin_pass="$(_get_admin_password KEYCLOAK_SYSTEM_ADMIN_PASSWORD)" || true
+  if [ -z "$_kc_admin_pass" ]; then
+    _kc_admin_pass="$(generate_password)"
+  fi
+  echo "KEYCLOAK_ADMIN_PASS=\"${_kc_admin_pass}\""
+  echo "KEYCLOAK_SYSTEM_ADMIN_PASSWORD=\"${_kc_admin_pass}\""
   echo "KEYCLOAK_USER_PASSWORD=\"$(generate_password)\""
   echo "OPENMETADATA_OIDC_SEED_PASSWORD=\"$(generate_password)\""
   echo ""

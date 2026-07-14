@@ -1,8 +1,5 @@
 services:
   openmetadata-db:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - metadata
     image: ${DQ_OPENMETADATA_DB_REGISTRY:?DQ_OPENMETADATA_DB_REGISTRY is required}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:?DQ_OPENMETADATA_DB_IMAGE is required}:${DQ_OPENMETADATA_DB_TAG:?DQ_OPENMETADATA_DB_TAG is required}
@@ -52,8 +49,6 @@ services:
     depends_on:
       openmetadata-db:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - metadata
     image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
@@ -70,9 +65,6 @@ services:
     labels:
     - monitoring=true
   openmetadata-search-v9:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - metadata
     image: ${OPENMETADATA_SEARCH_IMAGE:?OPENMETADATA_SEARCH_IMAGE is required}:${OPENMETADATA_SEARCH_TAG:?OPENMETADATA_SEARCH_TAG is required}
@@ -114,8 +106,6 @@ services:
         condition: service_healthy
       openmetadata-search-v9:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - metadata
     image: ${OPENMETADATA_REGISTRY}${OPENMETADATA_NAMESPACE}${OPENMETADATA_IMAGE}:${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
@@ -148,8 +138,6 @@ services:
       openmetadata-search-v9:
         condition: service_healthy
       openmetadata-migrate:
-        condition: service_completed_successfully
-      trust-bundle:
         condition: service_completed_successfully
     profiles:
     - metadata
@@ -246,8 +234,6 @@ services:
     depends_on:
       openmetadata-server:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
       keycloak:
         condition: service_healthy
     profiles:
@@ -303,8 +289,6 @@ services:
     depends_on:
       openmetadata-server:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - metadata
     image: ${OPENMETADATA_INGESTION_REGISTRY:?OPENMETADATA_INGESTION_REGISTRY is required}${OPENMETADATA_INGESTION_NAMESPACE:-}${OPENMETADATA_INGESTION_IMAGE:?OPENMETADATA_INGESTION_IMAGE is required}:${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}

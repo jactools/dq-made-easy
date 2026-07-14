@@ -4,10 +4,6 @@
 
 services:
   keycloak-seed-artifacts:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
-
     profiles: ["auth", "gateway", "support"]
     build:
       context: ..
@@ -48,8 +44,6 @@ services:
       dockerfile: Dockerfile.keycloak
     depends_on:
       keycloak-seed-artifacts:
-        condition: service_completed_successfully
-      trust-bundle:
         condition: service_completed_successfully
     environment:
       KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}

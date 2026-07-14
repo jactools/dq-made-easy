@@ -93,7 +93,10 @@ validate_openmetadata_authorization() {
 
 prepare_openmetadata_access_token() {
   local om_provider="${OM_AUTHENTICATION_PROVIDER:-custom-oidc}"
-  local token_url="${SSO_PUBLIC_ISSUER_URL:-}"
+  # Construct a direct localhost token URL to avoid DNS resolution issues
+  # and Kong proxy overhead when running outside containers.
+  local kc_host_port="${KEYCLOAK_HTTPS_HOST_PORT:-9444}"
+  local token_url="https://127.0.0.1:${kc_host_port}/realms/${KEYCLOAK_REALM:-jaccloud}"
   local client_id="${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}"
   local seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
   local seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"

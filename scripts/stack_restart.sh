@@ -151,7 +151,16 @@ fi
 }
 
 # ---------------------------------------------------------------------------
-# Step 6: Build images if requested
+# Step 6: Build and run the trust-bundle container
+# ---------------------------------------------------------------------------
+info "stack_restart.sh" "Building trust bundle (JKS/P12)..."
+"$ROOT_DIR/scripts/build_trust_bundle.sh" --env-file "$ROOT_ENV_FILE" || {
+  error "stack_restart.sh" "Trust-bundle build failed"
+  exit 1
+}
+
+# ---------------------------------------------------------------------------
+# Step 7: Build images if requested
 # ---------------------------------------------------------------------------
 if [ "$FORCE_BUILD" = true ]; then
   info "stack_restart.sh" "Building images (--force-build)..."
@@ -170,7 +179,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 7: Bring up containers
+# Step 8: Bring up containers
 # ---------------------------------------------------------------------------
 info "stack_restart.sh" "Starting containers..."
 export COMPOSE_PROGRESS=plain

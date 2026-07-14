@@ -20,7 +20,7 @@ wait_for_keycloak_ready() {
   local ready_url="$1"
   local service_label="${2:-Keycloak}"
   local max_attempts="${KEYCLOAK_READINESS_MAX_ATTEMPTS:-10}"
-  local sleep_seconds="${KEYCLOAK_READINESS_SLEEP_SECONDS:-3}"
+  local sleep_seconds="${KEYCLOAK_READINESS_SLEEP_SECONDS:-5}"
   local connect_timeout=10
   local max_time=20
   local is_ready=false
@@ -73,20 +73,19 @@ wait_for_keycloak_ready() {
   for attempt in $(seq 1 "$max_attempts"); do
     curl_status=0
     if curl_error_output="$(curl "${curl_args[@]}" "$ready_url" 2>&1)"; then
+      curl_status=$?
       is_ready=true
       break
     else
       curl_status=$?
+      info "$my_name" "  curl attempt ${attempt} failed: exit=${curl_status} url=${ready_url}"
+      info "$my_name" "  curl error output: ${curl_error_output}"
     fi
 
     last_failure_kind="$(classify_curl_failure "$curl_status" "$curl_error_output")"
 
     printf '.'
 
-    if (( attempt % 10 == 0 )); then
-      info "$my_name" "  waiting for ${service_label}... (${attempt}/${max_attempts})"
-      info "$my_name" "  last curl failure: kind=${last_failure_kind} exit=${curl_status} url=${ready_url}"
-    fi
     if [ "$sleep_seconds" != "0" ]; then
       sleep "$sleep_seconds"
     fi

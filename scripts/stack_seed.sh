@@ -161,29 +161,25 @@ fi
 
 # ---------------------------------------------------------------------------
 # Ensure required services are running
+# Note: seed_postgres_in_docker handles its own db/keycloak startup and
+# health waits (it removes the pg volume and restarts containers).
+# We only pre-wait here for keycloak when postgres seeding is NOT enabled.
 # ---------------------------------------------------------------------------
-if [ "$SEED_KEYCLOAK" = true ] || [ "$SEED_POSTGRES" = true ]; then
-  info "stack_seed.sh" "Ensuring db and keycloak are running..."
-  docker_compose up -d db keycloak || {
-    error "stack_seed.sh" "Failed to start db/keycloak for seeding"
+if [ "$SEED_KEYCLOAK" = true ] && [ "$SEED_POSTGRES" = false ]; then
+  info "stack_seed.sh" "Ensuring keycloak is running..."
+  docker_compose up -d keycloak || {
+    error "stack_seed.sh" "Failed to start keycloak for seeding"
     exit 1
   }
-  wait_for_compose_service_healthy db "Postgres" 120 5 || {
-    error "stack_seed.sh" "Postgres not healthy"
+  wait_for_compose_service_healthy keycloak "Keycloak" 180 3 || {
+    error "stack_seed.sh" "Keycloak not healthy"
+    docker_compose logs --no-color --tail 80 keycloak || true
     exit 1
   }
 fi
 
-if [ "$SEED_KEYCLOAK" = true ]; then
-  KEYCLOAK_PUBLIC_URL="${KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_LOCAL_URL:-}}"
-  if [ -n "$KEYCLOAK_PUBLIC_URL" ]; then
-    keycloak_ready_url="${KEYCLOAK_PUBLIC_URL}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration"
-    wait_for_keycloak_ready "$keycloak_ready_url" "Keycloak" 120 5 || {
-      error "stack_seed.sh" "Keycloak not ready for seeding"
-      exit 1
-    }
-  fi
-fi
+# When postgres seeding is enabled, seed_postgres_in_docker handles
+# starting db + keycloak and waiting for health before running db-seed.
 
 # ---------------------------------------------------------------------------
 # Run seed operations (ordered: keycloak → postgres → zammad → openmetadata → deliveries)
@@ -210,6 +206,31 @@ if [ "$SEED_ZAMMAD" = true ]; then
     error "stack_seed.sh" "Zammad seeding failed"
     exit 1
   }
+fi
+
+# ---------------------------------------------------------------------------
+# Reload rotated Keycloak credentials after seeding
+# The Keycloak seed artifacts container writes updated credentials to tmp/
+# We must re-source them so downstream scripts (OpenMetadata) use the new passwords.
+# ---------------------------------------------------------------------------
+_KC_ENV_SUFFIX="$(_derive_env_suffix "${ROOT_ENV_FILE}")"
+_KC_CREDS_ENV="$ROOT_DIR/tmp/keycloak_seed_user_credentials.${_KC_ENV_SUFFIX}.env"
+if [ -f "$_KC_CREDS_ENV" ]; then
+  info "stack_seed.sh" "Reloading rotated Keycloak credentials from $_KC_CREDS_ENV"
+  set -a
+  # shellcheck disable=SC1090
+  source "$_KC_CREDS_ENV"
+  set +a
+fi
+
+# ---------------------------------------------------------------------------
+# Propagate rotated Keycloak credentials to consumers that share the same user
+# OPENMETADATA_OIDC_SEED_USERNAME == SMOKE_LOGIN_EMAIL (dq-admin@jaccloud.nl)
+# so the OpenMetadata seed password must match the rotated Keycloak password.
+# ---------------------------------------------------------------------------
+if [ -n "${SMOKE_LOGIN_PASSWORD:-}" ] && [ "$OPENMETADATA_OIDC_SEED_USERNAME" = "$SMOKE_LOGIN_EMAIL" ]; then
+  info "stack_seed.sh" "Propagating rotated SMOKE_LOGIN password to OPENMETADATA_OIDC_SEED_PASSWORD"
+  export OPENMETADATA_OIDC_SEED_PASSWORD="$SMOKE_LOGIN_PASSWORD"
 fi
 
 if [ "$SEED_OPENMETADATA" = true ]; then

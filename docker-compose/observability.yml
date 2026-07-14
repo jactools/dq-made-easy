@@ -1,8 +1,5 @@
 services:
   loki:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - observability
     build:
@@ -76,9 +73,7 @@ services:
     - dq-network
     depends_on:
       loki:
-        condition: service_completed_successfully
-      trust-bundle:
-        condition: service_completed_successfully
+        condition: service_healthy
     labels:
     - monitoring=true
   tempo:
@@ -114,9 +109,7 @@ services:
     - dq-network
     depends_on:
       prometheus:
-        condition: service_completed_successfully
-      trust-bundle:
-        condition: service_completed_successfully
+        condition: service_healthy
     labels:
     - monitoring=true
   grafana:
@@ -204,9 +197,6 @@ services:
     labels:
     - monitoring=true
   container-metrics:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - observability
     build:
@@ -236,9 +226,6 @@ services:
     labels:
     - monitoring=true
   pushgateway:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - observability
     - pushgateway
@@ -290,15 +277,10 @@ services:
     - dq-network
     depends_on:
       tempo:
-        condition: service_completed_successfully
+        condition: service_healthy
       prometheus:
-        condition: service_completed_successfully
-      trust-bundle:
-        condition: service_completed_successfully
+        condition: service_healthy
   aistor:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - observability
     - aistor

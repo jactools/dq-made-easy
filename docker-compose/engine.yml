@@ -3,8 +3,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - engine
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
@@ -60,9 +58,6 @@ services:
       retries: 5
       start_period: 5s
   dq-made-easy-engine-warmup:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - engine
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
@@ -91,8 +86,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - workers
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
@@ -146,8 +139,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - workers
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
@@ -193,8 +184,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - workers
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
@@ -236,8 +225,6 @@ services:
     depends_on:
       kafka:
         condition: service_started
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - workers
     image: ${DQ_KAFKA_CONSUMER_REGISTRY:?DQ_KAFKA_CONSUMER_REGISTRY is required}${DQ_KAFKA_CONSUMER_NAMESPACE:-}${DQ_KAFKA_CONSUMER_IMAGE:?DQ_KAFKA_CONSUMER_IMAGE is required}:${DQ_KAFKA_CONSUMER_TAG:?DQ_KAFKA_CONSUMER_TAG is required}
@@ -272,8 +259,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - workers
     - profiling

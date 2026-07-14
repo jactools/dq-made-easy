@@ -1,8 +1,5 @@
 services:
   base:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - base
     image: ${DQ_BASE_REGISTRY:?DQ_BASE_REGISTRY is required}${DQ_BASE_NAMESPACE:-}${DQ_BASE_IMAGE:?DQ_BASE_IMAGE is required}:${DQ_BASE_TAG:?DQ_BASE_TAG is required}
@@ -17,9 +14,6 @@ services:
     networks:
     - dq-network
   db:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - core
     - gateway
@@ -64,11 +58,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 5s
+      start_period: 30s
   redis:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - redis
     - core
@@ -115,8 +106,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - core
     - gateway
@@ -138,8 +127,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - redis
     - core
@@ -158,9 +145,6 @@ services:
     labels:
     - monitoring=true
   kafka:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - engine
     - core
@@ -219,8 +203,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - core
     - gateway
@@ -255,8 +237,6 @@ services:
       redis:
         condition: service_healthy
       api-migrate:
-        condition: service_completed_successfully
-      trust-bundle:
         condition: service_completed_successfully
     profiles:
     - core
@@ -354,8 +334,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - core
     image: ${DQ_FRONTEND_REGISTRY}${DQ_FRONTEND_NAMESPACE}${DQ_FRONTEND_IMAGE}:${DQ_FRONTEND_TAG:?DQ_FRONTEND_TAG is required}

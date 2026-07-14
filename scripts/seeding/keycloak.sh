@@ -258,11 +258,12 @@ seed_keycloak_in_docker() {
     exit 33
   fi
 
-  keycloak_local_base="${KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_LOCAL_URL:-}}"
-  if [ -z "$keycloak_local_base" ]; then
-    error "$my_name" "KEYCLOAK_PUBLIC_URL or KEYCLOAK_LOCAL_URL is required for Keycloak readiness checks"
-    exit 33
-  fi
+  # For readiness checks, prefer a direct localhost connection over the external
+  # hostname to avoid DNS resolution issues and Kong proxy overhead during seeding.
+  local keycloak_host_port="${KEYCLOAK_HTTPS_HOST_PORT:-9444}"
+  keycloak_local_base="https://127.0.0.1:${keycloak_host_port}"
+
+  info "$my_name" "Using direct URL for readiness check: $keycloak_local_base"
   keycloak_ready_url="${keycloak_local_base}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration"
 
   info "$my_name" "Checking Keycloak realm readiness before applying seed artifacts..."
@@ -280,6 +281,10 @@ seed_keycloak_in_docker() {
   fi
   keycloak_admin_base_url="https://127.0.0.1:8443${keycloak_https_relative_path}"
 
+  # Use KEYCLOAK_SYSTEM_ADMIN vars if set, else fall back to KEYCLOAK_ADMIN vars
+  local kc_admin_user="${KEYCLOAK_SYSTEM_ADMIN_USERNAME:-${KEYCLOAK_ADMIN_USER:-}}"
+  local kc_admin_pass="${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:-${KEYCLOAK_ADMIN_PASS:-}}"
+
   local login_attempt login_max_attempts login_output
   login_max_attempts=5
   login_attempt=1
@@ -287,8 +292,8 @@ seed_keycloak_in_docker() {
     if login_output="$(run_keycloak_kcadm "$keycloak_container_id" config credentials \
       --server "$keycloak_admin_base_url" \
       --realm master \
-      --user "${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}" \
-      --password "${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}" 2>&1)"; then
+      --user "${kc_admin_user:?kc admin username required}" \
+      --password "${kc_admin_pass:?kc admin password required}" 2>&1)"; then
       break
     fi
 
@@ -353,11 +358,10 @@ seed_keycloak_in_docker() {
       exit 33
     fi
 
-    run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" --new-password "$password" >/dev/null || {
-      error "$my_name" "Failed to apply rotated password for ${email}"
-      exit 33
-    }
-    rotated_password_count=$((rotated_password_count + 1))
+    # Use kcadm to set the password.  "--new-password=${password}" (double-quoted,
+    # no space around =) avoids kcadm argument parsing issues when the password
+    # starts with '-'.
+    run_keycloak_kcadm "$keycloak_container_id" set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=\"$password\""
   done <<EOF
 $(docker exec "$keycloak_container_id" cat "$seed_credentials_file")
 EOF

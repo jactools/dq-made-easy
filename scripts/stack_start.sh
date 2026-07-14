@@ -193,7 +193,17 @@ info "stack_start.sh" "Ensuring TLS certificates..."
 }
 
 # ---------------------------------------------------------------------------
-# Step 5: Build images if requested
+# Step 5: Build and run the trust-bundle container
+# Runs BEFORE compose up so JKS/P12 are on disk for services that mount them.
+# ---------------------------------------------------------------------------
+info "stack_start.sh" "Building trust bundle (JKS/P12)..."
+"$ROOT_DIR/scripts/build_trust_bundle.sh" --env-file "$ROOT_ENV_FILE" || {
+  error "stack_start.sh" "Trust-bundle build failed"
+  exit 1
+}
+
+# ---------------------------------------------------------------------------
+# Step 6: Build images if requested
 # ---------------------------------------------------------------------------
 if [ "$FORCE_BUILD" = true ]; then
   info "stack_start.sh" "Building images (--force-build)..."
@@ -212,7 +222,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 6: Bring up all containers
+# Step 7: Bring up all containers
 # ---------------------------------------------------------------------------
 info "stack_start.sh" "Starting containers..."
 export COMPOSE_PROGRESS=plain
@@ -232,7 +242,7 @@ docker_compose "${PROFILE_ARGS[@]}" up -d --force-recreate --remove-orphans || {
 }
 
 # ---------------------------------------------------------------------------
-# Step 7: Wait for critical services
+# Step 8: Wait for critical services
 # ---------------------------------------------------------------------------
 info "stack_start.sh" "Waiting for Keycloak..."
 wait_for_compose_service_healthy keycloak "Keycloak (service=keycloak)" 120 5 || {

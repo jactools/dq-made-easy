@@ -4,10 +4,6 @@
 
 services:
   db-seed:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
-
     profiles: ["seed"]
     environment:
       COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
@@ -21,7 +17,13 @@ services:
       PGDATABASE: ${DQ_DB_NAME:?DQ_DB_NAME is required}
       KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL?KEYCLOAK_PUBLIC_URL is required}
-      SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      SSO_INTERNAL_ISSUER_URL: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:?KEYCLOAK_ADMIN_USER is required}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS:?KEYCLOAK_ADMIN_PASS is required}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}
+      KEYCLOAK_TOKEN_REALM: ${KEYCLOAK_TOKEN_REALM:?KEYCLOAK_TOKEN_REALM is required}
       CURL_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
       SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
     build:
@@ -53,10 +55,6 @@ services:
     restart: "no"
 
   delivery-seed:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
-
     profiles: ["seed"]
     image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
     build:

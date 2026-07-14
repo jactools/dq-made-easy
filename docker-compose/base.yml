@@ -16,21 +16,6 @@ x-tls-env: &tls-env
   REQUESTS_CA_BUNDLE: /etc/tls/internal-ca-bundle.pem
 
 # ============================================================================
-# SERVICES: Foundation services
-# ============================================================================
-services:
-  trust-bundle:
-    profiles: ["auth", "gateway", "core", "observability", "support", "airflow", "redis", "engine", "workers", "trino", "profiling", "metadata", "metadata_ingestion", "llm"]
-    build:
-      context: ..
-      dockerfile: docker/trust-bundle/Dockerfile
-    volumes:
-      - ../tmp/certs:/certs
-    networks:
-      - dq-network
-    restart: "no"
-
-# ============================================================================
 # VOLUMES: Persistent storage for all services
 # ============================================================================
 volumes:

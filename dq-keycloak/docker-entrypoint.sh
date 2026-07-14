@@ -66,8 +66,14 @@ if [ ! -f "$seed_credentials_file" ]; then
       exit 1
 fi
 
-if [ -z "${KEYCLOAK_SYSTEM_ADMIN_USERNAME:-}" ] || [ -z "${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:-}" ]; then
-      echo "[entrypoint] ERROR: KEYCLOAK_SYSTEM_ADMIN_USERNAME and KEYCLOAK_SYSTEM_ADMIN_PASSWORD are required" >&2
+# Keycloak admin credentials: use the system admin vars if set,
+# otherwise fall back to the KEYCLOAK_ADMIN* env vars that Keycloak
+# itself uses for the initial master-realm admin account.
+ADMIN_USERNAME="${KEYCLOAK_SYSTEM_ADMIN_USERNAME:-${KEYCLOAK_ADMIN:-}}"
+ADMIN_PASSWORD="${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:-${KEYCLOAK_ADMIN_PASSWORD:-}}"
+
+if [ -z "${ADMIN_USERNAME:-}" ] || [ -z "${ADMIN_PASSWORD:-}" ]; then
+      echo "[entrypoint] ERROR: admin username and password are required (KEYCLOAK_ADMIN or KEYCLOAK_SYSTEM_ADMIN_USERNAME)" >&2
       exit 1
 fi
 
@@ -303,7 +309,7 @@ sync_engine_worker_service_account_role() {
 # Wait for Keycloak admin endpoint to be available
 echo "[entrypoint] waiting for Keycloak admin endpoint..."
 for i in {1..30}; do
-      if /opt/keycloak/bin/kcadm.sh config credentials --server "$keycloak_admin_base_url" --realm master --user "${KEYCLOAK_SYSTEM_ADMIN_USERNAME}" --password "${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}" >/dev/null 2>&1; then
+      if /opt/keycloak/bin/kcadm.sh config credentials --server "$keycloak_admin_base_url" --realm master --user "${ADMIN_USERNAME}" --password "${ADMIN_PASSWORD}" >/dev/null 2>&1; then
             echo "[entrypoint] Keycloak is up"
             break
       fi

@@ -36,19 +36,13 @@ wait_for_db() {
   local attempt
   local probe_output
   for attempt in $(seq 1 90); do
+    info "$my_name" "Waiting for database... (${attempt}/90)"
     if probe_output="$(psql "$DQ_DB_INTERNAL_URL" -c 'select 1' 2>&1)"; then
+      info "$my_name" "database is ready at ${DQ_DB_INTERNAL_URL}"
       return 0
     fi
-
-    if [ "$attempt" -eq 1 ] || [ $((attempt % 10)) -eq 0 ]; then
-      info "$my_name" "Waiting for database... (${attempt}/90)"
-      info "$my_name" "  probe: psql ${DQ_DB_INTERNAL_URL} -c 'select 1'"
-      if [ -n "$probe_output" ]; then
-        info "$my_name" "  probe error: ${probe_output}"
-      fi
-    fi
-
-    sleep 2
+    info "$my_name" "  probe error: ${probe_output}"
+    sleep 5
   done
   error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL}"
   exit 1
@@ -284,7 +278,10 @@ SQL
 
 info "$my_name" "Containerized DB seed starting"
 info "$my_name" "Waiting for database..."
-wait_for_db
+wait_for_db || {
+  error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL}"
+  exit 1
+}
 info "$my_name" "Waiting for Keycloak..."
 if ! wait_for_keycloak_ready "$KEYCLOAK_READY_URL" "Keycloak"; then
   error "$my_name" "Keycloak did not become ready at ${KEYCLOAK_READY_URL}"

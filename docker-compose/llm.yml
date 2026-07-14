@@ -4,10 +4,6 @@
 
 services:
   dq-made-easy-llm:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
-
     profiles: ["llm"]
     image: ${DQ_LLM_REGISTRY:?DQ_LLM_REGISTRY is required}${DQ_LLM_NAMESPACE:?DQ_LLM_NAMESPACE is required}${DQ_LLM_IMAGE:?DQ_LLM_IMAGE is required}:${DQ_LLM_TAG:?DQ_LLM_TAG is required}
     build:

@@ -1,8 +1,5 @@
 services:
   kong-db:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - gateway
     - observability
@@ -39,8 +36,6 @@ services:
     depends_on:
       kong-db:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - gateway
     image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:?DQ_KONG_TAG is required}
@@ -74,8 +69,6 @@ services:
         condition: service_completed_successfully
       api:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - gateway
     image: ${DQ_KONG_REGISTRY}${DQ_KONG_NAMESPACE}${DQ_KONG_IMAGE}:${DQ_KONG_TAG:?DQ_KONG_TAG is required}
@@ -151,8 +144,6 @@ services:
     depends_on:
       kong-db:
         condition: service_healthy
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - gateway
     image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
@@ -169,9 +160,6 @@ services:
     labels:
     - monitoring=true
   edge:
-    depends_on:
-      trust-bundle:
-        condition: service_completed_successfully
     profiles:
     - edge
     build:
