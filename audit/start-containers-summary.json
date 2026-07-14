@@ -1,12 +1,12 @@
 {
   "args": "--with-core --with-auth --with-edge --with-gateway --with-engine --with-workers --with-airflow --with-observability --force-build",
-  "current_stage": "start docker stack",
+  "current_stage": "completed",
   "env_file": "/Users/jacbeekers/gitrepos/dq-made-easy/.env.dev.local",
   "env_selection": "dev (.env.dev.local)",
   "exit_code": "0",
-  "failed_command": "SKIP_POST_STACK_KONG_REFRESH=true ./scripts/start_stack.sh \"${STACK_ARGS[@]}\"",
-  "finished_at": "2026-07-14T13:17:06Z",
+  "failed_command": "exit 0",
+  "finished_at": "2026-07-14T15:05:45Z",
   "script": "start-containers.sh",
-  "started_at": "2026-07-14T13:13:16Z",
+  "started_at": "2026-07-14T14:58:21Z",
   "status": "succeeded"
 }

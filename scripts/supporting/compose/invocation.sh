@@ -282,20 +282,3 @@ EOF
   docker_compose logs --no-color --tail 50 "$service_name" || true
   return 1
 }
-
-remove_compose_postgres_volume() {
-  local project_prefix="${COMPOSE_PROJECT_NAME:-dq-made-easy-dev}"
-  local volume_name="${project_prefix}_pgdata_v18"
-
-  if ! command -v docker >/dev/null 2>&1; then
-    error "compose/invocation.sh" "docker is required to remove the PostgreSQL data volume"
-    return 127
-  fi
-
-  info "compose/invocation.sh" "Removing PostgreSQL data volume ${volume_name} so regenerated passwords apply cleanly"
-
-  docker_compose stop db >/dev/null 2>&1 || true
-  docker_compose rm -fs db >/dev/null 2>&1 || true
-
-  docker volume rm "$volume_name" 2>/dev/null || true
-}

@@ -255,7 +255,7 @@ remove_stale_stateful_volumes() {
   local volume_name=""
 
   info "stack_ctl.sh" "Removing stale stateful volumes before ${ACTION} so regenerated passwords can take effect"
-  for volume_name in pgdata_v18 kong-db-data-v17 openmetadata_pgdata_v18 \
+  for volume_name in keycloak_data pgdata_v18 kong-db-data-v17 openmetadata_pgdata_v18 \
     zammad_postgresql_data openmetadata_search_data openmetadata_search_v9_data; do
     docker volume rm "${project_prefix}_${volume_name}" 2>/dev/null || true
   done
