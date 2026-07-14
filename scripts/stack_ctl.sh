@@ -250,6 +250,17 @@ EOF
   fi
 }
 
+remove_stale_stateful_volumes() {
+  local project_prefix="${COMPOSE_PROJECT_NAME:-dq-made-easy-dev}"
+  local volume_name=""
+
+  info "stack_ctl.sh" "Removing stale stateful volumes before ${ACTION} so regenerated passwords can take effect"
+  for volume_name in pgdata_v18 kong-db-data-v17 openmetadata_pgdata_v18 \
+    zammad_postgresql_data openmetadata_search_data openmetadata_search_v9_data; do
+    docker volume rm "${project_prefix}_${volume_name}" 2>/dev/null || true
+  done
+}
+
 is_reconciliation_profile() {
   case "$1" in
     gateway|auth|metadata)
@@ -630,6 +641,10 @@ case "$ACTION" in
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_services_from_profiles
     stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
+    if ! docker_compose stop ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"} >/dev/null 2>&1; then
+      true
+    fi
+    remove_stale_stateful_volumes
     start_args=()
     start_args+=(up -d --force-recreate)
     if [ "$REMOVE_ORPHANS" = true ]; then
@@ -646,6 +661,10 @@ case "$ACTION" in
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_services_from_profiles
     stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
+    if ! docker_compose stop ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"} >/dev/null 2>&1; then
+      true
+    fi
+    remove_stale_stateful_volumes
     restart_args=(up -d --force-recreate)
     restart_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
     docker_compose "${restart_args[@]}"

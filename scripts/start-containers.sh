@@ -127,10 +127,10 @@ fi
 
 validate_selected_root_env_file "$ROOT_DIR" full
 
-# source repository-level .env
-set -a
-source "$ROOT_ENV_FILE"
-set +a
+if ! source_selected_root_env_file; then
+  exit 1
+fi
+
 cd "$ROOT_DIR"
 
 # Ensure canonical public Kong URL is present. Scripts expect this to be set

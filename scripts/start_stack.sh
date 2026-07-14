@@ -428,19 +428,18 @@ else
 fi
 
 info "$my_name" "Starting docker-compose stack (bringing containers up)..."
-# Remove stale volumes so databases initialize with fresh passwords.
+docker_compose down --remove-orphans 2>/dev/null || true
+
+# Remove stale volumes after the containers are stopped so the regenerated
+# passwords can be applied to fresh database state.
 # generate_secrets.sh --force always regenerates passwords, so old data
-# volumes would have mismatched credentials.
-# docker compose down -v only removes volumes when stopping containers.
-# If containers are already down, orphaned volumes persist, so we remove
-# the database volumes explicitly using the project name prefix.
+# volumes would otherwise keep the previous credentials.
 info "$my_name" "Removing stale database volumes for fresh initialization with new passwords..."
 PROJECT_PREFIX="${COMPOSE_PROJECT_NAME:-dq-made-easy-dev}"
 for vol_name in pgdata_v18 kong-db-data-v17 openmetadata_pgdata_v18 \
   zammad_postgresql_data openmetadata_search_data openmetadata_search_v9_data; do
   docker volume rm "${PROJECT_PREFIX}_$vol_name" 2>/dev/null || true
 done
-docker_compose down --remove-orphans 2>/dev/null || true
 
 UP_ARGS=(up -d)
 # Always recreate containers because generate_secrets.sh --force regenerates
