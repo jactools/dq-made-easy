@@ -24,6 +24,12 @@
 - Automated validation suite confirms no plaintext HTTP regressions across compose, edge, and bootstrap configuration
 - Operators have a documented cert-generation workflow, TLS troubleshooting guide, and exception registry to distinguish approved deviations from regressions
 
+### ✅ Build and Seeding Improvements
+
+- OpenMetadata seeding is now reliable: the host script obtains a validated access token and passes it to the seed container, avoiding the password-regeneration race that could cause 404 errors
+- Frontend builds are self-contained: the compiled `dist/` is committed to git, so `docker compose build` no longer requires Node.js/npm on the host
+- Full stack rebuild (`--force-build`) now regenerates frontend assets from source before packaging the Docker image
+
 ## v0.10.5 - Public Documentation Portal (May 22, 2026)
 
 ### ✅ What's Updated
