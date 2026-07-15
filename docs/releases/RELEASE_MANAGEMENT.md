@@ -8,7 +8,7 @@ This document describes how releases are managed, what "concluding a release" me
 
 ## Version Identity
 
-The app version is defined in three places and must always be consistent:
+The app version is defined in four files and must always be consistent:
 
 | File | Key | Purpose |
 |------|-----|---------|
@@ -51,11 +51,12 @@ Develop on v0.11.6  ──→  Conclude v0.11.6  ──→  Develop on v0.11.7
 While developing on a version (e.g. `0.11.6`):
 
 - All version markers point at `0.11.6`
-- Test proofs are created under `test-results/test-proof/0.11.6/`
-- Release notes draft lives in `docs/releases/RELEASE_0_11_6_*.md`
-- `TECHNICAL.md` changelog has an open `### v0.11.6` section
-- `RELEASE_NOTES_USER.md` has an open `## v0.11.6` section
-- `docs/releases/README.md` lists `0.11.6` as the latest
+- New test proofs are created under `test-results/test-proof/<current-version>/<proof_type>/`
+- Release notes draft lives in `docs/releases/RELEASE_<version>_*.md`
+- `TECHNICAL.md` changelog has an open `### v<version>` section
+- `RELEASE_NOTES_USER.md` has an open `## v<version>` section
+- `docs/releases/README.md` lists the current version as "Latest releases"
+- **Do not** add changes to concluded (previous) version sections — always target the current version
 
 ### Concluding a Release
 
@@ -74,21 +75,25 @@ To conclude release `v0.11.6` and begin `v0.11.7`:
    - Run `./scripts/validation/validate_test_proof.sh` to confirm all proofs are schema-compliant
 
 3. **Bump version markers** (these changes open the next development window)
-   - `dq-ui/package.json`: `"version": "0.11.6"` → `"0.11.7"`
-   - `dq-ui/docs-site/package.json`: `"version": "0.11.6"` → `"0.11.7"`
-   - `VERSION_MANIFEST.json` `apps.ui`: `"0.11.6"` → `"0.11.7"`
-   - `VERSION_MANIFEST.json` `apps.api`: `"0.11.6"` → `"0.11.7"`
-   - `VERSION_MANIFEST.json` components: bump any that changed, leave others as-is
-   - `docs/releases/README.md`: update "Latest releases" to `0.11.7`
-   - `RELEASE_NOTES_USER.md`: add new `## v0.11.7` section (initially empty or with "work in progress" note)
-   - `TECHNICAL.md`: add new `### v0.11.7` section
+
+   - Determine the next version: increment the patch digit (e.g. `0.11.6` → `0.11.7`). For minor releases, increment the minor digit and reset the patch (e.g. `0.11.x` → `0.12.0`).
+   - Update all four version markers to the new version:
+     - `dq-ui/package.json`: `"version": "0.11.6"` → `"0.11.7"`
+     - `dq-ui/docs-site/package.json`: `"version": "0.11.6"` → `"0.11.7"`
+     - `VERSION_MANIFEST.json` `apps.ui`: `"0.11.6"` → `"0.11.7"`
+     - `VERSION_MANIFEST.json` `apps.api`: `"0.11.6"` → `"0.11.7"`
+   - Update `VERSION_MANIFEST.json` `components`: bump only components that actually changed in the concluded release to the new version. Leave all other components at their previous value. If you are unsure which components changed, ask the user.
+   - Update `docs/releases/README.md`: change "Latest releases" to list the new version
+   - Add a new entry in `RELEASE_NOTES_USER.md`: `## v0.11.7 - <title> (<date>)` with a brief description line
+   - Add a new entry in `TECHNICAL.md`: `### v0.11.7 (<date>)` (initially can be empty or have a placeholder)
 
 4. **Rebuild docs and frontend**
-   - Run `./dq-ui/scripts/start_local.sh` (or `./scripts/local_build_frontend.sh`) to regenerate:
+   - Run `./scripts/local_build_frontend.sh` to regenerate:
      - `dq-ui/dist/` (Vite production build with new version markers)
      - `dq-ui/public/docs/` (Docusaurus build)
      - `dq-ui/public/user-manuals/` (synced from source)
      - `dq-ui/public/architecture/adr/` (synced from source)
+   - **Do not** run `start_local.sh` — it starts Vite in the background. Use `local_build_frontend.sh` which only builds without starting a server.
    - These rebuilt files carry the new version and must be committed
 
 5. **Commit**
@@ -164,7 +169,7 @@ These hooks run on every `npm run build` and `npm run dev` (including `start_loc
 - [ ] `docs/releases/RELEASE_<version>_*.md` is finalized
 - [ ] `./scripts/validation/validate_test_proof.sh` passes
 - [ ] Version markers bumped to next version in all files listed above
-- [ ] Docs and frontend rebuilt with `start_local.sh` or `local_build_frontend.sh`
+- [ ] Docs and frontend rebuilt with `./scripts/local_build_frontend.sh`
 - [ ] All changes committed with a clear bump commit message
 
 ## Instructions for AI Agents
@@ -211,13 +216,16 @@ If a proof fails validation, **fix the proof** (add missing fields, correct valu
 
 ### When asked to conclude a release
 
-Do not modify files in the concluded version. Instead:
+Do not modify any files inside the concluded version directory (`test-results/test-proof/<concluded-version>/`). Instead:
 
-1. Verify the release documentation is complete (`RELEASE_NOTES_USER.md`, `TECHNICAL.md`, release-specific `.md` in `docs/releases/`)
-2. Verify test proofs for the version are complete and valid
-3. Bump all version markers to the next version
-4. Rebuild docs and frontend
-5. Commit the bump
+1. Verify the release documentation is complete:
+   - `RELEASE_NOTES_USER.md` has a complete section for the concluded version
+   - `TECHNICAL.md` has a complete changelog entry for the concluded version
+   - `docs/releases/RELEASE_<version>_*.md` exists and captures the changes
+2. Verify test proofs for the version are complete and valid by running `./scripts/validation/validate_test_proof.sh`
+3. Bump all version markers to the next version (see "Concluding a Release" for the full procedure)
+4. Rebuild docs and frontend using `./scripts/local_build_frontend.sh`
+5. Commit the bump with a clear message (see template below)
 
 ### When the prebuild/predev hooks fail
 
@@ -230,15 +238,18 @@ The `prebuild` and `predev` npm hooks in `dq-ui/package.json` run the doc genera
 
 ### Frontend dist/ — always in git
 
-`dq-ui/dist/` is committed to git. After any code change that affects the build:
+`dq-ui/dist/` is committed to git. After any change that affects the frontend build (code, docs, test proofs, ADRs, manuals):
 
-1. Run `./scripts/local_build_frontend.sh` (or `npm run build` in `dq-ui/`)
-2. The rebuild will run the full prebuild pipeline (docs, test proofs, vite build)
-3. Commit the updated `dq-ui/dist/` files alongside your changes
+1. Run `./scripts/local_build_frontend.sh` to rebuild
+2. The rebuild runs the full pipeline: doc generation → test proof validation → Docusaurus build → ADR sync → manual sync → vite build
+3. Commit the updated `dq-ui/dist/` files alongside your source changes
+4. **Do not** skip the rebuild or commit source changes without the matching dist/
+
+If the rebuild fails, fix the root cause (stale test proof, broken link, missing file). Do not add `|| true` or suppress errors.
 
 ### When in doubt
 
 - Check the current version: `grep '"version"' dq-ui/package.json`
-- Check the manifest: `python3 -c "import json; d=json.load(open('VERSION_MANIFEST.json')); print(d['apps']['ui'], d['apps']['api'])"
+- Check the manifest: `python3 -c "import json; d=json.load(open('VERSION_MANIFEST.json')); print(d['apps']['ui'], d['apps']['api'])"`
 - Validate proofs: `./scripts/validation/validate_test_proof.sh`
-- Rebuild docs: `./dq-ui/scripts/start_local.sh` or `./scripts/local_build_frontend.sh`
+- Rebuild docs: `./scripts/local_build_frontend.sh`
