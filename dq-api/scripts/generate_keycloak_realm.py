@@ -430,6 +430,24 @@ def generate_realm(
                 "defaultClientScopes": ["profile", "email", "roles"],
             },
             {
+                "clientId": "openmetadata-admin",
+                "name": "OpenMetadata Admin",
+                "description": "Confidential client for OpenMetadata admin/seed operations",
+                "enabled": True,
+                "publicClient": False,
+                "clientAuthenticatorType": "client-secret",
+                "secret": openmetadata_client_secret,
+                "protocol": "openid-connect",
+                "serviceAccountsEnabled": True,
+                "standardFlowEnabled": False,
+                "implicitFlowEnabled": False,
+                "directAccessGrantsEnabled": False,
+                "attributes": {
+                    "access.token.lifespan": str(KEYCLOAK_SERVICE_ACCOUNT_ACCESS_TOKEN_LIFESPAN_SECONDS),
+                },
+                "defaultClientScopes": ["profile", "email", "roles"],
+            },
+            {
                 "clientId": "zammad",
                 "name": "Zammad",
                 "description": "Zammad support portal browser client",
@@ -688,6 +706,15 @@ def main():
         # randomly generated secret in git.
         engine_client_secret = "changeme"
 
+    openmetadata_client_id = str(args.openmetadata_client_id or "").strip() or "openmetadata-admin"
+    openmetadata_client_secret = str(args.openmetadata_client_secret or "").strip() or None
+    if openmetadata_client_secret is None:
+        openmetadata_client_secret = _load_existing_client_secret(realm_json_path=out_path, client_id=openmetadata_client_id)
+    if openmetadata_client_secret is None:
+        # Local/dev default: keep the realm JSON a usable example without embedding a
+        # randomly generated secret in git.
+        openmetadata_client_secret = "changeme"
+
     realm = generate_realm(
         users,
         realm_roles,
@@ -701,6 +728,8 @@ def main():
         zammad_public_url=args.zammad_public_url,
         engine_service_client_id=engine_client_id,
         engine_service_client_secret=engine_client_secret,
+        openmetadata_client_id=openmetadata_client_id,
+        openmetadata_client_secret=openmetadata_client_secret
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)

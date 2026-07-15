@@ -49,7 +49,7 @@ run_keycloak_kcadm() {
   shift
 
   local attempt max_attempts output
-  max_attempts=5
+  max_attempts=10
 
   attempt=1
   while [ "$attempt" -le "$max_attempts" ]; do
@@ -59,7 +59,7 @@ run_keycloak_kcadm() {
     fi
 
     if printf '%s' "$output" | grep -Eq 'Connect to 127\.0\.0\.1:8080|Connection refused|HTTP request error'; then
-      sleep 2
+      sleep 5
       attempt=$((attempt + 1))
       continue
     fi
@@ -101,6 +101,9 @@ keycloak_realm_role_exists() {
 
 sync_keycloak_seed_user_profiles() {
   local keycloak_container_id="$1"
+  local _kc_admin_user="${2:-}"
+  local _kc_admin_pass="${3:-}"
+  local keycloak_admin_base_url="${4:-}"
   local realm_import_file="/opt/keycloak/realm-import/${KEYCLOAK_REALM}-realm.json"
   local user_payloads operator_email operator_payload operator_user_id operator_user_json operator_current_roles missing_role_args
   local updated_user_count=0
@@ -186,26 +189,48 @@ sync_keycloak_seed_user_profiles() {
     user_json="$(run_keycloak_kcadm "$keycloak_container_id" get users -r "${KEYCLOAK_REALM}" -q "username=${username}" --fields id)"
     user_id="$(printf '%s\n' "$user_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
     if [ -z "$user_id" ]; then
-      run_keycloak_kcadm "$keycloak_container_id" create users -r "${KEYCLOAK_REALM}" \
+      local create_output
+      create_output="$(run_keycloak_kcadm "$keycloak_container_id" create users -r "${KEYCLOAK_REALM}" \
         -s "username=${username}" \
         -s "email=${email}" \
         -s "firstName=${first_name}" \
         -s "lastName=${last_name}" \
         -s 'enabled=true' \
-        -s 'emailVerified=true' >/dev/null || {
-          error "$my_name" "Seeded Keycloak user not found and could not be created for profile reconciliation: ${username}"
-          exit 33
-        }
+        -s 'emailVerified=true' 2>&1)"
+      local create_rc=$?
 
-      user_json="$(docker exec "$keycloak_container_id" /opt/keycloak/kcadm-trust.sh get users -r "${KEYCLOAK_REALM}" -q "username=${username}" --fields id)"
-      user_id="$(printf '%s\n' "$user_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
-      if [ -z "$user_id" ]; then
-        error "$my_name" "Seeded Keycloak user still missing after create: ${username}"
-        exit 33
+      if [ "$create_rc" -ne 0 ]; then
+        # User may have been created by realm import during seed-artifacts run.
+        # Re-query for the user by username.
+        user_json="$(docker exec "$keycloak_container_id" /opt/keycloak/kcadm-trust.sh get users -r "${KEYCLOAK_REALM}" -q "username=${username}" --fields id)"
+        user_id="$(printf '%s\n' "$user_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+        if [ -z "$user_id" ]; then
+          error "$my_name" "Seeded Keycloak user not found and could not be created for profile reconciliation: ${username}"
+          info "$my_name" "Create output: $create_output"
+          exit 33
+        fi
+      else
+        # User was created successfully, query for ID
+        user_json="$(docker exec "$keycloak_container_id" /opt/keycloak/kcadm-trust.sh get users -r "${KEYCLOAK_REALM}" -q "username=${username}" --fields id)"
+        user_id="$(printf '%s\n' "$user_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+        if [ -z "$user_id" ]; then
+          error "$my_name" "Seeded Keycloak user still missing after create: ${username}"
+          exit 33
+        fi
       fi
     fi
 
     if [ "$username" = "$operator_email" ]; then
+      # Refresh kcadm token before operator role reconciliation
+      # (token may have expired during the user reconciliation loop)
+      if [ -n "$_kc_admin_user" ] && [ -n "$_kc_admin_pass" ] && [ -n "$keycloak_admin_base_url" ]; then
+        run_keycloak_kcadm "$keycloak_container_id" config credentials \
+          --server "$keycloak_admin_base_url" \
+          --realm master \
+          --user "$_kc_admin_user" \
+          --password "$_kc_admin_pass" >/dev/null 2>&1 || true
+      fi
+
       operator_current_roles="$(run_keycloak_kcadm "$keycloak_container_id" get "users/${user_id}/role-mappings/realm" -r "${KEYCLOAK_REALM}" | jq -r '.[].name' 2>/dev/null || true)"
       missing_role_args=()
       if ! printf '%s\n' "$operator_current_roles" | grep -Fxq 'operator'; then
@@ -351,11 +376,19 @@ seed_keycloak_in_docker() {
     fi
   done
 
-  sync_keycloak_seed_user_profiles "$keycloak_container_id"
+  sync_keycloak_seed_user_profiles "$keycloak_container_id" "$kc_admin_user" "$kc_admin_pass" "$keycloak_admin_base_url"
 
   # Refresh kcadm token before the password loop — the config-credentials
   # call above happened before generate_keycloak_seed_artifacts() and
   # sync_keycloak_seed_user_profiles(), so the token may have expired by now.
+  # Wait for the container to be healthy first (it may have been restarted by
+  # the seed-artifacts volume change).
+  info "$my_name" "Waiting for Keycloak to be healthy before password rotation..."
+  if ! wait_for_compose_service_healthy keycloak "Keycloak" 180 5; then
+    error "$my_name" "Keycloak did not become healthy before password rotation"
+    exit 33
+  fi
+
   info "$my_name" "Refreshing kcadm admin token for password rotation..."
   if ! run_keycloak_kcadm "$keycloak_container_id" config credentials \
     --server "$keycloak_admin_base_url" \

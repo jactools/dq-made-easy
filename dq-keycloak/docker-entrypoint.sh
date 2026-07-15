@@ -306,6 +306,39 @@ sync_engine_worker_service_account_role() {
       echo "[entrypoint] assigned realm role ${required_role} to ${client_name} service-account"
 }
 
+sync_openmetadata_admin_service_account_role() {
+      local client_name="openmetadata-admin"
+      local required_role="${OM_ADMIN_OIDC_REALM_ROLE:-admin}"
+      local client_json=""
+      local client_id=""
+      local service_account_json=""
+      local service_account_id=""
+      local has_required_role=""
+
+      client_json="$(/opt/keycloak/kcadm-trust.sh get clients -r "${KEYCLOAK_REALM}" -q clientId="${client_name}" --fields id)"
+      client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$client_id" ]; then
+            echo "[entrypoint] ERROR: ${client_name} client not found in realm ${KEYCLOAK_REALM}" >&2
+            exit 1
+      fi
+
+      service_account_json="$(/opt/keycloak/kcadm-trust.sh get "clients/${client_id}/service-account-user" -r "${KEYCLOAK_REALM}" --fields id)"
+      service_account_id="$(printf '%s\n' "$service_account_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$service_account_id" ]; then
+            echo "[entrypoint] ERROR: service-account user not found for client ${client_name}" >&2
+            exit 1
+      fi
+
+      has_required_role="$(/opt/keycloak/kcadm-trust.sh get "users/${service_account_id}/role-mappings/realm" -r "${KEYCLOAK_REALM}" | grep -F '"name" : "'"${required_role}"'"' || true)"
+      if [ -n "$has_required_role" ]; then
+            echo "[entrypoint] ${client_name} service-account already has realm role ${required_role}"
+            return
+      fi
+
+      /opt/keycloak/kcadm-trust.sh add-roles -r "${KEYCLOAK_REALM}" --uid "$service_account_id" --rolename "$required_role" >/dev/null
+      echo "[entrypoint] assigned realm role ${required_role} to ${client_name} service-account"
+}
+
 # Wait for Keycloak admin endpoint to be available
 echo "[entrypoint] waiting for Keycloak admin endpoint..."
 for i in {1..30}; do
@@ -333,6 +366,9 @@ sync_zammad_client
 
 echo "[entrypoint] reconciling engine worker service-account role"
 sync_engine_worker_service_account_role
+
+echo "[entrypoint] reconciling openmetadata-admin service-account role"
+sync_openmetadata_admin_service_account_role
 
 echo "[entrypoint] applying rotated seeded user passwords"
 rotated_password_count=0
