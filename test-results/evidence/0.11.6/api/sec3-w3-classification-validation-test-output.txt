@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+collecting ... collected 18 items
+
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_classify_bucket_name_synthetic PASSED [  5%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_classify_bucket_name_evidence PASSED [ 11%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_classify_bucket_name_unclassified PASSED [ 16%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_classify_uri_synthetic PASSED [ 22%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_classify_uri_evidence PASSED [ 27%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_classify_uri_unparseable PASSED [ 33%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_validate_bucket_naming_synthetic_valid PASSED [ 38%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_validate_bucket_naming_evidence_valid PASSED [ 44%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_validate_bucket_naming_unclassified PASSED [ 50%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_validate_bucket_naming_synthetic_with_prohibited_terms PASSED [ 55%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_validate_bucket_naming_evidence_with_prohibited_terms PASSED [ 61%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_validate_bucket_naming_expected_mismatch PASSED [ 66%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_ensure_no_mixed_classification_empty PASSED [ 72%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_ensure_no_mixed_classification_uniform PASSED [ 77%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_ensure_no_mixed_classification_mixed_raises PASSED [ 83%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_ensure_no_mixed_classification_synthetic_in_evidence_scope PASSED [ 88%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_ensure_storage_target_matches PASSED [ 94%]
+dq-api/fastapi/tests/domain/services/test_classification_validation.py::test_ensure_storage_target_mismatch_raises PASSED [100%]
+
+=============================== warnings summary ===============================
+venv/lib/python3.13/site-packages/fastapi/testclient.py:1
+  /Users/jacbeekers/gitrepos/dq-made-easy/venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/domain/services/test_classification_validation.py::test_classify_bucket_name_synthetic
+  /Users/jacbeekers/gitrepos/dq-made-easy/venv/lib/python3.13/site-packages/reportlab/lib/rl_safe_eval.py:12: DeprecationWarning: ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead
+    haveNameConstant = hasattr(ast,'NameConstant')
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 18 passed, 2 warnings in 1.17s ========================

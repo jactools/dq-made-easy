@@ -30,6 +30,8 @@ type DeliveryInventoryNote = {
   deliveryStatus: string
   deliveryFormat?: string | null
   deliveryFormatWarning?: string | null
+  objectStorageClassification?: string | null
+  evidenceClassification?: string | null
   recordCount: number
   sizeBytes: number
   attributesCount: number
@@ -71,6 +73,8 @@ export const DeliveryInventory: React.FC = () => {
   const [selectedDeliveryNoteLoading, setSelectedDeliveryNoteLoading] = useState(false)
   const [selectedDeliveryNoteLoadingMode, setSelectedDeliveryNoteLoadingMode] = useState<'note' | 'storage' | null>(null)
   const [selectedDeliveryNoteError, setSelectedDeliveryNoteError] = useState<string | null>(null)
+  const [objectStorageClassification, setObjectStorageClassification] = useState<string>('')
+  const [evidenceClassification, setEvidenceClassification] = useState<string>('')
   const selectedDeliveryNoteRequestId = useRef(0)
 
   const workspaceId = auth.currentWorkspaceId
@@ -95,8 +99,17 @@ export const DeliveryInventory: React.FC = () => {
 
     try {
       const token = getAuthToken()
-      const response = await fetch(
-        `${apiBase}/delivery-inventory?workspace=${encodeURIComponent(workspaceId as string)}&page=1&limit=100`,
+      const params = new URLSearchParams()
+      params.set('workspace', workspaceId as string)
+      params.set('page', '1')
+      params.set('limit', '100')
+      if (objectStorageClassification) {
+        params.set('objectStorageClassification', objectStorageClassification)
+      }
+      if (evidenceClassification) {
+        params.set('evidenceClassification', evidenceClassification)
+      }
+      const response = await fetch(`${apiBase}/delivery-inventory?${params.toString()}`,
         {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -294,9 +307,45 @@ export const DeliveryInventory: React.FC = () => {
             placeholder="Filter deliveries"
           />
         </label>
-        <Button variant="tertiary" onClick={() => setSearchQuery('')} disabled={!searchQuery}>
-          Clear
-        </Button>
+        <div className="delivery-inventory-classification-filters">
+          <label className="delivery-inventory-filter-label">
+            <span>Storage classification</span>
+            <select
+              value={objectStorageClassification}
+              onChange={(event) => setObjectStorageClassification(event.target.value)}
+            >
+              <option value="">All</option>
+              <option value="synthetic_test">synthetic_test</option>
+              <option value="real_evidence">real_evidence</option>
+            </select>
+          </label>
+          <label className="delivery-inventory-filter-label">
+            <span>Evidence classification</span>
+            <select
+              value={evidenceClassification}
+              onChange={(event) => setEvidenceClassification(event.target.value)}
+            >
+              <option value="">All</option>
+              <option value="synthetic_result">synthetic_result</option>
+              <option value="real_evidence">real_evidence</option>
+            </select>
+          </label>
+        </div>
+        <div className="delivery-inventory-toolbar-actions">
+          <Button variant="tertiary" onClick={() => setSearchQuery('')} disabled={!searchQuery}>
+            Clear search
+          </Button>
+          <Button
+            variant="tertiary"
+            onClick={() => {
+              setObjectStorageClassification('')
+              setEvidenceClassification('')
+            }}
+            disabled={!objectStorageClassification && !evidenceClassification}
+          >
+            Clear filters
+          </Button>
+        </div>
       </div>
 
       {loading && (

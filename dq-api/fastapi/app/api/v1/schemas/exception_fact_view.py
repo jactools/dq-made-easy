@@ -89,6 +89,8 @@ class DeliveryExceptionSummaryView(SnakeModel):
     deliveryId: str
     dataObjectVersionId: str | None = None
     deliveryLocation: str | None = None
+    objectStorageClassification: str = ""
+    evidenceClassification: str = ""
     executionRunIds: list[str] = Field(default_factory=list)
     dataObjectVersionIds: list[str] = Field(default_factory=list)
     analytics: ExceptionReasonAnalyticsView

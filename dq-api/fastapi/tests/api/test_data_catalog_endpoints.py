@@ -1014,6 +1014,50 @@ def test_delivery_inventory_filters_by_workspace_and_reports_storage(monkeypatch
     assert inspected_locations == ["s3a://retail-banking/standardized/analytics/Customer/v1/LOAD_DTS=20260221T153000000Z"]
 
 
+def test_delivery_inventory_filters_by_classification(monkeypatch) -> None:
+    monkeypatch.setenv("SSO_ENABLED", "true")
+    monkeypatch.setenv("SSO_PUBLIC_ISSUER_URL", "http://keycloak.local:8080/realms/jaccloud")
+    monkeypatch.setenv("SSO_CLIENT_ID", "dq-rules-ui")
+    get_settings.cache_clear()
+
+    original_get_data_delivery_note = InMemoryDataCatalogRepository.get_data_delivery_note
+
+    def _get_data_delivery_note(self, delivery_id: str):
+        note = original_get_data_delivery_note(self, delivery_id)
+        if note is not None:
+            note.object_storage_classification = "synthetic_test"
+            note.evidence_classification = "synthetic_result"
+        return note
+
+    monkeypatch.setattr(InMemoryDataCatalogRepository, "get_data_delivery_note", _get_data_delivery_note)
+
+    class _Inspector:
+        def inspect(self, delivery_location: str) -> dict[str, object]:
+            return {"storage_exists": True, "storage_object_count": 1}
+
+    monkeypatch.setattr(data_catalog_endpoints, "DeliveryInventoryInspector", lambda: _Inspector())
+
+    # Filter by matching classification
+    response = client.get(
+        "/data-catalog/v1/delivery-inventory?workspace=retail-banking&dataObjectVersionId=dov-1&objectStorageClassification=synthetic_test&evidenceClassification=synthetic_result",
+        headers=_auth_headers("dq:rules:read"),
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["pagination"]["total"] == 1
+    assert payload["data"][0]["id"] == "del-31"
+
+    # Filter by non-matching classification
+    response = client.get(
+        "/data-catalog/v1/delivery-inventory?workspace=retail-banking&dataObjectVersionId=dov-1&objectStorageClassification=real_evidence",
+        headers=_auth_headers("dq:rules:read"),
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["pagination"]["total"] == 0
+    assert payload["data"] == []
+
+
 def test_rule_attributes_returns_read_only_mapping(monkeypatch) -> None:
     monkeypatch.setenv("SSO_ENABLED", "true")
     monkeypatch.setenv("SSO_PUBLIC_ISSUER_URL", "http://keycloak.local:8080/realms/jaccloud")

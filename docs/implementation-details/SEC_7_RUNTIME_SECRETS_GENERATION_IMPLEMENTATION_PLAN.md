@@ -1,4 +1,4 @@
-# SEC-3: Runtime Secrets Generation — Implementation Plan
+# SEC-7: Runtime Secrets Generation — Implementation Plan
 
 **Goal:** Eliminate all hardcoded passwords, secrets, and tokens from `.env.*.local` files. Every secret must be generated at startup time and sourced from `tmp/` artifacts.
 
@@ -75,113 +75,113 @@
 
 ### Phase 1: Secret Generation Infrastructure
 
-- [x] **SEC-3-01:** Create `scripts/generate_secrets.sh`
+- [x] **SEC-7-01:** Create `scripts/generate_secrets.sh`
   - Generates `tmp/secrets.{env}.env` with all non-user secrets (inventory A, B, C)
   - Uses `openssl rand` for passwords, `cryptography.Fernet` for encryption keys
   - Only generates if file is missing or `--force` flag is set
   - Idempotent: does not regenerate existing secrets on subsequent runs
   - Acceptance: `./scripts/generate_secrets.sh --env dev` produces valid `tmp/secrets.dev.env`
 
-- [x] **SEC-3-02:** Update `.gitignore` and `.dockerignore`
+- [x] **SEC-7-02:** Update `.gitignore` and `.dockerignore`
   - Ensure `tmp/secrets.*.env` is excluded from commits and image builds
   - Ensure `tmp/*.env` is excluded broadly
   - Acceptance: `git status` does not show `tmp/secrets.*.env`
 
 ### Phase 2: Startup Script Integration
 
-- [x] **SEC-3-03:** Update `scripts/common_startup.sh`
+- [x] **SEC-7-03:** Update `scripts/common_startup.sh`
   - Call `generate_secrets.sh` before any compose or seed step
   - Source `tmp/secrets.{env}.env` into the environment
   - Acceptance: secrets are available in `$SECRETS_ENV` or equivalent variable
 
-- [x] **SEC-3-04:** Update `scripts/stack_start.sh` / `scripts/stack_restart.sh`
+- [x] **SEC-7-04:** Update `scripts/stack_start.sh` / `scripts/stack_restart.sh`
   - Call `generate_secrets.sh --force` (fresh start) or `generate_secrets.sh --force --reuse-admin` (warm restart)
   - Pass `--env-file tmp/secrets.{env}.env` to `docker compose` commands via the compose invocation helper
   - Acceptance: `docker compose` resolves all `${SECRET:?required}` env vars
 
-- [x] **SEC-3-05:** Update `scripts/stack_seed.sh`
+- [x] **SEC-7-05:** Update `scripts/stack_seed.sh`
   - Source `tmp/secrets.{env}.env` before seeding
   - Source `tmp/keycloak_seed_user_credentials.{env}.env` for user passwords
   - Acceptance: seed scripts use generated secrets, not env defaults
 
-- [x] **SEC-3-12:** Add admin password reuse to `generate_secrets.sh`
+- [x] **SEC-7-12:** Add admin password reuse to `generate_secrets.sh`
   - Add `--reuse-admin` flag to preserve admin passwords from existing secrets file
   - Admin password vars (`DQ_DB_PASSWORD`, `KEYCLOAK_SYSTEM_ADMIN_PASSWORD`, etc.) are reused when `--reuse-admin` is set
   - Acceptance: `generate_secrets.sh --force --reuse-admin` keeps admin passwords, rotates service/user passwords
 
-- [x] **SEC-3-13:** Add admin password skip to `seed_password_rotation.py`
+- [x] **SEC-7-13:** Add admin password skip to `seed_password_rotation.py`
   - Add `--no-admin-rotate` flag to skip admin password variables during env rotation
   - Acceptance: `seed_password_rotation.py --no-admin-rotate` preserves admin passwords in the rotated env file
 
-- [x] **SEC-3-06:** Update `scripts/auth.sh` (shared auth helper)
+- [x] **SEC-7-06:** Update `scripts/auth.sh` (shared auth helper)
   - Read credentials from `tmp/keycloak_seed_user_credentials.{env}.env`
   - Acceptance: `auth.sh` obtains OIDC token without hardcoded passwords
 
 ### Phase 3: `.env.*.local` Cleanup
 
-- [x] **SEC-3-07:** Remove hardcoded secrets from `.env.dev.local`
+- [x] **SEC-7-07:** Remove hardcoded secrets from `.env.dev.local`
   - Remove all entries from inventory A, B, C
   - Remove user password entries from inventory D
   - Replace embedded-credential URLs (inventory E) with constructed forms
   - Keep non-secret values (hosts, ports, image refs)
   - Acceptance: file contains zero passwords, secrets, or tokens
 
-- [x] **SEC-3-08:** Remove hardcoded secrets from `.env.test.local`
+- [x] **SEC-7-08:** Remove hardcoded secrets from `.env.test.local`
   - Same treatment as dev
   - Acceptance: file contains zero passwords, secrets, or tokens
 
-- [x] **SEC-3-09:** Remove hardcoded secrets from `.env.prod.local`
+- [x] **SEC-7-09:** Remove hardcoded secrets from `.env.prod.local`
   - Same treatment as dev
   - Acceptance: file contains zero passwords, secrets, or tokens
 
-- [x] **SEC-3-10:** Update `.env.*.example` files
+- [x] **SEC-7-10:** Update `.env.*.example` files
   - Replace all secrets with `<<GENERATED>>` or `<<SECRET>>` placeholders
   - Add comments pointing to `generate_secrets.sh`
   - Acceptance: example files are safe to commit with no real secrets
 
 ### Phase 4: Container & Compose Wiring
 
-- [x] **SEC-3-11:** Verify compose files use `${VAR:?required}` pattern
+- [x] **SEC-7-11:** Verify compose files use `${VAR:?required}` pattern
   - All secrets in compose files already use `:?required` syntax
   - No fallback defaults that bypass the `:?required` guard
   - Acceptance: `docker compose config` fails fast if any secret is missing
 
-- [x] **SEC-3-12:** Fix `DQ_DB_INTERNAL_URL` / `DQ_DB_LOCAL_URL` construction
+- [x] **SEC-7-14:** Fix `DQ_DB_INTERNAL_URL` / `DQ_DB_LOCAL_URL` construction
   - Remove hardcoded `postgres:postgres` from URL templates
   - Construct URLs from `DQ_DB_USER` and `DQ_DB_PASSWORD` variables
   - Same for `KAFKA_CONSUMER_DB_URL`
   - Acceptance: URLs resolve correctly at compose time
 
-- [x] **SEC-3-13:** Verify no secrets are baked into Docker images
+- [x] **SEC-7-15:** Verify no secrets are baked into Docker images
   - Audit all `Dockerfile.*` for `ARG` or `ENV` that reference passwords
   - Ensure trust-bundle, keycloak, kong Dockerfiles use runtime mounts
   - Acceptance: no `RUN echo "password"` in any Dockerfile
 
 ### Phase 5: Script Credential Sourcing
 
-- [x] **SEC-3-14:** Update `scripts/auth.sh` to source credential files
+- [x] **SEC-7-16:** Update `scripts/auth.sh` to source credential files
   - Read `SMOKE_LOGIN_PASSWORD` from `tmp/keycloak_seed_user_credentials.{env}.env`
   - Read `KEYCLOAK_ADMIN_PASS` from same file
   - Acceptance: auth helper works without `.env.*.local` defaults
 
-- [x] **SEC-3-15:** Update `scripts/seeding/openmetadata.sh`
+- [x] **SEC-7-17:** Update `scripts/seeding/openmetadata.sh`
   - Source `tmp/keycloak_seed_user_credentials.{env}.env` for `OM_TOKEN` preparation
   - Acceptance: OpenMetadata seeding obtains valid token
 
-- [x] **SEC-3-16:** Update `scripts/seeding/zammad.sh`
+- [x] **SEC-7-18:** Update `scripts/seeding/zammad.sh`
   - No changes needed — Zammad seeding does not use Keycloak credentials
 
-- [x] **SEC-3-17:** Update `scripts/seeding/airflow.sh` (if applicable)
+- [x] **SEC-7-19:** Update `scripts/seeding/airflow.sh` (if applicable)
   - No airflow.sh exists yet; DQ_AIRFLOW_PASSWORD is constructed from env vars
 
 ### Phase 6: Validation & Testing
 
-- [x] **SEC-3-18:** Create `scripts/validation/validate_no_secrets_in_env.py`
+- [x] **SEC-7-20:** Create `scripts/validation/validate_no_secrets_in_env.py`
   - Scan all `.env.*.local` files for password/secret patterns
   - Fail if any hardcoded value is found
   - Acceptance: validation script passes on clean env files
 
-- [ ] **SEC-3-19:** End-to-end validation
+- [ ] **SEC-7-21:** End-to-end validation
   - Requires manual run: `./scripts/stack.sh dev init`
   - Takes ~5+ minutes to complete
   - Verify: all containers healthy, no `invalid_grant` errors
@@ -197,22 +197,22 @@
 
 | Phase | Items | Status |
 |-------|-------|--------|
-| 1 — Generation Infrastructure | SEC-3-01, SEC-3-02 | ✅ Complete |
-| 2 — Startup Script Integration | SEC-3-03 through SEC-3-06 | ✅ Complete |
-| 3 — `.env.*.local` Cleanup | SEC-3-07 through SEC-3-10 | ✅ Complete |
-| 4 — Container & Compose Wiring | SEC-3-11 through SEC-3-13 | ✅ Complete |
-| 5 — Script Credential Sourcing | SEC-3-14 through SEC-3-17 | ✅ Complete |
-| 6 — Validation & Testing | SEC-3-18 ✅, SEC-3-19 🔄 | 18/19 |
+| 1 — Generation Infrastructure | SEC-7-01, SEC-7-02 | ✅ Complete |
+| 2 — Startup Script Integration | SEC-7-03 through SEC-7-06 | ✅ Complete |
+| 3 — `.env.*.local` Cleanup | SEC-7-07 through SEC-7-10 | ✅ Complete |
+| 4 — Container & Compose Wiring | SEC-7-11 through SEC-7-15 | ✅ Complete |
+| 5 — Script Credential Sourcing | SEC-7-16 through SEC-7-19 | ✅ Complete |
+| 6 — Validation & Testing | SEC-7-20 ✅, SEC-7-21 🔄 | 20/21 |
 
 **Total: 18/19 items complete**
 
 ## Dependencies
 
-- SEC-3-01 must complete before SEC-3-03 through SEC-3-05
-- SEC-3-03 through SEC-3-05 must complete before SEC-3-07 through SEC-3-10
-- SEC-3-11 through SEC-3-13 can proceed in parallel with SEC-3-07
-- SEC-3-14 through SEC-3-17 depend on SEC-3-05 (seed scripts updated)
-- SEC-3-18 and SEC-3-19 are final gates
+- SEC-7-01 must complete before SEC-7-03 through SEC-7-05
+- SEC-7-03 through SEC-7-05 must complete before SEC-7-07 through SEC-7-10
+- SEC-7-11 through SEC-7-15 can proceed in parallel with SEC-7-07
+- SEC-7-16 through SEC-7-19 depend on SEC-7-05 (seed scripts updated)
+- SEC-7-20 and SEC-7-21 are final gates
 
 ## Notes
 

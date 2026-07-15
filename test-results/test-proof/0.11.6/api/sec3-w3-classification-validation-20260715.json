@@ -1,0 +1,52 @@
+{
+  "app_version": "0.11.6",
+  "proof_id": "sec3-w3-classification-validation-20260715",
+  "proof_type": "api",
+  "feature": "SEC-3 synthetic/test bucket and evidence boundaries",
+  "summary": "Workstream 3: Runtime Validation and Fail-Fast Enforcement. Classification validation module provides bucket/prefix naming checks, classification derivation, and fail-fast guards (mixed-classification export rejection, storage target mismatch rejection). Pre-existing SEC3-F-P3-02a (synthetic output namespace guard) already covers materialization request/completion flows. All new validation functions have dedicated test modules that pass.",
+  "status": "passed",
+  "executed_at_utc": "2026-07-15T14:35:00Z",
+  "command": "scripts/python_arm64.sh --python-bin ./venv/bin/python -m pytest dq-api/fastapi/tests/domain/services/test_classification_validation.py -v --no-header -o 'addopts='",
+  "raw_evidence_directory": "test-results/evidence/0.11.6/api/sec3-w3-classification-validation-test-output.txt",
+  "test_files": [
+    "dq-api/fastapi/tests/domain/services/test_classification_validation.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 18,
+  "assertions": [
+    "classify_bucket_name identifies synthetic_test bucket prefixes (dq-test-data, dq-landing-zone, dq-preview, dq-demo)",
+    "classify_bucket_name identifies real_evidence bucket prefixes (dq-evidence, dq-reporting, dq-source, dq-delivery)",
+    "classify_bucket_name returns unclassified for non-conforming bucket names",
+    "classify_uri parses s3a:// and s3:// URIs into bucket and key prefix",
+    "classify_uri returns unclassified for unparseable URIs",
+    "validate_bucket_naming accepts valid synthetic/test bucket with compliant key prefix",
+    "validate_bucket_naming accepts valid real/evidence bucket with compliant key prefix",
+    "validate_bucket_naming rejects unclassified bucket names",
+    "validate_bucket_naming rejects synthetic/test bucket with prohibited key prefix terms (evidence, reporting, compliance)",
+    "validate_bucket_naming rejects real/evidence bucket with prohibited key prefix terms (test, synthetic, preview)",
+    "validate_bucket_naming rejects bucket when expected_classification does not match actual classification",
+    "ensure_no_mixed_classification allows empty delivery notes list",
+    "ensure_no_mixed_classification allows uniform classification across notes",
+    "ensure_no_mixed_classification rejects mixed synthetic/test and real/evidence classifications",
+    "ensure_no_mixed_classification rejects synthetic artifacts when consumer_scope is real_evidence",
+    "ensure_storage_target_matches allows matching classification",
+    "ensure_storage_target_matches rejects mismatched classification with context details",
+    "pre-existing SEC3-F-P3-02a ensures synthetic output namespace guard rejects evidence-style URIs"
+  ],
+  "proof_data": {
+    "implementation_items": [
+      "SEC3-I-W3-01: bucket/prefix naming validation",
+      "SEC3-I-W3-02: materialization request fail-fast (pre-existing)",
+      "SEC3-I-W3-04: mixed-classification export guard",
+      "SEC3-I-W3-05: storage target classification guard"
+    ],
+    "files_created": [
+      "dq-api/fastapi/app/domain/services/classification_constants.py",
+      "dq-api/fastapi/app/domain/services/classification_validation.py",
+      "dq-api/fastapi/tests/domain/services/test_classification_validation.py"
+    ],
+    "pre_existing": [
+      "SEC3-F-P3-02a: ensure_synthetic_test_output_uri in test_data_materialization_service.py"
+    ]
+  }
+}
