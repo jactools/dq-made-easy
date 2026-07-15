@@ -266,7 +266,7 @@ discover_repositories() {
 
 normalize_repository_name() {
     case "$1" in
-        npm-base|dq-base) printf '%s' 'npm-base' ;;
+        npm-base|dq-base|dq-made-easy-base) printf '%s' 'npm-base' ;;
         dq-api|dq-made-easy-api) printf '%s' 'dq-api' ;;
         dq-engine|dq-made-easy-engine) printf '%s' 'dq-engine' ;;
         dq-profiling|dq-made-easy-profiling) printf '%s' 'dq-profiling' ;;
