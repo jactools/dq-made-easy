@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 import uuid
 from typing import Any, Protocol
@@ -99,6 +100,8 @@ class OpenMetadataRegistryDefinitionResolver:
                 token_url=self._oidc_token_url,
             )
             if self._oidc_username or self._oidc_password:
+                max_startup_retries = int(os.getenv("DQ_ENGINE_MAX_RETRIES", "3"))
+                retry_backoff_seconds = int(os.getenv("DQ_ENGINE_RETRY_BACKOFF_MS", "2000")) / 1000.0
                 return (
                     OidcPasswordTokenProvider(
                         token_url=token_url or "",
@@ -108,6 +111,8 @@ class OpenMetadataRegistryDefinitionResolver:
                         password=self._oidc_password,
                         scope=self._oidc_scope or None,
                         timeout_seconds=self._timeout_seconds,
+                        max_startup_retries=max_startup_retries,
+                        retry_backoff_seconds=retry_backoff_seconds,
                     ),
                     None,
                 )

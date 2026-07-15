@@ -1,0 +1,1 @@
+dq-made-easy bootstrap image that configures the OpenMetadata stack at startup

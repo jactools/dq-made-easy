@@ -9,8 +9,8 @@ set -euo pipefail
 # - Ensures the configured client has the required role mapping.
 # - Uses the canonical env-provided Keycloak client secret for verification and patch generation.
 #
-# Version: 1.0
-# Last modified: 2026-05-09
+# Version: 1.1
+# Last modified: 2026-07-01
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
@@ -26,7 +26,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 if [ "$#" -gt 0 ]; then
   error "$my_name" "Unknown arg: $1"
   exit 1
@@ -49,12 +49,17 @@ set +a
 : "${KEYCLOAK_CLIENT_SECRET:?Need KEYCLOAK_CLIENT_SECRET from the selected env file or environment}"
 
 # Enforce in-network only operation (deterministic inside Docker Compose).
-# Always use the compose service host and require an operator-provided
+# Always use the selected secure URL and require an operator-provided
 # `KEYCLOAK_CLIENT_SECRET` for client_credentials flow.
 KEYCLOAK_NETWORK="${KEYCLOAK_NETWORK:-dq-rulebuilder_default}"
 KEYCLOAK_HOST="${KEYCLOAK_HOST:-keycloak:8080}"
+KEYCLOAK_BASE_URL="${KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_LOCAL_URL:-}}"
+if [ -z "$KEYCLOAK_BASE_URL" ]; then
+  error "$my_name" "KEYCLOAK_PUBLIC_URL or KEYCLOAK_LOCAL_URL is required for Keycloak readiness checks"
+  exit 1
+fi
 
-kc_ready_url="http://${KEYCLOAK_HOST}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration"
+kc_ready_url="${KEYCLOAK_BASE_URL%/}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration"
 
 info "$my_name" "Keycloak post-seed: starting (realm=${KEYCLOAK_REALM} client=${KEYCLOAK_CLIENT_ID} host=${KEYCLOAK_HOST} network=${KEYCLOAK_NETWORK})"
 

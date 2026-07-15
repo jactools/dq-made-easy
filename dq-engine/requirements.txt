@@ -1,13 +1,14 @@
-fastapi==0.129.0
-uvicorn[standard]==0.41.0
-requests==2.32.5
-great-expectations==1.16.1
-spark-expectations
-boto3==1.43.10
+fastapi==0.139.0
+uvicorn[standard]==0.51.0
+requests==2.34.2
+great-expectations==1.18.2
+-e tmp/spark-expectations-2.10.1
+trino==0.326.0
+boto3==1.43.46
 python-dotenv==1.2.2
 redis==5.2.1
 pyspark==4.1.1
 delta-spark==4.1.0
-opentelemetry-api==1.40.0
-opentelemetry-exporter-otlp==1.40.0
-opentelemetry-sdk==1.40.0
+opentelemetry-api==1.43.0
+opentelemetry-exporter-otlp==1.43.0
+opentelemetry-sdk==1.43.0

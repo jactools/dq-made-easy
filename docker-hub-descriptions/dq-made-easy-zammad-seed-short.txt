@@ -1,0 +1,1 @@
+dq-made-easy Zammad seed image that prepares support data and demo content

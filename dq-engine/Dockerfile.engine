@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.13-slim
+ARG PYTHON_REGISTRY="docker.io/"
+ARG PYTHON_IMAGE="library/python"
+ARG PYTHON_TAG="3.13-slim-bookworm"
+
+FROM ${PYTHON_REGISTRY}${PYTHON_IMAGE}:${PYTHON_TAG}
 
 LABEL version="0.3.0"
 LABEL description="Data Quality rule execution engine (Python/FastAPI)"
@@ -24,10 +28,6 @@ RUN set -eux; \
 	if [ -f /run/secrets/internal_corporate_root_ca ]; then \
 		cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
 	fi; \
-	for apt_sources in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do \
-		[ -e "$apt_sources" ] || continue; \
-		sed -i 's|http://|https://|g' "$apt_sources"; \
-	done; \
 	apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		build-essential \
@@ -40,16 +40,15 @@ RUN set -eux; \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Optionally import a mkcert root CA provided as a base64-encoded build-arg
-# Usage: docker build --build-arg MKCERT_ROOT_CA="$(base64 -w0 tmp/certs/mkcert-rootCA.pem)" ...
-RUN if [ -n "${MKCERT_ROOT_CA:-}" ]; then \
+RUN if [ -n "${MKCERT_ROOT_CA:-}" ] && [ -f "${MKCERT_ROOT_CA}" ]; then \
 	echo "Importing mkcert root CA into system truststore"; \
-	echo "$MKCERT_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
+	cp "${MKCERT_ROOT_CA}" /usr/local/share/ca-certificates/mkcert-rootCA.crt; \
 	update-ca-certificates || true; \
 	fi
 
-RUN if [ -n "${INTERNAL_ROOT_CA:-}" ]; then \
+RUN if [ -n "${INTERNAL_ROOT_CA:-}" ] && [ -f "${INTERNAL_ROOT_CA}" ]; then \
 	echo "Importing internal root CA into system truststore"; \
-	echo "$INTERNAL_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
+	cp "${INTERNAL_ROOT_CA}" /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
 	update-ca-certificates || true; \
 	fi
 
@@ -62,6 +61,9 @@ RUN useradd --create-home --shell /bin/bash appuser \
 # Copy shared utils package and install it (cached unless dq-utils changes)
 COPY --chown=appuser:appuser dq-utils/ /app/dq-utils/
 
+# Copy the local spark-expectations source so the editable dependency resolves during the image build.
+COPY --chown=appuser:appuser tmp/spark-expectations-2.10.1/ /app/tmp/spark-expectations-2.10.1/
+
 # Copy requirements first (cached unless requirements.txt changes)
 COPY --chown=appuser:appuser dq-engine/requirements.txt /app/requirements.txt
 
@@ -71,10 +73,9 @@ RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir --upgrad
 	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -e /app/dq-utils \
 	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -r requirements.txt
 
-# Copy application code last (changes frequently)
-COPY --chown=appuser:appuser dq-engine/ /app/
-COPY --chown=appuser:appuser scripts/ /app/scripts/
-COPY --chown=appuser:appuser dq-db/mock-data/ /app/dq-db/mock-data/
+# -- Spark jar warmup (runs BEFORE app-code copy so the download layer is cached --)
+# Copy only the warmup script; the rest of scripts/ is copied later with app code.
+COPY --chown=appuser:appuser scripts/warmup_spark_jars.py /app/scripts/warmup_spark_jars.py
 
 RUN mkdir -p /home/appuser/.cache/tmp /home/appuser/.cache/spark-local /home/appuser/.dq-spark-jars
 
@@ -85,6 +86,7 @@ ENV SPARK_LOCAL_DIRS=/home/appuser/.cache/spark-local
 ENV JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/home/appuser/.cache/tmp
 
 # Warm the Spark package cache so runtime seeding does not depend on network access.
+# This layer is cached as long as the warmup script and package list do not change.
 RUN [ "${SKIP_SPARK_WARMUP:-false}" = "true" ] || python scripts/warmup_spark_jars.py \
 	--ivy-dir /home/appuser/.ivy2 \
 	--jar-dir /home/appuser/.dq-spark-jars \
@@ -106,6 +108,11 @@ for jar_path in jar_paths:
     shutil.copy2(jar_path, target_dir / jar_path.name)
 PY
 
+# -- Application code (changes frequently, invalidates only from here down) --
+COPY --chown=appuser:appuser dq-engine/ /app/
+COPY --chown=appuser:appuser scripts/ /app/scripts/
+COPY --chown=appuser:appuser dq-db/mock-data/ /app/dq-db/mock-data/
+
 ENV PORT=8000
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--ssl-certfile", "/etc/engine/certs/tls.crt", "--ssl-keyfile", "/etc/engine/certs/tls.key"]

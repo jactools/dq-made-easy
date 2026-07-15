@@ -1,0 +1,4 @@
+s                                                                        [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_trino_real_aistor_parquet_validation.py:85: Trino catalog 'aistor' is not available. Rebuild/start the Trino image with the repo dq-trino catalog config. Start Trino and AIStor with the existing stack scripts, for example `./scripts/stack_ctl.sh start --profile trino --profile aistor`, and seed the delivery parquet first.
+1 skipped in 0.17s

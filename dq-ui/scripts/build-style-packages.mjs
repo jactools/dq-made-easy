@@ -7,6 +7,7 @@ const repoRootDir = path.resolve(rootDir, '..')
 const sourceDir = path.join(rootDir, 'src', 'style-packages')
 const publicDir = path.join(rootDir, 'public', 'style-packages')
 const tmpDir = path.join(repoRootDir, 'tmp', 'style-packages')
+const manifestFile = path.join(sourceDir, 'style-packages.manifest.json')
 const vendorCacheDir = path.join(tmpDir, 'vendor-cache')
 const appTailwindBuildEnvDir = path.join(tmpDir, 'tailwind-build-env')
 const astroWindBuildEnvDir = path.join(tmpDir, 'astrowind-build-env')
@@ -44,6 +45,16 @@ fs.mkdirSync(tmpDir, { recursive: true })
 fs.mkdirSync(vendorCacheDir, { recursive: true })
 fs.mkdirSync(appTailwindBuildEnvDir, { recursive: true })
 fs.mkdirSync(astroWindBuildEnvDir, { recursive: true })
+
+if (!fs.existsSync(manifestFile)) {
+  throw new Error(`Style package manifest not found: ${manifestFile}`)
+}
+
+const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'))
+
+if (!manifest || manifest.version !== '1.0.0' || !Array.isArray(manifest.packages)) {
+  throw new Error(`Invalid style package manifest: ${manifestFile}`)
+}
 
 if (!fs.existsSync(tailwindInputFile)) {
   throw new Error(`Tailwind input stylesheet not found: ${tailwindInputFile}`)
@@ -231,31 +242,121 @@ const buildDataWebStylesheet = () => {
 ${bridgeCSS}`)
 }
 
-ensureAppTailwindBuildEnv()
-fs.copyFileSync(
-  tailwindInputFile,
-  appTailwindBuildSourceFile,
-)
-const appTailwindBuildSourceContent = fs.readFileSync(appTailwindBuildSourceFile, 'utf8')
-const rewrittenAppTailwindBuildSourceContent = appTailwindBuildSourceContent.replace(
-  "@config '../../tailwind.config.cjs';",
-  "@config './tailwind.config.cjs';",
-)
+const stylePackages = manifest.packages
 
-if (rewrittenAppTailwindBuildSourceContent === appTailwindBuildSourceContent) {
-  throw new Error(`Unable to rewrite Tailwind config path in ${appTailwindBuildSourceFile}`)
+for (const entry of stylePackages) {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error(`Invalid style package manifest entry: ${JSON.stringify(entry)}`)
+  }
+
+  switch (entry.kind) {
+    case 'copy': {
+      if (!entry.source || !entry.output) {
+        throw new Error(`Copy package entry requires source and output: ${JSON.stringify(entry)}`)
+      }
+      const sourceFile = path.join(sourceDir, entry.source)
+      const outputFile = path.join(publicDir, entry.output)
+      if (!fs.existsSync(sourceFile)) {
+        throw new Error(`Style source file not found: ${sourceFile}`)
+      }
+      fs.copyFileSync(sourceFile, outputFile)
+      break
+    }
+    case 'tailwind': {
+      if (!entry.input || !entry.output || !entry.rewriteConfigFrom || !entry.rewriteConfigTo) {
+        throw new Error(`Tailwind package entry requires input, output, rewriteConfigFrom, and rewriteConfigTo: ${JSON.stringify(entry)}`)
+      }
+      ensureAppTailwindBuildEnv()
+      const inputFile = path.join(sourceDir, entry.input)
+      const outputFile = path.join(publicDir, entry.output)
+      if (!fs.existsSync(inputFile)) {
+        throw new Error(`Tailwind input stylesheet not found: ${inputFile}`)
+      }
+      fs.copyFileSync(inputFile, appTailwindBuildSourceFile)
+      const appTailwindBuildSourceContent = fs.readFileSync(appTailwindBuildSourceFile, 'utf8')
+      const rewrittenAppTailwindBuildSourceContent = appTailwindBuildSourceContent.replace(
+        entry.rewriteConfigFrom,
+        entry.rewriteConfigTo,
+      )
+
+      if (rewrittenAppTailwindBuildSourceContent === appTailwindBuildSourceContent) {
+        throw new Error(`Unable to rewrite Tailwind config path in ${appTailwindBuildSourceFile}`)
+      }
+
+      fs.writeFileSync(appTailwindBuildSourceFile, rewrittenAppTailwindBuildSourceContent)
+      execFileSync(
+        path.join(appTailwindBuildEnvDir, 'node_modules', '.bin', 'tailwindcss'),
+        ['-c', appTailwindBuildConfigFile, '-i', appTailwindBuildSourceFile, '-o', outputFile, '--minify'],
+        {
+          cwd: appTailwindBuildEnvDir,
+          stdio: 'inherit',
+        },
+      )
+      break
+    }
+    case 'astrowind': {
+      if (!entry.version || !entry.output || !entry.bridge) {
+        throw new Error(`AstroWind package entry requires version, output, and bridge: ${JSON.stringify(entry)}`)
+      }
+      const archiveFile = path.join(vendorCacheDir, `astrowind-v${entry.version}.tar.gz`)
+      const extractedRootDir = path.join(vendorCacheDir, `astrowind-${entry.version}`)
+      const sourceRootDir = path.join(extractedRootDir, `astrowind-${entry.version}`)
+      const upstreamInputFile = path.join(sourceRootDir, 'src', 'assets', 'styles', 'tailwind.css')
+      const customStylesFile = path.join(sourceRootDir, 'src', 'components', 'CustomStyles.astro')
+      const buildSourceFile = path.join(astroWindBuildEnvDir, 'astrowind.input.css')
+      const compiledOutputFile = path.join(astroWindBuildEnvDir, 'astrowind.compiled.css')
+      const outputFile = path.join(publicDir, entry.output)
+      const bridgeFile = path.join(sourceDir, entry.bridge)
+
+      ensureDownloaded(archiveFile, 'curl', ['-L', '-o', archiveFile, `https://github.com/arthelokyo/astrowind/archive/refs/tags/v${entry.version}.tar.gz`])
+      ensureExtracted(archiveFile, extractedRootDir, upstreamInputFile)
+      ensureAstroWindBuildEnv()
+
+      fs.copyFileSync(upstreamInputFile, buildSourceFile)
+      execFileSync(
+        path.join(astroWindBuildEnvDir, 'node_modules', '.bin', 'tailwindcss'),
+        ['-i', buildSourceFile, '-o', compiledOutputFile],
+        {
+          cwd: astroWindBuildEnvDir,
+          stdio: 'inherit',
+        },
+      )
+
+      const astroWindCustomStylesSource = fs.readFileSync(customStylesFile, 'utf8')
+      const styleMatch = astroWindCustomStylesSource.match(/<style is:inline>\s*([\s\S]*?)\s*<\/style>/)
+      if (!styleMatch) {
+        throw new Error(`Unable to locate AstroWind inline style block in: ${customStylesFile}`)
+      }
+
+      const astroWindCustomStyles = styleMatch[1]
+        .replace(/(^|\n)\s*:root\s*\{/g, "$1:root[data-style-package='astrowind'] {")
+        .replace(/(^|\n)\s*\.dark\s*\{/g, "$1:root[data-style-package='astrowind'].dark {")
+        .trim()
+      const astroWindCompiledStyles = fs.readFileSync(compiledOutputFile, 'utf8').trim()
+      const astroWindBridgeCSS = fs.readFileSync(bridgeFile, 'utf8')
+      fs.writeFileSync(outputFile, `${astroWindCustomStyles}\n${astroWindCompiledStyles}\n${astroWindBridgeCSS}`)
+      break
+    }
+    case 'carbon': {
+      if (!entry.packageName || !entry.version || !entry.output || !entry.bridge) {
+        throw new Error(`Carbon package entry requires packageName, version, output, and bridge: ${JSON.stringify(entry)}`)
+      }
+      const archiveFile = path.join(vendorCacheDir, `carbon-styles-${entry.version}.tgz`)
+      const extractedRootDir = path.join(vendorCacheDir, `carbon-styles-${entry.version}`)
+      const sourceFile = path.join(extractedRootDir, 'package', 'css', 'styles.css')
+      const outputFile = path.join(publicDir, entry.output)
+      const bridgeFile = path.join(sourceDir, entry.bridge)
+
+      ensureDownloaded(archiveFile, 'npm', ['pack', `${entry.packageName}@${entry.version}`, '--pack-destination', vendorCacheDir])
+      ensureExtracted(archiveFile, extractedRootDir, sourceFile)
+      const carbonCSS = fs.readFileSync(sourceFile, 'utf8').trimEnd()
+      const bridgeCSS = fs.readFileSync(bridgeFile, 'utf8')
+      fs.writeFileSync(outputFile, `${carbonCSS}
+${bridgeCSS}`)
+      break
+    }
+    default:
+      throw new Error(`Unsupported style package kind: ${entry.kind}`)
+  }
 }
-
-fs.writeFileSync(appTailwindBuildSourceFile, rewrittenAppTailwindBuildSourceContent)
-execFileSync(
-  path.join(appTailwindBuildEnvDir, 'node_modules', '.bin', 'tailwindcss'),
-  ['-c', appTailwindBuildConfigFile, '-i', appTailwindBuildSourceFile, '-o', tailwindOutputFile, '--minify'],
-  {
-    cwd: appTailwindBuildEnvDir,
-    stdio: 'inherit',
-  },
-)
-
-buildAstroWindStylesheet()
-buildDataWebStylesheet()
 fs.copyFileSync(customBuiltSourceFile, customBuiltOutputFile)

@@ -1,0 +1,17 @@
+apiVersion: builtin
+kind: LabelTransformer
+metadata:
+  name: dq-traceability-labels
+labels:
+  app.kubernetes.io/managed-by: dq-made-easy-wf6
+  app.kubernetes.io/version: from-version-manifest
+  dq.jaccloud.nl/traceability: enabled
+fieldSpecs:
+  - path: metadata/labels
+    create: true
+  - path: spec/template/metadata/labels
+    create: true
+    kind: Deployment
+  - path: spec/template/metadata/labels
+    create: true
+    kind: Job

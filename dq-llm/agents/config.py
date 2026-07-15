@@ -14,9 +14,7 @@ Environment Variables:
 - DQ_AGENT_SESSION_TIMEOUT_SECONDS: Session timeout in seconds (default: 3600)
 - DQ_AGENT_MAX_TOOL_CALLS_PER_SESSION: Maximum tool calls per session (default: 100)
 - DQ_AGENT_AUDIT_ENABLED: Enable audit logging (default: true)
-- DQ_AGENT_API_BASE_URL: Base URL for DQ API calls (default: http://dq-api:4010)
-- DQ_AGENT_API_KEY: API key for DQ API authentication (optional)
-- DQ_AGENT_API_KEY_FILE: Path to file containing API key (optional)
+    - DQ_AGENT_API_BASE_URL: Base URL for DQ API calls (default: https://kong:8443)
 """
 
 import os
@@ -52,7 +50,7 @@ class DQAgentConfig(BaseSettings):
     )
     llm_chat_provider: str = Field(
         default="huggingface",
-        description="LLM provider: huggingface, openai, anthropic, grok, ollama"
+        description="LLM provider: huggingface, openai, anthropic, grok, llama_cpp"
     )
     
     # Agent Configuration
@@ -79,7 +77,7 @@ class DQAgentConfig(BaseSettings):
     
     # API Configuration
     api_base_url: str = Field(
-        default="http://dq-api:4010",
+        default="https://kong:8443",
         description="Base URL for DQ API endpoints"
     )
     api_key: Optional[str] = Field(
@@ -181,11 +179,6 @@ class DQAgentConfig(BaseSettings):
     def effective_api_key(self) -> Optional[str]:
         """Get the API key, preferring explicit value over file-based."""
         return self.get_api_key()
-    
-    @property
-    def is_ollama_provider(self) -> bool:
-        """Check if using Ollama provider."""
-        return self.llm_chat_provider.lower() == "ollama"
     
     @property
     def is_huggingface_provider(self) -> bool:

@@ -27,7 +27,7 @@ This document defines the first-party Airflow integration path for dq-made-easy 
 
 The example DAG and compose profile use these environment variables:
 
-- `DQ_AIRFLOW_BASE_URL`: internal dq-api URL reachable from Airflow, for example `http://api:4010`.
+- `DQ_AIRFLOW_BASE_URL`: internal Kong URL reachable from Airflow, for example `https://kong:8443`.
 - `DQ_AIRFLOW_ISSUER_URL`: Keycloak realm issuer URL, for example `http://keycloak:8080/realms/jaccloud`.
 - `DQ_AIRFLOW_CLIENT_ID`: OIDC client id used for password-grant token acquisition.
 - `DQ_AIRFLOW_USERNAME`: user or service-account username. In the seeded local stack this resolves to the rotated operator login by default.
@@ -53,7 +53,7 @@ scripts/build_dq_airflow_dag_artifact.sh
 docker compose --env-file .env.dev.local --profile gateway --profile airflow up airflow
 ```
 
-If you start the repo-managed stack through `scripts/start_stack.sh`, the script already sources `scripts/load_seeded_user_credentials.sh` and exports the rotated operator credentials into `DQ_AIRFLOW_USERNAME` and `DQ_AIRFLOW_PASSWORD` before the Airflow profile is rendered.
+If you start the repo-managed stack through `scripts/stack_start.sh` (or `scripts/stack.sh dev start --seed`), the script already sources `scripts/load_seeded_user_credentials.sh` and exports the rotated operator credentials into `DQ_AIRFLOW_USERNAME` and `DQ_AIRFLOW_PASSWORD` before the Airflow profile is rendered.
 
 The bundled service exposes the Airflow UI on `${AIRFLOW_HOST_PORT:-8088}` and authenticates the browser UI through Keycloak-backed FAB OAuth. The browser login uses the seeded `airflow` OIDC client, while the DQ operator credentials remain separate on `DQ_AIRFLOW_USERNAME` and `DQ_AIRFLOW_PASSWORD`.
 

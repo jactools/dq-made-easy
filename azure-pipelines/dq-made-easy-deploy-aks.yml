@@ -1,0 +1,248 @@
+# Purpose: Deploy any dq-made-easy Docker image to Kubernetes (AKS/EKS/GKE) using an explicit Build -> Test -> Publish -> Deploy stage contract.
+# What it does:
+# - Selects env-specific parameter templates.
+# - Resolves publish/deploy image references from Docker Hub or an internal registry.
+# - Ensures deploy uses published image references, never local agent images.
+# Version: 1.0
+# Last modified: 2026-07-06
+
+trigger: none
+pr: none
+name: dq-made-easy-deploy-aks_$(Date:yyyyMMdd)$(Rev:.r)
+
+parameters:
+  - name: cloudProvider
+    displayName: Cloud provider
+    type: string
+    default: aks
+    values:
+      - aks
+      - eks
+      - gke
+  - name: environment
+    displayName: Environment
+    type: string
+    default: dev
+    values:
+      - dev
+      - test
+      - prod
+  - name: serviceName
+    displayName: Workload/service name
+    type: string
+  - name: imageName
+    displayName: Image name (namespace/repository)
+    type: string
+  - name: imageTag
+    displayName: Image tag
+    type: string
+    default: latest
+  - name: testCommand
+    displayName: Test command
+    type: string
+    default: ./scripts/validate.sh
+  - name: imageDigest
+    displayName: Optional image digest override
+    type: string
+    default: ''
+  - name: registryTarget
+    displayName: Registry target
+    type: string
+    default: dockerhub
+    values:
+      - dockerhub
+      - internal
+  - name: registryServer
+    displayName: Internal registry server (required when registryTarget=internal)
+    type: string
+    default: ''
+  - name: registryUsername
+    displayName: Registry username
+    type: string
+    default: ''
+  - name: registryPassword
+    displayName: Registry password
+    type: string
+    default: ''
+
+variables:
+  - ${{ if and(eq(parameters.cloudProvider, 'aks'), eq(parameters.environment, 'dev')) }}:
+    - template: parameters/dq-made-easy-aks-dev.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'aks'), eq(parameters.environment, 'test')) }}:
+    - template: parameters/dq-made-easy-aks-test.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'aks'), eq(parameters.environment, 'prod')) }}:
+    - template: parameters/dq-made-easy-aks-prod.yml
+
+  - ${{ if and(eq(parameters.cloudProvider, 'eks'), eq(parameters.environment, 'dev')) }}:
+    - template: parameters/dq-made-easy-eks-dev.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'eks'), eq(parameters.environment, 'test')) }}:
+    - template: parameters/dq-made-easy-eks-test.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'eks'), eq(parameters.environment, 'prod')) }}:
+    - template: parameters/dq-made-easy-eks-prod.yml
+
+  - ${{ if and(eq(parameters.cloudProvider, 'gke'), eq(parameters.environment, 'dev')) }}:
+    - template: parameters/dq-made-easy-gke-dev.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'gke'), eq(parameters.environment, 'test')) }}:
+    - template: parameters/dq-made-easy-gke-test.yml
+  - ${{ if and(eq(parameters.cloudProvider, 'gke'), eq(parameters.environment, 'prod')) }}:
+    - template: parameters/dq-made-easy-gke-prod.yml
+
+stages:
+  - stage: Build
+    displayName: dq-made-easy - Build
+    jobs:
+      - job: BuildImages
+        displayName: dq-made-easy - Build images
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - bash: |
+              set -euo pipefail
+
+              image_name='${{ parameters.imageName }}'
+              image_tag='${{ parameters.imageTag }}'
+              env_name='${{ parameters.environment }}'
+
+              if [[ -z "$image_name" ]]; then
+                echo "imageName is required" >&2
+                exit 1
+              fi
+
+              repo_name="${image_name##*/}"
+              build_target=""
+              case "$repo_name" in
+                dq-made-easy-base) build_target="dq-base" ;;
+                dq-made-easy-api) build_target="dq-api" ;;
+                dq-made-easy-engine) build_target="dq-engine" ;;
+                dq-made-easy-profiling) build_target="dq-profiling" ;;
+                dq-made-easy-frontend) build_target="dq-frontend" ;;
+                dq-made-easy-kong) build_target="dq-kong" ;;
+                dq-made-easy-db) build_target="dq-db" ;;
+                dq-made-easy-keycloak) build_target="dq-keycloak" ;;
+                dq-made-easy-llm) build_target="dq-llm" ;;
+                *)
+                  echo "Unsupported imageName for scripted build: $image_name" >&2
+                  echo "Supported repositories: dq-made-easy-{base,api,engine,profiling,frontend,kong,db,keycloak,llm}" >&2
+                  exit 1
+                  ;;
+              esac
+
+              ./scripts/build_and_push_one.sh "$build_target" --env "$env_name" --no-push --version "$image_tag"
+            displayName: dq-made-easy - Validate build inputs
+
+  - stage: Test
+    displayName: dq-made-easy - Test
+    dependsOn: Build
+    jobs:
+      - job: TestGates
+        displayName: dq-made-easy - Test gates
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - bash: |
+              set -euo pipefail
+              test_command='${{ parameters.testCommand }}'
+              if [[ -z "$test_command" ]]; then
+                echo "testCommand is required" >&2
+                exit 1
+              fi
+              bash -lc "$test_command"
+            displayName: dq-made-easy - Run test gates
+
+  - stage: Publish
+    displayName: dq-made-easy - Publish to registry
+    dependsOn: Test
+    jobs:
+      - job: PublishToRegistry
+        displayName: dq-made-easy - Publish image
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - bash: |
+              set -euo pipefail
+
+              registry_target='${{ parameters.registryTarget }}'
+              registry_server='${{ parameters.registryServer }}'
+              image_name='${{ parameters.imageName }}'
+              image_tag='${{ parameters.imageTag }}'
+              image_digest='${{ parameters.imageDigest }}'
+
+              case "$registry_target" in
+                dockerhub)
+                  registry_host="docker.io"
+                  ;;
+                internal)
+                  if [[ -z "$registry_server" ]]; then
+                    echo "registryServer is required when registryTarget=internal" >&2
+                    exit 1
+                  fi
+                  registry_host="$registry_server"
+                  ;;
+                *)
+                  echo "Unsupported registryTarget: $registry_target" >&2
+                  exit 1
+                  ;;
+              esac
+
+              if [[ -n "$image_digest" ]]; then
+                publish_image_ref="${registry_host}/${image_name}@${image_digest}"
+              else
+                source_image_ref="docker.io/${image_name}:${image_tag}"
+                publish_image_ref="${registry_host}/${image_name}:${image_tag}"
+
+                if [[ -n '${{ parameters.registryUsername }}' && -n '${{ parameters.registryPassword }}' ]]; then
+                  printf '%s' '${{ parameters.registryPassword }}' | docker login "$registry_host" -u '${{ parameters.registryUsername }}' --password-stdin
+                fi
+
+                docker image inspect "$source_image_ref" >/dev/null 2>&1 || {
+                  echo "Local build image not found: $source_image_ref" >&2
+                  exit 1
+                }
+
+                docker tag "$source_image_ref" "$publish_image_ref"
+                docker push "$publish_image_ref"
+
+                digest_ref="$(docker image inspect --format='{{index .RepoDigests 0}}' "$publish_image_ref" 2>/dev/null || true)"
+                if [[ -n "$digest_ref" ]]; then
+                  publish_image_ref="$digest_ref"
+                fi
+              fi
+
+              echo "Publish target image: $publish_image_ref"
+
+              echo "##vso[task.setvariable variable=DEPLOY_IMAGE_REF;isOutput=true]${publish_image_ref}"
+            name: PublishImage
+            displayName: dq-made-easy - Resolve and publish image reference
+
+  - stage: Deploy
+    displayName: dq-made-easy - Deploy to Kubernetes
+    dependsOn: Publish
+    variables:
+      DEPLOY_IMAGE_REF: $[ stageDependencies.Publish.PublishToRegistry.outputs['PublishImage.DEPLOY_IMAGE_REF'] ]
+    jobs:
+      - template: templates/dq-made-easy-aks-deploy.yml
+        parameters:
+          cloudProvider: ${{ parameters.cloudProvider }}
+          serviceName: ${{ parameters.serviceName }}
+          imageRef: $(DEPLOY_IMAGE_REF)
+          kubernetesClusterName: $(aksClusterName)
+          kubernetesNamespace: $(aksNamespace)
+          kubeContext: $(kubeContext)
+          azureServiceConnection: $(azureServiceConnection)
+
+  - stage: Smoke
+    displayName: dq-made-easy - Kubernetes smoke validation
+    dependsOn: Deploy
+    jobs:
+      - template: templates/dq-made-easy-aks-smoke.yml
+        parameters:
+          cloudProvider: ${{ parameters.cloudProvider }}
+          serviceName: ${{ parameters.serviceName }}
+          kubernetesClusterName: $(aksClusterName)
+          kubernetesNamespace: $(aksNamespace)
+          kubeContext: $(kubeContext)
+          azureServiceConnection: $(azureServiceConnection)
+          imageRef: $(DEPLOY_IMAGE_REF)

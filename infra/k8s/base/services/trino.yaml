@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-trino
+  labels:
+    app.kubernetes.io/name: dq-trino
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-trino
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-trino
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-trino
+          image: docker.io/jacbeekers/dq-made-easy-trino:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-trino-config
+            - secretRef:
+                name: dq-trino-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-trino
+  labels:
+    app.kubernetes.io/name: dq-trino
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-trino
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

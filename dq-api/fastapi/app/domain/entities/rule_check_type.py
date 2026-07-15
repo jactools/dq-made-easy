@@ -15,6 +15,7 @@ from dq_domain_validation import RuleCheckTypeToleranceSource
 from dq_domain_validation import RuleCheckTypeToleranceUnit
 from dq_domain_validation import RuleCheckTypeTransferMatchMode
 from app.domain.entities.base import EntityModel
+from app.domain.entities.actuality_date_contract import ActualityDateContract
 
 
 class RuleCheckType(str, Enum):
@@ -253,6 +254,7 @@ class CorrectParams(EntityModel):
     referenceDataObjectVersionId: str = Field(min_length=1)
     joinKeys: list[CrossObjectJoinKey] = Field(min_length=1)
     comparison: CrossObjectComparison
+    actualityDate: ActualityDateContract | None = None
 
 
 class ReconcileParams(EntityModel):
@@ -261,6 +263,7 @@ class ReconcileParams(EntityModel):
     rightDataObjectVersionId: str = Field(min_length=1)
     joinKeys: list[CrossObjectJoinKey] = Field(min_length=1)
     comparisons: list[CrossObjectComparison] = Field(min_length=1)
+    actualityDate: ActualityDateContract | None = None
 
 
 class PlausibleContextualRange(EntityModel):
@@ -312,6 +315,7 @@ class TransferMatchParams(EntityModel):
     comparisons: list[CrossObjectComparison] = Field(default_factory=list)
     leftHashAttribute: str | None = None
     rightHashAttribute: str | None = None
+    actualityDate: ActualityDateContract | None = None
 
     @model_validator(mode="after")
     def _validate_transfer_payload(self) -> "TransferMatchParams":
@@ -342,41 +346,22 @@ class JoinConsistencyComparison(EntityModel):
     mode: RuleCheckTypeMode = "exact"
 
 
-class JoinConsistencyActualityDateParams(EntityModel):
-    """Actuality-date contract metadata for join consistency validation.
+class JoinConsistencyActualityDateParams(ActualityDateContract):
+    """Backward-compatibility alias for :class:`ActualityDateContract`.
 
-    ``resolvedTolerance*`` values are populated by contract resolution before
-    deterministic expression generation. ``overrideTolerance*`` remains optional
-    and is subject to separate policy validation.
+    Existing persisted JOIN_CONSISTENCY payloads that reference
+    ``JoinConsistencyActualityDateParams`` continue to validate correctly.
     """
 
-    leftAttribute: str = Field(min_length=1)
-    rightAttribute: str = Field(min_length=1)
-    toleranceSource: RuleCheckTypeToleranceSource = "DELIVERY_CONTRACT"
-    contractId: str = Field(min_length=1)
-    contractVersion: str | None = None
-    resolvedToleranceValue: int | None = Field(default=None, ge=0)
-    resolvedToleranceUnit: RuleCheckTypeToleranceUnit | None = None
-    overrideToleranceValue: int | None = Field(default=None, ge=0)
-    overrideToleranceUnit: RuleCheckTypeToleranceUnit | None = None
-
-    @model_validator(mode="after")
-    def _validate_tolerance_pairs(self) -> "JoinConsistencyActualityDateParams":
-        if (self.resolvedToleranceValue is None) != (self.resolvedToleranceUnit is None):
-            raise ValueError(
-                "JOIN_CONSISTENCY actualityDate requires both 'resolvedToleranceValue' and "
-                "'resolvedToleranceUnit' when either is supplied"
-            )
-        if (self.overrideToleranceValue is None) != (self.overrideToleranceUnit is None):
-            raise ValueError(
-                "JOIN_CONSISTENCY actualityDate requires both 'overrideToleranceValue' and "
-                "'overrideToleranceUnit' when either is supplied"
-            )
-        return self
+    pass  # inherits all fields and validators from ActualityDateContract
 
 
 class JoinConsistencyParams(EntityModel):
-    """Parameters for contract-governed cross-object consistency checks."""
+    """Parameters for contract-governed cross-object consistency checks.
+
+    ``actualityDate`` uses the shared :class:`ActualityDateContract` model
+    (via :class:`JoinConsistencyActualityDateParams` alias for backward compat).
+    """
 
     checkType: Literal["JOIN_CONSISTENCY"] = "JOIN_CONSISTENCY"
     leftDataObjectVersionId: str = Field(min_length=1)

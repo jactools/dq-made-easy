@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
+import React, { createContext, useContext, useLayoutEffect, useMemo, type ReactNode } from 'react'
 
 import type { StylePackageName } from '../types/settings'
 import {
   DEFAULT_STYLE_PACKAGE,
   STYLE_PACKAGE_OPTIONS,
+  type StyleRegistryStyle,
   getStylePackageStylesheetHref,
   normalizeStylePackageName,
+  toBrowserStylesheetHref,
 } from './styleThemeCatalog'
 
 export interface StyleThemeContextType {
@@ -17,20 +19,29 @@ const STYLE_PACKAGE_STYLESHEET_LINK_ID = 'dq-style-package-stylesheet'
 
 const StyleThemeContext = createContext<StyleThemeContextType | undefined>(undefined)
 
-export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: StylePackageName }> = ({
+export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: StylePackageName; registryStyles?: readonly StyleRegistryStyle[] | null }> = ({
   children,
   stylePackage,
+  registryStyles,
 }) => {
   const normalizedStylePackage = normalizeStylePackageName(stylePackage)
+  const registryStyleHref = useMemo(() => {
+    const registryStyle = registryStyles?.find((entry) => entry.isActive !== false && entry.id === normalizedStylePackage)
+    const href = registryStyle?.cssUrl?.trim() || undefined
+    return href ? toBrowserStylesheetHref(href) : undefined
+  }, [normalizedStylePackage, registryStyles])
+  const selectedHref = useMemo(
+    () => getStylePackageStylesheetHref(normalizedStylePackage, registryStyles),
+    [normalizedStylePackage, registryStyles],
+  )
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement
     root.setAttribute('data-style-package', normalizedStylePackage)
 
-    const selectedHref = getStylePackageStylesheetHref(normalizedStylePackage)
     const existingLink = document.getElementById(STYLE_PACKAGE_STYLESHEET_LINK_ID) as HTMLLinkElement | null
 
-    if (normalizedStylePackage === DEFAULT_STYLE_PACKAGE) {
+    if (!selectedHref || (normalizedStylePackage === DEFAULT_STYLE_PACKAGE && !registryStyleHref)) {
       existingLink?.remove()
       return
     }
@@ -48,7 +59,7 @@ export const StyleThemeProvider: React.FC<{ children: ReactNode; stylePackage: S
     return () => {
       link.remove()
     }
-  }, [normalizedStylePackage])
+  }, [normalizedStylePackage, registryStyleHref, selectedHref])
 
   const value = useMemo<StyleThemeContextType>(
     () => ({

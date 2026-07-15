@@ -92,7 +92,7 @@ def _resolve_config() -> WorkerConfig:
         or f"{queue_key}:processing"
     )
 
-    api_url = str(os.getenv("KONG_INTERNAL_URL") or "http://kong:8000").strip().rstrip("/")
+    api_url = str(os.getenv("KONG_INTERNAL_URL") or "https://kong:8443").strip().rstrip("/")
     if not api_url:
         raise RuntimeError("Missing KONG_INTERNAL_URL")
 
@@ -162,6 +162,27 @@ def _derive_s3_ssl_enabled(cfg: WorkerConfig) -> bool:
     return cfg.s3_endpoint.lower().startswith("https://")
 
 
+def _resolve_s3_verify(cfg: WorkerConfig) -> bool | str:
+    if cfg.s3_endpoint.lower().startswith("https://"):
+        bundle = str(
+            os.getenv("DQ_S3_CA_BUNDLE")
+            or os.getenv("AWS_CA_BUNDLE")
+            or os.getenv("REQUESTS_CA_BUNDLE")
+            or ""
+        ).strip()
+        if not bundle:
+            raise RuntimeError(
+                "S3 HTTPS requires DQ_S3_CA_BUNDLE, AWS_CA_BUNDLE, or REQUESTS_CA_BUNDLE"
+            )
+
+        bundle_path = Path(bundle).expanduser()
+        if not bundle_path.is_file():
+            raise RuntimeError(f"Missing S3 CA bundle: {bundle_path}")
+        return str(bundle_path)
+
+    return _derive_s3_ssl_enabled(cfg)
+
+
 def _ensure_bucket_exists(cfg: WorkerConfig, *, bucket: str) -> None:
     import boto3
 
@@ -171,7 +192,7 @@ def _ensure_bucket_exists(cfg: WorkerConfig, *, bucket: str) -> None:
         aws_access_key_id=cfg.s3_access_key,
         aws_secret_access_key=cfg.s3_secret_key,
         region_name=cfg.s3_region or "us-east-1",
-        verify=_derive_s3_ssl_enabled(cfg),
+        verify=_resolve_s3_verify(cfg),
     )
 
     try:
@@ -210,7 +231,7 @@ def _upload_directory_to_s3(
         aws_access_key_id=cfg.s3_access_key,
         aws_secret_access_key=cfg.s3_secret_key,
         region_name=cfg.s3_region or "us-east-1",
-        verify=_derive_s3_ssl_enabled(cfg),
+        verify=_resolve_s3_verify(cfg),
     )
 
     normalized_prefix = str(key_prefix or "").lstrip("/")
@@ -442,12 +463,16 @@ def _build_token_provider() -> TokenProvider:
         )
 
     try:
+        max_retries = int(os.getenv("DQ_ENGINE_MAX_RETRIES", "0"))
+        backoff_ms = int(os.getenv("DQ_ENGINE_RETRY_BACKOFF_MS", "5000"))
         return build_oidc_token_provider_from_env(
             issuer_env_var="DQ_ENGINE_OIDC_ISSUER",
             token_url_env_var="DQ_ENGINE_OIDC_TOKEN_URL",
             client_id_env_var="DQ_ENGINE_OIDC_CLIENT_ID",
             client_secret_env_var="DQ_ENGINE_OIDC_CLIENT_SECRET",
             scope_env_var="DQ_ENGINE_OIDC_SCOPE",
+            max_startup_retries=max_retries,
+            retry_backoff_seconds=backoff_ms / 1000.0,
         )
     except AuthConfigError as exc:
         raise RuntimeError(str(exc)) from exc

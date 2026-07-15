@@ -1,8 +1,8 @@
 # WF-3: Rule Versioning & Rollback - Workflow Integration
 
 Current-state references:
-- [WF-3 comprehensive summary](../status/current/WF3_COMPREHENSIVE_SUMMARY.md)
-- [Management feature summary](../status/current/MANAGEMENT_FEATURE_SUMMARY.md)
+- [WF-3 comprehensive summary](../features/WF3_COMPREHENSIVE_SUMMARY.md)
+- [Management feature summary](../features/MANAGEMENT_FEATURE_SUMMARY.md)
 
 ## Overview
 

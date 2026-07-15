@@ -14,7 +14,9 @@ set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
-source "$ROOT_DIR/.env"
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+init_root_env_file "$ROOT_DIR"
+source_selected_root_env_file
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 
 source "$ROOT_DIR/scripts/supporting/logging.sh"

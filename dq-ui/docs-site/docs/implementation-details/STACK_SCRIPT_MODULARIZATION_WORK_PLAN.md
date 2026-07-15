@@ -1,7 +1,7 @@
 # Stack Script Modularization Work Plan
 
-Status: [~] Draft — SMP-01 complete, SMP-02 complete, SMP-03 complete, SMP-04 complete, SMP-05 complete, SMP-06 complete, SMP-07 complete, SMP-08 complete, SMP-09 complete, SMP-10 complete, SMP-11 complete, SMP-12 complete
-Last updated: 2026-05-09
+Status: [~] Draft — SMP-01 through SMP-12 complete, SMP-13 complete
+Last updated: 2026-07-14
 
 ## Purpose
 
@@ -84,6 +84,13 @@ This work plan breaks the current start, stop, and seed shell scripts into small
   - Note any intentional exclusions or unchanged flows here.
   - Doc: [STACK_SCRIPT_CONTRACT.md](/docs/implementation-details/STACK_SCRIPT_CONTRACT/)
 
+- [x] SMP-13 Consolidate lifecycle into single-responsibility scripts with orchestrator
+  - Replace the monolithic `common_startup.sh` / `start-containers.sh` / `start_stack.sh` / `stop_stack.sh` / `seed_all.sh` / `init-all.sh` chain with single-responsibility scripts: `stack_destroy.sh`, `stack_start.sh`, `stack_stop.sh`, `stack_restart.sh`, `stack_seed.sh`.
+  - Add an orchestrator (`stack.sh`) that dispatches to these scripts based on action.
+  - Add admin password classification to `generate_secrets.sh` (`--reuse-admin`) and `seed_password_rotation.py` (`--no-admin-rotate`) so that DB-persisted admin passwords are reused when volumes exist and service/user passwords are always rotated.
+  - Add `stack_lifecycle.sh` shared helper for volume detection, admin var classification, artifact cleanup, and env loading.
+  - Scripts: [scripts/stack.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack.sh), [scripts/stack_destroy.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_destroy.sh), [scripts/stack_start.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_start.sh), [scripts/stack_stop.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_stop.sh), [scripts/stack_restart.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_restart.sh), [scripts/stack_seed.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_seed.sh), [scripts/supporting/stack_lifecycle.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/stack_lifecycle.sh)
+
 ## Suggested First Slice
 
 1. Keycloak technical block: start, stop, seed, readiness, and seeded credential loading.
@@ -95,3 +102,4 @@ This work plan breaks the current start, stop, and seed shell scripts into small
 - Changing the CSV-to-SQL mock-data conversion pipeline.
 - Introducing fallback behavior for missing services or credentials.
 - Adding legacy compatibility layers or dual-read shims.
+- Changing the image build/pull/push or status-reporting surface (those remain via `stack_ctl.sh` and `stack_status.sh`).

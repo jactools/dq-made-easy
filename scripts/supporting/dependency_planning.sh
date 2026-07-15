@@ -3,10 +3,12 @@
 # - Expands selected runtime profiles and explicit services into an ordered service plan.
 # - Reverses stop ordering so teardown respects dependency edges.
 # - Fails fast when a planned service container is unhealthy or cannot be inspected.
-# Version: 1.0
-# Last modified: 2026-05-08
+# Version: 1.1
+# Last modified: 2026-06-30
+# - 1.1 (2026-06-30): Made service-only planning safe under set -u.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="${ROOT_DIR:-$(cd "${SCRIPT_DIR}/../.." && pwd)}"
 source "$SCRIPT_DIR/logging.sh"
 source "$SCRIPT_DIR/compose/invocation.sh"
 
@@ -42,7 +44,7 @@ stack_dependency_plan_services() {
     IFS="$old_ifs"
   fi
 
-  if ! compose_json="$(docker_compose "${profile_args[@]}" config --format json)"; then
+  if ! compose_json="$(docker_compose ${profile_args[@]+"${profile_args[@]}"} config --format json)"; then
     error "docker compose config failed while planning dependencies"
     return 1
   fi
@@ -50,7 +52,7 @@ stack_dependency_plan_services() {
   if ! planned_services="$(SELECTED_PROFILES_CSV="$selected_profiles_csv" \
     SELECTED_SERVICES_CSV="$selected_services_csv" \
     PLAN_MODE="$mode" \
-    python3 -c '
+    $ROOT_DIR/scripts/python_arm64.sh --python-bin python3 -c '
 import json
 import os
 import sys

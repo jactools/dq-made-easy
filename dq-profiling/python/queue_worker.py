@@ -118,7 +118,7 @@ class ProfilingRequestStatusReporter:
     def __init__(self, api_url: str, *, timeout_seconds: int = 10) -> None:
         api_url = str(api_url or "").strip().rstrip("/")
         if not api_url:
-            raise RuntimeError("DQ_API_INTERNAL_URL is required for profiling worker status reporting")
+            raise RuntimeError("KONG_INTERNAL_URL is required for profiling worker status reporting")
         self._api_url = api_url
         self._timeout_seconds = int(timeout_seconds)
 
@@ -273,14 +273,14 @@ def _resolve_redis_url() -> str:
 
 
 def _resolve_api_url() -> str | None:
-    api_url = str(os.environ.get("DQ_API_INTERNAL_URL") or "").strip()
+    api_url = str(os.environ.get("KONG_INTERNAL_URL") or "").strip()
     return api_url.rstrip("/") or None
 
 
 def _build_status_reporter() -> ProfilingRequestStatusReporter:
     api_url = _resolve_api_url()
     if not api_url:
-        raise RuntimeError("DQ_API_INTERNAL_URL is required for profiling worker (used for request status reporting)")
+        raise RuntimeError("KONG_INTERNAL_URL is required for profiling worker (used for request status reporting)")
     return ProfilingRequestStatusReporter(api_url)
 
 

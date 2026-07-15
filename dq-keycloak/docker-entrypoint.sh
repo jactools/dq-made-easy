@@ -1,6 +1,22 @@
 #!/bin/bash
 set -e
 
+# ==========================================================================
+# Trust-bundle initialization
+# ==========================================================================
+# The trust-bundle container generates:
+#   /certs/trust/trust-bundle.pem      — CA bundle for curl/Python/etc.
+#   /certs/trust/trust-bundle.jks      — Java keystore with all CAs.
+#   /certs/trust/java-truststore-env.sh — JAVA_OPTS / KC_OPTS for JVMs.
+TRUST_ENV="/certs/trust/java-truststore-env.sh"
+if [ -f "$TRUST_ENV" ]; then
+  . "$TRUST_ENV"
+  echo "[entrypoint] sourced trust-bundle env from ${TRUST_ENV}"
+else
+  echo "[entrypoint] WARNING: trust-bundle env not found at ${TRUST_ENV}" >&2
+  echo "[entrypoint] using system truststore" >&2
+fi
+
 # Ensure the realm JSON is always present in data/import/ before Keycloak
 # starts, regardless of what the named volume contains.  The source file lives
 # outside /opt/keycloak/data so the volume mount can never shadow it.
@@ -32,18 +48,17 @@ fi
 
 # Start Keycloak in background so we can perform an initial admin tweak
 # (disable master realm SSL requirement for local/dev convenience).
-exec_kc="/opt/keycloak/bin/kc.sh $*"
 
 # Start Keycloak
 /opt/keycloak/bin/kc.sh "$@" &
 KC_PID=$!
 
-keycloak_http_relative_path="${KEYCLOAK_HTTP_RELATIVE_PATH:-${KC_HTTP_RELATIVE_PATH:-}}"
-if [ -n "$keycloak_http_relative_path" ]; then
-      keycloak_http_relative_path="/${keycloak_http_relative_path#/}"
-      keycloak_http_relative_path="${keycloak_http_relative_path%/}"
+keycloak_https_relative_path="${KEYCLOAK_HTTPS_RELATIVE_PATH:-${KC_HTTPS_RELATIVE_PATH:-}}"
+if [ -n "$keycloak_https_relative_path" ]; then
+      keycloak_https_relative_path="/${keycloak_https_relative_path#/}"
+      keycloak_https_relative_path="${keycloak_https_relative_path%/}"
 fi
-keycloak_admin_base_url="http://127.0.0.1:8080${keycloak_http_relative_path}"
+keycloak_admin_base_url="https://127.0.0.1:8443${keycloak_https_relative_path}"
 
 seed_credentials_file="/opt/keycloak/realm-import/keycloak_seed_user_credentials.csv"
 if [ ! -f "$seed_credentials_file" ]; then
@@ -51,8 +66,14 @@ if [ ! -f "$seed_credentials_file" ]; then
       exit 1
 fi
 
-if [ -z "${KEYCLOAK_SYSTEM_ADMIN_USERNAME:-}" ] || [ -z "${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:-}" ]; then
-      echo "[entrypoint] ERROR: KEYCLOAK_SYSTEM_ADMIN_USERNAME and KEYCLOAK_SYSTEM_ADMIN_PASSWORD are required" >&2
+# Keycloak admin credentials: use the system admin vars if set,
+# otherwise fall back to the KEYCLOAK_ADMIN* env vars that Keycloak
+# itself uses for the initial master-realm admin account.
+ADMIN_USERNAME="${KEYCLOAK_SYSTEM_ADMIN_USERNAME:-${KEYCLOAK_ADMIN:-}}"
+ADMIN_PASSWORD="${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:-${KEYCLOAK_ADMIN_PASSWORD:-}}"
+
+if [ -z "${ADMIN_USERNAME:-}" ] || [ -z "${ADMIN_PASSWORD:-}" ]; then
+      echo "[entrypoint] ERROR: admin username and password are required (KEYCLOAK_ADMIN or KEYCLOAK_SYSTEM_ADMIN_USERNAME)" >&2
       exit 1
 fi
 
@@ -138,14 +159,14 @@ sync_dq_rules_ui_client() {
       local client_json=""
       local client_id=""
 
-      client_json="$(/opt/keycloak/bin/kcadm.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=dq-rules-ui --fields id)"
+      client_json="$(/opt/keycloak/kcadm-trust.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=dq-rules-ui --fields id)"
       client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
       if [ -z "$client_id" ]; then
             echo "[entrypoint] ERROR: dq-rules-ui client not found in realm ${KEYCLOAK_REALM}" >&2
             exit 1
       fi
 
-      /opt/keycloak/bin/kcadm.sh update "clients/${client_id}" -r "${KEYCLOAK_REALM}" \
+      /opt/keycloak/kcadm-trust.sh update "clients/${client_id}" -r "${KEYCLOAK_REALM}" \
             -s "redirectUris=${redirect_uris_json}" \
             -s "webOrigins=${web_origins_json}" \
             -s "attributes.\"post.logout.redirect.uris\"=\"${post_logout_redirects}\"" >/dev/null
@@ -164,18 +185,57 @@ sync_grafana_client() {
       local client_json=""
       local client_id=""
 
-      client_json="$(/opt/keycloak/bin/kcadm.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=grafana --fields id)"
+      client_json="$(/opt/keycloak/kcadm-trust.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=grafana --fields id)"
       client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
       if [ -z "$client_id" ]; then
             echo "[entrypoint] ERROR: grafana client not found in realm ${KEYCLOAK_REALM}" >&2
             exit 1
       fi
 
-      /opt/keycloak/bin/kcadm.sh update "clients/${client_id}" -r "${KEYCLOAK_REALM}" \
+      /opt/keycloak/kcadm-trust.sh update "clients/${client_id}" -r "${KEYCLOAK_REALM}" \
             -s "redirectUris=${redirect_uris_json}" \
-            -s "webOrigins=${web_origins_json}" >/dev/null
+            -s "webOrigins=${web_origins_json}" \
+            -s 'serviceAccountsEnabled=true' >/dev/null
 
       echo "[entrypoint] synced grafana client redirects for ${grafana_public_url}"
+}
+
+sync_grafana_service_account_role() {
+      local client_name="grafana"
+      local required_role="${GRAFANA_OIDC_REALM_ROLE:-dq:rules:read}"
+      local client_json=""
+      local client_id=""
+      local service_account_json=""
+      local service_account_id=""
+      local has_required_role=""
+
+      if [ -z "$required_role" ]; then
+            echo "[entrypoint] ERROR: GRAFANA_OIDC_REALM_ROLE is required" >&2
+            exit 1
+      fi
+
+      client_json="$(/opt/keycloak/kcadm-trust.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=${client_name} --fields id)"
+      client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$client_id" ]; then
+            echo "[entrypoint] ERROR: ${client_name} client not found in realm ${KEYCLOAK_REALM}" >&2
+            exit 1
+      fi
+
+      service_account_json="$(/opt/keycloak/kcadm-trust.sh get "clients/${client_id}/service-account-user" -r "${KEYCLOAK_REALM}" --fields id)"
+      service_account_id="$(printf '%s\n' "$service_account_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$service_account_id" ]; then
+            echo "[entrypoint] ERROR: service-account user not found for client ${client_name}" >&2
+            exit 1
+      fi
+
+      has_required_role="$(/opt/keycloak/kcadm-trust.sh get "users/${service_account_id}/role-mappings/realm" -r "${KEYCLOAK_REALM}" | grep -F '"name" : "'"${required_role}"'"' || true)"
+      if [ -n "$has_required_role" ]; then
+            echo "[entrypoint] ${client_name} service-account already has realm role ${required_role}"
+            return
+      fi
+
+      /opt/keycloak/kcadm-trust.sh add-roles -r "${KEYCLOAK_REALM}" --uid "$service_account_id" --rolename "$required_role" >/dev/null
+      echo "[entrypoint] assigned realm role ${required_role} to ${client_name} service-account"
 }
 
 sync_zammad_client() {
@@ -189,14 +249,14 @@ sync_zammad_client() {
       local client_json=""
       local client_id=""
 
-      client_json="$(/opt/keycloak/bin/kcadm.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=zammad --fields id)"
+      client_json="$(/opt/keycloak/kcadm-trust.sh get clients -r "${KEYCLOAK_REALM}" -q clientId=zammad --fields id)"
       client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
       if [ -z "$client_id" ]; then
             echo "[entrypoint] ERROR: zammad client not found in realm ${KEYCLOAK_REALM}" >&2
             exit 1
       fi
 
-      /opt/keycloak/bin/kcadm.sh update "clients/${client_id}" -r "${KEYCLOAK_REALM}" \
+      /opt/keycloak/kcadm-trust.sh update "clients/${client_id}" -r "${KEYCLOAK_REALM}" \
             -s "redirectUris=${redirect_uris_json}" \
             -s "webOrigins=${web_origins_json}" >/dev/null
 
@@ -222,34 +282,67 @@ sync_engine_worker_service_account_role() {
             exit 1
       fi
 
-      client_json="$(/opt/keycloak/bin/kcadm.sh get clients -r "${KEYCLOAK_REALM}" -q clientId="${client_name}" --fields id)"
+      client_json="$(/opt/keycloak/kcadm-trust.sh get clients -r "${KEYCLOAK_REALM}" -q clientId="${client_name}" --fields id)"
       client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
       if [ -z "$client_id" ]; then
             echo "[entrypoint] ERROR: ${client_name} client not found in realm ${KEYCLOAK_REALM}" >&2
             exit 1
       fi
 
-      service_account_json="$(/opt/keycloak/bin/kcadm.sh get "clients/${client_id}/service-account-user" -r "${KEYCLOAK_REALM}" --fields id)"
+      service_account_json="$(/opt/keycloak/kcadm-trust.sh get "clients/${client_id}/service-account-user" -r "${KEYCLOAK_REALM}" --fields id)"
       service_account_id="$(printf '%s\n' "$service_account_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
       if [ -z "$service_account_id" ]; then
             echo "[entrypoint] ERROR: service-account user not found for client ${client_name}" >&2
             exit 1
       fi
 
-      has_required_role="$(/opt/keycloak/bin/kcadm.sh get "users/${service_account_id}/role-mappings/realm" -r "${KEYCLOAK_REALM}" | grep -F '"name" : "'"${required_role}"'"' || true)"
+      has_required_role="$(/opt/keycloak/kcadm-trust.sh get "users/${service_account_id}/role-mappings/realm" -r "${KEYCLOAK_REALM}" | grep -F '"name" : "'"${required_role}"'"' || true)"
       if [ -n "$has_required_role" ]; then
             echo "[entrypoint] ${client_name} service-account already has realm role ${required_role}"
             return
       fi
 
-      /opt/keycloak/bin/kcadm.sh add-roles -r "${KEYCLOAK_REALM}" --uid "$service_account_id" --rolename "$required_role" >/dev/null
+      /opt/keycloak/kcadm-trust.sh add-roles -r "${KEYCLOAK_REALM}" --uid "$service_account_id" --rolename "$required_role" >/dev/null
+      echo "[entrypoint] assigned realm role ${required_role} to ${client_name} service-account"
+}
+
+sync_openmetadata_admin_service_account_role() {
+      local client_name="openmetadata-admin"
+      local required_role="${OM_ADMIN_OIDC_REALM_ROLE:-admin}"
+      local client_json=""
+      local client_id=""
+      local service_account_json=""
+      local service_account_id=""
+      local has_required_role=""
+
+      client_json="$(/opt/keycloak/kcadm-trust.sh get clients -r "${KEYCLOAK_REALM}" -q clientId="${client_name}" --fields id)"
+      client_id="$(printf '%s\n' "$client_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$client_id" ]; then
+            echo "[entrypoint] ERROR: ${client_name} client not found in realm ${KEYCLOAK_REALM}" >&2
+            exit 1
+      fi
+
+      service_account_json="$(/opt/keycloak/kcadm-trust.sh get "clients/${client_id}/service-account-user" -r "${KEYCLOAK_REALM}" --fields id)"
+      service_account_id="$(printf '%s\n' "$service_account_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+      if [ -z "$service_account_id" ]; then
+            echo "[entrypoint] ERROR: service-account user not found for client ${client_name}" >&2
+            exit 1
+      fi
+
+      has_required_role="$(/opt/keycloak/kcadm-trust.sh get "users/${service_account_id}/role-mappings/realm" -r "${KEYCLOAK_REALM}" | grep -F '"name" : "'"${required_role}"'"' || true)"
+      if [ -n "$has_required_role" ]; then
+            echo "[entrypoint] ${client_name} service-account already has realm role ${required_role}"
+            return
+      fi
+
+      /opt/keycloak/kcadm-trust.sh add-roles -r "${KEYCLOAK_REALM}" --uid "$service_account_id" --rolename "$required_role" >/dev/null
       echo "[entrypoint] assigned realm role ${required_role} to ${client_name} service-account"
 }
 
 # Wait for Keycloak admin endpoint to be available
 echo "[entrypoint] waiting for Keycloak admin endpoint..."
 for i in {1..30}; do
-      if /opt/keycloak/bin/kcadm.sh config credentials --server "$keycloak_admin_base_url" --realm master --user "${KEYCLOAK_SYSTEM_ADMIN_USERNAME}" --password "${KEYCLOAK_SYSTEM_ADMIN_PASSWORD}" >/dev/null 2>&1; then
+      if /opt/keycloak/kcadm-trust.sh config credentials --server "$keycloak_admin_base_url" --realm master --user "${ADMIN_USERNAME}" --password "${ADMIN_PASSWORD}" >/dev/null 2>&1; then
             echo "[entrypoint] Keycloak is up"
             break
       fi
@@ -257,7 +350,7 @@ for i in {1..30}; do
 done
 
 echo "[entrypoint] configuring master realm sslRequired=none (dev only)"
-/opt/keycloak/bin/kcadm.sh update realms/master -s sslRequired=none >/dev/null
+/opt/keycloak/kcadm-trust.sh update realms/master -s sslRequired=none >/dev/null
 
 echo "[entrypoint] syncing dq-rules-ui client redirect configuration"
 sync_dq_rules_ui_client
@@ -265,11 +358,17 @@ sync_dq_rules_ui_client
 echo "[entrypoint] syncing grafana client redirect configuration"
 sync_grafana_client
 
+echo "[entrypoint] reconciling grafana service-account role"
+sync_grafana_service_account_role
+
 echo "[entrypoint] syncing zammad client redirect configuration"
 sync_zammad_client
 
 echo "[entrypoint] reconciling engine worker service-account role"
 sync_engine_worker_service_account_role
+
+echo "[entrypoint] reconciling openmetadata-admin service-account role"
+sync_openmetadata_admin_service_account_role
 
 echo "[entrypoint] applying rotated seeded user passwords"
 rotated_password_count=0
@@ -294,14 +393,16 @@ while IFS= read -r credential_line || [ -n "$credential_line" ]; do
             exit 1
       fi
 
-      user_json="$(/opt/keycloak/bin/kcadm.sh get users -r "${KEYCLOAK_REALM}" -q "username=${email}" --fields id)"
+      user_json="$(/opt/keycloak/kcadm-trust.sh get users -r "${KEYCLOAK_REALM}" -q "username=${email}" --fields id)"
       user_id="$(printf '%s\n' "$user_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
       if [ -z "$user_id" ]; then
             echo "[entrypoint] ERROR: seeded Keycloak user not found: ${email}" >&2
             exit 1
       fi
 
-      /opt/keycloak/bin/kcadm.sh set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" --new-password="$password" >/dev/null
+      # Use "--new-password=${password}" (no space) to avoid kcadm argument
+      # parsing issues with passwords containing special characters.
+      /opt/keycloak/kcadm-trust.sh set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=${password}" >/dev/null
       rotated_password_count=$((rotated_password_count + 1))
 done < "$seed_credentials_file"
 echo "[entrypoint] applied ${rotated_password_count} rotated seeded user passwords"

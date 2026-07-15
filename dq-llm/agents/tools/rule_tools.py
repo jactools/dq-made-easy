@@ -383,7 +383,7 @@ class RuleTool(PiTool):
     
     def __init__(
         self,
-        api_base_url: str = "http://dq-api:4010",
+        api_base_url: str = "https://kong:8443",
         llm_base_url: str = "http://dq-llm:4020",
         api_key_provider: Optional[Callable[[], Optional[str]]] = None,
         timeout: float = 30.0

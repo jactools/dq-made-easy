@@ -1,0 +1,1 @@
+1047:  info "$my_name" "Running Trino AIStor catalog seed after --seed-all delivery seeding..."

@@ -186,6 +186,11 @@ from app.api.v1.schemas.registry_definition_view import (
 	RegistryDefinitionView,
 )
 from app.api.v1.schemas.workspaces_view import WorkspaceView, WorkspacesPageView
+from app.api.v1.schemas.dq_plan_template_schemas import DQPlanTemplateSchema
+from app.api.v1.schemas.dq_plan_template_schemas import DQPlanTemplateParameterSchema
+from app.api.v1.schemas.dq_plan_template_schemas import InstantiateTemplateRequestSchema
+from app.api.v1.schemas.dq_plan_template_schemas import InstantiateTemplateResultSchema
+from app.api.v1.schemas.dq_plan_template_schemas import DQPlanTemplateView
 
 __all__ = [
 	"AddRuleAttributesResultView",
@@ -383,4 +388,9 @@ __all__ = [
 	"ValidationRunsPageView",
 	"WorkspaceView",
 	"WorkspacesPageView",
+	"DQPlanTemplateSchema",
+	"DQPlanTemplateParameterSchema",
+	"InstantiateTemplateRequestSchema",
+	"InstantiateTemplateResultSchema",
+	"DQPlanTemplateView",
 ]

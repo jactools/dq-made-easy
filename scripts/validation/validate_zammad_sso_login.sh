@@ -152,7 +152,7 @@ if [ "$browser_post_rc" -ne 0 ]; then
   exit "$browser_post_rc"
 fi
 
-browser_location_header="$(awk 'BEGIN { IGNORECASE=1 } /^location:/ { sub(/^location:[[:space:]]*/, "", $0); print; exit }' "$browser_headers_file")"
+browser_location_header="$(awk '/^[Ll][Oo][Cc][Aa][Tt][Ii][Oo][Nn]:/ { sub(/^[^:]+:[[:space:]]*/, "", $0); print; exit }' "$browser_headers_file")"
 if [ "$browser_post_code" != "302" ] && [ "$browser_post_code" != "303" ]; then
   error "$my_name" "Expected browser-style Zammad SSO initiation to redirect, got HTTP ${browser_post_code}"
   if [ -s "$browser_headers_file" ]; then

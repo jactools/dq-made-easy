@@ -43,7 +43,7 @@ The main objective is product clarity. The UI now uses `Rule Quality`, `Governan
 - [docs/features/FEATURES.md](../../docs/features/FEATURES.md)
 - [docs/features/DQ_FEATURES.md](../../docs/features/DQ_FEATURES.md)
 - [docs/user-manuals/DQ-2_QUICK_REFERENCE.md](../../docs/user-manuals/DQ-2_QUICK_REFERENCE.md)
-- [docs/status/current/MANAGEMENT_FEATURE_SUMMARY.md](../../docs/status/current/MANAGEMENT_FEATURE_SUMMARY.md)
+- [docs/features/MANAGEMENT_FEATURE_SUMMARY.md](../../docs/features/MANAGEMENT_FEATURE_SUMMARY.md)
 - [docs/implementation-details/DQ_1_RULE_VALIDATION_STANDARD_FEATURE_IMPLEMENTATION_PLAN.md](../../docs/implementation-details/DQ_1_RULE_VALIDATION_STANDARD_FEATURE_IMPLEMENTATION_PLAN.md)
 
 ## Notes

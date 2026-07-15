@@ -5,6 +5,10 @@ from fastapi import HTTPException
 
 from app.application.services.data_contract_resolver import JoinConsistencyContractResolver
 from app.application.services.data_contract_resolver import OpenMetadataContractResolver
+from app.application.services.ui_registry import RegistryConfiguration
+from app.application.services.ui_registry import RegistryManifest
+from app.application.services.ui_registry import RegistryManager
+from app.application.services.ui_registry import RegistrySource
 from app.application.services.product_spec_resolver import OpenMetadataProductSpecResolver
 from app.application.services.product_spec_resolver import ProductSpecResolver
 from app.application.services.grouped_execution_planner import GroupedExecutionPlanner
@@ -48,6 +52,7 @@ from app.domain.interfaces import SlaSloRepository
 from app.domain.interfaces import IncidentRepository
 from app.domain.interfaces import OntologyGraphRepository
 from app.domain.interfaces import FederatedMetadataRegistryRepository
+from app.domain.interfaces import DQPlanTemplateRepository
 from app.infrastructure.repositories import (
     InMemoryAdminRepository,
     InMemoryAgentRequestAuditRepository,
@@ -80,6 +85,7 @@ from app.infrastructure.repositories import (
     PostgresDataProtectionRepository,
     PostgresDqResultEventRepository,
     PostgresFederatedMetadataRegistryRepository,
+    PostgresUiRegistryRepository,
     PostgresMasterDataRepository,
     PostgresDataAssetRepository,
     PostgresOntologyGraphRepository,
@@ -107,7 +113,10 @@ from app.infrastructure.repositories import (
     PostgresSlaSloRepository,
     InMemoryIncidentRepository,
     PostgresIncidentRepository,
+    PostgresConnectorSyncJobRepository,
+    PostgresConnectorSyncScheduleRepository,
 )
+from app.infrastructure.repositories.postgres_dq_plan_template_repository import PostgresDQPlanTemplateRepository
 
 _rules_repository = InMemoryRulesRepository()
 _catalog_repository = InMemoryDataCatalogRepository()
@@ -246,6 +255,11 @@ def _get_postgres_connector_registry_repository(database_url: str) -> PostgresCo
     return PostgresConnectorRegistryRepository(database_url)
 
 
+@lru_cache(maxsize=8)
+def _get_postgres_ui_registry_repository(database_url: str) -> PostgresUiRegistryRepository:
+    return PostgresUiRegistryRepository(database_url)
+
+
 @lru_cache
 def _get_postgres_workspaces_repository(database_url: str) -> PostgresWorkspacesRepository:
     return PostgresWorkspacesRepository(database_url)
@@ -368,6 +382,45 @@ def get_admin_repository() -> AdminRepository:
 def get_app_config_repository() -> AppConfigRepository:
     database_url = _require_database_url(service="app-config-repository", display_name="App config repository")
     return _get_postgres_app_config_repository(database_url)
+
+
+@lru_cache
+def _get_ui_registry_manager(
+    source: str,
+    json_payload: str | None,
+    file_path: str | None,
+    url: str | None,
+    expected_version: str,
+    cache_ttl_seconds: int,
+    repository: PostgresUiRegistryRepository | None,
+) -> RegistryManager:
+    configuration = RegistryConfiguration(
+        source=None if source == "default" else RegistrySource(source),
+        json_payload=json_payload,
+        file_path=file_path,
+        url=url,
+        expected_version=expected_version,
+        cache_ttl_seconds=cache_ttl_seconds,
+    )
+    return RegistryManager.from_configuration(configuration, repository=repository)
+
+
+def get_ui_registry_manager() -> RegistryManager:
+    settings = get_settings()
+    repository = _get_postgres_ui_registry_repository(settings.database_url)
+    return _get_ui_registry_manager(
+        settings.ui_registry_source,
+        settings.ui_registry_json,
+        settings.ui_registry_file,
+        settings.ui_registry_url,
+        settings.ui_registry_manifest_version,
+        settings.ui_registry_cache_ttl_seconds,
+        repository,
+    )
+
+
+def get_ui_registry_manifest() -> RegistryManifest:
+    return get_ui_registry_manager().load()
 
 
 def get_session_repository() -> "SessionRepository":
@@ -724,3 +777,46 @@ def get_incident_repository() -> IncidentRepository:
         service="incident-repository", display_name="Incident repository"
     )
     return _get_postgres_incident_repository(database_url)
+
+
+@lru_cache
+def _get_postgres_dq_plan_template_repository(database_url: str) -> PostgresDQPlanTemplateRepository:
+    return PostgresDQPlanTemplateRepository(database_url)
+
+
+def get_dq_plan_template_repository() -> DQPlanTemplateRepository:
+    database_url = _require_database_url(
+        service="dq-plan-template-repository", display_name="DQ Plan template repository"
+    )
+    return _get_postgres_dq_plan_template_repository(database_url)
+
+
+# ---------------------------------------------------------------------------
+# Connector sync tracking repositories (API-1 gap closure)
+# ---------------------------------------------------------------------------
+
+
+@lru_cache
+def _get_postgres_connector_sync_job_repository(database_url: str) -> PostgresConnectorSyncJobRepository:
+    return PostgresConnectorSyncJobRepository(database_url)
+
+
+def get_connector_sync_job_repository() -> "ConnectorSyncJobRepository":
+    database_url = _require_database_url(
+        service="connector-sync-job-repository",
+        display_name="Connector sync job repository",
+    )
+    return _get_postgres_connector_sync_job_repository(database_url)
+
+
+@lru_cache
+def _get_postgres_connector_sync_schedule_repository(database_url: str) -> PostgresConnectorSyncScheduleRepository:
+    return PostgresConnectorSyncScheduleRepository(database_url)
+
+
+def get_connector_sync_schedule_repository() -> "ConnectorSyncScheduleRepository":
+    database_url = _require_database_url(
+        service="connector-sync-schedule-repository",
+        display_name="Connector sync schedule repository",
+    )
+    return _get_postgres_connector_sync_schedule_repository(database_url)

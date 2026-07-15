@@ -1,0 +1,9 @@
+{
+  "app_version": "0.11.5",
+  "mode": "api",
+  "label": "spark-expectations-large-quarantine",
+  "timestamp_utc": "20260628T202616Z",
+  "cwd": "/Users/jacbeekers/gitrepos/dq-made-easy",
+  "evidence_directory": "test-results/evidence/0.11.5/api/20260628T202616Z-spark-expectations-large-quarantine",
+  "status": 0
+}

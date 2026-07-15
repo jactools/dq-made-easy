@@ -68,7 +68,7 @@ It does not by itself define:
 - `/memories/repo/dq-rulebuilder-nonlegacy-scope-migration-note.md`
 - `/memories/repo/dq-rulebuilder-role-permissions-runtime-seed-note.md`
 - `/memories/repo/dq-rulebuilder-seeded-smoke-schema-bootstrap-and-profiling-fk-note.md`
-- `scripts/start_stack.sh`
-- `scripts/seed_stack.sh`
+- `scripts/stack_start.sh` (or `scripts/stack.sh dev start`)
+- `scripts/stack_seed.sh` (or `scripts/stack.sh dev seed`)
 - `scripts/reseed_running_db.sh`
 - `dq-api/fastapi/app/domain/entities/base.py`

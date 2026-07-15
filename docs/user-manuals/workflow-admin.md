@@ -2,7 +2,7 @@
 
 **Role:** Platform administrator responsible for workspace configuration, user management, alert routing, and application settings.
 **Time to read:** 8 minutes
-**Last updated:** 2026-05-31
+**Last updated:** 2026-07-02
 
 ## Responsibilities in scope
 
@@ -10,6 +10,7 @@
 - Configuring alert-routing targets for Teams, Slack, email, and PagerDuty.
 - Managing role assignments and SSO configuration.
 - Reviewing application configuration for secrets and connectivity values.
+- Managing custom UI styles and component bundles through the UI registry.
 - Seeding or resetting reference data for a workspace.
 
 ## Core workflows
@@ -55,6 +56,35 @@ For production, manage roles through your organisation's SSO provider and the co
 2. Open **Notification Routing** for that workspace.
 3. Map alert policy triggers to routing targets.
 4. Save routing rules. The API enforces routing at event-publication time.
+
+### 6. Configure custom UI styles and component bundles
+
+Use this workflow when you have already downloaded or prepared custom UI styles or component bundles and want to apply them as an admin.
+
+1. Open **Admin** → **App Settings**.
+2. Review the **UI Registry** snapshot to confirm the registry loaded correctly.
+3. If you uploaded a `.zip`, `.tgz`, or `.tar.gz` style bundle, it can include a `package.json` plus supporting assets such as fonts or favicons. The importer uses the package metadata and archive layout to locate the stylesheet entry and keep sibling assets available under the same local bundle URL. Component bundles still need a single loadable entry file such as `index.js` or `icons.mjs`, not a full `dist/` directory.
+4. Watch for the small status badge next to the upload button. It changes from uploading to verified once the UI checks the returned asset URL and confirms the file is available at the expected location.
+5. Confirm the uploaded style or component entry appears in the **UI Registry** snapshot after the refresh.
+6. In the **Style Packages** section, select the imported stylesheet entry you want to activate.
+7. In the **Component Bundles** section, select the component bundle or icon provider you want to use.
+8. Save the settings so the app stores the registry identifier and required runtime metadata.
+9. Refresh the app and verify the new styles and components are active.
+
+> If the registry snapshot is missing, invalid, or incomplete, stop here and correct the registry source first. The app falls back to built-in defaults, but the custom entry should not be treated as active until the snapshot is valid.
+
+### 7. Check whether a bundle is valid and usable
+
+A custom UI style or component bundle is considered usable only when all of these are true:
+
+1. The entry appears in the **UI Registry** snapshot on **Admin** → **App Settings**.
+2. The uploaded style archive exposed a discoverable stylesheet entry, and the extracted style asset is served from a local API URL, not a raw remote stylesheet URL.
+3. The component bundle has a resolver, adapter, or fallback path in the registry, and the archive contained one loadable entry file rather than a whole `dist/` tree.
+4. The entry is not marked inactive or unmapped in the registry snapshot.
+5. The selected value is saved as a registry identifier, and the app still shows the entry after refresh.
+6. After upload, the inline status badge includes the uploaded asset path or public URL, and the entry still appears after a manual reload. If verification fails, treat the bundle as not ready for admin activation and correct the registry first.
+
+If any of those checks fail, treat the bundle as not ready for admin activation and correct the registry first.
 
 ## What to check when users cannot log in
 

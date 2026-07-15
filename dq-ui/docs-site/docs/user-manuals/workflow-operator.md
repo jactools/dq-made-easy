@@ -2,7 +2,7 @@
 
 **Role:** Platform operator or DevOps engineer responsible for deploying, starting, monitoring, and recovering the dq-made-easy stack.
 **Time to read:** 10 minutes
-**Last updated:** 2026-05-31
+**Last updated:** 2026-07-14
 
 ## Responsibilities in scope
 
@@ -14,45 +14,70 @@
 
 ## Core workflows
 
-### 1. Start the full stack
+### 1. Start the full stack (first time)
+
+Use the orchestrator to do a full clean reset:
 
 ```bash
-./scripts/common_startup.sh --env dev --with-observability
+./scripts/stack.sh dev init
 ```
 
-Add `--force-build` when wheel artifacts or Docker images need rebuilding.
+This destroys any prior state, generates all secrets, starts all containers, and seeds the database.
 
-Check readiness after startup:
+### 2. Start the stack (volumes already exist)
 
 ```bash
+./scripts/stack.sh dev start --seed
+```
+
+When stateful volumes already exist (after a stop), admin passwords are reused automatically so database credentials stay consistent. Service and user passwords are still rotated.
+
+### 3. Restart the stack
+
+```bash
+./scripts/stack.sh dev restart --seed
+```
+
+Stops containers, reuses admin passwords, rotates service/user passwords, starts containers, and re-seeds.
+
+### 4. Stop the stack
+
+```bash
+./scripts/stack.sh dev stop
+```
+
+Stops containers and removes them. Volumes, secrets, and credentials are preserved for a subsequent `start` or `restart`.
+
+### 5. Destroy everything
+
+```bash
+./scripts/stack.sh dev destroy
+```
+
+Full teardown: stops containers, removes containers and volumes, and deletes all generated artifacts (secrets, rotated passwords, keycloak credentials, TLS certs).
+
+### 6. Reseed the database
+
+```bash
+./scripts/stack.sh dev seed
+```
+
+Runs all seeding operations (Keycloak, Postgres, Zammad, OpenMetadata) against the running stack.
+
+### 7. Check service health
+
+```bash
+# Container status
+docker compose --env-file .env.dev.local ps
+
+# Logs
+docker compose --env-file .env.dev.local logs --tail=100 <service>
+
+# Smoke validation
 ./scripts/validate.sh --groups api,repo
 ```
 
-### 2. Rebuild wheel artifacts before startup
-
-```bash
-./scripts/package-releases/build_required_wheels.sh --force-build --with-airflow
-```
-
-This builds all core repo Python packages and Airflow SDK/operator wheels used by Docker images.
-
-### 3. Seed or migrate the database
-
-Database seeding and schema migration are handled by the seed container during startup. If you need to run migrations manually:
-
-```bash
-cd dq-api/fastapi
-alembic upgrade head
-```
-
-### 4. Check service health
-
-- API liveness: `GET /health` on the API container.
-- Smoke tests: `./scripts/validate.sh --groups api`.
-- Container status: `docker compose ps`.
-- Logs: `docker compose logs --tail=100 &lt;service&gt;`.
-
-### 5. Respond to an alert
+### 8. Respond to an alert
 
 Match the alert to the relevant incident runbook:
 
@@ -65,12 +90,24 @@ Match the alert to the relevant incident runbook:
 
 Use `correlationId` from structured logs to trace a request across API → Engine → Worker.
 
-### 6. Rotate or update environment configuration
+### 9. Rotate or update environment configuration
 
 - Environment configuration lives in `.env.dev.local`, `.env.test.local`, or `.env.prod.local` under the repo root.
 - Do not commit these files.
 - Templates with safe placeholders are at `.env.dev.example`, `.env.test.example`, and `.env.prod.example`.
 - After changing config, restart the relevant service: `docker compose restart &lt;service&gt;`.
+
+## Password management
+
+The stack scripts manage passwords automatically:
+
+| Password type | Examples | Behavior |
+| --- | --- | --- |
+| Admin passwords | `DQ_DB_PASSWORD`, `KEYCLOAK_SYSTEM_ADMIN_PASSWORD` | Persisted in stateful volumes. Reused on `start` when volumes exist; regenerated only on fresh start or `destroy`. |
+| Service passwords | `DQ_ENGINE_OIDC_CLIENT_SECRET`, `APP_CONFIG_ENCRYPTION_KEY` | Rotated on every `start` or `restart`. |
+| User passwords | Keycloak seeded users | Rotated on every `seed`. |
+
+If you encounter database authentication errors after a start, the admin password may be stale. Run `./scripts/stack.sh dev destroy` then `./scripts/stack.sh dev init` for a full reset.
 
 ## What to check before escalating
 
@@ -81,6 +118,7 @@ Use `correlationId` from structured logs to trace a request across API → Engin
 
 ## Related guides
 
+- [Stack Script Contract](/docs/implementation-details/STACK_SCRIPT_CONTRACT/)
 - [Incident runbooks](/docs/runbooks/)
 - [Documentation ownership policy](/docs/technical/DOCUMENTATION_OWNERSHIP_AND_SOURCE_OF_TRUTH/)
 - [User Manuals index](/docs/user-manuals/)

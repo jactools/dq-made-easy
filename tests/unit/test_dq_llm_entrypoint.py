@@ -111,12 +111,12 @@ def test_generate_data_definitions_bundle_builds_openmetadata_contract() -> None
     bundle = module.generate_data_definitions_bundle(
         request_model,
         chat_client,
-        provider_name="ollama",
-        model_name="gemma3:4b",
+        provider_name="huggingface",
+        model_name="Qwen/Qwen2.5-7B-Instruct",
     )
 
-    assert bundle["provider"] == "ollama"
-    assert bundle["model_name"] == "gemma3:4b"
+    assert bundle["provider"] == "huggingface"
+    assert bundle["model_name"] == "Qwen/Qwen2.5-7B-Instruct"
     assert bundle["review_status"] == "board_feedback_incorporated"
     assert len(chat_client.prompts) == 2
     definition = bundle["registry_contract"]["definitions"][0]

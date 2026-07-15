@@ -1,0 +1,29 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "dq-engine-trino-executor-2026-06-30",
+  "proof_type": "api",
+  "feature": "trino-execution-engine-milestone-3",
+  "summary": "Milestone 3 Trino execution engine is implemented with DBAPI connection creation, query streaming, bounded result sampling, result validation, metrics collection, retries, close handling, and structured execution errors.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-30T16:45:00Z",
+  "command": "cd /Users/Jac.Beekers/gitrepos/dq-made-easy/dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/20260630T164500Z-dq-engine-trino-executor",
+  "test_files": [
+    "dq-engine/tests/test_trino_executor.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 13,
+  "assertions": [
+    "TrinoExecutor creates DBAPI connections with normalized and validated connection settings",
+    "Connection creation retries and reports DQ_TRINO_CONNECTION_FAILED when all attempts fail",
+    "Query execution streams fetchmany batches and keeps only a bounded sample while preserving full row count",
+    "DBAPI query, connection, and generic failures are mapped to structured TrinoExecutionError codes",
+    "Result validation supports row-count and scalar first-cell comparisons",
+    "Metrics collection reports duration and rows returned",
+    "Connection close handling is best-effort and logs close failures"
+  ],
+  "proof_data": {
+    "verification_command": "cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_executor.py -q",
+    "verification_result": "13 passed in 0.14s"
+  }
+}

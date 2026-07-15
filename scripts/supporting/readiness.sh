@@ -55,6 +55,8 @@ wait_for_http_ready() {
     return 127
   fi
 
+  info "readiness.sh" "Waiting for ${service_label} to become ready..."
+
   for attempt in $(seq 1 "$max_attempts"); do
     set +e
     probe_output="$("${probe_command[@]}" "$ready_url" 2>&1)"
@@ -73,7 +75,7 @@ wait_for_http_ready() {
       last_error=""
     fi
 
-    if (( attempt % 10 == 0 )); then
+    if [ "$attempt" -eq 1 ] || (( attempt % 5 == 0 )); then
       info "readiness.sh" "Waiting for ${service_label}... (${attempt}/${max_attempts})"
       info "readiness.sh" "  last status: code=${http_code} rc=${probe_rc} url=${ready_url}"
       if [ -n "$last_error" ]; then
@@ -144,6 +146,7 @@ wait_for_zammad_support_services_ready() {
     return 127
   fi
 
+  info "readiness.sh" "Waiting for Zammad support services to become ready..."
   for attempt in $(seq 1 "$max_attempts"); do
     zammad_postgres_id="$(find_running_container_id zammad-postgresql)"
     redis_id="$(find_running_container_id redis)"
@@ -186,20 +189,9 @@ wait_for_zammad_app_database_ready() {
     return 1
   fi
 
-  if ! command -v python >/dev/null 2>&1; then
-    error "readiness.sh" "python is required for Zammad database readiness checks"
-    return 127
-  fi
-
+  info "readiness.sh" "Waiting for Zammad application database to become ready..."
   for attempt in $(seq 1 "$max_attempts"); do
-    if DQ_DB_INTERNAL_URL="$database_url" python - <<'PY' >/dev/null 2>&1
-import os
-import psycopg
-
-conn = psycopg.connect(os.environ["DQ_DB_INTERNAL_URL"])
-conn.close()
-PY
-    then
+    if DQ_DB_INTERNAL_URL="$database_url" "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 "$ROOT_DIR/scripts/supporting/startup_helpers.py" check-database >/dev/null 2>&1; then
       return 0
     fi
 

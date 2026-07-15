@@ -12,8 +12,8 @@ set -euo pipefail
 # - Enqueues an ad-hoc GX run using source overrides and waits for completion.
 # - Asserts the GX worker reported `storage_uri` == the override output_uri.
 #
-# Version: 1.0
-# Last modified: 2026-04-09
+# Version: 1.4
+# Last modified: 2026-07-01
 
 __dq_scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${__dq_scripts_dir}/../.." && pwd)"
@@ -32,13 +32,14 @@ PROBE_JSON_PATH="$TMP_DIR/probe_$$.json"
 SUITE_SEED_JSON_PATH="$TMP_DIR/suite_seed_$$.json"
 SUITE_GET_JSON_PATH="$TMP_DIR/suite_get_$$.json"
 RUN_JSON_PATH="$TMP_DIR/run_$$.json"
+MATERIALIZATION_CREATE_JSON_PATH="$TMP_DIR/materialization_create_$$.json"
 
 init_root_env_file "$ROOT_DIR"
 if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 validate_selected_root_env_file "$ROOT_DIR" full
 
@@ -114,6 +115,22 @@ DQ_SMOKE_REFRESH="${DQ_SMOKE_REFRESH:-false}"
 
 DQ_SMOKE_MATERIALIZATION_TIMEOUT_SECONDS="${DQ_SMOKE_MATERIALIZATION_TIMEOUT_SECONDS:-180}"
 DQ_SMOKE_GX_TIMEOUT_SECONDS="${DQ_SMOKE_GX_TIMEOUT_SECONDS:-300}"
+DQ_SMOKE_GX_ACTIVE_RUN_STALE_SECONDS="${DQ_SMOKE_GX_ACTIVE_RUN_STALE_SECONDS:-120}"
+
+smoke_started_at_epoch="$(date +%s)"
+
+iso8601_to_epoch() {
+  local value="$1"
+  "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 - "$value" <<'PY'
+from datetime import datetime
+import sys
+
+value = sys.argv[1].strip()
+if value.endswith('Z'):
+    value = value[:-1] + '+00:00'
+print(int(datetime.fromisoformat(value).timestamp()))
+PY
+}
 
 case "${DQ_SMOKE_OUTPUT_FORMAT}" in
   parquet|delta) ;;
@@ -309,20 +326,54 @@ fi
 info "$my_name" "Using data_object_version_id=${DATA_OBJECT_VERSION_ID}"
 
 info "$my_name" "Creating/reusing test-data materialization (refresh=${DQ_SMOKE_REFRESH})"
-MATERIALIZATION_CREATE_BODY="$(
+materialization_create_request_body() {
+  local refresh_value="$1"
+
   jq -nc \
     --arg data_object_version_id "$DATA_OBJECT_VERSION_ID" \
     --arg output_format "$DQ_SMOKE_OUTPUT_FORMAT" \
     --argjson sample_count "$DQ_SMOKE_SAMPLE_COUNT" \
-    --argjson refresh "$DQ_SMOKE_REFRESH" \
+    --argjson refresh "$refresh_value" \
     '{data_object_version_id:$data_object_version_id, sample_count:$sample_count, output_format:$output_format, refresh:$refresh}'
-)"
-MATERIALIZATION_JSON="$(
-  curl -fsS -X POST "${KONG_PUBLIC_URL%/}/rulebuilder/v1/test-data/materializations" \
-    "${AUTH_HEADER[@]}" \
-    -H "Content-Type: application/json" \
-    -d "$MATERIALIZATION_CREATE_BODY"
-)"
+}
+
+materialization_create_refresh="$DQ_SMOKE_REFRESH"
+materialization_create_attempt=1
+materialization_create_max_attempts=5
+while true; do
+  MATERIALIZATION_CREATE_BODY="$(materialization_create_request_body "$materialization_create_refresh")"
+  MATERIALIZATION_HTTP_CODE="$(
+    curl -sS -o "$MATERIALIZATION_CREATE_JSON_PATH" -w "%{http_code}" -X POST "${KONG_PUBLIC_URL%/}/rulebuilder/v1/test-data/materializations" \
+      "${AUTH_HEADER[@]}" \
+      -H "Content-Type: application/json" \
+      -d "$MATERIALIZATION_CREATE_BODY" || true
+  )"
+
+  MATERIALIZATION_RESPONSE_ERROR="$(jq -r '.detail.error // empty' "$MATERIALIZATION_CREATE_JSON_PATH" 2>/dev/null || true)"
+
+  if [ "$MATERIALIZATION_HTTP_CODE" = "503" ] && [ "$MATERIALIZATION_RESPONSE_ERROR" = "test_data_output_check_failed" ] && [ "$materialization_create_refresh" = "false" ]; then
+    warning "$my_name" "Materialization reuse check is unavailable; retrying with refresh=true"
+    materialization_create_refresh="true"
+    continue
+  fi
+
+  if [ "$MATERIALIZATION_HTTP_CODE" = "503" ] && [ "$materialization_create_attempt" -lt "$materialization_create_max_attempts" ]; then
+    warning "$my_name" "Materialization create returned 503; retrying (${materialization_create_attempt}/${materialization_create_max_attempts})"
+    materialization_create_attempt=$((materialization_create_attempt + 1))
+    sleep 2
+    continue
+  fi
+
+  break
+done
+
+if [ "$MATERIALIZATION_HTTP_CODE" != "200" ] && [ "$MATERIALIZATION_HTTP_CODE" != "201" ] && [ "$MATERIALIZATION_HTTP_CODE" != "202" ]; then
+  error "$my_name" "Failed to create/reuse materialization (HTTP ${MATERIALIZATION_HTTP_CODE})"
+  cat "$MATERIALIZATION_CREATE_JSON_PATH" >&2 || true
+  exit 6
+fi
+
+MATERIALIZATION_JSON="$(cat "$MATERIALIZATION_CREATE_JSON_PATH")"
 MATERIALIZATION_REQUEST_ID="$(printf '%s' "$MATERIALIZATION_JSON" | jq -r '.request_id // empty')"
 if [ -z "$MATERIALIZATION_REQUEST_ID" ]; then
   error "$my_name" "Materialization response missing request_id"
@@ -400,6 +451,21 @@ if [ "$RUNS_HTTP_CODE" = "409" ]; then
       error "$my_name" "Ad-hoc enqueue returned active-run conflict without detail.active_run_id"
       printf '%s\n' "$RUNS_JSON" >&2
       exit 10
+    fi
+    ACTIVE_RUN_JSON="$({
+      curl -sS -f "${KONG_PUBLIC_URL%/}/rulebuilder/v1/gx/runs/${RUN_ID}" \
+        "${AUTH_HEADER[@]}"
+    } || true)"
+    ACTIVE_RUN_STATUS="$(printf '%s' "$ACTIVE_RUN_JSON" | jq -r '(.status // empty) | ascii_downcase' 2>/dev/null || true)"
+    ACTIVE_RUN_STARTED_AT="$(printf '%s' "$ACTIVE_RUN_JSON" | jq -r '(.started_at // .startedAt // .submitted_at // .submittedAt // .created_at // .createdAt // empty)' 2>/dev/null || true)"
+    if [ -n "$ACTIVE_RUN_STARTED_AT" ] && [ -n "$ACTIVE_RUN_STATUS" ] && [ "$ACTIVE_RUN_STATUS" != "succeeded" ] && [ "$ACTIVE_RUN_STATUS" != "failed" ] && [ "$ACTIVE_RUN_STATUS" != "cancelled" ]; then
+      ACTIVE_RUN_STARTED_AT_EPOCH="$(iso8601_to_epoch "$ACTIVE_RUN_STARTED_AT")"
+      ACTIVE_RUN_AGE_SECONDS=$((smoke_started_at_epoch - ACTIVE_RUN_STARTED_AT_EPOCH))
+      if [ "$ACTIVE_RUN_AGE_SECONDS" -ge "$DQ_SMOKE_GX_ACTIVE_RUN_STALE_SECONDS" ]; then
+        error "$my_name" "Detected stale active GX run_id=${RUN_ID} status=${ACTIVE_RUN_STATUS} started_at=${ACTIVE_RUN_STARTED_AT}"
+        error "$my_name" "Refusing to reuse a run that was already active before this smoke invocation; cancel it and rerun."
+        exit 10
+      fi
     fi
     warning "$my_name" "Ad-hoc enqueue already has active run_id=${RUN_ID}; reusing it"
   else

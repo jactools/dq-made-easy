@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dq-made-easy
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+    app.kubernetes.io/environment: prod

@@ -1,0 +1,7 @@
+command: cd /Users/Jac.Beekers/gitrepos/dq-made-easy && docker exec dq-made-easy-trino trino --version && docker exec dq-made-easy-trino trino --execute 'SELECT COUNT(*) FROM "aistor"."dq_validation"."currency_real_aistor_validation"'
+executed_at_utc: 2026-06-30T17:20:05Z
+status: passed
+
+Output:
+Trino CLI 482
+"180"

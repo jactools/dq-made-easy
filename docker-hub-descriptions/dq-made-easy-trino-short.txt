@@ -1,0 +1,1 @@
+dq-made-easy Trino query engine for federated SQL across platform data sources

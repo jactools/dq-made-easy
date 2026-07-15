@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from gx_dispatch_types import GxWorkerExecutionError
+from dq_plan_execution_types import GxWorkerExecutionError
 
 
 class _NativeGxBatchRunner:
@@ -104,10 +104,53 @@ def _supports_native_gx_execution(expectation_type: str) -> bool:
     }
 
 
+def _collect_row_condition_columns(row_condition: Any) -> list[str]:
+    """Collect all column names referenced in a row condition tree."""
+    if isinstance(row_condition, str) or row_condition is None:
+        return []
+    if not isinstance(row_condition, dict):
+        return []
+
+    condition_type = str(row_condition.get("type") or "").strip().lower()
+    if condition_type in {"and", "or"}:
+        raw_conditions = row_condition.get("conditions")
+        if not isinstance(raw_conditions, list):
+            return []
+        columns: list[str] = []
+        for item in raw_conditions:
+            columns.extend(_collect_row_condition_columns(item))
+        return columns
+
+    raw_column = row_condition.get("column")
+    if isinstance(raw_column, dict):
+        column_name = str(raw_column.get("name") or "").strip()
+        return [column_name] if column_name else []
+    return []
+
+
 def _required_columns_for_expectation(expectation_type: str, kwargs: dict[str, Any]) -> list[str]:
     if expectation_type == "expect_query_results_to_match_comparison":
         return []
-    return []
+    columns: list[str] = []
+    if expectation_type == "expect_compound_columns_to_be_unique":
+        raw_columns = kwargs.get("columns")
+        if isinstance(raw_columns, list):
+            columns.extend(str(value).strip() for value in raw_columns if str(value).strip())
+    elif expectation_type == "expect_column_pair_values_to_be_equal":
+        for key in ("column_A", "column_B"):
+            value = str(kwargs.get(key) or "").strip()
+            if value:
+                columns.append(value)
+    else:
+        column = str(kwargs.get("column") or "").strip()
+        if column:
+            columns.append(column)
+    columns.extend(_collect_row_condition_columns(kwargs.get("row_condition")))
+    deduplicated: list[str] = []
+    for column_name in columns:
+        if column_name and column_name not in deduplicated:
+            deduplicated.append(column_name)
+    return deduplicated
 
 
 def _native_gx_requires_column_projection(expectation_type: str, kwargs: dict[str, Any]) -> bool:

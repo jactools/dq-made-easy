@@ -9,8 +9,8 @@ set -euo pipefail
 # - Starts a short-lived debug container to run generate_external_id_patch.py.
 # - Writes logs and points to the generated SQL output.
 #
-# Version: 1.0
-# Last modified: 2026-04-07
+# Version: 1.1
+# Last modified: 2026-07-01
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -34,7 +34,7 @@ if ! consume_root_env_selection_args "$REPO_ROOT" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

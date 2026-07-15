@@ -13,7 +13,10 @@ PYTHON_RUNNER="$ROOT_DIR/scripts/python_arm64.sh"
 cd "$ROOT_DIR"
 
 source "$ROOT_DIR/scripts/supporting/logging.sh"
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 my_name="clean_install.sh"
+
+export NPM_CONFIG_USERCONFIG="$REPO_NPMRC_FILE"
 
 info "$my_name" "Cleaning and reinstalling npm dependencies for dq-ui..."
 cd "$ROOT_DIR/dq-ui"

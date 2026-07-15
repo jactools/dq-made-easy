@@ -6,8 +6,9 @@ set -euo pipefail
 # - Provides one command surface for build, pull, push, start, restart, stop, and seed.
 # - Uses canonical env selection (`--env` / `--env-file`) across all actions.
 # - Supports explicit selectors for profiles, services, images, and seed targets.
-# Version: 1.1
-# Last modified: 2026-05-09
+# Version: 1.3
+# Last modified: 2026-07-01
+# - 1.2 (2026-06-30): Made service-only lifecycle commands safe under set -u.
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
@@ -52,8 +53,8 @@ Actions:
   build         Build local repo-managed images
   pull          Pull repo-managed images from the configured registry
   push          Build and push repo-managed images
-  start         Start compose services
-  restart       Restart compose services
+  start         Start or recreate compose services
+  restart       Recreate compose services
   stop          Stop compose services without removing containers
   reconcile     Run explicit post-start reconciliation actions
   seed          Run seed actions
@@ -119,14 +120,14 @@ join_csv() {
 
 append_unique_profile() {
   local value="$1"
-  if ! contains_value "$value" "${SELECTED_PROFILES[@]}"; then
+  if ! contains_value "$value" ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"}; then
     SELECTED_PROFILES+=("$value")
   fi
 }
 
 append_unique_service() {
   local value="$1"
-  if ! contains_value "$value" "${SELECTED_SERVICES[@]}"; then
+  if ! contains_value "$value" ${SELECTED_SERVICES[@]+"${SELECTED_SERVICES[@]}"}; then
     SELECTED_SERVICES+=("$value")
   fi
 }
@@ -152,7 +153,7 @@ fail() {
 
 validate_runtime_profiles() {
   local profile=""
-  for profile in "${SELECTED_PROFILES[@]}"; do
+  for profile in ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"}; do
     if ! is_runtime_profile "$profile"; then
       fail "Unsupported runtime profile '$profile'"
     fi
@@ -229,15 +230,15 @@ resolve_services_from_profiles() {
 
   validate_runtime_profiles
 
-  profile_csv="$(join_csv "${SELECTED_PROFILES[@]}")"
-  service_csv="$(join_csv "${SELECTED_SERVICES[@]}")"
+  profile_csv="$(join_csv ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"})"
+  service_csv="$(join_csv ${SELECTED_SERVICES[@]+"${SELECTED_SERVICES[@]}"})"
 
   if ! planned="$(stack_dependency_plan_services "$ROOT_ENV_FILE" "$profile_csv" "$service_csv" "$ACTION")"; then
     fail "Unable to resolve dependency plan for $ACTION"
   fi
 
   while IFS= read -r service; do
-    if [ -n "$service" ] && ! contains_value "$service" "${RESOLVED_SERVICES[@]}"; then
+    if [ -n "$service" ] && ! contains_value "$service" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}; then
       RESOLVED_SERVICES+=("$service")
     fi
   done <<EOF
@@ -247,6 +248,17 @@ EOF
   if [ "${#RESOLVED_SERVICES[@]}" -eq 0 ]; then
     fail "Select --all, --profile, or --service for $ACTION"
   fi
+}
+
+remove_stale_stateful_volumes() {
+  local project_prefix="${COMPOSE_PROJECT_NAME:-dq-made-easy-dev}"
+  local volume_name=""
+
+  info "stack_ctl.sh" "Removing stale stateful volumes before ${ACTION} so regenerated passwords can take effect"
+  for volume_name in keycloak_data pgdata_v18 kong-db-data-v17 openmetadata_pgdata_v18 \
+    zammad_postgresql_data openmetadata_search_data openmetadata_search_v9_data; do
+    docker volume rm "${project_prefix}_${volume_name}" 2>/dev/null || true
+  done
 }
 
 is_reconciliation_profile() {
@@ -352,23 +364,23 @@ show_resolved_plan() {
       planned_args=(docker compose --env-file "$ROOT_ENV_FILE")
       case "$ACTION" in
         start)
-          planned_args+=(up -d)
+          planned_args+=(up -d --force-recreate)
           if [ "$REMOVE_ORPHANS" = true ]; then
             planned_args+=(--remove-orphans)
           fi
           ;;
         restart)
-          planned_args+=(restart)
+          planned_args+=(up -d --force-recreate)
           ;;
         stop)
           planned_args+=(stop)
           ;;
       esac
-      planned_args+=("${RESOLVED_SERVICES[@]}")
+      planned_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
       planned_command="$(printf '%s ' "${planned_args[@]}")"
       info "Plan: ${planned_command% }"
       info "Ordered services:"
-      for item in "${RESOLVED_SERVICES[@]}"; do
+      for item in ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}; do
         info "  - $item"
       done
       ;;
@@ -483,7 +495,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -628,14 +640,17 @@ case "$ACTION" in
     fi
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_services_from_profiles
-    stack_dependency_validate_service_health "$ROOT_ENV_FILE" "${RESOLVED_SERVICES[@]}"
-    start_args=()
-    if [ "$REMOVE_ORPHANS" = true ]; then
-      start_args+=(up -d --remove-orphans)
-    else
-      start_args+=(up -d)
+    stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
+    if ! docker_compose stop ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"} >/dev/null 2>&1; then
+      true
     fi
-    start_args+=("${RESOLVED_SERVICES[@]}")
+    remove_stale_stateful_volumes
+    start_args=()
+    start_args+=(up -d --force-recreate)
+    if [ "$REMOVE_ORPHANS" = true ]; then
+      start_args+=(--remove-orphans)
+    fi
+    start_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
     docker_compose "${start_args[@]}"
     ;;
   restart)
@@ -645,8 +660,14 @@ case "$ACTION" in
     fi
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_services_from_profiles
-    stack_dependency_validate_service_health "$ROOT_ENV_FILE" "${RESOLVED_SERVICES[@]}"
-    docker_compose restart "${RESOLVED_SERVICES[@]}"
+    stack_dependency_validate_service_health "$ROOT_ENV_FILE" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}
+    if ! docker_compose stop ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"} >/dev/null 2>&1; then
+      true
+    fi
+    remove_stale_stateful_volumes
+    restart_args=(up -d --force-recreate)
+    restart_args+=(${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"})
+    docker_compose "${restart_args[@]}"
     ;;
   stop)
     if [ "$DRY_RUN" = true ]; then
@@ -654,8 +675,8 @@ case "$ACTION" in
       exit 0
     fi
     validate_selected_root_env_file "$ROOT_DIR" stop
-    profile_csv="$(join_csv "${SELECTED_PROFILES[@]}")"
-    service_csv="$(join_csv "${SELECTED_SERVICES[@]}")"
+    profile_csv="$(join_csv ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"})"
+    service_csv="$(join_csv ${SELECTED_SERVICES[@]+"${SELECTED_SERVICES[@]}"})"
     if ! teardown_collect_targets "$ROOT_ENV_FILE" "$ACTION" "$profile_csv" "$service_csv"; then
       exit 1
     fi

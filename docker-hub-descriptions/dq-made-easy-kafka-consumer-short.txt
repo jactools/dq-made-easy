@@ -1,0 +1,1 @@
+dq-made-easy Kafka consumer worker for asynchronous background processing

@@ -14,30 +14,19 @@ docker compose version
 ```bash
 # 1. Clone repository (or copy deployment files)
 git clone <repo-url>
-cd dq-rulebuilder
+cd dq-made-easy
 
 # 2. Create your production env file
 cp .env.prod.example .env.prod.local
 # Edit .env.prod.local if needed (passwords, versions, canonical hostnames, etc.)
 
-# 3. Pull all images (uses versions from .env.prod.local)
-docker compose --env-file .env.prod.local pull
-
-# 4. Start services
-docker compose --env-file .env.prod.local up -d
-
-# 5. Check status
-docker compose --env-file .env.prod.local ps
-
-# 6. View logs
-docker compose --env-file .env.prod.local logs -f
+# 3. Full init (destroy any prior state, start stack, seed database)
+./scripts/stack.sh prod init
 ```
 
-Important: `.env.prod.example` is the tracked public single-host template, and `.env.prod.local` is your ignored repo-local runtime copy. For Debian operators, prefer `/etc/dq-made-easy/prod.env` with `root:root` ownership and `0600` permissions instead of storing production secrets in the repo root. For local workstation flows, use `.env.dev.example` or `.env.test.example` instead.
+The orchestrator handles secrets generation, TLS certificates, image builds, container startup, and seeding in the correct order.
 
-The `.env.*.example` files are documentation-only templates. Operational Compose runs and repo scripts use `.env.*.local` files or an explicit `--env-file PATH`.
-
-## Option 2: Use Pull Script
+## Option 2: Pull then Start
 
 ```bash
 # Pull latest versions
@@ -46,24 +35,27 @@ The `.env.*.example` files are documentation-only templates. Operational Compose
 # Or pull a shared manual override tag
 ./scripts/pull_images.sh v0.10.5
 
-# Then start
-docker compose --env-file .env.prod.local up -d
+# Then start with seeding
+./scripts/stack.sh prod start --seed
 ```
 
-## Option 3: Manual Pull
+## Environment-Specific Quick Commands
 
 ```bash
-# Pull individual images
-docker pull docker.io/jacbeekers/npm-base:0.10-566577b
-docker pull docker.io/jacbeekers/dq-api:0.10-7a9c018
-docker pull docker.io/jacbeekers/dq-engine:0.10-b745035
-docker pull docker.io/jacbeekers/dq-profiling:0.10-950d35e
-docker pull docker.io/jacbeekers/dq-frontend:0.10-bd861ee
-docker pull docker.io/jacbeekers/dq-kong:0.10-18a1248
+# Dev environment (full reset)
+./scripts/stack.sh dev init
 
-# Or with specific versions
-docker pull docker.io/jacbeekers/dq-api:0.10-7a9c018
-# ... etc
+# Test environment (start only)
+./scripts/stack.sh test start --seed
+
+# Prod environment (stop only)
+./scripts/stack.sh prod stop
+
+# Restart any environment (keeps admin passwords, rotates service/user)
+./scripts/stack.sh dev restart --seed
+
+# Destroy everything
+./scripts/stack.sh dev destroy
 ```
 
 ## Service Access
@@ -122,25 +114,43 @@ Notes:
 
 ## Common Operations
 
-### Update to Latest
+### Full Stack Lifecycle
+
 ```bash
-docker compose pull
-docker compose up -d
+# Full clean reset (destroy → start → seed)
+./scripts/stack.sh dev init
+
+# Start only (fresh: all new passwords; warm: admin passwords reused)
+./scripts/stack.sh dev start --seed
+
+# Restart (keeps admin passwords, rotates service/user passwords)
+./scripts/stack.sh dev restart --seed
+
+# Stop only (keeps everything)
+./scripts/stack.sh dev stop
+
+# Seed only (reseed running stack)
+./scripts/stack.sh dev seed
+
+# Destroy everything (containers, volumes, secrets, credentials)
+./scripts/stack.sh dev destroy
 ```
 
-### Restart Services
+### Restart Individual Services
+
 ```bash
 # All services
-docker compose restart
+docker compose --env-file .env.dev.local restart
 
 # Specific service
-docker compose restart api
+docker compose --env-file .env.dev.local restart api
 ```
 
 ### Reseed Database While Running
+
 ```bash
-# Re-apply schema + seed data through the dedicated db-seed one-shot service
-bash ./scripts/reseed_running_db.sh
+# Reseed via orchestrator
+./scripts/stack.sh dev seed
 
 # Or run the same one-shot service explicitly via Compose
 docker compose --profile auth --profile seed run --rm db-seed
@@ -150,6 +160,7 @@ docker exec -i <db-container-name> psql -U postgres -d dq -c "SELECT 1" >/dev/nu
 ```
 
 ### Keycloak and Kong Setup in Images
+
 ```bash
 # Keycloak realm import file baked into image
 docker exec -it <keycloak-container-name> ls -l /opt/keycloak/data/import
@@ -159,6 +170,7 @@ docker exec -it <kong-container-name> ls -l /opt/dq-kong/scripts
 ```
 
 ### View Logs
+
 ```bash
 # All logs
 docker compose logs -f
@@ -171,6 +183,7 @@ docker compose logs --tail=100
 ```
 
 ### Stop Services
+
 ```bash
 # Stop (keeps data)
 docker compose stop
@@ -180,9 +193,14 @@ docker compose down
 
 # Stop and remove everything including volumes (DELETES DATA!)
 docker compose down -v
+
+# Or use the orchestrator:
+./scripts/stack.sh dev stop   # stop only
+./scripts/stack.sh dev destroy  # full teardown
 ```
 
 ### Check Health
+
 ```bash
 # Service status
 docker compose ps
@@ -206,8 +224,18 @@ DQ_KONG_TAG=0.10-<kong-hash>
 Then:
 ```bash
 docker compose --env-file .env.prod.local pull
-docker compose --env-file .env.prod.local up -d
+./scripts/stack.sh prod start --seed
 ```
+
+## Password Management
+
+The stack scripts manage passwords automatically:
+
+- **Admin passwords** (DB superuser, Keycloak admin): persisted in stateful volumes. Reused when volumes exist to prevent DB authentication mismatches.
+- **Service passwords** (OIDC client secrets, encryption keys): rotated on every start/restart.
+- **User passwords** (Keycloak seeded users): rotated on every seed.
+
+A full password reset requires `destroy` followed by `start` (which removes volumes and regenerates everything).
 
 ## Troubleshooting
 
@@ -246,6 +274,7 @@ docker pull docker.io/jacbeekers/dq-api:0.10-7a9c018
 ```
 
 ### Database Issues
+
 ```bash
 # Reset database (WARNING: deletes data)
 docker compose down -v db
@@ -253,6 +282,22 @@ docker compose up -d db
 
 # Check database logs
 docker compose logs db
+
+# Full reseed
+./scripts/stack.sh dev seed
+```
+
+### Admin Password Mismatch
+
+If you get authentication errors against the database or Keycloak after starting, the admin password in your secrets file may not match what's inside the volume. Fix:
+
+```bash
+# Option A: Full reset (destroys all data)
+./scripts/stack.sh dev init
+
+# Option B: Stop → destroy → start (same effect)
+./scripts/stack.sh dev destroy
+./scripts/stack.sh dev init
 ```
 
 ## Minimal Files Needed
@@ -279,12 +324,13 @@ deploy/
 - [ ] Configure log aggregation
 - [ ] Add resource limits to docker-compose.yml
 - [ ] Review firewall rules
-- [ ] Set up reverse proxy (nginx/traefik)
+- [ ] Set up reverse proxy (nginx/traefic)
 - [ ] Enable Docker logging driver
 
 ## Getting Help
 
 - Full documentation: See [DEPLOYMENT.md](./DEPLOYMENT.md)
+- Stack script contract: See [STACK_SCRIPT_CONTRACT.md](../implementation-details/STACK_SCRIPT_CONTRACT.md)
 - Check Docker Hub: https://hub.docker.com/u/jacbeekers
 - View available tags: `docker search jacbeekers/dq-api`
 - Container logs: `docker compose --env-file .env.prod.local logs -f`

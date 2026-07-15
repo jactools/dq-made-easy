@@ -2,6 +2,10 @@
 
 Use this folder for technical references, deployment guides, and system-level documentation.
 
+## Service Architecture
+
+- [DQ_ENGINE_MODULE_ARCHITECTURE.md](./DQ_ENGINE_MODULE_ARCHITECTURE.md) — dq-engine module split, dependency graph, and responsibility boundaries
+
 ## Current technical sources
 
 - [DATABASE_ERD.md](./DATABASE_ERD.md)
@@ -27,6 +31,7 @@ Use this folder for technical references, deployment guides, and system-level do
 - [DQ_3C_DATA_ASSETS_ROLLOUT_AND_OPERATOR_NOTES.md](./DQ_3C_DATA_ASSETS_ROLLOUT_AND_OPERATOR_NOTES.md)
 - [DQ_PUBLIC_DOCUMENTATION_PORTAL_ROLLOUT_AND_OPERATOR_NOTES.md](./DQ_PUBLIC_DOCUMENTATION_PORTAL_ROLLOUT_AND_OPERATOR_NOTES.md)
 - [CONNECTOR_ONBOARDING_RUNBOOK.md](./CONNECTOR_ONBOARDING_RUNBOOK.md)
+- [INTERNAL_SERVICE_TLS_RUNBOOK.md](./INTERNAL_SERVICE_TLS_RUNBOOK.md)
 - [TECHNICAL.md](../../TECHNICAL.md)
 - [DOCUMENTATION_GUIDE.md](../../DOCUMENTATION_GUIDE.md)
 - [DEPLOYMENT.md](./DEPLOYMENT.md)

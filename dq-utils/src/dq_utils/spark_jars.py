@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import shlex
 from pathlib import Path
 from typing import Any
 
@@ -107,4 +108,24 @@ def spark_jar_paths() -> list[Path]:
 
 def configure_spark_builder_with_local_jars(builder: Any) -> Any:
     jar_paths = spark_jar_paths()
-    return builder.config("spark.jars", ",".join(str(path) for path in jar_paths))
+    jar_list = ",".join(str(path) for path in jar_paths)
+    classpath = os.pathsep.join(str(path) for path in jar_paths)
+
+    submit_args = os.environ.get("PYSPARK_SUBMIT_ARGS", "pyspark-shell")
+    submit_tokens = shlex.split(submit_args)
+    if "spark.driver.extraClassPath=" not in submit_args or "spark.executor.extraClassPath=" not in submit_args:
+        jar_submit_args = [
+            "--jars",
+            jar_list,
+            "--conf",
+            f"spark.driver.extraClassPath={classpath}",
+            "--conf",
+            f"spark.executor.extraClassPath={classpath}",
+        ]
+        os.environ["PYSPARK_SUBMIT_ARGS"] = " ".join(jar_submit_args + submit_tokens)
+
+    return (
+        builder.config("spark.jars", jar_list)
+        .config("spark.driver.extraClassPath", classpath)
+        .config("spark.executor.extraClassPath", classpath)
+    )

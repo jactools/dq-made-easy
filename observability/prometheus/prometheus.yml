@@ -26,7 +26,7 @@ scrape_configs:
   # Prometheus self-monitoring
   - job_name: "prometheus"
     static_configs:
-      - targets: ["observability.jac.dot:9090"]
+      - targets: ["prometheus:9090"]
 
   # ========================================================================
   # OpenTelemetry Collector Prometheus Exporter
@@ -45,7 +45,7 @@ scrape_configs:
   # ========================================================================
   - job_name: "dq-engine"
     static_configs:
-      - targets: ["dq-engine:8000"]
+      - targets: ["dq-made-easy-engine:8000"]
         labels:
           service: dq-engine
           component: execution-engine
@@ -56,14 +56,17 @@ scrape_configs:
   # ========================================================================
   # DQ-API Service
   # ========================================================================
+  # Scrape /health (public) so Prometheus can set up{job="dq-api"}=1.
+  # The /metrics endpoint stays protected behind auth — we only need
+  # the auto-generated up metric to confirm the container is reachable.
+  # ========================================================================
   - job_name: "dq-api"
     static_configs:
       - targets: ["api:4010"]
         labels:
           service: dq-api
           component: api
-    metrics_path: "/metrics"
-    bearer_token_file: "/etc/prometheus/bearer_token"
+    metrics_path: "/health"
     scrape_interval: 15s
     scrape_timeout: 10s
 
@@ -85,7 +88,7 @@ scrape_configs:
   # ========================================================================
   - job_name: "dq-llm"
     static_configs:
-      - targets: ["dq-llm:8000"]
+      - targets: ["dq-made-easy-llm:8000"]
         labels:
           service: dq-llm
           component: llm
@@ -111,7 +114,7 @@ scrape_configs:
   # ========================================================================
   - job_name: "postgres"
     static_configs:
-      - targets: ["dq-db-postgres-exporter:9187"]
+      - targets: ["dq-made-easy-db-postgres-exporter:9187"]
         labels:
           service: dq-db
           component: database
@@ -177,6 +180,9 @@ scrape_configs:
         labels:
           service: grafana
           component: dashboards
+    scheme: https
+    tls_config:
+      ca_file: /etc/prometheus/certs/mkcert-rootCA.pem
     metrics_path: "/metrics"
     scrape_interval: 15s
 
@@ -190,7 +196,8 @@ scrape_configs:
           service: container-metrics
           component: container-observability
     metrics_path: "/metrics"
-    scrape_interval: 15s
+    scrape_interval: 30s
+    scrape_timeout: 25s
 
   # ========================================================================
   # Pushgateway (for batch/ephemeral job metrics)

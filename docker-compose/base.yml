@@ -1,0 +1,72 @@
+# ============================================================================
+# BASE: Shared configurations (volumes, networks, secrets, TLS)
+# ============================================================================
+
+# ============================================================================
+# TLS: Common TLS configuration for all services
+# ============================================================================
+x-tls-volumes: &tls-volumes
+  - ../tmp/certs:/etc/tls/certs:ro
+  - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/tls/internal-ca-bundle.pem:ro
+  - ../tmp/certs/mkcert-rootCA.pem:/etc/tls/mkcert-rootCA.pem:ro
+
+x-tls-env: &tls-env
+  CURL_CA_BUNDLE: /etc/tls/internal-ca-bundle.pem
+  SSL_CERT_FILE: /etc/tls/internal-ca-bundle.pem
+  REQUESTS_CA_BUNDLE: /etc/tls/internal-ca-bundle.pem
+
+# ============================================================================
+# VOLUMES: Persistent storage for all services
+# ============================================================================
+volumes:
+  loki_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  tempo_data:
+    driver: local
+  grafana_data:
+    driver: local
+  aistor_data:
+    driver: local
+  dq-made-easy-llm-model-cache:
+  pgdata_v18:
+  keycloak_data:
+  keycloak_seed_artifacts:
+  redis_data:
+  zammad_postgresql_data:
+  zammad_redis_data:
+  zammad_storage:
+  zammad_backup:
+  kong-db-data-v17:
+  openmetadata_pgdata_v18:
+  openmetadata_search_data:
+  openmetadata_search_v9_data:
+  spark-jars:
+  ivy2_cache:
+  dq-made-easy-llm-hf-cache:
+  kafka_data:
+
+# ============================================================================
+# SECRETS: Shared secrets for all services
+# ============================================================================
+secrets:
+  repo_npmrc:
+    file: ${REPO_NPMRC_FILE:?REPO_NPMRC_FILE is required}
+  internal_mkcert_root_ca:
+    file: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+  internal_root_ca:
+    file: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+  internal_corporate_root_ca:
+    file: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+  internal_ca_bundle:
+    file: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+
+# ==============================================================================
+# NETWORK: Shared network for all services
+# ==============================================================================
+networks:
+  dq-network:
+    external: false
+    name: dq-network
+

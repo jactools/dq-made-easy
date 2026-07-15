@@ -10,8 +10,8 @@ set -euo pipefail
 # - Supports automatic content-hash version tags (or a manual override).
 # - Publishes repo-managed wrapper images as multi-arch manifests when pushing.
 #
-# Version: 1.4
-# Last modified: 2026-06-10
+# Version: 1.5
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.3 (2026-04-27): Rewrote the repo build flow to use buildx multi-arch publishing and preserve a local-only --no-push path.
 # - 1.4 (2026-06-10): Require explicit OpenMetadata base and helper image settings instead of falling back to registry defaults.
@@ -63,6 +63,12 @@ Repo scope (repo) builds the core set plus auxiliary repo-managed images:
  14) dq-made-easy-container-metrics
  15) dq-made-easy-zammad-seed
  16) dq-made-easy-llm
+ 17) dq-made-easy-kafka
+ 18) dq-made-easy-kafka-consumer
+ 19) dq-made-easy-trino
+ 20) dq-made-easy-edge
+ 21) dq-made-easy-airflow
+ 22) dq-made-easy-zammad-origin
 
 Options:
   --scope <core|repo>  Select image scope (default: core)
@@ -139,7 +145,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -208,19 +214,23 @@ if ! source_selected_root_env_file; then
   exit 1
 fi
 
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+
 export ROOT_ENV_FILE
 
 expand_selected_image_dependencies
 
 derive_docker_domain() {
-  local dns="${NEXUSCLOUD_DNS:-}"
-  dns="${dns#//}"
-  if [ -z "$dns" ]; then
+  local host="${NEXUSCLOUD_HOSTNAME:-}"
+  if [ -z "$host" ] && [ -n "${NEXUSCLOUD_DNS:-}" ]; then
+    host="${NEXUSCLOUD_DNS#//}"
+  fi
+  if [ -z "$host" ]; then
     return 1
   fi
   local suffix
-  suffix="$(printf '%s' "$dns" | sed 's/^[^.]*\.//')"
-  if [ -z "$suffix" ] || [ "$suffix" = "$dns" ]; then
+  suffix="$(printf '%s' "$host" | sed 's/^[^.]*\.//')"
+  if [ -z "$suffix" ] || [ "$suffix" = "$host" ]; then
     return 1
   fi
   printf '%s' "group-docker-19.${suffix}"
@@ -304,6 +314,17 @@ emit_step_header() {
   info "$my_name" "========================================"
 }
 
+refresh_docker_hub_description() {
+  local image_name="$1"
+
+  if [ "$NO_PUSH" = true ]; then
+    return 0
+  fi
+
+  info "$my_name" "Refreshing Docker Hub description for $image_name..."
+  bash "$ROOT_DIR/scripts/update_docker_hub.sh" --image "$image_name"
+}
+
 run_script_step() {
   local step_name="$1"
   local step_script="$2"
@@ -328,6 +349,8 @@ run_script_step() {
 
   export "$tag_var=$tag_value"
   "$step_script" "${SCRIPT_ARGS[@]}"
+
+  refresh_docker_hub_description "$step_name"
 }
 
 run_direct_build_step() {
@@ -373,6 +396,8 @@ run_direct_build_step() {
 
   if [ "$NO_PUSH" = true ]; then
     info "$my_name" "Skipping push (--no-push specified); loaded local image for platform ${build_platform}"
+  else
+    refresh_docker_hub_description "$step_name"
   fi
 }
 
@@ -386,6 +411,26 @@ DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-
 DQ_KEYCLOAK_SEED_NAMESPACE="${DQ_KEYCLOAK_SEED_NAMESPACE:-${DQ_KEYCLOAK_NAMESPACE:-jacbeekers/}}"
 DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-made-easy-keycloak-seed-artifacts}"
 
+DQ_KAFKA_REGISTRY="${DQ_KAFKA_REGISTRY:-docker.io/}"
+DQ_KAFKA_NAMESPACE="${DQ_KAFKA_NAMESPACE:-jacbeekers/}"
+DQ_KAFKA_IMAGE="${DQ_KAFKA_IMAGE:-dq-made-easy-kafka}"
+
+DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker.io/}"
+DQ_KAFKA_CONSUMER_NAMESPACE="${DQ_KAFKA_CONSUMER_NAMESPACE:-jacbeekers/}"
+DQ_KAFKA_CONSUMER_IMAGE="${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}"
+
+DQ_TRINO_REGISTRY="${DQ_TRINO_REGISTRY:-docker.io/}"
+DQ_TRINO_NAMESPACE="${DQ_TRINO_NAMESPACE:-jacbeekers/}"
+DQ_TRINO_IMAGE="${DQ_TRINO_IMAGE:-dq-made-easy-trino}"
+
+DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker.io/}"
+DQ_EDGE_NAMESPACE="${DQ_EDGE_NAMESPACE:-jacbeekers/}"
+DQ_EDGE_IMAGE="${DQ_EDGE_IMAGE:-dq-made-easy-edge}"
+
+DQ_AIRFLOW_REGISTRY="${DQ_AIRFLOW_REGISTRY:-docker.io/}"
+DQ_AIRFLOW_NAMESPACE="${DQ_AIRFLOW_NAMESPACE:-jacbeekers/}"
+DQ_AIRFLOW_IMAGE="${DQ_AIRFLOW_IMAGE:-dq-made-easy-airflow}"
+
 DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker.io/}"
 DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
 DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
@@ -396,7 +441,7 @@ DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-
 
 DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker.io/}"
 DQ_OPENMETADATA_SERVER_NAMESPACE="${DQ_OPENMETADATA_SERVER_NAMESPACE:-jacbeekers/}"
-DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata}"
+DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata-server}"
 
 DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker.io/}"
 DQ_METADATA_CONFIGURE_NAMESPACE="${DQ_METADATA_CONFIGURE_NAMESPACE:-jacbeekers/}"
@@ -410,14 +455,24 @@ DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker.io/}"
 DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
 DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
+DQ_ZAMMAD_ORIGIN_REGISTRY="${DQ_ZAMMAD_ORIGIN_REGISTRY:-docker.io/}"
+DQ_ZAMMAD_ORIGIN_NAMESPACE="${DQ_ZAMMAD_ORIGIN_NAMESPACE:-jacbeekers/}"
+DQ_ZAMMAD_ORIGIN_IMAGE="${DQ_ZAMMAD_ORIGIN_IMAGE:-dq-made-easy-zammad-origin}"
+
 export DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE
 export DQ_KEYCLOAK_SEED_REGISTRY DQ_KEYCLOAK_SEED_NAMESPACE DQ_KEYCLOAK_SEED_IMAGE
+export DQ_KAFKA_REGISTRY DQ_KAFKA_NAMESPACE DQ_KAFKA_IMAGE
+export DQ_KAFKA_CONSUMER_REGISTRY DQ_KAFKA_CONSUMER_NAMESPACE DQ_KAFKA_CONSUMER_IMAGE
+export DQ_TRINO_REGISTRY DQ_TRINO_NAMESPACE DQ_TRINO_IMAGE
+export DQ_EDGE_REGISTRY DQ_EDGE_NAMESPACE DQ_EDGE_IMAGE
+export DQ_AIRFLOW_REGISTRY DQ_AIRFLOW_NAMESPACE DQ_AIRFLOW_IMAGE
 export DQ_LLM_REGISTRY DQ_LLM_NAMESPACE DQ_LLM_IMAGE
 export DQ_OPENMETADATA_DB_REGISTRY DQ_OPENMETADATA_DB_NAMESPACE DQ_OPENMETADATA_DB_IMAGE
 export DQ_OPENMETADATA_SERVER_REGISTRY DQ_OPENMETADATA_SERVER_NAMESPACE DQ_OPENMETADATA_SERVER_IMAGE
 export DQ_METADATA_CONFIGURE_REGISTRY DQ_METADATA_CONFIGURE_NAMESPACE DQ_METADATA_CONFIGURE_IMAGE
 export DQ_CONTAINER_METRICS_REGISTRY DQ_CONTAINER_METRICS_NAMESPACE DQ_CONTAINER_METRICS_IMAGE
 export DQ_ZAMMAD_SEED_REGISTRY DQ_ZAMMAD_SEED_NAMESPACE DQ_ZAMMAD_SEED_IMAGE
+export DQ_ZAMMAD_ORIGIN_REGISTRY DQ_ZAMMAD_ORIGIN_NAMESPACE DQ_ZAMMAD_ORIGIN_IMAGE
 
 if [ -z "$VERSION_TAG" ]; then
   source "$ROOT_DIR/scripts/calculate_versions.sh"
@@ -434,6 +489,11 @@ else
   export DQ_KEYCLOAK_TAG="$VERSION_TAG"
   export DQ_DB_SEED_TAG="$VERSION_TAG"
   export DQ_KEYCLOAK_SEED_TAG="$VERSION_TAG"
+  export DQ_KAFKA_TAG="$VERSION_TAG"
+  export DQ_KAFKA_CONSUMER_TAG="$VERSION_TAG"
+  export DQ_TRINO_TAG="$VERSION_TAG"
+  export DQ_EDGE_TAG="$VERSION_TAG"
+  export DQ_AIRFLOW_TAG="$VERSION_TAG"
   export DQ_LLM_TAG="$VERSION_TAG"
   export DQ_OPENMETADATA_DB_TAG="$VERSION_TAG"
   export DQ_OPENMETADATA_SERVER_TAG="$VERSION_TAG"
@@ -589,8 +649,68 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "DQ_LLM_TAG" \
       "${DQ_LLM_REGISTRY}${DQ_LLM_NAMESPACE}${DQ_LLM_IMAGE}" \
       "$ROOT_DIR/dq-llm/Dockerfile.llm" \
-      "$ROOT_DIR/dq-made-easy-llm" \
+      "$ROOT_DIR/dq-llm" \
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
+  fi
+
+  if image_selected "dq-made-easy-kafka"; then
+    run_direct_build_step \
+      "dq-made-easy-kafka" \
+      "DQ_KAFKA_TAG" \
+      "${DQ_KAFKA_REGISTRY}${DQ_KAFKA_NAMESPACE}${DQ_KAFKA_IMAGE}" \
+      "$ROOT_DIR/dq-kafka/Dockerfile.kafka" \
+      "$ROOT_DIR/dq-kafka"
+  fi
+
+  if image_selected "dq-made-easy-kafka-consumer"; then
+    run_direct_build_step \
+      "dq-made-easy-kafka-consumer" \
+      "DQ_KAFKA_CONSUMER_TAG" \
+      "${DQ_KAFKA_CONSUMER_REGISTRY}${DQ_KAFKA_CONSUMER_NAMESPACE}${DQ_KAFKA_CONSUMER_IMAGE}" \
+      "$ROOT_DIR/dq-kafka-consumer/Dockerfile.kafka-consumer" \
+      "$ROOT_DIR/dq-kafka-consumer" \
+      "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
+  fi
+
+  if image_selected "dq-made-easy-trino"; then
+    run_direct_build_step \
+      "dq-made-easy-trino" \
+      "DQ_TRINO_TAG" \
+      "${DQ_TRINO_REGISTRY}${DQ_TRINO_NAMESPACE}${DQ_TRINO_IMAGE}" \
+      "$ROOT_DIR/dq-trino/Dockerfile.trino" \
+      "$ROOT_DIR/dq-trino" \
+      "TRINO_BASE_IMAGE=${TRINO_BASE_IMAGE:-trinodb/trino:482}"
+  fi
+
+  if image_selected "dq-made-easy-edge"; then
+    run_direct_build_step \
+      "dq-made-easy-edge" \
+      "DQ_EDGE_TAG" \
+      "${DQ_EDGE_REGISTRY}${DQ_EDGE_NAMESPACE}${DQ_EDGE_IMAGE}" \
+      "$ROOT_DIR/dq-edge/Dockerfile.edge" \
+      "$ROOT_DIR/dq-edge"
+  fi
+
+  if image_selected "dq-made-easy-airflow"; then
+    info "$my_name" "Preparing Airflow build artifacts..."
+    bash "$ROOT_DIR/scripts/package-releases/build_dq_airflow_wheels.sh"
+    bash "$ROOT_DIR/scripts/package-releases/build_dq_airflow_dag_artifact.sh"
+    run_direct_build_step \
+      "dq-made-easy-airflow" \
+      "DQ_AIRFLOW_TAG" \
+      "${DQ_AIRFLOW_REGISTRY}${DQ_AIRFLOW_NAMESPACE}${DQ_AIRFLOW_IMAGE}" \
+      "$ROOT_DIR/docker/airflow/Dockerfile.airflow" \
+      "$ROOT_DIR"
+  fi
+
+  if image_selected "dq-made-easy-zammad-origin"; then
+    run_direct_build_step \
+      "dq-made-easy-zammad-origin" \
+      "DQ_ZAMMAD_ORIGIN_TAG" \
+      "${DQ_ZAMMAD_ORIGIN_REGISTRY}${DQ_ZAMMAD_ORIGIN_NAMESPACE}${DQ_ZAMMAD_ORIGIN_IMAGE}" \
+      "$ROOT_DIR/docker/Dockerfile.zammad-origin" \
+      "$ROOT_DIR" \
+      "ZAMMAD_IMAGE=${ZAMMAD_IMAGE:-ghcr.io/zammad/zammad:7.0.1-0000}"
   fi
 fi
 

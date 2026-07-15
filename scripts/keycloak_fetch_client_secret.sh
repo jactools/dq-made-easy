@@ -85,11 +85,11 @@ if [[ "$METHOD" == "kcadm" ]]; then
   info "keycloak_fetch_client_secret.sh" "Using kcadm (docker compose) method against $BASE_URL"
 
   # Authenticate kcadm against master realm
-  docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh config credentials \
     --server "${BASE_URL}" --realm master --user "${ADMIN_USER}" --password "${ADMIN_PASS}" >/dev/null 2>&1
 
   # Get client UUID
-  CLIENT_JSON=$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get clients -r "${REALM}" -q clientId="${CLIENT_ID}")
+  CLIENT_JSON=$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get clients -r "${REALM}" -q clientId="${CLIENT_ID}")
   CLIENT_UUID=$(echo "$CLIENT_JSON" | jq -r '.[0].id')
   if [[ -z "$CLIENT_UUID" || "$CLIENT_UUID" == "null" ]]; then
     echo "Client '${CLIENT_ID}' not found in realm '${REALM}'" >&2
@@ -102,14 +102,14 @@ if [[ "$METHOD" == "kcadm" ]]; then
   IS_PUBLIC=$(echo "$CLIENT_JSON" | jq -r '.[0].publicClient')
   if [[ "$IS_PUBLIC" == "true" ]]; then
     info "keycloak_fetch_client_secret.sh" "Client is public - converting to confidential and enabling direct access grants"
-    docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh update clients/${CLIENT_UUID} -r "${REALM}" \
+    docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh update clients/${CLIENT_UUID} -r "${REALM}" \
       -s publicClient=false -s clientAuthenticatorType=client-secret -s directAccessGrantsEnabled=true
   else
     info "keycloak_fetch_client_secret.sh" "Client already confidential"
   fi
 
   # Fetch secret
-  SECRET_JSON=$(docker_compose exec -T keycloak /opt/keycloak/bin/kcadm.sh get clients/${CLIENT_UUID}/client-secret -r "${REALM}")
+  SECRET_JSON=$(docker_compose exec -T keycloak /opt/keycloak/kcadm-trust.sh get clients/${CLIENT_UUID}/client-secret -r "${REALM}")
   SECRET=$(echo "$SECRET_JSON" | jq -r .value)
   printf '%s\n' "$SECRET"
   exit 0

@@ -1,0 +1,1 @@
+dq-made-easy Zammad origin image with TLS, custom entrypoint, and cert handling

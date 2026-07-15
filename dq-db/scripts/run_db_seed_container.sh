@@ -18,15 +18,9 @@ RULE_VERSION_REL_SOURCE="$MOCK_SOURCE_DIR/versioning/rule_version_relationships.
 VERSION_SQL="$WORK_DIR/version_catalog.sql"
 
 DQ_DB_INTERNAL_URL="${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}"
-PGHOST="${PGHOST:-db}"
-PGPORT="${PGPORT:-5432}"
-PGUSER="${PGUSER:-postgres}"
-PGPASSWORD="${PGPASSWORD:-postgres}"
-PGDATABASE="${PGDATABASE:-dq}"
 KEYCLOAK_REALM="${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}"
-KEYCLOAK_HTTP_RELATIVE_PATH="${KEYCLOAK_HTTP_RELATIVE_PATH:-/}"
-KEYCLOAK_INTERNAL_URL="${KEYCLOAK_INTERNAL_URL:-http://keycloak:8080${KEYCLOAK_HTTP_RELATIVE_PATH}}"
-KEYCLOAK_PUBLIC_URL="${KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_INTERNAL_URL}}"
+KEYCLOAK_INTERNAL_URL="${KEYCLOAK_INTERNAL_URL:?KEYCLOAK_INTERNAL_URL is required}"
+KEYCLOAK_PUBLIC_URL="${KEYCLOAK_PUBLIC_URL:?KEYCLOAK_PUBLIC_URL is required}"
 KEYCLOAK_READY_URL="${KEYCLOAK_READY_URL:-${KEYCLOAK_INTERNAL_URL%/}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration}"
 
 # shellcheck disable=SC1091
@@ -36,17 +30,21 @@ source "$ROOT_DIR/scripts/supporting/keycloak_readiness.sh"
 
 my_name="run_db_seed_container.sh"
 
-export DQ_DB_INTERNAL_URL PGHOST PGPORT PGUSER PGPASSWORD PGDATABASE
+export DQ_DB_INTERNAL_URL KEYCLOAK_INTERNAL_URL KEYCLOAK_PUBLIC_URL KEYCLOAK_READY_URL
 
 wait_for_db() {
   local attempt
+  local probe_output
   for attempt in $(seq 1 90); do
-    if pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" >/dev/null 2>&1; then
+    info "$my_name" "Waiting for database... (${attempt}/90)"
+    if probe_output="$(psql "$DQ_DB_INTERNAL_URL" -c 'select 1' 2>&1)"; then
+      info "$my_name" "database is ready at ${DQ_DB_INTERNAL_URL}"
       return 0
     fi
-    sleep 2
+    info "$my_name" "  probe error: ${probe_output}"
+    sleep 5
   done
-  error "$my_name" "database did not become ready at ${PGHOST}:${PGPORT}/${PGDATABASE}"
+  error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL}"
   exit 1
 }
 
@@ -77,7 +75,7 @@ print(
 )
 PY
 
-  psql -v ON_ERROR_STOP=1 -f "$VERSION_SQL"
+  psql "$DQ_DB_INTERNAL_URL" -v ON_ERROR_STOP=1 -f "$VERSION_SQL"
 }
 
 validate_all_tables_have_rows() {
@@ -110,7 +108,7 @@ validate_all_tables_have_rows() {
   )
 
   for table_name in "${required_tables[@]}"; do
-    exists="$(psql -At -c "SELECT to_regclass('$table_name') IS NOT NULL;")"
+    exists="$(psql "$DQ_DB_INTERNAL_URL" -At -c "SELECT to_regclass('$table_name') IS NOT NULL;")"
     exists="$(printf '%s' "$exists" | tr -d '[:space:]')"
     if [ "$exists" != "t" ]; then
       error "$my_name" "required table '$table_name' does not exist after seed"
@@ -118,7 +116,7 @@ validate_all_tables_have_rows() {
       continue
     fi
 
-    row_count="$(psql -At -c "SELECT COUNT(*) FROM \"$table_name\";")"
+    row_count="$(psql "$DQ_DB_INTERNAL_URL" -At -c "SELECT COUNT(*) FROM \"$table_name\";")"
     row_count="$(printf '%s' "$row_count" | tr -d '[:space:]')"
     if [ -z "$row_count" ] || [ "$row_count" -lt 1 ]; then
       error "$my_name" "required table '$table_name' has 0 rows after seed"
@@ -275,12 +273,15 @@ ON CONFLICT (id) DO UPDATE SET
   created_at = EXCLUDED.created_at;
 SQL
 
-  psql -v ON_ERROR_STOP=1 -f "$versioning_sql"
+  psql "$DQ_DB_INTERNAL_URL" -v ON_ERROR_STOP=1 -f "$versioning_sql"
 }
 
 info "$my_name" "Containerized DB seed starting"
 info "$my_name" "Waiting for database..."
-wait_for_db
+wait_for_db || {
+  error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL}"
+  exit 1
+}
 info "$my_name" "Waiting for Keycloak..."
 if ! wait_for_keycloak_ready "$KEYCLOAK_READY_URL" "Keycloak"; then
   error "$my_name" "Keycloak did not become ready at ${KEYCLOAK_READY_URL}"
@@ -307,23 +308,23 @@ info "$my_name" "Generating external_id patch from Keycloak..."
 python "$ROOT_DIR/scripts/generate_external_id_patch.py" --output-file "$PATCH_FILE" --unmatched-file "$UNMATCHED_FILE"
 
 info "$my_name" "Resetting schema..."
-SEED_ROOT="$INIT_DIR" DB_NAME="$PGDATABASE" DB_USER="$PGUSER" bash "$ROOT_DIR/dq-db/scripts/reseed_in_container.sh"
+SEED_ROOT="$INIT_DIR" bash "$ROOT_DIR/dq-db/scripts/reseed_in_container.sh"
 
 info "$my_name" "Applying Alembic migrations..."
 (
   cd "$FASTAPI_DIR"
-  python -m alembic -c "$FASTAPI_DIR/alembic.ini" upgrade head
+  python -m alembic -c "$FASTAPI_DIR/alembic.ini" upgrade heads
 )
 
 info "$my_name" "Applying generated seed SQL files..."
-SEED_ROOT="$INIT_DIR" DB_NAME="$PGDATABASE" DB_USER="$PGUSER" bash "$ROOT_DIR/dq-db/scripts/apply_seeds_in_container.sh"
+SEED_ROOT="$INIT_DIR" bash "$ROOT_DIR/dq-db/scripts/apply_seeds_in_container.sh"
 
 info "$my_name" "Applying versioning operational seed SQL..."
 apply_versioning_operational_seeds
 
 if [ -s "$PATCH_FILE" ]; then
   info "$my_name" "Applying external_id patch..."
-  psql -v ON_ERROR_STOP=1 -f "$PATCH_FILE"
+  psql "$DQ_DB_INTERNAL_URL" -v ON_ERROR_STOP=1 -f "$PATCH_FILE"
 else
   error "$my_name" "external_id patch file missing or empty: $PATCH_FILE"
   exit 1

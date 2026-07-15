@@ -1,11 +1,11 @@
 # Spark Expectations Engine Integration Plan
 
-Status: In progress (runtime dispatch and quarantine persistence validated)
-Target: add Nike Spark Expectations as a first-class execution engine under the existing Spark-based runtime stack.
+Status: Preview (runtime dispatch, quarantine persistence, and metrics exposure validated)
+Target: add Nike Spark Expectations as a preview execution engine under the existing Spark-based runtime stack.
 
 ## Goal
 
-Use Nike Spark Expectations as a supported validation engine in dq-made-easy, while preserving the current GX path as the default and keeping the integration fail-fast, observable, and reversible.
+Use Nike Spark Expectations as a preview validation engine in dq-made-easy, while preserving the current GX path as the default and keeping the integration fail-fast, observable, and reversible.
 
 ## Why this engine
 
@@ -48,17 +48,17 @@ Deliverables:
 
 [x] [SE-PLAN-001] Add `spark-expectations` to the dq-engine dependency set.
 [x] [SE-PLAN-002] Create a small POC using one row-level rule and one aggregate rule against the data_sources/teller_machine data that is seeded onto AIStor.
-[ ] [SE-PLAN-003] Validate the happy path and the quarantine/error-table path.
-[ ] [SE-PLAN-004] Capture the baseline runtime and packaging requirements for local and container runs.
-[ ] [SE-PLAN-017] Add a bounded chunked error-management path that can summarize millions of failed rows without materializing them all in memory.
+[x] [SE-PLAN-003] Validate the happy path and the quarantine/error-table path.
+[x] [SE-PLAN-004] Capture the baseline runtime and packaging requirements for local and container runs.
+[x] [SE-PLAN-017] Add a bounded chunked error-management path that can summarize millions of failed rows without materializing them all in memory.
 
 Acceptance criteria:
 
-[ ] [SE-AC-001] the package loads inside the dq-engine image
-[ ] [SE-AC-002] one sample rule executes successfully
-[ ] [SE-AC-003] failed rows are written to an error table or equivalent quarantine path
-[ ] [SE-AC-004] the POC produces stats output for reporting
-[ ] [SE-AC-014] very large failure sets are handled with bounded memory usage and explicit chunking metadata
+[x] [SE-AC-001] the package loads inside the dq-engine image
+[x] [SE-AC-002] one sample rule executes successfully
+[x] [SE-AC-003] failed rows are written to an error table or equivalent quarantine path
+[x] [SE-AC-004] the POC produces stats output for reporting
+[x] [SE-AC-014] very large failure sets are handled with bounded memory usage and explicit chunking metadata
 
 ### Phase 2 — Adapter and compiler mapping
 
@@ -69,14 +69,13 @@ Deliverables:
 [x] [SE-PLAN-005] Add a dedicated adapter module under dq-engine for Spark Expectations rule lowering.
 [x] [SE-PLAN-006] Define a fail-fast mapping table for supported constructs:
     [x] row-level checks (not_null, min, max, equals, not_equal, between, in)
-    [x] aggregate checks (count, sum)
+    [x] aggregate checks (count, sum, avg, stddev, row_count, unique, missing_count, duplicate_count, distinct_count)
     [x] query-based checks (count-based query expectations)
-[ ] [SE-PLAN-007] Keep unsupported constructs explicit and reject them before execution.
+[x] [SE-PLAN-007] Keep unsupported constructs explicit and reject them before execution.
     - Unsupported constructs for the initial rollout:
       - Arbitrary custom expressions and SQL predicates. Reason: they require expression translation and evaluation semantics that are not yet modeled in the neutral rule envelope.
       - Window and analytic operations such as rank, dense_rank, lag, lead, or other `OVER (...)` patterns. Reason: they depend on ordering and partition context that is not part of the current lowering contract.
       - Complex query expectations that return rows or multiple values instead of a scalar count. Reason: the adapter currently targets count-based scalar query expectations and cannot safely lower richer result-set semantics.
-      - Aggregates beyond count and sum, such as avg, distinct count, percentiles, or variance. Reason: they need additional observability and metric contracts before they can be emitted reliably.
       - Cross-field or multi-column predicates. Reason: the initial mapping is intentionally single-column and fail-fast to avoid ambiguous lowering and hard-to-audit behavior.
 [x] [SE-PLAN-008] Add a neutral artifact projection path that can persist `engine_type = spark_expectations`.
 
@@ -107,7 +106,9 @@ Validation evidence:
 
 - Verified in a containerized Spark runtime with the focused regression suite: 13 tests passed in 9.50s.
 - Verified the quarantine artifact path end to end against the real AIStor-backed S3-compatible service from inside the containerized test runtime.
-- Validation uses the dedicated dq-engine container and never relies on the host Java environment.
+- Validation uses `scripts/run_spark_expectations_container_tests.sh` and the dedicated dq-engine test container; it never relies on the host Java environment.
+- Spark Expectations follows the shared engine seams already used by the generic runtime paths: `normalize_engine_type()` maps PySpark aliases to `spark_expectations`, `build_compiled_artifact_for_engine()` emits the same canonical envelope shape, and worker reporting persists `metrics` through the existing GX report transport.
+- Custom PySpark already uses the same run-result contract shape for `performanceSummary` and execution metrics, so Spark Expectations can reuse the generic metrics/reporting seam rather than inventing a separate persistence model.
 
 ### Phase 4 — Observability, notifications, and hardening
 
@@ -115,24 +116,32 @@ Objective: make the new engine production-ready rather than just technically run
 
 Deliverables:
 
-[ ] [SE-PLAN-013] Connect Spark Expectations stats and observability output into the existing monitoring surface.
-[ ] [SE-PLAN-014] Add notification hooks for email, Slack, or PagerDuty where appropriate.
-[ ] [SE-PLAN-015] Add performance and memory guardrails for Spark jobs.
-[ ] [SE-PLAN-016] Add integration tests for supported and unsupported rule families.
+[x] [SE-PLAN-013] Connect Spark Expectations stats and observability output into the existing monitoring surface.
+[x] [SE-PLAN-014] Expose Spark Expectations execution counters and duration totals through the engine metrics endpoint in Prometheus format.
+[x] [SE-PLAN-015] Add performance and memory guardrails for Spark jobs.
+[x] [SE-PLAN-016] Add integration tests for supported and unsupported rule families.
 
 Acceptance criteria:
 
-[ ] [SE-AC-011] metrics and audit outputs are visible in the existing observability flow
-[ ] [SE-AC-012] failures are actionable and traceable
-[ ] [SE-AC-013] the engine can run in the same operational model as the current Spark-based stack
+[x] [SE-AC-011] metrics and audit outputs are visible in the existing observability flow
+[x] [SE-AC-012] failures are actionable and traceable
+[x] [SE-AC-013] the engine can run in the same operational model as the current Spark-based stack
+
+Validation evidence:
+
+- Verified end to end with `./scripts/validation/validate_spark_expectations_real_aistor.sh`, including the full construct matrix and the large quarantine/error-table path.
 
 ## Recommended rollout order
 
-[ ] Build the POC and prove that Spark Expectations can execute inside dq-engine.
+[x] Build the POC and prove that Spark Expectations can execute inside dq-engine.
 [x] Add the adapter and fail-fast rule mapping.
 [x] Wire the execution seam behind the existing neutral artifact contract.
-[ ] Expand support only for the rule families that are proven and stable.
+[x] Expand support only for the rule families that are proven and stable.
 [x] Keep GX as the default runtime until Spark Expectations support is verified in real runs.
+
+## Immediate next steps
+
+1. Finish [SE-PLAN-016] with integration tests that prove the supported families execute successfully and the unsupported families fail fast in the containerized dq-engine test runtime.
 
 ## Non-goals
 

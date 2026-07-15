@@ -30,7 +30,7 @@ The main objective is operational clarity: the repo now distinguishes local `*.j
 ## Key implementation files
 
 - [docker-compose.yml](../../docker-compose.yml)
-- [.env.example](../../.env.example)
+- `.env.dev.example`
 - [.env.deployment.example](../../.env.deployment.example)
 - `.env.deployment.local` (ignored machine-local runtime copy created from the template)
 - [scripts/common_startup.sh](../../scripts/common_startup.sh)

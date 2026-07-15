@@ -1,0 +1,49 @@
+# Python File Size Allow-List
+# Files listed here are exempt from the 1000-line threshold.
+# Each entry must have a reason and tracking reference.
+#
+# Format: one relative path per line
+# Comments start with #
+#
+# Review quarterly. Remove entries when files are refactored.
+
+# --- dq-api: endpoint modules (candidates for split by feature area) ---
+dq-api/fastapi/app/api/v1/endpoints/agent.py                      # 1321 lines — agent + tool + audit routes mixed
+dq-api/fastapi/app/api/v1/endpoints/approvals.py                  # 1161 lines — approval CRUD + workflow
+dq-api/fastapi/app/api/v1/endpoints/data_assets.py                # 1109 lines — asset CRUD + metadata
+dq-api/fastapi/app/api/v1/endpoints/data_catalog.py               # 1330 lines — catalog search + browse + history
+dq-api/fastapi/app/api/v1/endpoints/execution_monitoring.py       # 1938 lines — run + incident + approval endpoints
+dq-api/fastapi/app/api/v1/endpoints/gx.py                         # 1793 lines — GX dispatch + compile + run + report
+dq-api/fastapi/app/api/v1/endpoints/incidents.py                  # 1435 lines — incident CRUD + assignment + timeline
+
+# --- dq-api: service modules (candidates for SRP split) ---
+dq-api/fastapi/app/application/services/gx_expectations.py         # 1011 lines — expectation generation + compilation
+dq-api/fastapi/app/application/services/natural_language_rule_drafting.py  # 1336 lines — NL parsing + drafting + LLM integration
+dq-api/fastapi/app/application/services/product_spec_resolver.py   # 1203 lines — spec resolution + caching + validation
+
+# --- dq-api: use-case modules (candidates for split) ---
+dq-api/fastapi/app/application/use_cases/execution_queries.py      # 1073 lines — run plan + execution query builders
+dq-api/fastapi/app/application/use_cases/rule_mutation.py          # 1418 lines — rule CRUD + validation + history
+
+# --- dq-api: infrastructure modules (data-heavy, hard to split) ---
+dq-api/fastapi/app/infrastructure/orm/models.py                    # 1731 lines — SQLAlchemy models (auto-generated portions)
+dq-api/fastapi/app/infrastructure/repositories/in_memory_rules_repository.py  # 1455 lines — in-memory test doubles
+dq-api/fastapi/app/infrastructure/repositories/in_memory_test_data.py         # 1018 lines — test fixtures
+dq-api/fastapi/app/infrastructure/repositories/postgres_rules_repository.py   # 1998 lines — Postgres CRUD + complex queries
+
+# --- dq-api: test files (monolithic, candidates for split) ---
+dq-api/fastapi/tests/api/test_approvals_endpoint_focus.py          # 1004 lines — approval endpoint focus tests
+dq-api/fastapi/tests/api/test_data_catalog_endpoints.py            # 1133 lines — catalog endpoint tests
+dq-api/fastapi/tests/api/test_execution_monitoring.py              # 3987 lines — monitoring endpoint tests (EXTREME)
+dq-api/fastapi/tests/api/test_gx_endpoint.py                       # 3953 lines — GX endpoint tests (EXTREME)
+dq-api/fastapi/tests/api/test_suggestions_endpoints.py             # 1658 lines — suggestion endpoint tests
+dq-api/fastapi/tests/application/services/test_gx_rule_expectations.py  # 1086 lines — expectation service tests
+dq-api/fastapi/tests/application/use_cases/test_rule_mutation_use_cases.py  # 1755 lines — rule mutation tests
+
+# --- dq-llm: agent modules (large due to tool registration) ---
+dq-llm/agents/specialized/steward_agent.py                         # 1224 lines — steward agent + tool registry
+dq-llm/entrypoint.py                                               # 1784 lines — startup + routing + tool registration
+
+# --- other: scripts (validation + pipeline) ---
+dq-metadata/scripts/run_ldd_openmetadata_pipeline.py               # 1244 lines — LDD pipeline orchestration
+scripts/validation/validate_kafka_violations_pipeline.py           # 1017 lines — validation script (slightly over)

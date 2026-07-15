@@ -1,0 +1,385 @@
+services:
+  base:
+    profiles:
+    - base
+    image: ${DQ_BASE_REGISTRY:?DQ_BASE_REGISTRY is required}${DQ_BASE_NAMESPACE:-}${DQ_BASE_IMAGE:?DQ_BASE_IMAGE is required}:${DQ_BASE_TAG:?DQ_BASE_TAG is required}
+    build:
+      context: ../dq-base
+      dockerfile: Dockerfile.base
+      args:
+        NODE_REGISTRY: ${NODE_REGISTRY:?NODE_REGISTRY is required}
+        NODE_NAMESPACE: ${NODE_NAMESPACE:-}
+        NODE_IMAGE: ${NODE_IMAGE:?NODE_IMAGE is required}
+        NODE_TAG: ${NODE_TAG:?NODE_TAG is required}
+    networks:
+    - dq-network
+  db:
+    profiles:
+    - core
+    - gateway
+    - engine
+    - profiling
+    - observability
+    image: ${DQ_DB_REGISTRY:?DQ_DB_REGISTRY is required}${DQ_DB_NAMESPACE:-}${DQ_DB_IMAGE:?DQ_DB_IMAGE is required}:${DQ_DB_TAG:?DQ_DB_TAG is required}
+    container_name: dq-made-easy-db
+    build:
+      context: ../dq-db
+      dockerfile: Dockerfile.db
+    command:
+    - postgres
+    - -c
+    - shared_preload_libraries=pg_stat_statements
+    - -c
+    - ssl=on
+    - -c
+    - ssl_cert_file=/etc/postgresql/certs/tls.crt
+    - -c
+    - ssl_key_file=/etc/postgresql/certs/tls.key
+    environment:
+      POSTGRES_USER: ${DQ_DB_USER:?DQ_DB_USER is required}
+      POSTGRES_PASSWORD: ${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required}
+      POSTGRES_DB: ${DQ_DB_NAME:?DQ_DB_NAME is required}
+      TZ: UTC
+    ports:
+    - ${DB_HOST_BIND:?DB_HOST_BIND is required}:${DB_HOST_PORT:?DB_HOST_PORT is required}:5432
+    volumes:
+    - ../tmp/certs/services/db:/etc/postgresql/certs:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
+    - pgdata_v18:/var/lib/postgresql
+    restart: unless-stopped
+    networks:
+    - dq-network
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - PGPASSWORD=${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required} psql 'host=localhost port=5432 dbname=${DQ_DB_NAME:?DQ_DB_NAME is required} user=${DQ_DB_USER:?DQ_DB_USER is required}
+        sslmode=verify-full sslrootcert=/etc/postgresql/internal-ca-bundle.pem' -c
+        'select 1' >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  redis:
+    profiles:
+    - redis
+    - core
+    - gateway
+    - observability
+    - support
+    image: ${REDIS_REGISTRY:?REDIS_REGISTRY is required}${REDIS_NAMESPACE:-}${REDIS_IMAGE:?REDIS_IMAGE is required}:${REDIS_TAG:?REDIS_TAG is required}
+    container_name: dq-made-easy-redis
+    ports:
+    - ${REDIS_HOST_BIND:?REDIS_HOST_BIND is required}:${REDIS_HOST_PORT:?REDIS_HOST_PORT is required}:6379
+    command:
+    - redis-server
+    - --port
+    - '0'
+    - --tls-port
+    - '6379'
+    - --tls-cert-file
+    - /etc/redis/certs/tls.crt
+    - --tls-key-file
+    - /etc/redis/certs/tls.key
+    - --tls-ca-cert-file
+    - /etc/redis/internal-ca-bundle.pem
+    - --tls-auth-clients
+    - 'no'
+    - --appendonly
+    - 'yes'
+    volumes:
+    - ../tmp/certs/services/redis:/etc/redis/certs:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/redis/internal-ca-bundle.pem:ro
+    - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - redis-cli --tls --cacert /etc/redis/internal-ca-bundle.pem -h localhost -p
+        6379 ping
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+    - dq-network
+  db-postgres-exporter:
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+    - core
+    - gateway
+    - observability
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+    container_name: dq-made-easy-db-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://${DQ_DB_USER:?DQ_DB_USER is required}:${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required}@db:5432/${DQ_DB_NAME:?DQ_DB_NAME is required}?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+    volumes:
+    - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
+    restart: unless-stopped
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  redis-exporter:
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+    - redis
+    - core
+    - gateway
+    - observability
+    - support
+    image: oliver006/redis_exporter:v1.67.0
+    container_name: dq-made-easy-redis-exporter
+    environment:
+      REDIS_ADDR: rediss://redis:6379?ssl_cert_reqs=required&ssl_ca_certs=/etc/internal-certs/internal-ca-bundle.pem&ssl_check_hostname=true
+    volumes:
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/internal-certs/internal-ca-bundle.pem:ro
+    restart: unless-stopped
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  kafka:
+    profiles:
+    - engine
+    - core
+    - gateway
+    - observability
+    image: ${DQ_KAFKA_REGISTRY:?DQ_KAFKA_REGISTRY is required}${DQ_KAFKA_NAMESPACE:-}${DQ_KAFKA_IMAGE:?DQ_KAFKA_IMAGE is required}:${DQ_KAFKA_TAG:?DQ_KAFKA_TAG is required}
+    build:
+      context: ../dq-kafka
+      dockerfile: Dockerfile.kafka
+    container_name: dq-made-easy-kafka
+    environment:
+      TZ: UTC
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: SSL://:9092,BROKER://:9094,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: SSL://${KAFKA_ADVERTISED_HOST:?KAFKA_ADVERTISED_HOST is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required},BROKER://kafka:9094
+      KAFKA_CERT_HOST: ${KAFKA_CERT_HOST?KAFKA_CERT_HOST is required}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.p12
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka_key_creds
+      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_SSL_CLIENT_AUTH: none
+      KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED:?KAFKA_TLS_ENABLED is required}
+      KAFKA_TLS_KEYSTORE_PASSWORD: ${KAFKA_TLS_KEYSTORE_PASSWORD:?KAFKA_TLS_KEYSTORE_PASSWORD is required}
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    command:
+    - /opt/kafka/bin/start-kafka.sh
+    ports:
+    - ${KAFKA_HOST_BIND:?KAFKA_HOST_BIND is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required}:9092
+    volumes:
+    - kafka_data:/var/lib/kafka/data
+    - ../tmp/certs:/etc/kafka/certs:ro
+    networks:
+    - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - echo | openssl s_client -connect ${KAFKA_HEALTHCHECK_HOST:?KAFKA_HEALTHCHECK_HOST is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required}
+        -servername ${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required} -CAfile /etc/kafka/certs/mkcert-rootCA.pem
+        >/dev/null 2>&1 || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+  api-migrate:
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+    - core
+    - gateway
+    - observability
+    image: ${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:${DQ_API_TAG:?DQ_API_TAG is required}
+    environment:
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
+      TZ: UTC
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
+      REQUIRE_DATABASE: 'true'
+    build:
+      context: ..
+      dockerfile: dq-api/Dockerfile.fastapi
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+    entrypoint:
+    - /bin/sh
+    - -lc
+    command:
+    - cd /app && python -m alembic -c alembic.ini upgrade heads
+    env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
+    volumes:
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    networks:
+    - dq-network
+    restart: 'no'
+  api:
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api-migrate:
+        condition: service_completed_successfully
+    profiles:
+    - core
+    - gateway
+    - observability
+    image: ${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:${DQ_API_TAG:?DQ_API_TAG is required}
+    environment:
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
+      TZ: UTC
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL:?DQ_DB_INTERNAL_URL is required}
+      APP_CONFIG_ENCRYPTION_KEY: ${APP_CONFIG_ENCRYPTION_KEY?APP_CONFIG_ENCRYPTION_KEY
+        is required}
+      REQUIRE_DATABASE: 'true'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: rediss://redis:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/openmetadata/certs/internal-ca-bundle.pem&ssl_check_hostname=true
+      PROFILING_QUEUE_KEY: ${PROFILING_QUEUE_KEY:?PROFILING_QUEUE_KEY is required}
+      GX_EXECUTION_QUEUE_KEY: ${GX_EXECUTION_QUEUE_KEY:?GX_EXECUTION_QUEUE_KEY is required}
+      GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: ${GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY:?GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY is required}
+      DQ_PROFILING_LOCAL_QUEUE: dq-made-easy-profiling:local-queue
+      SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME
+        is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+        is required}
+      SSO_PROVIDER: ${SSO_PROVIDER:?SSO_PROVIDER is required}
+      SSO_ISSUER: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:?SSO_CLIENT_ID is required}
+      SSO_ALLOWED_CLIENT_IDS: ${SSO_ALLOWED_CLIENT_IDS:?SSO_ALLOWED_CLIENT_IDS is required}
+      SSO_ENABLED: ${SSO_ENABLED:?SSO_ENABLED is required}
+      ALLOW_LOCAL_AUTH: ${ALLOW_LOCAL_AUTH:?ALLOW_LOCAL_AUTH is required}
+      CATALOG_PROVIDER: ${CATALOG_PROVIDER:?CATALOG_PROVIDER is required}
+      CATALOG_ENDPOINT: ${CATALOG_ENDPOINT:?CATALOG_ENDPOINT is required}
+      CATALOG_API_KEY: ${CATALOG_API_KEY:-}
+      CATALOG_OIDC_ISSUER: ${CATALOG_OIDC_ISSUER:?CATALOG_OIDC_ISSUER is required}
+      CATALOG_OIDC_TOKEN_URL: ${CATALOG_OIDC_TOKEN_URL:?CATALOG_OIDC_TOKEN_URL is required}
+      CATALOG_OIDC_CLIENT_ID: ${CATALOG_OIDC_CLIENT_ID:?CATALOG_OIDC_CLIENT_ID is required}
+      CATALOG_OIDC_CLIENT_SECRET: ${CATALOG_OIDC_CLIENT_SECRET:-}
+      CATALOG_OIDC_SCOPE: ${CATALOG_OIDC_SCOPE:?CATALOG_OIDC_SCOPE is required}
+      CATALOG_OIDC_USERNAME: ${CATALOG_OIDC_USERNAME:?CATALOG_OIDC_USERNAME is required}}
+      CATALOG_OIDC_PASSWORD: ${CATALOG_OIDC_PASSWORD:?CATALOG_OIDC_PASSWORD is required}}}
+      TRUST_PROXY_AUTH: ${TRUST_PROXY_AUTH:?TRUST_PROXY_AUTH is required}
+      GX_EXCEPTION_STORAGE_BACKEND: ${GX_EXCEPTION_STORAGE_BACKEND:?GX_EXCEPTION_STORAGE_BACKEND is required}
+      GX_EXCEPTION_STORAGE_BUCKET: ${GX_EXCEPTION_STORAGE_BUCKET:?GX_EXCEPTION_STORAGE_BUCKET is required}
+      GX_EXCEPTION_STORAGE_PREFIX: ${GX_EXCEPTION_STORAGE_PREFIX:?GX_EXCEPTION_STORAGE_PREFIX is required}
+      GX_EXCEPTION_STORAGE_ENDPOINT: ${GX_EXCEPTION_STORAGE_ENDPOINT:?GX_EXCEPTION_STORAGE_ENDPOINT is required}
+      GX_EXCEPTION_STORAGE_ACCESS_KEY: ${GX_EXCEPTION_STORAGE_ACCESS_KEY:?GX_EXCEPTION_STORAGE_ACCESS_KEY is required}
+      GX_EXCEPTION_STORAGE_SECRET_KEY: ${GX_EXCEPTION_STORAGE_SECRET_KEY:?GX_EXCEPTION_STORAGE_SECRET_KEY is required}
+      GX_EXCEPTION_STORAGE_REGION: ${GX_EXCEPTION_STORAGE_REGION:?GX_EXCEPTION_STORAGE_REGION is required}
+      GX_EXCEPTION_STORAGE_SSL_ENABLED: ${GX_EXCEPTION_STORAGE_SSL_ENABLED:?GX_EXCEPTION_STORAGE_SSL_ENABLED is required}
+      DQ_ENGINE_INTERNAL_URL: ${DQ_ENGINE_INTERNAL_URL:?DQ_ENGINE_INTERNAL_URL is required}
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      OIDC_REDIRECT_BASE_URL: ${OIDC_REDIRECT_BASE_URL:?OIDC_REDIRECT_BASE_URL is required}
+      DQ_LLM_BASE_URL: ${DQ_LLM_BASE_URL:?DQ_LLM_BASE_URL is required}
+      DQ_LLM_CA_BUNDLE: /etc/api/mkcert-rootCA.pem
+      REDIS_CA_BUNDLE: /etc/api/mkcert-rootCA.pem
+      REQUESTS_CA_BUNDLE: /etc/api/mkcert-rootCA.pem
+      SSL_CERT_FILE: /etc/api/mkcert-rootCA.pem
+      OTEL_SERVICE_NAME: dq-made-easy-api
+      OTEL_SERVICE_VERSION: ${DQ_API_TAG:?DQ_API_TAG is required}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?OTEL_EXPORTER_OTLP_ENDPOINT is required}
+      OTEL_CONSOLE_EXPORT: '1'
+      OTEL_EXPORTER_OTLP_FORCE: '1'
+      OTEL_TRACE_EXPORT_DEBUG: '1'
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: '1.0'
+      KEYCLOAK_TOKEN_REALM: ${KEYCLOAK_TOKEN_REALM:?KEYCLOAK_TOKEN_REALM is required}
+    build:
+      context: ..
+      dockerfile: dq-api/Dockerfile.fastapi
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+    ports:
+    - ${API_HOST_BIND:?API_HOST_BIND is required}:${API_HOST_PORT:?API_HOST_PORT is required}:4010
+    env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
+    volumes:
+    - ../tmp/certs/services/api:/etc/api/certs:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/api/mkcert-rootCA.pem:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    networks:
+    - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - python -c "import ssl, urllib.request; ctx = ssl.create_default_context(cafile='/etc/openmetadata/certs/internal-ca-bundle.pem');
+        urllib.request.urlopen('https://127.0.0.1:4010/health', context=ctx)" || exit
+        1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  frontend:
+    depends_on:
+      api:
+        condition: service_healthy
+    profiles:
+    - core
+    image: ${DQ_FRONTEND_REGISTRY}${DQ_FRONTEND_NAMESPACE}${DQ_FRONTEND_IMAGE}:${DQ_FRONTEND_TAG:?DQ_FRONTEND_TAG is required}
+    build:
+      context: ../dq-ui
+      dockerfile: Dockerfile.frontend
+      args:
+        NODE_REGISTRY: ${NODE_REGISTRY:?NODE_REGISTRY is required}
+        NODE_NAMESPACE: ${NODE_NAMESPACE:-}
+        NODE_IMAGE: ${NODE_IMAGE:?NODE_IMAGE is required}
+        NODE_TAG: ${NODE_TAG:?NODE_TAG is required}
+        NGINX_REGISTRY: ${NGINX_REGISTRY:?NGINX_REGISTRY is required}
+        NGINX_NAMESPACE: ${NGINX_NAMESPACE:-}
+        NGINX_IMAGE: ${NGINX_IMAGE:?NGINX_IMAGE is required}
+        NGINX_TAG: ${NGINX_TAG:?NGINX_TAG is required}
+        VITE_OTEL_ENABLED: ${VITE_OTEL_ENABLED:?VITE_OTEL_ENABLED is required}
+        VITE_OTEL_ENDPOINT: ${VITE_OTEL_ENDPOINT:?VITE_OTEL_ENDPOINT is required}
+        VITE_ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
+        VITE_SERVICE_VERSION: ${DQ_FRONTEND_TAG:?DQ_FRONTEND_TAG is required}
+      secrets:
+      - repo_npmrc
+    ports:
+    - ${FRONTEND_HOST_BIND:?FRONTEND_HOST_BIND is required}:${FRONTEND_HTTPS_HOST_PORT:?FRONTEND_HTTPS_HOST_PORT is required}:443
+    environment:
+      KONG_PUBLIC_URL: ${KONG_PUBLIC_URL?KONG_PUBLIC_URL is required}
+      FRONTEND_CERT_FILE: ${FRONTEND_CERT_FILE:?FRONTEND_CERT_FILE is required}
+      FRONTEND_KEY_FILE: ${FRONTEND_KEY_FILE:?FRONTEND_KEY_FILE is required}
+      KONG_SERVICE_FQDN: ${KONG_SERVICE_FQDN:?KONG_SERVICE_FQDN is required}
+      VITE_SSO_PROVIDER: ${VITE_SSO_PROVIDER:?VITE_SSO_PROVIDER is required}
+      VITE_SSO_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      VITE_SSO_CLIENT_ID: ${VITE_SSO_CLIENT_ID:?VITE_SSO_CLIENT_ID is required}
+      VITE_OTEL_ENABLED: ${VITE_OTEL_ENABLED:?VITE_OTEL_ENABLED is required}
+      VITE_OTEL_ENDPOINT: ${VITE_OTEL_ENDPOINT:?VITE_OTEL_ENDPOINT is required}
+      OTEL_SERVICE_NAME: dq-ui
+      OTEL_SERVICE_VERSION: ${DQ_FRONTEND_TAG:?DQ_FRONTEND_TAG is required}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
+    volumes:
+    - ../tmp/certs:/etc/nginx/certs:ro
+    networks:
+    - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -fk https://127.0.0.1/ || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

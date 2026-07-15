@@ -783,6 +783,7 @@ class GxExecutionRunRow(Base):
     execution_contract_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
     handoff_payload_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     result_summary_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    metrics_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     diagnostics_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
     failure_code: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     failure_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -1105,6 +1106,18 @@ class ConnectorRegistryRow(Base):
     capabilities_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
     supported_asset_kinds_json: Mapped[list] = mapped_column(JSONB, nullable=False)
     registered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class UiRegistryManifestRow(Base):
+    __tablename__ = "ui_registry_manifest"
+
+    manifest_key: Mapped[str] = mapped_column(Text, primary_key=True)
+    source_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source_ref: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    manifest_version: Mapped[str] = mapped_column(Text, nullable=False)
+    manifest_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    persisted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
@@ -1939,3 +1952,197 @@ class ValidationRunItemRow(Base):
     warnings: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     diagnostics: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     conflicts: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# DQ Plan Templates (DQ-2.0)
+# ---------------------------------------------------------------------------
+
+
+class DQPlanTemplateRow(Base):
+    """DQ Plan Template - reusable validation definition."""
+
+    __tablename__ = "dq_plan_templates"
+
+    template_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    template_name: Mapped[str] = mapped_column(Text, nullable=False)
+    template_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    template_version: Mapped[str] = mapped_column(Text, nullable=False)
+    template_type: Mapped[str] = mapped_column(Text, nullable=False)
+    domain: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tags: Mapped[list] = mapped_column(ARRAY(Text), nullable=False, default=list)
+    workspace_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    parameters_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=False)
+    scope_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    suites_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=False)
+    configuration_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    schedule_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
+    owner: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    approver: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    approved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    approval_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    created_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    updated_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    __table_args__ = (
+        Index(
+            "ix_dq_plan_templates_workspace",
+            "workspace_id",
+        ),
+        Index(
+            "ix_dq_plan_templates_domain",
+            "domain",
+        ),
+        Index(
+            "ix_dq_plan_templates_type",
+            "template_type",
+        ),
+        Index(
+            "ix_dq_plan_templates_tags",
+            "tags",
+            postgresql_using="gin",
+        ),
+        Index(
+            "ix_dq_plan_templates_is_active",
+            "is_active",
+        ),
+    )
+
+
+class DQPlanTemplateVersionRow(Base):
+    """Template version tracking for audit trail."""
+
+    __tablename__ = "dq_plan_template_versions"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    template_id: Mapped[str] = mapped_column(Text, nullable=False)
+    template_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    template_json: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    created_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    __table_args__ = (
+        Index(
+            "ix_dq_plan_template_versions_template_id",
+            "template_id",
+        ),
+        Index(
+            "ix_dq_plan_template_versions_created_at",
+            "created_at",
+        ),
+        UniqueConstraint("template_id", "template_version", name="uq_template_version"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Connector Sync Jobs (API-1 gap closure)
+# ---------------------------------------------------------------------------
+
+class ConnectorSyncJobRow(Base):
+    """Background sync job tracking for connector instances."""
+
+    __tablename__ = "connector_sync_jobs"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    connector_instance_id: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    kind: Mapped[str] = mapped_column(Text, nullable=False, server_default="full_sync")
+    trigger: Mapped[str] = mapped_column(Text, nullable=False, server_default="manual")
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="pending")
+    retry_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    max_retries: Mapped[int] = mapped_column(Integer, nullable=False, server_default="3")
+    synced_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    added_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    updated_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    removed_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    error_code: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_details: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    result_snapshot: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    workspace_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tenant_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        Index("ix_connector_sync_jobs_instance", "connector_instance_id"),
+        Index("ix_connector_sync_jobs_provider", "provider"),
+        Index("ix_connector_sync_jobs_status", "status"),
+        Index("ix_connector_sync_jobs_created_at", "created_at"),
+        Index("ix_connector_sync_jobs_workspace", "workspace_id"),
+    )
+
+
+class ConnectorSyncScheduleRow(Base):
+    """Periodic sync schedule configuration for connector instances."""
+
+    __tablename__ = "connector_sync_schedules"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    connector_instance_id: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    frequency: Mapped[str] = mapped_column(Text, nullable=False, server_default="day")
+    cron_expression: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    interval_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    next_run_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_run_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_job_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    timezone: Mapped[str] = mapped_column(Text, nullable=False, server_default="UTC")
+    workspace_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tenant_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        Index("ix_connector_sync_schedules_instance", "connector_instance_id"),
+        Index("ix_connector_sync_schedules_provider", "provider"),
+        Index("ix_connector_sync_schedules_next_run", "next_run_at"),
+        Index("ix_connector_sync_schedules_active", "is_active"),
+    )
+
+
+class ConnectorAssetSnapshotRow(Base):
+    """Asset metadata snapshots for incremental sync drift detection."""
+
+    __tablename__ = "connector_asset_snapshots"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    connector_instance_id: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    asset_identifier: Mapped[str] = mapped_column(Text, nullable=False)
+    asset_kind: Mapped[str] = mapped_column(Text, nullable=False)
+    asset_metadata: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    checksum: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        Index("ix_connector_asset_snapshots_instance", "connector_instance_id"),
+        Index("ix_connector_asset_snapshots_provider", "provider"),
+        Index(
+            "ix_connector_asset_snapshots_lookup",
+            "connector_instance_id",
+            "asset_identifier",
+        ),
+        UniqueConstraint(
+            "connector_instance_id",
+            "asset_identifier",
+            name="uq_connector_asset_snapshot_lookup",
+        ),
+    )
+

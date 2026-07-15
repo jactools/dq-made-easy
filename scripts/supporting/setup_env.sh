@@ -1,15 +1,20 @@
-# Purpose: Export repo environment variables and configure npm registry/auth.
+# Purpose: Export repo environment variables and derive shared Nexus auth values.
 #
 # What it does:
 # - Intended to be sourced (not executed) before running compose/scripts.
 # - Reads .env-derived configuration and exports image/tag/URL variables.
-# - Optionally configures npm registry auth (Nexus Cloud or public npm).
+# - Derives shared Nexus auth values for repo-root .npmrc consumers.
 #
-# Version: 1.7
-# Last modified: 2026-06-11
+# Version: 1.9
+# Last modified: 2026-06-30
+# Changelog:
+# - 1.9 (2026-06-30): Stop mutating npm config in shell and derive shared Nexus auth for repo-root .npmrc.
 
 # Source generic logging function
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -z "${ROOT_DIR:-}" ]; then
+    ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
 
 source "$SCRIPT_DIR/logging.sh"
 my_name="setup_env.sh"
@@ -98,40 +103,65 @@ curl_kong_host_probe() {
     fi
 }
 
+nexuscloud_hostname="${NEXUSCLOUD_HOSTNAME:-}"
 nexuscloud_dns="${NEXUSCLOUD_DNS:-}"
 nexuscloud_registry="${NEXUSCLOUD_REGISTRY:-}"
 nexuscloud_username="${NEXUSCLOUD_USERNAME:-}"
 nexuscloud_password="${NEXUSCLOUD_PASSWORD:-}"
 nexuscloud_password_base64="${NEXUSCLOUD_PASSWORD_BASE64:-}"
 nexuscloud_group_repo="${NEXUSCLOUD_PYPI_GROUP_REPO:-}"
-npm_public="${NPM_PUBLIC:-}"
-npm_public_token="${NPM_PUBLIC_TOKEN:-}"
+nexuscloud_maven_group_repo="${NEXUSCLOUD_MAVEN_GROUP_REPO:-${NEXUSCLOUD_MPM_GROUP_REPO:-}}"
 
-if [ -n "$nexuscloud_dns" ] || [ -n "$nexuscloud_registry" ]; then
-    debug "$my_name" "NEXUSCLOUD_DNS: ${nexuscloud_dns}"
-    debug "$my_name" "Setting up npm registry and authentication for Nexus Cloud..."
-    debug "$my_name" "NEXUSCLOUD_DNS: ${nexuscloud_dns}"
+if [ -z "$nexuscloud_hostname" ] && [ -n "$nexuscloud_dns" ]; then
+    nexuscloud_hostname="${nexuscloud_dns#//}"
+fi
+
+if [ -n "$nexuscloud_hostname" ]; then
+    nexuscloud_dns="//${nexuscloud_hostname}"
+    NEXUSCLOUD_HOSTNAME="$nexuscloud_hostname"
+    NEXUSCLOUD_DNS="$nexuscloud_dns"
+    export NEXUSCLOUD_HOSTNAME NEXUSCLOUD_DNS
+fi
+
+if [ -z "$nexuscloud_password_base64" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
+    nexuscloud_password_base64=$(printf '%s' "${nexuscloud_username}:${nexuscloud_password}" | base64)
+fi
+
+NEXUSCLOUD_PASSWORD_BASE64="$nexuscloud_password_base64"
+export NEXUSCLOUD_PASSWORD_BASE64
+
+if [ -n "$nexuscloud_hostname" ] || [ -n "$nexuscloud_registry" ]; then
+    debug "$my_name" "NEXUSCLOUD_HOSTNAME: ${nexuscloud_hostname}"
     debug "$my_name" "NEXUSCLOUD_REGISTRY: ${nexuscloud_registry}"
-
-    base64token="$nexuscloud_password_base64"
-    if [ -z "$base64token" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
-        base64token=$(printf '%s' "${nexuscloud_username}:${nexuscloud_password}" | base64)
+    if [ -z "$nexuscloud_password_base64" ]; then
+        warning "$my_name" "Nexus Cloud is configured but no shared npm auth value is available"
     fi
+fi
 
-    if [ -n "$nexuscloud_registry" ] && [ -n "$base64token" ]; then
-        npm config set "${nexuscloud_registry}:_authToken"="${base64token}" >/dev/null 2>&1
-    else
-        warning "$my_name" "Skipping Nexus npm auth configuration: registry or token is not set"
-    fi
-elif [ -n "$npm_public" ]; then
-    info "$my_name" "NPM_PUBLIC: ${npm_public}"
-    npm config set registry="${npm_public}"
-
-    if [ -n "$npm_public_token" ]; then
-        npm config set "${npm_public}:_authToken"="${npm_public_token}" >/dev/null 2>&1
-    fi
+if [ -n "${NEXUSCLOUD_NPM_REGISTRY:-}" ]; then
+    NPM_CONFIG_REGISTRY="$NEXUSCLOUD_NPM_REGISTRY"
 else
-    info "$my_name" "No npm registry override configured; using existing npm defaults"
+    NPM_CONFIG_REGISTRY="https://registry.npmjs.org/"
+fi
+
+REPO_NPMRC_FILE="${REPO_NPMRC_FILE:-}"
+if [ -n "$REPO_NPMRC_FILE" ] && [ ! -f "$REPO_NPMRC_FILE" ]; then
+    REPO_NPMRC_FILE=""
+fi
+
+if [ -z "$REPO_NPMRC_FILE" ]; then
+    if [ -f "$ROOT_DIR/.npmrc" ]; then
+        REPO_NPMRC_FILE="$ROOT_DIR/.npmrc"
+    else
+        mkdir -p "$ROOT_DIR/tmp"
+        REPO_NPMRC_FILE="$ROOT_DIR/tmp/public.npmrc"
+        if [ ! -f "$REPO_NPMRC_FILE" ]; then
+            cat > "$REPO_NPMRC_FILE" <<'EOF'
+registry=https://registry.npmjs.org/
+EOF
+        fi
+        warning "$my_name" "Repo-root .npmrc not found; using public npm registry fallback"
+    fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -144,37 +174,81 @@ fi
 # provided so Docker builds can be deterministic.
 # ---------------------------------------------------------------------------
 
-if [ -n "$nexuscloud_dns" ]; then
-    nexus_host="${nexuscloud_dns#//}"
+if [ -n "$nexuscloud_hostname" ]; then
+    nexus_host="$nexuscloud_hostname"
     if [ -z "$nexus_host" ]; then
-        error "$my_name" "NEXUSCLOUD_DNS is set but could not derive host (expected leading //host)"
+        error "$my_name" "NEXUSCLOUD_HOSTNAME is set but empty"
         return 1
     fi
 
     if [ -z "$nexuscloud_group_repo" ]; then
-        error "$my_name" "NEXUSCLOUD_DNS is set but NEXUSCLOUD_GROUP_REPO is not set (expected e.g. gr-pypi-36)"
+        error "$my_name" "NEXUSCLOUD_HOSTNAME is set but NEXUSCLOUD_GROUP_REPO is not set (expected e.g. gr-pypi-36)"
         return 1
     fi
 
     NEXUSCLOUD_PYPI_URL_NO_AUTH="https://${nexus_host}/repository/${nexuscloud_group_repo}/simple"
 
     if [ -z "$nexuscloud_username" ] || [ -z "$nexuscloud_password" ]; then
-        error "$my_name" "NEXUSCLOUD_DNS is set but NEXUSCLOUD_USERNAME/NEXUSCLOUD_PASSWORD are not set (required for authenticated PyPI URL)"
+        error "$my_name" "NEXUSCLOUD_HOSTNAME is set but NEXUSCLOUD_USERNAME/NEXUSCLOUD_PASSWORD are not set (required for authenticated PyPI URL)"
         return 1
     fi
 
     # Do not log this value; it contains credentials.
     NEXUSCLOUD_PYPI_URL="https://${nexuscloud_username}:${nexuscloud_password}@${nexus_host}/repository/${nexuscloud_group_repo}/simple"
-    # Use the standard pip env var name so `docker compose build` can pass it through.
-    PIP_INDEX_URL="$NEXUSCLOUD_PYPI_URL"
-    export NEXUSCLOUD_PYPI_URL NEXUSCLOUD_PYPI_URL_NO_AUTH PIP_INDEX_URL
+    export NEXUSCLOUD_PYPI_URL NEXUSCLOUD_PYPI_URL_NO_AUTH
+fi
+
+if [ -z "${PIP_INDEX_URL:-}" ]; then
+    if [ -n "${NEXUSCLOUD_PYPI_URL:-}" ]; then
+        PIP_INDEX_URL="$NEXUSCLOUD_PYPI_URL"
+    elif [ -n "${NEXUSCLOUD_PYPI_URL_NO_AUTH:-}" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
+        pip_index_host="${NEXUSCLOUD_PYPI_URL_NO_AUTH#https://}"
+        pip_index_host="${pip_index_host%%/repository/*}"
+        PIP_INDEX_URL="https://${nexuscloud_username}:${nexuscloud_password}@${pip_index_host}/repository/${nexuscloud_group_repo}/simple"
+    fi
+fi
+
+if [ -n "${PIP_INDEX_URL:-}" ]; then
+    export PIP_INDEX_URL
+fi
+
+# ---------------------------------------------------------------------------
+# Maven repositories configuration
+#
+# Spark package warm-up uses Maven/Ivy under the hood. Derive a Nexus-backed
+# Maven repository URL when a Nexus host and Maven group repo are configured.
+# Keep explicit MAVEN_REPOSITORIES overrides intact.
+# ---------------------------------------------------------------------------
+
+if [ -n "$nexuscloud_hostname" ] && [ -n "$nexuscloud_maven_group_repo" ]; then
+    NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH="https://${nexuscloud_hostname}/repository/${nexuscloud_maven_group_repo}/"
+    if [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
+        NEXUSCLOUD_MAVEN_REPOSITORY_URL="https://${nexuscloud_username}:${nexuscloud_password}@${nexuscloud_hostname}/repository/${nexuscloud_maven_group_repo}/"
+    fi
+fi
+
+if [ -z "${MAVEN_REPOSITORIES:-}" ]; then
+    if [ -n "${NEXUSCLOUD_MAVEN_REPOSITORY_URL:-}" ]; then
+        MAVEN_REPOSITORIES="$NEXUSCLOUD_MAVEN_REPOSITORY_URL"
+    elif [ -n "${NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH:-}" ]; then
+        MAVEN_REPOSITORIES="$NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH"
+    fi
+fi
+
+if [ -n "${MAVEN_REPOSITORIES:-}" ]; then
+    export MAVEN_REPOSITORIES
 fi
 
 export NEXUSCLOUD_REGISTRY
 export NEXUSCLOUD_GROUP_REPO
 export NEXUSCLOUD_PYPI_URL
 export NEXUSCLOUD_PYPI_URL_NO_AUTH
+export NEXUSCLOUD_MAVEN_REPOSITORY_URL
+export NEXUSCLOUD_MAVEN_REPOSITORY_URL_NO_AUTH
 export PIP_INDEX_URL
+export NPM_CONFIG_REGISTRY
+export REPO_NPMRC_FILE
+export NPM_CONFIG_USERCONFIG="$REPO_NPMRC_FILE"
 
 export REGISTRY
 
@@ -385,7 +459,10 @@ if [ "$internal_ca_bundle_found" = true ]; then
     export INTERNAL_CA_BUNDLE
 
     INTERNAL_CA_BUNDLE_FILE="$ROOT_DIR/tmp/certs/internal-ca-bundle.pem"
+    INTERNAL_CA_BUNDLE_FILE="$ROOT_DIR/tmp/certs/trust/internal-ca-bundle.pem"
+    mkdir -p "$ROOT_DIR/tmp/certs/trust"
     cp "$internal_ca_bundle_file" "$INTERNAL_CA_BUNDLE_FILE"
+    cp "$internal_ca_bundle_file" "$ROOT_DIR/tmp/certs/internal-ca-bundle.pem"
     export INTERNAL_CA_BUNDLE_FILE
 fi
 rm -f "$internal_ca_bundle_file"
@@ -402,9 +479,10 @@ fi
 export DQ_SPARK_DRIVER_MEMORY
 export DQ_SPARK_EXECUTOR_MEMORY
 
-# Prefer explicit DOCKER_DOMAIN, otherwise derive it from NEXUSCLOUD_DNS.
+# Prefer explicit DOCKER_DOMAIN, otherwise derive it from NEXUSCLOUD_HOSTNAME.
+# NEXUSCLOUD_HOSTNAME is only set in corporate environments; use :- default for portability.
 if [ -z "${DOCKER_DOMAIN:-}" ]; then
-    DOCKER_DOMAIN="${NEXUSCLOUD_HOSTNAME}"
+    DOCKER_DOMAIN="${NEXUSCLOUD_HOSTNAME:-}"
 fi
 if [ -n "${DOCKER_DOMAIN:-}" ]; then
     export DOCKER_DOMAIN
@@ -413,7 +491,11 @@ if [ -n "${DOCKER_DOMAIN:-}" ]; then
     # Force base image registries through Nexus group.
     NODE_REGISTRY="${DOCKER_DOMAIN}/"
     NGINX_REGISTRY="${DOCKER_DOMAIN}/"
-    PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
+    if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ]; then
+        PYTHON_REGISTRY=""
+    else
+        PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
+    fi
     export NODE_REGISTRY NGINX_REGISTRY PYTHON_REGISTRY
 
     # Ensure Docker is authenticated to Docker Hub for public base-image pulls.
@@ -424,6 +506,19 @@ if [ -n "${DOCKER_DOMAIN:-}" ]; then
         fi
     else
         warning "$my_name" "Docker Hub credentials missing; cannot login to $DOCKER_DOMAIN"
+    fi
+fi
+
+if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ] && [ -n "${NEXUSCLOUD_USERNAME:-}" ] && [ -n "${NEXUSCLOUD_PASSWORD:-}" ]; then
+    nexus_docker_io_registry="${NEXUSCLOUD_DOCKER_IO_REGISTRY#http://}"
+    nexus_docker_io_registry="${nexus_docker_io_registry#https://}"
+    nexus_docker_io_host="${nexus_docker_io_registry%%/*}"
+    if [ -n "$nexus_docker_io_host" ]; then
+        info "$my_name" "Logging in to Nexus Docker registry host: $nexus_docker_io_host"
+        if ! printf '%s' "$NEXUSCLOUD_PASSWORD" | docker login "$nexus_docker_io_host" --username "$NEXUSCLOUD_USERNAME" --password-stdin >/dev/null 2>&1; then
+            error "$my_name" "Docker login failed for Nexus registry host $nexus_docker_io_host"
+            return 1
+        fi
     fi
 fi
 

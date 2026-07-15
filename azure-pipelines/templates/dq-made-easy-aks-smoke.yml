@@ -1,0 +1,158 @@
+parameters:
+  - name: cloudProvider
+    type: string
+  - name: serviceName
+    type: string
+  - name: kubernetesClusterName
+    type: string
+  - name: kubernetesNamespace
+    type: string
+  - name: kubeContext
+    type: string
+  - name: azureServiceConnection
+    type: string
+  - name: imageRef
+    type: string
+
+jobs:
+  - job: K8sSmokeValidation
+    displayName: dq-made-easy - Kubernetes smoke validation
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - checkout: self
+
+      - ${{ if eq(parameters.cloudProvider, 'aks') }}:
+        - task: AzureCLI@2
+          displayName: dq-made-easy - Authenticate kubectl context for AKS smoke checks
+          inputs:
+            azureSubscription: ${{ parameters.azureServiceConnection }}
+            scriptType: bash
+            scriptLocation: inlineScript
+            inlineScript: |
+              set -euo pipefail
+
+              cluster_name='${{ parameters.kubernetesClusterName }}'
+              resource_group='$(resourceGroupName)'
+
+              if [[ -z "$resource_group" ]]; then
+                echo "resourceGroupName variable is required for AKS smoke checks" >&2
+                exit 1
+              fi
+
+              az aks get-credentials \
+                --resource-group "$resource_group" \
+                --name "$cluster_name" \
+                --overwrite-existing
+
+      - ${{ if ne(parameters.cloudProvider, 'aks') }}:
+        - bash: |
+            set -euo pipefail
+
+            kube_context='${{ parameters.kubeContext }}'
+
+            if [[ -n "$kube_context" ]]; then
+              kubectl config use-context "$kube_context"
+            else
+              echo "kubeContext not provided; using current kubectl context"
+            fi
+          displayName: dq-made-easy - Prepare non-AKS kubectl context
+
+      - bash: |
+          set -euo pipefail
+
+          ./scripts/validation/validate_k8s_cluster_capabilities.sh \
+            --provider '${{ parameters.cloudProvider }}' \
+            --namespace '${{ parameters.kubernetesNamespace }}'
+        displayName: dq-made-easy - Preflight smoke capability checks
+
+      - bash: |
+          set -euo pipefail
+
+          provider='${{ parameters.cloudProvider }}'
+          service_name='${{ parameters.serviceName }}'
+          namespace='${{ parameters.kubernetesNamespace }}'
+          image_ref='${{ parameters.imageRef }}'
+          ingress_name='dq-ingress-frontend'
+
+          expected_ingress_class=''
+          case "$provider" in
+            aks) expected_ingress_class='nginx' ;;
+            eks) expected_ingress_class='alb' ;;
+            gke) expected_ingress_class='gce' ;;
+            *)
+              echo "Unsupported cloudProvider for smoke checks: $provider" >&2
+              exit 1
+              ;;
+          esac
+
+          if [[ -z "$service_name" || -z "$namespace" || -z "$image_ref" ]]; then
+            echo "serviceName, kubernetesNamespace, and imageRef are required" >&2
+            exit 1
+          fi
+
+          kubectl -n "$namespace" get deployment "$service_name" >/dev/null
+          kubectl -n "$namespace" rollout status "deployment/${service_name}" --timeout=300s
+
+          running_count="$(kubectl -n "$namespace" get pods -l "app=${service_name}" --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l | tr -d '[:space:]')"
+          if [[ "$running_count" = "0" ]]; then
+            echo "No running pods found for service $service_name in namespace $namespace" >&2
+            kubectl -n "$namespace" get pods -l "app=${service_name}" -o wide || true
+            exit 1
+          fi
+
+          current_image="$(kubectl -n "$namespace" get deployment "$service_name" -o jsonpath='{.spec.template.spec.containers[0].image}')"
+          if [[ "$current_image" != "$image_ref" ]]; then
+            echo "Deployed image mismatch for $service_name: expected $image_ref, got $current_image" >&2
+            exit 1
+          fi
+
+          kubectl -n "$namespace" get ingress "$ingress_name" >/dev/null
+
+          actual_ingress_class="$(kubectl -n "$namespace" get ingress "$ingress_name" -o jsonpath='{.spec.ingressClassName}')"
+          if [[ "$actual_ingress_class" != "$expected_ingress_class" ]]; then
+            echo "Ingress class mismatch for $ingress_name: expected $expected_ingress_class, got $actual_ingress_class" >&2
+            exit 1
+          fi
+
+          lb_hostname=''
+          lb_ip=''
+          for attempt in $(seq 1 30); do
+            lb_hostname="$(kubectl -n "$namespace" get ingress "$ingress_name" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+            lb_ip="$(kubectl -n "$namespace" get ingress "$ingress_name" -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)"
+
+            if [[ "$provider" = "eks" ]]; then
+              if [[ -n "$lb_hostname" ]]; then
+                break
+              fi
+            else
+              if [[ -n "$lb_hostname" || -n "$lb_ip" ]]; then
+                break
+              fi
+            fi
+
+            echo "Waiting for ingress load balancer address ($attempt/30)"
+            sleep 10
+          done
+
+          if [[ "$provider" = "eks" ]]; then
+            if [[ -z "$lb_hostname" ]]; then
+              echo "Expected EKS ingress hostname for $ingress_name but none was published" >&2
+              exit 1
+            fi
+          else
+            if [[ -z "$lb_hostname" && -z "$lb_ip" ]]; then
+              echo "Expected ingress hostname or IP for $ingress_name but none was published" >&2
+              exit 1
+            fi
+          fi
+
+          echo "Smoke validation target service: $service_name"
+          echo "Smoke validation namespace: $namespace"
+          echo "Smoke validation image ref: $image_ref"
+          echo "Smoke validation provider: $provider"
+          echo "Smoke validation ingress class: $actual_ingress_class"
+          echo "Smoke validation ingress hostname: ${lb_hostname:-<none>}"
+          echo "Smoke validation ingress ip: ${lb_ip:-<none>}"
+          echo "Kubernetes rollout smoke checks passed."
+        displayName: dq-made-easy - Run Kubernetes smoke checks

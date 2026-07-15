@@ -36,6 +36,13 @@ Run smoke validation separately after startup:
 ./scripts/smoke_stack.sh
 ```
 
+Deployment workflows:
+
+- WF6 Kubernetes image deployment: [docs/features/WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md](docs/features/WF_6_KUBERNETES_IMAGE_DEPLOYMENT.md)
+- WF7 Azure Container Apps deployment: [docs/features/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md](docs/features/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT.md)
+- Local Kubernetes bootstrap: [scripts/k8s/ensure_local_cluster.sh](scripts/k8s/ensure_local_cluster.sh)
+- Local Kubernetes pipeline wrappers: [scripts/k8s/local_pipeline.sh](scripts/k8s/local_pipeline.sh) and [scripts/k8s/local_pipeline_batch.sh](scripts/k8s/local_pipeline_batch.sh)
+
 Use the common local startup wrapper:
 
 ```bash
@@ -84,7 +91,6 @@ Current profile groups in `docker-compose.yml`:
 - `core`: `db`, `redis`, `api`, `frontend`
 - `auth`: `keycloak`
 - `engine`: `dq-engine`
-- `spark`: `spark-master`, `spark-worker-1`, `spark-worker-2`
 - `workers`: `profiling-worker`
 - `profiling`: `profiling-worker`
 - `observability`: `db`, `redis`, `api`, `grafana`, `loki`, `prometheus`, `tempo`, `otel-collector`, `pushgateway`, `profiling-worker`, `redis-exporter`
@@ -184,6 +190,15 @@ Examples:
 
 # Seed only Postgres and delivery objects
 ./scripts/stack_ctl.sh seed --seed-target postgres --seed-target deliveries --wipe-aistor
+
+# Inspect the status of the core profile
+./scripts/stack_status.sh --profile core
+
+# Inspect the detailed container status for the core profile
+./scripts/stack_status.sh --per-container --profile core
+
+# Keep the screen awake for 30 minutes
+./scripts/supporting/stay_awake.sh --duration 30m --key left
 
 # Build and push selected images
 ./scripts/stack_ctl.sh push --image dq-api --image dq-kong
@@ -367,8 +382,8 @@ To pull and run pre-built Docker images on a different machine:
 ### Quick Deploy
 
 ```bash
-# 1. Pull all images
-./scripts/pull_images.sh          # pulls latest
+# 1. Pull all repo-managed images using the tags from .env.prod.local
+./scripts/pull_images.sh          # pulls repo-managed images from the selected env file
 ./scripts/pull_images.sh 0.3.2    # pulls specific version
 
 # 2. Start services

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-engine
+  labels:
+    app.kubernetes.io/name: dq-engine
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-engine
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-engine
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-engine
+          image: docker.io/jacbeekers/dq-made-easy-engine:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-engine-config
+            - secretRef:
+                name: dq-engine-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-engine
+  labels:
+    app.kubernetes.io/name: dq-engine
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-engine
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

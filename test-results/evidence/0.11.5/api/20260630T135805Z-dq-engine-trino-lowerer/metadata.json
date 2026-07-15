@@ -1,0 +1,9 @@
+{
+  "app_version": "0.11.5",
+  "mode": "api",
+  "label": "dq-engine-trino-lowerer",
+  "timestamp_utc": "20260630T135805Z",
+  "cwd": "/Users/Jac.Beekers/gitrepos/dq-made-easy",
+  "evidence_directory": "test-results/evidence/0.11.5/api/20260630T135805Z-dq-engine-trino-lowerer",
+  "status": 0
+}

@@ -1,2 +1,0 @@
-[console_scripts]
-dq-run-plan = app.cli.run_plan:main

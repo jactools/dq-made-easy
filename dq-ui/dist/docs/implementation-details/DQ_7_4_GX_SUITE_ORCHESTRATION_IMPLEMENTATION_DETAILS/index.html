@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.10.2">
+<title data-rh="true">DQ-7.4 Great Expectations Suite Orchestration - Implementation Details | DQ Made Easy Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="http://127.0.0.1/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="DQ-7.4 Great Expectations Suite Orchestration - Implementation Details | DQ Made Easy Docs"><meta data-rh="true" name="description" content="Deprecated: Historical implementation note for the DQ-7.4 GX suite orchestration slice. New contract, lowering, assistant, and rollout guidance live in the DQ-7 DSL 2.0 docs."><meta data-rh="true" property="og:description" content="Deprecated: Historical implementation note for the DQ-7.4 GX suite orchestration slice. New contract, lowering, assistant, and rollout guidance live in the DQ-7 DSL 2.0 docs."><link data-rh="true" rel="icon" href="/docs/img/favicon.svg"><link data-rh="true" rel="canonical" href="http://127.0.0.1/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/" hreflang="en"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DQ-7.4 Great Expectations Suite Orchestration - Implementation Details","item":"http://127.0.0.1/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS"}]}</script><link rel="stylesheet" href="/docs/assets/css/styles.78e6bda1.css">
+<script src="/docs/assets/js/runtime~main.97ff2b63.js" defer="defer"></script>
+<script src="/docs/assets/js/main.c3615baf.js" defer="defer"></script>
+</head>
+<body>
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/docs/"><div class="navbar__logo"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">DQ Made Easy Docs</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/feature-plans/">Feature Plans</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/technical-references/">Technical</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/release-notes/">Releases</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/user-manuals/">Manuals</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/features/">Status &amp; Roadmap</a><a class="navbar__item navbar__link" href="/docs/engineering-decisions/">EDRs</a><a class="navbar__item navbar__link" href="/docs/architecture/">Architecture</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/api-reference/">API</a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/"><span class="categoryLinkLabel_W154">Start Here</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/feature-plans/"><span class="categoryLinkLabel_W154">Portal Pages</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/features/ABS_1_EXECUTION_ABSTRACTION/"><span class="categoryLinkLabel_W154">Features</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/releases/"><span class="categoryLinkLabel_W154">Releases</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/engineering-decisions/"><span class="categoryLinkLabel_W154">Engineering Decisions</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture/"><span class="categoryLinkLabel_W154">Architecture</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/test-proof/"><span class="categoryLinkLabel_W154">Test Proof</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/implementation-details/"><span class="categoryLinkLabel_W154">Implementation Details</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/"><span class="linkLabel_WmDU">Docker Compose Split - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-1 Execution Abstraction - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_1_PYSPARK_NATIVE_COMPILER_MAPPING/"><span class="linkLabel_WmDU">ABS-1 PySpark-Native Compiler Mapping</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-2 Data Catalog Materialization - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-3 Delivery-Linked Rule Execution - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">ABS-3 Delivery-Linked Rule Execution - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">API-5: Business Terms Integration - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_2_COMPLETE/"><span class="linkLabel_WmDU">API-5 Phase 2: Alias Resolution &amp; Validation Enrichment - Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_4_COMPLETE/"><span class="linkLabel_WmDU">API-5 Phase 4: Governance - Drift Detection &amp; Batch Revalidation - Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_5_UI_INTEGRATION/"><span class="linkLabel_WmDU">API-5 Phase 5: UI Integration Implementation Complete ✅</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_6_FASTAPI_MIGRATION/"><span class="linkLabel_WmDU">API-6 FastAPI API Platform Migration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_7_DATA_DELIVERY_RESOLUTION/"><span class="linkLabel_WmDU">API-7 Data Delivery Resolution Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/"><span class="linkLabel_WmDU">API-7 Real DQ Rule Execution Milestone</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ARCH_1_FRONTEND_BFF_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">ARCH-1 Frontend BFF — Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/AZURE_CONTAINER_APPS_TO_AKS_DEPLOYMENT_PLAN/"><span class="linkLabel_WmDU">Azure Container Apps to Azure Kubernetes Deployment Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/BUSINESS_KEY_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">Business Key Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DARK_THEME_IMPLEMENTATION/"><span class="linkLabel_WmDU">DARK_THEME_IMPLEMENTATION</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_MIGRATION/"><span class="linkLabel_WmDU">Docker Compose Split Migration Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE/"><span class="linkLabel_WmDU">Docker Compose Split - Quick Reference</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING/"><span class="linkLabel_WmDU">Docker Compose Split - Troubleshooting</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_1_ENHANCED_RULE_VALIDATION/"><span class="linkLabel_WmDU">DQ-1 Enhanced Rule Validation Logic — Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_1_RULE_VALIDATION_STANDARD_FEATURE_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-1 Rule Validation Standard Feature Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-10 Natural-Language Rule Drafting - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_14_DATA_CONTRACTS_SCHEMA_CHANGE_GOVERNANCE_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-14 Data Contracts, Schema-Change Governance, and Conformance Checks Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_19_MULTI_RUNTIME_LOWERERS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-19 Implementation Plan: Trino, Polars, and Dask/Dask-SQL Lowerers</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_20_EXECUTION_DISPATCH_AND_LOWERER_MODULE_SPLIT_PLAN/"><span class="linkLabel_WmDU">DQ-20 Execution Dispatch and Lowerer Module Split Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_3C_DATA_ASSETS_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-3c Data Assets - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/"><span class="linkLabel_WmDU">DQ-4 New Rule Types / Checks — Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS/"><span class="linkLabel_WmDU">DQ-7.3 Rule Compiler Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-7.4 Great Expectations Suite Orchestration - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_DSL_MOCK_DATA_2_0_0_MIGRATION_PLAN/"><span class="linkLabel_WmDU">DQ-7 Mock-Data DSL 2.0.0 Migration Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_DSL_ROLLOUT_POLICY/"><span class="linkLabel_WmDU">DQ-7 DSL Rollout Policy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-7 Engine-Independent DSL Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_ACTUALITY_DATE_CROSS_DELIVERY_PLAN/"><span class="linkLabel_WmDU">Implementation Plan: Actuality-Date Support for Cross-Delivery DQ Rules</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_RULE_TO_RUN_PLAN_FLOW/"><span class="linkLabel_WmDU">DQ Rule to Run Plan Flow</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/EXPANDED_MOCK_DATA_SUMMARY/"><span class="linkLabel_WmDU">Expanded Mock Data Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ISO_11179_OPEN_DATA_PRODUCT_SPECIFICATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ISO 11179 + Open Data Product Specification Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ISO_11179_OPENMETADATA_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ISO 11179 + OpenMetadata Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - App Cutover Matrix</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - File Checklist</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_TARGET_ARCHITECTURE/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - Target Architecture</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OBSERVABILITY_QUICKSTART/"><span class="linkLabel_WmDU">Observability Stack - Quick Start Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OBSERVABILITY_SETUP/"><span class="linkLabel_WmDU">Lightweight Observability Stack for DQ Rule Builder</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OPENTELEMETRY_IMPLEMENTATION/"><span class="linkLabel_WmDU">OpenTelemetry Implementation for DQ Rule Builder</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OPENTELEMETRY_ROLLOUT_CHECKLIST/"><span class="linkLabel_WmDU">OpenTelemetry Rollout Checklist (UI + API)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PHASE_1_TRINO_LOWERER_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">Phase 1 Implementation Plan: Trino Lowerer</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PHASE_1_TRINO_SUMMARY/"><span class="linkLabel_WmDU">Phase 1 — Trino Lowerer: Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PROFILING_IMPLEMENTATION/"><span class="linkLabel_WmDU">Data Profiling &amp; AI Suggestions Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PYTHON_FILE_SIZE_POLICY/"><span class="linkLabel_WmDU">Python File Size Policy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/refactor-gx-dispatch-modules/"><span class="linkLabel_WmDU">Refactor gx_dispatch_worker.py — Single Responsibility Module Split</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-1: Internal Service TLS Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_2_POST_QUANTUM_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-2: Post-Quantum Cryptography Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_3_RUNTIME_SECRETS_GENERATION_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-3: Runtime Secrets Generation — Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-4 Container Egress Control Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-5: End-to-End No-HTTP TLS Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY/"><span class="linkLabel_WmDU">SEC-5 No-HTTP Contract and Exception Boundary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_W6_IMPLEMENTATION_STRATEGY/"><span class="linkLabel_WmDU">SEC-5 Workstream 6 Implementation Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/"><span class="linkLabel_WmDU">SEC-5 Workstream 7-04: End-to-End Cutover Runbook</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_6_LOCAL_VULNERABILITY_ASSESSMENT_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-6 Local Vulnerability Assessment — Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SPARK_EXPECTATIONS_ENGINE_PLAN/"><span class="linkLabel_WmDU">Spark Expectations Engine Integration Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SCRIPT_CONTRACT/"><span class="linkLabel_WmDU">Stack Script Contract</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SCRIPT_MODULARIZATION_WORK_PLAN/"><span class="linkLabel_WmDU">Stack Script Modularization Work Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SERVICE_DEPENDENCY_MANIFEST/"><span class="linkLabel_WmDU">Stack Service Dependency Manifest</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SHARED_SHELL_PRIMITIVES_PLAN/"><span class="linkLabel_WmDU">Stack Shared Shell Primitives Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TESTS_TODO/"><span class="linkLabel_WmDU">Test Coverage TODOs</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TLS_EDGE_ARCHITECTURE_REFERENCE/"><span class="linkLabel_WmDU">TLS Edge Architecture Reference</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TLS_VALIDATION_INFRASTRUCTURE/"><span class="linkLabel_WmDU">TLS Validation Infrastructure</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/USER_MANUALS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">User Manuals Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF_6_KUBERNETES_IMAGE_DEPLOYMENT_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">WF-6 Kubernetes Image Deployment Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">WF-7 Azure Container Apps Environment Deployment Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_API_ENDPOINTS/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - API Endpoints Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_APPLICATION_SETTINGS_SCOPE/"><span class="linkLabel_WmDU">WF-3 Application Settings Scope</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_DATABASE_MIGRATION_TEST/"><span class="linkLabel_WmDU">WF-3 Database Migration Test Report ✅</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_IMPLEMENTATION_COMPLETE/"><span class="linkLabel_WmDU">WF-3 Implementation Complete - Ready for Frontend</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_IMPLEMENTATION_PHASE_1/"><span class="linkLabel_WmDU">WF-3 Implementation Progress - Phase 1: Backend Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_MANDATORY_VERSIONING_FIX/"><span class="linkLabel_WmDU">WF-3: Mandatory Versioning Implementation Fix</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_RULE_VERSIONING_SCHEMA/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - Schema Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_UI_DESIGN/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - UI Layer Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_WORKFLOW_INTEGRATION/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - Workflow Integration</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/technical/"><span class="categoryLinkLabel_W154">Technical</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/contracts/"><span class="categoryLinkLabel_W154">Contracts</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/runbooks/"><span class="categoryLinkLabel_W154">Runbooks</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/fixes/DARK_THEME_CODE_CHANGES/"><span class="categoryLinkLabel_W154">Fixes</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/user-manuals/agent-workflow-examples-and-templates/"><span class="categoryLinkLabel_W154">User Manual Source</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Implementation Details</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">DQ-7.4 Great Expectations Suite Orchestration - Implementation Details</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>DQ-7.4 Great Expectations Suite Orchestration - Implementation Details</h1></header>
+<blockquote>
+<p><strong>Deprecated:</strong> Historical implementation note for the DQ-7.4 GX suite orchestration slice. New contract, lowering, assistant, and rollout guidance live in the DQ-7 DSL 2.0 docs.
+Start with <a class="" href="/docs/technical/DQ-7_RULE_DSL_CONTRACT/">DQ-7 Rule DSL Contract</a> and <a class="" href="/docs/implementation-details/DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN/">DQ-7 Engine-Independent DSL Implementation Plan</a>.</p>
+</blockquote>
+<p>Status: [~] Phase A Complete — Phase B Complete — Phase C Complete — Phase D Complete
+Last updated: 2026-04-20
+Related feature tracker: ../features/DQ_FEATURES.md
+Related decision record: ../../architecture/adr/ADR-014-gx-suite-registry-pyspark-execution-and-exception-store-separation.md
+Related compiler progress: ./DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS.md
+Canonical contract: ../contracts/gx-artifact-envelope/v1/schema.json
+Canonical example: ../contracts/gx-artifact-envelope/v1/example.json</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="goal">Goal<a href="#goal" class="hash-link" aria-label="Direct link to Goal" title="Direct link to Goal" translate="no">​</a></h2>
+<p>Implement the DQ-7.4 adapter and runtime so DQ rules are converted into Great Expectations (GX) suites and executed in a scalable, observable way across multiple data source types.</p>
+<p>The neutral <code>validation_run_plans</code> contract remains the canonical run-plan surface. GX suite orchestration projects from that neutral plan model so current GX execution and future Soda or SQL run plans can flow through the same run and execution-plan interfaces.</p>
+<p>Bookkeeping note:</p>
+<ul>
+<li class="">Registry, retrieval, PySpark execution, persistence separation, observability, and runtime traceability slices are implemented.</li>
+<li class="">Remaining DQ-7.4 scope is the broader multi-source adapter/runtime breadth and the open design decisions tracked later in this document.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="worked-example-one-data-object-version-run">Worked Example: One Data Object Version Run<a href="#worked-example-one-data-object-version-run" class="hash-link" aria-label="Direct link to Worked Example: One Data Object Version Run" title="Direct link to Worked Example: One Data Object Version Run" translate="no">​</a></h2>
+<p>This example shows the current end-to-end path for one active GX suite that applies rules to a single <code>dataObjectVersionId</code>, reports the run outcome, and stores row-level exception facts separately.</p>
+<p>Example input:</p>
+<ul>
+<li class="">target data object version: <code>dov_123</code></li>
+<li class="">rule: <code>rule_1</code></li>
+<li class="">rule version: <code>rule_version_7</code></li>
+<li class="">GX suite: <code>gx_suite_8f40b9ea</code> version <code>3</code></li>
+<li class="">correlation id: <code>corr_20260406_001</code></li>
+</ul>
+<ol>
+<li class="">A steward or operator selects the object version in the UI, which resolves to a retrieval query such as:</li>
+</ol>
+<div class="language-http codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-http codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token plain">GET /api/rulebuilder/v1/gx/suites?dataObjectVersionId=dov_123&amp;status=active&amp;latestOnly=true</span><br></div></code></pre></div></div>
+<ol start="2">
+<li class="">The API validates that exactly one primary scope was provided, fetches the active GX suite envelope, and returns the resolved execution target:</li>
+</ol>
+<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;suiteId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;gx_suite_8f40b9ea&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;suiteVersion&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token number" style="color:rgb(247, 140, 108)">3</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;assignmentScope&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;dataObjectId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;do_123&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;datasetId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;ds_456&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;dataProductId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;odcs.dp.sales-001&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;resolvedExecutionScope&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;dataObjectVersionIds&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">[</span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dov_123&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">]</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;executionContract&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;engineTarget&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;pyspark&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;executionShape&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;single_object&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;traceability&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">      </span><span class="token property">&quot;ruleId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;rule_1&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">      </span><span class="token property">&quot;ruleVersionId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;rule_version_7&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">      </span><span class="token property">&quot;gxSuiteId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;gx_suite_8f40b9ea&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">      </span><span class="token property">&quot;gxSuiteVersion&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token number" style="color:rgb(247, 140, 108)">3</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">      </span><span class="token property">&quot;dataObjectVersionId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dov_123&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain"></span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><br></div></code></pre></div></div>
+<ol start="3">
+<li class="">
+<p>The grouped planner batches all suites that share <code>dov_123</code>, starts one Spark session for the batch, loads the source data once, and runs every suite in that group.</p>
+</li>
+<li class="">
+<p>The worker reports the completed run back to the API run lifecycle store. A successful run summary looks like this:</p>
+</li>
+</ol>
+<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;runId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;run_20260406_001&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;suiteId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;gx_suite_8f40b9ea&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;suiteVersion&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token number" style="color:rgb(247, 140, 108)">3</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;dataObjectVersionId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dov_123&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;status&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;succeeded&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;passedCount&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token number" style="color:rgb(247, 140, 108)">12</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;failedCount&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token number" style="color:rgb(247, 140, 108)">1</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;startedAt&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;2026-04-06T13:15:00Z&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;finishedAt&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;2026-04-06T13:18:22Z&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;correlationId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;corr_20260406_001&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain"></span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><br></div></code></pre></div></div>
+<ol start="5">
+<li class="">The failed row is written to the separate exception store, not the rule/result database. The GX-specific repository-backed shape keeps the violation fact minimal and preserves the lineage needed for reporting:</li>
+</ol>
+<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;dataPrimaryKey&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;order_id=4711&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;ruleId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;rule_1&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;violationReason&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;customer_address is null&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;recordIdentifierType&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;primary_key&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;recordIdentifierValue&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;4711&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;reasonCode&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;completeness_not_null_violation&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;reasonText&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;customer_address must not be null&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;dataObjectVersionId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dov_123&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;runId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;run_20260406_001&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;observedAt&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;2026-04-06T13:18:22Z&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain"></span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><br></div></code></pre></div></div>
+<ol start="6">
+<li class="">The monitoring UI can then show the aggregate run result from the run lifecycle store and the separate exception detail from the exception store. The important boundary is that the run summary and the row-level failure evidence travel through different stores and APIs.</li>
+</ol>
+<p>If you are looking at the ABS-1 minimal base record rather than the GX repository-backed row, the stored violation fact is still the same separation boundary: primary key or business key, <code>ruleId</code>, and violation reason remain the durable fact, while optional operational metadata stays out of the rule/result database.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="scope-assumption">Scope Assumption<a href="#scope-assumption" class="hash-link" aria-label="Direct link to Scope Assumption" title="Direct link to Scope Assumption" translate="no">​</a></h2>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SA-01</code> <code>dataObjectId</code> is the steward-facing assignment scope for a specific Data Object.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SA-02</code> Data Products in this scope are ODCS Data Products.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SA-03</code> <code>dataProductId</code> in retrieval and execution scope means the canonical ODCS Data Product identifier.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SA-04</code> DQ execution always runs against one or more <code>dataObjectVersionId</code> targets resolved from assignment scope.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SA-05</code> The neutral validation plan is the canonical run-plan contract; GX run plans are projections of it, and future Soda or SQL run plans should follow the same abstraction.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="required-adjustments-confirmed">Required Adjustments (Confirmed)<a href="#required-adjustments-confirmed" class="hash-link" aria-label="Direct link to Required Adjustments (Confirmed)" title="Direct link to Required Adjustments (Confirmed)" translate="no">​</a></h2>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>RA-01</code> GX suites must run against a variety of data sources.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-02</code> Initial execution container is PySpark-based.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-03</code> Rules/suites for the same data object should execute clubbed in one run window to avoid repeated spin-up/spin-down.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-04</code> Detailed DQ outcomes and exception records must be captured separately.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-05</code> Exception records store only: primary key, ruleId, and violation reason.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-06</code> Exception records must not be stored in the rule/result database.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-07</code> End-to-end logging and monitoring are mandatory.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-08</code> GX suites are retrievable objects through API for external execution.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-09</code> API retrieval supports data object, data object version, data set, and data product scopes.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>RA-10</code> Data product scope is ODCS-aligned and uses ODCS Data Product IDs.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="target-architecture">Target Architecture<a href="#target-architecture" class="hash-link" aria-label="Direct link to Target Architecture" title="Direct link to Target Architecture" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="compile-and-registry">Compile and Registry<a href="#compile-and-registry" class="hash-link" aria-label="Direct link to Compile and Registry" title="Direct link to Compile and Registry" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CR-01</code> Input: DQ rule (expression or checkType/checkTypeParams) + assignment context.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CR-02</code> Compiler output: normalized intermediate model (already in DQ-7.3).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CR-03</code> GX adapter output: GX suite object + metadata envelope.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CR-04</code> Persist suite metadata, assignment scope, and resolved execution-version references in a GX suite registry.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CR-05</code> Persist the neutral validation plan as the canonical run-plan record, then project engine-specific GX run-plan views from that canonical state.</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="execution-runtime-pyspark-first">Execution Runtime (PySpark-first)<a href="#execution-runtime-pyspark-first" class="hash-link" aria-label="Direct link to Execution Runtime (PySpark-first)" title="Direct link to Execution Runtime (PySpark-first)" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ER-01</code> Executor container base image: PySpark runtime with GX dependencies.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ER-02</code> One execution batch is formed per data object version.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ER-03</code> Batch contains all active suites/rules mapped to that data object version.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ER-04</code> Single Spark session per batch minimizes cold-start overhead.</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="outcome-persistence-separation">Outcome Persistence Separation<a href="#outcome-persistence-separation" class="hash-link" aria-label="Direct link to Outcome Persistence Separation" title="Direct link to Outcome Persistence Separation" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-01</code> Rule/result database stores aggregate and operational run metadata only.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-02</code> Exception records are stored in a dedicated exception store (separate database/schema).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03</code> Exception store row shape includes:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03a</code> recordIdentifierType</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03b</code> recordIdentifierValue</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03c</code> reasonCode</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03d</code> reasonText</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03e</code> ruleId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03f</code> runId (recommended operational key)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OP-03g</code> observedAt (recommended operational timestamp)</li>
+</ol>
+<p>Repository-backed DB migration target for this row shape:</p>
+<ul>
+<li class="">Keep relational columns for <code>data_object_version_id</code>, <code>id</code>, <code>execution_run_id</code>, <code>rule_id</code>, <code>detected_at</code>, <code>created_at</code>, and <code>updated_at</code>.</li>
+<li class="">Persist <code>record_identifier_type</code> and <code>record_identifier_value</code> for every exception fact.</li>
+<li class="">Persist <code>reason_code</code> and <code>reason_text</code> for every exception fact.</li>
+<li class="">Replace the current wide optional columns and raw diagnostic payload with a single <code>ops_metadata_json</code> field for optional metadata such as <code>suite_id</code>, <code>suite_version</code>, <code>rule_version_id</code>, <code>correlation_id</code>, and <code>failure_class</code>.</li>
+<li class="">For the current reseeded prototype, callers should emit the canonical payload directly and the migration can recreate <code>gx_execution_violations</code> instead of translating legacy rows or preserving a compatibility shim.</li>
+<li class="">This repository-backed schema has been validated locally by applying Alembic head <code>20260418_0024</code> and rerunning the live ORM schema and GX retrieval integration slice against Postgres.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="observability">Observability<a href="#observability" class="hash-link" aria-label="Direct link to Observability" title="Direct link to Observability" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OB-01</code> Structured logs are present on major GX API and worker execution paths.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OB-02</code> Metrics, dashboards, and alerts are present for major GX surfaces.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OB-03</code> Tracing and correlation IDs are propagated on major GX API and worker paths.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>OB-04</code> Observability is validated end to end across compile, retrieval, execution, and persistence.</li>
+</ol>
+<p>Compile-plus-retrieval and execution-plus-persistence observability validation are complete.</p>
+<p>Compile-plus-retrieval validation evidence for <code>OB-04</code>:</p>
+<ul>
+<li class="">Log-field contract: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/scripts/validate_logging_required_fields_contract.sh" target="_blank" rel="noopener noreferrer" class="">scripts/validate_logging_required_fields_contract.sh</a></li>
+<li class="">Correlation propagation contract: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/scripts/validate_correlation_propagation.sh" target="_blank" rel="noopener noreferrer" class="">scripts/validate_correlation_propagation.sh</a></li>
+<li class="">Compiler behavior slice: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/tests/application/services/test_rule_compiler.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/tests/application/services/test_rule_compiler.py</a> and <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/tests/unit/test_rules_helpers_more.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/tests/unit/test_rules_helpers_more.py</a></li>
+<li class="">Retrieval behavior slice: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/tests/infrastructure/integration/test_gx_retrieval_integration.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/tests/infrastructure/integration/test_gx_retrieval_integration.py</a></li>
+<li class="">Monitoring assets and baseline validator: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/observability/grafana/provisioning/dashboards/dq-api-observability.json" target="_blank" rel="noopener noreferrer" class="">observability/grafana/provisioning/dashboards/dq-api-observability.json</a>, <a href="https://github.com/jactools/dq-rulebuilder/blob/main/observability/prometheus/alerts.yml" target="_blank" rel="noopener noreferrer" class="">observability/prometheus/alerts.yml</a>, and <a href="https://github.com/jactools/dq-rulebuilder/blob/main/scripts/validate_monitoring_baseline.sh" target="_blank" rel="noopener noreferrer" class="">scripts/validate_monitoring_baseline.sh</a></li>
+</ul>
+<p>Execution-plus-persistence validation evidence for <code>OB-04</code>:</p>
+<ul>
+<li class="">Execution API behavior slice: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/tests/api/test_execution_monitoring.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/tests/api/test_execution_monitoring.py</a></li>
+<li class="">Delivery-linked persistence separation slice: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/tests/api/test_delivery_linked_execution_endpoints.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/tests/api/test_delivery_linked_execution_endpoints.py</a></li>
+<li class="">Exception storage slice: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/tests/application/services/test_exception_storage.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/tests/application/services/test_exception_storage.py</a></li>
+<li class="">Worker execution and correlation slice: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-engine/tests/test_gx_dispatch_worker.py" target="_blank" rel="noopener noreferrer" class="">dq-engine/tests/test_gx_dispatch_worker.py</a> and <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-engine/tests/test_correlation_runtime_chain.py" target="_blank" rel="noopener noreferrer" class="">dq-engine/tests/test_correlation_runtime_chain.py</a></li>
+<li class="">Monitoring assets and baseline validator: <a href="https://github.com/jactools/dq-rulebuilder/blob/main/observability/grafana/provisioning/dashboards/dq-execution-monitoring.json" target="_blank" rel="noopener noreferrer" class="">observability/grafana/provisioning/dashboards/dq-execution-monitoring.json</a>, <a href="https://github.com/jactools/dq-rulebuilder/blob/main/observability/prometheus/alerts.yml" target="_blank" rel="noopener noreferrer" class="">observability/prometheus/alerts.yml</a>, and <a href="https://github.com/jactools/dq-rulebuilder/blob/main/scripts/validate_monitoring_baseline.sh" target="_blank" rel="noopener noreferrer" class="">scripts/validate_monitoring_baseline.sh</a></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-source-strategy-variety-requirement">Data Source Strategy (Variety Requirement)<a href="#data-source-strategy-variety-requirement" class="hash-link" aria-label="Direct link to Data Source Strategy (Variety Requirement)" title="Direct link to Data Source Strategy (Variety Requirement)" translate="no">​</a></h2>
+<p>GX execution layer must support pluggable datasource adapters:</p>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>DS-01</code> Spark DataFrames (initial, default path)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DS-02</code> JDBC-backed sources via Spark connectors</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DS-03</code> Files (Parquet/Delta/CSV) via Spark readers</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>DS-04</code> Lightweight Pandas path explicitly dropped from scope in favor of the Spark-only worker runtime</li>
+</ol>
+<p>Adapter contract:</p>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>AD-01</code> resolve_asset(scope)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>AD-02</code> load_dataframe(asset_ref)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>AD-03</code> materialize_primary_key(df, primary_key_config)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>AD-04</code> emit_validation_target(df, gx_context)</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="clubbed-execution-strategy-data-object-scoped">Clubbed Execution Strategy (Data Object Scoped)<a href="#clubbed-execution-strategy-data-object-scoped" class="hash-link" aria-label="Direct link to Clubbed Execution Strategy (Data Object Scoped)" title="Direct link to Clubbed Execution Strategy (Data Object Scoped)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="grouping-key">Grouping Key<a href="#grouping-key" class="hash-link" aria-label="Direct link to Grouping Key" title="Direct link to Grouping Key" translate="no">​</a></h3>
+<p>Primary grouping key:</p>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-01</code> dataObjectVersionId</li>
+</ol>
+<p>Secondary grouping (optional optimization):</p>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>CE-02</code> datasetId</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>CE-03</code> dataProductId</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="execution-flow">Execution Flow<a href="#execution-flow" class="hash-link" aria-label="Direct link to Execution Flow" title="Direct link to Execution Flow" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>CE-04</code> Collect due suites by scheduling criteria.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-05</code> Group suites by dataObjectVersionId.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-06</code> For each group:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-06a</code> start (or reuse) one Spark session</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-06b</code> load source data once</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-06c</code> execute all suites in the group</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-06d</code> write aggregate outcomes</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>CE-06e</code> write exception records to exception store</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>CE-07</code> Close session after group completion or idle timeout.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="api-design-for-gx-suite-retrieval">API Design for GX Suite Retrieval<a href="#api-design-for-gx-suite-retrieval" class="hash-link" aria-label="Direct link to API Design for GX Suite Retrieval" title="Direct link to API Design for GX Suite Retrieval" translate="no">​</a></h2>
+<p>All endpoints return portable GX suite payloads and metadata required by external executors.</p>
+<p>Routing note:</p>
+<ul>
+<li class="">Gateway/public (through Kong): <code>/rulebuilder/v1/...</code></li>
+<li class="">Internal FastAPI (direct, bypassing Kong): <code>/api/rulebuilder/v1/...</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="by-data-object">By Data Object<a href="#by-data-object" class="hash-link" aria-label="Direct link to By Data Object" title="Direct link to By Data Object" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-01</code> GET /rulebuilder/v1/gx/suites?dataObjectId={id}</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="by-data-object-version">By Data Object Version<a href="#by-data-object-version" class="hash-link" aria-label="Direct link to By Data Object Version" title="Direct link to By Data Object Version" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-02</code> GET /rulebuilder/v1/gx/suites?dataObjectVersionId={id}</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="by-data-set">By Data Set<a href="#by-data-set" class="hash-link" aria-label="Direct link to By Data Set" title="Direct link to By Data Set" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-03</code> GET /rulebuilder/v1/gx/suites?datasetId={id}</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="by-data-product">By Data Product<a href="#by-data-product" class="hash-link" aria-label="Direct link to By Data Product" title="Direct link to By Data Product" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-04</code> GET /rulebuilder/v1/gx/suites?dataProductId={id}</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-04a</code> <code>dataProductId</code> corresponds to ODCS Data Product identifier.</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="direct-suite-fetch">Direct Suite Fetch<a href="#direct-suite-fetch" class="hash-link" aria-label="Direct link to Direct Suite Fetch" title="Direct link to Direct Suite Fetch" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-05</code> GET /rulebuilder/v1/gx/suites/{suiteId}</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="response-envelope-minimum">Response Envelope (minimum)<a href="#response-envelope-minimum" class="hash-link" aria-label="Direct link to Response Envelope (minimum)" title="Direct link to Response Envelope (minimum)" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-06</code> suiteId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-07</code> suiteVersion</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-08</code> assignmentScope:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-08a</code> dataObjectId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-08b</code> datasetId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-08c</code> dataProductId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-09</code> resolvedExecutionScope:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-09a</code> dataObjectVersionIds[]</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-10</code> gxSuite (GX-native suite JSON)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-11</code> compiledFrom:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-11a</code> ruleIds[]</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-11b</code> compilerVersion</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-11c</code> generatedAt</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-12</code> executionHints:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-12a</code> recommendedEngine: pyspark</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>API-12b</code> primaryKeyFields[]</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="persistence-boundaries">Persistence Boundaries<a href="#persistence-boundaries" class="hash-link" aria-label="Direct link to Persistence Boundaries" title="Direct link to Persistence Boundaries" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ruleresult-db-allowed">Rule/Result DB (allowed)<a href="#ruleresult-db-allowed" class="hash-link" aria-label="Direct link to Rule/Result DB (allowed)" title="Direct link to Rule/Result DB (allowed)" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-01</code> run summary</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-02</code> pass/fail totals</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-03</code> execution timing</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-04</code> suite registry metadata</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-05</code> artifact references</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="exception-store-separate-required">Exception Store (separate, required)<a href="#exception-store-separate-required" class="hash-link" aria-label="Direct link to Exception Store (separate, required)" title="Direct link to Exception Store (separate, required)" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-06</code> violation row facts only:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-06a</code> dataPrimaryKey</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-06b</code> ruleId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-06c</code> violationReason</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-07</code> optional ops fields:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-07a</code> runId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-07b</code> observedAt</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PB-07c</code> dataObjectVersionId</li>
+</ol>
+<p>Note: no raw payload columns beyond the primary key should be required in the initial scope.</p>
+<p>For the repository-backed DB backend, this means the current <code>details_json</code> column should be retired rather than repurposed as a raw diagnostic dump. If optional operational metadata remains necessary, it should live in <code>ops_metadata_json</code>, not in the base violation fact, and repository reads should return that same minimal-fact shape rather than a legacy compatibility projection.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging-and-monitoring-requirements">Logging and Monitoring Requirements<a href="#logging-and-monitoring-requirements" class="hash-link" aria-label="Direct link to Logging and Monitoring Requirements" title="Direct link to Logging and Monitoring Requirements" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging">Logging<a href="#logging" class="hash-link" aria-label="Direct link to Logging" title="Direct link to Logging" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-01</code> JSON structured logging in API, compiler, and executor.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02</code> Mandatory fields:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02a</code> correlationId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02b</code> runId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02c</code> suiteId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02d</code> dataObjectVersionId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02e</code> datasetId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02f</code> dataProductId</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02g</code> component</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>LG-02h</code> event</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="monitoring">Monitoring<a href="#monitoring" class="hash-link" aria-label="Direct link to Monitoring" title="Direct link to Monitoring" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-01</code> Dashboards:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-01a</code> compile success/failure trend</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-01b</code> suite retrieval latency and error rate</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-01c</code> execution throughput by scope</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-01d</code> exception volume trend by rule/data object</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-02</code> Alerts:</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-02a</code> repeated compile failures</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-02b</code> executor timeout spikes</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-02c</code> exception store write failures</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>MN-02d</code> missing heartbeat from executor workers</li>
+</ol>
+<p>Implemented slice:</p>
+<ul>
+<li class=""><code>dq-engine/gx_dispatch_worker.py</code> now emits OTEL spans and metrics for dispatch, grouped batch execution, source reads, and expectation result counts.</li>
+<li class="">Grafana execution monitoring now includes GX worker latency and result panels backed by the new worker metrics.</li>
+<li class="">Grafana execution monitoring now also includes GX compile success/failure trend and GX run throughput-by-execution-shape panels for the MN-01 dashboard slice.</li>
+<li class="">Prometheus alerts now cover GX worker execution latency, source-read latency, and worker failure spikes.</li>
+<li class="">Grafana execution monitoring now also includes a GX executor heartbeat age-vs-threshold panel for direct visibility into the MN-02d stale-heartbeat alert condition.</li>
+<li class="">Prometheus alerts now also cover stale GX executor-worker heartbeats, driven by shared worker heartbeat timestamp and TTL metrics emitted from the Redis-backed heartbeat path.</li>
+<li class="">Grafana execution monitoring now also includes GX suite save/fetch latency and outcome panels for the API-side observability path.</li>
+<li class="">Prometheus alerts now cover GX suite save and fetch failures on the GX API surface.</li>
+<li class="">The top-level Execution Monitoring dashboard now uses runtime-agnostic panel naming for shared run, status, transition, latency, results/failures, compile, throughput, and heartbeat categories, even though GX remains the first concrete telemetry emitter underneath those panels.</li>
+<li class="">Rule Execution Monitoring in the app now includes an in-app failed-record hotspot dashboard backed by a dedicated exception-store analytics endpoint, with trend bars plus top rule and data-object summaries computed from persisted violation rows.</li>
+<li class="">A shared GX suite envelope adapter now centralizes GX artifact assembly for compiler auto-publish and GX suite repair flows.</li>
+<li class="">A shared GX execution-source adapter now centralizes asset resolution and source-handle loading for the PySpark executor.</li>
+<li class="">A grouped execution planner now groups GX suites by <code>dataObjectVersionId</code> and keeps batch ordering deterministic for clubbed execution.</li>
+<li class="">The PySpark executor now consumes grouped batches with one Spark session per execution run, reusing the loaded source for each suite in the batch.</li>
+<li class="">A shared GX exception storage service now centralizes batched violation persistence with deterministic row IDs for reproducible replay.</li>
+<li class="">The exception storage backend is object-storage-backed (AIStor or S3-compatible storage with a dedicated GX exceptions bucket) for raw exception facts; analytical aggregations may be stored in a database or an object-store projection depending on query needs.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="incremental-delivery-plan">Incremental Delivery Plan<a href="#incremental-delivery-plan" class="hash-link" aria-label="Direct link to Incremental Delivery Plan" title="Direct link to Incremental Delivery Plan" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-a---gx-registry--retrieval-api">Phase A - GX Registry + Retrieval API<a href="#phase-a---gx-registry--retrieval-api" class="hash-link" aria-label="Direct link to Phase A - GX Registry + Retrieval API" title="Direct link to Phase A - GX Registry + Retrieval API" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PHA-01</code> Add GX suite registry model and storage.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PHA-02</code> Expose retrieval API by object, object version, dataset, and product.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PHA-03</code> Return portable GX suite payloads.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-a-step-1---contract-and-registry-baseline-lock-before-build">Phase A Step 1 - Contract and Registry Baseline (Lock Before Build)<a href="#phase-a-step-1---contract-and-registry-baseline-lock-before-build" class="hash-link" aria-label="Direct link to Phase A Step 1 - Contract and Registry Baseline (Lock Before Build)" title="Direct link to Phase A Step 1 - Contract and Registry Baseline (Lock Before Build)" translate="no">​</a></h2>
+<p>This section defines the implementation contract to freeze before coding APIs and storage.</p>
+<p>Canonical source of truth in Git:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->JSON Schema contract: <code>docs/contracts/gx-artifact-envelope/v1/schema.json</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->JSON example payload: <code>docs/contracts/gx-artifact-envelope/v1/example.json</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->YAML rendering for review: <code>docs/contracts/gx-artifact-envelope/v1/example.yaml</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-1-deliverable-status">Step 1 Deliverable Status<a href="#step-1-deliverable-status" class="hash-link" aria-label="Direct link to Step 1 Deliverable Status" title="Direct link to Step 1 Deliverable Status" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Define canonical suite artifact envelope (v1).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Define GX suite registry logical schema.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Define retrieval API query semantics and response shape.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Implement DB migration and API endpoints in FastAPI.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="canonical-identifier-semantics">Canonical Identifier Semantics<a href="#canonical-identifier-semantics" class="hash-link" aria-label="Direct link to Canonical Identifier Semantics" title="Direct link to Canonical Identifier Semantics" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataObjectId</code>: internal stable Data Object identifier used for steward-facing assignment scope.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataObjectVersionId</code>: internal immutable execution-target identifier derived from assignment scope resolution.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>datasetId</code>: internal dataset identifier used by assignment scope.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataProductId</code>: canonical ODCS Data Product identifier.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Exactly one primary scope is required per retrieval query (<code>dataObjectId</code> or <code>dataObjectVersionId</code> or <code>datasetId</code> or <code>dataProductId</code>).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Assignment scope and execution scope are distinct: users assign rules to Data Objects or Data Sets, while runtime executes resolved Data Object Versions.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="gx-artifact-envelope-v1">GX Artifact Envelope (v1)<a href="#gx-artifact-envelope-v1" class="hash-link" aria-label="Direct link to GX Artifact Envelope (v1)" title="Direct link to GX Artifact Envelope (v1)" translate="no">​</a></h3>
+<div class="language-json codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-json codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;suiteId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;gx_suite_8f40b9ea&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;suiteVersion&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token number" style="color:rgb(247, 140, 108)">3</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;artifactVersion&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;v1&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;assignmentScope&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;dataObjectId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;do_123&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;datasetId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;ds_456&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;dataProductId&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;odcs.dp.sales-001&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;resolvedExecutionScope&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;dataObjectVersionIds&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">[</span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dov_123&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dov_124&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">]</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;gxSuite&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;expectation_suite_name&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dq_sales_orders_v3&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;expectations&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">[</span><span class="token punctuation" style="color:rgb(199, 146, 234)">]</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;meta&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;compiledFrom&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;ruleIds&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">[</span><span class="token string" style="color:rgb(195, 232, 141)">&quot;rule_1&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;rule_2&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">]</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;compilerVersion&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;dq-compiler-7.3&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;generatedAt&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;2026-03-22T10:30:00Z&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token property">&quot;executionHints&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">{</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;recommendedEngine&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token string" style="color:rgb(195, 232, 141)">&quot;pyspark&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">,</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">    </span><span class="token property">&quot;primaryKeyFields&quot;</span><span class="token operator" style="color:rgb(137, 221, 255)">:</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(199, 146, 234)">[</span><span class="token string" style="color:rgb(195, 232, 141)">&quot;order_id&quot;</span><span class="token punctuation" style="color:rgb(199, 146, 234)">]</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">  </span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><span class="token plain"></span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain"></span><span class="token punctuation" style="color:rgb(199, 146, 234)">}</span><br></div></code></pre></div></div>
+<p>Envelope constraints:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>artifactVersion</code> is required and starts at <code>v1</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suiteId</code> is immutable across versions; <code>suiteVersion</code> is monotonically increasing.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>gxSuite</code> stores GX-native suite JSON without lossy transformation.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>assignmentScope.dataProductId</code> must be ODCS identifier when provided.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>resolvedExecutionScope.dataObjectVersionIds[]</code> must contain one or more execution targets.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="registry-storage-contract-logical">Registry Storage Contract (Logical)<a href="#registry-storage-contract-logical" class="hash-link" aria-label="Direct link to Registry Storage Contract (Logical)" title="Direct link to Registry Storage Contract (Logical)" translate="no">​</a></h3>
+<p>Table: <code>gx_suite_registry</code> (migration <code>20260322_0002</code> + <code>20260322_0003</code>)</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>id</code> UUID PK</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_id</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_version</code> INTEGER NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>artifact_version</code> TEXT NOT NULL DEFAULT &#x27;v1&#x27;</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>status</code> TEXT NOT NULL DEFAULT &#x27;active&#x27; (allowed: active, deprecated, disabled)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>data_object_id</code> TEXT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataset_id</code> TEXT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>data_product_id</code> TEXT NULL (ODCS)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>gx_suite_json</code> JSONB NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>compiler_version</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>generated_at</code> TIMESTAMPTZ NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>created_at</code> TIMESTAMPTZ NOT NULL DEFAULT now()</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>updated_at</code> TIMESTAMPTZ NOT NULL DEFAULT now()</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>saved_by</code> TEXT NULL — identity that last saved the suite</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>source_pipeline</code> TEXT NULL — e.g. <code>rule-compiler</code> or <code>api</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Unique: (<code>suite_id</code>, <code>suite_version</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Query index: (<code>data_object_id</code>, <code>status</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Query index: (<code>dataset_id</code>, <code>status</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Query index: (<code>data_product_id</code>, <code>status</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Check constraint: at least one scope column is non-null.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Check constraint: <code>data_product_id</code> follows ODCS ID format policy (enforced by app validation first; DB regex optional).</li>
+</ul>
+<p>Table: <code>gx_suite_execution_target_map</code></p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_id</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_version</code> INTEGER NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>data_object_version_id</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Unique: (<code>suite_id</code>, <code>suite_version</code>, <code>data_object_version_id</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Query index: (<code>data_object_version_id</code>)</li>
+</ul>
+<p>Table: <code>gx_suite_rule_map</code></p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_id</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_version</code> INTEGER NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>rule_id</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Unique: (<code>suite_id</code>, <code>suite_version</code>, <code>rule_id</code>)</li>
+</ul>
+<p>Table: <code>gx_suite_status_history</code> (migration <code>20260322_0003</code>)</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>id</code> TEXT PK (UUID)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_id</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>suite_version</code> INTEGER NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>from_status</code> TEXT NULL — null on initial insert</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>to_status</code> TEXT NOT NULL</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>changed_by</code> TEXT NULL — principal from <code>get_user_id()</code> context</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>changed_at</code> TIMESTAMPTZ NOT NULL DEFAULT now()</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>reason</code> TEXT NULL — optional free-text reason for transition</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Index: (<code>suite_id</code>, <code>suite_version</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Index: <code>changed_at</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="write-and-status-api-contract-phase-a">Write and Status API Contract (Phase A)<a href="#write-and-status-api-contract-phase-a" class="hash-link" aria-label="Direct link to Write and Status API Contract (Phase A)" title="Direct link to Write and Status API Contract (Phase A)" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>POST /rulebuilder/v1/gx/suites?status=&amp;#123;status&amp;#125;</code> — persist or overwrite a GX suite envelope.<!-- -->
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Optional: <code>?expectedExistingHash=&amp;#123;sha256&amp;#125;</code> — rejects with <code>409</code> when current artifact hash does not match.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Optional: <code>?sourcePipeline=&amp;#123;name&amp;#125;</code> — recorded in <code>source_pipeline</code> column.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Returns <code>201</code> on insert, <code>200</code> on update.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PATCH /rulebuilder/v1/gx/suites/&amp;#123;suiteId&amp;#125;/status?status=&amp;#123;status&amp;#125;</code> — transition suite status.<!-- -->
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Optional: <code>?reason=&amp;#123;text&amp;#125;</code> — recorded in status history trail.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Returns <code>404</code> when suite not found.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/gx/suites/&amp;#123;suiteId&amp;#125;/status-history</code> — full chronological status trail.<!-- -->
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Optional: <code>?suiteVersion=&amp;#123;n&amp;#125;</code> — filters history to a specific version.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Returns <code>[]</code> (empty list) when no history entries match.</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="retrieval-api-contract-phase-a">Retrieval API Contract (Phase A)<a href="#retrieval-api-contract-phase-a" class="hash-link" aria-label="Direct link to Retrieval API Contract (Phase A)" title="Direct link to Retrieval API Contract (Phase A)" translate="no">​</a></h3>
+<p>Endpoint:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/gx/suites</code>
+(internal FastAPI path: <code>GET /api/rulebuilder/v1/gx/suites</code>)</li>
+</ul>
+<p>Query rules:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->One and only one primary scope filter is allowed:<!-- -->
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataObjectId</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataObjectVersionId</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>datasetId</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataProductId</code> (ODCS)</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Optional: <code>status</code> (default <code>active</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Optional: <code>latestOnly</code> (default <code>true</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataObjectVersionId</code> queries filter via <code>gx_suite_execution_target_map</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dataObjectId</code> and <code>datasetId</code> queries use assignment scope identifiers.</li>
+</ul>
+<p>Responses:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>200</code> returns list of artifact envelopes.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>400</code> when none or multiple primary scope filters are provided.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>404</code> when direct suite fetch target does not exist.</li>
+</ul>
+<p>Direct fetch:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/gx/suites/&amp;#123;suiteId&amp;#125;</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Optional query: <code>suiteVersion</code>; when omitted, return latest active version.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="api-validation-rules-mandatory">API Validation Rules (Mandatory)<a href="#api-validation-rules-mandatory" class="hash-link" aria-label="Direct link to API Validation Rules (Mandatory)" title="Direct link to API Validation Rules (Mandatory)" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Validate <code>dataProductId</code> as ODCS ID in request layer.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Reject unsupported combinations early with explicit <code>400</code> details.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Include <code>artifactVersion</code> and <code>suiteVersion</code> in every response.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Include <code>X-Correlation-Id</code> passthrough in response headers.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Reject accidental overwrite for existing <code>suiteId</code> + <code>suiteVersion</code> unless <code>expectedExistingHash</code> matches current artifact hash.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PATCH /rulebuilder/v1/gx/suites/&amp;#123;suiteId&amp;#125;/status</code> — dedicated status transition endpoint (active → deprecated → disabled) without requiring full re-PUT or hash.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="definition-of-done-for-step-1">Definition of Done for Step 1<a href="#definition-of-done-for-step-1" class="hash-link" aria-label="Direct link to Definition of Done for Step 1" title="Direct link to Definition of Done for Step 1" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Contract published in this implementation details document.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Versioned contract files created in Git.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Matching Pydantic schemas created in API module.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Matching Alembic revision created for registry tables.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->OpenAPI examples added for all retrieval variants.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Write path: <code>POST /rulebuilder/v1/gx/suites</code> — persist envelope + status.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Hash-based overwrite protection: <code>expectedExistingHash</code> query param; returns <code>409</code> on mismatch.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PATCH /rulebuilder/v1/gx/suites/&amp;#123;suiteId&amp;#125;/status</code> — status transition with optional <code>reason</code> query param.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Audit metadata columns (<code>saved_by</code>, <code>source_pipeline</code>) on <code>gx_suite_registry</code> (Alembic revision <code>20260322_0003</code>).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Status history trail: <code>gx_suite_status_history</code> table records every status transition with <code>from_status</code>, <code>to_status</code>, <code>changed_by</code>, <code>changed_at</code>, <code>reason</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/gx/suites/&amp;#123;suiteId&amp;#125;/status-history</code> — chronological audit trail endpoint; optional <code>suiteVersion</code> filter.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Compiler auto-publish: <code>POST /&amp;#123;ruleId&amp;#125;/activate</code> accepts optional <code>GxSuiteAutoPublishRequest</code> body; when assignment scope is provided, auto-creates GX suite stub via <code>_persist_gx_suite_from_compiler</code> (<code>source_pipeline=&quot;rule-compiler&quot;</code>).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>get_user_id()</code> context var wired for <code>saved_by</code> / <code>changed_by</code> in all write paths.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->24 tests passing (16 unit + 8 integration).</li>
+</ul>
+<p>Migration policy note:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->FastAPI migration tooling bootstrapped with Alembic.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Legacy baseline Alembic revision created for pre-Alembic schema state.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->First DQ-7.4 GX registry Alembic revision created.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Seeded startup flow runs <code>alembic upgrade head</code> before data seeding completes.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->GX registry tables must be introduced through Alembic, not direct SQL init edits.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Legacy <code>dq-db/init</code> SQL files remain transitional until a full Alembic baseline replaces bootstrap schema creation. <strong>DONE</strong> — All DDL baselined into migration <code>0001</code>; init DDL files archived under <code>dq-db/init/backup/</code>; API container runs <code>alembic upgrade head</code> on startup.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-b---pyspark-executor-clubbed">Phase B - PySpark Executor (Clubbed)<a href="#phase-b---pyspark-executor-clubbed" class="hash-link" aria-label="Direct link to Phase B - PySpark Executor (Clubbed)" title="Direct link to Phase B - PySpark Executor (Clubbed)" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add grouped execution planner by dataObjectVersionId.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Execute grouped suites in one Spark session.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Persist aggregate run outcomes.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-c---exception-store-split">Phase C - Exception Store Split<a href="#phase-c---exception-store-split" class="hash-link" aria-label="Direct link to Phase C - Exception Store Split" title="Direct link to Phase C - Exception Store Split" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Introduce dedicated exception persistence target.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Write violation records with strict minimal schema.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Ensure no exception rows are written to rule/result database.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-d---observability-hardening">Phase D - Observability Hardening<a href="#phase-d---observability-hardening" class="hash-link" aria-label="Direct link to Phase D - Observability Hardening" title="Direct link to Phase D - Observability Hardening" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add structured logs and tracing.</li>
+</ul>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PD-01</code> Add metrics and dashboards.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PD-02</code> Add SLO alerts for compile, retrieval, and execution.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>PD-03</code> Validate observability end to end across compile, retrieval, execution, and persistence.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="acceptance-criteria">Acceptance Criteria<a href="#acceptance-criteria" class="hash-link" aria-label="Direct link to Acceptance Criteria" title="Direct link to Acceptance Criteria" translate="no">​</a></h2>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-01</code> GX suite retrieval API supports all three scopes: data object version, dataset, and data product.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-02</code> GX suite retrieval API supports all four scopes: data object, data object version, dataset, and data product.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-03</code> Executor uses a PySpark-based container in initial implementation.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-04</code> Suites for one data object version execute in a clubbed batch.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-05</code> Detailed outcomes and exceptions are stored separately.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-06</code> Exception records do not live in the rule/result database.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-07</code> Exception schema minimally includes primary key, ruleId, and reason.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ACC-08</code> Logging, metrics, tracing, and alerting are in place and validated.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="remaining-implementation-backlog">Remaining Implementation Backlog<a href="#remaining-implementation-backlog" class="hash-link" aria-label="Direct link to Remaining Implementation Backlog" title="Direct link to Remaining Implementation Backlog" translate="no">​</a></h2>
+<p>This section replaces the older phase-era “open items” summary with the actual remaining DQ-7.4 backlog after the registry, retrieval, PySpark execution, persistence-separation, observability, and runtime-traceability slices already delivered.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="source-adapter-breadth">Source Adapter Breadth<a href="#source-adapter-breadth" class="hash-link" aria-label="Direct link to Source Adapter Breadth" title="Direct link to Source Adapter Breadth" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>BK-01</code> Add JDBC-backed sources via Spark connectors.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>BK-02</code> Extend file-source breadth beyond the current parquet/delta path where needed (for example CSV).</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="runtime-policy-hardening">Runtime Policy Hardening<a href="#runtime-policy-hardening" class="hash-link" aria-label="Direct link to Runtime Policy Hardening" title="Direct link to Runtime Policy Hardening" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>BK-04</code> Due-suite collection is explicit: the runtime may collect suites only from a direct schedule request, a grouped activation request, or another explicitly requested selector-backed batch. It must not infer hidden schedule windows or silently poll for due work.</li>
+</ol>
+<ul>
+<li class="">Current direct schedule and grouped dispatch flows already require explicit suite or scope selectors; any future scheduler must preserve that fail-fast contract instead of introducing implicit scanning.</li>
+</ul>
+<ol start="2" class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>BK-05</code> Spark session lifecycle is batch-scoped: one grouped execution batch owns one Spark session, and the worker must close that session immediately after batch completion.</li>
+</ol>
+<ul>
+<li class="">If session creation, execution, or shutdown fails, the worker must mark the run failed rather than keeping a dangling session alive.</li>
+</ul>
+<ol start="3" class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>BK-06</code> Grouped runs split only on an explicit batch-cap policy per <code>dataObjectVersionId</code>.</li>
+</ol>
+<ul>
+<li class="">Default behavior is one grouped batch per resolved <code>dataObjectVersionId</code>; if a future deployment needs to cap batch size, the split must be driven by an explicit configured maximum rather than an implicit timeout or heuristic.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="persistence-and-operations-decisions">Persistence and Operations Decisions<a href="#persistence-and-operations-decisions" class="hash-link" aria-label="Direct link to Persistence and Operations Decisions" title="Direct link to Persistence and Operations Decisions" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>BK-07</code> Raw exception facts live in object storage; analytical aggregations may be stored in a database or object store.</li>
+</ol>
+<ul>
+<li class="">The raw store remains append-only object storage, while analysis can use whichever projection store best fits the reporting path.</li>
+</ul>
+<ol start="2" class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>BK-08</code> Retention and purge for persisted exception records follows the retention and purge policy of the owning data object.<!-- -->
+<ul>
+<li class="">Exception facts inherit the lifecycle of the data object containing the data; when the owning data object is retained or purged, the linked exception records follow that policy.</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li class="">The runtime resolves the canonical policy from <code>data_object_versions.storage_options_json.retention_policy</code> and applies it per data object version during exception retention maintenance.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="follow-on-implementation-plan---engine-independent-exception-fact-store-and-reason-analytics">Follow-On Implementation Plan - Engine-Independent Exception Fact Store And Reason Analytics<a href="#follow-on-implementation-plan---engine-independent-exception-fact-store-and-reason-analytics" class="hash-link" aria-label="Direct link to Follow-On Implementation Plan - Engine-Independent Exception Fact Store And Reason Analytics" title="Direct link to Follow-On Implementation Plan - Engine-Independent Exception Fact Store And Reason Analytics" translate="no">​</a></h2>
+<p>This follow-on plan extends the existing exception-store separation model so row-level failure evidence can be persisted and analyzed consistently across GX, Soda, and future execution engines.</p>
+<p>The target outcome is:</p>
+<ul>
+<li class="">persist one exception fact per failed record and failed rule at a specific execution point in time</li>
+<li class="">keep the exact record identifier used by the runtime (<code>primary_key</code> or <code>business_key</code>)</li>
+<li class="">attach the failure fact to delivery, execution plan, suite or artifact, data object version, rule version, and runtime identity</li>
+<li class="">store a stable failure reason snapshot that supports reporting at that point in time</li>
+<li class="">support very large volumes, including millions of exception records</li>
+<li class="">provide aggregated reason analytics and reason fluctuation reporting over time without mixing exception facts into the rule/result database</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="scope">Scope<a href="#scope" class="hash-link" aria-label="Direct link to Scope" title="Direct link to Scope" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="in-scope">In scope<a href="#in-scope" class="hash-link" aria-label="Direct link to In scope" title="Direct link to In scope" translate="no">​</a></h4>
+<ul>
+<li class="">a canonical engine-independent exception fact contract</li>
+<li class="">explicit runtime capability requirements for row-level exception emission</li>
+<li class="">separate persistence for raw exception facts and aggregated reason analytics</li>
+<li class="">support for record identifiers using either primary key or business key</li>
+<li class="">support for delivery-linked execution context and execution-plan context</li>
+<li class="">trend and hotspot analytics by failure reason over time</li>
+<li class="">report-oriented read APIs for detailed exceptions and aggregated summaries</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="out-of-scope">Out of scope<a href="#out-of-scope" class="hash-link" aria-label="Direct link to Out of scope" title="Direct link to Out of scope" translate="no">​</a></h4>
+<ul>
+<li class="">silent fallback to aggregate-only execution when an engine cannot emit exception facts</li>
+<li class="">storing exception facts in the rule/result database</li>
+<li class="">logging raw exception identifiers into observability pipelines</li>
+<li class="">forcing every engine to expose the same native diagnostics shape internally</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="plan-assumptions">Plan Assumptions<a href="#plan-assumptions" class="hash-link" aria-label="Direct link to Plan Assumptions" title="Direct link to Plan Assumptions" translate="no">​</a></h3>
+<ol>
+<li class=""><code>EF-01</code> Exception facts remain a separate persistence concern from aggregate execution results.</li>
+<li class=""><code>EF-02</code> Execution engines are allowed to differ internally, but every supported engine must map its row-level failures into one canonical exception fact contract.</li>
+<li class=""><code>EF-03</code> If an engine cannot emit record-level exception facts for a requested execution mode, that path fails fast instead of degrading to aggregate-only success.</li>
+<li class=""><code>EF-04</code> The record identifier stored for an exception fact is the canonical identifier available at runtime: primary key where available, otherwise approved business key.</li>
+<li class=""><code>EF-05</code> Reason analytics must be generated from persisted exception facts, not inferred later from aggregate counts.</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="target-architecture-1">Target Architecture<a href="#target-architecture-1" class="hash-link" aria-label="Direct link to Target Architecture" title="Direct link to Target Architecture" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-canonical-exception-fact-contract">1. Canonical Exception Fact Contract<a href="#1-canonical-exception-fact-contract" class="hash-link" aria-label="Direct link to 1. Canonical Exception Fact Contract" title="Direct link to 1. Canonical Exception Fact Contract" translate="no">​</a></h4>
+<p>Define an engine-independent exception fact envelope above the current GX-only storage payload.</p>
+<p>Required fact fields:</p>
+<ul>
+<li class=""><code>exception_fact_id</code></li>
+<li class=""><code>engine_type</code></li>
+<li class=""><code>delivery_id</code></li>
+<li class=""><code>execution_plan_id</code></li>
+<li class=""><code>execution_plan_version_id</code></li>
+<li class=""><code>execution_run_id</code></li>
+<li class=""><code>suite_id</code> or <code>artifact_id</code></li>
+<li class=""><code>suite_version</code> or <code>artifact_version</code></li>
+<li class=""><code>data_object_version_id</code></li>
+<li class=""><code>rule_id</code></li>
+<li class=""><code>rule_version_id</code></li>
+<li class=""><code>record_identifier_type</code> with allowed values <code>primary_key</code> or <code>business_key</code></li>
+<li class=""><code>record_identifier_value</code></li>
+<li class=""><code>reason_code</code></li>
+<li class=""><code>reason_text</code></li>
+<li class=""><code>detected_at</code></li>
+</ul>
+<p>Optional operational metadata:</p>
+<ul>
+<li class=""><code>correlation_id</code></li>
+<li class=""><code>dataset_id</code></li>
+<li class=""><code>data_product_id</code></li>
+<li class=""><code>delivery_note_id</code></li>
+<li class=""><code>failure_class</code></li>
+<li class=""><code>engine_metadata</code></li>
+</ul>
+<p>Contract rules:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EF-06</code> <code>record_identifier_value</code> is required for every persisted exception fact.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EF-07</code> <code>reason_code</code> should be stable within a runtime adapter; <code>reason_text</code> stores the user-readable snapshot at that point in time.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EF-08</code> <code>rule_version_id</code> is required so historical reports remain correct when the underlying rule later changes.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EF-09</code> <code>engine_type</code> is required so GX, Soda, and later engines are explicit in persistence and analytics.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EF-10</code> <code>delivery_id</code> and <code>execution_plan_id</code> are nullable only for flows that genuinely do not execute in those contexts; they are not inferred later by fallback logic.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-engine-adapter-contract">2. Engine Adapter Contract<a href="#2-engine-adapter-contract" class="hash-link" aria-label="Direct link to 2. Engine Adapter Contract" title="Direct link to 2. Engine Adapter Contract" translate="no">​</a></h4>
+<p>Add an exception-emission seam parallel to the existing runtime-neutral validation-artifact seam.</p>
+<p>Each supported engine adapter must implement:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EA-01</code> <code>collect_exception_facts(run_result, execution_context)</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EA-02</code> <code>normalize_reason(native_failure)</code> -&gt; <code>{reason_code, reason_text, failure_class}</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EA-03</code> <code>resolve_record_identifier(native_failure, execution_context)</code> -&gt; <code>{record_identifier_type, record_identifier_value}</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EA-04</code> <code>emit_exception_fact_batch(...)</code></li>
+</ul>
+<p>Fail-fast rules:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EA-05</code> Reject execution for engines that cannot produce record identifiers for the selected execution mode.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EA-06</code> Reject execution for engines that cannot produce a normalized failure reason.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EA-07</code> Do not mark a run fully successful when aggregate results exist but exception-fact persistence was required and failed.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-persistence-model">3. Persistence Model<a href="#3-persistence-model" class="hash-link" aria-label="Direct link to 3. Persistence Model" title="Direct link to 3. Persistence Model" translate="no">​</a></h4>
+<p>Use a two-layer exception-store model so detailed facts and reporting summaries scale together.</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <!-- -->Layer A - Raw exception fact store:</p>
+</li>
+<li class="">
+<p>append-only canonical exception facts</p>
+</li>
+<li class="">
+<p>partitioned by <code>detected_at</code> and scoped identifiers such as <code>delivery_id</code> or <code>data_object_version_id</code></p>
+</li>
+<li class="">
+<p>optimized for large write volume and replay</p>
+</li>
+<li class="">
+<p>remains outside the rule/result database</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Layer B - Analytics projection store:</p>
+</li>
+<li class="">
+<p>reason-level rollups derived from raw exception facts</p>
+</li>
+<li class="">
+<p>optimized for query and reporting workloads</p>
+</li>
+<li class="">
+<p>stores bucketed aggregates by time and execution scope</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <!-- -->Recommended raw fact columns:</p>
+</li>
+<li class="">
+<p>all required fact fields from the canonical contract</p>
+</li>
+<li class="">
+<p>optional metadata in <code>ops_metadata_json</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Recommended analytics dimensions:</p>
+</li>
+<li class="">
+<p><code>bucket_start</code></p>
+</li>
+<li class="">
+<p><code>engine_type</code></p>
+</li>
+<li class="">
+<p><code>delivery_id</code></p>
+</li>
+<li class="">
+<p><code>execution_plan_id</code></p>
+</li>
+<li class="">
+<p><code>execution_plan_version_id</code></p>
+</li>
+<li class="">
+<p><code>suite_id</code> or <code>artifact_id</code></p>
+</li>
+<li class="">
+<p><code>data_object_version_id</code></p>
+</li>
+<li class="">
+<p><code>rule_id</code></p>
+</li>
+<li class="">
+<p><code>rule_version_id</code></p>
+</li>
+<li class="">
+<p><code>reason_code</code></p>
+</li>
+<li class="">
+<p><code>reason_text_snapshot</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Recommended analytics measures:</p>
+</li>
+<li class="">
+<p><code>failed_record_count</code></p>
+</li>
+<li class="">
+<p><code>distinct_record_identifier_count</code></p>
+</li>
+<li class="">
+<p><code>distinct_execution_run_count</code></p>
+</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="4-reason-analytics-model">4. Reason Analytics Model<a href="#4-reason-analytics-model" class="hash-link" aria-label="Direct link to 4. Reason Analytics Model" title="Direct link to 4. Reason Analytics Model" translate="no">​</a></h4>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Introduce a dedicated reason analytics projection rather than extending the current totals-only summary shape.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Required analytics outputs:</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <code>RAA-01</code> Top failure reasons by scope and time window.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <code>RAA-02</code> Trend over time for one failure reason.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <code>RAA-03</code> Trend over time for all failure reasons within one scope.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <code>RAA-04</code> Delivery report summary showing record counts by reason for one delivery.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <code>RAA-05</code> Execution-plan report summary showing fluctuation by reason across successive runs.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <code>RAA-06</code> Rule-version report summary showing whether one rule version introduced a new dominant failure reason.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Required group-by scopes:</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->by delivery</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->by execution plan</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->by suite or validation artifact</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->by data object version</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->by rule version</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->by engine type</p>
+</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="5-read-apis">5. Read APIs<a href="#5-read-apis" class="hash-link" aria-label="Direct link to 5. Read APIs" title="Direct link to 5. Read APIs" translate="no">​</a></h4>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <!-- -->Add engine-neutral exception read APIs rather than keeping the reporting shape GX-specific.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <!-- -->Suggested API direction:</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/exceptions/facts</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/exceptions/facts/&amp;#123;exception_fact_id&amp;#125;</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/exceptions/reason-analytics</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/exceptions/reason-analytics/trends</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/deliveries/&amp;#123;delivery_id&amp;#125;/exception-summary</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>GET /rulebuilder/v1/execution-plans/&amp;#123;execution_plan_id&amp;#125;/exception-summary</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <!-- -->Common filters:</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>delivery_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>execution_plan_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>execution_plan_version_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>execution_run_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>suite_id</code> or <code>artifact_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>data_object_version_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>rule_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>rule_version_id</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>engine_type</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>reason_code</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>detected_after</code></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>detected_before</code></p>
+</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="6-delivery-and-execution-lineage-requirements">6. Delivery And Execution-Lineage Requirements<a href="#6-delivery-and-execution-lineage-requirements" class="hash-link" aria-label="Direct link to 6. Delivery And Execution-Lineage Requirements" title="Direct link to 6. Delivery And Execution-Lineage Requirements" translate="no">​</a></h4>
+<p>Every exception fact should preserve the lineage needed for downstream reporting and audit.</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EL-01</code> Delivery-linked runs must stamp <code>delivery_id</code> onto every exception fact.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EL-02</code> Execution-plan-driven runs must stamp <code>execution_plan_id</code> and <code>execution_plan_version_id</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EL-03</code> Artifact-driven runs must stamp <code>suite_id</code> or neutral <code>artifact_id</code> plus version.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EL-04</code> Rule lineage must include both <code>rule_id</code> and <code>rule_version_id</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EL-05</code> Reports must be able to explain which rule version and which failure reason were in effect when the exception fact was written.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="7-scalability-strategy">7. Scalability Strategy<a href="#7-scalability-strategy" class="hash-link" aria-label="Direct link to 7. Scalability Strategy" title="Direct link to 7. Scalability Strategy" translate="no">​</a></h4>
+<p>The system must handle millions of exception records without relying on ad hoc scans of the raw fact store.</p>
+<p>Required scaling choices:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SC-01</code> Partition raw exception facts by time and high-cardinality execution scope.<!-- -->
+<ul>
+<li class="">Use <code>detected_at</code> as the time partition key and scope by identifiers such as <code>data_object_version_id</code>, <code>delivery_id</code>, <code>execution_plan_id</code>, <code>rule_id</code>, and <code>engine_type</code>.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SC-02</code> Keep raw facts append-only and immutable after write, except for retention and purge operations.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SC-03</code> Build incremental analytics rollups from raw facts rather than recomputing full-history reports on demand.<!-- -->
+<ul>
+<li class="">Rollups should aggregate by bounded time buckets and scope keys, and full-history recomputation should be reserved for controlled backfill or rebuild jobs only.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SC-04</code> Add retention tiers: hot queryable projections, warm object-storage facts, and pre-aggregated long-term reason trends.<!-- -->
+<ul>
+<li class="">Hot queryable projections may live in a database or query-optimized object-store projection; warm raw facts remain immutable object-storage archives; cold long-term trend summaries may use whichever projection store best fits reporting needs.</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>SC-05</code> Support paged detail retrieval by scope without requiring full delivery scans.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="8-security-and-governance">8. Security And Governance<a href="#8-security-and-governance" class="hash-link" aria-label="Direct link to 8. Security And Governance" title="Direct link to 8. Security And Governance" translate="no">​</a></h4>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="">
+<p><code>exception_fact_reader</code> is the workspace-scoped JIT role for list, summary, and analytics access only.</p>
+</li>
+<li class="">
+<p><code>exception_fact_investigator</code> is the workspace-scoped JIT role for raw fact detail access only.</p>
+</li>
+<li class="">
+<p>Neither exception-fact JIT role includes export access.</p>
+</li>
+<li class="">
+<p>A JIT request must come from a user who already has another role in the same workspace.</p>
+</li>
+<li class="">
+<p>A workspace admin approves the request.</p>
+</li>
+<li class="">
+<p>Approved duration is capped by <code>exceptionFactJitRoleMaxDurationMinutes</code> in App Settings.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>SG-01</code> Exception identifiers are stored in the exception store only and must not be copied into logs or telemetry payloads.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>SG-02</code> Access to detailed exception facts remains authorization-scoped by workspace and delivery/execution ownership.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>SG-03</code> Reports may expose aggregated counts by reason without exposing record identifiers when the caller lacks detail access.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled="" checked=""> <code>SG-04</code> Retention and purge policy must be explicit for raw facts and analytics projections.</p>
+</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="incremental-delivery-plan-1">Incremental Delivery Plan<a href="#incremental-delivery-plan-1" class="hash-link" aria-label="Direct link to Incremental Delivery Plan" title="Direct link to Incremental Delivery Plan" translate="no">​</a></h3>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-e1---canonical-contract-and-engine-capability-gate">Phase E1 - Canonical Contract And Engine Capability Gate<a href="#phase-e1---canonical-contract-and-engine-capability-gate" class="hash-link" aria-label="Direct link to Phase E1 - Canonical Contract And Engine Capability Gate" title="Direct link to Phase E1 - Canonical Contract And Engine Capability Gate" translate="no">​</a></h4>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E1-01</code> Define the engine-independent exception fact schema in <a href="https://github.com/jactools/dq-rulebuilder/blob/main/docs/contracts/exception-fact/v1/schema.json" target="_blank" rel="noopener noreferrer" class="">docs/contracts/exception-fact/v1</a>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E1-02</code> Introduce explicit engine capability flags for row-level exception recording in <code>docs/contracts/execution-engine-capabilities/v1</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E1-03</code> Fail fast when an execution engine cannot emit the required exception facts.</li>
+</ol>
+<p>Exit criteria:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E1-EC-01</code> One canonical exception fact contract exists above GX/Soda/native runtimes.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E1-EC-02</code> Every supported engine declares whether row-level exception facts are supported.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E1-EC-03</code> Unsupported paths reject explicitly.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-e2---raw-exception-fact-persistence-upgrade">Phase E2 - Raw Exception Fact Persistence Upgrade<a href="#phase-e2---raw-exception-fact-persistence-upgrade" class="hash-link" aria-label="Direct link to Phase E2 - Raw Exception Fact Persistence Upgrade" title="Direct link to Phase E2 - Raw Exception Fact Persistence Upgrade" translate="no">​</a></h4>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E2-01</code> Extend persistence to carry delivery, execution-plan, artifact, rule-version, and engine-type lineage.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E2-02</code> Add <code>record_identifier_type</code> and <code>record_identifier_value</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E2-03</code> Preserve <code>reason_code</code> and <code>reason_text</code> as point-in-time facts.</li>
+</ol>
+<p>Exit criteria:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E2-EC-01</code> Raw facts persist all required lineage identifiers.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E2-EC-02</code> One failed record against one rule creates one durable exception fact.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E2-EC-03</code> The store remains separate from the rule/result database.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-e3---reason-analytics-projection">Phase E3 - Reason Analytics Projection<a href="#phase-e3---reason-analytics-projection" class="hash-link" aria-label="Direct link to Phase E3 - Reason Analytics Projection" title="Direct link to Phase E3 - Reason Analytics Projection" translate="no">​</a></h4>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E3-01</code> Add reason-level rollup tables or materialized projections.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E3-02</code> Aggregate by time bucket and required scopes.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E3-03</code> Support trend queries for fluctuation reporting over time.</li>
+</ol>
+<p>Exit criteria:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E3-EC-01</code> Top reasons can be queried by delivery, plan, suite, object version, and rule version.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E3-EC-02</code> Trend buckets exist for failure reasons over time.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E3-EC-03</code> Analytics no longer stop at totals by rule or data object only.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-e4---api-and-reporting-surface">Phase E4 - API And Reporting Surface<a href="#phase-e4---api-and-reporting-surface" class="hash-link" aria-label="Direct link to Phase E4 - API And Reporting Surface" title="Direct link to Phase E4 - API And Reporting Surface" translate="no">​</a></h4>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E4-01</code> Add detail and summary APIs for exception facts and reason analytics.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E4-02</code> Add delivery-level and execution-plan-level report views.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E4-03</code> Add report exports using the analytics projection instead of raw fact scans.</li>
+</ol>
+<p>Exit criteria:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E4-EC-01</code> Detailed exception facts are queryable with paging and authorization.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E4-EC-02</code> Aggregated reason reports are queryable without raw-fact scans.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E4-EC-03</code> Report generation can show fluctuation per failure reason over time.</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-e5---operations-retention-and-backfill">Phase E5 - Operations, Retention, And Backfill<a href="#phase-e5---operations-retention-and-backfill" class="hash-link" aria-label="Direct link to Phase E5 - Operations, Retention, And Backfill" title="Direct link to Phase E5 - Operations, Retention, And Backfill" translate="no">​</a></h4>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E5-01</code> Define retention and purge policy for raw facts and analytics projections.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E5-02</code> Backfill legacy GX exception records into the canonical contract where possible.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E5-03</code> Add validation, monitoring, and alerts for exception-fact persistence and analytics freshness.</li>
+</ol>
+<p>Current E5-01 policy:</p>
+<ul>
+<li class="">raw exception facts inherit the retention and purge policy of the owning data object containing the data</li>
+<li class="">object-storage-backed exception fact archives remain append-only and are purged when the owning data object policy requires removal</li>
+<li class="">the canonical per-version policy lives on <code>data_object_versions.storage_options_json.retention_policy</code></li>
+<li class="">future materialized analytics projections may use their own retention window, but they must not outlive the owning data object policy for the raw facts they summarize unless a separate governance decision says otherwise</li>
+<li class="">purge automation reads the canonical data-object retention policy and applies object-storage deletion through <code>python scripts/maintain_exception_retention.py --execute</code></li>
+<li class="">the current GX analytics surface remains query-time only, so there is no separate projection-table purge path until a materialized projection store exists</li>
+</ul>
+<p>Current E5-02 path:</p>
+<ul>
+<li class="">repository-backed legacy rows are upgraded in place by <code>python scripts/backfill_legacy_gx_exception_facts.py --source repository --execute</code></li>
+<li class="">object-storage-backed legacy batches are replayed into the canonical Postgres exception repository by <code>python scripts/backfill_legacy_gx_exception_facts.py --source object-storage --execute</code></li>
+<li class="">repository backfill deterministically derives <code>record_identifier_type=primary_key</code> from <code>data_primary_key</code>, derives <code>reason_code</code> from <code>violation_reason</code>, defaults <code>engine_type=gx</code>, and upgrades <code>validation_artifact_id</code> / <code>validation_artifact_version</code> from stored <code>suite_id</code> / <code>suite_version</code></li>
+<li class="">replay preserves existing <code>violation_id</code> values when present and otherwise derives stable IDs from the canonical violation payload hash</li>
+<li class="">rows or archived violations missing <code>rule_version_id</code> or validation-artifact lineage are reported as unresolved and skipped rather than silently approximated</li>
+</ul>
+<p>Current E5-03 path:</p>
+<ul>
+<li class="">Postgres exporter queries now expose non-canonical exception-fact counts, oldest unresolved age, and latest canonical exception-fact age for the execution observability surface</li>
+<li class="">Prometheus records and alerts now flag persistent canonical-contract drift and analytics freshness lag alongside the existing exception-store write-failure alert</li>
+<li class="">the execution Grafana dashboard now shows non-canonical fact count, oldest unresolved age, and latest canonical fact age without surfacing raw exception payloads</li>
+<li class="">repo validation for this slice runs through <code>scripts/validate_exception_fact_observability.sh</code>, which checks the exporter, alert, recording-rule, and dashboard assets stay aligned</li>
+</ul>
+<p>Exit criteria:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E5-EC-01</code> Retention is explicit and automated.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E5-EC-02</code> Analytics freshness is monitored.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>E5-EC-03</code> Backfill and replay paths are deterministic.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="acceptance-criteria-1">Acceptance Criteria<a href="#acceptance-criteria-1" class="hash-link" aria-label="Direct link to Acceptance Criteria" title="Direct link to Acceptance Criteria" translate="no">​</a></h3>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>EFACC-01</code> Every supported execution engine emits canonical exception facts with no fallback to aggregate-only behavior.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>EFACC-02</code> Each exception fact stores the record identifier, rule version, execution lineage, and failure reason at the time of detection.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EFACC-03</code> Delivery-level and execution-plan-level reports can show failed-record counts by reason.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>EFACC-04</code> Time-series analytics can show fluctuation per failure reason over time.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>EFACC-05</code> The implementation scales to millions of exception facts through partitioning and incremental rollups.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>EFACC-06</code> Exception facts remain outside the rule/result database and outside observability payloads.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="follow-up-investigations">Follow-Up Investigations<a href="#follow-up-investigations" class="hash-link" aria-label="Direct link to Follow-Up Investigations" title="Direct link to Follow-Up Investigations" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>INV-01</code> Great Expectations Data Docs are explicitly excluded from the neutral exception-reporting surface; use protected row-level analysis capability instead.</li>
+</ol>
+<ul>
+<li class="">See <a class="" href="/docs/architecture/adr/ADR-035-exclude-great-expectations-data-docs-and-require-protected-row-level-analysis-capability/">ADR-035</a>.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="recommended-next-decisions">Recommended Next Decisions<a href="#recommended-next-decisions" class="hash-link" aria-label="Direct link to Recommended Next Decisions" title="Direct link to Recommended Next Decisions" translate="no">​</a></h3>
+<p>Decision record: <code>architecture/adr/ADR-034-engine-neutral-exception-fact-contract-family-and-storage-authority.md</code></p>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ND-01</code> Choose the canonical name for the engine-neutral exception store contract and APIs so the current GX naming can be retired at the boundary.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ND-02</code> Raw exception facts use immutable object-storage archives as the source of truth; analytical projections may be stored in a database or object store as query needs evolve.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ND-03</code> Decide whether <code>record_identifier_value</code> must be stored plaintext, encrypted, or paired with a deterministic hash for dedupe and join workflows.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>ND-04</code> Define the controlled taxonomy for <code>reason_code</code> so cross-engine analytics can compare like-for-like failure classes.</li>
+</ol>
+<p>Resolved ND decisions:</p>
+<ul>
+<li class=""><code>ND-01</code>: <code>exception-fact</code>, <code>exceptions</code>, and <code>exception analytics</code> are the canonical public family names; <code>gx_execution_violation</code> remains an internal transitional detail only.</li>
+<li class=""><code>ND-02</code>: production architecture uses immutable object-storage exception archives as the raw source of truth, with analytical projections allowed in a database or object store depending on reporting and query requirements.</li>
+<li class=""><code>ND-03</code>: <code>record_identifier_value</code> remains plaintext in authorized raw-fact storage and raw-fact APIs, must be kept out of observability and summary exports, and should be paired with <code>identifier_hash</code> in <code>sha256:&amp;lt;64 hex&gt;</code> form.</li>
+<li class=""><code>ND-04</code>: <code>reason_code</code> is a controlled cross-engine analytics key using shared families such as <code>completeness_*</code>, <code>uniqueness_*</code>, <code>validity_*</code>, <code>consistency_*</code>, <code>referential_integrity_*</code>, <code>range_*</code>, <code>freshness_*</code>, <code>volume_*</code>, and <code>custom_*</code>; engine-native expectation names stay in metadata.</li>
+</ul>
+<p>Follow-up implementation status:</p>
+<ul>
+<li class="">GX report ingestion now normalizes runtime <code>reason_code</code> values into the controlled taxonomy before persistence and preserves the raw GX <code>expectation_type</code> in metadata.</li>
+<li class="">The FastAPI API boundary now uses neutral <code>ExceptionFactRepository</code> and <code>ExceptionAnalyticsView</code> names even though concrete repository class names remain part of the deeper internal migration backlog.</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="external-contract-and-governance-decisions">External Contract and Governance Decisions<a href="#external-contract-and-governance-decisions" class="hash-link" aria-label="Direct link to External Contract and Governance Decisions" title="Direct link to External Contract and Governance Decisions" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>BK-09</code> API auth scope for external GX suite retrieval clients is <code>dq:rules:read</code> on the Kong-protected <code>/api/rulebuilder/v1/gx/suites</code> and <code>/api/rulebuilder/v1/gx/suites/&amp;#123;suiteId&amp;#125;</code> surfaces.</li>
+</ol>
+<ul>
+<li class="">See <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/tests/api/test_gx_suite_list_endpoints.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/tests/api/test_gx_suite_list_endpoints.py</a> and the Kong JWT / ACL bootstrap path in <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-kong/README.md" target="_blank" rel="noopener noreferrer" class="">dq-kong/README.md</a>.</li>
+</ul>
+<ol start="2" class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>BK-10</code> Assignment scope resolution is implemented as a fail-fast mapping from <code>dataObjectId</code>, <code>datasetId</code>, or <code>dataProductId</code> to one or more active <code>dataObjectVersionId</code> targets.</li>
+</ol>
+<ul>
+<li class="">See <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/app/application/services/source_data_resolver.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/app/application/services/source_data_resolver.py</a>, <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/app/domain/entities/gx_suite.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/app/domain/entities/gx_suite.py</a>, and the GX retrieval repository in <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/fastapi/app/infrastructure/repositories/postgres_gx_suite_repository.py" target="_blank" rel="noopener noreferrer" class="">dq-api/fastapi/app/infrastructure/repositories/postgres_gx_suite_repository.py</a>.</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/implementation-details/DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">DQ-7.3 Rule Compiler Implementation Progress</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/implementation-details/DQ_7_DSL_MOCK_DATA_2_0_0_MIGRATION_PLAN/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">DQ-7 Mock-Data DSL 2.0.0 Migration Plan</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#goal" class="table-of-contents__link toc-highlight">Goal</a></li><li><a href="#worked-example-one-data-object-version-run" class="table-of-contents__link toc-highlight">Worked Example: One Data Object Version Run</a></li><li><a href="#scope-assumption" class="table-of-contents__link toc-highlight">Scope Assumption</a></li><li><a href="#required-adjustments-confirmed" class="table-of-contents__link toc-highlight">Required Adjustments (Confirmed)</a></li><li><a href="#target-architecture" class="table-of-contents__link toc-highlight">Target Architecture</a><ul><li><a href="#compile-and-registry" class="table-of-contents__link toc-highlight">Compile and Registry</a></li><li><a href="#execution-runtime-pyspark-first" class="table-of-contents__link toc-highlight">Execution Runtime (PySpark-first)</a></li><li><a href="#outcome-persistence-separation" class="table-of-contents__link toc-highlight">Outcome Persistence Separation</a></li><li><a href="#observability" class="table-of-contents__link toc-highlight">Observability</a></li></ul></li><li><a href="#data-source-strategy-variety-requirement" class="table-of-contents__link toc-highlight">Data Source Strategy (Variety Requirement)</a></li><li><a href="#clubbed-execution-strategy-data-object-scoped" class="table-of-contents__link toc-highlight">Clubbed Execution Strategy (Data Object Scoped)</a><ul><li><a href="#grouping-key" class="table-of-contents__link toc-highlight">Grouping Key</a></li><li><a href="#execution-flow" class="table-of-contents__link toc-highlight">Execution Flow</a></li></ul></li><li><a href="#api-design-for-gx-suite-retrieval" class="table-of-contents__link toc-highlight">API Design for GX Suite Retrieval</a><ul><li><a href="#by-data-object" class="table-of-contents__link toc-highlight">By Data Object</a></li><li><a href="#by-data-object-version" class="table-of-contents__link toc-highlight">By Data Object Version</a></li><li><a href="#by-data-set" class="table-of-contents__link toc-highlight">By Data Set</a></li><li><a href="#by-data-product" class="table-of-contents__link toc-highlight">By Data Product</a></li><li><a href="#direct-suite-fetch" class="table-of-contents__link toc-highlight">Direct Suite Fetch</a></li><li><a href="#response-envelope-minimum" class="table-of-contents__link toc-highlight">Response Envelope (minimum)</a></li></ul></li><li><a href="#persistence-boundaries" class="table-of-contents__link toc-highlight">Persistence Boundaries</a><ul><li><a href="#ruleresult-db-allowed" class="table-of-contents__link toc-highlight">Rule/Result DB (allowed)</a></li><li><a href="#exception-store-separate-required" class="table-of-contents__link toc-highlight">Exception Store (separate, required)</a></li></ul></li><li><a href="#logging-and-monitoring-requirements" class="table-of-contents__link toc-highlight">Logging and Monitoring Requirements</a><ul><li><a href="#logging" class="table-of-contents__link toc-highlight">Logging</a></li><li><a href="#monitoring" class="table-of-contents__link toc-highlight">Monitoring</a></li></ul></li><li><a href="#incremental-delivery-plan" class="table-of-contents__link toc-highlight">Incremental Delivery Plan</a><ul><li><a href="#phase-a---gx-registry--retrieval-api" class="table-of-contents__link toc-highlight">Phase A - GX Registry + Retrieval API</a></li></ul></li><li><a href="#phase-a-step-1---contract-and-registry-baseline-lock-before-build" class="table-of-contents__link toc-highlight">Phase A Step 1 - Contract and Registry Baseline (Lock Before Build)</a><ul><li><a href="#step-1-deliverable-status" class="table-of-contents__link toc-highlight">Step 1 Deliverable Status</a></li><li><a href="#canonical-identifier-semantics" class="table-of-contents__link toc-highlight">Canonical Identifier Semantics</a></li><li><a href="#gx-artifact-envelope-v1" class="table-of-contents__link toc-highlight">GX Artifact Envelope (v1)</a></li><li><a href="#registry-storage-contract-logical" class="table-of-contents__link toc-highlight">Registry Storage Contract (Logical)</a></li><li><a href="#write-and-status-api-contract-phase-a" class="table-of-contents__link toc-highlight">Write and Status API Contract (Phase A)</a></li><li><a href="#retrieval-api-contract-phase-a" class="table-of-contents__link toc-highlight">Retrieval API Contract (Phase A)</a></li><li><a href="#api-validation-rules-mandatory" class="table-of-contents__link toc-highlight">API Validation Rules (Mandatory)</a></li><li><a href="#definition-of-done-for-step-1" class="table-of-contents__link toc-highlight">Definition of Done for Step 1</a></li><li><a href="#phase-b---pyspark-executor-clubbed" class="table-of-contents__link toc-highlight">Phase B - PySpark Executor (Clubbed)</a></li><li><a href="#phase-c---exception-store-split" class="table-of-contents__link toc-highlight">Phase C - Exception Store Split</a></li><li><a href="#phase-d---observability-hardening" class="table-of-contents__link toc-highlight">Phase D - Observability Hardening</a></li></ul></li><li><a href="#acceptance-criteria" class="table-of-contents__link toc-highlight">Acceptance Criteria</a></li><li><a href="#remaining-implementation-backlog" class="table-of-contents__link toc-highlight">Remaining Implementation Backlog</a><ul><li><a href="#source-adapter-breadth" class="table-of-contents__link toc-highlight">Source Adapter Breadth</a></li><li><a href="#runtime-policy-hardening" class="table-of-contents__link toc-highlight">Runtime Policy Hardening</a></li><li><a href="#persistence-and-operations-decisions" class="table-of-contents__link toc-highlight">Persistence and Operations Decisions</a></li></ul></li><li><a href="#follow-on-implementation-plan---engine-independent-exception-fact-store-and-reason-analytics" class="table-of-contents__link toc-highlight">Follow-On Implementation Plan - Engine-Independent Exception Fact Store And Reason Analytics</a><ul><li><a href="#scope" class="table-of-contents__link toc-highlight">Scope</a></li><li><a href="#plan-assumptions" class="table-of-contents__link toc-highlight">Plan Assumptions</a></li><li><a href="#target-architecture-1" class="table-of-contents__link toc-highlight">Target Architecture</a></li><li><a href="#incremental-delivery-plan-1" class="table-of-contents__link toc-highlight">Incremental Delivery Plan</a></li><li><a href="#acceptance-criteria-1" class="table-of-contents__link toc-highlight">Acceptance Criteria</a></li><li><a href="#follow-up-investigations" class="table-of-contents__link toc-highlight">Follow-Up Investigations</a></li><li><a href="#recommended-next-decisions" class="table-of-contents__link toc-highlight">Recommended Next Decisions</a></li><li><a href="#external-contract-and-governance-decisions" class="table-of-contents__link toc-highlight">External Contract and Governance Decisions</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/">Overview</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/feature-plans/">Feature Plans</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Reference</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/user-manuals/">User manuals</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/api-reference/">API reference</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/technical-references/">Technical references</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright 2026 dq-made-easy maintainers.</div></div></div></footer></div>
+</body>
+</html>

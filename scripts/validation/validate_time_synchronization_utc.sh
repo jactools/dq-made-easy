@@ -42,7 +42,7 @@ for service in "${CRITICAL_SERVICES[@]}"; do
       exit 0
     }
     END { exit found ? 0 : 1 }
-  ' "$REPO_ROOT/docker-compose.yml"; then
+  ' "$REPO_ROOT/docker-compose/"; then
     success "$my_name" "Service '$service' has TZ: UTC"
   else
     error "$my_name" "Service '$service' does not have TZ: UTC in docker-compose.yml"

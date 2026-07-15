@@ -60,6 +60,16 @@ def build_schedule_command(
         status=status,
         requested_by=requested_by,
         correlation_id=request_correlation_id(request),
+        source_override_uri=(
+            str(request_body.sourceOverrideUri or "").strip()
+            if request_body.sourceOverrideUri is not None
+            else None
+        ),
+        source_override_format=(
+            str(request_body.sourceOverrideFormat or "").strip().lower()
+            if request_body.sourceOverrideFormat is not None
+            else None
+        ),
     )
 
 

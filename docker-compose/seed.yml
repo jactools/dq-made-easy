@@ -1,0 +1,95 @@
+# ============================================================================
+# SEED: Database and delivery seed services
+# ============================================================================
+
+services:
+  db-seed:
+    profiles: ["seed"]
+    environment:
+      COMPOSE_DATABASE_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
+      DQ_DB_INTERNAL_URL: ${DQ_DB_INTERNAL_URL?DQ_DB_INTERNAL_URL is required}
+      DATABASE_SCHEMA: dq
+      REQUIRE_DATABASE: "true"
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: ${DQ_DB_USER:?DQ_DB_USER is required}
+      PGPASSWORD: ${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required}
+      PGDATABASE: ${DQ_DB_NAME:?DQ_DB_NAME is required}
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL?KEYCLOAK_INTERNAL_URL is required}
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL?KEYCLOAK_PUBLIC_URL is required}
+      SSO_INTERNAL_ISSUER_URL: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      KEYCLOAK_SYSTEM_ADMIN_USERNAME: ${KEYCLOAK_SYSTEM_ADMIN_USERNAME:?KEYCLOAK_SYSTEM_ADMIN_USERNAME is required}
+      KEYCLOAK_SYSTEM_ADMIN_PASSWORD: ${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:?KEYCLOAK_SYSTEM_ADMIN_PASSWORD is required}
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER:?KEYCLOAK_ADMIN_USER is required}
+      KEYCLOAK_ADMIN_PASS: ${KEYCLOAK_ADMIN_PASS:?KEYCLOAK_ADMIN_PASS is required}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}
+      KEYCLOAK_TOKEN_REALM: ${KEYCLOAK_TOKEN_REALM:?KEYCLOAK_TOKEN_REALM is required}
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
+    build:
+      context: ..
+      dockerfile: dq-db/Dockerfile.dq-db.seed
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        INTERNAL_CORPORATE_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+      secrets:
+        - internal_mkcert_root_ca
+        - internal_root_ca
+        - internal_ca_bundle
+    env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
+    entrypoint: ["/bin/bash", "/workspace/dq-db/scripts/run_db_seed_container.sh"]
+    networks:
+      - dq-network
+    volumes:
+      - ../dq-utils:/workspace/dq-utils:ro
+      - ../dq-api/fastapi:/workspace/dq-api/fastapi
+      - ../scripts:/workspace/scripts:ro
+      - ../dq-api/scripts/generate_sql_seeds.py:/workspace/dq-api/scripts/generate_sql_seeds.py:ro
+      - ../dq-api/scripts/quote_mock_data.py:/workspace/dq-api/scripts/quote_mock_data.py:ro
+      - ../dq-db/mock-data:/workspace/dq-db/mock-data:ro
+      - ../dq-db/scripts:/workspace/dq-db/scripts:ro
+      - ../VERSION_MANIFEST.json:/workspace/VERSION_MANIFEST.json:ro
+      - ../docs/contracts/internal-api:/workspace/dq-api/fastapi/docs/contracts/internal-api:ro
+      - ../data_sources/contracts:/workspace/dq-api/fastapi/data_sources/contracts:ro
+      - ../tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    restart: "no"
+
+  delivery-seed:
+    profiles: ["seed"]
+    image: ${DQ_ENGINE_REGISTRY}${DQ_ENGINE_NAMESPACE}${DQ_ENGINE_IMAGE}:${DQ_ENGINE_TAG:?DQ_ENGINE_TAG is required}
+    build:
+      context: ..
+      dockerfile: dq-engine/Dockerfile.engine
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
+        SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:?SKIP_SPARK_WARMUP is required}
+        MKCERT_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+        INTERNAL_CORPORATE_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+    env_file:
+      - ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
+    working_dir: /app
+    volumes:
+      - spark-jars:/home/appuser/.dq-spark-jars
+      - ivy2_cache:/home/appuser/.ivy2
+    entrypoint: ["python", "scripts/seed_delivery_objects.py"]
+    environment:
+      DQ_S3_ENDPOINT: ${DQ_S3_ENDPOINT:?DQ_S3_ENDPOINT is required}
+      DQ_S3_ACCESS_KEY: ${DQ_S3_ACCESS_KEY:?DQ_S3_ACCESS_KEY is required}
+      DQ_S3_SECRET_KEY: ${DQ_S3_SECRET_KEY:?DQ_S3_SECRET_KEY is required}
+      DQ_S3_REGION: ${DQ_S3_REGION:?DQ_S3_REGION is required}
+      DQ_S3_SSL_ENABLED: ${DQ_S3_SSL_ENABLED:?DQ_S3_SSL_ENABLED is required}
+      DQ_S3_PATH_STYLE_ACCESS: ${DQ_S3_PATH_STYLE_ACCESS:?DQ_S3_PATH_STYLE_ACCESS is required}
+      DQ_SPARK_MASTER: ${DQ_SPARK_MASTER:?DQ_SPARK_MASTER is required}
+      DQ_SPARK_DRIVER_HOST: 127.0.0.1
+      DQ_SPARK_DRIVER_BIND_ADDRESS: 0.0.0.0
+      DQ_SPARK_DRIVER_MEMORY: ${DQ_SPARK_DRIVER_MEMORY:?DQ_SPARK_DRIVER_MEMORY is required}
+      DQ_SPARK_EXECUTOR_MEMORY: ${DQ_SPARK_EXECUTOR_MEMORY:?DQ_SPARK_EXECUTOR_MEMORY is required}
+      DQ_SPARK_DRIVER_MAX_RESULT_SIZE: ${DQ_SPARK_DRIVER_MAX_RESULT_SIZE:?DQ_SPARK_DRIVER_MAX_RESULT_SIZE is required}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:?JAVA_TOOL_OPTIONS is required}
+      DQ_DELIVERY_OUTPUT_BUCKET: ${DQ_DELIVERY_OUTPUT_BUCKET:?DQ_DELIVERY_OUTPUT_BUCKET is required}
+      TZ: UTC
+    networks:
+      - dq-network
+    restart: "no"
+

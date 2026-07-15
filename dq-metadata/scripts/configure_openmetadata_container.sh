@@ -43,26 +43,46 @@ openmetadata_base_path_prefix() {
 }
 
 resolve_openmetadata_login_email() {
-  local seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
+  # Prefer mounted seed credentials file (fresh from keycloak-seed-artifacts)
+  # over env var (which may be stale from a previous startup run).
+  local seed_creds_file="/etc/openmetadata/seed-credentials.env"
+  local seed_username=""
+  if [ -f "$seed_creds_file" ]; then
+    seed_username="$(grep '^SMOKE_LOGIN_EMAIL=' "$seed_creds_file" 2>/dev/null | cut -d= -f2- || true)"
+  fi
+  # Fallback to env var if file not available
+  if [ -z "$seed_username" ]; then
+    seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
+  fi
 
   if [ -n "$seed_username" ]; then
     printf '%s\n' "$seed_username"
     return 0
   fi
 
-  echo "ERROR: OPENMETADATA_OIDC_SEED_USERNAME is required" >&2
+  echo "ERROR: OPENMETADATA_OIDC_SEED_USERNAME is required and not found in seed credentials" >&2
   return 1
 }
 
 resolve_openmetadata_seed_password() {
-  local seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
+  # Prefer mounted seed credentials file (fresh from keycloak-seed-artifacts)
+  # over env var (which may be stale from a previous startup run).
+  local seed_creds_file="/etc/openmetadata/seed-credentials.env"
+  local seed_password=""
+  if [ -f "$seed_creds_file" ]; then
+    seed_password="$(grep '^SMOKE_LOGIN_PASSWORD=' "$seed_creds_file" 2>/dev/null | cut -d= -f2- || true)"
+  fi
+  # Fallback to env var if file not available
+  if [ -z "$seed_password" ]; then
+    seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
+  fi
 
   if [ -n "$seed_password" ]; then
     printf '%s' "$seed_password"
     return 0
   fi
 
-  echo "ERROR: OPENMETADATA_OIDC_SEED_PASSWORD is required" >&2
+  echo "ERROR: OPENMETADATA_OIDC_SEED_PASSWORD is required and not found in seed credentials" >&2
   return 1
 }
 
@@ -270,25 +290,27 @@ prepare_openmetadata_access_token() {
   local om_probe_code
   local kc_realm_url
 
+  if [ "$om_provider" != "custom-oidc" ]; then
+    return 0
+  fi
+
+  # If OM_TOKEN was pre-set (e.g. by the host script via compose env), use it directly.
   if [ -n "${OM_TOKEN:-}" ]; then
     echo "Using preconfigured OM_TOKEN for OpenMetadata automation."
     return 0
   fi
 
-  if [ "$om_provider" != "custom-oidc" ]; then
-    return 0
-  fi
-
-  seed_username="$(resolve_openmetadata_login_email)" || return 1
-  seed_password="$(resolve_openmetadata_seed_password)" || return 1
-
   kc_realm_url="$(resolve_openmetadata_oidc_issuer)" || return 1
   token_endpoint="${kc_realm_url}/protocol/openid-connect/token"
 
   local realm_probe_code
+  local ca_bundle="/etc/openmetadata/certs/internal-ca-bundle.pem"
+  if [ ! -f "$ca_bundle" ]; then
+    ca_bundle="/etc/openmetadata/certs/mkcert-rootCA.pem"
+  fi
   echo "Waiting for Keycloak realm at ${kc_realm_url}..."
   for i in $(seq 1 20); do
-    realm_probe_code="$(curl -s -o /dev/null -w '%{http_code}' \
+    realm_probe_code="$(curl -s --cacert "$ca_bundle" -o /dev/null -w '%{http_code}' \
       "${kc_realm_url}/.well-known/openid-configuration" || true)"
     if [ "$realm_probe_code" = "200" ]; then
       break
@@ -301,7 +323,33 @@ prepare_openmetadata_access_token() {
     return 1
   fi
 
-  if ! OM_TOKEN="$(curl -fsS -X POST "$token_endpoint" \
+  # Try client credentials grant first (openmetadata-admin service account).
+  local om_admin_client_id="${OM_ADMIN_CLIENT_ID:-openmetadata-admin}"
+  local om_admin_client_secret="${OM_ADMIN_CLIENT_SECRET:-}"
+  if [ -n "$om_admin_client_secret" ]; then
+    if OM_TOKEN="$(curl -fsS --cacert "$ca_bundle" -X POST "$token_endpoint" \
+      -H 'Content-Type: application/x-www-form-urlencoded' \
+      --data-urlencode 'grant_type=client_credentials' \
+      --data-urlencode "client_id=$om_admin_client_id" \
+      --data-urlencode "client_secret=$om_admin_client_secret" \
+      | "$python_runner" --python-bin python3 -c 'import json,sys; print(json.load(sys.stdin).get("access_token", ""))' 2>/dev/null)"; then
+      if [ -n "$OM_TOKEN" ]; then
+        om_probe_code="$(curl -ks -o /dev/null -w '%{http_code}' \
+          "https://${OM_SERVER_HOST}:${OM_SERVER_PORT}$(openmetadata_base_path_prefix)/api/v1/system/version" \
+          -H "Authorization: Bearer $OM_TOKEN" || true)"
+        if [ "$om_probe_code" = "200" ]; then
+          echo "Prepared OpenMetadata access token via client credentials grant for $om_admin_client_id."
+          return 0
+        fi
+      fi
+    fi
+  fi
+
+  # Fallback: password grant with seeded user credentials.
+  seed_username="$(resolve_openmetadata_login_email)" || return 1
+  seed_password="$(resolve_openmetadata_seed_password)" || return 1
+
+  if ! OM_TOKEN="$(curl -fsS --cacert "$ca_bundle" -X POST "$token_endpoint" \
     -H 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode 'grant_type=password' \
     --data-urlencode "client_id=$om_client_id" \
@@ -318,7 +366,7 @@ prepare_openmetadata_access_token() {
   fi
 
   om_probe_code="$(curl -ks -o /dev/null -w '%{http_code}' \
-    "https://${OM_SERVER_HOST}:${OM_SERVER_PORT}$(openmetadata_base_path_prefix)/api/v1/users?limit=1" \
+    "https://${OM_SERVER_HOST}:${OM_SERVER_PORT}$(openmetadata_base_path_prefix)/api/v1/system/version" \
     -H "Authorization: Bearer $OM_TOKEN" || true)"
   if [ "$om_probe_code" != "200" ]; then
     echo "ERROR: obtained OIDC token for $seed_username but OpenMetadata API probe returned HTTP $om_probe_code; refusing OpenMetadata local-login fallback." >&2

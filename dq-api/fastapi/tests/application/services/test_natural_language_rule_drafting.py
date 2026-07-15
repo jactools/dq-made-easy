@@ -428,7 +428,7 @@ def test_build_natural_language_rule_preview_payload_for_provider_uses_llm_conte
 ) -> None:
     async def _fake_fetch_llm_rules(*, prompt: str, llm_service_url: str) -> list[str]:
         assert prompt == "Please make this a uniqueness rule"
-        assert llm_service_url == "http://dq-llm:8000"
+        assert llm_service_url == "https://dq-made-easy-llm:8000"
         return ["customer_id"]
 
     monkeypatch.setattr(
@@ -444,7 +444,7 @@ def test_build_natural_language_rule_preview_payload_for_provider_uses_llm_conte
             accessible_workspace_ids=accessible_workspace_ids,
             catalog_repository=preview_catalog_repository,
             analysis_provider="llm",
-            llm_service_url="http://dq-llm:8000",
+            llm_service_url="https://dq-made-easy-llm:8000",
         )
     )
 
@@ -452,7 +452,11 @@ def test_build_natural_language_rule_preview_payload_for_provider_uses_llm_conte
     assert payload["candidate_attributes"][0]["attribute_id"] == "attr-retail-customer-id"
 
 
-def test_fetch_llm_rules_uses_a_user_facing_unavailable_message(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_fetch_llm_rules_uses_a_user_facing_unavailable_message(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    ca_bundle = tmp_path / "ca.pem"
+    ca_bundle.write_text("dummy ca bundle\n", encoding="utf-8")
+    monkeypatch.setenv("DQ_LLM_CA_BUNDLE", str(ca_bundle))
+
     class _FakeAsyncClient:
         def __init__(self, *args, **kwargs) -> None:
             del args, kwargs
@@ -468,7 +472,7 @@ def test_fetch_llm_rules_uses_a_user_facing_unavailable_message(monkeypatch: pyt
             del args, kwargs
             raise httpx.RequestError(
                 "connect failed",
-                request=httpx.Request("POST", "http://dq-llm:8000/extract_rules"),
+                request=httpx.Request("POST", "https://dq-made-easy-llm:8000/extract_rules"),
             )
 
     monkeypatch.setattr(
@@ -483,6 +487,6 @@ def test_fetch_llm_rules_uses_a_user_facing_unavailable_message(monkeypatch: pyt
         asyncio.run(
             __import__("app.application.services.natural_language_rule_drafting", fromlist=["fetch_llm_rules"]).fetch_llm_rules(
                 prompt="Please make this a uniqueness rule",
-                llm_service_url="http://dq-llm:8000",
+                llm_service_url="https://dq-made-easy-llm:8000",
             )
         )

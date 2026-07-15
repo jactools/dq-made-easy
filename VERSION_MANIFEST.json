@@ -1,7 +1,7 @@
 {
   "apps": {
-    "ui": "0.11.4",
-    "api": "0.11.4",
+    "ui": "0.11.6",
+    "api": "0.11.6",
     "base": "0.9-993739e",
     "db": "0.9-372fb2f",
     "redis": "6.0-alpine",
@@ -42,7 +42,7 @@
     "RoleManagement": "0.9.3",
     "AppConfig": "0.9.0",
     "FilterManagement": "0.9.0",
-    "Documentation": "0.11.4",
+    "Documentation": "0.11.6",
     "Report": "0.11.0",
     "DataCatalog": "0.10.4",
     "Audit": "0.9.0",
@@ -52,10 +52,10 @@
     "Sampling": "0.9.0",
     "Monitoring": "0.9.0",
     "Alerting": "0.9.0",
-    "Infrastructure": "0.10.5",
+    "Infrastructure": "0.11.6",
     "DataSources": "0.9.0",
     "Authentication": "0.10.4",
     "Telemetry": "0.9.0",
-    "Testautomation": "0.11.0"
+    "Testautomation": "0.11.6"
   }
 }

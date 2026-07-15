@@ -241,6 +241,7 @@ class PostgresSuggestionsRepository(SuggestionsRepository):
                 updated_at=requested_at,
             )
             session.add(row)
+            session.flush()
             self._append_natural_language_request_history_row(
                 session,
                 request_id=request.request_id,

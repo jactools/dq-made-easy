@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -58,10 +59,15 @@ class OpenMetadataDefinitionImporter:
         self._oidc_client_id = _clean(oidc_client_id)
         self._oidc_client_secret = _clean(oidc_client_secret)
         self._oidc_scope = _clean(oidc_scope)
-        self._oidc_username = _clean(oidc_username)
-        self._oidc_password = _clean(oidc_password)
+        self._oidc_username = str(oidc_username or "").strip()
+        self._oidc_password = str(oidc_password or "").strip()
         self._timeout_seconds = max(int(timeout_seconds), 1)
         self._token_provider, self._token_provider_error = self._initialize_token_provider()
+
+    def _oidc_retry_params(self) -> tuple[int, float]:
+        max_startup_retries = int(os.getenv("DQ_ENGINE_MAX_RETRIES", "3"))
+        retry_backoff_seconds = int(os.getenv("DQ_ENGINE_RETRY_BACKOFF_MS", "2000")) / 1000.0
+        return max_startup_retries, retry_backoff_seconds
 
     def _initialize_token_provider(self) -> tuple[TokenProvider | None, str | None]:
         try:
@@ -85,6 +91,7 @@ class OpenMetadataDefinitionImporter:
 
             token_url = resolve_oidc_token_url(issuer=self._oidc_issuer, token_url=self._oidc_token_url)
             if self._oidc_username or self._oidc_password:
+                max_startup_retries, retry_backoff_seconds = self._oidc_retry_params()
                 return (
                     OidcPasswordTokenProvider(
                         token_url=token_url or "",
@@ -94,6 +101,8 @@ class OpenMetadataDefinitionImporter:
                         password=self._oidc_password,
                         scope=self._oidc_scope or None,
                         timeout_seconds=self._timeout_seconds,
+                        max_startup_retries=max_startup_retries,
+                        retry_backoff_seconds=retry_backoff_seconds,
                     ),
                     None,
                 )

@@ -32,6 +32,7 @@ from app.domain.interfaces.v1.validation_run_plan_repository import ValidationRu
 from app.domain.interfaces.v1.validation_run_repository import ValidationRunRepository
 from app.domain.interfaces.v1.workspaces_repository import WorkspacesRepository
 from app.domain.interfaces.profiling_repository import ProfilingRepository
+from app.domain.interfaces.v1.dq_plan_template_repository import DQPlanTemplateRepository
 
 __all__ = [
 	"AdminRepository",
@@ -68,4 +69,5 @@ __all__ = [
 	"ValidationRunRepository",
 	"WorkspacesRepository",
 	"ProfilingRepository",
+	"DQPlanTemplateRepository",
 ]

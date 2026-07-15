@@ -4,8 +4,8 @@
 # - Copies repo docs and architecture content into the docs-site workspace.
 # - Normalizes copied links so the Docusaurus build can resolve local targets.
 # - Installs docs-site dependencies on demand when the local Docusaurus bin is missing.
-# Version: 1.2
-# Last modified: 2026-06-11
+# Version: 1.4
+# Last modified: 2026-06-30
 
 set -euo pipefail
 
@@ -296,16 +296,26 @@ fi
 
 if [[ ! -x "$docs_site_dir/node_modules/.bin/docusaurus" ]]; then
   echo "[build-public-docs] Installing docs-site dependencies" >&2
-  npm_cache_dir="$repo_root/tmp/npm-cache/dq-ui-docs-site"
-  mkdir -p "$npm_cache_dir"
-  npm_config_cache="$npm_cache_dir" npm --prefix "$docs_site_dir" install --include=dev --no-audit --no-fund --package-lock=false
+  (cd "$repo_root" && npm --prefix "$docs_site_dir" install --include=dev --no-audit --no-fund --package-lock=false)
 fi
 
-"$repo_root/scripts/publish_test_proof.sh"
+if [[ -x "$repo_root/scripts/publish_test_proof.sh" ]]; then
+  "$repo_root/scripts/publish_test_proof.sh"
+else
+  echo "[build-public-docs] Skipping test proof publishing; helper not available at $repo_root/scripts/publish_test_proof.sh" >&2
+fi
 
 prepare_docs_tree "$docs_site_dir/docs"
-copy_docs_contents "$repo_root/docs" "$docs_site_dir/docs"
-copy_docs_tree "$repo_root/architecture" "$docs_site_dir/docs/architecture"
+if [[ -d "$repo_root/docs" ]]; then
+  copy_docs_contents "$repo_root/docs" "$docs_site_dir/docs"
+else
+  echo "[build-public-docs] Skipping repo docs copy; source directory not available at $repo_root/docs" >&2
+fi
+if [[ -d "$repo_root/architecture" ]]; then
+  copy_docs_tree "$repo_root/architecture" "$docs_site_dir/docs/architecture"
+else
+  echo "[build-public-docs] Skipping architecture copy; source directory not available at $repo_root/architecture" >&2
+fi
 rm -f \
   "$docs_site_dir/docs/README.md" \
   "$docs_site_dir/docs/user-manuals/README.md" \

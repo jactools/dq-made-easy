@@ -17,7 +17,7 @@
 ### 1. Start the local development stack
 
 ```bash
-./scripts/common_startup.sh --env dev
+./scripts/stack.sh dev start --seed
 ```
 
 The UI dev server starts on port 5173 by default. The API is available on the configured port behind Kong.

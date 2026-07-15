@@ -3,6 +3,7 @@ import { JoinConsistencyParams } from '../../types/rules'
 import { AppSelect } from '../app-primitives'
 import { useDataProduct } from '../../contexts/DataProductContext'
 import { DataAttribute, DataObject, DataObjectVersion, DataSet } from '../../types/dataProducts'
+import { ActualityDateConfig, type ActualityDateFieldErrors } from './ActualityDateConfig'
 import { JoinConsistencyFieldErrors } from './joinConsistencyValidation'
 import './JoinConsistencyForm.css'
 
@@ -107,14 +108,23 @@ export const JoinConsistencyForm: React.FC<JoinConsistencyFormProps> = ({ params
     emit({ comparisons: source.filter((_, i) => i !== index) })
   }
 
-  const emitActuality = (patch: Partial<JoinConsistencyParams['actualityDate']>) => {
-    emit({
-      actualityDate: {
-        ...defaultParams(params).actualityDate,
-        ...patch,
-      },
-    })
+  const emitActuality = (contract: JoinConsistencyParams['actualityDate']) => {
+    emit({ actualityDate: contract })
   }
+
+  // Map JOIN_CONSISTENCY-specific field errors to the shared component interface
+  const actualityFieldErrors: ActualityDateFieldErrors | undefined = fieldErrors
+    ? {
+        leftAttribute: fieldErrors.actualityLeftAttribute,
+        rightAttribute: fieldErrors.actualityRightAttribute,
+        contractId: fieldErrors.contractId,
+        toleranceSource: fieldErrors.toleranceSource,
+        resolvedToleranceValue: fieldErrors.resolvedToleranceValue,
+        resolvedToleranceUnit: fieldErrors.resolvedToleranceUnit,
+        overrideToleranceValue: fieldErrors.overrideToleranceValue,
+        overrideToleranceUnit: fieldErrors.overrideToleranceUnit,
+      }
+    : undefined
 
   const allDatasets = useMemo(() => {
     const productDatasets = filteredProducts.flatMap(product =>
@@ -300,17 +310,6 @@ export const JoinConsistencyForm: React.FC<JoinConsistencyFormProps> = ({ params
       ...attributes,
     ]
   }
-
-  const actuality = defaultParams(params).actualityDate
-  const overrideAllowed = actuality.overrideAllowed === true
-  const hasResolvedTolerance =
-    actuality.resolvedToleranceValue !== undefined &&
-    actuality.resolvedToleranceValue !== null &&
-    Boolean(actuality.resolvedToleranceUnit)
-
-  const overrideUnitOptions = actuality.maxOverrideToleranceUnit
-    ? [actuality.maxOverrideToleranceUnit]
-    : ['minutes', 'hours', 'days']
 
   const formatVersionLabel = (version: DataObjectVersion) => {
     if (version.version < 0) {
@@ -685,163 +684,14 @@ export const JoinConsistencyForm: React.FC<JoinConsistencyFormProps> = ({ params
       </div>
 
       <div className="join-consistency-section">
-        <label className="check-type-form-label">Actuality date contract mapping</label>
-        <div className="check-type-form-row">
-          <div className="check-type-form-field check-type-form-field--half">
-            <select
-              className="modal-input"
-              value={defaultParams(params).actualityDate.leftAttribute}
-              onChange={(e) => emitActuality({ leftAttribute: e.target.value })}
-            >
-              <option value="">Select left actuality attribute</option>
-              {renderAttributeOptions(leftAttributes, defaultParams(params).actualityDate.leftAttribute)}
-            </select>
-            {fieldErrors?.actualityLeftAttribute && (
-              <p className="check-type-form-hint join-consistency-field-error">{fieldErrors.actualityLeftAttribute}</p>
-            )}
-          </div>
-          <div className="check-type-form-field check-type-form-field--half">
-            <select
-              className="modal-input"
-              value={defaultParams(params).actualityDate.rightAttribute}
-              onChange={(e) => emitActuality({ rightAttribute: e.target.value })}
-            >
-              <option value="">Select right actuality attribute</option>
-              {renderAttributeOptions(rightAttributes, defaultParams(params).actualityDate.rightAttribute)}
-            </select>
-            {fieldErrors?.actualityRightAttribute && (
-              <p className="check-type-form-hint join-consistency-field-error">{fieldErrors.actualityRightAttribute}</p>
-            )}
-          </div>
-        </div>
-        <div className="check-type-form-row">
-          <div className="check-type-form-field check-type-form-field--half">
-            <label className="check-type-form-label" htmlFor="ct-jc-contract-id">
-              Contract ID
-            </label>
-            <input
-              id="ct-jc-contract-id"
-              type="text"
-              className="modal-input"
-              value={defaultParams(params).actualityDate.contractId}
-              placeholder="e.g. urn:dq:contract:demo-azure-payments-sql"
-              onChange={(e) => emitActuality({ contractId: e.target.value })}
-            />
-            {fieldErrors?.contractId && (
-              <p className="check-type-form-hint join-consistency-field-error">{fieldErrors.contractId}</p>
-            )}
-          </div>
-          <div className="check-type-form-field check-type-form-field--half">
-            <AppSelect
-              id="ct-jc-tolerance-source"
-              label="Tolerance source"
-              value={defaultParams(params).actualityDate.toleranceSource}
-              onChange={() => emitActuality({ toleranceSource: 'DELIVERY_CONTRACT' })}
-              options={[{ value: 'DELIVERY_CONTRACT', label: 'Delivery contract' }]}
-            />
-          </div>
-        </div>
-
-        <div className="join-consistency-policy-panel">
-          <div className="join-consistency-policy-row">
-            <span className="join-consistency-policy-label">Contract version</span>
-            <span className="join-consistency-policy-value">{actuality.contractVersion || 'Pending resolution'}</span>
-          </div>
-          <div className="join-consistency-policy-row">
-            <span className="join-consistency-policy-label">Resolved tolerance</span>
-            <span className="join-consistency-policy-value">
-              {hasResolvedTolerance
-                ? `${actuality.resolvedToleranceValue} ${actuality.resolvedToleranceUnit}`
-                : 'Will be resolved by contract policy on save'}
-            </span>
-          </div>
-          <div className="join-consistency-policy-row">
-            <span className="join-consistency-policy-label">Override policy</span>
-            <span className="join-consistency-policy-value">
-              {overrideAllowed ? 'Allowed' : 'Not allowed'}
-            </span>
-          </div>
-          {overrideAllowed && actuality.maxOverrideToleranceValue !== undefined && actuality.maxOverrideToleranceValue !== null && actuality.maxOverrideToleranceUnit && (
-            <div className="join-consistency-policy-row">
-              <span className="join-consistency-policy-label">Max override</span>
-              <span className="join-consistency-policy-value">
-                {actuality.maxOverrideToleranceValue} {actuality.maxOverrideToleranceUnit}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {overrideAllowed ? (
-          <div className="check-type-form-row">
-            <div className="check-type-form-field check-type-form-field--half">
-              <label className="check-type-form-label" htmlFor="ct-jc-override-tolerance-value">
-                Override tolerance value
-              </label>
-              <input
-                id="ct-jc-override-tolerance-value"
-                type="number"
-                className="modal-input"
-                min={0}
-                step={1}
-                value={actuality.overrideToleranceValue ?? ''}
-                onChange={(e) => {
-                  const raw = String(e.target.value || '').trim()
-                  if (!raw) {
-                    emitActuality({ overrideToleranceValue: undefined, overrideToleranceUnit: undefined })
-                    return
-                  }
-                  const nextValue = Number(raw)
-                  if (!Number.isFinite(nextValue)) {
-                    return
-                  }
-                  emitActuality({
-                    overrideToleranceValue: Math.max(0, Math.floor(nextValue)),
-                    overrideToleranceUnit:
-                      actuality.overrideToleranceUnit ||
-                      actuality.maxOverrideToleranceUnit ||
-                      actuality.resolvedToleranceUnit ||
-                      'hours',
-                  })
-                }}
-              />
-              {fieldErrors?.overrideToleranceValue && (
-                <p className="check-type-form-hint join-consistency-field-error">{fieldErrors.overrideToleranceValue}</p>
-              )}
-            </div>
-            <div className="check-type-form-field check-type-form-field--half">
-              <label className="check-type-form-label" htmlFor="ct-jc-override-tolerance-unit">
-                Override tolerance unit
-              </label>
-              <select
-                id="ct-jc-override-tolerance-unit"
-                className="modal-input"
-                value={actuality.overrideToleranceUnit || ''}
-                onChange={(e) => {
-                  const unit = String(e.target.value || '') as 'minutes' | 'hours' | 'days'
-                  if (!unit) {
-                    emitActuality({ overrideToleranceUnit: undefined, overrideToleranceValue: undefined })
-                    return
-                  }
-                  emitActuality({ overrideToleranceUnit: unit })
-                }}
-              >
-                <option value="">Select unit</option>
-                {overrideUnitOptions.map(unit => (
-                  <option key={unit} value={unit}>
-                    {unit}
-                  </option>
-                ))}
-              </select>
-              {fieldErrors?.overrideToleranceUnit && (
-                <p className="check-type-form-hint join-consistency-field-error">{fieldErrors.overrideToleranceUnit}</p>
-              )}
-            </div>
-          </div>
-        ) : (
-          <p className="check-type-form-hint">
-            Contract policy currently disallows actuality-date override values. Resolved tolerance is authoritative.
-          </p>
-        )}
+        <ActualityDateConfig
+          value={defaultParams(params).actualityDate}
+          onChange={(contract) => emitActuality(contract)}
+          leftAttributes={leftAttributes.map((attr) => attr.name)}
+          rightAttributes={rightAttributes.map((attr) => attr.name)}
+          fieldErrors={actualityFieldErrors}
+          idPrefix="ct-jc-actuality"
+        />
       </div>
 
       <div className="check-type-form-row">

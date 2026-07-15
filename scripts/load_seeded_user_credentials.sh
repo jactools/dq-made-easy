@@ -6,8 +6,8 @@ set -euo pipefail
 # - Resolves the canonical root env file using the shared --env/--env-file selector.
 # - Sources the selected root env file so downstream scripts inherit stack URLs and client ids.
 # - Sources the matching tmp/keycloak_seed_user_credentials.<stage>.env file.
-# Version: 1.0
-# Last modified: 2026-05-01
+# Version: 1.1
+# Last modified: 2026-07-01
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -119,13 +119,15 @@ dq_load_seeded_user_credentials_main() {
   local quiet="false"
   local credentials_env_file=""
   local stage=""
+  local preserved_pip_index_url="${PIP_INDEX_URL:-}"
+  local preserved_maven_repositories="${MAVEN_REPOSITORIES:-}"
 
   init_root_env_file "$ROOT_DIR"
 
   if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
     return 1
   fi
-  set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+  set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -147,6 +149,16 @@ dq_load_seeded_user_credentials_main() {
 
   if ! source_selected_root_env_file; then
     return 1
+  fi
+
+  # Keep previously-derived package index settings from setup_env.sh when this
+  # helper is sourced after env bootstrap. The root env file may intentionally
+  # leave PIP_INDEX_URL blank and rely on runtime derivation.
+  if [[ -z "${PIP_INDEX_URL:-}" && -n "$preserved_pip_index_url" ]]; then
+    export PIP_INDEX_URL="$preserved_pip_index_url"
+  fi
+  if [[ -z "${MAVEN_REPOSITORIES:-}" && -n "$preserved_maven_repositories" ]]; then
+    export MAVEN_REPOSITORIES="$preserved_maven_repositories"
   fi
 
   stage="$(dq_normalize_stage "${ENVIRONMENT:-}")"

@@ -278,6 +278,8 @@ def test_initialize_token_provider_supports_static_password_and_client_credentia
         "password": "secret",
         "scope": "openid",
         "timeout_seconds": 7,
+        "max_startup_retries": 3,
+        "retry_backoff_seconds": 2.0,
     }
 
     client_resolver = OpenMetadataRegistryDefinitionResolver(

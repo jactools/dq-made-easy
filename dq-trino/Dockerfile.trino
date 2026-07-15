@@ -1,0 +1,17 @@
+ARG TRINO_BASE_IMAGE=trinodb/trino:482
+FROM ${TRINO_BASE_IMAGE}
+
+ARG MKCERT_ROOT_CA
+
+RUN mkdir -p /tmp/trino-hive-metastore && chown trino:trino /tmp/trino-hive-metastore
+
+RUN if [ -n "${MKCERT_ROOT_CA:-}" ] && [ -f "${MKCERT_ROOT_CA}" ]; then \
+	cp "${MKCERT_ROOT_CA}" /tmp/mkcert-rootCA.crt; \
+	keytool -importcert -noprompt -storepass changeit -cacerts -alias mkcert-root-ca -file /tmp/mkcert-rootCA.crt; \
+	rm -f /tmp/mkcert-rootCA.crt; \
+	fi
+
+COPY etc/catalog/ /etc/trino/catalog/
+
+LABEL version="0.1.0"
+LABEL description="Data Quality Made Easy Trino coordinator service"

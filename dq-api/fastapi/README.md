@@ -35,8 +35,8 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 4010
 ## Unit tests and coverage
 
 ```bash
-cd dq-api/fastapi
-pip install -r requirements-dev.txt
+cd <repo-root>
+pip install -r dq-api/fastapi/requirements-dev.txt
 ./scripts/testing/run_unit_with_pylint.sh
 ```
 

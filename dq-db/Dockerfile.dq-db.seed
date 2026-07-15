@@ -40,9 +40,9 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
         echo "Importing internal root CA into system truststore"; \
         import_ca_file /run/secrets/internal_root_ca /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
     fi; \
-    if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ]; then \
+    if [ -n "${INTERNAL_CORPORATE_ROOT_CA:-}" ] && [ -f "${INTERNAL_CORPORATE_ROOT_CA}" ]; then \
         echo "Importing internal corporate root CA into system truststore"; \
-        printf '%s' "$INTERNAL_CORPORATE_ROOT_CA" | base64 -d > /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
+        cp "${INTERNAL_CORPORATE_ROOT_CA}" /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
     fi; \
     if [ -f /run/secrets/internal_ca_bundle ]; then \
         echo "Importing internal certificate bundle into system truststore"; \
@@ -51,7 +51,7 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
     update-ca-certificates || true; \
     install -d /usr/share/keyrings \
     && curl -fsSL --insecure https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo \"$VERSION_CODENAME\")-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo \"$VERSION_CODENAME\")-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends postgresql-client-18 \
     && PIP_CERT=/etc/ssl/certs/ca-certificates.crt PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r /tmp/requirements.txt \

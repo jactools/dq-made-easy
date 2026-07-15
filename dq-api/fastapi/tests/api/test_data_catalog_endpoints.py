@@ -1294,3 +1294,41 @@ def test_data_definition_pending_approval_does_not_import(monkeypatch) -> None:
     assert response.status_code == 200
     assert importer.imported_contracts == []
     assert suggestions_repository.update_calls[0]["result"]["review_status"] == "pending_board_review"
+
+
+def test_data_definition_task_status_reports_running_with_worker_heartbeat(monkeypatch) -> None:
+    monkeypatch.setenv("SSO_ENABLED", "true")
+    monkeypatch.setenv("SSO_PUBLIC_ISSUER_URL", "http://keycloak.local:8080/realms/jaccloud")
+    monkeypatch.setenv("SSO_CLIENT_ID", "dq-rules-ui")
+    get_settings.cache_clear()
+
+    record = {
+        "request_id": "dd-task-running-1",
+        "job_id": "job-running-1",
+        "current_workspace_id": "retail-banking",
+        "version_id": "version-1",
+        "selected_attribute_ids": ["attr-1"],
+        "prompt": "Generate data definitions",
+        "requested_by_user_id": "user-123",
+        "requested_at": "2026-05-26T12:00:00+00:00",
+        "started_at": "2026-05-26T12:01:00+00:00",
+        "status": "started",
+        "analysis_type": "definition_task",
+        "analysis_provider": "llm",
+        "auto_import": False,
+        "task_payload": {},
+        "result": None,
+    }
+
+    monkeypatch.setattr(data_catalog_endpoints, "load_request_record_from_settings", lambda settings, request_id: record)
+    monkeypatch.setattr(data_catalog_endpoints, "load_request_worker_heartbeat_from_settings", lambda settings, request_id: {"status": "running"})
+
+    response = client.get(
+        "/api/data-catalog/v1/data-definition-tasks/requests/dd-task-running-1/status",
+        headers=_auth_headers("dq:rules:read"),
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["request"]["status"] == "started"
+    assert payload["request"]["monitoring_state"] == "running"

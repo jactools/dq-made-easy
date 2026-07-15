@@ -132,7 +132,7 @@ main() {
   local stack_files
   local file_path
 
-  stack_files="${ROOT_DIR}/docker-compose.yml ${ROOT_DIR}/dq-metadata/docker-compose.yml"
+  stack_files="${ROOT_DIR}/docker-compose/ ${ROOT_DIR}/dq-metadata/docker-compose.yml"
 
   info "$my_name" "Checking repository-managed stack definitions for SEC-4 egress policy drift..."
 

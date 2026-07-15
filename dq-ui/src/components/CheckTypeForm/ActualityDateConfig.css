@@ -1,0 +1,96 @@
+/* ----------------------------------------------------------------------- */
+/* ActualityDateConfig shared section                                     */
+/* ----------------------------------------------------------------------- */
+
+.actuality-date-config {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  background: var(--app-surface-primary);
+}
+
+.actuality-date-config__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.actuality-date-config__title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--app-text-primary);
+}
+
+.actuality-date-config__hint {
+  font-size: 0.75rem;
+  color: var(--app-text-secondary);
+  margin: 0;
+}
+
+.actuality-date-config__row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.actuality-date-config__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.actuality-date-config__field--half {
+  flex: 1;
+  min-width: 0;
+}
+
+.actuality-date-config__field .check-type-form-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--app-text-secondary);
+}
+
+.actuality-date-config__error {
+  font-size: 0.7rem;
+  color: var(--app-status-error-text);
+  display: block;
+}
+
+/* Policy info panel */
+.actuality-date-config__policy-panel {
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--app-border-subtle);
+  border-radius: 6px;
+  background: var(--app-surface-secondary);
+}
+
+.actuality-date-config__policy-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.actuality-date-config__policy-row + .actuality-date-config__policy-row {
+  margin-top: 0.25rem;
+}
+
+.actuality-date-config__policy-label {
+  color: var(--app-text-secondary);
+}
+
+.actuality-date-config__policy-value {
+  color: var(--app-text-primary);
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .actuality-date-config__row {
+    flex-direction: column;
+  }
+}

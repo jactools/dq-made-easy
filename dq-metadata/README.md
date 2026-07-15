@@ -46,7 +46,7 @@ docker compose --env-file ../.env.dev.local --profile metadata-ingestion up -d
 
 - OpenMetadata UI/API: `https://openmetadata.jac.dot:8585`
 - OpenMetadata version API: `https://openmetadata.jac.dot:8585/api/v1/system/version`
-- Airflow UI (ingestion, optional): `http://localhost:18080`
+- Airflow UI (ingestion, optional): `https://localhost:18080`
 - PostgreSQL (host mapped): `localhost:13306`
 - Elasticsearch (host mapped): `localhost:19200`
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dq-made-easy-airflow-operator"
-version = "0.1.1"
+version = "0.1.2"
 description = "Airflow 3 operator for dq-made-easy validation run plans."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -24,7 +24,7 @@ The data-catalog API now persists immutable natural-language draft request histo
 | Test File Count | 1 |
 | Test Count | 33 |
 | Command | cd /Users/jacbeekers/gitrepos/dq-rulebuilder/dq-api/fastapi &amp;&amp; APP_CONFIG_ENCRYPTION_KEY='ksYUPwhhthla8CFag5CLNRqEYhwPIOHKkxfEgkVn9zk=' PYTHONPATH=/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-utils/src:/Users/jacbeekers/gitrepos/dq-rulebuilder/dq-domain-validation/src /Users/jacbeekers/gitrepos/dq-rulebuilder/scripts/python_arm64.sh --python-bin /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest -o addopts='' tests/api/test_data_catalog_endpoints.py -q |
-| Raw Evidence Directory | test-results/evidence/0.11.2/command/20260605T213922Z-ws8-a01-data-catalog-history |
+| Raw Evidence Directory | test-results/evidence/0.11.3/api/ws8-a01-data-catalog-history-2026-06-05 |
 
 ## Test Files
 
@@ -32,7 +32,7 @@ The data-catalog API now persists immutable natural-language draft request histo
 
 ## Assertions
 
-- The new GET /api/data-catalog/v1/data-definition-tasks/requests/{request_id}/history endpoint returned 200 for an existing request and exposed the append-only request trail.
+- The new GET /api/data-catalog/v1/data-definition-tasks/requests/&#123;request_id&#125;/history endpoint returned 200 for an existing request and exposed the append-only request trail.
 - The internal API contract registry resolved the new history route after the aggregate bundle was updated.
 - The full data-catalog API regression file still passed after the contract and repository changes.
 

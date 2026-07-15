@@ -12,7 +12,7 @@ Introduce a future-ready multi-runtime lowerer architecture for the DQ Engine so
 - Make runtime support explicit and capability-driven.
 - Prefer fail-fast behavior for unsupported semantics.
 - Reuse the neutral artifact and execution abstraction seams already established by the engine work.
-- Keep Spark/GX as the default path until the new lowerers are validated.
+- Keep Spark/GX as the compatibility path; prefer Trino and DuckDB as the primary non-JVM execution targets, and treat any PySpark/Spark Expectations-adjacent work as preview-only until validated.
 
 ## Phase 0 — Architecture baseline
 
@@ -133,7 +133,7 @@ Validate the lowerers in a repeatable way before broad rollout.
 
 ### Deliverables
 
-- Add focused regression suites for Trino, Polars, and Dask paths.
+- Add focused regression suites for Trino, Polars, and DuckDB paths.
 - Add integration tests with local or containerized environments where possible.
 - Capture proof artifacts under the repo’s test evidence structure.
 - Keep the new engines opt-in until stability is demonstrated.
@@ -148,9 +148,8 @@ Validate the lowerers in a repeatable way before broad rollout.
 1. Shared lowerer interface and capability registry.
 2. Trino lowerer.
 3. Polars lowerer.
-4. Dask / Dask-SQL lowerer.
-5. Runtime dispatch and evidence integration.
-6. Rollout and hardening.
+4. Runtime dispatch and evidence integration.
+5. Rollout and hardening.
 
 ## Non-goals for the first iteration
 
@@ -161,6 +160,6 @@ Validate the lowerers in a repeatable way before broad rollout.
 
 ## Open questions
 
-- Should Trino and Dask-SQL use a common SQL-plan abstraction or separate engine-native adapters?
-- Should Polars use a lazy-expression path or eager execution first?
-- Which rule families should be prioritized for the initial release of each engine?
+- Should Trino and Dask-SQL use a common SQL-plan abstraction or separate engine-native adapters? ==> common SQL--lan
+- Should Polars use a lazy-expression path or eager execution first? ==> Lazy
+- Which rule families should be prioritized for the initial release of each engine? to-be-determined

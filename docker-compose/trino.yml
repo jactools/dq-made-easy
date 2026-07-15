@@ -1,0 +1,23 @@
+# ============================================================================
+# TRINO: Trino analytics engine
+# ============================================================================
+
+services:
+  trino:
+    profiles: ["trino"]
+    image: ${DQ_TRINO_REGISTRY:?DQ_TRINO_REGISTRY is required}${DQ_TRINO_NAMESPACE:-}${DQ_TRINO_IMAGE:?DQ_TRINO_IMAGE is required}:${DQ_TRINO_TAG:?DQ_TRINO_TAG is required}
+    build:
+      context: ../dq-trino
+      dockerfile: Dockerfile.trino
+      args:
+        TRINO_BASE_IMAGE: ${TRINO_BASE_IMAGE:?TRINO_BASE_IMAGE is required}
+        MKCERT_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+    container_name: dq-made-easy-trino
+    ports:
+      - "${TRINO_HOST_BIND:?TRINO_HOST_BIND is required}:${TRINO_HOST_PORT:?TRINO_HOST_PORT is required}:8080"
+    environment:
+      TZ: UTC
+    networks:
+      - dq-network
+    restart: unless-stopped
+

@@ -1,4 +1,0 @@
-[console_scripts]
-dq-mcp-server = dq_cli.mcp_server:main
-dq-onboard = dq_cli.onboard:main
-dq-run-plan = dq_cli.run_plan:main

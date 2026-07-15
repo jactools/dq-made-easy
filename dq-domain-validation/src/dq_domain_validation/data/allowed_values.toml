@@ -204,8 +204,8 @@ description = "Allowed modes for transfer-match checks."
 values = ["row_value_match", "payload_hash_match"]
 
 [allowed_values."rule_check_type.tolerance_source"]
-description = "Allowed tolerance source values for join consistency checks."
-values = ["DELIVERY_CONTRACT"]
+description = "Allowed tolerance source values for cross-object actuality-date contracts."
+values = ["DELIVERY_CONTRACT", "DELIVERY_METADATA", "EXPLICIT"]
 
 [allowed_values."rule_check_type.tolerance_unit"]
 description = "Allowed tolerance units for join consistency checks."

@@ -1,0 +1,36 @@
+parameters:
+  - name: imageName
+    type: string
+  - name: imageTag
+    type: string
+    default: latest
+  - name: imageDigest
+    type: string
+    default: ''
+  - name: outputVariableName
+    type: string
+    default: DEPLOY_IMAGE_REF
+
+steps:
+  - bash: |
+      set -euo pipefail
+
+      image_name='${{ parameters.imageName }}'
+      image_tag='${{ parameters.imageTag }}'
+      image_digest='${{ parameters.imageDigest }}'
+      output_var='${{ parameters.outputVariableName }}'
+
+      if [[ -z "$image_name" ]]; then
+        echo "imageName is required" >&2
+        exit 1
+      fi
+
+      if [[ -n "$image_digest" ]]; then
+        image_ref="${image_name}@${image_digest}"
+      else
+        image_ref="${image_name}:${image_tag}"
+      fi
+
+      echo "Resolved image reference: $image_ref"
+      echo "##vso[task.setvariable variable=${output_var}]${image_ref}"
+    displayName: Resolve deploy image reference

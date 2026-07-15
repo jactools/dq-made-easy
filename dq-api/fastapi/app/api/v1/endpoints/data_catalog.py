@@ -92,6 +92,7 @@ from app.application.services.data_definition_task_service import require_approv
 from app.application.services.natural_language_draft_enqueue_service import enqueue_natural_language_draft_job
 from app.application.services.natural_language_draft_enqueue_service import build_request_status_event_payload
 from app.application.services.natural_language_draft_enqueue_service import load_request_record_from_settings
+from app.application.services.natural_language_draft_enqueue_service import load_request_worker_heartbeat_from_settings
 from app.application.services.natural_language_draft_enqueue_service import NaturalLanguageDraftEnqueueServiceError
 from app.application.services.natural_language_draft_enqueue_service import open_request_event_stream_client
 from app.application.services.natural_language_draft_enqueue_service import read_request_status_events
@@ -153,6 +154,7 @@ def _build_definition_task_status_view(record: Mapping[str, Any]) -> DataDefinit
             "completedAt": record.get("completed_at"),
             "status": str(record.get("status") or "pending"),
             "errorMessage": record.get("error_message"),
+            "monitoringState": str(record.get("monitoring_state") or record.get("monitoringState") or "unavailable"),
             "analysisType": str(record.get("analysis_type") or ANALYSIS_TYPE_DEFINITION_TASK),
             "analysisProvider": str(record.get("analysis_provider") or "llm"),
             "autoImport": bool(record.get("auto_import")),
@@ -160,6 +162,22 @@ def _build_definition_task_status_view(record: Mapping[str, Any]) -> DataDefinit
             "result": record.get("result"),
         }
     )
+
+
+def _definition_task_monitoring_state(record: Mapping[str, Any], settings: Any) -> str:
+    status = str(record.get("status") or "pending").strip().lower()
+    if status in {"completed", "failed"}:
+        return "terminal"
+
+    if status != "started":
+        return "unavailable"
+
+    try:
+        heartbeat = load_request_worker_heartbeat_from_settings(settings, str(record.get("request_id") or ""))
+    except Exception:
+        return "unavailable"
+
+    return "running" if heartbeat else "stale"
 
 
 def _build_definition_task_audit_event_view(record: Mapping[str, Any]) -> DataDefinitionTaskAuditEventView:
@@ -972,7 +990,7 @@ async def get_data_definition_task_status(request_id: str) -> JSONResponse:
     return JSONResponse(
         status_code=200,
         content=DataDefinitionTaskStatusResponseView(
-            request=_build_definition_task_status_view(record),
+            request=_build_definition_task_status_view({**dict(record), "monitoringState": _definition_task_monitoring_state(record, get_settings())}),
         ).model_dump(by_alias=True, mode="json"),
     )
 
@@ -1065,6 +1083,13 @@ async def list_data_definition_tasks(
                     "analysis_type": request_entity.analysis_type,
                     "analysis_provider": request_entity.analysis_provider,
                     "result": request_entity.result,
+                    "monitoringState": _definition_task_monitoring_state(
+                        {
+                            "request_id": request_entity.request_id,
+                            "status": request_entity.status,
+                        },
+                        get_settings(),
+                    ),
                 }
             )
             for request_entity in filtered

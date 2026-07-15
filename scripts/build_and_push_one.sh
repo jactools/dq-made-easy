@@ -9,8 +9,8 @@ set -euo pipefail
 # - Delegates to the service-specific build script.
 # - Optionally overrides the version tag.
 #
-# Version: 1.0
-# Last modified: 2026-04-07
+# Version: 1.1
+# Last modified: 2026-07-01
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -24,6 +24,7 @@ NO_CACHE=false
 NO_PUSH=false
 VERSION_TAG=""
 SERVICE=""
+REPO_IMAGE=""
 
 usage() {
   cat <<EOF
@@ -44,6 +45,11 @@ Images:
   dq-kong
   dq-db
   dq-keycloak
+  dq-kafka
+  dq-kafka-consumer
+  dq-trino
+  dq-edge
+  dq-airflow
   dq-llm
 
 Options:
@@ -62,14 +68,12 @@ fi
 SERVICE="$1"
 shift
 
-DIRECT_DQ_LLM=false
-
 if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   usage
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 export ROOT_ENV_FILE
 
 while [[ $# -gt 0 ]]; do
@@ -139,10 +143,35 @@ case "$SERVICE" in
     STEP_SCRIPT="$ROOT_DIR/dq-keycloak/scripts/build_and_push.sh"
     TAG_VAR="DQ_KEYCLOAK_TAG"
     ;;
+  dq-kafka)
+    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
+    TAG_VAR="DQ_KAFKA_TAG"
+    REPO_IMAGE="dq-made-easy-kafka"
+    ;;
+  dq-kafka-consumer)
+    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
+    TAG_VAR="DQ_KAFKA_CONSUMER_TAG"
+    REPO_IMAGE="dq-made-easy-kafka-consumer"
+    ;;
+  dq-trino)
+    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
+    TAG_VAR="DQ_TRINO_TAG"
+    REPO_IMAGE="dq-made-easy-trino"
+    ;;
+  dq-edge)
+    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
+    TAG_VAR="DQ_EDGE_TAG"
+    REPO_IMAGE="dq-made-easy-edge"
+    ;;
+  dq-airflow)
+    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
+    TAG_VAR="DQ_AIRFLOW_TAG"
+    REPO_IMAGE="dq-made-easy-airflow"
+    ;;
   dq-llm)
-    DIRECT_DQ_LLM=true
     STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
     TAG_VAR="DQ_LLM_TAG"
+    REPO_IMAGE="dq-made-easy-llm"
     ;;
   *)
     error "$my_name" "Unknown image '$SERVICE'"
@@ -151,11 +180,11 @@ case "$SERVICE" in
     ;;
 esac
 
-if [[ "$DIRECT_DQ_LLM" != true && ! -f "$STEP_SCRIPT" ]]; then
+if [[ -z "$REPO_IMAGE" && ! -f "$STEP_SCRIPT" ]]; then
   error "$my_name" "Script not found: $STEP_SCRIPT"
   exit 1
 fi
-if [[ "$DIRECT_DQ_LLM" != true ]]; then
+if [[ -z "$REPO_IMAGE" ]]; then
   [[ -x "$STEP_SCRIPT" ]] || chmod +x "$STEP_SCRIPT"
 fi
 
@@ -193,10 +222,17 @@ info "$my_name" "Push:  $push_state"
 info "$my_name" "========================================"
 
 export "$TAG_VAR=$TAG_VALUE"
-if [[ "$DIRECT_DQ_LLM" == true ]]; then
-  "$ROOT_DIR/scripts/build_and_push_all.sh" --image dq-llm "${SCRIPT_ARGS[@]}"
+if [[ -n "$REPO_IMAGE" ]]; then
+  repo_script_args=("--image" "$REPO_IMAGE")
+  if [[ -n "$VERSION_TAG" ]]; then
+    repo_script_args+=("--version" "$VERSION_TAG")
+  fi
+  "$ROOT_DIR/scripts/build_and_push_all.sh" "${repo_script_args[@]}" "${SCRIPT_ARGS[@]}"
 else
   "$STEP_SCRIPT" "${SCRIPT_ARGS[@]}"
+  if [[ "$NO_PUSH" == false ]]; then
+    bash "$ROOT_DIR/scripts/update_docker_hub.sh" --image "$SERVICE"
+  fi
 fi
 
 info "$my_name" ""

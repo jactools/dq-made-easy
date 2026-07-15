@@ -18,8 +18,8 @@ set -euo pipefail
 #
 # validate: groups=api,regression
 #
-# Version: 1.3
-# Last modified: 2026-06-01
+# Version: 1.4
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.3 (2026-06-01): Construct proposal_id as template_id::data_object_version_id::attribute_id instead of reading a non-existent .proposal_id field.
 # - 1.2 (2026-06-01): Load env via root_env_file.sh; bake in seeded workspace name constant; remove all external env-var dependencies.
@@ -48,7 +48,7 @@ init_root_env_file "$ROOT_DIR"
 if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 validate_selected_root_env_file "$ROOT_DIR" full
 

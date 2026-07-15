@@ -5,10 +5,10 @@ Last updated: 2026-04-27
 Owner: Product + UI + API
 
 Related documents:
-- [Management feature summary](../status/current/MANAGEMENT_FEATURE_SUMMARY.md)
+- [Management feature summary](../features/MANAGEMENT_FEATURE_SUMMARY.md)
 - [DQ-1 Rule Validation User Guide](../user-manuals/DQ-1_RULE_VALIDATION_USER_GUIDE.md)
 - [DQ-1 Enhanced Rule Validation Logic — Implementation Progress](./DQ_1_ENHANCED_RULE_VALIDATION_PROGRESS.md)
-- [API-7 Real DQ Rule Execution](../status/current/API_7_REAL_DQ_RULE_EXECUTION.md)
+- [API-7 Real DQ Rule Execution](../features/API_7_REAL_DQ_RULE_EXECUTION.md)
 
 ## Goal
 

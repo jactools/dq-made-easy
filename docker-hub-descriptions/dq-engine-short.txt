@@ -1,1 +1,0 @@
-Python-based data quality rule execution engine with multi-database support

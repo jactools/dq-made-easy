@@ -209,6 +209,11 @@ Browser-auth notes:
 - `TRUST_PROXY_AUTH=true` must be present for both the API and the Kong bootstrap path.
 - `SSO_PUBLIC_ISSUER_URL` must match the canonical public Keycloak issuer exactly.
 
+Zammad support notes:
+- Zammad derives its browser-facing callback host from its stored `http_type` and `fqdn` settings, so the live app config must match the public support URL.
+- Zammad discovers Keycloak through the internal Docker-network issuer for token/userinfo validation, while the browser still uses the public authorization endpoint.
+- The `zammad-https` container must receive both `ZAMMAD_SSL_CERT_FILE_NAME` and `ZAMMAD_SSL_KEY_FILE_NAME`; those filenames must match the certificate pair mounted in `tmp/certs/`.
+
 ## Minimal Deployment (Without Source Code)
 
 If you don't want to clone the full repository, create these files:

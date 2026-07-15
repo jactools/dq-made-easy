@@ -1,0 +1,44 @@
+{
+  "checks": {
+    "large_result_persisted_sample_within_bounds": true,
+    "large_result_row_count_preserved": true,
+    "large_result_sample_within_bounds": true,
+    "large_result_truncation_preserved": true,
+    "lowering_throughput_within_bounds": true,
+    "pipeline_throughput_within_bounds": true
+  },
+  "executed_at_utc": "2026-06-30T16:40:13.791896+00:00",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "python_version": "3.13.9",
+  "results": {
+    "large_result_guardrail": {
+      "elapsed_seconds": 0.0012199170014355332,
+      "persisted_row_count": 2500000,
+      "persisted_sample_count": 20,
+      "persisted_truncated": true,
+      "result_row_count": 2500000,
+      "result_rows_sample_count": 20,
+      "result_rows_truncated": true
+    },
+    "lowering": {
+      "elapsed_seconds": 0.01684074999866425,
+      "iterations": 10000,
+      "rule_count": 7,
+      "rules_per_second": 593797.7822123816
+    },
+    "pipeline": {
+      "elapsed_seconds": 0.005466457998409169,
+      "iterations": 1000,
+      "mean_ms": 0.005399893951107515,
+      "p95_ms": 0.005500001861946657,
+      "runs_per_second": 182933.812038987
+    }
+  },
+  "status": "passed",
+  "thresholds": {
+    "max_bounded_sample_rows": 20,
+    "min_lowering_rules_per_second": 1000.0,
+    "min_pipeline_runs_per_second": 100.0
+  },
+  "validation": "dq-engine-trino-phase1-benchmark"
+}

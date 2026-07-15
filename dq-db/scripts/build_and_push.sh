@@ -21,6 +21,8 @@ if ! source_selected_root_env_file; then
     exit 1
 fi
 
+source "$ROOT_DIR/../scripts/supporting/setup_env.sh"
+
 # Restore exported TAG if it was previously set
 if [ -n "$SAVED_DQ_DB_TAG" ]; then
     DQ_DB_TAG="$SAVED_DQ_DB_TAG"

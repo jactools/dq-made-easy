@@ -14,17 +14,12 @@ set -euo pipefail
 # Last modified: 2026-05-01
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-OBS_COMPOSE="${ROOT_DIR}/docker-compose.yml"
-APP_COMPOSE="${ROOT_DIR}/docker-compose.yml"
+OBS_COMPOSE="${ROOT_DIR}/docker-compose/"
+APP_COMPOSE="${ROOT_DIR}/docker-compose/"
 
-# Load repo defaults when available so hostnames/ports match local stack.
-# (Do not source setup_env.sh here; it may perform docker login and other side-effects.)
-if [ -f "${ROOT_DIR}/.env" ]; then
-  set +u
-  # shellcheck disable=SC1091
-  . "${ROOT_DIR}/.env"
-  set -u
-fi
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+init_root_env_file "$ROOT_DIR"
+source_selected_root_env_file
 
 # shellcheck disable=SC1091
 # shellcheck disable=SC1091
@@ -51,7 +46,7 @@ fi
 export KEYCLOAK_PUBLIC_HOSTNAME
 
 if [ -z "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" ]; then
-  OTEL_EXPORTER_OTLP_ENDPOINT="http://dq-made-easy-otel-collector:4317"
+  OTEL_EXPORTER_OTLP_ENDPOINT="https://dq-made-easy-otel-collector:4318"
 fi
 export OTEL_EXPORTER_OTLP_ENDPOINT
 
@@ -67,7 +62,7 @@ if [ "$KONG_ADMIN_BIND_HOST" = "0.0.0.0" ] || [ "$KONG_ADMIN_BIND_HOST" = "::" ]
   KONG_ADMIN_BIND_HOST="127.0.0.1"
 fi
 KONG_ADMIN_PORT="${KONG_ADMIN_HOST_PORT:-8001}"
-KONG_ADMIN_URL="http://${KONG_ADMIN_BIND_HOST}:${KONG_ADMIN_PORT}"
+KONG_ADMIN_URL="https://${KONG_ADMIN_BIND_HOST}:${KONG_ADMIN_PORT}"
 GRAFANA_URL="${GRAFANA_PUBLIC_URL:-}"
 if [[ -z "$GRAFANA_URL" ]]; then
   error "validate_ui_api_trace_propagation.sh" "GRAFANA_PUBLIC_URL or GRAFANA_URL must be set"
@@ -81,8 +76,8 @@ if [[ -z "${GRAFANA_ADMIN_USER:-}" || -z "${GRAFANA_ADMIN_PASSWORD:-}" ]]; then
   exit 1
 fi
 GRAFANA_COOKIE_HEADER=""
-UI_ORIGIN_PRIMARY="${UI_ORIGIN_PRIMARY:-${UI_NGINX_LOCAL_URL:-http://${UI_HOSTNAME}:5173}}"
-UI_ORIGIN_SECONDARY="${UI_ORIGIN_SECONDARY:-${UI_VITE_LOCAL_URL:-http://${UI_HOSTNAME}:5174}}"
+UI_ORIGIN_PRIMARY="${UI_ORIGIN_PRIMARY:-${UI_NGINX_LOCAL_URL:-https://${UI_HOSTNAME}:5173}}"
+UI_ORIGIN_SECONDARY="${UI_ORIGIN_SECONDARY:-${UI_VITE_LOCAL_URL:-https://${UI_HOSTNAME}:5174}}"
 UI_ORIGIN="${UI_ORIGIN:-${UI_ORIGIN_PRIMARY}}"
 TRACE_ATTEMPTS="${TRACE_ATTEMPTS:-24}"
 TEMPO_SEARCH_POLLS="${TEMPO_SEARCH_POLLS:-36}"

@@ -7,12 +7,13 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-DOCKER_DIR="$ROOT_DIR"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SERVICE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$SERVICE_DIR"
+DOCKER_DIR="$SERVICE_DIR"
 
-source "$ROOT_DIR/../scripts/supporting/root_env_file.sh"
-init_root_env_file "$ROOT_DIR/.."
+source "$SERVICE_DIR/../scripts/supporting/root_env_file.sh"
+init_root_env_file "$SERVICE_DIR/.."
 
 # Preserve TAG variables that may have been exported from parent
 SAVED_DQ_PROFILING_TAG="${DQ_PROFILING_TAG:-}"
@@ -21,6 +22,8 @@ SAVED_DQ_BASE_TAG="${DQ_BASE_TAG:-}"
 if ! source_selected_root_env_file; then
     exit 1
 fi
+
+source "$SERVICE_DIR/../scripts/supporting/setup_env.sh"
 
 # Restore exported TAGs if they were previously set
 if [ -n "$SAVED_DQ_PROFILING_TAG" ]; then

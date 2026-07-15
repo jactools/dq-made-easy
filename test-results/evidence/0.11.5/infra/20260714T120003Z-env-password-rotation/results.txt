@@ -1,0 +1,9 @@
+=== seed_password_rotation.py --no-admin-rotate test ===
+PASS: rotated env file created
+PASS: DQ_DB_PASSWORD unchanged (admin)
+PASS: KEYCLOAK_SYSTEM_ADMIN_PASSWORD unchanged (admin)
+PASS: DQ_ENGINE_OIDC_CLIENT_SECRET rotated (service)
+PASS: GRAFANA_OIDC_SECRET rotated (service)
+PASS: DB_HOST unchanged (non-password)
+
+Total: 6 passed, 0 failed

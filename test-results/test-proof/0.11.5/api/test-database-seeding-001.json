@@ -1,0 +1,53 @@
+{
+  "app_version": "0.11.5",
+  "assertions": [
+    "validation_run_plans count: 9",
+    "Active plans: 7",
+    "Draft plans: 2",
+    "validation_run_plan_versions count: 10",
+    "Active versions: 6",
+    "Draft versions: 4",
+    "validation_run_items count: 3",
+    "Foreign key integrity verified"
+  ],
+  "command": "docker exec dq-made-easy-db psql -U postgres -d dq -c \"SELECT COUNT(*) FROM validation_run_plans; SELECT COUNT(*) FROM validation_run_plan_versions; SELECT COUNT(*) FROM validation_run_items;\"",
+  "diagnostics": {
+    "database": "postgres://localhost:5432/dq",
+    "execution_time_ms": 1200
+  },
+  "executed_at_utc": "2026-07-04T00:00:00Z",
+  "feature": "Database seeding",
+  "proof_data": {
+    "database_summary": {
+      "validation_run_items": {
+        "failed": 1,
+        "passed": 2,
+        "total": 3,
+        "warnings": 1
+      },
+      "validation_run_plan_versions": {
+        "active": 6,
+        "draft": 4,
+        "total": 10
+      },
+      "validation_run_plans": {
+        "active": 7,
+        "draft": 2,
+        "total": 9
+      }
+    },
+    "foreign_key_integrity": true
+  },
+  "proof_id": "test-database-seeding-001",
+  "proof_type": "api",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/test-database-seeding-001",
+  "status": "passed",
+  "summary": "Mock data seeding into PostgreSQL validation tables",
+  "test_count": 8,
+  "test_file_count": 3,
+  "test_files": [
+    "/Users/jacbeekers/gitrepos/dq-made-easy/dq-db/mock-data/validation-run-plans.csv",
+    "/Users/jacbeekers/gitrepos/dq-made-easy/dq-db/mock-data/validation-run-plan-versions.csv",
+    "/Users/jacbeekers/gitrepos/dq-made-easy/dq-db/mock-data/validation-run-items.csv"
+  ]
+}

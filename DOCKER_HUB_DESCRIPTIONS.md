@@ -1,8 +1,16 @@
 # Docker Hub Repository Descriptions
 
-This document contains the repository overview descriptions for each Docker image on Docker Hub.
+⚠️ **DEPRECATED** — This document describes v0.3.0 (legacy). 
+
+**For current v0.11.5+ documentation, see [DOCKER_SERVICES_REFERENCE.md](DOCKER_SERVICES_REFERENCE.md)** which covers all 22+ active services, deployment profiles, observability stack, and TLS security configuration.
 
 ---
+
+## Legacy Content (v0.3.0)
+
+The following describes services as they existed in the 0.3.0 release. Most services have been significantly evolved or replaced. This document is retained for historical reference only.
+
+
 
 ## docker.io/jacbeekers/npm-base
 

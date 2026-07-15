@@ -58,6 +58,7 @@ class GxExecutionRunView(SnakeModel):
     resolvedDataDeliveryId: str | None = None
     executionProgress: GxExecutionProgressView | None = None
     resultSummary: dict[str, Any] = Field(default_factory=dict)
+    metrics: dict[str, Any] | None = None
     performanceSummary: dict[str, Any] | None = None
     diagnostics: list[dict[str, Any]] = Field(default_factory=list)
     failureCode: str | None = None

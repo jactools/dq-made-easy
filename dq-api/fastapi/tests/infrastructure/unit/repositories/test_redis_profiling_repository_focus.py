@@ -25,6 +25,25 @@ def _install_fake_redis(monkeypatch: pytest.MonkeyPatch, client: _FakeRedisClien
     monkeypatch.setattr("app.infrastructure.repositories.redis_profiling_repository.redis.Redis", lambda **kwargs: client)
 
 
+def test_repository_initializes_tls_enabled_redis_client(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+    client = _FakeRedisClient()
+
+    def _fake_redis(**kwargs):
+        captured.update(kwargs)
+        return client
+
+    monkeypatch.setattr("app.infrastructure.repositories.redis_profiling_repository.redis.Redis", _fake_redis)
+
+    repository = RedisProfilingRepository(redis_host="example")
+
+    assert repository._client is client
+    assert captured["ssl"] is True
+    assert captured["ssl_cert_reqs"] == "required"
+    assert captured["ssl_check_hostname"] is True
+    assert str(captured["ssl_ca_certs"]).endswith("internal-ca-bundle.pem")
+
+
 def _request(*, status: str | None = None, job_id: str | None = None) -> ProfilingRequest:
     return ProfilingRequest(
         id=None,

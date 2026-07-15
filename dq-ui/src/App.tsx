@@ -34,7 +34,7 @@ import { ApplicationSettings } from './components/ApplicationSettings'
 import { RoleManagement } from './components/RoleManagement'
 import { UserManagement } from './components/UserManagement'
 import { snakeToCamel } from './utils/caseConverters'
-import { IconGallery } from './components/IconGallery'
+import { UIRegistryAdmin } from './components/UIRegistryAdmin'
 import { ValidationRunPlansAdmin } from './components/GxRunPlansAdmin'
 import { GxSuitesAdmin } from './components/GxSuitesAdmin'
 import { AccessRequestsDashboard } from './components/AccessRequestsDashboard'
@@ -61,7 +61,7 @@ import {
   ExceptionRecordHandling,
   RuleExecutionMonitoring,
 } from './components/features'
-import { DEFAULT_STYLE_PACKAGE } from './contexts/styleThemeCatalog'
+import { DEFAULT_STYLE_PACKAGE, type StyleRegistryStyle } from './contexts/styleThemeCatalog'
 
 const RULE_VALIDATION_NAV_SELECTION_KEY = 'dq-rule-validation-navigation-selection'
 
@@ -89,6 +89,7 @@ const NAV_SCOPE_REQUIREMENTS: Array<{ match: RegExp; scopes: string[] }> = [
   { match: /^(data-browser|data-browser-|definition-mappings)/, scopes: ['dq:data_catalog:read', 'dq:data_catalog:*', 'dq:*'] },
   { match: /^data-assets$/, scopes: ['dq:data_catalog:read', 'dq:data_catalog:write', 'dq:data_catalog:*', 'dq:*'] },
   { match: /^(delivery-inventory|delivery-inventory-)/, scopes: ['dq:data_catalog:read', 'dq:data_catalog:*', 'dq:*'] },
+  { match: /^reports-agent-access$/, scopes: ['dq:admin:read'] },
   { match: /^(reports|reports-)/, scopes: ['dq:reports:read', 'dq:reports:*', 'dq:*'] },
   { match: /^discussions$/, scopes: ['dq:rules:approve', 'dq:reports:read', 'dq:data_catalog:read', 'dq:workspace:read', 'dq:*'] },
   { match: /^(audit|audit-)/, scopes: ['dq:audit:read', 'dq:audit:*', 'dq:*'] },
@@ -159,6 +160,7 @@ function AppContent() {
     message: '',
   })
   const [authToken, setAuthToken] = useState<string | null>(() => getAuthToken())
+  const [uiRegistryStyles, setUiRegistryStyles] = useState<readonly StyleRegistryStyle[] | null>(null)
   const auth = useAuth()
   const settings = useSettings()
   const allowLocalAuth = settings.applicationSettings?.allowLocalAuth === true
@@ -216,11 +218,55 @@ function AppContent() {
     setLoginModalOpen(true)
   }, [auth.currentWorkspaceId, auth.isAuthenticated, auth.user, loginModalOpen])
 
+  useEffect(() => {
+    const apiBaseUrl = settings.applicationSettings?.apiBaseUrl
+    if (!apiBaseUrl || !authToken) {
+      setUiRegistryStyles(null)
+      return
+    }
+
+    let cancelled = false
+
+    const loadUiRegistry = async () => {
+      try {
+        const apiBase = toApiGroupV1Base('system', apiBaseUrl)
+        const response = await fetch(`${apiBase}/ui-registry`, {
+          headers: {
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+        })
+
+        if (!response.ok || cancelled) {
+          return
+        }
+
+        const view = (await response.json()) as { styles?: StyleRegistryStyle[] }
+        if (!cancelled) {
+          setUiRegistryStyles(Array.isArray(view.styles) ? view.styles : [])
+        }
+      } catch {
+        if (!cancelled) {
+          setUiRegistryStyles(null)
+        }
+      }
+    }
+
+    void loadUiRegistry()
+
+    return () => {
+      cancelled = true
+    }
+  }, [authToken, settings.applicationSettings?.apiBaseUrl])
+
   const isAdminUser = auth.getCurrentUserRole() === 'admin'
 
   const hasNavAccess = useCallback((navId: string): boolean => {
+    if (navId === 'administration-ui-registry') {
+      return isAdminUser
+    }
+
     if (navId === 'administration-connectors') {
-      return hasAdminWorkspaceAccess
+      return isAdminUser
     }
 
     const requirement = NAV_SCOPE_REQUIREMENTS.find((entry) => entry.match.test(navId))
@@ -242,7 +288,7 @@ function AppContent() {
     }
 
     return true
-  }, [auth, hasAdminWorkspaceAccess])
+  }, [auth, hasAdminWorkspaceAccess, isAdminUser])
 
   const handleNavigate = useCallback((nextNav: string) => {
     const normalizedNextNav = NAV_SECTION_DEFAULTS[nextNav] || nextNav
@@ -550,7 +596,7 @@ function AppContent() {
 
   if (maintenanceState.enabled && !isAdminUser) {
     return (
-      <StyleThemeProvider stylePackage={stylePackage}>
+      <StyleThemeProvider stylePackage={stylePackage} registryStyles={uiRegistryStyles}>
         <div className="app maintenance-mode" data-theme={effectiveTheme} data-app-theme={effectiveTheme}>
           <Header
             onLoginClick={() => setLoginModalOpen(true)}
@@ -587,7 +633,7 @@ function AppContent() {
 
   if (publicDocsRoute) {
     return (
-      <StyleThemeProvider stylePackage={stylePackage}>
+      <StyleThemeProvider stylePackage={stylePackage} registryStyles={uiRegistryStyles}>
         <div className="app public-documentation" data-theme={effectiveTheme} data-app-theme={effectiveTheme}>
           <main className="app-main app-main-full">
             <div className="app-content">
@@ -606,7 +652,7 @@ function AppContent() {
   }
 
   return (
-    <StyleThemeProvider stylePackage={stylePackage}>
+    <StyleThemeProvider stylePackage={stylePackage} registryStyles={uiRegistryStyles}>
       <div className="app" data-theme={effectiveTheme} data-app-theme={effectiveTheme}>
       <Header
         onLoginClick={() => setLoginModalOpen(true)}
@@ -731,9 +777,9 @@ function AppContent() {
               {(activeNav === 'reports' || activeNav.startsWith('reports-')) && (
                 hasNavAccess(activeNav) && (
                 <>
-                  {(activeNav === 'reports' || activeNav === 'reports-metrics' || activeNav === 'reports-test-results' || activeNav === 'reports-incidents' || activeNav === 'reports-reconciliation') && (
+                  {(activeNav === 'reports' || activeNav === 'reports-metrics' || activeNav === 'reports-agent-access' || activeNav === 'reports-data-definition' || activeNav === 'reports-test-results' || activeNav === 'reports-incidents' || activeNav === 'reports-reconciliation') && (
                     <Reports
-                      initialTab={activeNav === 'reports-test-results' ? 'test-results' : activeNav === 'reports-incidents' ? 'incidents' : activeNav === 'reports-reconciliation' ? 'reconciliation' : 'metrics'}
+                      initialTab={activeNav === 'reports-test-results' ? 'test-results' : activeNav === 'reports-agent-access' ? 'agent-access' : activeNav === 'reports-data-definition' ? 'data-definition' : activeNav === 'reports-incidents' ? 'incidents' : activeNav === 'reports-reconciliation' ? 'reconciliation' : 'metrics'}
                       onNavigate={handleNavigate}
                     />
                   )}
@@ -790,11 +836,11 @@ function AppContent() {
                   {activeNav === 'administration-connectors' && <ConnectorWorkbench />}
                   {activeNav === 'administration-system-metrics' && <SystemMetrics />}
                   {activeNav === 'administration-application' && <ApplicationSettings />}
+                  {activeNav === 'administration-ui-registry' && <UIRegistryAdmin />}
                   {activeNav === 'administration-users' && <UserManagement />}
                   {activeNav === 'administration-roles' && <RoleManagement />}
                   {activeNav === 'administration-gx-run-plans' && <ValidationRunPlansAdmin />}
                   {activeNav === 'administration-gx-suites' && <GxSuitesAdmin />}
-                  {activeNav === 'administration-icon-gallery' && <IconGallery />}
                 </>
                 )
               )}

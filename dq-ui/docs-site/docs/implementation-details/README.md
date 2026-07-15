@@ -1,51 +1,57 @@
-# Implementation Details
+# Docker Compose Split - Implementation Details
 
-Use this folder for implementation notes, phase reports, and deep-dive execution docs.
+This directory contains documentation for the Docker Compose split migration from a monolithic file to modular files.
 
-## Observability & Monitoring
+## Documentation
 
-- [OBSERVABILITY_SETUP.md](/docs/implementation-details/OBSERVABILITY_SETUP/) — Complete observability stack architecture and design (Loki + Prometheus + Tempo + Grafana)
-- [OBSERVABILITY_QUICKSTART.md](/docs/implementation-details/OBSERVABILITY_QUICKSTART/) — Quick start guide with 5-minute setup and instrumentation examples
-- [OPENTELEMETRY_IMPLEMENTATION.md](/docs/implementation-details/OPENTELEMETRY_IMPLEMENTATION/) — Detailed OpenTelemetry instrumentation patterns, span enrichment, custom metrics, and trace propagation
+| Document | Description |
+|----------|-------------|
+| [DOCKER_COMPOSE_SPLIT_MIGRATION.md](/docs/implementation-details/DOCKER_COMPOSE_SPLIT_MIGRATION/) | Complete migration guide with step-by-step instructions |
+| [DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE.md](/docs/implementation-details/DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE/) | Quick reference for common commands and usage patterns |
+| [DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING.md](/docs/implementation-details/DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING/) | Troubleshooting guide for common issues |
 
-## Gateway & Ingress
+## Overview
 
-- [KONG_SINGLE_HTTPS_INGRESS_TARGET_ARCHITECTURE.md](/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_TARGET_ARCHITECTURE/) — Exact target-state architecture for one public HTTPS edge on port 443, with Kong retained as the API gateway behind the edge
-- [KONG_SINGLE_HTTPS_INGRESS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_IMPLEMENTATION_PLAN/) — Concrete implementation plan for docker-compose, Kong assumptions, env files, and local `*.jac.dot` execution on the single-edge model
-- [KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST.md](/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/) — File-by-file implementation checklist for moving public apps behind Kong and removing direct service exposure
-- [KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX.md](/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX/) — Application-by-application cutover matrix with break risks and verification tasks
+The Docker Compose configuration has been split from:
+- **Before**: 1 file, 2,079 lines, 86 services
+- **After**: 12 modular files, ~1,587 lines total, 86 services
 
-## Documentation Publishing
+### Key Benefits
 
-- [USER_MANUALS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/USER_MANUALS_IMPLEMENTATION_PLAN/) — Checkable implementation plan for topic-focused user manuals, static HTML publishing, and UI navigation
+1. **Improved Maintainability**: Each file is 150-300 lines vs 2,000+
+2. **Reduced Duplication**: YAML anchors for shared configurations
+3. **Better Organization**: Services grouped by function
+4. **Enhanced Collaboration**: Teams can work on different files
+5. **Faster Operations**: Docker Compose parses smaller files faster
 
-## Historical / Deprecated
+### New File Structure
 
-- [DQ_4_NEW_RULE_TYPES_PROGRESS.md](/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/) — Historical progress log for the pre-DSL 2.0 typed check-type builder
-- [DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS.md](/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/) — Historical GX orchestration note superseded by the DQ-7 DSL 2.0 contract and implementation plan
+```
+docker-compose/
+├── docker-compose.yml     # Main include file
+├── base.yml              # Shared configs & anchors
+├── core.yml              # Core services (db, redis, kafka, api, frontend)
+├── engine.yml            # Engine services
+├── observability.yml     # Monitoring (prometheus, grafana, exporters)
+├── support.yml           # Zammad support
+├── metadata.yml          # OpenMetadata
+├── auth.yml              # Keycloak
+├── gateway.yml           # Kong
+├── llm.yml               # LLM services
+├── seed.yml              # Initialization
+├── trino.yml             # Trino
+└── airflow.yml           # Airflow
+```
 
-## Current implementation-detail sources
+## Getting Started
 
-- [DQ_RULE_TO_RUN_PLAN_FLOW.md](/docs/implementation-details/DQ_RULE_TO_RUN_PLAN_FLOW/)
-- [ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS.md](/docs/implementation-details/ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS/)
-- [ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS.md](/docs/implementation-details/ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS/)
-- [ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_DETAILS.md](/docs/implementation-details/ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_DETAILS/)
-- [BUSINESS_KEY_IMPLEMENTATION_DETAILS.md](/docs/implementation-details/BUSINESS_KEY_IMPLEMENTATION_DETAILS/)
-- [API_7_DATA_DELIVERY_RESOLUTION.md](/docs/implementation-details/API_7_DATA_DELIVERY_RESOLUTION/)
-- [API_5_IMPLEMENTATION_PLAN.md](/docs/implementation-details/API_5_IMPLEMENTATION_PLAN/)
-- [API_5_PHASE_2_COMPLETE.md](/docs/implementation-details/API_5_PHASE_2_COMPLETE/)
-- [API_5_PHASE_4_COMPLETE.md](/docs/implementation-details/API_5_PHASE_4_COMPLETE/)
-- [API_5_PHASE_5_UI_INTEGRATION.md](/docs/implementation-details/API_5_PHASE_5_UI_INTEGRATION/)
-- [API_6_FASTAPI_MIGRATION.md](/docs/implementation-details/API_6_FASTAPI_MIGRATION/)
-- [DQ_1_RULE_VALIDATION_STANDARD_FEATURE_IMPLEMENTATION_PLAN.md](/docs/implementation-details/DQ_1_RULE_VALIDATION_STANDARD_FEATURE_IMPLEMENTATION_PLAN/)
-- [DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN.md](/docs/implementation-details/DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN/)
-- [DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS.md](/docs/implementation-details/DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS/)
-- [FRONTEND_UI_LIBRARY_ABSTRACTION_IMPLEMENTATION_APPROACH.md](https://github.com/jactools/dq-rulebuilder/blob/main/FRONTEND_UI_LIBRARY_ABSTRACTION_IMPLEMENTATION_APPROACH.md)
-- [FRONTEND_UI_PORTABILITY_ACTION_PLAN.md](https://github.com/jactools/dq-rulebuilder/blob/main/FRONTEND_UI_PORTABILITY_ACTION_PLAN.md)
-- [UI_PORTABILITY_RDS_REMOVAL_RESPONSE_PLAN.md](https://github.com/jactools/dq-rulebuilder/blob/main/UI_PORTABILITY_RDS_REMOVAL_RESPONSE_PLAN.md)
-- [docs/technical/API_6_FASTAPI_MIGRATION_GUIDE.md](/docs/technical/API_6_FASTAPI_MIGRATION_GUIDE/)
-- [PROFILING_IMPLEMENTATION.md](/docs/implementation-details/PROFILING_IMPLEMENTATION/)
-- [SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/)
-- [SEC_2_POST_QUANTUM_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_2_POST_QUANTUM_IMPLEMENTATION_PLAN/)
-- [WF-3_IMPLEMENTATION_PHASE_1.md](/docs/implementation-details/WF-3_IMPLEMENTATION_PHASE_1/)
-- [WF-3_IMPLEMENTATION_COMPLETE.md](/docs/implementation-details/WF-3_IMPLEMENTATION_COMPLETE/)
+1. **Read the Migration Guide** for complete instructions: [DOCKER_COMPOSE_SPLIT_MIGRATION.md](/docs/implementation-details/DOCKER_COMPOSE_SPLIT_MIGRATION/)
+
+2. **Use the Quick Reference** for common commands: [DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE.md](/docs/implementation-details/DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE/)
+
+3. **Check Troubleshooting** if you encounter issues: [DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING.md](/docs/implementation-details/DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING/)
+
+## Support
+
+- Slack: #devops
+- GitHub: Create issue with docker-compose label

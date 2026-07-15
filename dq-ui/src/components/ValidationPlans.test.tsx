@@ -14,6 +14,7 @@ vi.mock('../hooks/useKeycloak', () => ({
 
 vi.mock('../hooks/useContexts', () => ({
   useSettings: () => mockUseSettings(),
+  useSettingsOptional: () => mockUseSettings(),
 }))
 
 vi.mock('../contexts/AuthContext', () => ({
@@ -88,6 +89,29 @@ describe('ValidationPlans', () => {
                 },
               ],
             },
+            {
+              run_plan_id: 'run-plan-2',
+              workspace_id: 'retail-banking',
+              scope_selector: { tag_ids: ['finance'] },
+              planning_mode: 'multi_suite',
+              status: 'draft',
+              current_active_version_id: 'run-plan-version-9',
+              pending_version_id: null,
+              pending_version_governance_state: null,
+              activated_by: 'user-ops',
+              activated_at: '2026-04-11T08:00:00Z',
+              last_dispatched_run_id: null,
+              created_at: '2026-04-11T07:00:00Z',
+              updated_at: '2026-04-11T08:00:00Z',
+              versions: [
+                {
+                  run_plan_version_id: 'run-plan-version-9',
+                  governance_state: 'draft',
+                  schedule_definition: { scheduled_at: '2026-04-13T08:00:00Z' },
+                  created_at: '2026-04-11T08:00:00Z',
+                },
+              ],
+            },
           ],
           validation_suites: [
             {
@@ -105,6 +129,22 @@ describe('ValidationPlans', () => {
                 engine_type: 'gx',
               },
               created_at: '2026-04-10T08:00:00Z',
+            },
+            {
+              run_plan_id: 'run-plan-2',
+              run_plan_version_id: 'run-plan-version-9',
+              governance_state: 'draft',
+              artifact_id: 'suite-2',
+              artifact_version: 2,
+              engine_type: 'airflow',
+              tag_ids: ['finance'],
+              schedule_definition: { scheduled_at: '2026-04-13T08:00:00Z' },
+              artifact_snapshot: {
+                validation_artifact_id: 'suite-2',
+                validation_artifact_version: 2,
+                engine_type: 'airflow',
+              },
+              created_at: '2026-04-11T08:00:00Z',
             },
           ],
         }), { status: 200 })
@@ -224,13 +264,23 @@ describe('ValidationPlans', () => {
     render(<ValidationPlans />)
 
     expect(await screen.findByText('run-plan-1')).toBeTruthy()
-    expect(screen.getByText(/Planning mode: /i)).toBeTruthy()
+    expect(screen.getAllByText(/Planning mode: /i)).toHaveLength(2)
     expect(screen.getAllByText(/Tags: gold, regulatory/i)).toHaveLength(2)
     expect(screen.getByText(/Active version: run-plan-version-2/i)).toBeTruthy()
     expect(screen.getByText('gx')).toBeTruthy()
-    expect(screen.getByText('Recent Runs')).toBeTruthy()
+    expect(screen.getAllByText('Recent Runs')).toHaveLength(2)
     expect(await screen.findByText('run-1')).toBeTruthy()
     expect(screen.getByText(/Customer Order Completeness/i)).toBeTruthy()
+
+    expect(screen.getByText('run-plan-2')).toBeTruthy()
+    expect(screen.getByText('suite-2')).toBeTruthy()
+
+    fireEvent.change(screen.getByLabelText('Search'), { target: { value: 'customer' } })
+
+    expect(screen.getByText('run-plan-1')).toBeTruthy()
+    expect(screen.queryByText('run-plan-2')).toBeNull()
+    expect(screen.getByText('suite-1')).toBeTruthy()
+    expect(screen.queryByText('suite-2')).toBeNull()
 
     fireEvent.click(screen.getByRole('button', { name: /run again/i }))
 

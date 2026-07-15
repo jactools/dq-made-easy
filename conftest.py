@@ -13,7 +13,12 @@ This is a local developer convenience to run the whole test suite in-place.
 
 import importlib.util
 import os
+import subprocess
 import sys
+
+import pytest
+
+from spark_container_test_harness import build_container_test_command, should_route_spark_tests_to_container
 
 ROOT = os.path.dirname(__file__)
 
@@ -40,6 +45,7 @@ os.environ["APP_CONFIG_ENCRYPTION_KEY"] = "i0aU2BE0dzqEVAWxfEsvffw5zw93FjFZrr24R
 # Make commonly-used local package source dirs importable during tests
 local_src_paths = [
     os.path.join(ROOT, "dq-api", "fastapi"),
+    os.path.join(ROOT, "dq-engine"),
     os.path.join(ROOT, "dq-utils", "src"),
     os.path.join(ROOT, "dq-domain-validation", "src"),
 ]
@@ -106,3 +112,25 @@ for name, file_path in plugin_map.items():
         pass
 
 pytest_plugins = list(plugin_map.keys())
+
+
+def pytest_configure(config):
+    """Route Spark Expectations test runs to the containerized validation harness."""
+    if os.getenv("DQ_SPARK_CONTAINER_TESTS_ROUTED") == "1":
+        return
+
+    if os.getenv("DQ_DISABLE_CONTAINER_SPARK_TEST_ROUTING"):
+        return
+
+    invocation_params = getattr(config, "invocation_params", None)
+    args = list(getattr(invocation_params, "args", []) or [])
+    if not args:
+        return
+
+    if should_route_spark_tests_to_container(args):
+        command = build_container_test_command(args)
+        if command:
+            os.environ["DQ_SPARK_CONTAINER_TESTS_ROUTED"] = "1"
+            print(f"Routing Spark Expectations pytest targets to container: {' '.join(command)}", file=sys.stderr)
+            returncode = subprocess.run(command, check=False).returncode
+            raise pytest.exit(f"Spark Expectations pytest run completed with exit code {returncode}", returncode=returncode)

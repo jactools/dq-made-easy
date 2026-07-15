@@ -5,6 +5,7 @@ from app.infrastructure.repositories.in_memory_connector_instance_repository imp
 from app.infrastructure.repositories.in_memory_connector_registry_repository import InMemoryConnectorRegistryRepository
 from app.infrastructure.repositories.in_memory_approvals_repository import InMemoryApprovalsRepository
 from app.infrastructure.repositories.in_memory_app_config_repository import InMemoryAppConfigRepository
+from app.infrastructure.repositories.in_memory_ui_registry_repository import InMemoryUiRegistryRepository
 from app.infrastructure.repositories.in_memory_data_asset_repository import InMemoryDataAssetRepository
 from app.infrastructure.repositories.in_memory_federated_metadata_registry_repository import InMemoryFederatedMetadataRegistryRepository
 from app.infrastructure.repositories.in_memory_data_catalog_repository import InMemoryDataCatalogRepository
@@ -35,6 +36,7 @@ from app.infrastructure.repositories.postgres_approvals_repository import Postgr
 from app.infrastructure.repositories.postgres_app_config_repository import PostgresAppConfigRepository
 from app.infrastructure.repositories.postgres_data_asset_repository import PostgresDataAssetRepository
 from app.infrastructure.repositories.postgres_federated_metadata_registry_repository import PostgresFederatedMetadataRegistryRepository
+from app.infrastructure.repositories.postgres_ui_registry_repository import PostgresUiRegistryRepository
 from app.infrastructure.repositories.postgres_data_catalog_repository import PostgresDataCatalogRepository
 from app.infrastructure.repositories.postgres_data_protection_repository import PostgresDataProtectionRepository
 from app.infrastructure.repositories.postgres_dq_result_event_repository import PostgresDqResultEventRepository
@@ -65,6 +67,8 @@ from app.infrastructure.repositories.in_memory_incident_repository import InMemo
 from app.infrastructure.repositories.postgres_incident_repository import PostgresIncidentRepository
 from app.infrastructure.repositories.in_memory_sla_slo_repository import InMemorySlaSloRepository
 from app.infrastructure.repositories.postgres_sla_slo_repository import PostgresSlaSloRepository
+from app.infrastructure.repositories.postgres_connector_sync_job_repository import PostgresConnectorSyncJobRepository
+from app.infrastructure.repositories.postgres_connector_sync_schedule_repository import PostgresConnectorSyncScheduleRepository
 
 __all__ = [
 	"InMemoryAdminRepository",
@@ -74,6 +78,7 @@ __all__ = [
 	"InMemoryConnectorRegistryRepository",
 	"InMemoryApprovalsRepository",
 	"InMemoryAppConfigRepository",
+	"InMemoryUiRegistryRepository",
 	"InMemoryDataAssetRepository",
 	"InMemoryFederatedMetadataRegistryRepository",
 	"InMemoryOntologyGraphRepository",
@@ -107,6 +112,7 @@ __all__ = [
 	"PostgresAppConfigRepository",
 	"PostgresDataAssetRepository",
 	"PostgresFederatedMetadataRegistryRepository",
+	"PostgresUiRegistryRepository",
 	"PostgresOntologyGraphRepository",
 	"PostgresDataCatalogRepository",
 	"PostgresDataProtectionRepository",
@@ -134,4 +140,6 @@ __all__ = [
 	"InMemoryProfilingRepository",
 	"RedisProfilingRepository",
 	"PostgresProfilingRepository",
+	"PostgresConnectorSyncJobRepository",
+	"PostgresConnectorSyncScheduleRepository",
 ]

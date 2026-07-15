@@ -1,7 +1,10 @@
-## This Dockerfile expects a prebuilt `dist` directory in the build context.
-## Use `./scripts/local_build_frontend.sh` (or your CI) to produce `dq-ui/dist`
-## before building the image. This avoids running `vite` inside the container.
+## Frontend runtime image build.
+## The Vite assets are built locally before this image is assembled.
 
+ARG NODE_REGISTRY=""
+ARG NODE_NAMESPACE=""
+ARG NODE_IMAGE="node"
+ARG NODE_TAG="20-bullseye-slim"
 ARG NGINX_REGISTRY=""
 ARG NGINX_NAMESPACE=""
 ARG NGINX_IMAGE="nginx"
@@ -14,7 +17,7 @@ LABEL description="Data Quality frontend UI (React + Vite)"
 
 WORKDIR /usr/share/nginx/html
 
-# Copy the prebuilt site into nginx html dir
+# Copy the prebuilt site assets into nginx html dir
 COPY dist/ /usr/share/nginx/html/
 
 # Copy runtime config template and startup script for runtime API URL injection
@@ -22,8 +25,9 @@ COPY nginx/runtime-config.template.js /usr/share/nginx/html/runtime-config.templ
 COPY scripts/docker-entrypoint-runtime-config.sh /docker-entrypoint-runtime-config.sh
 RUN chmod +x /docker-entrypoint-runtime-config.sh
 
-# Copy custom nginx config to proxy /api to the api service on the docker network
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+# Copy nginx config template; rendered at startup by the entrypoint script
+# so that cert paths and SNI names are driven by environment variables.
+COPY nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
 
 # RUN ls -la /usr/share/nginx/html/assets/
 

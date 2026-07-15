@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import json
+import os
 import re
 from typing import Any
 
@@ -19,7 +20,8 @@ from app.domain.interfaces import ProfilingRepository
 SUPPORTED_SEARCH_SCOPES = frozenset({"current", "all", "all_across_workspaces"})
 SUPPORTED_CHECK_TYPES = frozenset({"UNIQUENESS", "PRESENT", "REGEX", "RANGE", "ALLOWLIST", "FRESHNESS"})
 SUPPORTED_ANALYSIS_PROVIDERS = frozenset({"rapidfuzz", "llm"})
-DEFAULT_LLM_SERVICE_URL = "http://dq-llm:8000"
+DEFAULT_LLM_SERVICE_URL = "https://dq-made-easy-llm:8000"
+LLM_CA_BUNDLE_ENV = "DQ_LLM_CA_BUNDLE"
 
 CHECK_TYPE_LABELS = {
     "UNIQUENESS": "Uniqueness",
@@ -288,13 +290,31 @@ def _normalize_llm_rules(raw_rules: Any) -> list[str]:
     return normalized_rules
 
 
+def _llm_service_client_kwargs(base_url: str) -> dict[str, Any]:
+    normalized_base_url = str(base_url or "").strip().rstrip("/")
+    if not normalized_base_url.lower().startswith("https://"):
+        return {}
+
+    ca_bundle = str(os.getenv(LLM_CA_BUNDLE_ENV, "")).strip()
+    if not ca_bundle:
+        raise NaturalLanguageDraftingProviderUnavailableError(
+            f"HTTPS LLM service URLs require {LLM_CA_BUNDLE_ENV} to be configured."
+        )
+
+    return {"verify": ca_bundle}
+
+
+def create_llm_service_client(*, base_url: str, timeout_seconds: float) -> httpx.AsyncClient:
+    return httpx.AsyncClient(timeout=timeout_seconds, **_llm_service_client_kwargs(base_url))
+
+
 async def fetch_llm_rules(*, prompt: str, llm_service_url: str = DEFAULT_LLM_SERVICE_URL) -> list[str]:
     normalized_service_url = str(llm_service_url or "").strip().rstrip("/")
     if not normalized_service_url:
         raise NaturalLanguageDraftingProviderResponseError("LLM service URL is not configured.")
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with create_llm_service_client(base_url=normalized_service_url, timeout_seconds=30.0) as client:
             response = await client.post(f"{normalized_service_url}/extract_rules", json={"text": prompt})
     except httpx.TimeoutException as exc:
         raise NaturalLanguageDraftingProviderUnavailableError(

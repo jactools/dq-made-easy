@@ -22,6 +22,8 @@ if ! source_selected_root_env_file; then
     exit 1
 fi
 
+source "$REPO_ROOT/scripts/supporting/setup_env.sh"
+
 # Restore exported TAGs if they were previously set
 if [ -n "$SAVED_DQ_API_TAG" ]; then
     DQ_API_TAG="$SAVED_DQ_API_TAG"

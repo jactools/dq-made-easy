@@ -17,6 +17,7 @@ from app.api.presenters.gx import extract_itsm_ticket_number
 from app.api.presenters.gx import extract_itsm_ticket_url
 from app.api.presenters.support import build_support_delivery_message
 from app.api.presenters.support import build_support_email_message
+from app.api.presenters.support import build_support_email_mailto_url
 from app.api.presenters.support import build_support_request_payload
 from app.api.presenters.support import build_support_teams_payload
 from app.api.presenters.support import build_zammad_ticket_payload
@@ -136,6 +137,7 @@ async def create_support_request(
         smtp_username = str(getattr(app_config, "supportEmailSmtpUsername", "") or "").strip()
         smtp_password = str(getattr(app_config, "supportEmailSmtpPassword", "") or "").strip()
         smtp_from_address = str(getattr(app_config, "supportEmailFromAddress", "") or "").strip() or smtp_username
+        email_mailto_url = build_support_email_mailto_url(recipient_email, request_view, correlation_id, reference_id)
 
         try:
             smtp_port = int(smtp_port_value)
@@ -152,45 +154,36 @@ async def create_support_request(
             )
 
         if not smtp_host or not smtp_username or not smtp_password or not smtp_from_address:
-            increment_gx_failure(surface="support_api", operation="request_support", reason="email_transport_missing")
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": "email_transport_missing",
-                    "message": "Support email SMTP settings are not configured",
-                    "reference_id": reference_id,
-                    "correlation_id": correlation_id,
-                },
+            mailto_url = email_mailto_url
+        else:
+            email_message = build_support_email_message(
+                recipient_email=recipient_email,
+                sender_email=smtp_from_address,
+                request_payload=request_view,
+                correlation_id=correlation_id,
+                reference_id=reference_id,
             )
-
-        email_message = build_support_email_message(
-            recipient_email=recipient_email,
-            sender_email=smtp_from_address,
-            request_payload=request_view,
-            correlation_id=correlation_id,
-            reference_id=reference_id,
-        )
-        try:
-            _send_support_email(
-                smtp_host=smtp_host,
-                smtp_port=smtp_port,
-                smtp_username=smtp_username,
-                smtp_password=smtp_password,
-                message=email_message,
-            )
-        except (OSError, smtplib.SMTPException) as exc:
-            increment_gx_failure(surface="support_api", operation="request_support", reason="email_delivery_failed")
-            _log.exception("Support email delivery failed")
-            raise HTTPException(
-                status_code=503,
-                detail={
-                    "error": "email_delivery_failed",
-                    "message": "Unable to send the support email through the configured SMTP relay",
-                    "reference_id": reference_id,
-                    "correlation_id": correlation_id,
-                },
-            ) from exc
-        mailto_url = None
+            try:
+                _send_support_email(
+                    smtp_host=smtp_host,
+                    smtp_port=smtp_port,
+                    smtp_username=smtp_username,
+                    smtp_password=smtp_password,
+                    message=email_message,
+                )
+            except (OSError, smtplib.SMTPException) as exc:
+                increment_gx_failure(surface="support_api", operation="request_support", reason="email_delivery_failed")
+                _log.exception("Support email delivery failed")
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "error": "email_delivery_failed",
+                        "message": "Unable to send the support email through the configured SMTP relay",
+                        "reference_id": reference_id,
+                        "correlation_id": correlation_id,
+                    },
+                ) from exc
+            mailto_url = None
         delivered_destinations.append("email")
 
     support_payload = build_support_request_payload(request_view, reference_id, correlation_id, user_id)
@@ -364,6 +357,7 @@ async def create_support_request(
         delivered_destinations,
         reference_id,
         recipient_email=recipient_email,
+        email_draft_url=mailto_url,
         ticket_system=it_system,
         ticket_number=ticket_number,
     )

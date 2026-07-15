@@ -4,6 +4,7 @@ from collections.abc import Mapping, Sequence
 from email.message import EmailMessage
 import json
 from typing import TYPE_CHECKING, Any
+from urllib.parse import quote
 
 from dq_domain_validation import allowed_values
 
@@ -114,6 +115,23 @@ def build_support_email_message(
         message["X-Run-Plan-Version-ID"] = run_plan_version_id
     message.set_content(chr(10).join(body_lines))
     return message
+
+
+def build_support_email_mailto_url(
+    recipient_email: str,
+    request_payload: Any,
+    correlation_id: str,
+    reference_id: str,
+) -> str:
+    title = str(_field(request_payload, "title") or "")
+    subject = f"{title} [{reference_id}]"
+    body_lines = build_support_body_lines(request_payload, correlation_id, reference_id)
+
+    return (
+        f"mailto:{quote(recipient_email, safe='@._-')}"
+        f"?subject={quote(subject)}"
+        f"&body={quote(chr(10).join(body_lines))}"
+    )
 
 
 def build_support_request_payload(
@@ -262,12 +280,15 @@ def build_support_delivery_message(
     reference_id: str,
     *,
     recipient_email: str | None = None,
+    email_draft_url: str | None = None,
     ticket_system: str | None = None,
     ticket_number: str | None = None,
 ) -> str:
     destinations = list(delivered_destinations)
     destination_summary = ", ".join(destinations)
     if destinations == ["email"]:
+        if email_draft_url:
+            return f"Prepared email draft for {recipient_email}. Reference ID: {reference_id}"
         return f"Sent email assistance request to {recipient_email}. Reference ID: {reference_id}"
     if destinations == ["teams"]:
         return f"Sent the support request to Teams. Reference ID: {reference_id}"

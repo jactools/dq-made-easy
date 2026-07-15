@@ -1,7 +1,7 @@
 # Stack Shared Shell Primitives Plan
 
-Status: [~] Draft — SHP-01 complete, SHP-02 complete, SHP-03 complete
-Last updated: 2026-05-09
+Status: [~] Draft — SHP-01 complete, SHP-02 complete, SHP-03 complete, SHP-04 complete, SHP-05 complete
+Last updated: 2026-07-14
 
 ## Purpose
 
@@ -39,12 +39,12 @@ This plan covers the shared shell building blocks that multiple stack scripts ca
   - Extract the first implementation module into `scripts/supporting/compose/invocation.sh`.
   - Pilot the module through `scripts/start_stack.sh` before migrating more scripts.
 
-- [ ] SHP-04 Centralize seeded credential loading
+- [x] SHP-04 Centralize seeded credential loading
   - Keep one canonical loader for seeded user credentials and smoke user lookup.
   - Load the matching stage-specific credential artifact from `tmp`.
   - Expose the canonical OpenMetadata seed username and password for callers that need them.
 
-- [ ] SHP-05 Centralize readiness checks
+- [x] SHP-05 Centralize readiness checks
   - Provide reusable readiness helpers for Keycloak and any other required services.
   - Keep readiness loops and failure handling consistent.
   - Ensure readiness helpers stop immediately when dependencies never become healthy.
@@ -74,6 +74,14 @@ This plan covers the shared shell building blocks that multiple stack scripts ca
   - Keep helper names canonical and avoid shims or aliases.
   - Make the helper boundaries explicit before extracting code.
 
+- [x] SHP-11 Centralize stack lifecycle helpers
+  - Add `scripts/supporting/stack_lifecycle.sh` for shared lifecycle operations used by `stack_destroy.sh`, `stack_start.sh`, `stack_stop.sh`, `stack_restart.sh`, and `stack_seed.sh`.
+  - Admin password variable classification (`is_admin_password_var`).
+  - Stateful volume detection and management (`stateful_volumes_exist`, `remove_stateful_volumes`).
+  - Generated artifact cleanup (`remove_generated_artifacts`).
+  - Generated env loading (`load_generated_env`).
+  - Helper: [scripts/supporting/stack_lifecycle.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/stack_lifecycle.sh)
+
 ## Migration Approach
 
 1. Build the new helper structure with one pilot script or script family.
@@ -88,6 +96,7 @@ This plan covers the shared shell building blocks that multiple stack scripts ca
 3. `load_seeded_user_credentials.sh` and auth bootstrap helpers.
 4. `keycloak_readiness.sh` and other reusable readiness loops.
 5. `python_arm64.sh` call sites and repo-root helpers.
+6. `stack_lifecycle.sh` for lifecycle-specific shared operations (volume detection, admin var classification, artifact cleanup).
 
 ## Explicit Non-Goals
 

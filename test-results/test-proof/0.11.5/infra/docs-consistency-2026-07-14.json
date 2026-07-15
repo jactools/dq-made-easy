@@ -1,0 +1,21 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "docs-consistency-2026-07-14",
+  "proof_type": "infra",
+  "feature": "stack-scripts",
+  "summary": "Grep for stack.sh references in key docs; verify lifecycle script listing and password policy documentation. 11 tests passed.",
+  "status": "passed",
+  "executed_at_utc": "2026-07-14T12:00:06+00:00",
+  "command": "grep for stack.sh references in key docs; verify lifecycle script listing",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/infra/20260714T120006Z-docs-consistency",
+  "test_files": [
+    "docs/test-proof/0.11.5/infra/stack-scripts-lifecycle.md"
+  ],
+  "test_file_count": 1,
+  "test_count": 11,
+  "assertions": [
+    "Docs reference stack.sh as the stack orchestrator",
+    "Lifecycle scripts are listed with correct names",
+    "Password rotation policy is documented"
+  ]
+}

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dq-ingress-frontend
+  labels:
+    app.kubernetes.io/name: dq-ingress-frontend
+    app.kubernetes.io/part-of: dq-made-easy
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - dq-placeholder.local
+      secretName: dq-tls-cert
+  rules:
+    - host: dq-placeholder.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-kong
+                port:
+                  number: 8443

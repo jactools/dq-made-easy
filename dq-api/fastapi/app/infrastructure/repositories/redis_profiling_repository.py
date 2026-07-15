@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 from typing import Optional
 
 import json
@@ -18,7 +19,19 @@ class RedisProfilingRepository(ProfilingRepository):
     """
 
     def __init__(self, redis_host: str = "localhost", redis_port: int = 6379, redis_db: int = 0, password: str | None = None) -> None:
-        self._client = redis.Redis(host=redis_host, port=redis_port, db=redis_db, password=password, decode_responses=True)
+        self._client = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            password=password,
+            decode_responses=True,
+            ssl=True,
+            ssl_cert_reqs="required",
+            ssl_ca_certs=os.getenv("REDIS_CA_BUNDLE")
+            or os.getenv("SSL_CERT_FILE")
+            or "/etc/openmetadata/certs/internal-ca-bundle.pem",
+            ssl_check_hostname=True,
+        )
 
     def _key(self, profiling_request_id: str) -> str:
         return f"profiling:{profiling_request_id}"

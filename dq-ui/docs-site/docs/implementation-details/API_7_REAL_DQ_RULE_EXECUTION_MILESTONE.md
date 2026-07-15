@@ -2,7 +2,7 @@
 
 Build a real rule-running pipeline that executes compiled DQ rules against source data, not just generated mock data. Keep generated-data testing intact, but make it a separate path from real source execution.
 
-Related feature plan: [API-7 Real DQ Rule Execution](/docs/status/current/API_7_REAL_DQ_RULE_EXECUTION/)
+Related feature plan: [API-7 Real DQ Rule Execution](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/)
 
 ## Phase 1: Contract
 - [x] (API7-P1-01) Define the runtime chain: rule version -> compiled artifact -> GX suite envelope -> source target.
@@ -124,7 +124,7 @@ Notes:
 - The API enforces basic queue capacity limits (pending + in-flight) and fails fast with `429` when the queue is saturated.
 
 Prerequisites:
-- Start AIStor and the workers (for local: `./scripts/common_startup.sh --with-observability --force-build` starts the stack and workers).
+- Start AIStor and the workers (for local: `./scripts/stack.sh dev start --seed --force-build` starts the stack and workers).
 
 API usage:
 

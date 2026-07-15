@@ -92,7 +92,7 @@ docker-compose up -d
 | **Kong Proxy (HTTP)** | http://localhost:8000 | Main API gateway endpoint |
 | **Kong Proxy (HTTPS)** | https://localhost:8443 | Secure API gateway (self-signed cert) |
 | **Kong Admin API** | http://localhost:8001 | REST API for Kong configuration |
-| **Kong Manager UI** | http://localhost:8002 | Web UI for Kong management |
+| **Kong Manager UI** | https://localhost:8444/ops/kong | Web UI for Kong management |
 | **DQ API (direct)** | http://localhost:4001 | Bypass gateway (internal only) |
 | **Prometheus Metrics** | http://localhost:8001/metrics | Kong metrics for monitoring |
 
@@ -159,7 +159,7 @@ curl http://localhost:8001/consumers | jq
 
 ## Kong Manager Access
 
-1. **Open Kong Manager**: http://localhost:8002
+1. **Open Kong Manager**: https://localhost:8444/ops/kong
 2. **Use Kong Admin API credentials/config** from your environment
 3. **Browse Configuration**:
   - Services → `dq-api`
@@ -246,7 +246,7 @@ What `configure_kong.sh` does:
 - [x] Deploy Kong: `docker-compose up -d kong`
 - [x] Configure: `./scripts/configure_kong.sh`
 - [x] Test: `curl http://localhost:8000/v1/health`
-- [x] Browse Kong Manager: http://localhost:8002
+- [x] Browse Kong Manager: https://localhost:8444/ops/kong
 
 ### Phase 2 (JWT Authentication)
 - [ ] Install Kong OIDC plugin (or use Kong Enterprise)

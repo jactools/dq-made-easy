@@ -12,7 +12,7 @@ set -euo pipefail
 # Version: 1.0
 # Last modified: 2026-04-07
 
-KONG_ADMIN_LOCAL_URL="${KONG_ADMIN_LOCAL_URL:-http://localhost:8001}"
+KONG_ADMIN_LOCAL_URL="${KONG_ADMIN_LOCAL_URL:-https://localhost:8001}"
 JWT_JWKS_URL="${JWT_JWKS_URL:-}"
 MAX_RETRIES=30
 RETRY_COUNT=0
@@ -334,8 +334,8 @@ echo "✓ Kong configuration complete!"
 echo ""
 echo "Available endpoints:"
 echo "  - Kong Proxy:       https://kong.jac.dot:9443"
-echo "  - Kong Admin API:   http://localhost:8001"
-echo "  - Kong Manager GUI: http://localhost:8002"
+echo "  - Kong Admin API:   https://localhost:8001"
+echo "  - Kong Manager GUI: https://localhost:8444/ops/kong"
 echo "  - API Docs (Kong):  https://kong.jac.dot:9443/api-docs"
 echo "  - OpenAPI JSON:     https://kong.jac.dot:9443/api-docs-json"
 echo ""

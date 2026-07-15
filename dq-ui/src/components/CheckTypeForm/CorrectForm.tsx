@@ -1,6 +1,7 @@
 import React from 'react'
 import { CorrectParams, CrossObjectComparisonMode, CrossObjectJoinKey } from '../../types/rules'
 import { AppSelect } from '../app-primitives'
+import { ActualityDateConfig } from './ActualityDateConfig'
 import { CheckTypeFieldErrors } from './checkTypeValidation'
 
 interface CorrectFormProps {
@@ -166,6 +167,13 @@ export const CorrectForm: React.FC<CorrectFormProps> = ({ params, onChange, fiel
           )}
         </div>
       </div>
+
+      {/* Shared actuality-date section */}
+      <ActualityDateConfig
+        value={params.actualityDate}
+        onChange={(contract) => emit({ actualityDate: contract })}
+        idPrefix="ct-correct-actuality"
+      />
     </div>
   )
 }

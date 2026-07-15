@@ -1,0 +1,1 @@
+dq-made-easy OpenMetadata server with OpenTelemetry agent and HTTPS startup wrapper

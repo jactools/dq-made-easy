@@ -1,0 +1,8 @@
+variables:
+  cloudProvider: eks
+  region: eu-west-1
+  aksClusterName: dq-made-easy-test-eks
+  aksNamespace: dq-made-easy-test
+  kubeContext: arn:aws:eks:eu-west-1:123456789012:cluster/dq-made-easy-test-eks
+  azureServiceConnection: ''
+  ingressDomain: test.dq-made-easy.jaccloud.nl

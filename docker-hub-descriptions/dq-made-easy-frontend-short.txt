@@ -1,0 +1,1 @@
+dq-made-easy web UI for managing data quality rules (React/Vite)

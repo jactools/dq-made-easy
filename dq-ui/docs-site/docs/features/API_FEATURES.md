@@ -14,9 +14,9 @@
 - [API-2 Webhook Notifications](/docs/features/API_2_WEBHOOK_NOTIFICATIONS/)
 - [API-3 API Rate Limiting](/docs/features/API_3_RATE_LIMITING/)
 - [API-4 Advanced Authentication Options](/docs/features/API_4_AUTHENTICATION_OPTIONS/)
-- [API-5 Business Metadata Integration](/docs/status/current/API_5_METADATA_INTEGRATION/)
+- [API-5 Business Metadata Integration](/docs/features/API_5_METADATA_INTEGRATION/)
 - [API-6 FastAPI API Platform Migration](/docs/implementation-details/API_6_FASTAPI_MIGRATION/)
-- [API-7 Real DQ Rule Execution](/docs/status/current/API_7_REAL_DQ_RULE_EXECUTION/)
+- [API-7 Real DQ Rule Execution](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/)
 
 ## Notes
 

@@ -16,14 +16,11 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+init_root_env_file "$ROOT_DIR"
+source_selected_root_env_file
 
 my_name="test_jwt_flow.sh"
-if [ -f "$ROOT_DIR/.env" ]; then
-  set +u
-  # shellcheck disable=SC1091
-  . "$ROOT_DIR/.env"
-  set -u
-fi
 
 KONG_CA_CERT="${KONG_CA_CERT:-$ROOT_DIR/tmp/certs/mkcert-rootCA.pem}"
 if [ -f "$KONG_CA_CERT" ] && [ -z "${CURL_CA_BUNDLE:-}" ]; then
@@ -89,7 +86,7 @@ decode_base64_json() {
     return 1
   fi
 
-  python3 - "$normalized" <<'PY'
+  "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 - "$normalized" <<'PY'
 import base64
 import binascii
 import sys

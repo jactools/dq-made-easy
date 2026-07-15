@@ -1,4 +1,5 @@
 from app.domain.entities.admin import AdminRoleEntity, AdminUserEntity, ExceptionFactAccessRequestEntity
+from app.domain.entities.actuality_date_contract import ActualityDateContract, JoinConsistencyActualityDateParams
 from app.domain.entities.app_config import AppConfigEntity
 from app.domain.entities.approvals import ApprovalAuditEntity, ApprovalEntity, build_approval_audit_entity
 from app.domain.entities.catalog_governance import (
@@ -25,6 +26,23 @@ from app.domain.entities.data_catalog import (
 	DomainEntity,
 	RuleAttributeEntity,
 )
+from app.domain.entities.dq_plan_template import (
+	DQPlanTemplateEntity,
+	DQPlanTemplateParameterEntity,
+	DQPlanTemplateConfigurationEntity,
+	DQPlanTemplateScopeEntity,
+	DQPlanTemplateSuiteEntity,
+	DQPlanTemplateScheduleEntity,
+	InstantiateTemplateRequestEntity,
+	build_dq_plan_template_entity,
+	build_dq_plan_template_parameter_entity,
+	build_dq_plan_template_configuration_entity,
+	build_dq_plan_template_scope_entity,
+	build_dq_plan_template_suite_entity,
+	build_dq_plan_template_schedule_entity,
+	build_instantiate_template_request_entity,
+)
+
 from app.domain.entities.federated_metadata_registry import (
 	FederatedMetadataRegistryAccessGrantEntity,
 	FederatedMetadataRegistryExchangeSnapshotEntity,
@@ -278,6 +296,8 @@ from app.domain.entities.federated_metadata_registry import FederatedMetadataReg
 from app.domain.entities.federated_metadata_registry import FederatedMetadataRegistryGoverningScopeEntity
 
 __all__ = [
+	"ActualityDateContract",
+	"JoinConsistencyActualityDateParams",
 	"AttributeProtectionPolicyEntity",
 	"DataEncryptionKeyEntity",
 	"AddRuleAttributesResultEntity",

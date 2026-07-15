@@ -2,7 +2,7 @@
 
 Goal: Enable onboarding of external data platforms through a consistent connector framework for metadata discovery, profiling, and rule execution readiness.
 
-Related work: [API-7 Real DQ Rule Execution](../status/current/API_7_REAL_DQ_RULE_EXECUTION.md)
+Related work: [API-7 Real DQ Rule Execution](../features/API_7_REAL_DQ_RULE_EXECUTION.md)
 
 ## Phase 1: Connector Framework
 
@@ -54,6 +54,12 @@ Related work: [API-7 Real DQ Rule Execution](../status/current/API_7_REAL_DQ_RUL
 - [x] `UX-1.5` Connector setup and sync UI flow
 - [x] `WF-1.5` Connector audit trail + governance hooks
 - [x] `DOC-1.5` Connector onboarding runbook ([runbook](../technical/CONNECTOR_ONBOARDING_RUNBOOK.md))
+- [x] `API-1.10` Async sync job queue with status polling (background jobs, job history, cancellation)
+- [x] `API-1.11` Retry/backoff policy for transient connection failures (exponential backoff with jitter)
+- [x] `API-1.12` Scheduled connector syncs (cron/frequency-based, next-run computation)
+- [x] `API-1.13` Incremental sync support (asset snapshots, checksum-based drift detection)
+- [x] `API-1.14` Staleness health indicators (age-based staleness check endpoint)
+- [x] `API-1.15` Background sync worker (db-polling, claim-and-process, retry loop)
 
 ## Delivery Milestones
 
@@ -61,3 +67,4 @@ Related work: [API-7 Real DQ Rule Execution](../status/current/API_7_REAL_DQ_RUL
 - Milestone B (Connectors): `API-1.3` to `API-1.6`
 - Milestone C (API/Jobs): `API-1.7` to `API-1.8`
 - Milestone D (UX/Governance/Docs): `UX-1.5`, `WF-1.5`, `DOC-1.5`
+- Milestone E (Async Operations): `API-1.10` to `API-1.15`

@@ -1,0 +1,1 @@
+window.__DQ_CONFIG__ = window.__DQ_CONFIG__ || {}

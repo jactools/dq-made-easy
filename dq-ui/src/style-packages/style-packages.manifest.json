@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "packages": [
+    {
+      "id": "custom-built-package",
+      "kind": "copy",
+      "source": "custom-built-package.css",
+      "output": "custom-built-package.css"
+    },
+    {
+      "id": "tailwind",
+      "kind": "tailwind",
+      "input": "tailwind.input.css",
+      "output": "tailwind.css",
+      "rewriteConfigFrom": "../../tailwind.config.cjs",
+      "rewriteConfigTo": "./tailwind.config.cjs"
+    },
+    {
+      "id": "astrowind",
+      "kind": "astrowind",
+      "version": "1.0.0-beta.60",
+      "output": "astrowind.css",
+      "bridge": "astrowind.bridge.css"
+    },
+    {
+      "id": "data-web-css",
+      "kind": "carbon",
+      "packageName": "@carbon/styles",
+      "version": "1.107.0",
+      "output": "data-web.css",
+      "bridge": "data-web.bridge.css"
+    }
+  ]
+}

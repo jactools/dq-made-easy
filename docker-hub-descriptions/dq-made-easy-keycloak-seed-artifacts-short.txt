@@ -1,0 +1,1 @@
+dq-made-easy helper that builds Keycloak realm seed artifacts from repository data

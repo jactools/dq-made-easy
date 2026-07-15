@@ -10,8 +10,8 @@ set -euo pipefail
 # - Defaults to the standard seeded smoke checks when invoked without flags.
 # - Uses the repo venv and installs missing dev deps when required.
 #
-# Version: 1.0
-# Last modified: 2026-04-21
+# Version: 1.1
+# Last modified: 2026-07-01
 
 ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
 PYTHON_RUNNER="${PYTHON_RUNNER:-$ROOT_DIR/scripts/python_arm64.sh}"
@@ -39,13 +39,13 @@ run_fastapi_seeded_list_verification_tests() {
 
   info "$my_name" "Checking FastAPI verification test dependencies..."
   if ! (
-    cd "$fastapi_dir"
+    cd "$ROOT_DIR"
     "$PYTHON_RUNNER" --python-bin "$py_cmd" -c "import reportlab" >/dev/null 2>&1
   ); then
     info "$my_name" "Installing missing FastAPI test dependencies from requirements-dev.txt..."
     (
-      cd "$fastapi_dir"
-      "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pip install --quiet -r requirements-dev.txt
+      cd "$ROOT_DIR"
+      "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pip install --quiet -r dq-api/fastapi/requirements-dev.txt
     ) || {
       error "$my_name" "FastAPI test verification failed: unable to install requirements-dev.txt"
       return 1
@@ -58,7 +58,7 @@ run_fastapi_seeded_list_verification_tests() {
     env REQUIRE_DATABASE=false DQ_DB_LOCAL_URL="$database_url" DQ_DB_HOST="${DQ_DB_HOST:-dq-db.jac.dot}" \
       "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pytest \
       tests/api/test_list_endpoints_non_empty.py \
-      --cov-fail-under=0 -q
+      --cov-fail-under=0 -q -o addopts='' --disable-warnings
   ) || {
     error "$my_name" "FastAPI seeded-list unit verification failed."
     return 1
@@ -70,7 +70,7 @@ run_fastapi_seeded_list_verification_tests() {
     env DQ_DB_LOCAL_URL="$database_url" DQ_DB_HOST="${DQ_DB_HOST:-dq-db.jac.dot}" \
       "$PYTHON_RUNNER" --python-bin "$py_cmd" -m pytest -m integration \
       tests/infrastructure/integration/test_endpoint_list_non_empty.py \
-      --cov-fail-under=0 -q
+      --cov-fail-under=0 -q -o addopts='' --disable-warnings
   ) || {
     error "$my_name" "FastAPI seeded-list integration verification failed."
     return 1
@@ -118,7 +118,7 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     exit 1
   fi
 
-  set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+  set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
   validate_selected_root_env_file "$ROOT_DIR" full
 

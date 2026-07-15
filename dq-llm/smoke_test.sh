@@ -10,10 +10,11 @@ set -euo pipefail
 # Version: 1.1
 # Last modified: 2026-05-26
 
-BASE_URL="${DQ_LLM_BASE_URL:-http://127.0.0.1:8123}"
+BASE_URL="${DQ_LLM_BASE_URL:-https://127.0.0.1:8123}"
 HEALTH_URL="${BASE_URL%/}/health"
 EXTRACT_URL="${BASE_URL%/}/extract_rules"
 GENERATE_DEFINITIONS_URL="${BASE_URL%/}/generate_data_definitions"
+CA_BUNDLE="${DQ_LLM_CA_BUNDLE:-/etc/internal-certs/internal-ca-bundle.pem}"
 
 log() {
   printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
@@ -58,7 +59,7 @@ trap cleanup EXIT
 log "Checking dq-llm at ${BASE_URL}"
 
 log "[1/3] GET ${HEALTH_URL}"
-HEALTH_CODE="$(curl -sS --connect-timeout 5 --max-time 10 -o "$HEALTH_BODY_FILE" -w "%{http_code}" "$HEALTH_URL")"
+HEALTH_CODE="$(curl -sS --connect-timeout 5 --max-time 10 --cacert "$CA_BUNDLE" -o "$HEALTH_BODY_FILE" -w "%{http_code}" "$HEALTH_URL")"
 if [ "$HEALTH_CODE" != "200" ]; then
   log_err "FAIL: /health returned HTTP ${HEALTH_CODE}"
   print_body "$HEALTH_BODY_FILE"
@@ -76,7 +77,7 @@ log "PASS: /health returned ok"
 
 log "[2/3] POST ${EXTRACT_URL}"
 REQUEST_BODY="$(jq -nc --arg text 'The discount percentage must be lower than 10%.' '{text: $text}')"
-EXTRACT_CODE="$(curl -sS --connect-timeout 5 --max-time 300 -o "$EXTRACT_BODY_FILE" -w "%{http_code}" \
+EXTRACT_CODE="$(curl -sS --connect-timeout 5 --max-time 300 --cacert "$CA_BUNDLE" -o "$EXTRACT_BODY_FILE" -w "%{http_code}" \
   -X POST "$EXTRACT_URL" \
   -H 'content-type: application/json' \
   --data "$REQUEST_BODY")"
@@ -135,7 +136,7 @@ GENERATE_REQUEST_BODY="$(jq -nc '{
     }
   ]
 }')"
-GENERATE_DEFINITIONS_CODE="$(curl -sS --connect-timeout 5 --max-time 300 -o "$GENERATE_DEFINITIONS_BODY_FILE" -w "%{http_code}" \
+GENERATE_DEFINITIONS_CODE="$(curl -sS --connect-timeout 5 --max-time 300 --cacert "$CA_BUNDLE" -o "$GENERATE_DEFINITIONS_BODY_FILE" -w "%{http_code}" \
   -X POST "$GENERATE_DEFINITIONS_URL" \
   -H 'content-type: application/json' \
   --data "$GENERATE_REQUEST_BODY")"

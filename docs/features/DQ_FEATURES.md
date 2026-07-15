@@ -161,7 +161,7 @@ Goal: mature profiling and AI-powered suggestions so the feature uses the same i
 Status note: DQ-5 is complete. Suggestions profiling, suggestion review, and natural-language draft persistence now flow through repository-backed infrastructure and dependency injection instead of endpoint-local ORM/session handling.
 
 Tracked Work Items
-- [x] `DQ-5.1` Define repository-backed domain entities and contracts for suggestions, interactions, profiling requests, and source metadata ([detail](../status/current/DQ-5_ADVANCED_DATA_PROFILING.md))
+- [x] `DQ-5.1` Define repository-backed domain entities and contracts for suggestions, interactions, profiling requests, and source metadata ([detail](../features/DQ-5_ADVANCED_DATA_PROFILING.md))
 - [x] `DQ-5.2` Move the current suggestions persistence logic into concrete repository implementations
 - [x] `DQ-5.3` Refactor suggestions endpoints to depend on injected repositories instead of direct ORM/session access
 - [x] `DQ-5.4` Preserve the current HTTP contract while hardening fail-fast behavior and test isolation
@@ -287,7 +287,7 @@ A rule test that generates zero test records was previously reported as a pass (
 
 ## DQ-10 Natural-Language Rule Drafting Preview
 
-Status note: DQ-10 is complete. The current-state snapshot now lives in [docs/status/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md](../status/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md).
+Status note: DQ-10 is complete. The current-state snapshot now lives in [docs/features/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md](../features/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md).
 
 Related details:
 - [DQ-10 implementation details](../implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS.md)
@@ -443,7 +443,7 @@ Acceptance Criteria
 
 Goal: close feature gaps highlighted by the public Ataccama ONE platform surface, especially business glossary, reference data management, master data management, autonomous AI stewardship, and governed data protection workflows.
 
-Roadmap alignment: `DQ-19.9` is tracked in `WS-10` as the Agentic AI Ecosystem workstream in [docs/status/roadmap/FEATURE_ROADMAP_OVERVIEW.md](../status/roadmap/FEATURE_ROADMAP_OVERVIEW.md).
+Roadmap alignment: `DQ-19.9` is tracked in `WS-10` as the Agentic AI Ecosystem workstream in [docs/features/FEATURE_ROADMAP_OVERVIEW.md](../features/FEATURE_ROADMAP_OVERVIEW.md).
 
 Tracked Work Items
 - [x] `DQ-19.1` Business glossary with stewarded terms, hierarchies, synonyms, and rule bindings. Note: this is intentionally OpenMetadata-backed and not Postgres-backed.

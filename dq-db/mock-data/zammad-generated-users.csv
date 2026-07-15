@@ -1,5 +1,6 @@
 id,login,firstname,lastname,email,web,phone,fax,mobile,department,street,zip,city,country,address,vip,verified,active,note,last_login,out_of_office,out_of_office_start_at,out_of_office_end_at,roles,out_of_office_replacement,organizations,organization
 ,dq-admin@jaccloud.nl,Admin,,dq-admin@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
+,openmetadata-admin@jaccloud.nl,OpenMetadata,Admin,openmetadata-admin@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,global
 ,alice@jaccloud.nl,Alice,,alice@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
 ,bob@jaccloud.nl,Bob,,bob@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking
 ,charlie@jaccloud.nl,Charlie,,charlie@jaccloud.nl,,,,,,,,,,,false,false,true,,,false,,,,,,retail-banking

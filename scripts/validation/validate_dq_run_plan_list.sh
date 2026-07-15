@@ -9,7 +9,7 @@ set -euo pipefail
 # - Verifies the catalog response is non-empty and emits a concise summary.
 #
 # validate: groups=api,cli
-# Version: 1.0.0
+# Version: 1.0.1
 # Last modified: 2026-05-17
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -45,7 +45,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 for arg in "$@"; do
   case "$arg" in

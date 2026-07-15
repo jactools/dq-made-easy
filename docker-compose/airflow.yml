@@ -1,0 +1,39 @@
+services:
+  airflow:
+    depends_on:
+      kong:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    profiles:
+    - airflow
+    build:
+      context: ..
+      dockerfile: docker/airflow/Dockerfile.airflow
+    command:
+    - airflow
+    - standalone
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'false'
+      SSO_PUBLIC_ISSUER_URL: ${SSO_PUBLIC_ISSUER_URL?SSO_PUBLIC_ISSUER_URL is required}
+      SSO_INTERNAL_ISSUER_URL: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is
+        required}
+      AIRFLOW_FAB_CLIENT_ID: ${AIRFLOW_FAB_CLIENT_ID:?AIRFLOW_FAB_CLIENT_ID is required}
+      AIRFLOW_FAB_CLIENT_SECRET: ${AIRFLOW_FAB_CLIENT_SECRET:?AIRFLOW_FAB_CLIENT_SECRET is required}
+      DQ_AIRFLOW_BASE_URL: ${DQ_AIRFLOW_BASE_URL:?DQ_AIRFLOW_BASE_URL is required}
+      DQ_AIRFLOW_ISSUER_URL: ${DQ_AIRFLOW_ISSUER_URL:?DQ_AIRFLOW_ISSUER_URL is required}
+      DQ_AIRFLOW_CLIENT_ID: ${DQ_AIRFLOW_CLIENT_ID:?DQ_AIRFLOW_CLIENT_ID is required}
+      DQ_AIRFLOW_USERNAME: ${DQ_AIRFLOW_USERNAME:?DQ_AIRFLOW_USERNAME is required}
+      DQ_AIRFLOW_PASSWORD: ${DQ_AIRFLOW_PASSWORD:?DQ_AIRFLOW_PASSWORD is required}
+      DQ_AIRFLOW_RUN_PLAN_ID: ${DQ_AIRFLOW_RUN_PLAN_ID:?DQ_AIRFLOW_RUN_PLAN_ID is required}
+      DQ_AIRFLOW_SOURCE_PIPELINE: ${DQ_AIRFLOW_SOURCE_PIPELINE:?DQ_AIRFLOW_SOURCE_PIPELINE is required}
+      DQ_AIRFLOW_WAIT_TIMEOUT_SECONDS: ${DQ_AIRFLOW_WAIT_TIMEOUT_SECONDS:?DQ_AIRFLOW_WAIT_TIMEOUT_SECONDS is required}
+      DQ_AIRFLOW_POLL_INTERVAL_SECONDS: ${DQ_AIRFLOW_POLL_INTERVAL_SECONDS:?DQ_AIRFLOW_POLL_INTERVAL_SECONDS is required}
+    ports:
+    - ${AIRFLOW_HOST_BIND:?AIRFLOW_HOST_BIND is required}:${AIRFLOW_HOST_PORT:?AIRFLOW_HOST_PORT is required}:8080
+    networks:
+    - dq-network
+    restart: unless-stopped

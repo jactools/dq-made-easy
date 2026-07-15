@@ -58,8 +58,8 @@ start_stack_block_gateway() {
         return 0
       fi
 
-      info "$my_name" "Waiting for Kong Gateway (http://localhost:8001) to become available..."
-      if ! wait_for_kong_admin_ready "http://localhost:8001" "Kong Admin API" 30 1; then
+      info "$my_name" "Waiting for Kong Gateway (https://localhost:8001) to become available..."
+      if ! wait_for_kong_admin_ready "https://localhost:8001" "Kong Admin API" 30 1; then
         error "$my_name" "Kong Admin API did not respond after 30 seconds"
         exit 1
       fi
@@ -112,7 +112,7 @@ start_stack_block_gateway() {
       SSO_ENABLED=$(printf '%s' "$APP_CFG" | jq -r '.ssoEnabled // false' 2>/dev/null || echo false)
       SSO_ISSUER=$(printf '%s' "$APP_CFG" | jq -r '.ssoIssuer // empty' 2>/dev/null || true)
       if [[ "$SSO_ENABLED" == "true" ]] && [[ -n "$SSO_ISSUER" ]]; then
-        if curl -s http://localhost:8001/consumers/oidc-issuer/jwt | jq -r '.data[]?.key' | grep -qx "$SSO_ISSUER"; then
+        if curl -s https://localhost:8001/consumers/oidc-issuer/jwt | jq -r '.data[]?.key' | grep -qx "$SSO_ISSUER"; then
           info "$my_name" "Kong JWT credentials include SSO issuer: $SSO_ISSUER"
         else
           error "$my_name" "Kong JWT credentials missing SSO issuer: $SSO_ISSUER"

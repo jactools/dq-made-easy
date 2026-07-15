@@ -1,0 +1,338 @@
+services:
+  openmetadata-db:
+    profiles:
+    - metadata
+    image: ${DQ_OPENMETADATA_DB_REGISTRY:?DQ_OPENMETADATA_DB_REGISTRY is required}${DQ_OPENMETADATA_DB_NAMESPACE:-}${DQ_OPENMETADATA_DB_IMAGE:?DQ_OPENMETADATA_DB_IMAGE is required}:${DQ_OPENMETADATA_DB_TAG:?DQ_OPENMETADATA_DB_TAG is required}
+    build:
+      context: ..
+      dockerfile: dq-metadata/Dockerfile.openmetadata-db
+      args:
+        OPENMETADATA_DB_BASE_IMAGE: ${OPENMETADATA_DB_BASE_IMAGE?OPENMETADATA_DB_BASE_IMAGE
+          is required}
+    command:
+    - postgres
+    - -c
+    - shared_preload_libraries=pg_stat_statements
+    - -c
+    - pg_stat_statements.max=10000
+    - -c
+    - pg_stat_statements.track=all
+    - -c
+    - ssl=on
+    - -c
+    - ssl_cert_file=/etc/postgresql/certs/tls.crt
+    - -c
+    - ssl_key_file=/etc/postgresql/certs/tls.key
+    environment:
+      POSTGRES_USER: ${OM_DB_USER:?OM_DB_USER is required}
+      POSTGRES_PASSWORD: ${OM_DB_PASSWORD:?OM_DB_PASSWORD is required}
+      POSTGRES_DB: ${OM_DB_NAME:?OM_DB_NAME is required}
+    ports:
+    - ${OPENMETADATA_DB_HOST_BIND:?OPENMETADATA_DB_HOST_BIND is required}:${OPENMETADATA_DB_HOST_PORT:?OPENMETADATA_DB_HOST_PORT is required}:${OPENMETADATA_DB_CONTAINER_PORT:?OPENMETADATA_DB_CONTAINER_PORT is required}
+    volumes:
+    - ../tmp/certs/services/openmetadata-db:/etc/postgresql/certs:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
+    - openmetadata_pgdata_v18:/var/lib/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -h 127.0.0.1 -U ${OM_DB_USER:?OM_DB_USER is required} -d ${OM_DB_NAME:?OM_DB_NAME is required}
+        || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+    - dq-network
+  openmetadata-db-postgres-exporter:
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+    profiles:
+    - metadata
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.19.1
+    container_name: dq-made-easy-openmetadata-db-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://${OM_DB_USER:?OM_DB_USER is required}:${OM_DB_PASSWORD:?OM_DB_PASSWORD is required}@openmetadata-db:5432/${OM_DB_NAME:?OM_DB_NAME is required}?sslmode=verify-full&sslrootcert=/etc/postgres-exporter/internal-ca-bundle.pem
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+    volumes:
+    - ../observability/postgres-exporter/queries.yaml:/etc/postgres-exporter/queries.yaml:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/postgres-exporter/internal-ca-bundle.pem:ro
+    restart: unless-stopped
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  openmetadata-search-v9:
+    profiles:
+    - metadata
+    image: ${OPENMETADATA_SEARCH_IMAGE:?OPENMETADATA_SEARCH_IMAGE is required}:${OPENMETADATA_SEARCH_TAG:?OPENMETADATA_SEARCH_TAG is required}
+    environment:
+      discovery.type: single-node
+      ELASTIC_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:?OPENMETADATA_SEARCH_PASSWORD is required}
+      xpack.security.enabled: 'true'
+      xpack.security.http.ssl.enabled: 'true'
+      xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.http.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
+      xpack.security.transport.ssl.enabled: 'true'
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
+      xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
+      xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+    volumes:
+    - ../tmp/certs/services/openmetadata-search-v9/tls.crt:/usr/share/elasticsearch/config/certs/tls.crt:ro
+    - ../tmp/certs/services/openmetadata-search-v9/tls.key:/usr/share/elasticsearch/config/certs/tls.key:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/usr/share/elasticsearch/config/certs/mkcert-rootCA.pem:ro
+    - openmetadata_search_v9_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -fsS --cacert /usr/share/elasticsearch/config/certs/mkcert-rootCA.pem
+        -u elastic:$$ELASTIC_PASSWORD https://127.0.0.1:9200/_cluster/health || exit
+        1
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    networks:
+    - dq-network
+  openmetadata-migrate:
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+      openmetadata-search-v9:
+        condition: service_healthy
+    profiles:
+    - metadata
+    image: ${OPENMETADATA_REGISTRY}${OPENMETADATA_NAMESPACE}${OPENMETADATA_IMAGE}:${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
+    environment:
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_HOST: openmetadata-db
+      DB_PORT: 5432
+      OM_DATABASE: ${OM_DB_NAME:?OM_DB_NAME is required}
+      DB_USER: ${OM_DB_USER:?OM_DB_USER is required}
+      DB_USER_PASSWORD: ${OM_DB_PASSWORD:?OM_DB_PASSWORD is required}
+      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/mkcert-rootCA.pem
+      OM_SEARCH_TYPE: elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-search-v9
+      ELASTICSEARCH_PORT: 9200
+      SECRET_MANAGER: db
+    command:
+    - /opt/openmetadata/bootstrap/openmetadata-ops.sh
+    - migrate
+    volumes:
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    networks:
+    - dq-network
+    restart: 'no'
+  openmetadata-server:
+    depends_on:
+      openmetadata-db:
+        condition: service_healthy
+      openmetadata-search-v9:
+        condition: service_healthy
+      openmetadata-migrate:
+        condition: service_completed_successfully
+    profiles:
+    - metadata
+    image: ${DQ_OPENMETADATA_SERVER_REGISTRY:?DQ_OPENMETADATA_SERVER_REGISTRY is required}${DQ_OPENMETADATA_SERVER_NAMESPACE:-}${DQ_OPENMETADATA_SERVER_IMAGE:?DQ_OPENMETADATA_SERVER_IMAGE is required}:${DQ_OPENMETADATA_SERVER_TAG:?DQ_OPENMETADATA_SERVER_TAG is required}
+    build:
+      context: ..
+      dockerfile: dq-metadata/Dockerfile.openmetadata-server
+      args:
+        OPENMETADATA_BASE_IMAGE: ${OPENMETADATA_REGISTRY}${OPENMETADATA_NAMESPACE}${OPENMETADATA_IMAGE}:${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
+        OTEL_JAVAAGENT_HELPER_IMAGE: ${OTEL_JAVAAGENT_HELPER_IMAGE?OTEL_JAVAAGENT_HELPER_IMAGE
+          is required}
+        OTEL_JAVAAGENT_VERSION: ${OTEL_JAVAAGENT_VERSION:?OTEL_JAVAAGENT_VERSION is required}
+      secrets:
+      - internal_corporate_root_ca
+    environment:
+      SERVER_PORT: 8585
+      BASE_PATH: ${OPENMETADATA_BASE_PATH:?OPENMETADATA_BASE_PATH is required}
+      SERVER_USE_FORWARDED_HEADERS: ${OPENMETADATA_USE_FORWARDED_HEADERS:?OPENMETADATA_USE_FORWARDED_HEADERS is required}
+      OPENMETADATA_SERVER_URL: ${OPENMETADATA_PUBLIC_URL:?OPENMETADATA_PUBLIC_URL is required}
+      DB_DRIVER_CLASS: org.postgresql.Driver
+      DB_SCHEME: postgresql
+      DB_HOST: openmetadata-db
+      DB_PORT: 5432
+      OM_DATABASE: ${OM_DB_NAME:?OM_DB_NAME is required}
+      DB_USER: ${OM_DB_USER:?OM_DB_USER is required}
+      DB_USER_PASSWORD: ${OM_DB_PASSWORD:?OM_DB_PASSWORD is required}
+      DB_PARAMS: sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/mkcert-rootCA.pem
+      OM_SEARCH_TYPE: elasticsearch
+      ELASTICSEARCH_HOST: openmetadata-search-v9
+      ELASTICSEARCH_PORT: 9200
+      ELASTICSEARCH_SCHEME: https
+      ELASTICSEARCH_USER: ${OPENMETADATA_SEARCH_USER:?OPENMETADATA_SEARCH_USER is required}
+      ELASTICSEARCH_PASSWORD: ${OPENMETADATA_SEARCH_PASSWORD:?OPENMETADATA_SEARCH_PASSWORD is required}
+      ELASTICSEARCH_TRUST_STORE_PATH: /etc/openmetadata/certs/trust/trust-bundle.jks
+      ELASTICSEARCH_TRUST_STORE_PASSWORD: ${ELASTICSEARCH_TRUST_STORE_PASSWORD:-}
+      AUTHORIZER_CLASS_NAME: org.openmetadata.service.security.DefaultAuthorizer
+      AUTHORIZER_REQUEST_FILTER: org.openmetadata.service.security.JwtFilter
+      AUTHORIZER_ADMIN_PRINCIPALS: ${OM_AUTHORIZER_ADMIN_PRINCIPALS:?OM_AUTHORIZER_ADMIN_PRINCIPALS is required}
+      AUTHORIZER_PRINCIPAL_DOMAIN: ${OM_AUTHORIZER_PRINCIPAL_DOMAIN:?OM_AUTHORIZER_PRINCIPAL_DOMAIN is required}
+      AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:?OM_AUTHENTICATION_PROVIDER is required}
+      CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:?OM_OIDC_PROVIDER_NAME is required}
+      AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:?OM_AUTHENTICATION_PUBLIC_KEYS is required}
+      AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:?OM_AUTHENTICATION_AUTHORITY is required}
+      AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:?OM_AUTHENTICATION_CLIENT_ID is required}
+      AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:?OM_AUTHENTICATION_CALLBACK_URL is required}
+      AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:?OM_AUTHENTICATION_DISCOVERY_URI is required}
+      AUTHENTICATION_RESPONSE_TYPE: ${OM_AUTHENTICATION_RESPONSE_TYPE:?OM_AUTHENTICATION_RESPONSE_TYPE is required}
+      AIRFLOW_HOST: https://openmetadata-ingestion:8080
+      PIPELINE_SERVICE_CLIENT_ENDPOINT: https://openmetadata-ingestion:8080
+      SECRET_MANAGER: db
+      OTEL_SERVICE_NAME: dq-made-easy-openmetadata
+      OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?OTEL_EXPORTER_OTLP_ENDPOINT is required}
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:?OTEL_TRACES_SAMPLER_ARG is required}
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_CERTIFICATE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/mkcert-rootCA.pem
+      OTEL_RESOURCE_ATTRIBUTES: service.name=dq-made-easy-openmetadata,deployment.environment=${ENVIRONMENT:?ENVIRONMENT
+        is required}
+      OTEL_LOGS_EXPORTER: none
+      OPENMETADATA_HEAP_OPTS: ${OPENMETADATA_HEAP_OPTS:--Xms1g -Xmx1g}
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/agent/opentelemetry-javaagent.jar
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
+    entrypoint:
+    - /bin/bash
+    command:
+    - /openmetadata-https-start.sh
+    ports:
+    - ${OPENMETADATA_HOST_BIND:?OPENMETADATA_HOST_BIND is required}:${OPENMETADATA_HOST_PORT:?OPENMETADATA_HOST_PORT is required}:${OPENMETADATA_CONTAINER_PORT:?OPENMETADATA_CONTAINER_PORT is required}
+    volumes:
+    - ../tmp/certs/openmetadata.p12:/opt/openmetadata/conf/openmetadata.p12:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    - ../tmp/certs/trust/trust-bundle.jks:/etc/openmetadata/certs/trust/trust-bundle.jks:ro
+    - ../tmp/certs/trust/truststore-password.txt:/certs/trust/truststore-password.txt:ro
+    networks:
+    - dq-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - base_path='${OPENMETADATA_BASE_PATH:?OPENMETADATA_BASE_PATH is required}'; if [ "$$base_path" = "/" ]; then
+        base_path=''; fi; SSL_CERT_FILE=/etc/openmetadata/certs/mkcert-rootCA.pem
+        wget -q -O /dev/null "https://127.0.0.1:8585$${base_path}/api/v1/system/version"
+        || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 180s
+  openmetadata-configure:
+    depends_on:
+      openmetadata-server:
+        condition: service_healthy
+      # keycloak is not a direct dependency; the configure script contacts Keycloak
+      # via the internal Docker network. Requiring keycloak as a dependency forces
+      # docker compose to re-run keycloak-seed-artifacts (keycloak's build-time
+      # dependency), which regenerates passwords that are not yet applied to the
+      # live Keycloak and breaks the openmetadata password grant.
+    profiles:
+    - metadata
+    build:
+      context: ..
+      dockerfile: dq-metadata/Dockerfile.configure
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        INTERNAL_CORPORATE_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
+    image: ${DQ_METADATA_CONFIGURE_REGISTRY:?DQ_METADATA_CONFIGURE_REGISTRY is required}${DQ_METADATA_CONFIGURE_NAMESPACE:-}${DQ_METADATA_CONFIGURE_IMAGE:?DQ_METADATA_CONFIGURE_IMAGE is required}:${DQ_METADATA_CONFIGURE_TAG:?DQ_METADATA_CONFIGURE_TAG is required}
+    environment:
+      OM_DB_HOST: ${OM_DB_HOST:?OM_DB_HOST is required}
+      OM_SERVER_HOST: ${OM_SERVER_HOST:?OM_SERVER_HOST is required}
+      OM_DB_USER: ${OM_DB_USER:?OM_DB_USER is required}
+      OM_DB_PASSWORD: ${OM_DB_PASSWORD:?OM_DB_PASSWORD is required}
+      OM_DB_NAME: ${OM_DB_NAME:?OM_DB_NAME is required}
+      OM_DB_SSL_MODE: ${OM_DB_SSL_MODE:?OM_DB_SSL_MODE is required}
+      OPENMETADATA_BASE_PATH: ${OPENMETADATA_BASE_PATH:?OPENMETADATA_BASE_PATH is required}
+      OPENMETADATA_PUBLIC_URL: ${OPENMETADATA_PUBLIC_URL:?OPENMETADATA_PUBLIC_URL is required}
+      OM_AUTHENTICATION_PROVIDER: ${OM_AUTHENTICATION_PROVIDER:?OM_AUTHENTICATION_PROVIDER is required}
+      OM_OIDC_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:?OM_OIDC_PROVIDER_NAME is required}
+      OM_AUTHENTICATION_AUTHORITY: ${OM_AUTHENTICATION_AUTHORITY:?OM_AUTHENTICATION_AUTHORITY is required}
+      OM_AUTHENTICATION_CLIENT_ID: ${OM_AUTHENTICATION_CLIENT_ID:?OM_AUTHENTICATION_CLIENT_ID is required}
+      OM_AUTHENTICATION_CALLBACK_URL: ${OM_AUTHENTICATION_CALLBACK_URL:?OM_AUTHENTICATION_CALLBACK_URL is required}
+      OM_AUTHENTICATION_DISCOVERY_URI: ${OM_AUTHENTICATION_DISCOVERY_URI:?OM_AUTHENTICATION_DISCOVERY_URI is required}
+      OM_AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTHENTICATION_PUBLIC_KEYS:?OM_AUTHENTICATION_PUBLIC_KEYS is required}
+      OM_ENABLE_AUTO_REDIRECT: ${OM_ENABLE_AUTO_REDIRECT:?OM_ENABLE_AUTO_REDIRECT is required}
+      OM_TOKEN: ${OM_TOKEN}
+      OM_ADMIN_CLIENT_ID: ${OM_ADMIN_CLIENT_ID:-openmetadata-admin}
+      OM_ADMIN_CLIENT_SECRET: ${OM_ADMIN_CLIENT_SECRET:-changeme}
+      DQ_DB_USER: ${DQ_DB_USER:?DQ_DB_USER is required}
+      DQ_DB_PASSWORD: ${DQ_DB_PASSWORD:?DQ_DB_PASSWORD is required}
+      DQ_DB_NAME: ${DQ_DB_NAME:?DQ_DB_NAME is required}
+      SSO_INTERNAL_ISSUER_URL: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is
+        required}
+      SSO_INTERNAL_ISSUER: ${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is required}
+      KEYCLOAK_USER_PASSWORD: ${KEYCLOAK_USER_PASSWORD:?KEYCLOAK_USER_PASSWORD is required}
+      OPENMETADATA_OIDC_SEED_USERNAME: ${OPENMETADATA_OIDC_SEED_USERNAME?OPENMETADATA_OIDC_SEED_USERNAME
+        is required}
+      OPENMETADATA_OIDC_SEED_PASSWORD: ${OPENMETADATA_OIDC_SEED_PASSWORD?OPENMETADATA_OIDC_SEED_PASSWORD
+        is required}
+      OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:?OPENMETADATA_SERVER_URL is required}/api}
+      OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:?OPENMETADATA_VERIFY_SSL is required}
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      CURL_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SEED_ALL: ${SEED_ALL:?SEED_ALL is required}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    - ../tmp/keycloak_seed_user_credentials.${ENVIRONMENT:-dev}.env:/etc/openmetadata/seed-credentials.env:ro
+    networks:
+    - dq-network
+    restart: 'no'
+  openmetadata-ingestion:
+    depends_on:
+      openmetadata-server:
+        condition: service_healthy
+    profiles:
+    - metadata
+    image: ${OPENMETADATA_INGESTION_REGISTRY:?OPENMETADATA_INGESTION_REGISTRY is required}${OPENMETADATA_INGESTION_NAMESPACE:-}${OPENMETADATA_INGESTION_IMAGE:?OPENMETADATA_INGESTION_IMAGE is required}:${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////tmp/airflow.db
+      AIRFLOW__API__BASE_URL: https://openmetadata-ingestion:8080
+      AIRFLOW__API__SSL_CERT: /etc/openmetadata/certs/openmetadata-ingestion/tls.crt
+      AIRFLOW__API__SSL_KEY: /etc/openmetadata/certs/openmetadata-ingestion/tls.key
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'True'
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${OM_AIRFLOW_SECRET_KEY:?OM_AIRFLOW_SECRET_KEY is required}
+      OPENMETADATA_SERVER_URL: ${OPENMETADATA_SERVER_URL:?OPENMETADATA_SERVER_URL is required}/api}
+      OPENMETADATA_VERIFY_SSL: ${OPENMETADATA_VERIFY_SSL:?OPENMETADATA_VERIFY_SSL is required}
+      OPENMETADATA_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      REQUESTS_CA_BUNDLE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      SSL_CERT_FILE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      OTEL_SERVICE_NAME: dq-made-easy-openmetadata-ingestion
+      OTEL_SERVICE_VERSION: ${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:?OTEL_EXPORTER_OTLP_ENDPOINT is required}
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_CERTIFICATE: /etc/openmetadata/certs/internal-ca-bundle.pem
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:?OTEL_TRACES_SAMPLER_ARG is required}
+      ENVIRONMENT: ${ENVIRONMENT:?ENVIRONMENT is required}
+    entrypoint:
+    - /bin/bash
+    command:
+    - -c
+    - airflow db migrate && airflow api-server -p 8080
+    ports:
+    - ${OPENMETADATA_INGESTION_HOST_BIND:?OPENMETADATA_INGESTION_HOST_BIND is required}:${OPENMETADATA_INGESTION_HOST_PORT:?OPENMETADATA_INGESTION_HOST_PORT is required}:${OPENMETADATA_INGESTION_CONTAINER_PORT:?OPENMETADATA_INGESTION_CONTAINER_PORT is required}
+    volumes:
+    - ../tmp/certs/services/openmetadata-ingestion/tls.crt:/etc/openmetadata/certs/openmetadata-ingestion/tls.crt:ro
+    - ../tmp/certs/services/openmetadata-ingestion/tls.key:/etc/openmetadata/certs/openmetadata-ingestion/tls.key:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
+    - ../tmp/certs/trust/internal-ca-bundle.pem:/etc/openmetadata/certs/internal-ca-bundle.pem:ro
+    networks:
+    - dq-network
+    restart: unless-stopped

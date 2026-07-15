@@ -62,7 +62,7 @@ stages:
                 state_resource_group='$(stateResourceGroupName)'
                 state_storage_account='$(stateStorageAccountName)'
                 state_storage_container='$(stateStorageContainerName)'
-                state_key='$(stateKeyPrefix)/environment.tfstate'
+                state_key='$(stateKeyPrefixEnvironment)/environment.tfstate'
                 tofu_version='${{ parameters.openTofuVersion }}'
                 if [[ -z "$resource_group" || -z "$region" || -z "$environment_name" || -z "$workspace_name" || -z "$state_resource_group" || -z "$state_storage_account" || -z "$state_storage_container" ]]; then
                   echo "Required dq-made-easy pipeline variables are missing" >&2
@@ -177,7 +177,7 @@ stages:
                 state_resource_group='$(stateResourceGroupName)'
                 state_storage_account='$(stateStorageAccountName)'
                 state_storage_container='$(stateStorageContainerName)'
-                state_key='$(stateKeyPrefix)/environment.tfstate'
+                state_key='$(stateKeyPrefixEnvironment)/environment.tfstate'
                 tofu_version='${{ parameters.openTofuVersion }}'
                 if [[ -z "$resource_group" || -z "$region" || -z "$environment_name" || -z "$workspace_name" || -z "$state_resource_group" || -z "$state_storage_account" || -z "$state_storage_container" ]]; then
                   echo "Required dq-made-easy pipeline variables are missing" >&2
@@ -292,7 +292,7 @@ stages:
                 state_resource_group='$(stateResourceGroupName)'
                 state_storage_account='$(stateStorageAccountName)'
                 state_storage_container='$(stateStorageContainerName)'
-                state_key='$(stateKeyPrefix)/environment.tfstate'
+                state_key='$(stateKeyPrefixEnvironment)/environment.tfstate'
                 tofu_version='${{ parameters.openTofuVersion }}'
                 if [[ -z "$resource_group" || -z "$region" || -z "$environment_name" || -z "$workspace_name" || -z "$state_resource_group" || -z "$state_storage_account" || -z "$state_storage_container" ]]; then
                   echo "Required dq-made-easy pipeline variables are missing" >&2

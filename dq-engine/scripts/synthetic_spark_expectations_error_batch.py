@@ -12,7 +12,7 @@ DQ_ENGINE_ROOT = ROOT / "dq-engine"
 if str(DQ_ENGINE_ROOT) not in sys.path:
     sys.path.insert(0, str(DQ_ENGINE_ROOT))
 
-from spark_expectations_adapter import build_error_management_plan
+from spark_expectations_execution_adapter import build_error_management_plan
 
 
 def _parse_args() -> argparse.Namespace:

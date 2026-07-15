@@ -6,6 +6,7 @@ WORKDIR /app
 COPY dq-api/scripts/generate_keycloak_realm.py /app/generate_keycloak_realm.py
 COPY dq-db/mock-data /app/mock-data
 COPY dq-keycloak/scripts/generate_seed_artifacts.sh /app/generate_seed_artifacts.sh
+COPY scripts/supporting/seed_password_rotation.py /app/seed_password_rotation.py
 
 RUN chmod +x /app/generate_seed_artifacts.sh
 

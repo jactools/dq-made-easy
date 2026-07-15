@@ -1,0 +1,22 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "stack-lifecycle-helpers-2026-07-14",
+  "proof_type": "infra",
+  "feature": "stack-scripts",
+  "summary": "Source stack_lifecycle.sh; tested is_admin_password_var, _derive_env_suffix, _get_project_prefix, STATEFUL_VOLUME_NAMES. 24 tests passed.",
+  "status": "passed",
+  "executed_at_utc": "2026-07-14T12:00:04+00:00",
+  "command": "source stack_lifecycle.sh; test is_admin_password_var, _derive_env_suffix, _get_project_prefix, STATEFUL_VOLUME_NAMES",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/infra/20260714T120004Z-stack-lifecycle-helpers",
+  "test_files": [
+    "scripts/supporting/stack_lifecycle.sh"
+  ],
+  "test_file_count": 1,
+  "test_count": 24,
+  "assertions": [
+    "is_admin_password_var classifies admin variables correctly",
+    "_derive_env_suffix produces correct suffixes for dev/test/prod",
+    "_get_project_prefix derives correct prefix from compose files",
+    "STATEFUL_VOLUME_NAMES lists all expected stateful volumes"
+  ]
+}

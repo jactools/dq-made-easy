@@ -75,6 +75,6 @@ It does not by itself define:
 - `docker-compose.yml` (`delivery-seed`)
 - `dq-api/fastapi/app/infrastructure/repositories/in_memory_test_data.py`
 - `dq-api/scripts/generate_sql_seeds.py`
-- `scripts/seed_stack.sh`
+- `scripts/stack_seed.sh` (or `scripts/stack.sh dev seed`)
 - `scripts/reseed_running_db.sh`
 - `scripts/seed_delivery_objects.py`

@@ -21,9 +21,10 @@ require_env() {
   printf '%s' "$value"
 }
 
-KONG_ADMIN_INTERNAL_URL="${KONG_ADMIN_INTERNAL_URL:-http://127.0.0.1:8001}"
+KONG_ADMIN_INTERNAL_URL="${KONG_ADMIN_INTERNAL_URL:-https://localhost:8444}"
 DQ_API_INTERNAL_URL="$(require_env DQ_API_INTERNAL_URL)"
 APP_CONFIG_INTERNAL_URL="${DQ_API_INTERNAL_URL%/}/api/system/v1/app-config"
+KONG_LUA_SSL_TRUSTED_CERTIFICATE="${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-/etc/kong/certs/trust/internal-ca-bundle.pem}"
 MAX_RETRIES="${MAX_RETRIES:-60}"
 RETRY_COUNT=0
 KEYCLOAK_INTERNAL_URL="$(require_env KEYCLOAK_INTERNAL_URL)"
@@ -43,9 +44,18 @@ ADMIN_ONLY_GROUPS='["admin"]'
 
 REALM_CONSUMERS_SYNCED=false
 
+CURL_CA_BUNDLE="${CURL_CA_BUNDLE:-${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-}}"
+KONG_ADMIN_CURL_ARGS=(-s -f -k)
+if [ -n "$CURL_CA_BUNDLE" ] && [ -f "$CURL_CA_BUNDLE" ]; then
+  KONG_ADMIN_CURL_ARGS=(-s -f --cacert "$CURL_CA_BUNDLE")
+fi
+# Do NOT override with --cacert for admin API; the admin listener uses Kong's
+# default self-signed cert, not our internal CA cert. Keep -k for admin API access.
+
 echo "[kong-bootstrap] waiting for Kong Admin API at ${KONG_ADMIN_INTERNAL_URL}"
+export KONG_LUA_SSL_TRUSTED_CERTIFICATE
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
-  if curl -s -f "$KONG_ADMIN_INTERNAL_URL/" >/dev/null 2>&1; then
+  if curl "${KONG_ADMIN_CURL_ARGS[@]}" "$KONG_ADMIN_INTERNAL_URL/" >/dev/null 2>&1; then
     break
   fi
   RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -390,30 +400,34 @@ ensure_keycloak_user_consumers() {
   done
 }
 
-ensure_service_account_consumer() {
-  local rsa_public_key="$1"
+ensure_service_account_consumer_for_client() {
+  local client_id="$1"
+  local rsa_public_key="$2"
   local admin_token=""
   local client_uuid=""
   local service_user_id=""
   local service_username=""
   local roles_json="[]"
-
   admin_token=$(keycloak_admin_token)
-  client_uuid=$(keycloak_api_get "$admin_token" "/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${DQ_ENGINE_OIDC_CLIENT_ID}" | jq -r '.[0].id // empty' 2>/dev/null || true)
+  client_uuid=$(keycloak_api_get "$admin_token" "/admin/realms/${KEYCLOAK_REALM}/clients?clientId=${client_id}" | jq -r '.[0].id // empty' 2>/dev/null || true)
   if [ -z "$client_uuid" ]; then
-    echo "[kong-bootstrap] ${DQ_ENGINE_OIDC_CLIENT_ID} client not found in Keycloak"
+    echo "[kong-bootstrap] ${client_id} client not found in Keycloak"
     exit 1
   fi
 
   service_user_id=$(keycloak_api_get "$admin_token" "/admin/realms/${KEYCLOAK_REALM}/clients/${client_uuid}/service-account-user" | jq -r '.id // empty' 2>/dev/null || true)
   service_username=$(keycloak_api_get "$admin_token" "/admin/realms/${KEYCLOAK_REALM}/clients/${client_uuid}/service-account-user" | jq -r '.username // .email // empty' 2>/dev/null || true)
   if [ -z "$service_user_id" ] || [ -z "$service_username" ]; then
-    echo "[kong-bootstrap] service-account user for ${DQ_ENGINE_OIDC_CLIENT_ID} not found in Keycloak"
+    echo "[kong-bootstrap] service-account user for ${client_id} not found in Keycloak"
     exit 1
   fi
 
   roles_json=$(keycloak_user_roles_json "$admin_token" "$service_user_id")
   ensure_consumer_from_roles "$service_username" "$roles_json" "$rsa_public_key"
+}
+
+ensure_service_account_consumer() {
+  ensure_service_account_consumer_for_client "$DQ_ENGINE_OIDC_CLIENT_ID" "$1"
 }
 
 ensure_consumer() {
@@ -529,6 +543,7 @@ enable_jwt_for_route() {
   if [ "$REALM_CONSUMERS_SYNCED" != "true" ]; then
     ensure_keycloak_user_consumers "$rsa_public_key"
     ensure_service_account_consumer "$rsa_public_key"
+    ensure_service_account_consumer_for_client "${GRAFANA_OIDC_CLIENT_ID:-grafana}" "$rsa_public_key"
     REALM_CONSUMERS_SYNCED=true
   fi
 }
@@ -546,7 +561,7 @@ disable_jwt_for_route() {
   done
 }
 
-create_service "dq-api" "http://api:4010"
+create_service "dq-api" "https://api:4010"
 create_route "dq-api" "dq-api-auth-v1" "/auth/v1"
 create_route "dq-api" "dq-api-admin-v1" "/admin/v1"
 create_route "dq-api" "dq-api-admin-v1-users" "/admin/v1/users"
@@ -555,6 +570,7 @@ create_route "dq-api" "dq-api-admin-v1-rules" "/admin/v1/rules"
 create_route "dq-api" "dq-api-system-v1" "/system/v1"
 create_route "dq-api" "dq-api-system-v1-app-config-read" "/system/v1/app-config" '["GET","HEAD","OPTIONS"]'
 create_route "dq-api" "dq-api-system-v1-app-config-write" "/system/v1/app-config" '["POST","PUT","PATCH","DELETE"]'
+create_route "dq-api" "dq-api-system-v1-ui-registry" "/api/system/v1/ui-registry"
 create_route "dq-api" "dq-api-data-catalog-v1" "/data-catalog/v1"
 create_route "dq-api" "dq-api-rulebuilder-v1" "/rulebuilder/v1"
 create_route "dq-api" "dq-api-agent-v1" "/agent/v1"
@@ -593,6 +609,7 @@ if [ "$TRUST_PROXY_AUTH_ENABLED" = "true" ]; then
   enable_jwt_for_route "dq-api-system-v1"
   enable_jwt_for_route "dq-api-system-v1-app-config-read"
   enable_jwt_for_route "dq-api-system-v1-app-config-write"
+  enable_jwt_for_route "dq-api-system-v1-ui-registry"
   enable_jwt_for_route "dq-api-data-catalog-v1"
   enable_jwt_for_route "dq-api-rulebuilder-v1"
   enable_jwt_for_route "dq-api-agent-v1"
@@ -608,6 +625,7 @@ if [ "$TRUST_PROXY_AUTH_ENABLED" = "true" ]; then
   setup_acl_for_route "dq-api-system-v1" "$ALL_AUTHENTICATED_GROUPS"
   setup_acl_for_route "dq-api-system-v1-app-config-read" "$ALL_AUTHENTICATED_GROUPS"
   setup_acl_for_route "dq-api-system-v1-app-config-write" "$ADMIN_ONLY_GROUPS"
+  setup_acl_for_route "dq-api-system-v1-ui-registry" "$ALL_AUTHENTICATED_GROUPS"
   setup_acl_for_route "dq-api-data-catalog-v1" "$ALL_AUTHENTICATED_GROUPS"
   setup_acl_for_route "dq-api-rulebuilder-v1" "$ALL_AUTHENTICATED_GROUPS"
   setup_acl_for_route "dq-api-agent-v1" "$ALL_AUTHENTICATED_GROUPS"
@@ -624,6 +642,7 @@ else
   disable_jwt_for_route "dq-api-system-v1"
   disable_jwt_for_route "dq-api-system-v1-app-config-read"
   disable_jwt_for_route "dq-api-system-v1-app-config-write"
+  disable_jwt_for_route "dq-api-system-v1-ui-registry"
   disable_jwt_for_route "dq-api-data-catalog-v1"
   disable_jwt_for_route "dq-api-rulebuilder-v1"
   disable_jwt_for_route "dq-api-agent-v1"

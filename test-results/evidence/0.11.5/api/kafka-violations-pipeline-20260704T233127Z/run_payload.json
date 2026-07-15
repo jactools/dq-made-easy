@@ -1,0 +1,205 @@
+{
+  "id": "run-48f256e7ae4f",
+  "suite_id": "gx_rule-e8a5f77ea06841d49191b4f2802c61a3",
+  "suite_version": 1,
+  "rule_id": "rule-e8a5f77ea06841d49191b4f2802c61a3",
+  "rule_version_id": "rv_910e1275-91f1-431b-b210-5a56385340b2",
+  "run_plan_id": null,
+  "correlation_id": "corr-66aac2af47c7",
+  "requested_by": "alice@jaccloud.nl",
+  "engine_target": "pyspark",
+  "execution_shape": "single_object",
+  "status": "failed",
+  "submitted_at": "2026-07-04T23:31:14.784965+00:00",
+  "started_at": "2026-07-04T23:31:14.794810+00:00",
+  "completed_at": "2026-07-04T23:31:14.853951+00:00",
+  "created_at": "2026-07-04T23:31:14.787426+00:00",
+  "updated_at": "2026-07-04T23:31:14.861400+00:00",
+  "execution_contract": {
+    "engine_type": "gx",
+    "engine_target": "pyspark",
+    "execution_shape": "single_object",
+    "traceability": {
+      "rule_id": "rule-e8a5f77ea06841d49191b4f2802c61a3",
+      "rule_version_id": "rv_910e1275-91f1-431b-b210-5a56385340b2",
+      "gx_suite_id": "gx_rule-e8a5f77ea06841d49191b4f2802c61a3",
+      "gx_suite_version": 1,
+      "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+      "source_rule_expression": "lifetime_value = '__kafka_integration_test_expected_failure_894ba89f__'",
+      "compiled_expression": "lifetime_value = '__kafka_integration_test_expected_failure_894ba89f__'",
+      "artifact_key": "rule::rule-e8a5f77ea06841d49191b4f2802c61a3::version::rv_910e1275-91f1-431b-b210-5a56385340b2::bd18c85fab49479c"
+    },
+    "resolved_data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+    "resolved_data_delivery_id": "td-del-a44c818d9eb6",
+    "resolved_delivery_location": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+    "delivery_resolution_mode": "latest_delivery",
+    "scope_selector": {},
+    "suite_refs": []
+  },
+  "handoff_payload": {
+    "run_id": "run-48f256e7ae4f",
+    "queue_message_id": "run-48f256e7ae4f",
+    "suite_id": "gx_rule-e8a5f77ea06841d49191b4f2802c61a3",
+    "suite_version": 1,
+    "correlation_id": "corr-66aac2af47c7",
+    "requested_by": "alice@jaccloud.nl",
+    "engine_type": "gx",
+    "engine_target": "pyspark",
+    "execution_shape": "single_object",
+    "dispatch_mode": "queued",
+    "executor_target": "dq-engine",
+    "queue_key": "dq-gx:execution-dispatch",
+    "handoff_status": "accepted",
+    "handoff_ready": true,
+    "submitted_at": "2026-07-04T23:31:14.784965+00:00",
+    "scheduled_at": "2026-07-04T23:31:14.775027+00:00",
+    "execution_scope_override": [],
+    "execution_contract": {
+      "engine_type": "gx",
+      "engine_target": "pyspark",
+      "execution_shape": "single_object",
+      "traceability": {
+        "rule_id": "rule-e8a5f77ea06841d49191b4f2802c61a3",
+        "rule_version_id": "rv_910e1275-91f1-431b-b210-5a56385340b2",
+        "gx_suite_id": "gx_rule-e8a5f77ea06841d49191b4f2802c61a3",
+        "gx_suite_version": 1,
+        "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+        "source_rule_expression": "lifetime_value = '__kafka_integration_test_expected_failure_894ba89f__'",
+        "compiled_expression": "lifetime_value = '__kafka_integration_test_expected_failure_894ba89f__'",
+        "artifact_key": "rule::rule-e8a5f77ea06841d49191b4f2802c61a3::version::rv_910e1275-91f1-431b-b210-5a56385340b2::bd18c85fab49479c"
+      },
+      "resolved_data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+      "resolved_data_delivery_id": "td-del-a44c818d9eb6",
+      "resolved_delivery_location": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+      "delivery_resolution_mode": "latest_delivery",
+      "scope_selector": {},
+      "suite_refs": []
+    },
+    "scope_selector": {},
+    "suite_refs": [],
+    "headers": {
+      "traceparent": "00-23b52da7be9809295edfa1e14404976f-e30859c02ff680b2-00"
+    },
+    "source_overrides_by_data_object_version_id": {},
+    "status_details": {
+      "source": "gx.suite.run.schedule",
+      "queue_key": "dq-gx:execution-dispatch",
+      "engine_type": "gx",
+      "scheduled_at": "2026-07-04T23:31:14.775027+00:00",
+      "dispatch_mode": "queued",
+      "handoff_ready": true,
+      "handoff_status": "accepted",
+      "queue_message_id": "run-48f256e7ae4f"
+    }
+  },
+  "resolved_data_delivery_id": "td-del-a44c818d9eb6",
+  "execution_progress": {
+    "percent": 0,
+    "label": "Queued for execution",
+    "completed_steps": 0,
+    "total_steps": 1,
+    "source": "dq-engine-gx-worker",
+    "updated_at": "2026-07-04T23:31:14.794800Z"
+  },
+  "result_summary": {
+    "results": []
+  },
+  "metrics": null,
+  "performance_summary": null,
+  "diagnostics": [],
+  "failure_code": "GX_WORKER_MISSING_SOURCE_LOCATION",
+  "failure_message": "Missing storage_uri for data_object_version_id '019e0488-9a53-7a41-86dc-5b725064f27d'",
+  "comments": null,
+  "status_history": [
+    {
+      "id": "gx-run-hist-cbebb4eaf48c40718e570d815e17b8b8",
+      "run_id": "run-48f256e7ae4f",
+      "from_status": null,
+      "to_status": "pending",
+      "changed_by": "alice@jaccloud.nl",
+      "changed_at": "2026-07-04T23:31:14.787234+00:00",
+      "reason": "GX suite run scheduled",
+      "details": {
+        "source": "gx.suite.run.schedule",
+        "queue_key": "dq-gx:execution-dispatch",
+        "engine_type": "gx",
+        "scheduled_at": "2026-07-04T23:31:14.775027+00:00",
+        "dispatch_mode": "queued",
+        "handoff_ready": true,
+        "handoff_status": "accepted",
+        "queue_message_id": "run-48f256e7ae4f"
+      }
+    },
+    {
+      "id": "gx-run-hist-c42eb2f046cb4550a13eb77a13c1f72a",
+      "run_id": "run-48f256e7ae4f",
+      "from_status": "pending",
+      "to_status": "running",
+      "changed_by": "alice@jaccloud.nl",
+      "changed_at": "2026-07-04T23:31:14.838745+00:00",
+      "reason": "GX worker started execution",
+      "details": {
+        "source": "dq-engine-gx-worker",
+        "dispatch": {
+          "run_id": "run-48f256e7ae4f",
+          "headers": {
+            "traceparent": "00-23b52da7be9809295edfa1e14404976f-e30859c02ff680b2-00"
+          },
+          "suite_id": "gx_rule-e8a5f77ea06841d49191b4f2802c61a3",
+          "queue_key": "dq-gx:execution-dispatch",
+          "suite_refs": [],
+          "engine_type": "gx",
+          "requested_by": "alice@jaccloud.nl",
+          "scheduled_at": "2026-07-04T23:31:14.775027+00:00",
+          "submitted_at": "2026-07-04T23:31:14.784965+00:00",
+          "dispatch_mode": "queued",
+          "engine_target": "pyspark",
+          "handoff_ready": true,
+          "suite_version": 1,
+          "correlation_id": "corr-66aac2af47c7",
+          "handoff_status": "accepted",
+          "scope_selector": {},
+          "execution_shape": "single_object",
+          "executor_target": "dq-engine",
+          "queue_message_id": "run-48f256e7ae4f",
+          "execution_contract": {
+            "suite_refs": [],
+            "engine_type": "gx",
+            "traceability": {
+              "rule_id": "rule-e8a5f77ea06841d49191b4f2802c61a3",
+              "gx_suite_id": "gx_rule-e8a5f77ea06841d49191b4f2802c61a3",
+              "artifact_key": "rule::rule-e8a5f77ea06841d49191b4f2802c61a3::version::rv_910e1275-91f1-431b-b210-5a56385340b2::bd18c85fab49479c",
+              "rule_version_id": "rv_910e1275-91f1-431b-b210-5a56385340b2",
+              "gx_suite_version": 1,
+              "compiled_expression": "lifetime_value = '__kafka_integration_test_expected_failure_894ba89f__'",
+              "data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d",
+              "source_rule_expression": "lifetime_value = '__kafka_integration_test_expected_failure_894ba89f__'"
+            },
+            "engine_target": "pyspark",
+            "scope_selector": {},
+            "execution_shape": "single_object",
+            "delivery_resolution_mode": "latest_delivery",
+            "resolved_data_delivery_id": "td-del-a44c818d9eb6",
+            "resolved_delivery_location": "s3a://dq-test-data/data_object_version_id=019e0488-9a53-7a41-86dc-5b725064f27d/attr_hash=all/sample_count=500/format=parquet",
+            "resolved_data_object_version_id": "019e0488-9a53-7a41-86dc-5b725064f27d"
+          },
+          "execution_scope_override": [],
+          "source_overrides_by_data_object_version_id": {}
+        }
+      }
+    },
+    {
+      "id": "gx-run-hist-271ed297771140eeb5017f0dc7a86a6d",
+      "run_id": "run-48f256e7ae4f",
+      "from_status": "running",
+      "to_status": "failed",
+      "changed_by": "alice@jaccloud.nl",
+      "changed_at": "2026-07-04T23:31:14.861097+00:00",
+      "reason": "GX worker execution failed",
+      "details": {
+        "source": "dq-engine-gx-worker",
+        "exception_type": "GxWorkerExecutionError"
+      }
+    }
+  ]
+}

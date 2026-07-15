@@ -46,14 +46,17 @@ PROMPT_DIR = Path(__file__).resolve().parent
 EXTRACT_RULES_PROMPT_PATH = PROMPT_DIR / "extract_rules_prompt.jinja2"
 
 MODEL_ID = os.getenv("DQ_LLM_MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
+
+# Smaller model options for faster startup
+SMALL_MODEL_ID = os.getenv("DQ_LLM_SMALL_MODEL_ID", "Qwen/Qwen2.5-0.5B-Instruct")
+
 DEVICE_MAP = os.getenv("DQ_LLM_DEVICE_MAP", "auto")
 MAX_NEW_TOKENS = int(os.getenv("DQ_LLM_MAX_NEW_TOKENS", "512"))
 CHAT_PROVIDER = os.getenv("DQ_LLM_CHAT_PROVIDER", "huggingface").strip().lower() or "huggingface"
-OLLAMA_BASE_URL = os.getenv("DQ_LLM_OLLAMA_BASE_URL", "").strip().rstrip("/")
-OLLAMA_MODEL = os.getenv("DQ_LLM_OLLAMA_MODEL", "").strip()
 MAX_RETRIES = max(1, int(os.getenv("DQ_LLM_MAX_RETRIES", "3")))
 LOAD_IN_4BIT = os.getenv("DQ_LLM_LOAD_IN_4BIT", "false").strip().lower() in ("1", "true")
-OLLAMA_TIMEOUT_SECONDS = int(os.getenv("DQ_LLM_OLLAMA_TIMEOUT_SECONDS", "180"))
+TLS_CERT_FILE = os.getenv("DQ_LLM_TLS_CERT_FILE", "/etc/dq-llm/certs/tls.crt")
+TLS_KEY_FILE = os.getenv("DQ_LLM_TLS_KEY_FILE", "/etc/dq-llm/certs/tls.key")
 
 DEFAULT_APPROVAL_CRITERIA = [
     "Business meaning is unambiguous and aligns with the logical data model.",
@@ -1125,73 +1128,80 @@ class HuggingFaceChatClient:
         )
 
 
-class OllamaChatClient:
-    def __init__(self, *, base_url: str, model: str, timeout_seconds: int, max_new_tokens: int) -> None:
-        if not base_url:
-            raise LLMServiceUnavailableError(
-                "DQ_LLM_OLLAMA_BASE_URL must be configured when DQ_LLM_CHAT_PROVIDER=ollama."
-            )
-        if not model:
-            raise LLMServiceUnavailableError(
-                "DQ_LLM_OLLAMA_MODEL must be configured when DQ_LLM_CHAT_PROVIDER=ollama."
-            )
+class LlamaCppChatClient:
+    """Inference provider backed by llama-cpp-python (GGUF model files).
 
-        self._base_url = base_url.rstrip("/")
-        self._model = model
-        self._timeout_seconds = timeout_seconds
+    Requires DQ_LLM_LLAMA_CPP_MODEL_PATH to point to a local GGUF file.
+    Optional env vars:
+        DQ_LLM_LLAMA_CPP_N_CTX  — context window size (default: 4096)
+        DQ_LLM_LLAMA_CPP_N_GPU_LAYERS — layers offloaded to GPU (default: 0)
+    """
+
+    def __init__(self, *, model_path: str, n_ctx: int, n_gpu_layers: int, max_new_tokens: int) -> None:
+        self._model_path = model_path
+        self._n_ctx = n_ctx
+        self._n_gpu_layers = n_gpu_layers
         self._max_new_tokens = max_new_tokens
+        self._model = None
+
+    def _ensure_loaded(self) -> None:
+        if self._model is not None:
+            return
+        try:
+            llama_cpp = importlib.import_module("llama_cpp")
+        except ImportError as exc:
+            raise LLMServiceUnavailableError(
+                "llama-cpp-python is required for DQ_LLM_CHAT_PROVIDER=llama_cpp but is not installed in this runtime."
+            ) from exc
+        logger.info(
+            "Loading llama.cpp GGUF model path=%s n_ctx=%d n_gpu_layers=%d",
+            self._model_path,
+            self._n_ctx,
+            self._n_gpu_layers,
+        )
+        self._model = llama_cpp.Llama(
+            model_path=self._model_path,
+            n_ctx=self._n_ctx,
+            n_gpu_layers=self._n_gpu_layers,
+            verbose=False,
+        )
+        logger.info("llama.cpp model loaded successfully.")
 
     def generate(self, prompt: str, *, max_new_tokens: int | None = None) -> str:
-        body = json.dumps(
-            {
-                "model": self._model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {"num_predict": max_new_tokens or self._max_new_tokens},
-            }
-        ).encode("utf-8")
-        http_request = urllib_request.Request(
-            f"{self._base_url}/api/generate",
-            data=body,
-            headers={"content-type": "application/json"},
-            method="POST",
+        self._ensure_loaded()
+        assert self._model is not None
+        response = self._model.create_chat_completion(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=max_new_tokens or self._max_new_tokens,
         )
-
-        try:
-            with urllib_request.urlopen(http_request, timeout=self._timeout_seconds) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-        except urllib_error.HTTPError as exc:
-            body_text = exc.read().decode("utf-8", errors="replace")
-            raise LLMServiceResponseError(
-                f"Ollama returned HTTP {exc.code}: {body_text[:400]}"
-            ) from exc
-        except urllib_error.URLError as exc:
-            raise LLMServiceUnavailableError(
-                f"Failed to reach Ollama at {self._base_url}: {exc}"
-            ) from exc
-        except json.JSONDecodeError as exc:
-            raise LLMServiceResponseError("Ollama returned a non-JSON response.") from exc
-
-        response_text = str(payload.get("response") or "").strip()
-        if not response_text:
-            raise LLMServiceResponseError("Ollama returned an empty response payload.")
-        return response_text
+        content = str((response["choices"][0]["message"].get("content") or "")).strip()
+        if not content:
+            raise LLMServiceResponseError("llama.cpp returned an empty response payload.")
+        return content
 
 
 @lru_cache(maxsize=1)
 def get_chat_client() -> Any:
     provider = os.getenv("DQ_LLM_CHAT_PROVIDER", CHAT_PROVIDER).strip().lower() or "huggingface"
-    if provider == "ollama":
-        return OllamaChatClient(
-            base_url=os.getenv("DQ_LLM_OLLAMA_BASE_URL", OLLAMA_BASE_URL).strip().rstrip("/"),
-            model=os.getenv("DQ_LLM_OLLAMA_MODEL", OLLAMA_MODEL).strip(),
-            timeout_seconds=int(os.getenv("DQ_LLM_OLLAMA_TIMEOUT_SECONDS", str(OLLAMA_TIMEOUT_SECONDS))),
+    if provider == "llama_cpp":
+        model_path = os.getenv("DQ_LLM_LLAMA_CPP_MODEL_PATH", "").strip()
+        if not model_path:
+            raise LLMServiceUnavailableError(
+                "DQ_LLM_LLAMA_CPP_MODEL_PATH must be set when DQ_LLM_CHAT_PROVIDER=llama_cpp."
+            )
+        return LlamaCppChatClient(
+            model_path=model_path,
+            n_ctx=int(os.getenv("DQ_LLM_LLAMA_CPP_N_CTX", "4096")),
+            n_gpu_layers=int(os.getenv("DQ_LLM_LLAMA_CPP_N_GPU_LAYERS", "0")),
             max_new_tokens=int(os.getenv("DQ_LLM_MAX_NEW_TOKENS", str(MAX_NEW_TOKENS))),
         )
     if provider != "huggingface":
         raise LLMServiceUnavailableError(f"Unsupported DQ_LLM_CHAT_PROVIDER '{provider}'.")
+    # Use smaller model if requested
+    effective_model_id = os.getenv("DQ_LLM_SMALL_MODEL_ID", SMALL_MODEL_ID)
+    model_id = effective_model_id if effective_model_id else os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
     return HuggingFaceChatClient(
-        model_id=os.getenv("DQ_LLM_MODEL_ID", MODEL_ID),
+        model_id=model_id,
         device_map=os.getenv("DQ_LLM_DEVICE_MAP", DEVICE_MAP),
         max_new_tokens=int(os.getenv("DQ_LLM_MAX_NEW_TOKENS", str(MAX_NEW_TOKENS))),
         load_in_4bit=os.getenv("DQ_LLM_LOAD_IN_4BIT", str(LOAD_IN_4BIT)).strip().lower() in ("1", "true"),
@@ -1966,11 +1976,7 @@ async def generate_data_definitions(request: DataDefinitionRequest):
     _mark_request_started("generate_data_definitions")
     client = get_chat_client()
     provider_name = os.getenv("DQ_LLM_CHAT_PROVIDER", CHAT_PROVIDER).strip().lower() or "huggingface"
-    model_name = (
-        os.getenv("DQ_LLM_OLLAMA_MODEL", OLLAMA_MODEL).strip()
-        if provider_name == "ollama"
-        else os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
-    )
+    model_name = os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
     try:
         return await run_in_threadpool(
             lambda: generate_data_definitions_bundle(
@@ -1996,11 +2002,12 @@ async def generate_data_definitions(request: DataDefinitionRequest):
 @app.get("/health")
 async def health():
     provider_name = os.getenv("DQ_LLM_CHAT_PROVIDER", CHAT_PROVIDER).strip().lower() or "huggingface"
-    model_name = (
-        os.getenv("DQ_LLM_OLLAMA_MODEL", OLLAMA_MODEL).strip()
-        if provider_name == "ollama"
-        else os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
-    )
+    # Use smaller model if requested
+    effective_model_id = os.getenv("DQ_LLM_SMALL_MODEL_ID", SMALL_MODEL_ID)
+    if effective_model_id:
+        model_name = effective_model_id
+    else:
+        model_name = os.getenv("DQ_LLM_MODEL_ID", MODEL_ID)
     return {
         "status": "ok",
         "provider": provider_name,
@@ -2026,11 +2033,13 @@ async def metrics() -> Response:
 
 
 if __name__ == "__main__":
-    logger.info("Starting FastAPI server on 0.0.0.0:8000...")
+    logger.info("Starting FastAPI server on 0.0.0.0:8000 with TLS...")
     uvicorn.run(
         "entrypoint:app",
         host="0.0.0.0",
         port=8000,
         reload=False,
         log_config=None,
+        ssl_certfile=TLS_CERT_FILE,
+        ssl_keyfile=TLS_KEY_FILE,
     )

@@ -1,0 +1,123 @@
+{
+  "test_id": "test-template-entities-001",
+  "test_name": "Template Entities Test",
+  "test_date": "2026-07-04",
+  "status": "PASSED",
+  "environment": {
+    "python_version": "3.13.13",
+    "pydantic_version": "2.x",
+    "working_directory": "/Users/jacbeekers/gitrepos/dq-made-easy/dq-api/fastapi"
+  },
+  "test_data": {
+    "input_template": {
+      "template_id": "test-123",
+      "template_name": "Test Template",
+      "template_type": "data_quality",
+      "domain": "test",
+      "tags": ["test", "validation"],
+      "parameters": [
+        {
+          "name": "dataset_name",
+          "type": "string",
+          "required": true,
+          "description": "Dataset to validate"
+        }
+      ],
+      "suites": [
+        {
+          "suite_name": "test_suite",
+          "engine_type": "gx",
+          "rule_ids": ["rule-1", "rule-2"]
+        }
+      ],
+      "is_active": true,
+      "is_default": true
+    },
+    "serialized_json": {
+      "template_id": "test-123",
+      "template_name": "Test Template",
+      "template_type": "data_quality",
+      "domain": "test",
+      "tags": ["test", "validation"],
+      "parameters": [
+        {
+          "name": "dataset_name",
+          "type": "string",
+          "required": true,
+          "description": "Dataset to validate"
+        }
+      ],
+      "suites": [
+        {
+          "suite_name": "test_suite",
+          "engine_type": "gx",
+          "rule_ids": ["rule-1", "rule-2"]
+        }
+      ],
+      "is_active": true,
+      "is_default": true
+    },
+    "deserialized_object": {
+      "template_id": "test-123",
+      "template_name": "Test Template",
+      "template_type": "data_quality",
+      "domain": "test",
+      "tags": ["test", "validation"],
+      "parameters_count": 1,
+      "suites_count": 1,
+      "is_active": true,
+      "is_default": true
+    }
+  },
+  "assertions": [
+    {
+      "name": "Template ID Preservation",
+      "expected": "test-123",
+      "actual": "test-123",
+      "passed": true
+    },
+    {
+      "name": "Template Name Preservation",
+      "expected": "Test Template",
+      "actual": "Test Template",
+      "passed": true
+    },
+    {
+      "name": "Parameter Count",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "name": "Suite Count",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "name": "Is Active Flag",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "name": "Is Default Flag",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    }
+  ],
+  "coverage": {
+    "file": "dq_plan_template.py",
+    "functions_tested": [
+      "DQPlanTemplateEntity",
+      "DQPlanTemplateParameterEntity",
+      "DQPlanTemplateSuiteEntity",
+      "model_dump",
+      "model_validate"
+    ],
+    "coverage_percentage": 100
+  },
+  "execution_time_ms": 500,
+  "evidence_path": "evidence/test-template-entities-001.json"
+}

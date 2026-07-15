@@ -57,7 +57,7 @@ Kong Gateway has been successfully deployed and configured for the DQ API. All s
 |---------|-----|--------|
 | **Kong Proxy (HTTP)** | http://localhost:9111 | ✅ Working |
 | **Kong Admin API** | http://localhost:8001 | ✅ Working |
-| **Kong Manager (GUI)** | http://localhost:8002 | ✅ Available |
+| **Kong Manager (GUI)** | https://localhost:8444/ops/kong | ✅ Available |
 | **Prometheus Metrics** | http://localhost:8001/metrics | ✅ Available |
 | **DQ API (direct)** | http://localhost:4001 | ✅ Working |
 
@@ -136,7 +136,7 @@ Rebuilt `dq-api` Docker image with:
 ### Immediate
 - [ ] Test CORS from dq-ui (browser)
 - [ ] Verify OpenAPI spec at http://localhost:4001/api-docs
-- [ ] Browse Kong Manager UI at http://localhost:8002
+- [ ] Browse Kong Manager UI at https://localhost:8444/ops/kong
 - [ ] Check Kong metrics at http://localhost:8001/metrics
 
 ### Phase 2: JWT Authentication

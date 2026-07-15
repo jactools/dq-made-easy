@@ -2,20 +2,33 @@
 
 > **For developers and admins:** See [TECHNICAL.md](./TECHNICAL.md) for API reference, architecture, and deployment details.
 
-## v0.11.4 - Version Alignment and Documentation Refresh (June 6, 2026)
+## v0.11.5 - TLS Security Hardening and Documentation Refresh (July 9, 2026)
 
 ### ✅ What's Updated
 
-- UI package version bumped to `0.11.4`
-- Docs-site package version bumped to `0.11.4`
-- API app marker remains `0.11.0` because this release changes the documentation publishing surface rather than API runtime code
-- Version manifest markers updated for the changed tracked component: `Documentation`
+- UI package version bumped to `0.11.5`
+- Docs-site package version bumped to `0.11.5`
+- Version manifest markers updated for the changed tracked components: `Infrastructure`, `Testautomation`, `Documentation`
+- Release, deployment, and versioning docs now point at the `v0.11.5` release line
 
 ### ✅ New and Improved
 
 - The Definition Mappings user manual now explains the AI-assisted data-definition workflow end to end
 - The manual covers draft generation, steward review, board approval, validation, and OpenMetadata import
-- Release, deployment, and versioning docs now point at the `v0.11.4` release line
+
+### ✅ Security and Infrastructure
+
+- Internal transport is now fully TLS end-to-end for the local development stack: no browser request passes through more than one TLS-terminating proxy
+- The Zammad support stack (ITSM) now uses native TLS listeners; the support browser path is verified over HTTPS with certificate validation at each hop
+- Healthchecks for all TLS-capable services now verify the certificate rather than just testing connectivity
+- Automated validation suite confirms no plaintext HTTP regressions across compose, edge, and bootstrap configuration
+- Operators have a documented cert-generation workflow, TLS troubleshooting guide, and exception registry to distinguish approved deviations from regressions
+
+### ✅ Build and Seeding Improvements
+
+- OpenMetadata seeding is now reliable: the host script obtains a validated access token and passes it to the seed container, avoiding the password-regeneration race that could cause 404 errors
+- Frontend builds are self-contained: the compiled `dist/` is committed to git, so `docker compose build` no longer requires Node.js/npm on the host
+- Full stack rebuild (`--force-build`) now regenerates frontend assets from source before packaging the Docker image
 
 ## v0.10.5 - Public Documentation Portal (May 22, 2026)
 
@@ -41,7 +54,7 @@
 
 ### ✅ New and Improved
 
-- The DQ-10 natural-language rule drafting preview is now captured in the current-state docs under `docs/status/current`
+- The DQ-10 natural-language rule drafting preview is now captured in the current-state docs under `docs/features/current`
 - The preview flow remains inside Suggestions, with ranked candidate attributes, explicit steward confirmation, and fail-fast ambiguity handling
 - Release, deployment, and versioning docs now point at the `v0.10.4` release line
 

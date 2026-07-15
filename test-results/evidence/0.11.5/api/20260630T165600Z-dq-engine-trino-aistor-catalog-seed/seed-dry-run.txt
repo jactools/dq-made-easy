@@ -1,0 +1,5 @@
+[2026-06-30T17:02:51Z] [INFO] [seed_trino_aistor_catalogs.sh] Environment selection: custom (.env.dev.local) -> .env.dev.local
+[2026-06-30T17:02:51Z] [INFO] [seed_trino_aistor_catalogs.sh] Trino validation parquet target: s3a://retail-banking/standardized/analytics/Currency/v1/LOAD_DTS=20260220T071500000Z
+[2026-06-30T17:02:51Z] [INFO] [seed_trino_aistor_catalogs.sh] Dry run: planning selected Trino AIStor seed deliveries
+Planned 1 delivery object upload(s):
+- 019e0488-9a53-72c3-9444-dbd3c1a2baf7: s3a://retail-banking/standardized/analytics/Currency/v1/LOAD_DTS=20260220T071500000Z (180 rows, 2 file(s), 5 columns, parquet)

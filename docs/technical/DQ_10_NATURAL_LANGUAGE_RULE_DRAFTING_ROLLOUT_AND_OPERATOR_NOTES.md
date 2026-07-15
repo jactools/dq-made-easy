@@ -92,6 +92,6 @@ Expected outcomes:
 
 ## References
 
-- [DQ-10 current-state snapshot](../status/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
+- [DQ-10 current-state snapshot](../features/current/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW.md)
 - [DQ-10 implementation details](../implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS.md)
 - [Technical documentation index](./README.md)

@@ -8,19 +8,19 @@ Status: active policy for documentation updates.
 
 | Audience | Primary need | Canonical entry point |
 | --- | --- | --- |
-| Product, planning, and delivery coordination | Planned scope, acceptance criteria, and sequencing | `docs/features/` and `docs/status/roadmap/` |
+| Product, planning, and delivery coordination | Planned scope, acceptance criteria, and sequencing | `docs/features/` and `docs/features/roadmap/` |
 | Operators and maintainers | Runtime operations, deployment, troubleshooting, and reliability controls | `docs/technical/`, `docs/runbooks/`, and `docs/engineering-decisions/` |
 | Developers and integrators | Contracts, implementation boundaries, and architecture intent | `docs/contracts/`, `docs/technical/`, and `architecture/` |
 | End users (analysts, approvers, stewards, admins) | Task-oriented product workflows | `docs/user-manuals/` |
-| Leadership and status consumers | What is implemented vs what remains | `docs/status/current/` and `docs/status/roadmap/` |
+| Leadership and status consumers | What is implemented vs what remains | `docs/features/current/` and `docs/features/roadmap/` |
 
 ## Canonical Boundaries
 
 | Documentation family | Source-of-truth scope | Must not be used as source-of-truth for | Primary owner |
 | --- | --- | --- | --- |
 | `docs/features/` | Planned work definition: goals, backlog decomposition, acceptance criteria, and sequencing | Claims that work is implemented and released unless mirrored in current-state docs | Product owner + feature lead |
-| `docs/status/roadmap/` | Cross-workstream future-state prioritization and implementation tracking (`WS*`, `AC*`) | Detailed implementation instructions or operator runbooks | Product/program management |
-| `docs/status/current/` | Implemented and validated state snapshots | Future planning or unreleased commitments | Engineering management + owning team |
+| `docs/features/roadmap/` | Cross-workstream future-state prioritization and implementation tracking (`WS*`, `AC*`) | Detailed implementation instructions or operator runbooks | Product/program management |
+| `docs/features/current/` | Implemented and validated state snapshots | Future planning or unreleased commitments | Engineering management + owning team |
 | `docs/technical/` | Canonical technical behavior, contracts-in-practice, and operational architecture guidance | User workflow walkthroughs and product onboarding copy | Technical owner for the subsystem |
 | `docs/runbooks/` | Operational execution procedures and incident handling | Feature planning or UX guidance | Operations/on-call owner |
 | `docs/engineering-decisions/` and `architecture/` | Decision rationale, constraints, and architecture governance | Daily operator steps or marketing/user workflow material | Architecture owner / maintainers |
@@ -34,8 +34,8 @@ When documentation appears inconsistent, resolve in this order and then update l
 1. Versioned contracts and enforced runtime behavior (`docs/contracts/`, running API behavior).
 2. Engineering decisions and architecture decisions (`docs/engineering-decisions/`, `architecture/`).
 3. Technical and runbook docs (`docs/technical/`, `docs/runbooks/`).
-4. Current-state status snapshots (`docs/status/current/`).
-5. Feature and roadmap planning docs (`docs/features/`, `docs/status/roadmap/`).
+4. Current-state status snapshots (`docs/features/current/`).
+5. Feature and roadmap planning docs (`docs/features/`, `docs/features/roadmap/`).
 6. User manuals (which should reflect implemented behavior only).
 
 Notes:

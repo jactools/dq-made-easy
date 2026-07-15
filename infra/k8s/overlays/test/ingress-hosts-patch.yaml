@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dq-ingress-frontend
+spec:
+  tls:
+    - hosts:
+        - dq-made-easy.nl
+      secretName: dq-test-tls-cert
+  rules:
+    - host: dq-made-easy.nl
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dq-ingress-keycloak
+spec:
+  tls:
+    - hosts:
+        - keycloak.dq-made-easy.nl
+      secretName: dq-test-keycloak-tls-cert
+  rules:
+    - host: keycloak.dq-made-easy.nl
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dq-ingress-openmetadata
+spec:
+  tls:
+    - hosts:
+        - openmetadata.dq-made-easy.nl
+      secretName: dq-test-openmetadata-tls-cert
+  rules:
+    - host: openmetadata.dq-made-easy.nl

@@ -1,6 +1,10 @@
 # Data Quality Made Easy - Features
 
-Deprecated rollup document. This is a legacy high-level overview of the platform's components, features, and tooling. Use the split feature files under this folder and the roadmap overview in [docs/status/roadmap/FEATURE_ROADMAP_OVERVIEW.md](/docs/status/roadmap/FEATURE_ROADMAP_OVERVIEW/) for current planning.
+**FEATURES.md is the authoritative reference for all platform capabilities and features.**
+
+For implementation status (which features are Done vs Planned) and detailed planning, see [README.md](/docs/features/).
+
+For detailed workstream sequencing and roadmap, see [FEATURE_ROADMAP_OVERVIEW.md](/docs/features/FEATURE_ROADMAP_OVERVIEW/).
 
 ## Overview
 
@@ -10,7 +14,6 @@ Data Quality Made Easy is a comprehensive data quality rule management platform 
 
 ### 1. Frontend UI (`dq-ui`)
 - **Technology**: React 18 + TypeScript + Vite
-- **Design System**: app-owned components
 - **Features**: Modern, responsive UI with dark mode support
 
 ### 2. Backend API (`dq-api`)
@@ -39,25 +42,25 @@ Four distinct user roles with granular permissions:
 - Full system access
 - Create, edit, delete, approve, and activate rules
 - Manage workspaces and users
-- Access Governance queues, Operations views, and audit trails
+- Access all reports and audit trails
 - Configure system settings
 
 #### Editor
 - Create and edit rules
 - Submit rules for testing and approval
-- View Rule Quality diagnostics and Operations metrics
+- View reports and metrics
 - Propose templates
 - Cannot approve own rules
 
 #### Reviewer
 - Review and approve/reject rules
 - Add approval comments
-- View rules, Governance queues, and Operations results
+- View rules and reports
 - Cannot create or edit rules
 
 #### Viewer
 - Read-only access to rules
-- View Operations dashboards and audit-ready evidence
+- View reports and dashboards
 - No modification permissions
 
 ### Workspace Management
@@ -168,9 +171,7 @@ Complete rule lifecycle with 7 distinct stages:
 
 ---
 
-## Governance
-
-The user-facing sidebar now groups approval and lifecycle workflows under `Governance`.
+## Approval Workflow
 
 ### Approval Process
 - ✅ **Pending Approvals Queue**: Centralized view of rules awaiting review
@@ -207,9 +208,7 @@ The user-facing sidebar now groups approval and lifecycle workflows under `Gover
 
 ---
 
-## Operations
-
-The user-facing sidebar now groups runtime metrics, test results, and related monitoring under `Operations`.
+## Reporting & Analytics
 
 ### Dashboard
 - ✅ **Rule Status Overview**: Visual summary of all rule statuses
@@ -217,10 +216,10 @@ The user-facing sidebar now groups runtime metrics, test results, and related mo
 - ✅ **Recent Activity**: Latest rule actions and changes
 - ✅ **Workspace Summary**: Current workspace metrics
 
-### Operations Views
-Multiple operations views with filtering and visualization:
+### Reports
+Multiple report types with filtering and visualization:
 
-#### Operational Metrics
+#### Metrics & Analytics
 - ✅ **Data Quality Metrics**: Aggregate quality scores
 - ✅ **Rule Performance**: Success/failure rates
 - ✅ **Coverage Analysis**: Test coverage statistics
@@ -272,10 +271,14 @@ Multiple operations views with filtering and visualization:
 - ✅ **Preview Features**: Opt-in to experimental features
 - ✅ **Persistent Settings**: Saved to localStorage
 
+### Workspace Settings (Admin only)
+- ✅ **Workspace Details**: Name, description, configuration
+- ✅ **User Management**: Add/remove users from workspace
+- ✅ **Role Assignment**: Assign roles to users
+- ✅ **Workspace Defaults**: Configure default behaviors
+
 ### Application Settings (Admin only)
 Complete application-wide configuration:
-
-- ✅ **Workspace Configuration**: Workspace defaults and governance policies are managed from Administration instead of User Settings
 
 #### Authentication & SSO
 - ✅ **SSO Toggle**: Enable/disable Single Sign-On
@@ -344,20 +347,16 @@ Complete application-wide configuration:
 ### Navigation Items
 - **Dashboard**: Overview and quick stats (all roles)
 - **Rules**: Rule management (editor, reviewer, admin)
-- **Rule Quality**: Rule validation and rule suggestions (editor, reviewer, admin)
-- **Governance**: Approval workflow, lifecycle, and exception handling (reviewer, admin)
-- **Data Catalog**: Data product browser and schema explorer (editor, reviewer, admin)
-- **Operations**: Metrics, test results, aggregation, and monitoring
-  - Operational Metrics
-  - Validation Test Results
+- **Approvals**: Approval workflow (reviewer, admin)
+- **Data Products**: Data product browser and schema explorer (editor, reviewer, admin)
+- **Reports**: Analytics and metrics
+  - Metrics & Analytics
+  - Test Results
 - **Audit Trail**: Activity logs
   - All Activity
   - Changes
-- **Notifications**: Alerts and workflow updates
 - **Templates**: Template library (editor, admin)
-- **Documentation**: User guides and release notes
 - **Settings**: System configuration (admin)
-- **Administration**: System administration surfaces (admin)
 
 ---
 
@@ -405,7 +404,7 @@ Complete application-wide configuration:
 
 ### Rule Execution
 - ✅ **Great Expectations Integration**: Industry-standard validation library
-- ✅ **API-Only Execution**: Execution components do not connect directly to Postgres
+- ✅ **Database Connectivity**: Connect to PostgreSQL and other databases
 - ✅ **Rule Translation**: Automatic conversion to expectations
 - ✅ **Batch Processing**: Execute multiple rules at once
 - ✅ **Result Posting**: Automatic result posting to API
@@ -448,13 +447,15 @@ Complete application-wide configuration:
 - ✅ **Health Checks**: Service availability monitoring
 
 ### Scripts & Automation
-- `common_startup.sh` - Start the usual local stack and Vite UI, with `--env dev\|test\|prod` or `--env-file PATH`
-- `start-containers.sh` - Start selected Docker profile groups (`--with-*` or `--all`)
-- `stop-all.sh` - Stop all services
+- `stack.sh` - Orchestrator: `stack.sh &lt;env&gt; &lt;action&gt;` (init, start, restart, stop, seed, destroy)
+- `stack_destroy.sh` - Full teardown (containers, volumes, artifacts)
+- `stack_start.sh` - Start containers (fresh or warm start)
+- `stack_stop.sh` - Stop containers (keeps volumes)
+- `stack_restart.sh` - Restart (reuse admin passwords, rotate service/user)
+- `stack_seed.sh` - Seed running stack
+- `stack_ctl.sh` - Image build/pull/push and status reporting
 - `smoke_test.sh` - Validate running services
 - `build_images.sh` - Build Docker images
-- `start_stack.sh` - Docker Compose up
-- `stop_stack.sh` - Docker Compose down
 - `seed_local_postgres.sh` - Initialize database
 
 ---
@@ -564,13 +565,14 @@ Complete application-wide configuration:
   1. **Request Profiling**: Select a data source and run data profiling to analyze data patterns
   2. **Review Suggestions**: AI generates recommendations with confidence scores
   3. **Manage Suggestions**:
-      - **Accept**: Review and confirm the suggestion is good, create the rule, and change status to `accepted`
+     - **Accept**: Review and confirm the suggestion is good (changes status to `accepted`)
+     - **Apply as Rule**: Create an actual rule from the suggestion (changes status to `applied`)
      - **Dismiss**: Reject the suggestion (changes status to `dismissed`)
   
   4. **Applied Rules** enter the normal rule lifecycle:
      - Draft → Testing → Tested → Pending Approval → Approved → Activated
   
-    **Note**: Accept creates the rule and records the suggestion as accepted.
+  **Note**: You can accept a suggestion without immediately applying it, allowing you to review multiple suggestions before committing rules. Or skip directly to Apply as Rule to create a rule immediately.
 
 #### Future Preview Features (Planned)
 - Advanced visual rule builder
@@ -639,18 +641,13 @@ Complete application-wide configuration:
   - See [KONG_QUICKSTART.md](https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_QUICKSTART.md#api-specifications-openapi-30) for details
 
 ### Data Contracts
-- ✅ **ODCS 3.1 Contracts**: Open Data Contract Standard support
+- ✅ **ODCS 3.1.0 Contracts**: Open Data Contract Standard support
   - Vendor-neutral machine-readable data contract format
   - Access via `/v1/data-contracts` endpoint
   - Schema definitions, quality rules, SLAs, and lineage
   - YAML and JSON format support
   - Standards-compliant with SodaCL for quality specifications
-  - See [KONG_QUICKSTART.md](https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_QUICKSTART.md) for details
-
-- ✅ **Open Data Product Specification 4.1**: product-level governed specification support
-  - Canonical product semantics for governed data products
-  - Registry-backed product meaning with OpenMetadata where applicable
-  - Separate from ODCS contract semantics and delivery interfaces
+  - See [KONG_QUICKSTART.md](https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_QUICKSTART.md#data-contracts-odcs-310) for details
 
 ---
 
@@ -739,4 +736,4 @@ Data Quality Made Easy is a **production-ready**, **enterprise-grade** data qual
 
 ---
 
-*Last Updated: April 16, 2026*
+*Last Updated: February 25, 2026*

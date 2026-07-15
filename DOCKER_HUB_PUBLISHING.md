@@ -29,10 +29,14 @@ export DOCKER_HUB_TOKEN="dckr_pat_your_token_here"
 
 The script will:
 - ✅ Authenticate with Docker Hub
-- ✅ Update all 8 repository descriptions automatically
+- ✅ Update all repository descriptions in `docker-hub-descriptions/` automatically
 - ✅ Update both short and full descriptions
 - ✅ Show success/failure for each repository
 - ✅ Provide a summary at the end
+
+When you publish a specific image through `scripts/build_and_push_one.sh` or
+`scripts/build_and_push_all.sh --image <name>`, the matching Docker Hub
+description is refreshed automatically after a successful push.
 
 **That's it!** All repositories will be updated in under a minute.
 

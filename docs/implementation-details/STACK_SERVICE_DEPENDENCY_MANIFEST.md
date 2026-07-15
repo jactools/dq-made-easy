@@ -24,7 +24,7 @@ This manifest defines the technical blocks behind stack orchestration. Docker co
 - `engine`: Spark runtime and engine helpers.
 - `workers`: queue workers that depend on API, Kong, or Redis.
 - `profiling`: profiling worker lifecycle.
-- `metadata`: OpenMetadata runtime, auth bootstrap, and ingestion. Through `scripts/start-containers.sh --with-metadata`, this also starts/reconciles Keycloak auth and refreshes seeded credentials before OpenMetadata token minting.
+- `metadata`: OpenMetadata runtime, auth bootstrap, and ingestion. Through `scripts/stack.sh dev start --seed`, this starts/reconciles Keycloak auth and refreshes seeded credentials before OpenMetadata token minting.
 - `support`: Zammad support stack and the legacy shared OpenMetadata search node.
 - `observability`: exporters, Loki, Prometheus, Tempo, Grafana, and telemetry plumbing.
 - `edge`: external ingress rendering only.
@@ -79,7 +79,7 @@ This manifest defines the technical blocks behind stack orchestration. Docker co
   - Depends on: keycloak-seed-artifacts completed successfully
   - Start: imports the generated realm and applies the seed-artifact volume.
   - Stop: stop before Kong, OpenMetadata auth bootstrap, and any caller that needs the realm.
-  - Seed: seed_stack.sh may rotate seeded passwords against the live realm.
+  - Seed: stack_seed.sh may rotate seeded passwords against the live realm.
 
 - [ ] 8. api-migrate
   - Profiles: core, gateway, observability
@@ -364,9 +364,9 @@ This manifest defines the technical blocks behind stack orchestration. Docker co
 ## Canonical Seed Responsibilities
 
 - `keycloak-seed-artifacts`: generates the realm import and rotated credential files.
-- `seed_stack.sh --seed-keycloak`: applies the rotated password set to the live Keycloak realm and syncs the generated credential files back to `tmp`.
-- `seed_stack.sh --seed-openmetadata`: loads the seeded credentials after Keycloak reseeding, configures OpenMetadata auth, then mints the OIDC token.
-- `start-containers.sh --with-metadata`: starts the auth and metadata profiles together, reconciles the Keycloak `openmetadata` client, reruns `--seed-keycloak` so the live realm matches the current generated credentials, then runs `openmetadata-configure`.
+- `stack.sh dev seed` (Keycloak): applies the rotated password set to the live Keycloak realm and syncs the generated credential files back to `tmp`.
+- `stack.sh dev seed` (OpenMetadata): loads the seeded credentials after Keycloak reseeding, configures OpenMetadata auth, then mints the OIDC token.
+- `stack.sh dev start --seed`: starts the auth and metadata profiles together, reconciles the Keycloak `openmetadata` client, runs `--seed-keycloak` so the live realm matches the current generated credentials, then runs `openmetadata-configure`.
 - `db-seed`: converts mock-data CSVs to SQL and applies them to Postgres.
 - `delivery-seed`: keeps the delivery-object generation path separate from mock-data SQL generation.
 

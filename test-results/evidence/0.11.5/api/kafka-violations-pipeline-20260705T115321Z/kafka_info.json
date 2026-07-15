@@ -1,0 +1,4 @@
+{
+  "skipped": false,
+  "error": "cannot access local variable 'NoBrokersAvailable' where it is not associated with a value"
+}

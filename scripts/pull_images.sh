@@ -6,20 +6,54 @@ set -euo pipefail
 # - Loads image registry/tag configuration from the selected canonical root env file.
 # - Supports pulling either the default image scope or an explicit image subset.
 # - Supports semantic version overrides via calculate_versions.sh.
-# Version: 2.0
-# Last modified: 2026-04-29
+# Version: 2.1
+# Last modified: 2026-07-01
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-source "$ROOT_DIR/scripts/supporting/logging.sh"
-source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
+source "$SCRIPT_DIR/supporting/logging.sh"
+#source "$ROOT_DIR/scripts/supporting/auth.sh"
+#source "$ROOT_DIR/scripts/supporting/openmetadata.sh"
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
 source "$ROOT_DIR/scripts/stack_catalog.sh"
-init_root_env_file "$ROOT_DIR"
-
+set_log_level INFO
 my_name="pull_images.sh"
 
-PULL_SCOPE="core"
+# init_root_env_file "$ROOT_DIR"
+
+PYTHON_RUNNER="$ROOT_DIR/scripts/python_arm64.sh"
+PYTHON_BIN="$ROOT_DIR/venv/bin/python"
+if [ ! -x "$PYTHON_BIN" ]; then
+  PYTHON_BIN="python3"
+fi
+init_root_env_file "$ROOT_DIR"
+
+if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
+  exit 1
+fi
+
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
+
+if [ ! -f "$ROOT_ENV_FILE" ]; then
+  error "$my_name" "Env file not found: $ROOT_ENV_FILE"
+  exit 1
+fi
+
+validate_selected_root_env_file "$ROOT_DIR" full
+
+export ROOT_ENV_FILE
+
+info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
+
+# source repository-level .env
+source "$ROOT_ENV_FILE"
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+my_name="pull_images.sh"
+cd "$ROOT_DIR"
+
+PULL_SCOPE="repo"
 VERSION=""
 SELECTED_IMAGES=()
 FAILED_IMAGES=()
@@ -35,7 +69,7 @@ Canonical env options:
   --env-file PATH          Use an explicit env file
 
 Options:
-  --scope <core|repo>      Pull the default core or full repo-managed image scope (default: core)
+  --scope <core|repo>      Pull the default core or full repo-managed image scope (default: repo)
   --image <name>           Pull only the named repo-managed image (repeatable)
   --version <tag>          Override tags for this pull operation
   -h, --help               Show this help message
@@ -46,6 +80,7 @@ Core images:
 Auxiliary repo images:
   dq-made-easy-db-seed dq-made-easy-keycloak-seed-artifacts dq-made-easy-openmetadata-db dq-made-easy-openmetadata-server
   dq-made-easy-metadata-configure dq-made-easy-container-metrics dq-made-easy-zammad-seed dq-made-easy-llm
+  dq-made-easy-kafka dq-made-easy-kafka-consumer dq-made-easy-trino dq-made-easy-edge dq-made-easy-airflow
 
 Examples:
   $(basename "$0")
@@ -59,13 +94,60 @@ append_unique_image() {
   local candidate="$1"
   local existing
 
-  for existing in "${SELECTED_IMAGES[@]}"; do
+  for existing in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
     if [ "$existing" = "$candidate" ]; then
       return 0
     fi
   done
 
   SELECTED_IMAGES+=("$candidate")
+}
+
+extract_image_name_from_ref() {
+  local raw_value="$1"
+
+  if [[ "$raw_value" == *:* ]]; then
+    printf '%s' "${raw_value%%:*}"
+  else
+    printf '%s' "$raw_value"
+  fi
+}
+
+extract_image_tag_from_ref() {
+  local raw_value="$1"
+
+  if [[ "$raw_value" == *:* ]]; then
+    printf '%s' "${raw_value##*:}"
+  else
+    printf '%s' ""
+  fi
+}
+
+normalize_repo_image_name() {
+  case "$1" in
+    dq-made-easy-base) printf '%s' 'dq-base' ;;
+    dq-made-easy-api) printf '%s' 'dq-api' ;;
+    dq-made-easy-engine) printf '%s' 'dq-engine' ;;
+    dq-made-easy-profiling) printf '%s' 'dq-profiling' ;;
+    dq-made-easy-frontend) printf '%s' 'dq-frontend' ;;
+    dq-made-easy-kong) printf '%s' 'dq-kong' ;;
+    dq-made-easy-db) printf '%s' 'dq-db' ;;
+    dq-made-easy-keycloak) printf '%s' 'dq-keycloak' ;;
+    dq-made-easy-kafka) printf '%s' 'dq-kafka' ;;
+    dq-made-easy-kafka-consumer) printf '%s' 'dq-kafka-consumer' ;;
+    dq-made-easy-trino) printf '%s' 'dq-trino' ;;
+    dq-made-easy-edge) printf '%s' 'dq-edge' ;;
+    dq-made-easy-airflow) printf '%s' 'dq-airflow' ;;
+    dq-made-easy-llm) printf '%s' 'dq-llm' ;;
+    dq-made-easy-db-seed) printf '%s' 'dq-db-seed' ;;
+    dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-keycloak-seed-artifacts' ;;
+    dq-made-easy-openmetadata-db) printf '%s' 'dq-openmetadata-db' ;;
+    dq-made-easy-openmetadata-server) printf '%s' 'dq-openmetadata-server' ;;
+    dq-made-easy-metadata-configure) printf '%s' 'dq-metadata-configure' ;;
+    dq-made-easy-container-metrics) printf '%s' 'dq-container-metrics' ;;
+    dq-made-easy-zammad-seed) printf '%s' 'dq-zammad-seed' ;;
+    *) printf '%s' "$1" ;;
+  esac
 }
 
 set_aux_image_defaults() {
@@ -83,7 +165,7 @@ set_aux_image_defaults() {
 
   DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker.io/}"
   DQ_OPENMETADATA_SERVER_NAMESPACE="${DQ_OPENMETADATA_SERVER_NAMESPACE:-jacbeekers/}"
-  DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata}"
+  DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata-server}"
 
   DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker.io/}"
   DQ_METADATA_CONFIGURE_NAMESPACE="${DQ_METADATA_CONFIGURE_NAMESPACE:-jacbeekers/}"
@@ -97,9 +179,94 @@ set_aux_image_defaults() {
   DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
   DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
+  DQ_KAFKA_REGISTRY="${DQ_KAFKA_REGISTRY:-docker.io/}"
+  DQ_KAFKA_NAMESPACE="${DQ_KAFKA_NAMESPACE:-jacbeekers/}"
+  DQ_KAFKA_IMAGE="${DQ_KAFKA_IMAGE:-dq-made-easy-kafka}"
+
+  DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker.io/}"
+  DQ_KAFKA_CONSUMER_NAMESPACE="${DQ_KAFKA_CONSUMER_NAMESPACE:-jacbeekers/}"
+  DQ_KAFKA_CONSUMER_IMAGE="${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}"
+
+  DQ_TRINO_REGISTRY="${DQ_TRINO_REGISTRY:-docker.io/}"
+  DQ_TRINO_NAMESPACE="${DQ_TRINO_NAMESPACE:-jacbeekers/}"
+  DQ_TRINO_IMAGE="${DQ_TRINO_IMAGE:-dq-made-easy-trino}"
+
+  DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker.io/}"
+  DQ_EDGE_NAMESPACE="${DQ_EDGE_NAMESPACE:-jacbeekers/}"
+  DQ_EDGE_IMAGE="${DQ_EDGE_IMAGE:-dq-made-easy-edge}"
+
+  DQ_AIRFLOW_REGISTRY="${DQ_AIRFLOW_REGISTRY:-docker.io/}"
+  DQ_AIRFLOW_NAMESPACE="${DQ_AIRFLOW_NAMESPACE:-jacbeekers/}"
+  DQ_AIRFLOW_IMAGE="${DQ_AIRFLOW_IMAGE:-dq-made-easy-airflow}"
+
   DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker.io/}"
   DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
   DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
+}
+
+auto_resolve_tags_from_calculated_versions() {
+  local tag_var=""
+  local needs_calculated_tags=false
+  local calculate_rc=0
+  local calculated_tag_lines=""
+  local tag_vars=(
+    DQ_BASE_TAG
+    DQ_API_TAG
+    DQ_ENGINE_TAG
+    DQ_PROFILING_TAG
+    DQ_FRONTEND_TAG
+    DQ_KONG_TAG
+    DQ_DB_TAG
+    DQ_KEYCLOAK_TAG
+    DQ_DB_SEED_TAG
+    DQ_KEYCLOAK_SEED_TAG
+    DQ_KAFKA_TAG
+    DQ_KAFKA_CONSUMER_TAG
+    DQ_TRINO_TAG
+    DQ_EDGE_TAG
+    DQ_AIRFLOW_TAG
+    DQ_LLM_TAG
+    DQ_OPENMETADATA_DB_TAG
+    DQ_OPENMETADATA_SERVER_TAG
+    DQ_METADATA_CONFIGURE_TAG
+    DQ_CONTAINER_METRICS_TAG
+    DQ_ZAMMAD_SEED_TAG
+  )
+
+  if [ -n "$VERSION" ]; then
+    return 0
+  fi
+
+  for tag_var in "${tag_vars[@]}"; do
+    if [ -z "${!tag_var:-}" ]; then
+      needs_calculated_tags=true
+      break
+    fi
+  done
+
+  if [ "$needs_calculated_tags" = "true" ]; then
+    calculated_tag_lines="$(
+      ROOT_ENV_FILE="$ROOT_ENV_FILE" LOG_LEVEL=1 bash -c '
+        source "$1" >/dev/null 2>&1
+        shift
+        for tag_var in "$@"; do
+          eval "tag_value=\${$tag_var-}"
+          printf "%s=%s\n" "$tag_var" "$tag_value"
+        done
+      ' "$ROOT_DIR/scripts/calculate_versions.sh" "$ROOT_DIR/scripts/calculate_versions.sh" "${tag_vars[@]}"
+    )" || calculate_rc=$?
+    if [ "$calculate_rc" -ne 0 ]; then
+      error "$my_name" "Unable to auto-calculate image tags via scripts/calculate_versions.sh"
+      exit 1
+    fi
+    while IFS= read -r line; do
+      [ -z "$line" ] && continue
+      export "$line"
+    done <<EOF
+$calculated_tag_lines
+EOF
+    info "$my_name" "Auto-resolved image tags from scripts/calculate_versions.sh"
+  fi
 }
 
 set_override_tags() {
@@ -189,7 +356,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -210,16 +377,29 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --image)
+      normalized_image=""
+      image_name_arg=""
+      image_tag_arg=""
       if [[ -z "${2:-}" ]]; then
         error "$my_name" "--image requires a repo-managed image name"
         exit 1
       fi
-      if ! is_repo_managed_image "$2"; then
+      image_name_arg="$(extract_image_name_from_ref "$2")"
+      image_tag_arg="$(extract_image_tag_from_ref "$2")"
+      normalized_image="$(normalize_repo_image_name "$image_name_arg")"
+      if ! is_repo_managed_image "$normalized_image"; then
         error "$my_name" "Unsupported image '$2'"
         exit 1
       fi
-      append_unique_image "$2"
-      if ! is_core_repo_image "$2"; then
+      if [[ -n "$image_tag_arg" ]]; then
+        if [[ -n "$VERSION" && "$VERSION" != "$image_tag_arg" ]]; then
+          error "$my_name" "Conflicting version values supplied: '$VERSION' and '$image_tag_arg'"
+          exit 1
+        fi
+        VERSION="$image_tag_arg"
+      fi
+      append_unique_image "$normalized_image"
+      if ! is_core_repo_image "$normalized_image"; then
         PULL_SCOPE="repo"
       fi
       shift 2
@@ -242,12 +422,21 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      if [ -n "$VERSION" ]; then
-        error "$my_name" "Multiple VERSION values supplied"
-        exit 1
-      fi
-      VERSION="$1"
-      shift
+      case "$1" in
+        core|repo)
+          # Backward-compatible fallback: accept bare scope values without --scope.
+          PULL_SCOPE="$1"
+          shift
+          ;;
+        *)
+          if [ -n "$VERSION" ]; then
+            error "$my_name" "Multiple VERSION values supplied"
+            exit 1
+          fi
+          VERSION="$1"
+          shift
+          ;;
+      esac
       ;;
   esac
  done
@@ -256,8 +445,9 @@ if ! source_selected_root_env_file; then
   exit 1
 fi
 
-source "$SCRIPT_DIR/supporting/setup_env.sh"
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 set_aux_image_defaults
+auto_resolve_tags_from_calculated_versions
 resolve_selected_images
 set_override_tags
 
@@ -269,13 +459,13 @@ info "$my_name" "Scope: $PULL_SCOPE"
 if [ -n "$VERSION" ]; then
   info "$my_name" "Version override: $VERSION"
 fi
-info "$my_name" "Images: ${SELECTED_IMAGES[*]}"
+info "$my_name" "Images: ${SELECTED_IMAGES[*]+"${SELECTED_IMAGES[*]}"}"
 info "$my_name" "========================================"
 
 success_count=0
 fail_count=0
 
-for image in "${SELECTED_IMAGES[@]}"; do
+for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
   full_image="$(resolve_full_image_name "$image")"
   info "$my_name" "Pulling: $full_image"
 
@@ -297,7 +487,7 @@ info "$my_name" "Successful: $success_count"
 info "$my_name" "Failed: $fail_count"
 
 if [ "$fail_count" -gt 0 ]; then
-  error "$my_name" "Failed images: ${FAILED_IMAGES[*]}"
+  error "$my_name" "Failed images: ${FAILED_IMAGES[*]+"${FAILED_IMAGES[*]}"}"
   exit 1
 fi
 

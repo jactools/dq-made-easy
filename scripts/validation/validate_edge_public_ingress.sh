@@ -7,7 +7,7 @@ set -euo pipefail
 # - Verifies public path-prefix routes for /iam, /metadata, /observability, /support, and /ops/kong.
 # - Verifies that non-edge host-published ports resolve to 127.0.0.1 in the public deployment config.
 # validate: groups=repo,regression
-# Version: 1.9
+# Version: 1.10
 # Last modified: 2026-05-10
 # Changelog:
 # - 1.1 (2026-04-28): Switched validation to the tracked prod example and explicitly exported ROOT_ENV_FILE for nested compose env_file resolution.
@@ -31,7 +31,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 validate_selected_root_env_file "$ROOT_DIR" full
 
@@ -53,6 +53,10 @@ resolve_path() {
       ;;
     ./*)
       printf '%s/%s' "$ROOT_DIR" "${path#./}"
+      ;;
+    ../*)
+      # ../tmp/certs → $ROOT_DIR/tmp/certs (Compose bind-mount relative paths)
+      printf '%s/%s' "$ROOT_DIR" "${path#../}"
       ;;
     *)
       printf '%s/%s' "$ROOT_DIR" "$path"
@@ -180,8 +184,10 @@ assert_contains 'location /metadata/ {' "$rendered_config"
 assert_contains 'location /observability/otlp/ {' "$rendered_config"
 assert_contains 'location /observability/ {' "$rendered_config"
 assert_contains 'location /support/ {' "$rendered_config"
+assert_contains 'set $upstream https://zammad-https:443;' "$rendered_config"
 assert_contains 'location /ops/kong/ {' "$rendered_config"
-assert_contains 'proxy_pass http://dq-made-easy-otel-collector:4319/;' "$rendered_config"
+assert_contains 'proxy_pass https://dq-made-easy-otel-collector:4318/;' "$rendered_config"
+assert_contains 'proxy_ssl_name dq-made-easy-otel-collector;' "$rendered_config"
 
 info "$my_name" "Checking public deployment host bindings..."
 assert_running_service_host_ip edge "$(expected_bind EDGE_BIND_HOST 0.0.0.0)"

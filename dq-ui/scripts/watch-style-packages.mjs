@@ -6,9 +6,10 @@ import { fileURLToPath } from 'url'
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const sourceDir = path.join(rootDir, 'src', 'style-packages')
 const tailwindConfigFile = path.join(rootDir, 'tailwind.config.cjs')
+const manifestFile = path.join(sourceDir, 'style-packages.manifest.json')
 const buildScriptFile = path.join(rootDir, 'scripts', 'build-style-packages.mjs')
 
-const watchedPaths = [sourceDir, tailwindConfigFile]
+const watchedPaths = [sourceDir, tailwindConfigFile, manifestFile]
 let rebuildScheduled = false
 let rebuildInFlight = false
 
@@ -53,6 +54,7 @@ const sourceWatcher = fs.watch(sourceDir, { recursive: true }, (_eventType, file
 
   if (
     filename.endsWith('tailwind.input.css') ||
+    filename.endsWith('style-packages.manifest.json') ||
     filename.endsWith('custom-built-package.css')
   ) {
     scheduleRebuild()

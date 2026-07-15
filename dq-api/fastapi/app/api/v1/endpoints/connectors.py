@@ -683,3 +683,7 @@ async def create_connector_instance(
     configuration = _build_connector_configuration(_normalized_provider(body.configuration.get("provider") or ""), body.configuration)
     instance = _build_connector_instance(configuration)
     return instance_repository.upsert_instance(instance)
+
+
+# Connector sync job, schedule and staleness endpoints live in
+# connector_sync_jobs.py to keep this file under the 1000-line limit.

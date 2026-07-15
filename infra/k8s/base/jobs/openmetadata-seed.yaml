@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-job-openmetadata-seed
+  labels:
+    app.kubernetes.io/name: dq-job-openmetadata-seed
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-job-openmetadata-seed
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: openmetadata-seed
+          image: docker.io/jacbeekers/dq-made-easy-metadata-configure:latest
+          imagePullPolicy: Always
+          env:
+            - name: SEED_ALL
+              value: "true"
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-openmetadata-server-config
+            - secretRef:
+                name: dq-openmetadata-server-secrets

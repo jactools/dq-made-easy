@@ -82,12 +82,24 @@ if ! ./required-script.sh; then
 fi
 ```
 
+Spark Expectations and pySpark test execution
+- When running Spark Expectations tests, always use `scripts/run_spark_expectations_container_tests.sh` and the dedicated dq-engine test container.
+- When running pySpark tests, use the same containerized dq-engine test environment; do not rely on the host Java runtime or host PySpark installation.
+- If the containerized test path is unavailable, fail fast and report the blocker instead of falling back to host execution.
+
 Background workers / queues
 - Mark the job as failed in the status store, record the cause and correlation id, emit a metric/alert; do not silently drop or mark succeeded with a substituted payload.
 
 Tests and verification
 - Unit tests should assert that dependency failures result in explicit error propagation (exceptions or HTTP 5xx), not silent success.
 - Integration/smoke tests should include a dependency-failure scenario to confirm fail-fast behaviour.
+
+DQ UI typography and font sizes
+-------------------------------
+- In `dq-ui`, prefer the existing tokenized typography patterns in `dq-ui/src/App.css`, `dq-ui/src/styles/appPatterns.css`, and `dq-ui/src/themes.css` instead of introducing new one-off font-size values.
+- Use `rem` for new text sizes unless a component already has a documented fixed-size token; avoid mixing arbitrary `px` values into reusable UI code.
+- When a font-size change is part of a broader style-package update, change the source CSS under `dq-ui/src/` and rebuild the published style assets rather than editing generated files in `dq-ui/dist/` or `dq-ui/public/`.
+- If a text size looks like it should become a reusable pattern, prefer adding or reusing a CSS custom property rather than duplicating hardcoded values across components.
 
 Enforcement suggestions
 -----------------------
@@ -119,3 +131,5 @@ Next steps I can take
 - Add example unit/integration tests that show the fail-fast behavior patterns.
 
 When in doubt, ask the maintainers before introducing any behaviour that relaxes this rule.
+
+Repository-specific env, URL, and trust-bundle contracts live in [.github/copilot/06-internal-service-contracts.md](.github/copilot/06-internal-service-contracts.md).

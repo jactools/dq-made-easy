@@ -36,7 +36,7 @@ export const useAgentHarness = () => {
   const [error, setError] = useState<string | null>(null)
 
   const apiBaseUrl = normalizeApiBaseUrl(settings.applicationSettings?.apiBaseUrl)
-  const llmApiBase = toApiGroupV1Base('llm', settings.applicationSettings?.apiBaseUrl)
+  const agentApiBase = toApiGroupV1Base('agent', settings.applicationSettings?.apiBaseUrl)
 
   const buildAuthHeaders = useCallback((includeJsonContentType = false): HeadersInit => {
     const token = getAuthToken()
@@ -59,7 +59,7 @@ export const useAgentHarness = () => {
     setError(null)
 
     try {
-      const response = await fetch(`${llmApiBase}/agent/agents`, {
+      const response = await fetch(`${agentApiBase}/agents`, {
         method: 'GET',
         headers: buildAuthHeaders(),
       })
@@ -78,7 +78,7 @@ export const useAgentHarness = () => {
     } finally {
       setLoadingAgents(false)
     }
-  }, [buildAuthHeaders, llmApiBase])
+  }, [agentApiBase, buildAuthHeaders])
 
   const runAgent = useCallback(async (request: {
     prompt: string
@@ -89,7 +89,7 @@ export const useAgentHarness = () => {
     setError(null)
 
     try {
-      const response = await fetch(`${llmApiBase}/agent/run`, {
+      const response = await fetch(`${agentApiBase}/run`, {
         method: 'POST',
         headers: buildAuthHeaders(true),
         body: JSON.stringify({
@@ -112,7 +112,7 @@ export const useAgentHarness = () => {
       setError(message)
       return null
     }
-  }, [buildAuthHeaders, llmApiBase])
+  }, [agentApiBase, buildAuthHeaders])
 
   useEffect(() => {
     void listAgents()

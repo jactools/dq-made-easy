@@ -10,7 +10,7 @@ set -euo pipefail
 # - Runs the corresponding user-facing top-level scripts for a selected group
 # - Emits versioned test proof JSON and republishes docs for api/regression/ui/engine/profiling validations
 #
-# Version: 1.4
+# Version: 1.5
 # Last modified: 2026-05-01
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -45,6 +45,7 @@ Groups:
   profiling      Profiling worker lifecycle validations (docker)
   observability  Monitoring/observability validations (docker)
   openmetadata   OpenMetadata OTel smoke validation (docker)
+  security       Local vulnerability assessment (SAST, deps, IaC, images)
   other          Untagged validate_*.sh scripts
 
 Options:
@@ -199,7 +200,7 @@ has_group() {
 
 list_groups() {
   local groups
-  groups="all smoke repo governance api regression ui engine profiling observability openmetadata other"
+  groups="all smoke repo governance api regression ui engine profiling observability openmetadata security other"
 
   info "$my_name" "Groups:"
   for g in $groups; do
@@ -308,7 +309,7 @@ main() {
   if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
     exit 1
   fi
-  set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+  set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
   if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     print_usage

@@ -31,8 +31,8 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
         tls:
-          cert_file: /etc/otel/certs/observability.jac.dot+3.pem
-          key_file: /etc/otel/certs/observability.jac.dot+3-key.pem
+          cert_file: /etc/otel/certs/services/otel-collector/tls.crt
+          key_file: /etc/otel/certs/services/otel-collector/tls.key
         cors:
           allowed_origins:
             - https://dq-made-easy.jac.dot:5173

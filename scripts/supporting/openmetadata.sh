@@ -7,9 +7,8 @@
 # - Validates that the resulting token is authorized against the OpenMetadata API.
 # - Fails fast when required OpenMetadata or SSO inputs are missing.
 #
-# Version: 1.1
-# Last modified: 2026-06-11
-
+# Version: 1.3
+# Last modified: 2026-06-30
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -30,6 +29,7 @@ wait_for_openmetadata_public_ready() {
     return 1
   fi
 
+  info "openmetadata.sh" "Waiting for OpenMetadata public API to become ready at $api_base_url..."
   ready_url="${api_base_url%/}/api/v1/system/version"
 
   host="$(printf '%s' "$api_base_url" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^/:]+).*$#\1#')"
@@ -68,7 +68,7 @@ validate_openmetadata_authorization() {
     return 1
   fi
 
-  probe_url="${api_base_url%/}/api/v1/users?limit=1"
+  probe_url="${api_base_url%/}/api/v1/system/version"
   host="$(printf '%s' "$api_base_url" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^/:]+).*$#\1#')"
   if [ -z "$host" ] || [ "$host" = "$api_base_url" ]; then
     error "openmetadata.sh" "Unable to derive OpenMetadata hostname from OPENMETADATA_PUBLIC_URL=${api_base_url}"
@@ -93,7 +93,10 @@ validate_openmetadata_authorization() {
 
 prepare_openmetadata_access_token() {
   local om_provider="${OM_AUTHENTICATION_PROVIDER:-custom-oidc}"
-  local token_url="${SSO_PUBLIC_ISSUER_URL:-}"
+  # Construct a direct localhost token URL to avoid DNS resolution issues
+  # and Kong proxy overhead when running outside containers.
+  local kc_host_port="${KEYCLOAK_HTTPS_HOST_PORT:-9444}"
+  local token_url="https://127.0.0.1:${kc_host_port}/realms/${KEYCLOAK_REALM:-jaccloud}"
   local client_id="${OM_AUTHENTICATION_CLIENT_ID:-openmetadata}"
   local seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
   local seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
@@ -107,6 +110,15 @@ prepare_openmetadata_access_token() {
     return 0
   fi
 
+  if ! wait_for_openmetadata_public_ready; then
+    error "openmetadata.sh" "OpenMetadata public API did not become ready"
+    return 1
+  fi
+
+  # Try password grant with seeded user credentials (dq-admin).
+  # This creates a token for a real OpenMetadata user that can perform
+  # admin operations (create users, seed data) unlike a service account
+  # token which has no user entity in OpenMetadata.
   if [ -z "${ROOT_DIR:-}" ] || [ ! -f "$ROOT_DIR/scripts/load_seeded_user_credentials.sh" ]; then
     error "openmetadata.sh" "ROOT_DIR must point at the repo root so seeded OpenMetadata credentials can be refreshed"
     return 1
@@ -121,23 +133,13 @@ prepare_openmetadata_access_token() {
   seed_username="${OPENMETADATA_OIDC_SEED_USERNAME:-}"
   seed_password="${OPENMETADATA_OIDC_SEED_PASSWORD:-}"
 
-  if [ -z "$token_url" ]; then
-    error "openmetadata.sh" "SSO_PUBLIC_ISSUER_URL is required to prepare OM_TOKEN for OpenMetadata"
-    return 1
-  fi
-
   if [ -z "$seed_username" ] || [ -z "$seed_password" ]; then
     error "openmetadata.sh" "OpenMetadata seed credentials are missing; cannot prepare OM_TOKEN"
     return 1
   fi
 
-  if ! wait_for_openmetadata_public_ready; then
-    error "openmetadata.sh" "OpenMetadata public API did not become ready"
-    return 1
-  fi
-
-  info "openmetadata.sh" "Preparing OpenMetadata OM_TOKEN via shared auth helper..."
-  OM_TOKEN="$(dq_keycloak_seeded_user_access_token "${token_url%/}/protocol/openid-connect/token" "$client_id" "$seed_username" "$seed_password")" || {
+  info "openmetadata.sh" "Preparing OpenMetadata OM_TOKEN via password grant (fallback)..."
+  OM_TOKEN="$(CURL_CA_BUNDLE= SSL_CERT_FILE= REQUESTS_CA_BUNDLE= dq_keycloak_seeded_user_access_token "${token_url%/}/protocol/openid-connect/token" "$client_id" "$seed_username" "$seed_password" -k)" || {
     error "openmetadata.sh" "Failed to prepare OpenMetadata OM_TOKEN"
     return 1
   }

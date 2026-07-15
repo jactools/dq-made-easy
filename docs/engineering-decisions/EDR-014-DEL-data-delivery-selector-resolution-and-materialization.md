@@ -78,4 +78,4 @@ It does not by itself define:
 - `docker-compose.yml` (`delivery-seed`)
 - `dq-api/scripts/generate_sql_seeds.py`
 - `scripts/seed_delivery_objects.py`
-- `scripts/seed_stack.sh`
+- `scripts/stack_seed.sh` (or `scripts/stack.sh dev seed`)

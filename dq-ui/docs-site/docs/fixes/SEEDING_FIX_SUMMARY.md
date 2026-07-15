@@ -1,7 +1,7 @@
 # PostgreSQL Seeding Fix Summary
 
 ## Problem
-`./scripts/start-containers.sh --seed-all` was failing with:
+`./scripts/stack.sh dev init` was failing with:
 ```
 Failed resetting schema in container
 ERROR: Postgres seed script failed
@@ -86,7 +86,7 @@ The generator now skips the support-only Zammad CSVs:
 - `dq-db/mock-data/zammad-generated-users.csv`
 - `dq-db/mock-data/zammad-user-template.csv`
 
-This keeps the shared Postgres seed path focused on the core app database and prevents `COPY zammad_admin ...` failures during `common_startup.sh --with-observability`.
+This keeps the shared Postgres seed path focused on the core app database and prevents `COPY zammad_admin ...` failures during `scripts/stack.sh dev start --seed`.
 
 ## Results
 
@@ -133,7 +133,7 @@ bash scripts/seed_local_postgres.sh
 
 ### Run full stack with seeding:
 ```bash
-./scripts/start-containers.sh --seed-all
+./scripts/stack.sh dev init
 ```
 
 ## Files Modified

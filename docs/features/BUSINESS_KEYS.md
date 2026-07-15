@@ -196,5 +196,5 @@ Backfill existing records, enforce uniqueness, and document the governance model
 
 - [ADR-019](../../architecture/adr/ADR-019-platform-business-keys-and-stable-identity-surfaces.md)
 - [ADR-018](../../architecture/adr/ADR-018-iso-11179-based-data-definition-framework-for-bcbs-239-and-mifid-ii.md)
-- [ABS-2](../status/current/ABS_2_DATA_CATALOG_MATERIALIZATION.md)
-- [ABS-3](../status/current/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)
+- [ABS-2](../features/ABS_2_DATA_CATALOG_MATERIALIZATION.md)
+- [ABS-3](../features/ABS_3_DELIVERY_LINKED_RULE_EXECUTION.md)

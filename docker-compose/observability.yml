@@ -1,0 +1,366 @@
+services:
+  loki:
+    profiles:
+    - observability
+    build:
+      context: ..
+      dockerfile: docker/loki/Dockerfile
+    container_name: dq-made-easy-loki
+    ports:
+    - ${LOKI_HOST_BIND:?LOKI_HOST_BIND is required}:${LOKI_HOST_PORT:?LOKI_HOST_PORT
+      is required}:3100
+    environment:
+      LOKI_CONFIG_FILE: /etc/loki/local-config.yml
+    volumes:
+    - ../observability/loki/loki-config.yml:/etc/loki/local-config.yml
+    - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yml
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget --no-verbose --tries=1 --timeout=5 -O /dev/null http://localhost:3100/ready || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  prometheus:
+    profiles:
+    - observability
+    image: prom/prometheus:v3
+    container_name: dq-made-easy-prometheus
+    user: 0:0
+    ports:
+    - ${PROMETHEUS_HOST_BIND:?PROMETHEUS_HOST_BIND is required}:${PROMETHEUS_HOST_PORT:?PROMETHEUS_HOST_PORT
+      is required}:9090
+    environment:
+    - TZ=UTC
+    - SSO_INTERNAL_ISSUER_URL=${SSO_INTERNAL_ISSUER_URL?SSO_INTERNAL_ISSUER_URL is
+      required}
+    - DQ_ENGINE_OIDC_CLIENT_ID=${DQ_ENGINE_OIDC_CLIENT_ID?DQ_ENGINE_OIDC_CLIENT_ID
+      is required}
+    volumes:
+    - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    - ../observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml
+    - ../observability/prometheus/tmp/prometheus_oauth2_client_secret.txt:/etc/prometheus/oauth2_client_secret:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/prometheus/certs/mkcert-rootCA.pem:ro
+    - prometheus_data:/prometheus
+    command:
+    - --config.file=/etc/prometheus/prometheus.yml
+    - --storage.tsdb.path=/prometheus
+    - --storage.tsdb.retention.time=90d
+    - --web.console.libraries=/usr/share/prometheus/console_libraries
+    - --web.console.templates=/usr/share/prometheus/consoles
+    - --web.enable-lifecycle
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://prometheus:9090/-/healthy
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+    - dq-network
+    depends_on:
+      loki:
+        condition: service_healthy
+    labels:
+    - monitoring=true
+  tempo:
+    profiles:
+    - observability
+    image: grafana/tempo:2.6.1
+    container_name: dq-made-easy-tempo
+    user: 0:0
+    ports:
+    - ${TEMPO_HOST_BIND:?TEMPO_HOST_BIND is required}:${TEMPO_HOST_PORT:?TEMPO_HOST_PORT
+      is required}:3200
+    environment:
+    - TZ=UTC
+    volumes:
+    - ../observability/tempo/tempo-config.yml:/etc/tempo/tempo.yml
+    - tempo_data:/var/tempo
+    command:
+    - -config.file=/etc/tempo/tempo.yml
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://tempo:3200/ready
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+    - dq-network
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    labels:
+    - monitoring=true
+  grafana:
+    profiles:
+    - observability
+    image: grafana/grafana:12.3
+    container_name: dq-made-easy-grafana
+    ports:
+    - ${GRAFANA_HOST_BIND:?GRAFANA_HOST_BIND is required}:${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT
+      is required}:${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT is required}
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD
+        is required}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_AUTH_BASIC_ENABLED: ${GRAFANA_AUTH_BASIC_ENABLED:?GRAFANA_AUTH_BASIC_ENABLED
+        is required}
+      GF_AUTH_DISABLE_LOGIN_FORM: ${GRAFANA_AUTH_DISABLE_LOGIN_FORM:?GRAFANA_AUTH_DISABLE_LOGIN_FORM
+        is required}
+      GF_USERS_ALLOW_SIGN_UP: 'true'
+      GF_AUTH_GENERIC_OAUTH_ENABLED: 'true'
+      GF_AUTH_GENERIC_OAUTH_NAME: Keycloak
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: grafana
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: ${GRAFANA_OIDC_SECRET:?GRAFANA_OIDC_SECRET
+        is required}
+      GRAFANA_OIDC_SECRET: ${GRAFANA_OIDC_SECRET:?GRAFANA_OIDC_SECRET is required}
+      GF_AUTH_GENERIC_OAUTH_SCOPES: openid profile email roles
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: ${KEYCLOAK_PUBLIC_URL:?KEYCLOAK_PUBLIC_URL is
+        required}/realms/${KEYCLOAK_REALM:?KEYCLOAK_REALM is required}/protocol/openid-connect/auth
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: ${SSO_INTERNAL_ISSUER_URL:?SSO_INTERNAL_ISSUER_URL
+        is required}/protocol/openid-connect/token
+      GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH: email
+      GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH: email
+      GF_AUTH_GENERIC_OAUTH_NAME_ATTRIBUTE_PATH: email
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: contains(email, 'dq-admin@jaccloud.nl')
+        && 'Admin' || 'Viewer'
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT: 'true'
+      GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: 'true'
+      GF_AUTH_GENERIC_OAUTH_SKIP_ORG_ROLE_SYNC: 'true'
+      GF_AUTH_GENERIC_OAUTH_ALLOW_ASSIGN_GRAFANA_ADMIN: 'true'
+      GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN: ${GRAFANA_AUTH_GENERIC_OAUTH_AUTO_LOGIN:?GRAFANA_AUTH_GENERIC_OAUTH_AUTO_LOGIN
+        is required}
+      GF_SERVER_DOMAIN: ${GRAFANA_PUBLIC_DOMAIN?GRAFANA_PUBLIC_DOMAIN is required}
+      GF_SERVER_HTTP_ADDR: 0.0.0.0
+      GF_SERVER_HTTP_PORT: ${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT is required}
+      GF_SERVER_PROTOCOL: https
+      GF_SERVER_CERT_FILE: /etc/grafana/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE
+        is required}
+      GF_SERVER_CERT_KEY: /etc/grafana/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE
+        is required}
+      GF_SERVER_ROOT_URL: ${GRAFANA_PUBLIC_URL?GRAFANA_PUBLIC_URL is required}
+      GF_SERVER_SERVE_FROM_SUB_PATH: ${GRAFANA_SERVE_FROM_SUB_PATH?GRAFANA_SERVE_FROM_SUB_PATH
+        is required}
+      GF_RBAC_PERMISSION_CACHE_TTL: '3600'
+      GF_ANALYTICS_REPORTING_ENABLED: 'false'
+      GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: 'false'
+      GF_NEWS_NEWS_FEED_ENABLED: 'false'
+      GF_PLUGINS_PUBLIC_KEY_RETRIEVAL_DISABLED: 'true'
+      GF_PLUGINS_PLUGIN_ADMIN_ENABLED: 'false'
+      GF_INSTALL_PLUGINS: yesoreyeram-infinity-datasource
+      SSL_CERT_FILE: /run/secrets/internal_corporate_root_ca
+      TZ: UTC
+    secrets:
+    - internal_corporate_root_ca
+    volumes:
+    - ../tmp/certs/${GRAFANA_CERT_FILE:?GRAFANA_CERT_FILE is required}:/etc/grafana/certs/${GRAFANA_CERT_FILE}:ro
+    - ../tmp/certs/${GRAFANA_KEY_FILE:?GRAFANA_KEY_FILE is required}:/etc/grafana/certs/${GRAFANA_KEY_FILE}:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/grafana/certs/mkcert-rootCA.pem:ro
+    - ../observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    - ../observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    - ../observability/grafana/grafana.ini:/etc/grafana/grafana.ini
+    - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl --fail --silent --show-error --cacert /etc/grafana/certs/mkcert-rootCA.pem
+        https://127.0.0.1:3000/api/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  container-metrics:
+    profiles:
+    - observability
+    build:
+      context: ../observability/container-metrics
+      dockerfile: Dockerfile.container-metrics
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+      secrets:
+      - internal_corporate_root_ca
+    container_name: dq-made-easy-container-metrics
+    environment:
+      COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME?COMPOSE_PROJECT_NAME is required}
+      LOG_LEVEL: INFO
+      PORT: 8000
+      NEXUSCLOUD_USERNAME: ${NEXUSCLOUD_USERNAME:-}
+      NEXUSCLOUD_PASSWORD: ${NEXUSCLOUD_PASSWORD:-}
+      NEXUSCLOUD_DNS: ${NEXUSCLOUD_DNS:-}
+      NEXUSCLOUD_PYPI_GROUP_REPO: ${NEXUSCLOUD_PYPI_GROUP_REPO:-}
+    ports:
+    - ${CONTAINER_METRICS_HOST_BIND:?CONTAINER_METRICS_HOST_BIND is required}:${CONTAINER_METRICS_HOST_PORT:?CONTAINER_METRICS_HOST_PORT
+      is required}:8000
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  pushgateway:
+    profiles:
+    - observability
+    - pushgateway
+    image: prom/pushgateway:v1.11.2
+    container_name: dq-made-easy-pushgateway
+    ports:
+    - ${PUSHGATEWAY_HOST_BIND:?PUSHGATEWAY_HOST_BIND is required}:${PUSHGATEWAY_HOST_PORT:?PUSHGATEWAY_HOST_PORT
+      is required}:9091
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://pushgateway:9091/-/healthy
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+    - dq-network
+    labels:
+    - monitoring=true
+  otel-collector:
+    profiles:
+    - observability
+    - otel
+    image: otel/opentelemetry-collector-contrib:0.148.0
+    container_name: dq-made-easy-otel-collector
+    command:
+    - --config=/etc/otel-collector-config.yml
+    ports:
+    - ${OTEL_GRPC_HOST_BIND:?OTEL_GRPC_HOST_BIND is required}:${OTEL_GRPC_HOST_PORT:?OTEL_GRPC_HOST_PORT
+      is required}:4317
+    - ${OTEL_HTTP_HOST_BIND:?OTEL_HTTP_HOST_BIND is required}:${OTEL_HTTP_HOST_PORT:?OTEL_HTTP_HOST_PORT
+      is required}:4318
+    - ${OTEL_JAEGER_HOST_BIND:?OTEL_JAEGER_HOST_BIND is required}:${OTEL_JAEGER_HOST_PORT:?OTEL_JAEGER_HOST_PORT
+      is required}:14250
+    - ${OTEL_ZIPKIN_HOST_BIND:?OTEL_ZIPKIN_HOST_BIND is required}:${OTEL_ZIPKIN_HOST_PORT:?OTEL_ZIPKIN_HOST_PORT
+      is required}:9411
+    volumes:
+    - ../observability/otel-collector/config.yml:/etc/otel-collector-config.yml
+    - ../tmp/certs:/etc/otel/certs:ro
+    - ../tmp:/var/tmp
+    environment:
+      TZ: UTC
+    networks:
+    - dq-network
+    depends_on:
+      tempo:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+  aistor:
+    profiles:
+    - observability
+    - aistor
+    image: quay.io/minio/aistor/minio:latest
+    container_name: dq-made-easy-aistor
+    ports:
+    - ${AISTOR_API_HOST_BIND:?AISTOR_API_HOST_BIND is required}:${AISTOR_API_HOST_PORT:?AISTOR_API_HOST_PORT
+      is required}:9000
+    - ${AISTOR_CONSOLE_HOST_BIND:?AISTOR_CONSOLE_HOST_BIND is required}:${AISTOR_CONSOLE_HOST_PORT:?AISTOR_CONSOLE_HOST_PORT
+      is required}:9001
+    environment:
+      MINIO_ROOT_USER: ${AISTOR_ROOT_USER?AISTOR_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${AISTOR_ROOT_PASSWORD?AISTOR_ROOT_PASSWORD is required}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    volumes:
+    - aistor_data:/mnt/data
+    - ${AISTOR_LICENSE_FILE:?AISTOR_LICENSE_FILE is required}:/minio.license:ro
+    - ../tmp/certs/services/aistor:/root/.minio/certs:ro
+    command:
+    - minio
+    - server
+    - /mnt/data
+    - --certs-dir
+    - /root/.minio/certs
+    - --console-address
+    - :9001
+    - --license
+    - /minio.license
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - --cacert
+      - /root/.minio/certs/CAs/internal-ca-bundle.pem
+      - https://localhost:9000/minio/health/live
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      dq-network:
+        aliases:
+        - minio
+    labels:
+    - monitoring=false
+  grafana-init:
+    depends_on:
+      grafana:
+        condition: service_started
+    profiles:
+    - observability
+    image: curlimages/curl:latest
+    command: ["/bin/sh", "/grafana-init/grafana-init.sh"]
+    container_name: dq-made-easy-grafana-init
+    environment:
+      TZ: UTC
+      GRAFANA_HOST: ${GRAFANA_HOST:?GRAFANA_HOST is required}
+      GRAFANA_HTTPS_HOST_PORT: ${GRAFANA_HTTPS_HOST_PORT:?GRAFANA_HTTPS_HOST_PORT
+        is required}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD
+        is required}
+      GRAFANA_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GRAFANA_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD
+        is required}
+      OBSERVABILITY_DASHBOARD_UID: ${OBSERVABILITY_DASHBOARD_UID:?OBSERVABILITY_DASHBOARD_UID
+        is required}
+      OBSERVABILITY_DASHBOARD_TITLE: ${OBSERVABILITY_DASHBOARD_TITLE:?OBSERVABILITY_DASHBOARD_TITLE
+        is required}
+      CURL_CA_BUNDLE: /etc/grafana-init/mkcert-rootCA.pem
+      SSL_CERT_FILE: /etc/grafana-init/mkcert-rootCA.pem
+    volumes:
+    - ../observability/grafana/grafana-init.sh:/grafana-init/grafana-init.sh:ro
+    - ../tmp/certs/mkcert-rootCA.pem:/etc/grafana-init/mkcert-rootCA.pem:ro
+    networks:
+    - dq-network
+    restart: 'no'
+    labels:
+    - monitoring=false
+    entrypoint:
+    - /bin/sh
+    - /grafana-init/grafana-init.sh

@@ -1,0 +1,17 @@
+{
+  "app_version": "0.11.6",
+  "mode": "infra",
+  "label": "docs-consistency",
+  "timestamp_utc": "20260714T120006ZZ",
+  "cwd": "/Users/jacbeekers/gitrepos/dq-made-easy",
+  "evidence_directory": "test-results/evidence/0.11.6/infra/20260714T120006Z-docs-consistency",
+  "status": 0,
+  "command": "grep for stack.sh references in key docs; verify lifecycle script listing",
+  "results": {
+    "docs_reference_stack_sh": true,
+    "lifecycle_scripts_documented": true,
+    "password_policy_documented": true,
+    "tests_passed": 11,
+    "tests_failed": 0
+  }
+}

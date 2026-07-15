@@ -1,1 +1,0 @@
-Background worker for data profiling and rule suggestion generation

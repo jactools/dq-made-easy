@@ -12,7 +12,7 @@ set -euo pipefail
 # Version: 1.0
 # Last modified: 2026-04-07
 
-KONG_ADMIN_LOCAL_URL="${KONG_ADMIN_LOCAL_URL:-http://localhost:8001}"
+KONG_ADMIN_LOCAL_URL="${KONG_ADMIN_LOCAL_URL:-https://localhost:8001}"
 DQ_API_LOCAL_URL="${DQ_API_LOCAL_URL:-http://localhost:4010}"
 APP_CONFIG_LOCAL_URL="${DQ_API_LOCAL_URL%/}/api/system/v1/app-config"
 
@@ -415,9 +415,9 @@ echo "  Consumer:    dq-ui (${UI_CONSUMER_ID:0:8}...)"
 echo ""
 echo "🔗 Access Points:"
 echo "  Proxy:       https://kong.jac.dot:9443/system/v1/health"
-echo "  Admin API:   http://localhost:8001/"
-echo "  Kong Manager:http://localhost:8002/"
-echo "  Metrics:     http://localhost:8001/metrics"
+echo "  Admin API:   https://localhost:8001/"
+echo "  Kong Manager: https://localhost:8444/ops/kong"
+echo "  Metrics:     https://localhost:8001/metrics"
 echo ""
 echo "📝 Next Steps:"
 echo "  1. Verify JWT flow: ./scripts/test_jwt_flow.sh"

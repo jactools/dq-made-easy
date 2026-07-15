@@ -1,7 +1,7 @@
 # PostgreSQL Seeding - Complete Fix Report
 
 ## Overview
-Fixed three critical issues that prevented successful database seeding with `./scripts/start-containers.sh --seed-all`:
+Fixed three critical issues that prevented successful database seeding with `./scripts/stack.sh dev init`:
 
 1. **Missing rule versioning initialization** - Rule versions weren't being created for existing rules
 2. **Container ID whitespace corruption** - Docker compose ps output had trailing whitespace causing docker exec to fail  
@@ -181,7 +181,7 @@ bash scripts/seed_local_postgres.sh
 
 ### Option 2: Full Stack with Seeding
 ```bash
-./scripts/start-containers.sh --seed-all
+./scripts/stack.sh dev init
 ```
 
 ### Verify Success

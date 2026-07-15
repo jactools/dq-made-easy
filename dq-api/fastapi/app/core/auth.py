@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlparse, urlunparse
 
 from fastapi import Request
 
@@ -56,6 +57,21 @@ def normalize_auth_path(path: str) -> str:
     return normalized or "/"
 
 
+def _issuer_variants(issuer: str | None) -> set[str]:
+    normalized = str(issuer or "").strip().rstrip("/")
+    if not normalized:
+        return set()
+
+    variants = {normalized}
+    parsed = urlparse(normalized)
+    if parsed.scheme == "https" and parsed.hostname:
+        internal_netloc = f"{parsed.hostname}:8080"
+        internal_issuer = parsed._replace(scheme="http", netloc=internal_netloc)
+        variants.add(urlunparse(internal_issuer).rstrip("/"))
+
+    return variants
+
+
 def is_public_route(path: str) -> bool:
     normalized = normalize_auth_path(path)
     if normalized == "/":
@@ -81,6 +97,9 @@ def get_required_scopes(method: str, path: str) -> list[str]:
     normalized_method = str(method or "GET").upper()
     normalized_path = normalize_auth_path(path)
 
+    if normalized_path.startswith("/system/v1/ui-registry/assets/") and normalized_method in {"GET", "HEAD", "OPTIONS"}:
+        return []
+
     if is_public_route(normalized_path):
         return []
 
@@ -96,6 +115,11 @@ def get_required_scopes(method: str, path: str) -> list[str]:
     if normalized_path.startswith("/system/v1/app-config"):
         if normalized_method in {"GET", "HEAD", "OPTIONS"}:
             return ["dq:admin:read"]
+        return ["dq:config:manage"]
+
+    if normalized_path.startswith("/system/v1/ui-registry"):
+        if normalized_method in {"GET", "HEAD", "OPTIONS"}:
+            return ["dq:admin:read", "dq:config:manage"]
         return ["dq:config:manage"]
 
     if normalized_path.startswith("/agent/v1/audit/events"):
@@ -279,8 +303,9 @@ def is_jwt_payload_valid(payload: dict[str, Any] | None, settings: Settings) -> 
 
     expected_issuer = (settings.sso_issuer or "").rstrip("/")
     token_issuer = str(payload.get("iss") or "").rstrip("/")
-    if settings.sso_enabled and expected_issuer and token_issuer and token_issuer != expected_issuer:
-        return False
+    if settings.sso_enabled and expected_issuer and token_issuer:
+        if token_issuer not in _issuer_variants(expected_issuer):
+            return False
 
     if settings.sso_enabled:
         allowed_clients = settings.sso_allowed_client_ids_list

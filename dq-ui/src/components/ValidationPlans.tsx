@@ -8,6 +8,7 @@ import { snakeToCamel } from '../utils/caseConverters'
 import { SecondaryButton } from './Button'
 import { AdminPageHeader } from './AdminPageHeader'
 import { StatusBanner } from './StatusBanner'
+import { AppIcon } from './app-primitives'
 import { AppPageShell } from './app-primitives/AppPageShell'
 import './Settings.css'
 
@@ -120,6 +121,94 @@ const formatTagIds = (tagIds: string[] | null | undefined): string => {
   return normalized.length > 0 ? normalized.join(', ') : 'none'
 }
 
+const normalizeSearchValue = (value: unknown): string => String(value ?? '').trim().toLowerCase()
+
+const tokenizeSearchQuery = (value: unknown): string[] => {
+  return normalizeSearchValue(value)
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean)
+}
+
+const matchesSearchQuery = (searchableValues: Array<unknown>, query: string): boolean => {
+  const queryTokens = tokenizeSearchQuery(query)
+
+  if (queryTokens.length === 0) {
+    return true
+  }
+
+  return searchableValues.some((value) => {
+    const normalizedValue = normalizeSearchValue(value)
+    return queryTokens.some((token) => normalizedValue.includes(token))
+  })
+}
+
+const getPlanSearchValues = (
+  plan: ValidationPlan,
+  activeSuite: ValidationPlanSuite | null,
+  recentRuns: ValidationPlanRecentRun[],
+): Array<unknown> => {
+  return [
+    plan.runPlanId,
+    plan.workspaceId,
+    plan.planningMode,
+    plan.status,
+    plan.currentActiveVersionId,
+    plan.pendingVersionId,
+    plan.pendingVersionGovernanceState,
+    plan.activatedBy,
+    plan.activatedAt,
+    plan.lastDispatchedRunId,
+    plan.createdAt,
+    plan.updatedAt,
+    plan.scopeSelector?.tagIds?.join(' '),
+    ...(plan.versions.flatMap((version) => [
+      version.runPlanVersionId,
+      version.governanceState,
+      version.scheduleDefinition?.scheduledAt,
+      version.createdAt,
+    ])),
+    activeSuite?.artifactId,
+    activeSuite?.artifactVersion,
+    activeSuite?.engineType,
+    activeSuite?.governanceState,
+    activeSuite?.runPlanVersionId,
+    activeSuite?.tagIds?.join(' '),
+    ...(recentRuns.flatMap((run) => [
+      run.id,
+      run.runPlanId,
+      run.suiteId,
+      run.suiteVersion,
+      run.ruleName,
+      run.ruleId,
+      run.dataObjectNames?.join(' '),
+      run.status,
+      run.submittedAt,
+    ])),
+  ]
+}
+
+const getSuiteSearchValues = (suite: ValidationPlanSuite, recentRuns: ValidationPlanRecentRun[]): Array<unknown> => {
+  return [
+    suite.artifactId,
+    suite.artifactVersion,
+    suite.engineType,
+    suite.governanceState,
+    suite.runPlanId,
+    suite.runPlanVersionId,
+    suite.scheduleDefinition?.scheduledAt,
+    suite.createdAt,
+    suite.tagIds?.join(' '),
+    ...(recentRuns.flatMap((run) => [
+      run.id,
+      run.ruleName,
+      run.ruleId,
+      run.dataObjectNames?.join(' '),
+      run.status,
+    ])),
+  ]
+}
+
 const extractErrorMessage = (payload: unknown, fallback: string): string => {
   const detail = (payload as { detail?: unknown })?.detail
   if (typeof detail === 'string') return detail
@@ -149,6 +238,7 @@ export const ValidationPlans: React.FC = () => {
   const [actionMessage, setActionMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [searchInput, setSearchInput] = useState('')
 
   const activeSuiteByPlanVersionKey = useMemo(() => {
     const index: Record<string, ValidationPlanSuite> = {}
@@ -157,6 +247,11 @@ export const ValidationPlans: React.FC = () => {
     }
     return index
   }, [suites])
+
+  const activeSearchQuery = useMemo(() => {
+    const normalized = normalizeSearchValue(searchInput)
+    return normalized.length >= 3 ? normalized : ''
+  }, [searchInput])
 
   const loadPlans = useCallback(async () => {
     if (!workspaceId) {
@@ -361,6 +456,60 @@ export const ValidationPlans: React.FC = () => {
     void loadPlans()
   }, [loadPlans])
 
+  const filteredPlans = useMemo(() => {
+    if (!activeSearchQuery) {
+      return plans
+    }
+
+    return plans.filter((plan) => {
+      const activeSuite = plan.currentActiveVersionId
+        ? activeSuiteByPlanVersionKey[`${plan.runPlanId}:${plan.currentActiveVersionId}`] || null
+        : null
+      const recentRuns = recentRunsByPlanId[plan.runPlanId] || []
+      const planMatches = matchesSearchQuery(getPlanSearchValues(plan, activeSuite, recentRuns), activeSearchQuery)
+      const suiteMatches = suites.some((suite) => suite.runPlanId === plan.runPlanId && matchesSearchQuery(getSuiteSearchValues(suite, recentRuns), activeSearchQuery))
+      return planMatches || suiteMatches
+    })
+  }, [activeSearchQuery, activeSuiteByPlanVersionKey, plans, recentRunsByPlanId, suites])
+
+  const filteredSuites = useMemo(() => {
+    if (!activeSearchQuery) {
+      return suites
+    }
+
+    return suites.filter((suite) => {
+      const recentRuns = recentRunsByPlanId[suite.runPlanId] || []
+      return matchesSearchQuery(getSuiteSearchValues(suite, recentRuns), activeSearchQuery)
+        || filteredPlans.some((plan) => plan.runPlanId === suite.runPlanId)
+    })
+  }, [activeSearchQuery, filteredPlans, recentRunsByPlanId, suites])
+
+  const filteredRecentRunsByPlanId = useMemo(() => {
+    if (!activeSearchQuery) {
+      return recentRunsByPlanId
+    }
+
+    const nextRecentRunsByPlanId: Record<string, ValidationPlanRecentRun[]> = {}
+
+    for (const plan of filteredPlans) {
+      const recentRuns = recentRunsByPlanId[plan.runPlanId] || []
+      const matchingRuns = recentRuns.filter((run) => matchesSearchQuery([
+        run.id,
+        run.runPlanId,
+        run.suiteId,
+        run.suiteVersion,
+        run.ruleName,
+        run.ruleId,
+        run.dataObjectNames?.join(' '),
+        run.status,
+        run.submittedAt,
+      ], activeSearchQuery))
+      nextRecentRunsByPlanId[plan.runPlanId] = matchingRuns.length > 0 ? matchingRuns : recentRuns
+    }
+
+    return nextRecentRunsByPlanId
+  }, [activeSearchQuery, filteredPlans, recentRunsByPlanId])
+
   return (
     <AppPageShell className="settings-container">
       <AdminPageHeader
@@ -370,6 +519,22 @@ export const ValidationPlans: React.FC = () => {
       <div className="settings-content">
         <div className="settings-panel">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div className="validation-plans-search-panel">
+              <span>Search</span>
+              <div className="validation-plans-search-row">
+                <input
+                  id="validation-plans-search"
+                  type="search"
+                  aria-label="Search"
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  onInput={(event) => setSearchInput((event.target as HTMLInputElement).value)}
+                  placeholder="Type 3+ characters to search..."
+                />
+                <AppIcon name="search" className="validation-plans-search-icon" />
+              </div>
+            </div>
+
             <div className="settings-panel" style={{ margin: 0 }}>
               <div className="gx-run-plan-card-heading">
                 <h3 className="gx-run-plan-card-title">Overview</h3>
@@ -390,16 +555,19 @@ export const ValidationPlans: React.FC = () => {
 
               {loading && <p className="settings-subtitle" style={{ marginTop: 16 }}>Loading validation plans…</p>}
 
-              {!loading && plans.length === 0 && !error && (
-                <p className="settings-subtitle" style={{ marginTop: 16 }}>No validation plans found for the current workspace.</p>
+              {!loading && filteredPlans.length === 0 && !error && (
+                <p className="settings-subtitle" style={{ marginTop: 16 }}>
+                  {activeSearchQuery ? 'No validation plans match your search.' : 'No validation plans found for the current workspace.'}
+                </p>
               )}
 
               <div className="admin-users gx-run-plan-list">
-                {plans.map((plan) => {
+                {filteredPlans.map((plan) => {
                   const latestVersion = plan.versions[plan.versions.length - 1] || null
                   const activeSuite = plan.currentActiveVersionId
                     ? activeSuiteByPlanVersionKey[`${plan.runPlanId}:${plan.currentActiveVersionId}`] || null
                     : null
+                  const visibleRecentRuns = filteredRecentRunsByPlanId[plan.runPlanId] || recentRunsByPlanId[plan.runPlanId] || []
                   return (
                     <div key={plan.runPlanId} className="admin-user-row gx-run-plan-card">
                       <div className="admin-user-info gx-run-plan-card-info">
@@ -447,12 +615,14 @@ export const ValidationPlans: React.FC = () => {
                             Unable to load recent runs: {recentRunsErrorsByPlanId[plan.runPlanId]}
                           </p>
                         )}
-                        {!recentRunsErrorsByPlanId[plan.runPlanId] && (recentRunsByPlanId[plan.runPlanId]?.length || 0) === 0 && !loading && (
-                          <p className="settings-subtitle" style={{ marginTop: 16 }}>No recent runs found for this plan.</p>
+                        {!recentRunsErrorsByPlanId[plan.runPlanId] && (visibleRecentRuns?.length || 0) === 0 && !loading && (
+                          <p className="settings-subtitle" style={{ marginTop: 16 }}>
+                            {activeSearchQuery ? 'No recent runs match your search.' : 'No recent runs found for this plan.'}
+                          </p>
                         )}
-                        {!recentRunsErrorsByPlanId[plan.runPlanId] && (recentRunsByPlanId[plan.runPlanId]?.length || 0) > 0 && (
+                        {!recentRunsErrorsByPlanId[plan.runPlanId] && (visibleRecentRuns?.length || 0) > 0 && (
                           <div className="gx-run-plan-version-list">
-                            {recentRunsByPlanId[plan.runPlanId].map((run) => {
+                            {visibleRecentRuns.map((run) => {
                               const isHighlightedRun = highlightedRecentRunByPlanId[plan.runPlanId] === run.id
                               return (
                                 <div
@@ -514,12 +684,14 @@ export const ValidationPlans: React.FC = () => {
                 <h3 className="gx-run-plan-card-title">Validation Suite List</h3>
               </div>
 
-              {!loading && suites.length === 0 && !error && (
-                <p className="settings-subtitle" style={{ marginTop: 16 }}>No validation suites found for the current workspace.</p>
+              {!loading && filteredSuites.length === 0 && !error && (
+                <p className="settings-subtitle" style={{ marginTop: 16 }}>
+                  {activeSearchQuery ? 'No validation suites match your search.' : 'No validation suites found for the current workspace.'}
+                </p>
               )}
 
               <div className="admin-users gx-run-plan-list">
-                {suites.map((suite) => (
+                {filteredSuites.map((suite) => (
                   <div key={`${suite.runPlanId}:${suite.runPlanVersionId}`} className="admin-user-row gx-run-plan-card">
                     <div className="admin-user-info gx-run-plan-card-info">
                       <span className="admin-user-name">{suite.artifactId || suite.runPlanVersionId}</span>

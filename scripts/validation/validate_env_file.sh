@@ -8,13 +8,52 @@ set -euo pipefail
 # - Supports a reduced stop-mode check so teardown still works with invalid non-stop settings.
 # validate: groups=repo
 # validate: include=false
-# Version: 1.0
+# Version: 1.1
 # Last modified: 2026-05-13
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
+source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+validate_no_http_urls() {
+  local forbidden_values=()
+  local variable_name=""
+  local variable_value=""
+
+  while IFS='=' read -r variable_name variable_value; do
+    [[ -z "$variable_name" ]] && continue
+    case "$variable_name" in
+      \#*|'' )
+        continue
+        ;;
+      HTTP_PROXY|HTTPS_PROXY|NO_PROXY|ALL_PROXY|http_proxy|https_proxy|no_proxy|all_proxy)
+        continue
+        ;;
+    esac
+
+    variable_value="${!variable_name:-}"
+    if [[ "$variable_value" == http://* ]]; then
+      forbidden_values+=("${variable_name}=${variable_value}")
+    fi
+  done < <(grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$ROOT_ENV_FILE")
+
+  if [[ "${#forbidden_values[@]}" -gt 0 ]]; then
+    error "$my_name" "HTTP URLs are forbidden in runtime env files. Found:"
+    local forbidden_value=""
+    for forbidden_value in "${forbidden_values[@]}"; do
+      error "$my_name" "  $forbidden_value"
+    done
+    exit 1
+  fi
+}
+
 init_root_env_file "$ROOT_DIR"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
+source_runtime_env_dependencies "$ROOT_ENV_FILE" pre-root
+set -a
+# shellcheck disable=SC1090
+source "$ROOT_ENV_FILE"
+set +a
+source_runtime_env_dependencies "$ROOT_ENV_FILE" post-root
 
 my_name="validate_env_file.sh"
 
@@ -104,6 +143,11 @@ validate_internal_db_url() {
     *://db:*|*://db/*|*@db:*|*@db/*) return 0 ;;
     *) fail "DQ_DB_INTERNAL_URL must use the compose service host 'db' (got: $1)" ;;
   esac
+
+  case "$1" in
+    *'sslmode=verify-full'*'sslrootcert='*) return 0 ;;
+    *) fail "DQ_DB_INTERNAL_URL must use TLS with sslmode=verify-full and sslrootcert (got: $1)" ;;
+  esac
 }
 
 validate_local_db_url() {
@@ -112,7 +156,10 @@ validate_local_db_url() {
       fail "DQ_DB_LOCAL_URL must be host-facing and must not use the compose service host 'db' (got: $1)"
       ;;
     *)
-      return 0
+      case "$1" in
+        *'sslmode=verify-full'*'sslrootcert='*) return 0 ;;
+        *) fail "DQ_DB_LOCAL_URL must use TLS with sslmode=verify-full and sslrootcert (got: $1)" ;;
+      esac
       ;;
   esac
 }
@@ -199,6 +246,7 @@ run_full_validation() {
   require_nonempty DQ_LLM_DEVICE_MAP
   require_nonempty DQ_LLM_MAX_NEW_TOKENS
 
+  validate_no_http_urls
   validate_internal_db_url "$DQ_DB_INTERNAL_URL"
   validate_local_db_url "$DQ_DB_LOCAL_URL"
 
@@ -263,6 +311,8 @@ run_full_validation() {
       require_nonempty EDGE_SSL_CERTS_DIR
       validate_filename EDGE_SSL_CERT_FILE_NAME
       validate_filename EDGE_SSL_KEY_FILE_NAME
+      validate_filename ZAMMAD_SSL_CERT_FILE_NAME
+      validate_filename ZAMMAD_SSL_KEY_FILE_NAME
       ;;
   esac
 }
@@ -285,7 +335,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 1
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

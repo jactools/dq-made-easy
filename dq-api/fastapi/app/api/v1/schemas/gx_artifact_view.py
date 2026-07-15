@@ -196,6 +196,8 @@ class GxSuiteRunScheduleRequestView(SnakeModel):
     model_config = ConfigDict(from_attributes=True, alias_generator=to_snake_alias, populate_by_name=True)
 
     scheduledAt: datetime
+    sourceOverrideUri: str | None = None
+    sourceOverrideFormat: str | None = None
 
 
 class GxSuiteRetrievalQueryView(SnakeModel):

@@ -25,6 +25,10 @@ COPY scripts /app/scripts
 COPY dq-api/fastapi/docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
 
+# Create non-root user and set ownership
+RUN useradd --create-home --shell /bin/bash appuser && chown -R appuser:appuser /app
+USER appuser
+
 EXPOSE 4010
 
 # Entrypoint runs generator (inside container), alembic upgrade, and starts uvicorn

@@ -126,7 +126,7 @@ services:
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
-      KONG_ADMIN_GUI_URL: http://localhost:8002
+      KONG_ADMIN_GUI_URL: https://localhost:8444/ops/kong
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
     ports:
       - "8000:8000"   # HTTP proxy
@@ -164,7 +164,7 @@ curl -i http://localhost:8001/
 ### 3. Access Kong Admin Interfaces
 
 - **Kong Admin API**: http://localhost:8001
-- **Kong Manager**: http://localhost:8002
+- **Kong Manager**: https://localhost:8444/ops/kong
 
 ## Configuration: Automated Setup Script
 
@@ -313,7 +313,7 @@ echo ""
 echo "🔗 Access Points:"
 echo "  Proxy:       http://localhost:8000/v1/health"
 echo "  Admin API:   http://localhost:8001/"
-echo "  Kong Manager:http://localhost:8002/"
+echo "  Kong Manager: https://localhost:8444/ops/kong"
 echo "  Metrics:     http://localhost:8001/metrics"
 echo ""
 echo "📝 Next Steps:"

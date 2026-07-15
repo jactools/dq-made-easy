@@ -9,8 +9,8 @@
 # Version: 1.0
 # Last modified: 2026-05-08
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-source "$ROOT_DIR/scripts/supporting/logging.sh"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+source "$REPO_ROOT/scripts/supporting/logging.sh"
 
 env_selector_values() {
   printf '%s' 'dev|test|prod'
@@ -61,12 +61,87 @@ named_root_env_file_path() {
   esac
 }
 
+source_runtime_env_dependencies() {
+  local selected_root_env_file="${1:-${ROOT_ENV_FILE:-}}"
+  local phase="${2:-pre-root}"
+  local root_dir=""
+  local basename=""
+  local env_name=""
+  local dependency_file=""
+  local dependency_files=()
+
+  if [[ -z "$selected_root_env_file" ]]; then
+    return 0
+  fi
+
+  if [[ "$selected_root_env_file" != /* ]]; then
+    selected_root_env_file="$ROOT_DIR/$selected_root_env_file"
+  fi
+
+  root_dir="$(dirname "$selected_root_env_file")"
+  basename="$(basename "$selected_root_env_file")"
+
+  if [[ "$basename" == *.local ]]; then
+    basename="${basename%.local}"
+  fi
+  if [[ "$basename" == .env.* ]]; then
+    basename="${basename#.env.}"
+  fi
+
+  case "$basename" in
+    dev|development)
+      env_name="dev"
+      ;;
+    test|testing)
+      env_name="test"
+      ;;
+    prod|production)
+      env_name="prod"
+      ;;
+    *)
+      env_name="local"
+      ;;
+  esac
+
+  case "$phase" in
+    pre-root)
+      dependency_files=(
+        "$root_dir/tmp/secrets.${env_name}.env"
+        "$root_dir/tmp/keycloak_seed_user_credentials.${env_name}.env"
+      )
+      ;;
+    post-root)
+      dependency_files=(
+        "$root_dir/tmp/secrets.${env_name}.env"
+        "$root_dir/tmp/keycloak_seed_user_credentials.${env_name}.env"
+        "$root_dir/tmp/env_passwords/${env_name}.env"
+      )
+      ;;
+    *)
+      dependency_files=()
+      ;;
+  esac
+
+  for dependency_file in "${dependency_files[@]}"; do
+    if [[ -f "$dependency_file" ]]; then
+      set -a
+      # shellcheck disable=SC1090
+      source "$dependency_file"
+      set +a
+    fi
+  done
+}
+
 init_root_env_file() {
   local root_dir="$1"
   local default_env_file
 
   default_env_file="$(named_root_env_file_path "$root_dir" dev)"
-  ROOT_ENV_FILE="${ROOT_ENV_FILE:-$default_env_file}"
+  if [ -n "${ROOT_ENV_FILE:-}" ]; then
+    ROOT_ENV_FILE="$(resolve_env_file_path "$root_dir" "$ROOT_ENV_FILE")"
+  else
+    ROOT_ENV_FILE="$default_env_file"
+  fi
 }
 
 ensure_selected_root_env_file_exists() {
@@ -79,10 +154,16 @@ ensure_selected_root_env_file_exists() {
 source_selected_root_env_file() {
   ensure_selected_root_env_file_exists || return 1
 
+  local selected_root_env_file="$ROOT_ENV_FILE"
+  source_runtime_env_dependencies "$selected_root_env_file" pre-root
   set -a
   # shellcheck disable=SC1090
-  source "$ROOT_ENV_FILE"
+  source "$selected_root_env_file"
   set +a
+  source_runtime_env_dependencies "$selected_root_env_file" post-root
+
+  ROOT_ENV_FILE="$selected_root_env_file"
+  export ROOT_ENV_FILE
 }
 
 validate_selected_root_env_file() {

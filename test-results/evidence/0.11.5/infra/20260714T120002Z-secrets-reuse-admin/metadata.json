@@ -1,0 +1,16 @@
+{
+  "app_version": "0.11.6",
+  "mode": "infra",
+  "label": "secrets-reuse-admin",
+  "timestamp_utc": "20260714T120002ZZ",
+  "cwd": "/Users/jacbeekers/gitrepos/dq-made-easy",
+  "evidence_directory": "test-results/evidence/0.11.6/infra/20260714T120002Z-secrets-reuse-admin",
+  "status": 0,
+  "command": "generate_secrets.sh --force then --force --reuse-admin; verify admin reused, service rotated",
+  "results": {
+    "admin_password_reused": true,
+    "service_password_rotated": true,
+    "tests_passed": 3,
+    "tests_failed": 0
+  }
+}

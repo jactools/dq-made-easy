@@ -24,9 +24,9 @@ fi
 DB_SERVICE_NAME="${DB_SERVICE_NAME:-dq-db}"
 DB_COMPOSE_SERVICE="${DB_COMPOSE_SERVICE:-db}"
 DB_HOST_PORT="${DB_HOST_PORT:-db:5432}"
-DB_NAME="${DB_NAME:-dq}"
-DB_USERNAME="${DB_USERNAME:-postgres}"
-DB_PASSWORD="${DB_PASSWORD:-postgres}"
+DB_NAME="${DB_NAME:-${DQ_DB_NAME}}"
+DB_USERNAME="${DB_USERNAME:-${DQ_DB_USER}}"
+DB_PASSWORD="${DB_PASSWORD:-${DQ_DB_PASSWORD}}"
 DB_SSL_MODE="${DB_SSL_MODE:-disable}"
 HEARTBEAT_INTERVAL_SECONDS="${HEARTBEAT_INTERVAL_SECONDS:-5}"
 
@@ -39,7 +39,7 @@ MAPPING_FAIL_ON_LOW_COVERAGE="${MAPPING_FAIL_ON_LOW_COVERAGE:-false}"
 # If true, try to provision glossaryTerm custom property `assetId` before LDD import.
 ENSURE_GLOSSARY_ASSET_ID="${ENSURE_GLOSSARY_ASSET_ID:-true}"
 
-INGESTION_CONTAINER="${INGESTION_CONTAINER:-$(docker ps --format '{{.Names}}' | grep -E 'dq-made-easy-openmetadata-ingestion' | head -n 1 || true)}"
+INGESTION_CONTAINER="${INGESTION_CONTAINER:-$(docker ps --format '{{.Names}}' | grep -E 'openmetadata-ingestion' | head -n 1 || true)}"
 if [[ -z "$INGESTION_CONTAINER" ]]; then
   echo "No running OpenMetadata ingestion container found."
   echo "Start it first (example): docker compose --profile metadata-ingestion up -d"

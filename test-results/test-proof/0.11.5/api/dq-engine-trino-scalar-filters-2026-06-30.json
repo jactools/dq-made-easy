@@ -1,0 +1,29 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "dq-engine-trino-scalar-filters-2026-06-30",
+  "proof_type": "api",
+  "feature": "trino-scalar-where-filters",
+  "summary": "Trino scalar row checks support structured params.where filters before the scalar expectation while continuing to reject raw SQL predicates.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-30T16:30:00Z",
+  "command": "cd /Users/Jac.Beekers/gitrepos/dq-made-easy/dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/20260630T163000Z-dq-engine-trino-scalar-filters",
+  "test_files": [
+    "dq-engine/tests/test_trino_adapter.py",
+    "dq-engine/tests/test_runtime_lowerer_registry.py"
+  ],
+  "test_file_count": 2,
+  "test_count": 67,
+  "assertions": [
+    "Scalar row checks compose structured params.where filters before the scalar expectation",
+    "Scalar WHERE filters support comparison and set operators through the shared Trino filter formatter",
+    "Invalid scalar WHERE filter payloads fail fast instead of accepting raw SQL predicates",
+    "The generic compile_rule_payload path returns scalar WHERE filter SQL through the Trino runtime lowerer"
+  ],
+  "proof_data": {
+    "verification_command": "cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q",
+    "verification_result": "67 passed in 0.23s",
+    "coverage_gate": "cd dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_trino_executor.py tests/test_trino_execution_pipeline.py tests/test_runtime_lowerer_registry.py --cov=trino_adapter --cov=trino_config --cov=trino_executor --cov=trino_execution_pipeline --cov-report=term-missing --cov-fail-under=90 -q",
+    "coverage_result": "88 passed in 0.64s; Required test coverage of 90% reached. Total coverage: 95.05%"
+  }
+}

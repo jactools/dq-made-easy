@@ -139,6 +139,7 @@ class GxExecutionRunReportRequestView(SnakeModel):
     startedAt: str | None = None
     completedAt: str | None = None
     resultSummary: dict[str, Any] | None = None
+    metrics: dict[str, Any] | None = None
     performanceSummary: dict[str, Any] | None = None
     diagnostics: list[dict[str, Any]] | None = None
     failureCode: str | None = None

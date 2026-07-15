@@ -1,192 +1,482 @@
+"""GX dispatch processing — routing dispatch messages by execution_shape (grouped/single/join-pair/spark expectations).
+
+Owns the main dispatch routing logic: ``process_dispatch_message()`` routes to
+``_process_grouped_dispatch_message``, ``_process_spark_expectations_dispatch_message``,
+or the single-object/join-pair path based on ``execution_shape`` and ``engine_type``.
+"""
+
 from __future__ import annotations
 
 import json
 import logging
-import os
+import tempfile
 import time
+from dataclasses import dataclass
 from typing import Any
 from uuid import uuid4
 
-import requests
-
-from dq_utils.auth_utils import TokenProvider
-from dq_utils.auth_utils import build_oidc_token_provider_from_env
 from dq_utils.logging_utils import log_event
+from dq_plan_execution import (
+    SUPPORTED_EXECUTION_ENGINES,
+    build_execution_progress,
+    coerce_int,
+    coerce_str,
+    execute_engine_rule_payload,
+    normalize_execution_engine,
+    parse_dispatch_payload,
+    process_engine_dispatch_message,
+    report_run,
+)
 
-from gx_dispatch_types import GxWorkerConfig
-from gx_dispatch_types import GxWorkerExecutionError
-from gx_dispatch_types import GxWorkerConfigError
-
-
-logger = logging.getLogger(__name__)
-
-
-def parse_dispatch_payload(raw: str) -> dict[str, Any]:
-    try:
-        payload = json.loads(raw)
-    except Exception as exc:
-        raise GxWorkerExecutionError("GX dispatch message is not valid JSON", failure_code="GX_DISPATCH_INVALID_JSON") from exc
-    if not isinstance(payload, dict):
-        raise GxWorkerExecutionError("GX dispatch message must be a JSON object", failure_code="GX_DISPATCH_INVALID_JSON")
-    return payload
-
-
-def coerce_str(payload: dict[str, Any], *keys: str) -> str:
-    for key in keys:
-        value = payload.get(key)
-        if value is None:
-            continue
-        text_value = str(value).strip()
-        if text_value:
-            return text_value
-    return ""
-
-
-def coerce_int(payload: dict[str, Any], *keys: str) -> int:
-    for key in keys:
-        value = payload.get(key)
-        if value is None:
-            continue
-        try:
-            parsed = int(value)
-            if parsed >= 1:
-                return parsed
-        except Exception:
-            continue
-    return 0
-
-
-def build_token_provider() -> TokenProvider:
-    try:
-        return build_oidc_token_provider_from_env()
-    except Exception:
-        raise GxWorkerConfigError("Failed to initialize API token provider") from None
-
-
-def _build_api_request_headers(config: GxWorkerConfig, token_provider: TokenProvider, *, correlation_id: str) -> dict[str, str]:
-    token = token_provider.get_token(correlation_id=correlation_id)
-    return {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "X-Correlation-ID": correlation_id,
-        "X-Request-Source": "dq-engine-gx-worker",
-        "X-Api-Url": config.api_url,
-    }
+from gx_dispatch_api import (
+    _api_get_suite_envelope,
+    _api_report_execution_progress,
+)
+from gx_dispatch_config import (
+    _build_token_provider,
+    _utc_now_iso,
+)
+from gx_dispatch_expectations import evaluate_expectations_spark
+from gx_dispatch_expectations import _column_is_available
+from gx_dispatch_payload import (
+    SourceLocation,
+    _assert_runnable_suite,
+    _extract_source_overrides,
+    _resolve_join_pair_location,
+    _resolve_join_pair_report_storage_uri,
+    _resolve_locations_for_targets,
+)
+from gx_dispatch_runtime import (
+    _assert_supported_uri,
+    _coerce_source_location,
+    _create_spark_session,
+    _download_s3a_prefix_to_tempdir,
+    _infer_materialized_source_location,
+    _normalize_s3_uri,
+    _require_s3_config_for_location,
+    _safe_stop_spark_session,
+    _spark_read_dataset,
+)
+from gx_dispatch_telemetry import (
+    record_spark_expectations_observability,
+    record_worker_duration,
+    record_worker_expectation_results,
+    traced_worker_span,
+)
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerExecutionError
 
 
-def api_request(
+# ---------------------------------------------------------------------------
+# Payload coercion helpers (thin wrappers around execution_dispatch)
+# ---------------------------------------------------------------------------
+# Grouped dispatch processing
+# ---------------------------------------------------------------------------
+
+
+def _process_grouped_dispatch_message(
     config: GxWorkerConfig,
-    token_provider: TokenProvider,
     *,
-    method: str,
-    path: str,
+    payload: dict[str, Any],
+    run_id: str,
     correlation_id: str,
-    params: dict[str, Any] | None = None,
-    json_body: dict[str, Any] | None = None,
-) -> Any:
-    url = f"{config.api_url.rstrip('/')}{path}"
-    headers = _build_api_request_headers(config, token_provider, correlation_id=correlation_id)
-    try:
-        response = requests.request(method=method.upper(), url=url, headers=headers, params=params, json=json_body, timeout=30)
-    except requests.RequestException as exc:  # pragma: no cover
-        raise GxWorkerExecutionError(f"API request failed: {exc}", failure_code="GX_API_REQUEST_FAILED") from exc
-
-    if response.status_code >= 400:
+    requested_by: str | None,
+) -> None:
+    logger = logging.getLogger(__name__)
+    grouped_plan = payload.get("grouped_execution_plan") if isinstance(payload.get("grouped_execution_plan"), dict) else None
+    if grouped_plan is None:
         raise GxWorkerExecutionError(
-            f"API request failed with {response.status_code}: {response.text}",
-            failure_code="GX_API_REQUEST_FAILED",
-            status_code=response.status_code,
+            "Grouped GX dispatch payload is missing grouped_execution_plan",
+            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
         )
 
-    try:
-        return response.json() if response.content else None
-    except ValueError:
-        return response.text
+    batches = grouped_plan.get("batches")
+    if not isinstance(batches, list) or not batches:
+        raise GxWorkerExecutionError(
+            "Grouped GX dispatch payload is missing execution batches",
+            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+        )
 
-
-def report_run(
-    config: GxWorkerConfig,
-    token_provider: TokenProvider,
-    *,
-    run_id: str,
-    correlation_id: str,
-    new_status: str,
-    changed_by: str | None,
-    reason: str | None,
-    details: dict[str, Any] | None,
-    execution_progress: dict[str, Any] | None = None,
-    started_at: str | None = None,
-    completed_at: str | None = None,
-    result_summary: dict[str, Any] | None = None,
-    diagnostics: list[dict[str, Any]] | None = None,
-    failure_code: str | None = None,
-    failure_message: str | None = None,
-) -> None:
-    _ = api_request(
-        config,
-        token_provider,
-        method="POST",
-        path=f"/rulebuilder/v1/gx/runs/{run_id}/report",
+    log_event(
+        logger,
+        "gx.worker.dispatch.received",
+        component="dq-engine-gx-worker",
         correlation_id=correlation_id,
-        json_body={
-            "new_status": new_status,
-            "changed_by": changed_by,
-            "reason": reason,
-            "details": details,
-            "execution_progress": execution_progress,
-            "started_at": started_at,
-            "completed_at": completed_at,
-            "result_summary": result_summary,
-            "diagnostics": diagnostics,
-            "failure_code": failure_code,
-            "failure_message": failure_message,
-        },
+        run_id=run_id,
+        execution_shape="grouped_scope",
+        batch_count=grouped_plan.get("batch_count"),
+        suite_count=grouped_plan.get("suite_count"),
     )
 
-
-def report_execution_progress(
-    config: GxWorkerConfig,
-    token_provider: TokenProvider,
-    *,
-    run_id: str,
-    correlation_id: str,
-    changed_by: str | None,
-    reason: str,
-    details: dict[str, Any] | None,
-    completed_steps: int,
-    total_steps: int,
-    label: str,
-) -> None:
-    report_run(
+    token_provider = _build_token_provider()
+    grouped_execution_started = time.perf_counter()
+    total_steps = len(batches) + 1
+    _api_report_execution_progress(
         config,
         token_provider,
         run_id=run_id,
         correlation_id=correlation_id,
-        new_status="running",
-        changed_by=changed_by,
-        reason=reason,
-        details=details,
-        execution_progress=build_execution_progress(
-            completed_steps=completed_steps,
-            total_steps=total_steps,
-            label=label,
-        ),
+        changed_by=requested_by,
+        reason="GX worker started grouped execution",
+        details={"source": "dq-engine-gx-worker", "dispatch": payload},
+        completed_steps=0,
+        total_steps=total_steps,
+        label="Queued for grouped execution",
+    )
+
+    target_ids = [
+        str(batch.get("data_object_version_id") or "").strip()
+        for batch in batches
+        if isinstance(batch, dict)
+    ]
+    target_ids = [target_id for target_id in target_ids if target_id]
+    if not target_ids:
+        raise GxWorkerExecutionError(
+            "Grouped GX dispatch payload does not define any data_object_version_id targets",
+            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+        )
+
+    locations_by_target = _resolve_locations_for_targets(
+        config,
+        token_provider,
+        correlation_id=correlation_id,
+        target_ids=target_ids,
+        payload=payload,
+    )
+
+    _api_report_execution_progress(
+        config,
+        token_provider,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        changed_by=requested_by,
+        reason="GX worker resolved grouped execution inputs",
+        details={"source": "dq-engine-gx-worker"},
+        completed_steps=1,
+        total_steps=total_steps,
+        label=f"Resolved {len(batches)} grouped batches",
+    )
+
+    needs_delta = any(loc.format == "delta" for loc in locations_by_target.values())
+    spark_session = _create_spark_session(config, enable_delta=needs_delta)
+    tmpdirs: list[tempfile.TemporaryDirectory[str]] = []
+    all_ok = True
+    all_diagnostics: list[dict[str, Any]] = []
+    batch_results: list[dict[str, Any]] = []
+    total_suite_count = 0
+
+    try:
+        for batch_index, batch in enumerate(batches, start=1):
+            if not isinstance(batch, dict):
+                raise GxWorkerExecutionError(
+                    "Grouped GX dispatch batch is invalid",
+                    failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+                )
+            target_id = str(batch.get("data_object_version_id") or "").strip()
+            if not target_id:
+                raise GxWorkerExecutionError(
+                    "Grouped GX dispatch batch is missing data_object_version_id",
+                    failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+                )
+            suites = batch.get("suites")
+            if not isinstance(suites, list) or not suites:
+                raise GxWorkerExecutionError(
+                    f"Grouped GX dispatch batch '{target_id}' does not include any suite envelopes",
+                    failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+                )
+
+            batch_started_at = time.perf_counter()
+            batch_ok = True
+            location = locations_by_target[target_id]
+            normalized_uri = _normalize_s3_uri(location.uri)
+            _assert_supported_uri(normalized_uri)
+            _require_s3_config_for_location(config, uri=normalized_uri)
+            read_uri = normalized_uri
+            if normalized_uri.startswith("s3a://"):
+                tmpdir, localized_path = _download_s3a_prefix_to_tempdir(config, uri=normalized_uri)
+                tmpdirs.append(tmpdir)
+                read_uri = localized_path
+
+            with traced_worker_span(
+                "gx.worker.batch",
+                component="dq-engine-gx-worker",
+                correlation_id=correlation_id,
+                run_id=run_id,
+                execution_shape="grouped_scope",
+                batch_index=batch_index,
+                data_object_version_id=target_id,
+                suite_count=len(suites),
+            ):
+                source_read_started_at = time.perf_counter()
+                df = _spark_read_dataset(
+                    spark_session,
+                    location=SourceLocation(uri=read_uri, format=location.format, options=location.options),
+                    max_rows=config.max_rows,
+                )
+                record_worker_duration(
+                    stage="source_read",
+                    execution_shape="grouped_scope",
+                    duration_ms=(time.perf_counter() - source_read_started_at) * 1000.0,
+                    result="success",
+                    source_format=location.format,
+                    batch_count=len(batches),
+                    suite_count=len(suites),
+                    target_count=1,
+                )
+
+                suite_results: list[dict[str, Any]] = []
+                for suite_payload in suites:
+                    if not isinstance(suite_payload, dict):
+                        raise GxWorkerExecutionError(
+                            f"Grouped GX dispatch batch '{target_id}' contains an invalid suite envelope",
+                            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+                        )
+                    expectations, suite_targets, primary_key_fields = _assert_runnable_suite(suite_payload)
+                    if target_id not in suite_targets:
+                        raise GxWorkerExecutionError(
+                            f"Grouped GX dispatch suite is not attached to target '{target_id}'",
+                            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+                        )
+                    ok, summary, diagnostics = evaluate_expectations_spark(
+                        df,
+                        expectations,
+                        primary_key_fields=primary_key_fields,
+                    )
+                    record_worker_expectation_results(
+                        execution_shape="grouped_scope",
+                        passed_count=int(summary.get("passed_expectation_count") or 0),
+                        failed_count=int(summary.get("failed_expectation_count") or 0),
+                    )
+                    suite_id = str(suite_payload.get("suite_id") or "")
+                    suite_version = int(suite_payload.get("suite_version") or 0)
+                    compiled_from = suite_payload.get("compiled_from") if isinstance(suite_payload.get("compiled_from"), dict) else None
+                    rule_ids = []
+                    if isinstance(compiled_from, dict):
+                        raw_rule_ids = compiled_from.get("rule_ids") or []
+                        if isinstance(raw_rule_ids, list):
+                            rule_ids = [str(item).strip() for item in raw_rule_ids if str(item).strip()]
+                    suite_results.append(
+                        {
+                            "suite_id": suite_id,
+                            "suite_version": suite_version,
+                            "rule_ids": rule_ids,
+                            "ok": ok,
+                            "summary": summary,
+                        }
+                    )
+                    total_suite_count += 1
+                    if not ok:
+                        batch_ok = False
+                        all_ok = False
+                    for diag in diagnostics:
+                        diag["data_object_version_id"] = target_id
+                        diag["storage_uri"] = normalized_uri
+                        diag["storage_format"] = location.format
+                        diag["suite_id"] = suite_id
+                        diag["suite_version"] = suite_version
+                        all_diagnostics.append(diag)
+
+                batch_results.append(
+                    {
+                        "data_object_version_id": target_id,
+                        "storage_uri": normalized_uri,
+                        "storage_format": location.format,
+                        "suite_count": len(suite_results),
+                        "suite_results": suite_results,
+                        "ok": batch_ok,
+                    }
+                )
+
+                _api_report_execution_progress(
+                    config,
+                    token_provider,
+                    run_id=run_id,
+                    correlation_id=correlation_id,
+                    changed_by=requested_by,
+                    reason="GX worker evaluated a grouped batch",
+                    details={"source": "dq-engine-gx-worker", "batch_index": batch_index},
+                    completed_steps=batch_index + 1,
+                    total_steps=total_steps,
+                    label=f"Evaluated grouped batch {batch_index} of {len(batches)}",
+                )
+
+            record_worker_duration(
+                stage="batch_execution",
+                execution_shape="grouped_scope",
+                duration_ms=(time.perf_counter() - batch_started_at) * 1000.0,
+                result="success" if batch_ok else "failure",
+                batch_count=len(batches),
+                suite_count=len(suite_results),
+                target_count=1,
+            )
+    finally:
+        _safe_stop_spark_session(spark_session)
+        for tmpdir in tmpdirs:
+            tmpdir.cleanup()
+
+    result_summary = {
+        "selection_mode": "grouped_scope",
+        "batch_count": len(batch_results),
+        "suite_count": total_suite_count,
+        "results": batch_results,
+    }
+
+    if all_ok:
+        report_run(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            new_status="succeeded",
+            changed_by=requested_by,
+            reason="GX worker completed grouped execution",
+            details={"source": "dq-engine-gx-worker", "selection_mode": "grouped_scope"},
+            execution_progress=build_execution_progress(
+                completed_steps=total_steps,
+                total_steps=total_steps,
+                label="Grouped execution completed",
+            ),
+            completed_at=_utc_now_iso(),
+            result_summary=result_summary,
+            diagnostics=[],
+            failure_code=None,
+            failure_message=None,
+        )
+        record_worker_duration(
+            stage="dispatch",
+            execution_shape="grouped_scope",
+            duration_ms=(time.perf_counter() - grouped_execution_started) * 1000.0,
+            result="success",
+            batch_count=len(batch_results),
+            suite_count=total_suite_count,
+            target_count=len(target_ids),
+        )
+    else:
+        report_run(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            new_status="failed",
+            changed_by=requested_by,
+            reason="GX worker completed grouped execution with failures",
+            details={"source": "dq-engine-gx-worker", "selection_mode": "grouped_scope", "failure_count": len(all_diagnostics)},
+            execution_progress=build_execution_progress(
+                completed_steps=total_steps,
+                total_steps=total_steps,
+                label="Grouped execution completed with failures",
+            ),
+            completed_at=_utc_now_iso(),
+            result_summary=result_summary,
+            diagnostics=all_diagnostics,
+            failure_code="GX_VALIDATION_FAILED",
+            failure_message="One or more grouped-scope expectations failed",
+        )
+        record_worker_duration(
+            stage="dispatch",
+            execution_shape="grouped_scope",
+            duration_ms=(time.perf_counter() - grouped_execution_started) * 1000.0,
+            result="failure",
+            batch_count=len(batch_results),
+            suite_count=total_suite_count,
+            target_count=len(target_ids),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Spark expectations dispatch (generic engine)
+# ---------------------------------------------------------------------------
+
+
+def _process_spark_expectations_dispatch_message(
+    config: GxWorkerConfig,
+    *,
+    payload: dict[str, Any],
+    run_id: str,
+    correlation_id: str,
+    requested_by: str | None,
+) -> None:
+    response_payload = process_engine_dispatch_message(
+        config,
+        payload=payload,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        requested_by=requested_by,
+        report_run_fn=report_run,
+        report_progress_fn=_api_report_execution_progress,
+        token_provider_factory=_build_token_provider,
+        execute_payload_fn=execute_engine_rule_payload,
+    )
+    engine_type = str(response_payload.get("engine_type") or normalize_execution_engine(coerce_str(payload, "engine_type")))
+    if engine_type == "spark_expectations":
+        record_spark_expectations_observability(
+            observability_summary=response_payload.get("observability_summary"),
+            result=response_payload.get("result") if isinstance(response_payload.get("result"), str) else response_payload.get("result_status"),
+        )
+    record_worker_duration(
+        stage="dispatch",
+        execution_shape=engine_type,
+        duration_ms=0.0,
+        result="success" if response_payload.get("ok") else "failure",
+        batch_count=1,
+        suite_count=1,
+        target_count=1,
     )
 
 
-def build_execution_progress(*, completed_steps: int, total_steps: int, label: str) -> dict[str, Any]:
-    percent = 0 if total_steps <= 0 else int(round((completed_steps / total_steps) * 100))
-    return {
-        "percent": max(0, min(percent, 100)),
-        "label": label,
-        "completed_steps": completed_steps,
-        "total_steps": total_steps,
-        "source": "dq-engine-gx-worker",
-        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-    }
+# ---------------------------------------------------------------------------
+# Main dispatch routing entry point
+# ---------------------------------------------------------------------------
 
 
-def log_dispatch_received(*, correlation_id: str, run_id: str, suite_id: str | None = None, suite_version: int | None = None, execution_shape: str | None = None, **extra: Any) -> None:
+def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> None:
+    """Route a raw dispatch message to the correct processing handler.
+
+    Handles: grouped_scope, spark expectations (generic engines), single_object,
+    and join_pair execution shapes.
+    """
+    payload = parse_dispatch_payload(raw_message)
+
+    run_id = coerce_str(payload, "run_id", "queue_message_id")
+    execution_shape = coerce_str(payload, "execution_shape") or "single_object"
+    suite_id = coerce_str(payload, "suite_id")
+    suite_version = coerce_int(payload, "suite_version")
+    correlation_id = coerce_str(payload, "correlation_id") or f"corr-{uuid4().hex[:12]}"
+    requested_by = coerce_str(payload, "requested_by") or None
+
+    if execution_shape == "grouped_scope":
+        if not run_id:
+            raise GxWorkerExecutionError(
+                "GX dispatch payload is missing required run_id for grouped execution",
+                failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+            )
+        _process_grouped_dispatch_message(
+            config,
+            payload=payload,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            requested_by=requested_by,
+        )
+        return
+
+    dispatch_engine_type = normalize_execution_engine(coerce_str(payload, "engine_type"))
+    if dispatch_engine_type in (SUPPORTED_EXECUTION_ENGINES - {"gx"}):
+        _process_spark_expectations_dispatch_message(
+            config,
+            payload=payload,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            requested_by=requested_by,
+        )
+        return
+
+    if not run_id or not suite_id or suite_version <= 0:
+        raise GxWorkerExecutionError(
+            "GX dispatch payload is missing required identifiers (run_id/suite_id/suite_version)",
+            failure_code="GX_DISPATCH_INVALID_PAYLOAD",
+        )
+
+    logger = logging.getLogger(__name__)
     log_event(
         logger,
         "gx.worker.dispatch.received",
@@ -195,6 +485,397 @@ def log_dispatch_received(*, correlation_id: str, run_id: str, suite_id: str | N
         run_id=run_id,
         suite_id=suite_id,
         suite_version=suite_version,
-        execution_shape=execution_shape,
-        **extra,
     )
+
+    token_provider = _build_token_provider()
+    single_execution_started = time.perf_counter()
+
+    report_run(
+        config,
+        token_provider,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        new_status="running",
+        changed_by=requested_by,
+        reason="GX worker started execution",
+        details={"source": "dq-engine-gx-worker", "dispatch": payload},
+        execution_progress=build_execution_progress(
+            completed_steps=0,
+            total_steps=1,
+            label="Queued for execution",
+        ),
+        started_at=_utc_now_iso(),
+    )
+
+    envelope = _api_get_suite_envelope(
+        config,
+        token_provider,
+        suite_id=suite_id,
+        suite_version=suite_version,
+        correlation_id=correlation_id,
+    )
+    expectations, target_ids, primary_key_fields = _assert_runnable_suite(envelope)
+
+    # Optional scope override (adhoc runs may choose a subset of the resolved targets).
+    raw_scope_override = payload.get("executionScopeOverride") or payload.get("execution_scope_override")
+    if isinstance(raw_scope_override, list):
+        normalized_override = [str(v).strip() for v in raw_scope_override if str(v).strip()]
+        if normalized_override:
+            missing = [v for v in normalized_override if v not in target_ids]
+            if missing:
+                raise GxWorkerExecutionError(
+                    "GX dispatch executionScopeOverride contains target(s) not attached to the suite",
+                    failure_code="GX_WORKER_INVALID_SCOPE_OVERRIDE",
+                )
+            target_ids = normalized_override
+
+    if execution_shape == "join_pair":
+        join_pair_location = _resolve_join_pair_location(
+            payload=payload,
+            envelope=envelope,
+            target_ids=target_ids,
+        )
+        total_steps = 2
+        _api_report_execution_progress(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            changed_by=requested_by,
+            reason="GX worker resolved join-pair source",
+            details={"source": "dq-engine-gx-worker", "execution_shape": "join_pair"},
+            completed_steps=1,
+            total_steps=total_steps,
+            label="Resolved joined source materialization",
+        )
+
+        needs_delta = join_pair_location.format == "delta"
+        spark_session = _create_spark_session(config, enable_delta=needs_delta)
+        normalized_uri = _normalize_s3_uri(join_pair_location.uri)
+        _assert_supported_uri(normalized_uri)
+        _require_s3_config_for_location(config, uri=normalized_uri)
+
+        tmpdirs: list[tempfile.TemporaryDirectory[str]] = []
+        try:
+            read_uri = normalized_uri
+            if normalized_uri.startswith("s3a://"):
+                tmpdir, localized_path = _download_s3a_prefix_to_tempdir(config, uri=normalized_uri)
+                tmpdirs.append(tmpdir)
+                read_uri = localized_path
+
+            with traced_worker_span(
+                "gx.worker.join_pair",
+                component="dq-engine-gx-worker",
+                correlation_id=correlation_id,
+                run_id=run_id,
+                suite_id=suite_id,
+                suite_version=suite_version,
+                execution_shape="join_pair",
+            ):
+                source_read_started_at = time.perf_counter()
+                df = _spark_read_dataset(
+                    spark_session,
+                    location=SourceLocation(uri=read_uri, format=join_pair_location.format, options=join_pair_location.options),
+                    max_rows=config.max_rows,
+                )
+                record_worker_duration(
+                    stage="source_read",
+                    execution_shape="join_pair",
+                    duration_ms=(time.perf_counter() - source_read_started_at) * 1000.0,
+                    result="success",
+                    source_format=join_pair_location.format,
+                    target_count=len(target_ids),
+                )
+
+                ok, summary, diagnostics = evaluate_expectations_spark(
+                    df,
+                    expectations,
+                    primary_key_fields=primary_key_fields,
+                )
+                record_worker_expectation_results(
+                    execution_shape="join_pair",
+                    passed_count=int(summary.get("passed_expectation_count") or 0),
+                    failed_count=int(summary.get("failed_expectation_count") or 0),
+                )
+
+            _api_report_execution_progress(
+                config,
+                token_provider,
+                run_id=run_id,
+                correlation_id=correlation_id,
+                changed_by=requested_by,
+                reason="GX worker evaluated join-pair source",
+                details={"source": "dq-engine-gx-worker", "execution_shape": "join_pair"},
+                completed_steps=2,
+                total_steps=total_steps,
+                label="Evaluated joined source materialization",
+            )
+        finally:
+            _safe_stop_spark_session(spark_session)
+            for tmpdir in tmpdirs:
+                tmpdir.cleanup()
+
+        result_summary = {
+            "suite_id": suite_id,
+            "suite_version": suite_version,
+            "target_count": len(target_ids),
+            "results": [
+                {
+                    "data_object_version_id": target_ids[0] if target_ids else None,
+                    "storage_uri": _resolve_join_pair_report_storage_uri(
+                        payload=payload,
+                        envelope=envelope,
+                        target_ids=target_ids,
+                        join_pair_location=join_pair_location,
+                    ),
+                    "storage_format": join_pair_location.format,
+                    "ok": ok,
+                    "summary": summary,
+                }
+            ],
+        }
+        if ok:
+            report_run(
+                config,
+                token_provider,
+                run_id=run_id,
+                correlation_id=correlation_id,
+                new_status="succeeded",
+                changed_by=requested_by,
+                reason="GX worker completed join-pair execution",
+                details={"source": "dq-engine-gx-worker", "execution_shape": "join_pair"},
+                execution_progress=build_execution_progress(
+                    completed_steps=total_steps,
+                    total_steps=total_steps,
+                    label="Execution completed",
+                ),
+                completed_at=_utc_now_iso(),
+                result_summary=result_summary,
+                diagnostics=[],
+                failure_code=None,
+                failure_message=None,
+            )
+            record_worker_duration(
+                stage="dispatch",
+                execution_shape="join_pair",
+                duration_ms=(time.perf_counter() - single_execution_started) * 1000.0,
+                result="success",
+                target_count=len(target_ids),
+            )
+        else:
+            report_run(
+                config,
+                token_provider,
+                run_id=run_id,
+                correlation_id=correlation_id,
+                new_status="failed",
+                changed_by=requested_by,
+                reason="GX worker completed join-pair execution with failures",
+                details={"source": "dq-engine-gx-worker", "execution_shape": "join_pair", "failure_count": len(diagnostics)},
+                execution_progress=build_execution_progress(
+                    completed_steps=total_steps,
+                    total_steps=total_steps,
+                    label="Execution completed with failures",
+                ),
+                completed_at=_utc_now_iso(),
+                result_summary=result_summary,
+                diagnostics=diagnostics,
+                failure_code="GX_VALIDATION_FAILED",
+                failure_message="One or more expectations failed",
+            )
+            record_worker_duration(
+                stage="dispatch",
+                execution_shape="join_pair",
+                duration_ms=(time.perf_counter() - single_execution_started) * 1000.0,
+                result="failure",
+                target_count=len(target_ids),
+            )
+        return
+
+    locations_by_target = _resolve_locations_for_targets(
+        config,
+        token_provider,
+        correlation_id=correlation_id,
+        target_ids=target_ids,
+        payload=payload,
+    )
+
+    total_steps = len(target_ids) + 1
+    _api_report_execution_progress(
+        config,
+        token_provider,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        changed_by=requested_by,
+        reason="GX worker resolved execution inputs",
+        details={"source": "dq-engine-gx-worker"},
+        completed_steps=1,
+        total_steps=total_steps,
+        label=f"Resolved {len(target_ids)} source targets",
+    )
+
+    needs_delta = any(loc.format == "delta" for loc in locations_by_target.values())
+    spark_session = _create_spark_session(config, enable_delta=needs_delta)
+
+    all_ok = True
+    per_target_results: list[dict[str, Any]] = []
+    all_diagnostics: list[dict[str, Any]] = []
+
+    tmpdirs: list[tempfile.TemporaryDirectory[str]] = []
+
+    try:
+        for target_index, target_id in enumerate(target_ids, start=1):
+            target_started_at = time.perf_counter()
+            location = locations_by_target[target_id]
+            normalized_uri = _normalize_s3_uri(location.uri)
+            _assert_supported_uri(normalized_uri)
+            _require_s3_config_for_location(config, uri=normalized_uri)
+
+            read_uri = normalized_uri
+            if normalized_uri.startswith("s3a://"):
+                tmpdir, localized_path = _download_s3a_prefix_to_tempdir(config, uri=normalized_uri)
+                tmpdirs.append(tmpdir)
+                read_uri = localized_path
+
+            with traced_worker_span(
+                "gx.worker.target",
+                component="dq-engine-gx-worker",
+                correlation_id=correlation_id,
+                run_id=run_id,
+                suite_id=suite_id,
+                suite_version=suite_version,
+                execution_shape="single_object",
+                target_index=target_index,
+                data_object_version_id=target_id,
+            ):
+                source_read_started_at = time.perf_counter()
+                df = _spark_read_dataset(
+                    spark_session,
+                    location=SourceLocation(uri=read_uri, format=location.format, options=location.options),
+                    max_rows=config.max_rows,
+                )
+                record_worker_duration(
+                    stage="source_read",
+                    execution_shape="single_object",
+                    duration_ms=(time.perf_counter() - source_read_started_at) * 1000.0,
+                    result="success",
+                    source_format=location.format,
+                    target_count=len(target_ids),
+                )
+
+                ok, summary, diagnostics = evaluate_expectations_spark(
+                    df,
+                    expectations,
+                    primary_key_fields=primary_key_fields,
+                )
+                record_worker_expectation_results(
+                    execution_shape="single_object",
+                    passed_count=int(summary.get("passed_expectation_count") or 0),
+                    failed_count=int(summary.get("failed_expectation_count") or 0),
+                )
+                per_target_results.append(
+                    {
+                        "data_object_version_id": target_id,
+                        "storage_uri": normalized_uri,
+                        "storage_format": location.format,
+                        "ok": ok,
+                        "summary": summary,
+                    }
+                )
+                if not ok:
+                    all_ok = False
+                for diag in diagnostics:
+                    diag["data_object_version_id"] = target_id
+                    diag["storage_uri"] = normalized_uri
+                    diag["storage_format"] = location.format
+                    all_diagnostics.append(diag)
+
+                _api_report_execution_progress(
+                    config,
+                    token_provider,
+                    run_id=run_id,
+                    correlation_id=correlation_id,
+                    changed_by=requested_by,
+                    reason="GX worker evaluated a source target",
+                    details={"source": "dq-engine-gx-worker", "target_index": target_index},
+                    completed_steps=target_index + 1,
+                    total_steps=total_steps,
+                    label=f"Evaluated source target {target_index} of {len(target_ids)}",
+                )
+
+            record_worker_duration(
+                stage="target_execution",
+                execution_shape="single_object",
+                duration_ms=(time.perf_counter() - target_started_at) * 1000.0,
+                result="success" if ok else "failure",
+                source_format=location.format,
+                target_count=len(target_ids),
+            )
+    finally:
+        _safe_stop_spark_session(spark_session)
+        for tmpdir in tmpdirs:
+            tmpdir.cleanup()
+
+    result_summary = {
+        "suite_id": suite_id,
+        "suite_version": suite_version,
+        "target_count": len(target_ids),
+        "results": per_target_results,
+    }
+
+    if all_ok:
+        report_run(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            new_status="succeeded",
+            changed_by=requested_by,
+            reason="GX worker completed execution",
+            details={"source": "dq-engine-gx-worker"},
+            execution_progress=build_execution_progress(
+                completed_steps=total_steps,
+                total_steps=total_steps,
+                label="Execution completed",
+            ),
+            completed_at=_utc_now_iso(),
+            result_summary=result_summary,
+            diagnostics=[],
+            failure_code=None,
+            failure_message=None,
+        )
+        record_worker_duration(
+            stage="dispatch",
+            execution_shape="single_object",
+            duration_ms=(time.perf_counter() - single_execution_started) * 1000.0,
+            result="success",
+            target_count=len(target_ids),
+        )
+    else:
+        report_run(
+            config,
+            token_provider,
+            run_id=run_id,
+            correlation_id=correlation_id,
+            new_status="failed",
+            changed_by=requested_by,
+            reason="GX worker completed execution with failures",
+            details={"source": "dq-engine-gx-worker", "failure_count": len(all_diagnostics)},
+            execution_progress=build_execution_progress(
+                completed_steps=total_steps,
+                total_steps=total_steps,
+                label="Execution completed with failures",
+            ),
+            completed_at=_utc_now_iso(),
+            result_summary=result_summary,
+            diagnostics=all_diagnostics,
+            failure_code="GX_VALIDATION_FAILED",
+            failure_message="One or more expectations failed",
+        )
+        record_worker_duration(
+            stage="dispatch",
+            execution_shape="single_object",
+            duration_ms=(time.perf_counter() - single_execution_started) * 1000.0,
+            result="failure",
+            target_count=len(target_ids),
+        )

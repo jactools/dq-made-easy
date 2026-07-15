@@ -1063,3 +1063,141 @@ def test_dispatcher_threshold_override_and_helper_functions() -> None:
     assert generator_module._quote_values(["A", "B"], case_sensitive=False) == "'a', 'b'"
     assert generator_module._operator_symbol("gte") == ">="
     assert generator_module._join_consistency_tolerance_unit("days") == "DAY"
+
+
+# ---------------------------------------------------------------------------
+# Actuality-date clause generation
+# ---------------------------------------------------------------------------
+
+
+def _correct_params_with_actuality() -> dict:
+    return {
+        "checkType": "CORRECT",
+        "sourceDataObjectVersionId": "src-v1",
+        "referenceDataObjectVersionId": "ref-v1",
+        "joinKeys": [{"leftAttribute": "src_id", "rightAttribute": "ref_id"}],
+        "comparison": {"leftAttribute": "src_value", "rightAttribute": "ref_value"},
+        "actualityDate": {
+            "leftAttribute": "src_updated_at",
+            "rightAttribute": "ref_updated_at",
+            "toleranceSource": "DELIVERY_CONTRACT",
+            "contractId": "c1",
+            "resolvedToleranceValue": 30,
+            "resolvedToleranceUnit": "minutes",
+        },
+    }
+
+
+def _reconcile_params_with_actuality() -> dict:
+    return {
+        "checkType": "RECONCILE",
+        "leftDataObjectVersionId": "left-v1",
+        "rightDataObjectVersionId": "right-v1",
+        "joinKeys": [{"leftAttribute": "left_id", "rightAttribute": "right_id"}],
+        "comparisons": [
+            {"leftAttribute": "left_amount", "rightAttribute": "right_amount"},
+        ],
+        "actualityDate": {
+            "leftAttribute": "left_effective_at",
+            "rightAttribute": "right_effective_at",
+            "toleranceSource": "EXPLICIT",
+            "contractId": "n/a",
+            "resolvedToleranceValue": 2,
+            "resolvedToleranceUnit": "days",
+        },
+    }
+
+
+def _transfer_match_params_with_actuality() -> dict:
+    return {
+        "checkType": "TRANSFER_MATCH",
+        "leftDataObjectVersionId": "left-v1",
+        "rightDataObjectVersionId": "right-v1",
+        "joinKeys": [{"leftAttribute": "left_id", "rightAttribute": "right_id"}],
+        "comparisons": [
+            {"leftAttribute": "left_hash", "rightAttribute": "right_hash"},
+        ],
+        "actualityDate": {
+            "leftAttribute": "left_ts",
+            "rightAttribute": "right_ts",
+            "toleranceSource": "DELIVERY_METADATA",
+            "contractId": "meta",
+            "resolvedToleranceValue": 60,
+            "resolvedToleranceUnit": "hours",
+        },
+    }
+
+
+def test_correct_expression_includes_actuality_clause() -> None:
+    expr = generate_expression_from_check_type("CORRECT", _correct_params_with_actuality())
+    assert "src_id = rhs.ref_id" in expr
+    assert "src_value = rhs.ref_value" in expr
+    assert "ABS(TIMESTAMPDIFF(MINUTE, src_updated_at, rhs.ref_updated_at)) <= 30" in expr
+
+
+def test_correct_expression_without_actuality_is_unchanged() -> None:
+    params = {
+        "checkType": "CORRECT",
+        "sourceDataObjectVersionId": "src-v1",
+        "referenceDataObjectVersionId": "ref-v1",
+        "joinKeys": [{"leftAttribute": "src_id", "rightAttribute": "ref_id"}],
+        "comparison": {"leftAttribute": "src_value", "rightAttribute": "ref_value"},
+    }
+    expr = generate_expression_from_check_type("CORRECT", params)
+    assert "src_id = rhs.ref_id" in expr
+    assert "src_value = rhs.ref_value" in expr
+    assert "TIMESTAMPDIFF" not in expr
+
+
+def test_reconcile_expression_includes_actuality_clause() -> None:
+    expr = generate_expression_from_check_type("RECONCILE", _reconcile_params_with_actuality())
+    assert "left_id = rhs.right_id" in expr
+    assert "left_amount = rhs.right_amount" in expr
+    assert "ABS(TIMESTAMPDIFF(DAY, left_effective_at, rhs.right_effective_at)) <= 2" in expr
+
+
+def test_transfer_match_row_value_match_includes_actuality() -> None:
+    expr = generate_expression_from_check_type("TRANSFER_MATCH", _transfer_match_params_with_actuality())
+    assert "left_id = rhs.right_id" in expr
+    assert "left_hash = rhs.right_hash" in expr
+    assert "ABS(TIMESTAMPDIFF(HOUR, left_ts, rhs.right_ts)) <= 60" in expr
+
+
+def test_transfer_match_payload_hash_match_includes_actuality() -> None:
+    params = {
+        "checkType": "TRANSFER_MATCH",
+        "mode": "payload_hash_match",
+        "leftDataObjectVersionId": "left-v1",
+        "rightDataObjectVersionId": "right-v1",
+        "joinKeys": [{"leftAttribute": "left_id", "rightAttribute": "right_id"}],
+        "leftHashAttribute": "left_payload_hash",
+        "rightHashAttribute": "right_payload_hash",
+        "actualityDate": {
+            "leftAttribute": "left_ts",
+            "rightAttribute": "right_ts",
+            "toleranceSource": "EXPLICIT",
+            "contractId": "n/a",
+            "resolvedToleranceValue": 5,
+            "resolvedToleranceUnit": "days",
+        },
+    }
+    expr = generate_expression_from_check_type("TRANSFER_MATCH", params)
+    assert "left_id = rhs.right_id" in expr
+    assert "left_payload_hash = rhs.right_payload_hash" in expr
+    assert "ABS(TIMESTAMPDIFF(DAY, left_ts, rhs.right_ts)) <= 5" in expr
+
+
+def test_actuality_clause_uses_days_unit() -> None:
+    params = _correct_params_with_actuality()
+    params["actualityDate"]["resolvedToleranceUnit"] = "days"
+    params["actualityDate"]["resolvedToleranceValue"] = 1
+    expr = generate_expression_from_check_type("CORRECT", params)
+    assert "TIMESTAMPDIFF(DAY, src_updated_at, rhs.ref_updated_at)) <= 1" in expr
+
+
+def test_actuality_clause_uses_hours_unit() -> None:
+    params = _correct_params_with_actuality()
+    params["actualityDate"]["resolvedToleranceUnit"] = "hours"
+    params["actualityDate"]["resolvedToleranceValue"] = 12
+    expr = generate_expression_from_check_type("CORRECT", params)
+    assert "TIMESTAMPDIFF(HOUR, src_updated_at, rhs.ref_updated_at)) <= 12" in expr

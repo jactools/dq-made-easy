@@ -21,6 +21,25 @@ if ! source_selected_root_env_file; then
     exit 1
 fi
 
+source "$DOCKER_DIR/scripts/supporting/setup_env.sh"
+
+PYTHON_BASE_IMAGE_REF="${PYTHON_REGISTRY:-}${PYTHON_IMAGE:-library/python}:${PYTHON_TAG:-3.13-slim-bookworm}"
+
+if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ]; then
+    if ! docker image inspect "$PYTHON_BASE_IMAGE_REF" >/dev/null 2>&1; then
+        if ! python3 "$DOCKER_DIR/dq-engine/scripts/import_nexus_python_image.py" \
+            --registry-url "$NEXUSCLOUD_DOCKER_IO_REGISTRY" \
+            --image-ref "$PYTHON_BASE_IMAGE_REF" \
+            --image-path "${PYTHON_IMAGE:-library/python}" \
+            --tag "${PYTHON_TAG:-3.13-slim-bookworm}" \
+            --username "${NEXUSCLOUD_USERNAME:-}" \
+            --password "${NEXUSCLOUD_PASSWORD:-}"; then
+            echo "ERROR: failed to import Nexus Python base image: $PYTHON_BASE_IMAGE_REF" >&2
+            exit 1
+        fi
+    fi
+fi
+
 # Restore exported TAG if it was previously set
 if [ -n "$SAVED_DQ_ENGINE_TAG" ]; then
     DQ_ENGINE_TAG="$SAVED_DQ_ENGINE_TAG"
@@ -97,6 +116,9 @@ echo ""
 
 echo "Starting build..."
 if docker build $NO_CACHE \
+    --build-arg PYTHON_REGISTRY="${PYTHON_REGISTRY:-}" \
+    --build-arg PYTHON_IMAGE="${PYTHON_IMAGE:-library/python}" \
+    --build-arg PYTHON_TAG="${PYTHON_TAG:-3.13-slim-bookworm}" \
     --build-arg PIP_INDEX_URL="${PIP_INDEX_URL:-}" \
     --build-arg MAVEN_REPOSITORIES="${MAVEN_REPOSITORIES:-}" \
     -f "$DOCKER_DIR/dq-engine/Dockerfile.engine" \

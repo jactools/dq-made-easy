@@ -5,7 +5,30 @@ Overview
 --------
 This service exposes compile-time rule translation for dq-made-easy. It translates canonical rule payloads into Great Expectations expectations without executing them against source data.
 
-Runtime execution is handled by the GX dispatch worker in `dq-engine/gx_dispatch_worker.py`, which runs suites on Spark and reports outcomes back through the main API.
+Runtime execution is handled by the **GX dispatch worker**, which runs suites on Spark and reports outcomes back through the main API (Kong → FastAPI → DB).
+
+### Module Architecture
+
+The engine is split into focused modules following the Single Responsibility Principle:
+
+| Module | Responsibility |
+|---|---|
+| `gx_dispatch_config.py` | Configuration loading, environment variable resolution |
+| `gx_dispatch_api.py` | Kong API client, run reporting, failure handling |
+| `gx_dispatch_payload.py` | Dispatch payload parsing, source override extraction |
+| `gx_dispatch_dispatch.py` | Dispatch routing (grouped / single / join-pair / spark expectations) |
+| `gx_dispatch_expectations.py` | Expectation evaluation engine — single source of truth |
+| `gx_dispatch_runtime.py` | Spark session, S3/URI handling, source resolution |
+| `gx_dispatch_telemetry.py` | OpenTelemetry instrumentation |
+| `gx_dispatch_types.py` | Shared type definitions |
+| `gx_dispatch_worker.py` | Main entry point — worker loop, heartbeat, crash recovery |
+| `execution_dispatch.py` | Generic execution dispatch (non-GX engines) |
+
+**Full module architecture:** [docs/technical/DQ_ENGINE_MODULE_ARCHITECTURE.md](../docs/technical/DQ_ENGINE_MODULE_ARCHITECTURE.md)
+
+### Kafka Consumer
+
+The **`dq-kafka-consumer`** is a separate, lightweight container that consumes violation records from Kafka and persists them to both the database and S3. See `dq-kafka-consumer/README.md` for details.
 
 Quick start (local)
 -------------------

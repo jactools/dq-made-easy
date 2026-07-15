@@ -4,7 +4,7 @@ import { getAuthToken } from '../contexts/AuthContext'
 import { useAuth } from '../hooks/useKeycloak'
 import { toApiGroupV1Base } from '../config/api'
 import { ApplicationSettings as ApplicationSettingsType, AlertRoutingPolicy, SecuritySettings, APISettings, WorkspaceSettings, type IconProviderName } from '../types/settings'
-import { AppSelect, AppPageShell } from './app-primitives'
+import { AppInput, AppSelect, AppPageShell } from './app-primitives'
 import { Button } from './Button'
 import { PrimaryButton, SecondaryButton } from './Button'
 import { AdminPageHeader } from './AdminPageHeader'
@@ -14,12 +14,12 @@ import './Settings.css'
 import { camelToSnake, snakeToCamel } from '../utils/caseConverters'
 import { createSupportReferenceId, formatSupportReferenceId } from '../utils/supportReference'
 import { PLAYGROUND_SOURCE_BUNDLES } from '../data/playgroundSourceBundles'
-import { DEFAULT_STYLE_PACKAGE, STYLE_PACKAGE_OPTIONS, getStylePackageLabel } from '../contexts/styleThemeCatalog'
+import { DEFAULT_STYLE_PACKAGE } from '../contexts/styleThemeCatalog'
 import type { StylePackageName } from '../types/settings'
 
 type AppSettingsTab = 'application' | 'security' | 'api'
 type FeatureStage = 'off' | 'preview' | 'live'
-type SettingsSection = { readonly id: string; readonly label: string }
+type SettingsSection = { readonly id: string; readonly label: string; readonly searchTerms?: readonly string[] }
 type AgentDefaultAction = 'deny' | 'allow'
 
 type AgentAccessAllowEntry = {
@@ -388,7 +388,6 @@ export const buildAppConfigPayload = (
     exceptionAnalyticsProjectionRetentionDays: applicationData.exceptionAnalyticsProjectionRetentionDays,
     exceptionFactPurgeBatchSize: applicationData.exceptionFactPurgeBatchSize,
     exceptionFactJitRequestTimeoutMinutes: applicationData.exceptionFactJitRequestTimeoutMinutes,
-    sessionTimeoutWarningMinutes: applicationData.sessionTimeoutWarningMinutes,
     siemEnabled:
       typeof applicationData.siemEnabled === 'boolean'
         ? applicationData.siemEnabled
@@ -603,6 +602,8 @@ export const ApplicationSettings: React.FC = () => {
   const auth = useAuth()
   const [activeTab, setActiveTab] = useState<AppSettingsTab>('application')
   const [hasChanges, setHasChanges] = useState(false)
+  const [sectionSearchQuery, setSectionSearchQuery] = useState('')
+
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [saveStatusMessage, setSaveStatusMessage] = useState<string | null>(null)
   const [appConfigError, setAppConfigError] = useState<string | null>(null)
@@ -936,13 +937,10 @@ export const ApplicationSettings: React.FC = () => {
           if (!applicationData) return
           // Keep API base URL user-specific; global settings are persisted to app-config.
           console.info(`${logPrefix} Saving user-scoped application preferences`)
-          const nextStylePackage = applicationData.stylePackage || DEFAULT_STYLE_PACKAGE
-          const currentStylePackage = settings.applicationSettings?.stylePackage || DEFAULT_STYLE_PACKAGE
           await settings.updateSettings({
             category: 'application',
             data: {
               apiBaseUrl: applicationData.apiBaseUrl,
-              ...(nextStylePackage !== currentStylePackage ? { stylePackage: nextStylePackage } : {}),
             },
           })
           {
@@ -1150,6 +1148,16 @@ export const ApplicationSettings: React.FC = () => {
     }
   }
 
+  const matchesSectionSearch = (section: SettingsSection, query: string): boolean => {
+    const normalizedQuery = query.trim().toLowerCase()
+    if (!normalizedQuery) {
+      return true
+    }
+
+    const searchableText = [section.label, ...(section.searchTerms ?? [])].join(' ').toLowerCase()
+    return searchableText.includes(normalizedQuery)
+  }
+
   const getSectionsForTab = (): readonly SettingsSection[] => {
     switch (activeTab) {
       case 'application':
@@ -1163,6 +1171,11 @@ export const ApplicationSettings: React.FC = () => {
     }
   }
 
+  const visibleSections = useMemo(
+    () => getSectionsForTab().filter((section) => matchesSectionSearch(section, sectionSearchQuery)),
+    [activeTab, sectionSearchQuery],
+  )
+
   const getSelectedSectionId = (sections: readonly SettingsSection[]): string => {
     if (sections.some((section) => section.id === activeSection)) {
       return activeSection
@@ -1173,20 +1186,34 @@ export const ApplicationSettings: React.FC = () => {
 
   const renderSectionsNav = (sections: readonly SettingsSection[], navId: string) => (
     <div className="settings-sections-nav settings-sections-nav--header">
-      <span className="settings-sections-nav-label">Jump to section:</span>
-      <div className="settings-sections-nav-scroll">
-        <AppTabs
-          ariaLabel={navId}
-          value={getSelectedSectionId(sections)}
-          onChange={scrollToSection}
-          className="settings-sections-nav-control"
-          tabs={sections.map((section) => ({
-            value: section.id,
-            label: section.label,
-            title: `Jump to ${section.label}`,
-          }))}
+      <div className="settings-sections-nav-search">
+        <AppInput
+          id="settingsSectionSearch"
+          label="Search settings sections"
+          value={sectionSearchQuery}
+          onChange={(event) => setSectionSearchQuery(event.target.value)}
+          placeholder="Search SSO, workspace, or retention"
+          hint="Use this to quickly find application settings sections."
         />
       </div>
+      <span className="settings-sections-nav-label">Jump to section:</span>
+      {sections.length > 0 ? (
+        <div className="settings-sections-nav-scroll">
+          <AppTabs
+            ariaLabel={navId}
+            value={getSelectedSectionId(sections)}
+            onChange={scrollToSection}
+            className="settings-sections-nav-control"
+            tabs={sections.map((section) => ({
+              value: section.id,
+              label: section.label,
+              title: `Jump to ${section.label}`,
+            }))}
+          />
+        </div>
+      ) : (
+        <p className="settings-hint settings-sections-nav-empty">No matching settings sections.</p>
+      )}
     </div>
   )
 
@@ -1406,7 +1433,7 @@ export const ApplicationSettings: React.FC = () => {
       <AdminPageHeader
         title="Application Settings"
         subtitle="Configure application-wide settings, limits, and workspace defaults"
-        supplementary={renderSectionsNav(getSectionsForTab(), 'Application settings sections')}
+        supplementary={renderSectionsNav(visibleSections, 'Application settings sections')}
         actions={
           hasChanges ? (
             <>
@@ -1478,43 +1505,7 @@ export const ApplicationSettings: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <AppSelect
-                  id="iconProvider"
-                  label="Icon provider"
-                  value={applicationData.iconProvider || 'tabler'}
-                  onChange={(value) => {
-                    setApplicationData({
-                      ...applicationData,
-                      iconProvider: value as IconProviderName,
-                    })
-                    setHasChanges(true)
-                  }}
-                  options={[
-                    { value: 'tabler', label: 'Tabler' },
-                    { value: 'lucide', label: 'Lucide' },
-                  ]}
-                />
-                <p className="info-text">Controls the package-backed icon provider used by the app-owned icon seam.</p>
-              </div>
-
-              <div className="form-group">
-                <AppSelect
-                  id="stylePackage"
-                  label="Style package"
-                  value={applicationData.stylePackage || DEFAULT_STYLE_PACKAGE}
-                  onChange={(value) => {
-                    setApplicationData({
-                      ...applicationData,
-                      stylePackage: value as StylePackageName,
-                    })
-                    setHasChanges(true)
-                  }}
-                  options={STYLE_PACKAGE_OPTIONS.map((option) => ({
-                    value: option.value,
-                    label: getStylePackageLabel(option.value),
-                  }))}
-                />
-                <p className="info-text">Controls which package-backed stylesheet the app loads at runtime.</p>
+                <p className="info-text">Application-wide behavior settings continue below.</p>
               </div>
             </div>
             {/* Authentication & SSO Section */}

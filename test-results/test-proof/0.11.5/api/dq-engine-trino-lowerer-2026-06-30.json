@@ -1,0 +1,27 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "dq-engine-trino-lowerer-2026-06-30",
+  "proof_type": "api",
+  "feature": "trino-lowerer-milestone-1",
+  "summary": "Milestone 1 Trino lowering now generates valid Trino SQL for row, aggregate, and query rules, and rejects unsupported constructs before parameter validation.",
+  "status": "passed",
+  "executed_at_utc": "2026-06-30T13:58:05Z",
+  "command": "cd /Users/Jac.Beekers/gitrepos/dq-made-easy/dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/api/20260630T135805Z-dq-engine-trino-lowerer",
+  "test_files": [
+    "dq-engine/tests/test_trino_adapter.py",
+    "dq-engine/tests/test_runtime_lowerer_registry.py"
+  ],
+  "test_file_count": 2,
+  "test_count": 33,
+  "assertions": [
+    "Row-level Trino rules cover not_null, is_null, equals, not_equal, between, in, not_in, min, and max",
+    "Aggregate Trino rules cover count, sum, avg, min, max, and distinct_count",
+    "Unsupported Trino constructs are rejected before parameter validation and are reported as compile failures",
+    "The runtime registry resolves the trino engine type through compile_rule_payload"
+  ],
+  "proof_data": {
+    "verification_command": "cd /Users/Jac.Beekers/gitrepos/dq-made-easy/dq-engine && /Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python -m pytest tests/test_trino_adapter.py tests/test_runtime_lowerer_registry.py -q",
+    "verification_result": "33 passed in 0.27s"
+  }
+}

@@ -37,6 +37,21 @@ const resolveDevApiProxyTarget = (command: 'build' | 'serve'): string | undefine
   )
 }
 
+const resolveDevOtelProxyTarget = (command: 'build' | 'serve'): string | undefined => {
+  if (command !== 'serve') {
+    return undefined
+  }
+
+  const target = process.env.VITE_OTEL_PROXY_TARGET
+  if (isAbsoluteHttpUrl(target)) {
+    return target
+  }
+
+  throw new Error(
+    'Vite OTLP proxy target is not configured. Set VITE_OTEL_PROXY_TARGET before starting the dev server.'
+  )
+}
+
 const devServerHttps = useDevHttps
   ? {
       key: fs.readFileSync(devHttpsKeyFile),
@@ -168,6 +183,7 @@ if (iconSourceDir) {
 
 export default defineConfig(({ command }) => {
   const devApiProxyTarget = resolveDevApiProxyTarget(command)
+  const devOtelProxyTarget = resolveDevOtelProxyTarget(command)
 
   return {
   plugins: [
@@ -196,11 +212,22 @@ export default defineConfig(({ command }) => {
     ...(command === 'serve'
       ? {
           proxy: {
+            '/api/system/v1/ui-registry': {
+              target: devApiProxyTarget,
+              changeOrigin: true,
+              secure: false,
+            },
             '/api': {
               target: devApiProxyTarget,
               changeOrigin: true,
               secure: false,
               rewrite: (requestPath) => requestPath.replace(/^\/api(?=\/|$)/, '') || '/',
+            },
+            '/observability/otlp': {
+              target: devOtelProxyTarget,
+              changeOrigin: true,
+              secure: false,
+              rewrite: (requestPath) => requestPath.replace(/^\/observability\/otlp(?=\/|$)/, '') || '/',
             }
           }
         }

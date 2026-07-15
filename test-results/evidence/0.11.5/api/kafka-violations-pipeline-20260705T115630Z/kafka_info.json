@@ -1,0 +1,4 @@
+{
+  "skipped": false,
+  "error": "cannot import name 'TopicListing' from 'kafka.admin' (/Users/jacbeekers/gitrepos/dq-made-easy/venv/lib/python3.13/site-packages/kafka/admin/__init__.py)"
+}

@@ -1,8 +1,8 @@
 # WF-3: Rule Versioning & Rollback - Workflow Integration
 
 Current-state references:
-- [WF-3 comprehensive summary](/docs/status/current/WF3_COMPREHENSIVE_SUMMARY/)
-- [Management feature summary](/docs/status/current/MANAGEMENT_FEATURE_SUMMARY/)
+- [WF-3 comprehensive summary](/docs/features/WF3_COMPREHENSIVE_SUMMARY/)
+- [Management feature summary](https://github.com/jactools/dq-rulebuilder/blob/main/features/MANAGEMENT_FEATURE_SUMMARY.md)
 
 ## Overview
 

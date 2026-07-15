@@ -44,7 +44,8 @@ jobs:
             stateResourceGroupName
             stateStorageAccountName
             stateStorageContainerName
-            stateKeyPrefix
+            stateKeyPrefixApp
+            environmentName
           )
 
           for var_name in "${required_vars[@]}"; do
@@ -58,6 +59,21 @@ jobs:
             echo "registryUsername and registryPassword are required when registryServer is set" >&2
             exit 1
           fi
+
+          if [[ -z "${containerAppName:-}" || -z "${containerImage:-}" || -z "${containerName:-}" ]]; then
+            echo "containerAppName, containerImage, and containerName are required" >&2
+            exit 1
+          fi
+
+          if ! [[ "${targetPort:-}" =~ ^[0-9]+$ ]] || [[ "${targetPort}" -lt 1 || "${targetPort}" -gt 65535 ]]; then
+            echo "targetPort must be a valid TCP port between 1 and 65535" >&2
+            exit 1
+          fi
+
+          if [[ "${ingress:-}" != "internal" && "${ingress:-}" != "external" ]]; then
+            echo "ingress must be one of: internal, external" >&2
+            exit 1
+          fi
         displayName: dq-made-easy - Validate deploy inputs
         env:
           azureServiceConnection: $(azureServiceConnection)
@@ -68,7 +84,13 @@ jobs:
           stateResourceGroupName: $(stateResourceGroupName)
           stateStorageAccountName: $(stateStorageAccountName)
           stateStorageContainerName: $(stateStorageContainerName)
-          stateKeyPrefix: $(stateKeyPrefix)
+          stateKeyPrefixApp: $(stateKeyPrefixApp)
+          environmentName: $(environmentName)
+          containerAppName: ${{ parameters.containerAppName }}
+          containerImage: ${{ parameters.containerImage }}
+          containerName: ${{ parameters.containerName }}
+          targetPort: ${{ parameters.targetPort }}
+          ingress: ${{ parameters.ingress }}
           registryServer: ${{ parameters.registryServer }}
           registryUsername: ${{ parameters.registryUsername }}
           registryPassword: ${{ parameters.registryPassword }}
@@ -99,7 +121,7 @@ jobs:
             state_resource_group='$(stateResourceGroupName)'
             state_storage_account='$(stateStorageAccountName)'
             state_storage_container='$(stateStorageContainerName)'
-            state_key='$(stateKeyPrefix)/${container_app_name}.tfstate'
+            state_key='$(stateKeyPrefixApp)/${container_app_name}.tfstate'
 
             if [[ -z "$container_app_name" || -z "$container_image" || -z "$target_port" ]]; then
               echo "containerAppName, containerImage, and targetPort are required" >&2
@@ -198,21 +220,3 @@ jobs:
               echo "Deployed target port mismatch for $container_app_name: expected $target_port, got $deployed_target_port" >&2
               exit 1
             fi
-
-*** Add File: /Users/Jac.Beekers/gitrepos/dq-rulebuilder/infra/opentofu/container-app-environment/versions.tf
-terraform {
-  required_version = ">= 1.8.0"
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 4.0.0"
-    }
-  }
-
-  backend "azurerm" {}
-}
-
-provider "azurerm" {
-  features {}
-}

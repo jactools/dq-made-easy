@@ -236,6 +236,7 @@ class GxExecutionRunCreateEntity(EntityModel):
     startedAt: str | None = None
     completedAt: str | None = None
     resultSummary: GxExecutionResultSummaryEntity | None = None
+    metrics: dict[str, Any] | None = None
     performanceSummary: dict[str, Any] | None = None
     diagnostics: list[GxExecutionDiagnosticEntity] = Field(default_factory=list)
     failureCode: str | None = None
@@ -257,6 +258,7 @@ class GxExecutionRunStatusTransitionEntity(EntityModel):
     startedAt: str | None = None
     completedAt: str | None = None
     resultSummary: GxExecutionResultSummaryEntity | None = None
+    metrics: dict[str, Any] | None = None
     performanceSummary: dict[str, Any] | None = None
     diagnostics: list[GxExecutionDiagnosticEntity] | None = None
     failureCode: str | None = None
@@ -301,6 +303,7 @@ class GxExecutionRunEntity(EntityModel):
     handoffPayload: GxDispatchPayloadEntity | None = None
     executionProgress: GxExecutionProgressEntity | None = None
     resultSummary: GxExecutionResultSummaryEntity | None = None
+    metrics: dict[str, Any] | None = None
     performanceSummary: dict[str, Any] | None = None
     diagnostics: list[GxExecutionDiagnosticEntity] = Field(default_factory=list)
     failureCode: str | None = None
@@ -709,8 +712,14 @@ def build_gx_execution_run_status_transition_entity(payload: Any) -> GxExecution
     if normalized_payload.get("details") is None:
         normalized_payload["details"] = {}
     result_summary_payload = normalized_payload.pop("resultSummary", normalized_payload.get("result_summary"))
+    metrics_payload = normalized_payload.pop("metrics", normalized_payload.get("metrics"))
     performance_summary_payload = normalized_payload.pop("performanceSummary", normalized_payload.get("performance_summary"))
     normalized_payload["result_summary"] = build_gx_execution_result_summary_entity(result_summary_payload)
+    normalized_payload["metrics"] = (
+        dict(metrics_payload)
+        if isinstance(metrics_payload, Mapping)
+        else (dict(performance_summary_payload) if isinstance(performance_summary_payload, Mapping) else None)
+    )
     normalized_payload["performance_summary"] = (
         dict(performance_summary_payload) if isinstance(performance_summary_payload, Mapping) else performance_summary_payload
     )
@@ -747,7 +756,10 @@ def build_gx_execution_run_entity(payload: Mapping[str, Any]) -> GxExecutionRunE
     execution_contract_payload = _mapping_value(payload, "executionContract", "execution_contract")
     handoff_payload = _mapping_value(payload, "handoffPayload", "handoff_payload")
     result_summary_payload = _mapping_value(payload, "resultSummary", "result_summary")
+    metrics_payload = _mapping_value(payload, "metrics", "metrics_json")
     performance_summary_payload = _mapping_value(payload, "performanceSummary", "performance_summary")
+    if metrics_payload is None and isinstance(performance_summary_payload, Mapping):
+        metrics_payload = performance_summary_payload
     suite_id = _run_suite_id(payload)
     suite_version = _run_suite_version(payload)
 
@@ -796,6 +808,7 @@ def build_gx_execution_run_entity(payload: Mapping[str, Any]) -> GxExecutionRunE
             else None
         ),
         resultSummary=build_gx_execution_result_summary_entity(result_summary_payload),
+        metrics=(dict(metrics_payload) if isinstance(metrics_payload, Mapping) else None),
         performanceSummary=(dict(performance_summary_payload) if isinstance(performance_summary_payload, Mapping) else None),
         diagnostics=build_gx_execution_diagnostic_entities(diagnostics_payload),
         failureCode=(

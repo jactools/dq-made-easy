@@ -7,6 +7,7 @@ import {
   TransferMatchParams,
 } from '../../types/rules'
 import { AppSelect } from '../app-primitives'
+import { ActualityDateConfig } from './ActualityDateConfig'
 import { CheckTypeFieldErrors } from './checkTypeValidation'
 
 interface TransferMatchFormProps {
@@ -196,6 +197,13 @@ export const TransferMatchForm: React.FC<TransferMatchFormProps> = ({ params, on
           </div>
         </div>
       )}
+
+      {/* Shared actuality-date section */}
+      <ActualityDateConfig
+        value={params.actualityDate}
+        onChange={(contract) => emit({ actualityDate: contract })}
+        idPrefix="ct-transfer-actuality"
+      />
     </div>
   )
 }

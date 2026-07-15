@@ -9,8 +9,8 @@ set -euo pipefail
 # - Starts selected profiles (including metadata and ingestion).
 # - Optionally runs seeding steps for DB, Keycloak, or OpenMetadata.
 #
-# Version: 1.3
-# Last modified: 2026-04-29
+# Version: 1.4
+# Last modified: 2026-07-01
 # Changelog:
 # - 1.1 (2026-04-27): Added env-file selection flags and propagated ROOT_ENV_FILE through compose calls.
 # - 1.2 (2026-04-28): Updated help text to reflect the tracked deployment example and local runtime copy split.
@@ -56,7 +56,7 @@ fi
 
 my_name="start_stack_pull.sh"
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -169,6 +169,10 @@ success "$my_name" "Stack started using pulled images only."
 
 if $SEED_DB; then
   info "$my_name" "Seeding database..."
+  remove_compose_postgres_volume || {
+    error "$my_name" "Failed to remove the PostgreSQL data volume before seeding"
+    exit 1
+  }
   docker_compose up -d db keycloak
   wait_for_compose_service_healthy db "Postgres database" 60 2 || {
     error "$my_name" "Postgres database did not become healthy before seeding"
@@ -185,5 +189,5 @@ if $SEED_OPENMETADATA; then
     info "$my_name" "--seed-openmetadata requested without --seed-keycloak: reseeding Keycloak first so the live realm matches the generated credentials"
     ./scripts/seed_stack.sh --seed-keycloak
   fi
-  docker_compose --profile metadata run --rm openmetadata-configure --seed-all
+  docker_compose --profile metadata --profile auth run --rm openmetadata-configure --seed-all
 fi

@@ -39,7 +39,7 @@ The new `C=3` requirement and checklist now make this gap explicit, and future `
 
 - [docker-compose.yml](../../docker-compose.yml) currently includes `ALLOW_LOCAL_AUTH: ${ALLOW_LOCAL_AUTH:-true}` for the API service.
 - [docker-compose.yml](../../docker-compose.yml) includes seeded/default credentials such as `CATALOG_OIDC_PASSWORD: ${CATALOG_OIDC_PASSWORD:-${KEYCLOAK_JACCLOUD_PASSWORD:-password}}`, `KEYCLOAK_USER_PASSWORD: ${KEYCLOAK_USER_PASSWORD:-password}`, and `GF_SECURITY_ADMIN_PASSWORD: "changeme"`; local/example environment files also include bootstrap values such as `AISTOR_ROOT_PASSWORD=aistoradmin`.
-- [.env.example](../../.env.example) currently includes values such as `ALLOW_LOCAL_AUTH=true`, `KEYCLOAK_JACCLOUD_PASSWORD=password`, `KONG_ADMIN_PASSWORD=kong`, `GRAFANA_ADMIN_PASSWORD=admin`, and `OM_DB_PASSWORD=openmetadata_pass`.
+- The tracked local template `.env.dev.example` currently includes values such as `ALLOW_LOCAL_AUTH=true`, `KEYCLOAK_JACCLOUD_PASSWORD=password`, `KONG_ADMIN_PASSWORD=kong`, `GRAFANA_ADMIN_PASSWORD=admin`, and `OM_DB_PASSWORD=openmetadata_pass`.
 
 ## Exit Criteria
 

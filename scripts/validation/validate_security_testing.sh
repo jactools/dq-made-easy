@@ -1,38 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Purpose: Run automated security scans in the repo validation pipeline.
+# DEPRECATED: This script has been split into focused security scans.
+# Use validate_bandit_scan.sh and validate_pip_audit_fastapi.sh instead.
 #
-# What it does:
-# - Executes Bandit on the backend core/resolver/entity paths that are part of the security-critical runtime surface.
-# - Executes pip-audit on the FastAPI dependency manifest to detect known package vulnerabilities.
-# - Fails the validation run on scan findings so CI/CD catches regressions early.
+# This file remains as a compatibility shim that delegates to the new scripts.
+# Remove once all callers have migrated.
 #
 # validate: groups=repo
+# validate: include=false
 #
-# Version: 1.0
-# Last modified: 2026-06-07
+# Version: 2.0
+# Last modified: 2026-07-14
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 
 my_name="validate_security_testing.sh"
-PYTHON_CMD=("$ROOT_DIR/scripts/python_arm64.sh" --python-bin "$ROOT_DIR/venv/bin/python")
 
 main() {
-  info "$my_name" "Running automated security scans for the backend runtime surface..."
+  warning "$my_name" "DEPRECATED — this script is now split into:"
+  warning "$my_name" "  - scripts/validation/validate_bandit_scan.sh"
+  warning "$my_name" "  - scripts/validation/validate_pip_audit_fastapi.sh"
+  warning "$my_name" "Run: ./scripts/validate.sh security"
 
-  "${PYTHON_CMD[@]}" -m bandit \
-    -r "$ROOT_DIR/dq-api/fastapi/app/core" \
-    "$ROOT_DIR/dq-api/fastapi/app/application/resolvers" \
-    "$ROOT_DIR/dq-api/fastapi/app/domain/entities" \
-    -q
+  # Delegate to the new scripts
+  "$ROOT_DIR/scripts/validation/validate_bandit_scan.sh"
+  "$ROOT_DIR/scripts/validation/validate_pip_audit_fastapi.sh"
 
-  "${PYTHON_CMD[@]}" -m pip_audit \
-    -r "$ROOT_DIR/dq-api/fastapi/requirements.txt" \
-    --progress-spinner off
-
-  success "$my_name" "Automated security scans passed."
+  success "$my_name" "Automated security scans passed (via delegates)."
 }
 
 main "$@"

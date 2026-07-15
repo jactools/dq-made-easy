@@ -1,6 +1,6 @@
 -r requirements.txt
-pytest==9.0.2
-pytest-cov==7.0.0
+pytest==9.1.1
+pytest-cov==7.1.0
 httpx==0.28.1
 pylint==3.3.8
 build
@@ -12,7 +12,9 @@ pytest-asyncio==1.4.0
 bandit==1.9.4
 pip-audit==2.10.0
 pyspark
-./tmp/dq-cli-wheel/dq_cli-0.6.3-py3-none-any.whl
-./tmp/dq-utils-release/dq_made_easy_utils-0.1.0-py3-none-any.whl 
-./tmp/dq-domain-validation-release/dq_made_easy_domain_validation-0.1.0-py3-none-any.whl
+# BEGIN managed repo wheel pins
+./tmp/dq-cli-dist/dq_made_easy_cli-0.6.4-py3-none-any.whl
+./tmp/dq-utils-dist/dq_made_easy_utils-0.1.2-py3-none-any.whl
+./tmp/dq-domain-validation-dist/dq_made_easy_domain_validation-0.1.2-py3-none-any.whl
+# END managed repo wheel pins
 

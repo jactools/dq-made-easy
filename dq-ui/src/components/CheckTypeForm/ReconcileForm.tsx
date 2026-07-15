@@ -5,6 +5,7 @@ import {
   CrossObjectJoinKey,
   ReconcileParams,
 } from '../../types/rules'
+import { ActualityDateConfig } from './ActualityDateConfig'
 import { CheckTypeFieldErrors } from './checkTypeValidation'
 
 interface ReconcileFormProps {
@@ -136,6 +137,13 @@ export const ReconcileForm: React.FC<ReconcileFormProps> = ({ params, onChange, 
           <span className="check-type-form-hint check-type-form-field-error">{fieldErrors.comparisonTolerance}</span>
         )}
       </div>
+
+      {/* Shared actuality-date section */}
+      <ActualityDateConfig
+        value={params.actualityDate}
+        onChange={(contract) => emit({ actualityDate: contract })}
+        idPrefix="ct-reconcile-actuality"
+      />
     </div>
   )
 }

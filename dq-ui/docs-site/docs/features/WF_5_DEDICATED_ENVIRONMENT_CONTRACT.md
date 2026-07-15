@@ -163,7 +163,7 @@ Characteristics:
 
 ## Canonical Script Contract
 
-Startup, stop, seed, pull, and validation scripts should share this selection contract:
+Startup, stop, seed, pull, and validation scripts share this selection contract:
 
 ```bash
 --env dev       # .env.dev.local
@@ -174,25 +174,41 @@ Startup, stop, seed, pull, and validation scripts should share this selection co
 
 The direct `--env-file PATH` mode remains the supported escape hatch for CI, Debian paths under `/etc`, and one-off diagnostics.
 
-Scripts to update together:
+The canonical operator entry point is the orchestrator:
+
+```bash
+./scripts/stack.sh dev init          # destroy → start → seed (full clean reset)
+./scripts/stack.sh dev start --seed  # start containers + seed
+./scripts/stack.sh dev restart --seed # stop → start (reuse admin passwords, rotate service/user)
+./scripts/stack.sh dev stop           # stop only (keeps volumes and artifacts)
+./scripts/stack.sh dev destroy        # full teardown
+./scripts/stack.sh dev seed           # reseed running stack
+```
+
+Lifecycle scripts that `stack.sh` dispatches to:
 
 ```text
-scripts/common_startup.sh
-scripts/start-containers.sh
-scripts/start_stack.sh
-scripts/start_stack_pull.sh
-scripts/seed_stack.sh
-scripts/stop_stack.sh
-scripts/stop-all.sh
+scripts/stack.sh                  # orchestrator
+scripts/stack_destroy.sh          # full teardown
+scripts/stack_start.sh            # start (detect fresh vs warm, manage passwords)
+scripts/stack_stop.sh             # stop containers
+scripts/stack_restart.sh          # stop → start (reuse admin passwords)
+scripts/stack_seed.sh             # seed running stack
+```
+
+For image build/pull/push and status reporting, the legacy scripts remain:
+
+```text
+scripts/stack_ctl.sh              # build, pull, push, reconcile, list-targets
+scripts/stack_status.sh           # container status reporting
 ```
 
 Repo-controlled examples and docs should use canonical names only:
 
 ```bash
-./scripts/common_startup.sh --env dev --with-observability
-./scripts/common_startup.sh --env test --with-observability
-./scripts/start_stack_pull.sh --env prod
-./scripts/start-containers.sh --env-file /etc/dq-made-easy/prod.env --with-core --with-auth --with-gateway
+./scripts/stack.sh dev init
+./scripts/stack.sh test start --seed
+./scripts/stack.sh prod stop
 ```
 
 ## Validation Contract
@@ -265,8 +281,8 @@ Validation rules:
 - [x] `WF-5.16` Verify `docker compose --env-file .env.dev.local config` succeeds.
 - [x] `WF-5.17` Verify `docker compose --env-file .env.test.local config` succeeds.
 - [x] `WF-5.18` Verify `docker compose --env-file .env.prod.local config` succeeds.
-- [x] `WF-5.19` Verify `./scripts/common_startup.sh --env dev --with-observability` succeeds.
-- [x] `WF-5.20` Verify `./scripts/common_startup.sh --env test --with-observability` succeeds without sharing dev state.
+- [x] `WF-5.19` Verify `./scripts/stack.sh dev start --seed` succeeds.
+- [x] `WF-5.20` Verify `./scripts/stack.sh test start --seed` succeeds without sharing dev state.
 
 Current blocker for `WF-5.20`: the local test certificate files configured in `.env.test.local` are not present yet, so the dedicated `test` startup proof cannot be completed until `dq-made-easy.nl.crt` and `dq-made-easy.nl.key` exist at the configured absolute paths.
 

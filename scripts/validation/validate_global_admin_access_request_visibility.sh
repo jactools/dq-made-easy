@@ -8,7 +8,7 @@ set -euo pipefail
 # - Verifies the global admin can list that pending request through /admin/v1/exception-fact-access-requests.
 # - Cleans up by rejecting the created request so repeated runs remain stable.
 # validate: groups=api,regression
-# Version: 1.0
+# Version: 1.1
 # Last modified: 2026-06-01
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -91,7 +91,7 @@ if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
   exit 2
 fi
 
-set -- "${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"
+set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

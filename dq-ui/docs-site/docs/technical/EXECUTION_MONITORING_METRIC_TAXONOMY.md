@@ -4,7 +4,7 @@ Purpose: define the shared Prometheus metric families and label rules that back 
 
 Related policy: [LOGGING_AND_MONITORING_POLICY_ISO27001.md](/docs/technical/LOGGING_AND_MONITORING_POLICY_ISO27001/)
 Related dashboard semantics: [EDR-005-OBS execution monitoring dashboard status and activity semantics](/docs/engineering-decisions/EDR-005-OBS-execution-monitoring-dashboard-status-and-activity-semantics/)
-Related execution feature: [API_7_REAL_DQ_RULE_EXECUTION.md](/docs/status/current/API_7_REAL_DQ_RULE_EXECUTION/)
+Related execution feature: [API_7_REAL_DQ_RULE_EXECUTION.md](/docs/features/API_7_REAL_DQ_RULE_EXECUTION/)
 
 ## Scope
 

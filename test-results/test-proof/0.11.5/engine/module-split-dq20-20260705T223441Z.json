@@ -1,0 +1,31 @@
+{
+  "app_version": "0.11.5",
+  "assertions": [
+    "All 82 tests passing",
+    "Legacy modules removed (execution_dispatch, runtime_lowerers, execution_contract)",
+    "13 new dq_plan_* modules created",
+    "Output modules extracted for clean responsibility segregation",
+    "Boundary tests enforce no upward imports"
+  ],
+  "command": "python -m pytest dq-engine/tests/ --tb=short",
+  "executed_at_utc": "2026-07-05T22:34:41.395155+00:00",
+  "feature": "module-split-dq20",
+  "proof_id": "module-split-dq20-20260705T223441Z",
+  "proof_type": "engine",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/engine/20260705T223441Z-module-split-dq20",
+  "status": "passed",
+  "summary": "DQ-20 execution dispatch and lowerer module split (Phases 1-9)",
+  "test_count": 82,
+  "test_file_count": 9,
+  "test_files": [
+    "dq-engine/tests/test_dq_plan_execution.py",
+    "dq-engine/tests/test_dq_plan_execution_api.py",
+    "dq-engine/tests/test_dq_plan_execution_contract.py",
+    "dq-engine/tests/test_dq_plan_execution_orchestrator.py",
+    "dq-engine/tests/test_dq_plan_execution_payload.py",
+    "dq-engine/tests/test_dq_plan_execution_persistence.py",
+    "dq-engine/tests/test_dq_plan_execution_types.py",
+    "dq-engine/tests/test_dq_plan_lowerers.py",
+    "dq-engine/tests/test_dq_plan_module_boundaries.py"
+  ]
+}

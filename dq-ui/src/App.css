@@ -148,7 +148,7 @@ body {
 
 /* Header */
 .app-header {
-  background-color: var(--app-header-bg);
+  background: var(--app-header-bg);
   color: var(--app-header-text);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 0;
@@ -239,8 +239,10 @@ body {
   align-items: center;
   padding: 0.45rem 0.75rem;
   border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--app-header-text) 24%, transparent);
-  background: color-mix(in srgb, var(--app-header-bg) 82%, #0b1220 18%);
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  color: var(--app-text-primary);
 }
 
 .current-workspace {
@@ -251,7 +253,7 @@ body {
 
 .workspace-label {
   font-size: 0.75rem;
-  color: color-mix(in srgb, var(--app-header-text) 74%, transparent);
+  color: rgba(15, 23, 42, 0.7);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -261,8 +263,23 @@ body {
 .workspace-name {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--app-header-text);
+  color: var(--app-text-primary);
   line-height: 1.25;
+}
+
+[data-theme='dark'] .workspace-info {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--app-header-text);
+}
+
+[data-theme='dark'] .workspace-label {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+[data-theme='dark'] .workspace-name {
+  color: var(--app-header-text);
 }
 
 .user-role-indicator {

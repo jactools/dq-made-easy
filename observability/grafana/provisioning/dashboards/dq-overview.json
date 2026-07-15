@@ -122,6 +122,17 @@
       "includeVars": false,
       "keepTime": true,
       "targetBlank": false,
+      "title": "Container Resources",
+      "tooltip": "Open per-container CPU and memory metrics",
+      "type": "link",
+      "url": "/d/dq-container-resources"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "targetBlank": false,
       "title": "Storage",
       "tooltip": "Open AIStor storage capacity and drive metrics",
       "type": "link",
@@ -204,7 +215,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(dq_api_request_count_total[5m]))",
+          "expr": "sum(rate(dq_api_requests_total[5m]))",
           "refId": "A"
         }
       ],
@@ -287,7 +298,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(dq_api_request_count_total{status=\"error\"}[5m])) / clamp_min(sum(rate(dq_api_request_count_total[5m])), 0.001)",
+          "expr": "sum(rate(dq_api_requests_errors_total[5m])) / clamp_min(sum(rate(dq_api_requests_total[5m])), 0.001) or vector(0)",
           "refId": "A",
           "legendFormat": "Error Rate"
         }
@@ -333,11 +344,11 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "topk(5, sum by (reason) (increase(dq_api_auth_failures_total[15m])))",
+          "expr": "sum(increase(dq_api_requests_errors_total[15m])) or vector(0)",
           "refId": "A"
         }
       ],
-      "title": "Auth Failures by Reason (15m)",
+      "title": "API Errors (15m)",
       "type": "piechart"
     },
     {
@@ -377,11 +388,11 @@
       "pluginVersion": "8.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(dq_api_operation_latency_ms_milliseconds_bucket[5m])))",
+          "expr": "dq_api_requests_p95_duration_ms",
           "refId": "A"
         }
       ],
-      "title": "API Latency p95 (ms)",
+      "title": "API p95 Duration (ms)",
       "type": "timeseries"
     },
     {

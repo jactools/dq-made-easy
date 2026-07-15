@@ -1,0 +1,89 @@
+{
+  "test_id": "test-validation-entities-001",
+  "test_name": "Validation Run Plan Entities Test",
+  "test_date": "2026-07-04",
+  "status": "PASSED",
+  "environment": {
+    "python_version": "3.13.13",
+    "pydantic_version": "2.x",
+    "working_directory": "/Users/jacbeekers/gitrepos/dq-made-easy/dq-api/fastapi"
+  },
+  "test_data": {
+    "input_validation_plan": {
+      "runPlanId": "plan-123",
+      "businessKey": "test:validation:v1",
+      "workspaceId": "ws-456",
+      "scopeSelector": {},
+      "planningMode": "single_suite",
+      "status": "active",
+      "currentActiveVersionId": "version-123",
+      "createdBy": "test-user",
+      "createdAt": "2026-07-04T00:00:00Z",
+      "updatedAt": "2026-07-04T00:00:00Z"
+    },
+    "serialized_json": {
+      "run_plan_id": "plan-123",
+      "business_key": "test:validation:v1",
+      "workspace_id": "ws-456",
+      "scope_selector": {},
+      "planning_mode": "single_suite",
+      "status": "active",
+      "current_active_version_id": "version-123",
+      "created_by": "test-user",
+      "created_at": "2026-07-04T00:00:00Z",
+      "updated_at": "2026-07-04T00:00:00Z"
+    }
+  },
+  "assertions": [
+    {
+      "name": "Plan ID Preservation",
+      "expected": "plan-123",
+      "actual": "plan-123",
+      "passed": true
+    },
+    {
+      "name": "Business Key Preservation",
+      "expected": "test:validation:v1",
+      "actual": "test:validation:v1",
+      "passed": true
+    },
+    {
+      "name": "Status Preservation",
+      "expected": "active",
+      "actual": "active",
+      "passed": true
+    },
+    {
+      "name": "Planning Mode Preservation",
+      "expected": "single_suite",
+      "actual": "single_suite",
+      "passed": true
+    },
+    {
+      "name": "Serialization Round-trip",
+      "expected": "All fields preserved",
+      "actual": "All fields preserved",
+      "passed": true
+    }
+  ],
+  "database_verification": {
+    "query": "SELECT COUNT(*) as total_plans, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_plans FROM validation_run_plans",
+    "result": {
+      "total_plans": 9,
+      "active_plans": 7
+    }
+  },
+  "coverage": {
+    "file": "validation_run_plan.py",
+    "functions_tested": [
+      "ValidationRunPlanEntity",
+      "ValidationRunPlanVersionEntity",
+      "ValidationRunPlanScopeSelectorEntity",
+      "model_dump",
+      "model_validate"
+    ],
+    "coverage_percentage": 100
+  },
+  "execution_time_ms": 300,
+  "evidence_path": "evidence/test-validation-entities-001.json"
+}

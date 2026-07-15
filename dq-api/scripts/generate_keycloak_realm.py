@@ -3,7 +3,7 @@
 Generate a Keycloak realm JSON from the seed users CSV.
 
 Usage:
-    python generate_keycloak_realm.py --input ../mock-data/users.csv --output ../keycloak/jaccloud-realm.json --domain jaccloud.nl
+    python generate_keycloak_realm.py --input ../mock-data/users.csv --output ../keycloak/realm.json --domain example.org
 
 The script reads the CSV with headers including 'first_name', 'last_name', 'email', and 'password' and emits a realm JSON
 compatible with Keycloak import (users + public clients named `dq-rules-ui` and `zammad`).
@@ -267,14 +267,31 @@ def generate_realm(
     zammad_public_url=None,
     engine_service_client_id: str | None = None,
     engine_service_client_secret: str | None = None,
+    openmetadata_client_id: str | None = None,
+    openmetadata_client_secret: str | None = None,
 ):
     # Resolve runtime defaults from environment (after .env has been loaded).
-    realm_name = realm_name or os.getenv("KEYCLOAK_REALM", "jaccloud")
-    realm_display_name = realm_display_name or os.getenv("KEYCLOAK_REALM_DISPLAY_NAME", "Jaccloud Realm")
-    openmetadata_callback = openmetadata_callback or os.getenv("OPENMETADATA_CALLBACK", "https://openmetadata.jac.dot:8585/callback")
-    grafana_public_url = grafana_public_url or os.getenv("GRAFANA_PUBLIC_URL", "http://observability.jac.dot:3000")
-    grafana_oidc_secret = grafana_oidc_secret or os.getenv("GRAFANA_OIDC_SECRET", "changeme")
+    realm_name = realm_name or os.getenv("KEYCLOAK_REALM")
+    if not realm_name:
+        raise SystemExit("KEYCLOAK_REALM is required")
+
+    realm_display_name = realm_display_name or os.getenv("KEYCLOAK_REALM_DISPLAY_NAME", "Keycloak Realm")
+
+    openmetadata_callback = openmetadata_callback or os.getenv("OPENMETADATA_CALLBACK")
+    if not openmetadata_callback:
+        raise SystemExit("OPENMETADATA_CALLBACK is required")
+
+    grafana_public_url = grafana_public_url or os.getenv("GRAFANA_PUBLIC_URL")
+    if not grafana_public_url:
+        raise SystemExit("GRAFANA_PUBLIC_URL is required")
+
+    grafana_oidc_secret = grafana_oidc_secret or os.getenv("GRAFANA_OIDC_SECRET")
+    if not grafana_oidc_secret:
+        raise SystemExit("GRAFANA_OIDC_SECRET is required")
+
     zammad_public_url = zammad_public_url or os.getenv("ZAMMAD_PUBLIC_URL")
+    if not zammad_public_url:
+        raise SystemExit("ZAMMAD_PUBLIC_URL is required")
 
     frontend_origins = frontend_origins or [os.getenv("UI_VITE_LOCAL_URL"), os.getenv("UI_NGINX_LOCAL_URL")]
 
@@ -415,6 +432,40 @@ def generate_realm(
                 "defaultClientScopes": ["profile", "email", "roles"],
             },
             {
+                "clientId": "openmetadata-admin",
+                "name": "OpenMetadata Admin",
+                "description": "Confidential client for OpenMetadata admin/seed operations",
+                "enabled": True,
+                "publicClient": False,
+                "clientAuthenticatorType": "client-secret",
+                "secret": openmetadata_client_secret,
+                "protocol": "openid-connect",
+                "serviceAccountsEnabled": True,
+                "standardFlowEnabled": False,
+                "implicitFlowEnabled": False,
+                "directAccessGrantsEnabled": False,
+                "attributes": {
+                    "access.token.lifespan": str(KEYCLOAK_SERVICE_ACCOUNT_ACCESS_TOKEN_LIFESPAN_SECONDS),
+                },
+                "defaultClientScopes": ["openid", "profile", "email", "roles"],
+                "protocolMappers": [
+                    {
+                        "name": "email",
+                        "protocol": "openid-connect",
+                        "protocolMapper": "oidc-hardcoded-claim-mapper",
+                        "consentRequired": False,
+                        "config": {
+                            "introspection.token.claim": "true",
+                            "id.token.claim": "true",
+                            "access.token.claim": "true",
+                            "claim.name": "email",
+                            "claim.value": "openmetadata-admin@jaccloud.nl",
+                            "jsonType.label": "String",
+                        },
+                    },
+                ],
+            },
+            {
                 "clientId": "zammad",
                 "name": "Zammad",
                 "description": "Zammad support portal browser client",
@@ -437,6 +488,7 @@ def generate_realm(
                 "description": "Grafana - Rule Builder Observability UI",
                 "enabled": True,
                 "publicClient": False,
+                "serviceAccountsEnabled": True,
                 "secret": grafana_oidc_secret,
                 "protocol": "openid-connect",
                 "standardFlowEnabled": True,
@@ -561,11 +613,12 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--input", default="../mock-data/users.csv", help="Path to users CSV")
     p.add_argument("--output", default="../keycloak/jaccloud-realm.json", help="Output realm JSON path")
-    p.add_argument("--domain", default=None, help="Optional email domain to replace existing domains, e.g. jaccloud.nl")
+    p.add_argument("--domain", default=None, help="Optional email domain to replace existing domains, e.g. example.org")
     p.add_argument("--redirect", help="Client redirect URI")
     p.add_argument("--realm-name", default=None, help="Realm name (falls back to .env KEYCLOAK_REALM)")
     p.add_argument("--realm-display-name", default=None, help="Realm display name (falls back to .env KEYCLOAK_REALM_DISPLAY_NAME)")
     p.add_argument("--openmetadata-callback", default=None, help="OpenMetadata OIDC callback URI (falls back to .env OPENMETADATA_CALLBACK)")
+    p.add_argument("--openmetadata-client-id", default=None, help="Client ID for the confidential OpenMetadata OIDC client in Keycloak (falls back to .env OPENMETADATA_CLIENT_ID)")
     p.add_argument(
         "--frontend-origin",
         action="append",
@@ -601,6 +654,11 @@ def main():
         "--browser-auth-client-secret",
         default=None,
         help="Client secret for the browser auth client (falls back to .env BROWSER_AUTH_CLIENT_SECRET)",
+    )
+    p.add_argument(
+        "--openmetadata-client-secret",
+        default=None,
+        help="Client secret for the confidential OpenMetadata OIDC client in Keycloak (falls back to .env OPENMETADATA_CLIENT_SECRET)",
     )
     p.add_argument(
         "--engine-service-client-id",
@@ -672,6 +730,15 @@ def main():
         # randomly generated secret in git.
         engine_client_secret = "changeme"
 
+    openmetadata_client_id = str(args.openmetadata_client_id or "").strip() or "openmetadata-admin"
+    openmetadata_client_secret = str(args.openmetadata_client_secret or "").strip() or None
+    if openmetadata_client_secret is None:
+        openmetadata_client_secret = _load_existing_client_secret(realm_json_path=out_path, client_id=openmetadata_client_id)
+    if openmetadata_client_secret is None:
+        # Local/dev default: keep the realm JSON a usable example without embedding a
+        # randomly generated secret in git.
+        openmetadata_client_secret = "changeme"
+
     realm = generate_realm(
         users,
         realm_roles,
@@ -685,6 +752,8 @@ def main():
         zammad_public_url=args.zammad_public_url,
         engine_service_client_id=engine_client_id,
         engine_service_client_secret=engine_client_secret,
+        openmetadata_client_id=openmetadata_client_id,
+        openmetadata_client_secret=openmetadata_client_secret
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)

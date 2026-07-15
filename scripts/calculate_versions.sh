@@ -216,6 +216,53 @@ content_hash_keycloak="$(calculate_image_hash \
 )"
 export DQ_KEYCLOAK_TAG="${MAJOR_MINOR}-${content_hash_keycloak}"
 
+content_hash_kafka="$(calculate_image_hash \
+    "" \
+    dq-kafka/Dockerfile.kafka \
+    dq-kafka/start-kafka.sh
+)"
+export DQ_KAFKA_TAG="${MAJOR_MINOR}-${content_hash_kafka}"
+
+content_hash_kafka_consumer="$(calculate_image_hash \
+    "PIP_INDEX_URL" \
+    dq-kafka-consumer/Dockerfile.kafka-consumer \
+    dq-kafka-consumer/kafka_consumer_worker.py \
+    dq-kafka-consumer/requirements.txt
+)"
+export DQ_KAFKA_CONSUMER_TAG="${MAJOR_MINOR}-${content_hash_kafka_consumer}"
+
+content_hash_trino="$(calculate_image_hash \
+    "TRINO_BASE_IMAGE" \
+    dq-trino/Dockerfile.trino \
+    dq-trino/etc/catalog
+)"
+export DQ_TRINO_TAG="${MAJOR_MINOR}-${content_hash_trino}"
+
+content_hash_edge="$(calculate_image_hash \
+    "" \
+    dq-edge/Dockerfile.edge \
+    dq-edge/docker-entrypoint.d/40-render-edge-config.sh \
+    dq-edge/placeholders
+)"
+export DQ_EDGE_TAG="${MAJOR_MINOR}-${content_hash_edge}"
+
+content_hash_airflow="$(calculate_image_hash \
+    "" \
+    .dockerignore \
+    docker/airflow/Dockerfile.airflow \
+    docker/airflow/webserver_config.py \
+    docker/airflow/dags \
+    dq-airflow-sdk \
+    dq-airflow-operator \
+    dq-api/fastapi/app/airflow_sdk.py \
+    dq-api/fastapi/app/airflow_operator.py \
+    scripts/package-releases/build_dq_airflow_dag_artifact.sh \
+    scripts/package-releases/build_dq_airflow_wheels.sh \
+    scripts/package-releases/build_dq_airflow_sdk_wheel.sh \
+    scripts/package-releases/build_dq_airflow_operator_wheel.sh
+)"
+export DQ_AIRFLOW_TAG="${MAJOR_MINOR}-${content_hash_airflow}"
+
 content_hash_db_seed="$(calculate_image_hash \
     "PIP_INDEX_URL" \
     .dockerignore \
@@ -323,6 +370,11 @@ if [ "${1:-}" = "--display" ] || [ "${1:-}" = "--show" ]; then
     info "$my_name" "DQ_KONG_TAG:                $DQ_KONG_TAG"
     info "$my_name" "DQ_DB_TAG:                  $DQ_DB_TAG"
     info "$my_name" "DQ_KEYCLOAK_TAG:            $DQ_KEYCLOAK_TAG"
+    info "$my_name" "DQ_KAFKA_TAG:               $DQ_KAFKA_TAG"
+    info "$my_name" "DQ_KAFKA_CONSUMER_TAG:      $DQ_KAFKA_CONSUMER_TAG"
+    info "$my_name" "DQ_TRINO_TAG:               $DQ_TRINO_TAG"
+    info "$my_name" "DQ_EDGE_TAG:                $DQ_EDGE_TAG"
+    info "$my_name" "DQ_AIRFLOW_TAG:             $DQ_AIRFLOW_TAG"
     info "$my_name" ""
     info "$my_name" "Auxiliary repo images:"
     info "$my_name" "DQ_DB_SEED_TAG:             $DQ_DB_SEED_TAG"

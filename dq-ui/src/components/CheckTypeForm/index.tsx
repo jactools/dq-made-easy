@@ -14,9 +14,14 @@ import { ReconcileForm } from './ReconcileForm'
 import { TimelinessForm } from './TimelinessForm'
 import { TransferMatchForm } from './TransferMatchForm'
 import { JoinConsistencyForm } from './JoinConsistencyForm'
+import { ActualityDateConfig } from './ActualityDateConfig'
 import { JoinConsistencyFieldErrors } from './joinConsistencyValidation'
 import { CheckTypeFieldErrors } from './checkTypeValidation'
 import './CheckTypeForm.css'
+import './ActualityDateConfig.css'
+
+export { ActualityDateConfig } from './ActualityDateConfig'
+export type { ActualityDateFieldErrors } from './ActualityDateConfig'
 
 interface CheckTypeFormProps {
   checkType: RuleCheckType

@@ -24,6 +24,7 @@ from app.api.v1.endpoints.rules import router as rules_router
 from app.api.v1.endpoints.suggestions import router as suggestions_router
 from app.api.v1.endpoints.status_governance import router as status_governance_router
 from app.api.v1.endpoints.system import router as system_router
+from app.api.v1.endpoints.ui_registry_assets import router as ui_registry_assets_router
 from app.api.v1.endpoints.testing import router as testing_router
 from app.api.v1.endpoints.validation_runs import router as validation_runs_router
 from app.api.v1.endpoints.workspaces import router as workspaces_router
@@ -34,6 +35,7 @@ from app.api.v1.endpoints.exception_reports import router as exception_reports_r
 from app.api.v1.endpoints.exception_fact_access_requests import router as exception_fact_access_requests_router
 from app.api.v1.endpoints.notifications import router as notifications_router
 from app.api.v1.endpoints.profiling import router as profiling_router
+from app.api.v1.endpoints.ui_registry import router as ui_registry_router
 from app.api.v1.endpoints.run_plan import router as run_plan_router
 from app.api.v1.endpoints.validation_run_plans import router as validation_run_plans_router
 from app.api.v1.endpoints.incidents import router as incidents_router
@@ -61,6 +63,7 @@ api_router.include_router(user_group)
 system_group = APIRouter(prefix="/system/v1")
 system_group.include_router(system_router)
 system_group.include_router(app_config_router)
+system_group.include_router(ui_registry_assets_router)
 system_group.include_router(data_protection_router)
 system_group.include_router(health_router)
 system_group.include_router(support_router)
@@ -114,3 +117,7 @@ api_router.include_router(agent_group)
 internal_rulebuilder_group = APIRouter(prefix="/rulebuilder/v1")
 internal_rulebuilder_group.include_router(validation_run_plans_router)
 internal_api_router.include_router(internal_rulebuilder_group)
+
+internal_system_group = APIRouter(prefix="/system/v1")
+internal_system_group.include_router(ui_registry_router)
+internal_api_router.include_router(internal_system_group)

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dq-ingress-openmetadata
+  labels:
+    app.kubernetes.io/name: dq-ingress-openmetadata
+    app.kubernetes.io/part-of: dq-made-easy
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - openmetadata-placeholder.local
+      secretName: dq-openmetadata-tls-cert
+  rules:
+    - host: openmetadata-placeholder.local
+      http:
+        paths:
+          - path: /openmetadata
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-kong
+                port:
+                  number: 8443

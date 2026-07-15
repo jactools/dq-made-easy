@@ -79,6 +79,8 @@ function mdEscape(value) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/\|/g, '\\|')
+    .replace(/\{/g, '&#123;')
+    .replace(/\}/g, '&#125;')
     .replace(/\r?\n/g, '<br />')
 }
 

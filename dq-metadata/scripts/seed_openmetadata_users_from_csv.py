@@ -93,7 +93,13 @@ def iter_existing_users(api_base: str, token: str) -> Iterable[Dict[str, Any]]:
         params: Dict[str, Any] = {"limit": 100}
         if after:
             params["after"] = after
-        obj = request_json(api_base, "/v1/users", token=token, params=params)
+        try:
+            obj = request_json(api_base, "/v1/users", token=token, params=params)
+        except Exception as exc:  # noqa: BLE001
+            # If listing users fails (e.g. 404 when the caller has no user entity
+            # in OpenMetadata yet), treat as empty list and proceed to create users.
+            print(f"[warn] could not list existing users: {exc}; proceeding with empty list")
+            return
         for row in obj.get("data") or []:
             yield row
         after = clean(((obj.get("paging") or {}).get("after")))

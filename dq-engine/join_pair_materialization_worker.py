@@ -7,37 +7,37 @@ import tempfile
 from typing import Any
 from uuid import uuid4
 
-from gx_dispatch_worker import GxWorkerConfig
-from gx_dispatch_worker import GxWorkerConfigError
-from gx_dispatch_worker import GxWorkerExecutionError
-from gx_dispatch_worker import SourceLocation
-from gx_dispatch_worker import _api_get_data_object_version
-from gx_dispatch_worker import _api_report_execution_progress
-from gx_dispatch_worker import _api_report_run
-from gx_dispatch_worker import _assert_supported_uri
-from gx_dispatch_worker import _build_token_provider
-from gx_dispatch_worker import _coerce_source_location
-from gx_dispatch_worker import _create_spark_session
-from gx_dispatch_worker import _infer_materialized_source_location
-from gx_dispatch_worker import _normalize_s3_uri
-from gx_dispatch_worker import _parse_dispatch_payload
-from gx_dispatch_worker import _parse_s3a_uri
-from gx_dispatch_worker import _require_redis
-from gx_dispatch_worker import _require_s3_config_for_location
-from gx_dispatch_worker import _resolve_api_url
-from gx_dispatch_worker import _resolve_bool_env
-from gx_dispatch_worker import _resolve_optional_bool_env
-from gx_dispatch_worker import _resolve_redis_url
-from gx_dispatch_worker import _resolve_s3_access_key
-from gx_dispatch_worker import _resolve_s3_endpoint
-from gx_dispatch_worker import _resolve_s3_region
-from gx_dispatch_worker import _resolve_s3_secret_key
-from gx_dispatch_worker import _resolve_spark_master
-from gx_dispatch_worker import _resolve_spark_ui_port
-from gx_dispatch_worker import _resolve_worker_heartbeat_interval_seconds
-from gx_dispatch_worker import _spark_read_dataset
+from dq_plan_execution_types import GxWorkerConfig
+from dq_plan_execution_types import GxWorkerConfigError
+from dq_plan_execution_types import GxWorkerExecutionError
+from gx_dispatch_payload import SourceLocation
+from gx_dispatch_api import _api_get_data_object_version
+from gx_dispatch_api import _api_report_execution_progress
+from gx_dispatch_api import _api_report_run
+from gx_dispatch_runtime import _assert_supported_uri
+from gx_dispatch_config import _build_token_provider
+from gx_dispatch_runtime import _coerce_source_location
+from gx_dispatch_runtime import _create_spark_session
+from gx_dispatch_runtime import _infer_materialized_source_location
+from gx_dispatch_runtime import _normalize_s3_uri
+from gx_dispatch_payload import _parse_dispatch_payload
+from gx_dispatch_runtime import _parse_s3a_uri
+from gx_dispatch_config import _require_redis
+from gx_dispatch_runtime import _require_s3_config_for_location
+from gx_dispatch_config import _resolve_api_url
+from gx_dispatch_config import _resolve_bool_env
+from gx_dispatch_config import _resolve_optional_bool_env
+from gx_dispatch_config import _resolve_redis_url
+from gx_dispatch_config import _resolve_s3_access_key
+from gx_dispatch_config import _resolve_s3_endpoint
+from gx_dispatch_config import _resolve_s3_region
+from gx_dispatch_config import _resolve_s3_secret_key
+from gx_dispatch_config import _resolve_spark_master
+from gx_dispatch_config import _resolve_spark_ui_port
+from gx_dispatch_config import _resolve_worker_heartbeat_interval_seconds
+from gx_dispatch_runtime import _spark_read_dataset
 from gx_dispatch_worker import _start_worker_heartbeat_loop
-from gx_dispatch_worker import _utc_now_iso
+from gx_dispatch_config import _utc_now_iso
 from gx_dispatch_worker import _write_worker_heartbeat
 from test_data_materialization_worker import _ensure_bucket_exists
 from test_data_materialization_worker import _upload_directory_to_s3
@@ -176,6 +176,11 @@ def _build_joined_dataframe(
     left_df = _spark_read_dataset(spark_session, location=left_location, max_rows=config.max_rows).alias("lhs")
     right_df = _spark_read_dataset(spark_session, location=right_location, max_rows=config.max_rows).alias("rhs_raw")
 
+    # Optional: apply actuality-date pre-filter before join (optimization)
+    left_df, right_df = _apply_actuality_date_pre_filter(
+        left_df, right_df, source_materialization
+    )
+
     left_columns = list(getattr(left_df, "columns", []) or [])
     right_columns = list(getattr(right_df, "columns", []) or [])
     missing_left = [item["left_attribute"] for item in join_key_pairs if item["left_attribute"] not in left_columns]
@@ -201,6 +206,84 @@ def _build_joined_dataframe(
         *[F.col(f"lhs.{column}").alias(column) for column in left_columns],
         rhs_struct,
     )
+
+
+def _apply_actuality_date_pre_filter(
+    left_df: Any,
+    right_df: Any,
+    source_materialization: dict[str, Any],
+) -> tuple[Any, Any]:
+    """Optionally pre-filter rows by actuality-date tolerance before join.
+
+    When ``source_materialization`` contains an ``actualityDate`` block with
+    resolved tolerance, this function filters out rows whose actuality-date
+    difference exceeds the tolerance, reducing join size.
+
+    Controlled by ``DQ_JOIN_PAIR_ACTUALITY_PRE_FILTER_ENABLED`` env var
+    (default: ``false``).
+    """
+    enabled = _resolve_optional_bool_env("DQ_JOIN_PAIR_ACTUALITY_PRE_FILTER_ENABLED", False)
+    if not enabled:
+        return left_df, right_df
+
+    actuality = source_materialization.get("actualityDate")
+    if not isinstance(actuality, dict) or not actuality:
+        return left_df, right_df
+
+    left_attr = str(actuality.get("leftAttribute") or "").strip()
+    right_attr = str(actuality.get("rightAttribute") or "").strip()
+    tolerance_value = actuality.get("resolvedToleranceValue")
+    tolerance_unit = str(actuality.get("resolvedToleranceUnit") or "").strip().lower()
+
+    if not all([left_attr, right_attr, tolerance_value, tolerance_unit]):
+        return left_df, right_df
+
+    # Validate columns exist
+    left_cols = set(getattr(left_df, "columns", []) or [])
+    right_cols = set(getattr(right_df, "columns", []) or [])
+    if left_attr not in left_cols or right_attr not in right_cols:
+        return left_df, right_df
+
+    from pyspark.sql import functions as F
+
+    # Compute the acceptable right-side actuality window based on left side
+    # and broadcast it for filtering.  Use a simpler approach: compute the
+    # max/min acceptable right actuality from the left side and filter.
+    try:
+        interval_unit_map = {
+            "minutes": "minute",
+            "hours": "hour",
+            "days": "day",
+        }
+        spark_unit = interval_unit_map.get(tolerance_unit)
+        if spark_unit is None:
+            return left_df, right_df
+
+        tolerance = int(tolerance_value)
+
+        # Filter right side: keep rows within tolerance of any left row
+        # Use a broadcast approach for efficiency
+        right_broadcast = right_df.alias("rb")
+        left_stats = left_df.agg(
+            F.min(F.col(left_attr)).alias("min_actuality"),
+            F.max(F.col(left_attr)).alias("max_actuality"),
+        )
+
+        def filter_right(df):  # noqa: ANN202
+            return df.filter(
+                (F.col(right_attr) >= left_stats.first().min_actuality - F.expr(
+                    f"INTERVAL {tolerance} {spark_unit}"
+                ))
+                & (F.col(right_attr) <= left_stats.first().max_actuality + F.expr(
+                    f"INTERVAL {tolerance} {spark_unit}"
+                ))
+            )
+
+        return left_df, filter_right(right_df)
+
+    except Exception as exc:
+        LOG.warning("actuality_date_pre_filter.failed: %s", exc)
+        return left_df, right_df
 
 
 def _write_joined_dataframe(config: GxWorkerConfig, *, df: Any, output_location: str) -> tuple[str, str, int]:
