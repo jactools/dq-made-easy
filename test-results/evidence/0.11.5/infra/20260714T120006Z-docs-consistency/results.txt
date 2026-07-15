@@ -1,0 +1,14 @@
+=== Documentation consistency checks ===
+PASS: docs/implementation-details/STACK_SCRIPT_CONTRACT.md references stack.sh
+PASS: docs/technical/QUICKSTART_DEPLOY.md references stack.sh
+PASS: docs/user-manuals/workflow-operator.md references stack.sh
+PASS: STACK_SCRIPT_CONTRACT.md lists stack_destroy.sh
+PASS: STACK_SCRIPT_CONTRACT.md lists stack_start.sh
+PASS: STACK_SCRIPT_CONTRACT.md lists stack_stop.sh
+PASS: STACK_SCRIPT_CONTRACT.md lists stack_restart.sh
+PASS: STACK_SCRIPT_CONTRACT.md lists stack_seed.sh
+PASS: STACK_SCRIPT_CONTRACT.md has Password Management Policy section
+PASS: password policy mentions fresh vs warm start
+PASS: docs/features/WF_5_DEDICATED_ENVIRONMENT_CONTRACT.md references stack.sh
+
+Total: 11 passed, 0 failed

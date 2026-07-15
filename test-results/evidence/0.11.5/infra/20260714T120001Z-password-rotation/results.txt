@@ -1,0 +1,14 @@
+=== Python module test ===
+PASS: all imports successful
+PASS: _ADMIN_PASSWORD_VARS has 8 entries
+PASS: admin var count = 8
+PASS: known admin vars present
+PASS: service vars correctly excluded from admin set
+PASS: skip_admin=True blocks admin password rotation
+PASS: skip_admin=False allows admin password rotation
+PASS: skip_admin=True still rotates service passwords
+PASS: non-password vars never rotate
+PASS: DOCKER_HUB_ prefix skipped
+PASS: generated password length = 32
+PASS: 10 unique passwords generated
+Exit: 0

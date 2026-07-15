@@ -1,10 +1,10 @@
 # Stack Script Contract
 
-Last updated: 2026-05-09
+Last updated: 2026-07-14
 
 ## Purpose
 
-This document records the current operator contract for the stack scripts in `scripts/`. It covers the canonical command entrypoints, the shared shell helpers they depend on, and the service dependency shape that governs startup, teardown, seed, reconcile, smoke, and validation flows.
+This document records the current operator contract for the stack scripts in `scripts/`. It covers the canonical command entrypoints, the shared shell helpers they depend on, and the password management policy that governs lifecycle actions.
 
 ## Canonical Env Contract
 
@@ -25,20 +25,104 @@ The canonical named env files are:
 
 `--env-file PATH` remains the explicit escape hatch for CI, `/etc`, and diagnostics.
 
-## Command Surface
+## Orchestrator
 
-| Script | Responsibility | Contract Notes |
+The primary operator entry point is the orchestrator:
+
+```
+scripts/stack.sh <env> <action> [OPTIONS]
+```
+
+| Action | What it does | Calls |
 | --- | --- | --- |
-| [scripts/stack_ctl.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_ctl.sh) | Unified operator entrypoint for build, pull, push, start, restart, stop, reconcile, seed, and list-targets. | Uses canonical env selection and dependency planning. `stop` now uses the shared teardown helpers so service shutdown follows the dependency graph. |
-| [scripts/stack_status.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_status.sh) | Status reporter for compose services resolved from profiles and explicit services. | Uses the canonical env selection contract, resolves the same dependency-ordered service set as the lifecycle scripts, and reports grouped service status by default with `--per-container` for detailed container-level output. |
-| [scripts/start_stack.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/start_stack.sh) | Compose startup entrypoint for runtime profiles. | Slices startup into named startup blocks under `scripts/startup/`. It does not perform seed or smoke work. |
-| [scripts/stop_stack.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stop_stack.sh) | Full-stack teardown wrapper with optional volume removal. | Delegates service shutdown to `stack_ctl.sh stop --all` and then handles `compose down` / volume cleanup. |
-| [scripts/stop-all.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stop-all.sh) | Stops the local frontend and then the stack. | Wrapper around `stop_stack.sh` for operator convenience. |
-| [scripts/seed_stack.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/seed_stack.sh) | Seed entrypoint for runtime seed actions. | Dispatches dedicated seed blocks under `scripts/seeding/`. |
-| [scripts/start_stack_pull.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/start_stack_pull.sh) | Pulls repo-managed images before startup. | Uses the same env contract and seed helpers as the main lifecycle scripts. |
-| [scripts/reconcile_stack.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/reconcile_stack.sh) | Post-start reconciliation entrypoint. | Runs explicit Kong, Keycloak, and OpenMetadata reconciliation actions outside startup. |
-| [scripts/smoke_stack.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/smoke_stack.sh) | Explicit smoke follow-up wrapper. | Delegates to [scripts/validation/stack_smoke.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/validation/stack_smoke.sh); smoke checks are not part of startup or teardown. |
-| [scripts/validate.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/validate.sh) | Validation runner for repo checks. | Validation scripts assume the stack is already running when they need it; they do not bring services up. |
+| `destroy` | Full teardown: containers, volumes, all generated artifacts | `stack_destroy.sh` |
+| `stop` | Stop containers only; keeps volumes, secrets, credentials | `stack_stop.sh` |
+| `start` | Generate secrets, rotate passwords, start containers | `stack_start.sh` |
+| `start --seed` | Start then seed | `stack_start.sh` then `stack_seed.sh` |
+| `restart` | Stop then start; reuse admin passwords, rotate service/user | `stack_restart.sh` |
+| `restart --seed` | Restart then seed | `stack_restart.sh` then `stack_seed.sh` |
+| `init` | Full clean reset: destroy → start → seed | `stack_destroy.sh` → `stack_start.sh` → `stack_seed.sh` |
+| `seed` | Seed the running stack | `stack_seed.sh` |
+
+```bash
+./scripts/stack.sh dev init
+./scripts/stack.sh dev start --seed
+./scripts/stack.sh test restart --seed
+./scripts/stack.sh prod stop
+./scripts/stack.sh dev seed
+```
+
+## Single-Responsibility Scripts
+
+| Script | Responsibility |
+| --- | --- |
+| [scripts/stack.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack.sh) | Orchestrator — dispatches to lifecycle scripts based on action |
+| [scripts/stack_destroy.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_destroy.sh) | Full teardown: stop containers, `compose down -v`, remove all generated artifacts (secrets, rotated passwords, keycloak credentials, TLS certs) |
+| [scripts/stack_start.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_start.sh) | Detect fresh vs warm start, generate/reuse secrets, rotate passwords, ensure TLS certs, build images, `compose up`, wait for Keycloak and Postgres health |
+| [scripts/stack_stop.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_stop.sh) | Stop containers, `compose down --remove-orphans` (keeps volumes and all artifacts) |
+| [scripts/stack_restart.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_restart.sh) | Stop → start with `--reuse-admin` and `--no-admin-rotate` (keeps admin passwords, rotates service/user passwords) |
+| [scripts/stack_seed.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_seed.sh) | Run all seeding operations (Keycloak, Postgres, Zammad, OpenMetadata, deliveries) and post-seed reconciliation |
+
+These scripts replace the legacy `common_startup.sh`, `start-containers.sh`, `start_stack.sh`, `stop_stack.sh`, `stop-all.sh`, `seed_all.sh`, `seed_stack.sh`, `seed_containers.sh`, `init-all.sh`, and `reseed_running_db.sh`. Those older scripts are retained for backward compatibility but are deprecated.
+
+## Password Management Policy
+
+Passwords are classified into two categories:
+
+### Admin Passwords
+
+These passwords are persisted inside stateful volumes (Postgres, Keycloak, Kong DB, OpenMetadata DB, Zammad DB). They **must not change** unless the volume is destroyed first.
+
+```
+DQ_DB_PASSWORD
+KONG_DB_PASSWORD
+OM_DB_PASSWORD
+OM_DB_ROOT_PASSWORD
+OPENMETADATA_SEARCH_PASSWORD
+ZAMMAD_POSTGRES_PASSWORD
+KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+KEYCLOAK_ADMIN_PASS
+```
+
+### Service / User Passwords
+
+These are injected at runtime via env files or generated secrets. They can and should be rotated on every start or restart.
+
+Examples: `DQ_ENGINE_OIDC_CLIENT_SECRET`, `GRAFANA_OIDC_SECRET`, `APP_CONFIG_ENCRYPTION_KEY`, `CATALOG_OIDC_PASSWORD`, seeded user passwords.
+
+### Password Policy Matrix
+
+| Password type | destroy | start (fresh) | start (warm) | restart | stop | seed |
+| --- | --- | --- | --- | --- | --- | --- |
+| Admin (DB, Keycloak admin) | remove | generate new | **reuse** | **reuse** | keep | keep |
+| Service (OIDC, encryption) | remove | generate new | generate new | generate new | keep | keep |
+| User (Keycloak seeded) | remove | seed rotates | seed rotates | seed rotates | keep | rotate |
+
+**Fresh vs warm detection:** `stack_start.sh` checks whether stateful Docker volumes exist. If no volumes exist (first run or after destroy), all passwords are generated. If volumes exist (after stop + start), admin passwords are reused and only service/user passwords are rotated.
+
+### Implementation details
+
+- `generate_secrets.sh --reuse-admin` preserves admin passwords from the existing `tmp/secrets.&#123;env&#125;.env` file while generating new service/user passwords.
+- `seed_password_rotation.py --no-admin-rotate` skips admin password variables when rotating `.env.*.local` passwords.
+- `stack_lifecycle.sh` provides shared helpers for volume detection, admin var classification, artifact cleanup, and env loading.
+
+## Legacy Scripts (Deprecated)
+
+These scripts are retained but deprecated. Prefer `stack.sh` for all lifecycle operations.
+
+| Legacy script | Replacement |
+| --- | --- |
+| `scripts/stack_ctl.sh` | `stack.sh` (orchestrator) — `stack_ctl.sh` remains for image build/pull/push/status |
+| `scripts/common_startup.sh` | `stack.sh dev start --seed` |
+| `scripts/start-containers.sh` | `stack.sh dev start --seed` |
+| `scripts/start_stack.sh` | `stack.sh dev start` |
+| `scripts/stop_stack.sh` | `stack.sh dev stop` |
+| `scripts/stop-all.sh` | `stack.sh dev stop` |
+| `scripts/init-all.sh` | `stack.sh dev init` |
+| `scripts/seed_all.sh` | `stack.sh dev seed` |
+| `scripts/seed_stack.sh` | `stack.sh dev seed` |
+| `scripts/seed_containers.sh` | `stack.sh dev seed` |
+| `scripts/reseed_running_db.sh` | `stack.sh dev seed` |
 
 ## Shared Helpers
 
@@ -47,17 +131,18 @@ The canonical named env files are:
 | [scripts/supporting/logging.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/logging.sh) and [scripts/supporting/logging/core.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/logging/core.sh) | Canonical logging entrypoint and logging implementation. |
 | [scripts/supporting/env/selection.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/env/selection.sh) | Canonical `--env` / `--env-file` parsing, env-file resolution, and validation dispatch. |
 | [scripts/supporting/compose/invocation.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/compose/invocation.sh) | Canonical `docker compose` wrapper bound to the selected env file. |
-| [scripts/supporting/stay_awake.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/stay_awake.sh) | macOS display-awake helper used by long-running operator scripts. | Uses `caffeinate` when available, can be sourced by other scripts, and can also be run directly with `--duration` plus an optional arrow-key press to keep the screen awake for a fixed time. |
+| [scripts/supporting/stack_lifecycle.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/stack_lifecycle.sh) | Lifecycle helpers: admin var classification, stateful volume detection, volume removal, artifact cleanup, generated env loading. |
 | [scripts/supporting/auth.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/auth.sh) | Seeded credential loading and Keycloak password-grant token minting. |
 | [scripts/supporting/readiness.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/readiness.sh) | HTTP, Kong, Zammad, and database readiness helpers. |
 | [scripts/supporting/dependency_planning.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/dependency_planning.sh) | Dependency closure planning and runtime health validation. |
 | [scripts/supporting/teardown.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/teardown.sh) | Shared teardown target collection and stop execution helpers. |
 | [scripts/stack_catalog.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/stack_catalog.sh) | Canonical lists for runtime profiles, repo-managed images, and seed targets. |
+| [scripts/generate_secrets.sh](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/generate_secrets.sh) | Generate runtime secrets. Supports `--reuse-admin` to preserve admin passwords from existing secrets. |
+| [scripts/supporting/seed_password_rotation.py](https://github.com/jactools/dq-rulebuilder/blob/main/scripts/supporting/seed_password_rotation.py) | Rotate env-file passwords. Supports `--no-admin-rotate` to skip admin password vars. |
 
 ## Dependency Graph Summary
 
 The exhaustive service-level dependency list lives in [STACK_SERVICE_DEPENDENCY_MANIFEST.md](/docs/implementation-details/STACK_SERVICE_DEPENDENCY_MANIFEST/). The summary below is the operator-facing shape used by the scripts.
-
 
 ```mermaid
 flowchart TD
@@ -129,24 +214,17 @@ flowchart TD
 
 Stop order is the reverse of the dependency graph. The shared teardown helper resolves selected profiles and/or services into an ordered stop list, validates that the selected services are running, and then stops them in reverse dependency order.
 
-That means shared dependencies stop after their consumers, for example:
-
-- `frontend` stops before `api`
-- `api` stops before `db` and `redis`
-- `kong` stops before `kong-db`, `api`, and `keycloak`
-- `openmetadata-ingestion` stops before `openmetadata-server`
-- `openmetadata-server` stops before `openmetadata-db` and `openmetadata-search-v9`
-- `zammad-nginx` stops before `zammad-railsserver`, `zammad-scheduler`, and `zammad-websocket`
-- `zammad-*` application services stop before `zammad-postgresql`, `redis`, and `zammad-memcached`
-
 ## Unchanged Flows
 
 - The mock-data CSV to SQL conversion pipeline remains unchanged.
 - Validation and smoke scripts do not start the stack; they assume the required services are already up and fail fast if they are not.
 - No compatibility shims or legacy selector aliases are introduced.
+- Image build/pull/push actions remain via `scripts/stack_ctl.sh build\|pull\|push`.
+- Container status reporting remains via `scripts/stack_status.sh`.
 
 ## See Also
 
 - [STACK_SCRIPT_MODULARIZATION_WORK_PLAN.md](/docs/implementation-details/STACK_SCRIPT_MODULARIZATION_WORK_PLAN/)
 - [STACK_SHARED_SHELL_PRIMITIVES_PLAN.md](/docs/implementation-details/STACK_SHARED_SHELL_PRIMITIVES_PLAN/)
 - [STACK_SERVICE_DEPENDENCY_MANIFEST.md](/docs/implementation-details/STACK_SERVICE_DEPENDENCY_MANIFEST/)
+- [SEC_3_RUNTIME_SECRETS_GENERATION_IMPLEMENTATION_PLAN.md](/docs/implementation-details/SEC_3_RUNTIME_SECRETS_GENERATION_IMPLEMENTATION_PLAN/)

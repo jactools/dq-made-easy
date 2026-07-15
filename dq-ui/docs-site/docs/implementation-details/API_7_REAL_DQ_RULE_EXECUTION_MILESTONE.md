@@ -124,7 +124,7 @@ Notes:
 - The API enforces basic queue capacity limits (pending + in-flight) and fails fast with `429` when the queue is saturated.
 
 Prerequisites:
-- Start AIStor and the workers (for local: `./scripts/common_startup.sh --with-observability --force-build` starts the stack and workers).
+- Start AIStor and the workers (for local: `./scripts/stack.sh dev start --seed --force-build` starts the stack and workers).
 
 API usage:
 

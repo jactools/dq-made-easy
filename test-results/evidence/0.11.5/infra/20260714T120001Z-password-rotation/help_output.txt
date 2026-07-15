@@ -1,0 +1,24 @@
+usage: seed_password_rotation.py [-h] [--source SOURCE]
+                                 [--rotated-users ROTATED_USERS]
+                                 [--credentials-csv CREDENTIALS_CSV]
+                                 [--credentials-env CREDENTIALS_ENV]
+                                 [--env-file ENV_FILE]
+                                 [--output-dir OUTPUT_DIR] [--no-admin-rotate]
+
+Generate random passwords for seed users and/or env files
+
+options:
+  -h, --help            show this help message and exit
+  --source SOURCE       Path to the source users CSV
+  --rotated-users ROTATED_USERS
+                        Output path for users CSV with generated passwords
+  --credentials-csv CREDENTIALS_CSV
+                        Output path for email,password CSV
+  --credentials-env CREDENTIALS_ENV
+                        Output path for shell-sourceable env file
+  --env-file ENV_FILE   Path to .env.*.local file to rotate passwords in
+  --output-dir OUTPUT_DIR
+                        Output directory for rotated env file (default:
+                        tmp/env_passwords)
+  --no-admin-rotate     Do NOT rotate admin passwords (they are persisted in
+                        stateful volumes)

@@ -124,7 +124,7 @@ ERROR: Found 1 workspace(s) with dataset count mismatches
 When running the standard seeding process:
 
 ```bash
-./scripts/seed_all.sh
+./scripts/stack.sh dev seed
 # or
 ./scripts/seed_local_postgres.sh
 # or via compose
@@ -142,7 +142,7 @@ When adding new datasets to the system:
 
 1. Add the new row(s) to `dq-db/mock-data/data-sets.csv`
 2. Ensure the `workspace_id` field is populated with the correct workspace
-3. Run seeding (`./scripts/seed_all.sh` or `./scripts/seed_local_postgres.sh`)
+3. Run seeding (`./scripts/stack.sh dev seed` or `./scripts/seed_local_postgres.sh`)
 4. Validation will confirm the new dataset count is correct
 5. If validation fails, review the CSV for formatting issues or missing workspace assignments
 
