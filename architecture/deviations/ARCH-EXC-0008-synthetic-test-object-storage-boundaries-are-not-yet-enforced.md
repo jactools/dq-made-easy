@@ -39,9 +39,21 @@ ADR-031, requirement `DQ-OBJ-SYN-001`, and SEC-3 now make the boundary explicit.
 
 - [ABS_2_DATA_CATALOG_MATERIALIZATION.md](../../docs/features/ABS_2_DATA_CATALOG_MATERIALIZATION.md) and [ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS.md](../../docs/implementation-details/ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS.md) describe generated outputs written to AIStor or other S3-compatible storage.
 - [API_7_REAL_DQ_RULE_EXECUTION_MILESTONE.md](../../docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE.md) describes a real-data execution path that also reads from AIStor or other S3-compatible storage.
-- [exception_storage.py](../../dq-api/fastapi/app/application/services/exception_storage.py) defaults GX exception persistence to AIStor or other S3-compatible object storage.
+- [exception_storage.py](../../dq-api/fastapi/app/application/services/exception_storage.py) defaults DQ exception persistence to AIStor or other S3-compatible object storage.
 - [stage_local_csv_to_s3_parquet.py](../../scripts/stage_local_csv_to_s3_parquet.py) allows arbitrary local CSV staging into AIStor or other S3-compatible storage.
+
+## Implementation Progress
+
+Phase 1 (Classification Baseline) is complete:
+- [Bucket and Prefix Naming Conventions](../../docs/technical/object-storage-classification/BUCKET_PREFIX_NAMING_CONVENTIONS.md) defines canonical naming patterns
+- [Flow Inventory](../../docs/technical/object-storage-classification/FLOW_INVENTORY.md) classifies all current AIStor/S3 flows
+- [Operator Guidance](../../docs/technical/object-storage-classification/OPERATOR_GUIDANCE.md) provides runbooks for classification and drift handling
+- [Deviation Tracker](../../docs/technical/object-storage-classification/DEVIATION_TRACKER.md) tracks remaining deviations (DEV-001, DEV-002, DEV-003)
+
+Remaining work: Phase 2 (artifact labeling for non-materialization flows), Phase 3 (broader validation and enforcement beyond SEC3-F-P3-02a).
 
 ## Exit Criteria
 
 Repository-managed object-storage flows expose or enforce `synthetic_test` versus `real_evidence` classification, synthetic bucket results are labeled as synthetic results where interpretation matters, and mixed or ambiguous storage semantics are reduced to explicit approved exceptions only.
+
+This deviation will be retired when DEV-001 (DQ exception classification ambiguity) is resolved and all other deviations are closed.

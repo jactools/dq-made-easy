@@ -8,9 +8,9 @@ Related requirement: [Object Storage Synthetic/Test Bucket and Synthetic Evidenc
 
 ## Phase 1: Classification Baseline
 
-- [ ] (SEC3-F-P1-01) Define the repository naming or prefix convention for `synthetic_test` versus `real_evidence` object-storage locations.
-- [ ] (SEC3-F-P1-02) Identify current AIStor or other S3-compatible flows that must be classified under the new boundary.
-- [ ] (SEC3-F-P1-03) Document which existing flows produce synthetic results even when they mimic production-like execution paths.
+- [x] (SEC3-F-P1-01) Define the repository naming or prefix convention for `synthetic_test` versus `real_evidence` object-storage locations. ([Bucket and Prefix Naming Conventions](../technical/object-storage-classification/BUCKET_PREFIX_NAMING_CONVENTIONS.md))
+- [x] (SEC3-F-P1-02) Identify current AIStor or other S3-compatible flows that must be classified under the new boundary. ([Flow Inventory](../technical/object-storage-classification/FLOW_INVENTORY.md))
+- [x] (SEC3-F-P1-03) Document which existing flows produce synthetic results even when they mimic production-like execution paths. ([Flow Inventory §3](../technical/object-storage-classification/FLOW_INVENTORY.md#3-flows-that-produce-synthetic-results-mimicking-production-paths-sec3-f-p1-03))
 
 ## Phase 2: Artifact Semantics
 
@@ -28,7 +28,7 @@ Related requirement: [Object Storage Synthetic/Test Bucket and Synthetic Evidenc
 
 ## Acceptance Criteria
 
-- [ ] (SEC3-F-AC-01) Repository-managed object-storage flows are classifiable as `synthetic_test` or `real_evidence`.
-- [ ] (SEC3-F-AC-02) Results from synthetic/test buckets are explicitly treated as synthetic results in repository documentation and evidence narratives.
-- [ ] (SEC3-F-AC-03) Synthetic/test bucket results are not presented as production-grade or regulated reporting evidence.
-- [ ] (SEC3-F-AC-04) Remaining ambiguous flows are tracked explicitly until enforcement is complete.
+- [ ] (SEC3-F-AC-01) Repository-managed object-storage flows are classifiable as `synthetic_test` or `real_evidence`. (⚠️ Partial — naming convention defined, most flows classified, DQ exceptions ambiguous)
+- [ ] (SEC3-F-AC-02) Results from synthetic/test buckets are explicitly treated as synthetic results in repository documentation and evidence narratives. (⚠️ Partial — operator guidance created, test materialization labels set)
+- [ ] (SEC3-F-AC-03) Synthetic/test bucket results are not presented as production-grade or regulated reporting evidence. (⚠️ Partial — one fail-fast check active)
+- [x] (SEC3-F-AC-04) Remaining ambiguous flows are tracked explicitly until enforcement is complete. ([Deviation Tracker](../technical/object-storage-classification/DEVIATION_TRACKER.md))
