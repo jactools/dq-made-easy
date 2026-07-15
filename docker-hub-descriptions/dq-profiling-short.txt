@@ -1,1 +1,1 @@
-Background worker for data profiling and rule suggestion generation
+dq-made-easy background worker for data profiling and rule suggestion generation

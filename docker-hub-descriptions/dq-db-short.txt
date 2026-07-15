@@ -1,1 +1,1 @@
-PostgreSQL 18 database image with bundled schema, seed data, and reseed scripts
+dq-made-easy PostgreSQL 18 database image with bundled schema, seed data, and reseed scripts

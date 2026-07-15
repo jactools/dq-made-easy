@@ -1,1 +1,1 @@
-React-based web UI for managing data quality rules
+dq-made-easy web UI for managing data quality rules (React/Vite)

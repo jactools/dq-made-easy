@@ -1,1 +1,1 @@
-Nginx-based edge ingress image with repo-owned TLS and config rendering
+dq-made-easy edge ingress — Nginx-based with repo-owned TLS and config rendering

@@ -1,1 +1,1 @@
-OpenMetadata PostgreSQL image with repository extensions and bootstrap data
+dq-made-easy PostgreSQL image for OpenMetadata with repo extensions and bootstrap data

@@ -1,1 +1,1 @@
-Trino query engine image for federated SQL access across platform data sources
+dq-made-easy Trino query engine for federated SQL across platform data sources

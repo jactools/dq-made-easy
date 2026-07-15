@@ -1,1 +1,1 @@
-Container metrics exporter for observability dashboards and alerts
+dq-made-easy container metrics exporter for observability dashboards and alerts

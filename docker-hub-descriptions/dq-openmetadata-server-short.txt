@@ -1,1 +1,1 @@
-OpenMetadata server image with OpenTelemetry agent and HTTPS startup wrapper
+dq-made-easy OpenMetadata server with OpenTelemetry agent and HTTPS startup wrapper
