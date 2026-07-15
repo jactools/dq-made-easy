@@ -364,7 +364,9 @@ while IFS= read -r credential_line || [ -n "$credential_line" ]; do
             exit 1
       fi
 
-      /opt/keycloak/bin/kcadm.sh set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" --new-password="$password" >/dev/null
+      # Use "--new-password=${password}" (no space) to avoid kcadm argument
+      # parsing issues with passwords containing special characters.
+      /opt/keycloak/bin/kcadm.sh set-password -r "${KEYCLOAK_REALM}" --userid "$user_id" "--new-password=${password}" >/dev/null
       rotated_password_count=$((rotated_password_count + 1))
 done < "$seed_credentials_file"
 echo "[entrypoint] applied ${rotated_password_count} rotated seeded user passwords"
