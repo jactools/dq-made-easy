@@ -20,6 +20,7 @@ Additional instruction files (if they exist):
 - `.github/instructions/env-only-connection.instructions.md` — Enforce env-file-only service connectivity; no script-local service defaults or fallback paths
 - `.github/instructions/python-test-module-boundary.instructions.md` — Every Python production module must have its own dedicated unit test module
 - `.github/instructions/commit-validation-gate.instructions.md` — All commits must pass relevant build/test validation before being created; if a script can't be run, the commit is blocked
+- `docs/releases/RELEASE_MANAGEMENT.md` — Release lifecycle, conclusion procedure, and agent instructions for version bumps and test proofs
 
 ## Error handling and validation rules
 

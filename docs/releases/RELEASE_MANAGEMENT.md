@@ -166,3 +166,79 @@ These hooks run on every `npm run build` and `npm run dev` (including `start_loc
 - [ ] Version markers bumped to next version in all files listed above
 - [ ] Docs and frontend rebuilt with `start_local.sh` or `local_build_frontend.sh`
 - [ ] All changes committed with a clear bump commit message
+
+## Instructions for AI Agents
+
+When you are working on this repository, follow these rules for versioning, test proofs, and releases.
+
+### Version markers — always consistent
+
+The four version markers must always match the **current development version**:
+
+| File | Key | Must equal |
+|------|-----|------------|
+| `dq-ui/package.json` | `version` | current dev version |
+| `dq-ui/docs-site/package.json` | `version` | current dev version |
+| `VERSION_MANIFEST.json` | `apps.ui` | current dev version |
+| `VERSION_MANIFEST.json` | `apps.api` | current dev version |
+
+If you change any of these, update all four. If you find them out of sync, raise the conflict to the user.
+
+### Test proofs — must be schema-compliant
+
+Every test proof JSON under `test-results/test-proof/<version>/<proof_type>/` must:
+
+1. Have `app_version` matching the version directory name
+2. Have `proof_type` matching the subdirectory name and be one of: `ui`, `ui-api`, `api`, `engine`, `database`, `ai`, `command`, `infra`
+3. Contain all required fields from the schema
+4. Pass `./scripts/validation/validate_test_proof.sh` without errors
+
+Schema: `docs/contracts/test-proof/v1/schema.json`
+
+If a proof fails validation, **fix the proof** (add missing fields, correct values). Do not add `|| true`, skip the validation, or suppress the error.
+
+### When creating a test proof
+
+1. Place it under `test-results/test-proof/<app_version>/<proof_type>/` as `<proof_id>.json`
+2. Set `proof_id` to match the filename (without `.json`)
+3. Set `app_version` to the current development version
+4. Set `proof_type` to the directory name
+5. Populate `test_files` with actual file paths (not placeholders)
+6. Populate `assertions` with specific, checkable statements (not generic summaries)
+7. Set `raw_evidence_directory` to point to the corresponding directory under `test-results/evidence/`
+8. Run `./scripts/validation/validate_test_proof.sh` to verify
+9. Run the doc rebuild to publish the Markdown page
+
+### When asked to conclude a release
+
+Do not modify files in the concluded version. Instead:
+
+1. Verify the release documentation is complete (`RELEASE_NOTES_USER.md`, `TECHNICAL.md`, release-specific `.md` in `docs/releases/`)
+2. Verify test proofs for the version are complete and valid
+3. Bump all version markers to the next version
+4. Rebuild docs and frontend
+5. Commit the bump
+
+### When the prebuild/predev hooks fail
+
+The `prebuild` and `predev` npm hooks in `dq-ui/package.json` run the doc generation pipeline. If they fail:
+
+1. Read the error message carefully
+2. Fix the underlying issue (stale test proof, broken link, missing file)
+3. Re-run to confirm it passes
+4. **Never** add `|| true` or other error suppression
+
+### Frontend dist/ — always in git
+
+`dq-ui/dist/` is committed to git. After any code change that affects the build:
+
+1. Run `./scripts/local_build_frontend.sh` (or `npm run build` in `dq-ui/`)
+2. The rebuild will run the full prebuild pipeline (docs, test proofs, vite build)
+3. Commit the updated `dq-ui/dist/` files alongside your changes
+
+### When in doubt
+
+- Check the current version: `grep '"version"' dq-ui/package.json`
+- Check the manifest: `python3 -c "import json; d=json.load(open('VERSION_MANIFEST.json')); print(d['apps']['ui'], d['apps']['api'])"
+- Validate proofs: `./scripts/validation/validate_test_proof.sh`
+- Rebuild docs: `./dq-ui/scripts/start_local.sh` or `./scripts/local_build_frontend.sh`
