@@ -76,6 +76,8 @@ def _build_export_response(
     scope_kind: str,
     scope_id: str,
     serialized_summary: dict,
+    object_storage_classification: str,
+    evidence_classification: str,
 ) -> Response:
     if format == "csv":
         return Response(
@@ -83,6 +85,8 @@ def _build_export_response(
                 scope_kind=scope_kind,
                 scope_id=scope_id,
                 serialized_summary=serialized_summary,
+                object_storage_classification=object_storage_classification,
+                evidence_classification=evidence_classification,
             ),
             media_type="text/csv",
             headers={"Content-Disposition": f"attachment; filename={filename_prefix}.csv"},
@@ -93,6 +97,8 @@ def _build_export_response(
                 scope_kind=scope_kind,
                 scope_id=scope_id,
                 serialized_summary=serialized_summary,
+                object_storage_classification=object_storage_classification,
+                evidence_classification=evidence_classification,
             ),
             media_type="text/markdown",
             headers={"Content-Disposition": f"attachment; filename={filename_prefix}.md"},
@@ -102,6 +108,8 @@ def _build_export_response(
             scope_kind=scope_kind,
             scope_id=scope_id,
             serialized_summary=serialized_summary,
+            object_storage_classification=object_storage_classification,
+            evidence_classification=evidence_classification,
         )
         return Response(
             content=_markdown_to_pdf_bytes(markdown_report),
@@ -438,6 +446,8 @@ async def get_delivery_exception_summary(
             "deliveryId": delivery_id,
             "dataObjectVersionId": str(getattr(delivery_note, "data_object_version_id", "") or "").strip() or None,
             "deliveryLocation": str(getattr(delivery_note, "delivery_location", "") or "").strip() or None,
+            "objectStorageClassification": str(getattr(delivery_note, "object_storage_classification", "") or "").strip(),
+            "evidenceClassification": str(getattr(delivery_note, "evidence_classification", "") or "").strip(),
             "executionRunIds": result.execution_run_ids if allow_detail_identifiers else [],
             "dataObjectVersionIds": result.data_object_version_ids if allow_detail_identifiers else [],
             "analytics": ExceptionReasonAnalyticsView.model_validate(result.analytics),
@@ -591,6 +601,8 @@ async def export_delivery_exception_summary(
         scope_kind="delivery",
         scope_id=delivery_id,
         serialized_summary=serialized_summary,
+        object_storage_classification=str(summary.object_storage_classification or "").strip(),
+        evidence_classification=str(summary.evidence_classification or "").strip(),
     )
 
 
@@ -647,6 +659,8 @@ async def export_execution_plan_exception_summary(
         scope_kind="execution_plan",
         scope_id=execution_plan_id,
         serialized_summary=serialized_summary,
+        object_storage_classification="",
+        evidence_classification="",
     )
 
 

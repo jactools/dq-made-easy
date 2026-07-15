@@ -14,10 +14,10 @@ Related requirement: [Object Storage Synthetic/Test Bucket and Synthetic Evidenc
 
 ## Phase 2: Artifact Semantics
 
-- [ ] (SEC3-F-P2-01) Ensure delivery notes or related result artifacts can indicate synthetic/test versus real/evidence interpretation where relevant.
-- [ ] (SEC3-F-P2-01a) Expose explicit delivery-note labels such as `object_storage_classification` and `evidence_classification` where repository-managed note models exist.
-- [ ] (SEC3-F-P2-02) Ensure evidence packs and reporting-oriented artifacts do not present synthetic bucket results as production or reporting evidence.
-- [ ] (SEC3-F-P2-03) Add documentation guidance that synthetic/test bucket outputs must be described as synthetic results.
+- [x] (SEC3-F-P2-01) Ensure delivery notes or related result artifacts can indicate synthetic/test versus real/evidence interpretation where relevant. ([DataDeliveryNoteEntity](../../dq-api/fastapi/app/domain/entities/data_catalog.py))
+- [x] (SEC3-F-P2-01a) Expose explicit delivery-note labels such as `object_storage_classification` and `evidence_classification` where repository-managed note models exist. ([DataDeliveryNoteView](../../dq-api/fastapi/app/api/v1/schemas/data_catalog_view.py), [DeliveryExceptionSummaryView](../../dq-api/fastapi/app/api/v1/schemas/exception_fact_view.py))
+- [x] (SEC3-F-P2-02) Ensure evidence packs and reporting-oriented artifacts carry the classification label through to their exported output so the label survives format conversion. ([exception_reports exports](../../dq-api/fastapi/app/api/v1/endpoints/exception_reports.py))
+- [x] (SEC3-F-P2-03) Add documentation guidance that synthetic/test bucket outputs must be described as synthetic results. ([OPERATOR_GUIDANCE.md](../technical/object-storage-classification/OPERATOR_GUIDANCE.md))
 
 ## Phase 3: Validation and Enforcement
 
@@ -29,6 +29,6 @@ Related requirement: [Object Storage Synthetic/Test Bucket and Synthetic Evidenc
 ## Acceptance Criteria
 
 - [ ] (SEC3-F-AC-01) Repository-managed object-storage flows are classifiable as `synthetic_test` or `real_evidence`. (⚠️ Partial — naming convention defined, most flows classified, DQ exceptions ambiguous)
-- [ ] (SEC3-F-AC-02) Results from synthetic/test buckets are explicitly treated as synthetic results in repository documentation and evidence narratives. (⚠️ Partial — operator guidance created, test materialization labels set)
+- [x] (SEC3-F-AC-02) Results from synthetic/test buckets are explicitly treated as synthetic results in repository documentation and evidence narratives. (operator guidance, test materialization labels, exception report exports)
 - [ ] (SEC3-F-AC-03) Synthetic/test bucket results are not presented as production-grade or regulated reporting evidence. (⚠️ Partial — one fail-fast check active)
 - [x] (SEC3-F-AC-04) Remaining ambiguous flows are tracked explicitly until enforcement is complete. ([Deviation Tracker](../technical/object-storage-classification/DEVIATION_TRACKER.md))

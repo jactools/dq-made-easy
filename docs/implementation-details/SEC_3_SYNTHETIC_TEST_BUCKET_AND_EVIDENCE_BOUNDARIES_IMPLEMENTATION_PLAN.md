@@ -55,11 +55,11 @@ Derived documentation:
 
 ## Workstream 2: Artifact Labeling and Delivery-Note Model
 
-- [ ] (SEC3-I-W2-01) Add explicit `object_storage_classification` and `evidence_classification` fields to the repository-managed delivery-note model where that model exists.
-- [ ] (SEC3-I-W2-02) Ensure API retrieval endpoints expose the classification labels so downstream consumers can distinguish synthetic from real results without guessing.
-- [ ] (SEC3-I-W2-03) Update materialization request and completion flows to populate classification labels deterministically based on the `output_uri` bucket/prefix.
-- [ ] (SEC3-I-W2-04) Ensure evidence packs and reporting-oriented artifacts carry the classification label through to their exported output so the label survives format conversion.
-- [ ] (SEC3-I-W2-05) Add frontend surfaces where operators can view and filter artifacts by classification label without requiring API-level access.
+- [x] (SEC3-I-W2-01) Add explicit `object_storage_classification` and `evidence_classification` fields to the repository-managed delivery-note model where that model exists. ([DataDeliveryNoteEntity](../../dq-api/fastapi/app/domain/entities/data_catalog.py), [DataDeliveryNoteView](../../dq-api/fastapi/app/api/v1/schemas/data_catalog_view.py))
+- [x] (SEC3-I-W2-02) Ensure API retrieval endpoints expose the classification labels so downstream consumers can distinguish synthetic from real results without guessing. ([DeliveryExceptionSummaryView](../../dq-api/fastapi/app/api/v1/schemas/exception_fact_view.py), [data_assets classification signals](../../dq-api/fastapi/app/api/v1/endpoints/data_assets.py))
+- [x] (SEC3-I-W2-03) Update materialization request and completion flows to populate classification labels deterministically based on the `output_uri` bucket/prefix. ([test_data_materialization_support.py](../../dq-api/fastapi/app/api/v1/test_data_materialization_support.py))
+- [x] (SEC3-I-W2-04) Ensure evidence packs and reporting-oriented artifacts carry the classification label through to their exported output so the label survives format conversion. ([exception_reports exports](../../dq-api/fastapi/app/api/v1/endpoints/exception_reports.py), [exception_reports presenter](../../dq-api/fastapi/app/api/presenters/exception_reports.py))
+- [ ] (SEC3-I-W2-05) Add frontend surfaces where operators can view and filter artifacts by classification label without requiring API-level access. (deferred — frontend UI work)
 
 ## Workstream 3: Runtime Validation and Fail-Fast Enforcement
 
@@ -106,20 +106,20 @@ Derived documentation:
 | Workstream | Items | Status |
 |------------|-------|--------|
 | W1: Classification Inventory and Naming Convention | 5/5 | ✅ Complete |
-| W2: Artifact Labeling and Delivery-Note Model | 0/5 | 🔲 Not started |
+| W2: Artifact Labeling and Delivery-Note Model | 4/5 (W2-05 deferred to frontend) | ⚠️ Mostly complete |
 | W3: Runtime Validation and Fail-Fast Enforcement | 0/5 (1/5 pre-existing: SEC3-F-P3-02a) | 🔲 Not started |
 | W4: Documentation and Operator Guidance | 3/4 | ⚠️ Mostly complete |
 | W5: Deviation Tracking and Migration Path | 4/4 | ✅ Complete |
 
-**Total: 12/23 items complete (pre-existing SEC3-F-P3-02a not counted as new work)**
+**Total: 16/23 items complete (pre-existing SEC3-F-P3-02a not counted as new work; W2-05 deferred to frontend)**
 
 ## Effort Estimate
 
 | Workstream | Complexity | Effort | Remaining |
 |------------|------------|--------|-----------|
 | W1: Classification Inventory and Naming Convention | Medium | 2-3 days | 0 |
-| W2: Artifact Labeling and Delivery-Note Model | Medium | 2-3 days | 2-3 days |
+| W2: Artifact Labeling and Delivery-Note Model | Medium | 2-3 days | 0 (W2-05 deferred) |
 | W3: Runtime Validation and Fail-Fast Enforcement | Medium | 3-5 days | 3-5 days |
 | W4: Documentation and Operator Guidance | Low | 1-2 days | 0-1 day |
 | W5: Deviation Tracking and Migration Path | Medium | 2-3 days | 0 |
-| **Total** | | **10-16 days** | **5-9 days** |
+| **Total** | | **10-16 days** | **3-6 days** |

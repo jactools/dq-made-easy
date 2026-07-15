@@ -10,13 +10,22 @@ def build_exception_summary_json_export(serialized_summary: dict[str, Any]) -> s
     return json.dumps(serialized_summary, default=str, indent=2)
 
 
-def build_exception_summary_csv_export(*, scope_kind: str, scope_id: str, serialized_summary: dict[str, Any]) -> str:
+def build_exception_summary_csv_export(
+    *,
+    scope_kind: str,
+    scope_id: str,
+    serialized_summary: dict[str, Any],
+    object_storage_classification: str,
+    evidence_classification: str,
+) -> str:
     output = io.StringIO()
     writer = csv.DictWriter(
         output,
         fieldnames=[
             "scope_kind",
             "scope_id",
+            "object_storage_classification",
+            "evidence_classification",
             "reason_code",
             "reason_text",
             "total_failed_records",
@@ -42,6 +51,9 @@ def build_exception_summary_csv_export(*, scope_kind: str, scope_id: str, serial
         if str(item.get("reason_code") or "").strip()
     }
 
+    storage_class = str(object_storage_classification).strip()
+    evidence_class = str(evidence_classification).strip()
+
     rows: list[dict[str, Any]] = []
     if fluctuations:
         for item in fluctuations:
@@ -50,6 +62,8 @@ def build_exception_summary_csv_export(*, scope_kind: str, scope_id: str, serial
                 {
                     "scope_kind": scope_kind,
                     "scope_id": scope_id,
+                    "object_storage_classification": storage_class,
+                    "evidence_classification": evidence_class,
                     "reason_code": reason_code,
                     "reason_text": str(item.get("reason_text") or ""),
                     "total_failed_records": int(analytics.get("total_failed_records") or 0),
@@ -69,6 +83,8 @@ def build_exception_summary_csv_export(*, scope_kind: str, scope_id: str, serial
                 {
                     "scope_kind": scope_kind,
                     "scope_id": scope_id,
+                    "object_storage_classification": storage_class,
+                    "evidence_classification": evidence_class,
                     "reason_code": str(item.get("reason_code") or ""),
                     "reason_text": str(item.get("reason_text") or ""),
                     "total_failed_records": int(analytics.get("total_failed_records") or 0),
@@ -89,7 +105,14 @@ def build_exception_summary_csv_export(*, scope_kind: str, scope_id: str, serial
     return output.getvalue()
 
 
-def build_exception_summary_markdown_report(*, scope_kind: str, scope_id: str, serialized_summary: dict[str, Any]) -> str:
+def build_exception_summary_markdown_report(
+    *,
+    scope_kind: str,
+    scope_id: str,
+    serialized_summary: dict[str, Any],
+    object_storage_classification: str,
+    evidence_classification: str,
+) -> str:
     analytics = dict(serialized_summary.get("analytics") or {})
     top_reasons = analytics.get("top_reasons") if isinstance(analytics.get("top_reasons"), list) else []
     reason_fluctuations = analytics.get("reason_fluctuations") if isinstance(analytics.get("reason_fluctuations"), list) else []
@@ -104,9 +127,17 @@ def build_exception_summary_markdown_report(*, scope_kind: str, scope_id: str, s
         f"- Runs with failures: {int(analytics.get('runs_with_failures') or 0)}",
         f"- Execution runs: {', '.join(str(item) for item in execution_run_ids) if execution_run_ids else 'none'}",
         f"- Data object versions: {', '.join(str(item) for item in data_object_version_ids) if data_object_version_ids else 'none'}",
-        "",
-        "## Top Reasons",
     ]
+    storage_class = str(object_storage_classification).strip()
+    evidence_class = str(evidence_classification).strip()
+    if storage_class:
+        lines.append(f"- Object storage classification: {storage_class}")
+    if evidence_class:
+        lines.append(f"- Evidence classification: {evidence_class}")
+    if not storage_class and not evidence_class:
+        lines.append("> **WARNING**: Classification labels are empty. This delivery note lacks `object_storage_classification` and `evidence_classification`. Treat results as unclassified.")
+
+    lines.extend(["", "## Top Reasons"])
 
     if top_reasons:
         for item in top_reasons:

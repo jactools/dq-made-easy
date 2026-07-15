@@ -63,6 +63,6 @@ To check for classification drift:
 | Criterion | Status | Notes |
 |-----------|--------|-------|
 | SEC3-F-AC-01: flows classifiable as `synthetic_test` or `real_evidence` | ⚠️ Partial | Naming convention defined; most flows classified; DQ exceptions ambiguous (DEV-001) |
-| SEC3-F-AC-02: synthetic results treated as synthetic in documentation | ✅ Partial | Operator guidance created; test materialization labels set; CSV staging lacks labels (DEV-002) |
+| SEC3-F-AC-02: synthetic results treated as synthetic in documentation | ✅ Complete | Operator guidance, test materialization labels, exception report exports carry classification |
 | SEC3-F-AC-03: synthetic results not presented as production evidence | ⚠️ Partial | One fail-fast check active (SEC3-F-P3-02a); broader enforcement pending |
 | SEC3-F-AC-04: ambiguous flows tracked explicitly | ✅ Complete | DEV-001, DEV-002, DEV-003 recorded |
