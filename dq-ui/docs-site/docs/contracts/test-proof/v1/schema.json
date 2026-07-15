@@ -39,7 +39,8 @@
         "engine",
         "database",
         "ai",
-        "command"
+        "command",
+        "infra"
       ]
     },
     "feature": {

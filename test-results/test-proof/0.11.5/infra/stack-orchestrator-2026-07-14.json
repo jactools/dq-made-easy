@@ -1,0 +1,27 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "stack-orchestrator-2026-07-14",
+  "proof_type": "infra",
+  "feature": "stack-scripts",
+  "summary": "Test stack.sh help output, argument parsing, child script existence. 19 tests passed.",
+  "status": "passed",
+  "executed_at_utc": "2026-07-14T12:00:05+00:00",
+  "command": "test stack.sh help output, argument parsing, child script existence",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/infra/20260714T120005Z-stack-orchestrator",
+  "test_files": [
+    "scripts/stack.sh",
+    "scripts/stack_start.sh",
+    "scripts/stack_stop.sh",
+    "scripts/stack_destroy.sh",
+    "scripts/stack_restart.sh",
+    "scripts/stack_seed.sh"
+  ],
+  "test_file_count": 6,
+  "test_count": 19,
+  "assertions": [
+    "Help output lists all subcommands with descriptions",
+    "Argument validation rejects invalid subcommands",
+    "All referenced child scripts exist and are executable",
+    "Argument parsing correctly routes to child scripts"
+  ]
+}

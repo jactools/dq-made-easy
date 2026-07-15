@@ -1,0 +1,33 @@
+{
+  "app_version": "0.11.5",
+  "proof_id": "stack-syntax-validation-2026-07-14",
+  "proof_type": "infra",
+  "feature": "stack-scripts",
+  "summary": "Shell syntax validation for all stack lifecycle scripts using bash -n. All 8 scripts pass syntax check.",
+  "status": "passed",
+  "executed_at_utc": "2026-07-14T12:00:00+00:00",
+  "command": "bash -n on all 8 new/modified scripts",
+  "raw_evidence_directory": "test-results/evidence/0.11.5/infra/20260714T120000Z-stack-syntax-validation",
+  "test_files": [
+    "scripts/stack.sh",
+    "scripts/stack_start.sh",
+    "scripts/stack_stop.sh",
+    "scripts/stack_destroy.sh",
+    "scripts/stack_restart.sh",
+    "scripts/stack_seed.sh",
+    "scripts/supporting/stack_lifecycle.sh",
+    "scripts/supporting/generate_secrets.sh"
+  ],
+  "test_file_count": 8,
+  "test_count": 8,
+  "assertions": [
+    "scripts/stack.sh: syntax valid",
+    "scripts/stack_start.sh: syntax valid",
+    "scripts/stack_stop.sh: syntax valid",
+    "scripts/stack_destroy.sh: syntax valid",
+    "scripts/stack_restart.sh: syntax valid",
+    "scripts/stack_seed.sh: syntax valid",
+    "scripts/supporting/stack_lifecycle.sh: syntax valid",
+    "scripts/supporting/generate_secrets.sh: syntax valid"
+  ]
+}
