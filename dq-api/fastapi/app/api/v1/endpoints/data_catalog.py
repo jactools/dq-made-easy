@@ -1457,6 +1457,8 @@ async def get_delivery_inventory(
     workspace: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
+    objectStorageClassification: str | None = Query(default=None, alias="objectStorageClassification"),
+    evidenceClassification: str | None = Query(default=None, alias="evidenceClassification"),
     repository: DataCatalogRepository = Depends(get_data_catalog_repository),
 ) -> DataDeliveryInventoryPageView:
     if dataObjectVersionId and versionId and dataObjectVersionId != versionId:
@@ -1465,6 +1467,21 @@ async def get_delivery_inventory(
             detail="Provide only one of dataObjectVersionId or versionId",
         )
     rows = repository.list_data_deliveries(dataObjectVersionId or versionId, workspace)
+
+    def _delivery_classification_match(row: Any) -> bool:
+        note = repository.get_data_delivery_note(str(getattr(row, "id", "") or ""))
+        if note is None:
+            return False
+        storage_class = str(getattr(note, "object_storage_classification", "") or "").strip()
+        evidence_class = str(getattr(note, "evidence_classification", "") or "").strip()
+        if objectStorageClassification and storage_class != objectStorageClassification:
+            return False
+        if evidenceClassification and evidence_class != evidenceClassification:
+            return False
+        return True
+
+    if objectStorageClassification or evidenceClassification:
+        rows = [row for row in rows if _delivery_classification_match(row)]
     data_objects_catalog = repository.list_data_objects_catalog()
     object_name_lookup = {
         **{str(obj.id or ""): str(obj.name or "") for obj in data_objects_catalog},

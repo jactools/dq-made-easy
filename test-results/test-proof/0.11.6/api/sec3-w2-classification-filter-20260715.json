@@ -1,0 +1,35 @@
+{
+  "app_version": "0.11.6",
+  "proof_id": "sec3-w2-classification-filter-20260715",
+  "proof_type": "api",
+  "feature": "SEC-3 synthetic/test bucket and evidence boundaries",
+  "summary": "Workstream 2: Artifact Labeling (W2-05). Delivery inventory API endpoint filters by objectStorageClassification and evidenceClassification query parameters. Frontend DeliveryInventory component renders classification filter controls and passes them to the API. Test proves server-side filtering works for matching and non-matching classifications.",
+  "status": "passed",
+  "executed_at_utc": "2026-07-15T14:40:00Z",
+  "command": "scripts/python_arm64.sh --python-bin ./venv/bin/python -m pytest dq-api/fastapi/tests/api/test_data_catalog_endpoints.py::test_delivery_inventory_filters_by_classification -v --no-header -o 'addopts='",
+  "raw_evidence_directory": "test-results/evidence/0.11.6/api/sec3-w2-classification-filter-test-output.txt",
+  "test_files": [
+    "dq-api/fastapi/tests/api/test_data_catalog_endpoints.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 1,
+  "assertions": [
+    "Delivery inventory API accepts objectStorageClassification query parameter",
+    "Delivery inventory API accepts evidenceClassification query parameter",
+    "Delivery inventory API filters server-side when classification matches",
+    "Delivery inventory API returns empty results when classification does not match",
+    "Frontend DeliveryInventory component renders classification filter controls",
+    "Frontend passes classification filters as query parameters to the API"
+  ],
+  "proof_data": {
+    "implementation_items": [
+      "SEC3-I-W2-05: frontend surfaces for classification filtering via API"
+    ],
+    "files_modified": [
+      "dq-api/fastapi/app/api/v1/endpoints/data_catalog.py",
+      "dq-ui/src/components/DeliveryInventory.tsx",
+      "dq-ui/src/components/DeliveryInventory.css",
+      "dq-api/fastapi/tests/api/test_data_catalog_endpoints.py"
+    ]
+  }
+}

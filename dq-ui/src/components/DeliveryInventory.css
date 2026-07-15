@@ -128,6 +128,45 @@
   color: var(--delivery-inventory-text);
 }
 
+.delivery-inventory-classification-filters {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.delivery-inventory-filter-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.delivery-inventory-filter-label span {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--delivery-inventory-muted);
+}
+
+.delivery-inventory-filter-label select {
+  padding: 11px 14px;
+  border: 1px solid var(--delivery-inventory-border);
+  border-radius: 12px;
+  background: var(--delivery-inventory-surface);
+  color: var(--delivery-inventory-text);
+  font-size: 14px;
+  min-width: 180px;
+}
+
+.delivery-inventory-toolbar-actions {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+}
+
 .delivery-inventory-search input:focus {
   outline: 2px solid color-mix(in srgb, var(--delivery-inventory-brand) 30%, transparent 70%);
   border-color: var(--delivery-inventory-brand);

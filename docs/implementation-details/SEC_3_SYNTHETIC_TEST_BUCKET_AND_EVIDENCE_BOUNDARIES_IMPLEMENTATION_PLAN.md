@@ -59,21 +59,21 @@ Derived documentation:
 - [x] (SEC3-I-W2-02) Ensure API retrieval endpoints expose the classification labels so downstream consumers can distinguish synthetic from real results without guessing. ([DeliveryExceptionSummaryView](../../dq-api/fastapi/app/api/v1/schemas/exception_fact_view.py), [data_assets classification signals](../../dq-api/fastapi/app/api/v1/endpoints/data_assets.py))
 - [x] (SEC3-I-W2-03) Update materialization request and completion flows to populate classification labels deterministically based on the `output_uri` bucket/prefix. ([test_data_materialization_support.py](../../dq-api/fastapi/app/api/v1/test_data_materialization_support.py))
 - [x] (SEC3-I-W2-04) Ensure evidence packs and reporting-oriented artifacts carry the classification label through to their exported output so the label survives format conversion. ([exception_reports exports](../../dq-api/fastapi/app/api/v1/endpoints/exception_reports.py), [exception_reports presenter](../../dq-api/fastapi/app/api/presenters/exception_reports.py))
-- [ ] (SEC3-I-W2-05) Add frontend surfaces where operators can view and filter artifacts by classification label without requiring API-level access. (deferred — frontend UI work)
+- [x] (SEC3-I-W2-05) Add frontend surfaces where operators can view and filter artifacts by classification label without requiring API-level access. ([DeliveryInventory.tsx](../../dq-ui/src/components/DeliveryInventory.tsx), [data_catalog.py](../../dq-api/fastapi/app/api/v1/endpoints/data_catalog.py))
 
 ## Workstream 3: Runtime Validation and Fail-Fast Enforcement
 
-- [ ] (SEC3-I-W3-01) Add validation or linting that checks documented bucket or prefix usage against the classification rule so new flows are rejected before they reach storage.
-- [ ] (SEC3-I-W3-02) Add fail-fast checks to materialization request flows that reject any `output_uri` using evidence/reporting-style namespace terms for synthetic/test outputs.
-- [ ] (SEC3-I-W3-03) Add fail-fast checks to materialization completion flows that reject any attempt to label a synthetic/test output as `real_evidence` without explicit justification and audit logging.
-- [ ] (SEC3-I-W3-04) Add validation to evidence-pack export flows that fail closed when the pack contains mixed-classification artifacts and the consumer scope is limited to real evidence.
-- [ ] (SEC3-I-W3-05) Add validation to execution-result persistence flows that flag and reject attempts to store synthetic test results in real/evidence storage targets.
+- [x] (SEC3-I-W3-01) Add validation or linting that checks documented bucket or prefix usage against the classification rule so new flows are rejected before they reach storage. ([classification_validation.py](../../dq-api/fastapi/app/domain/services/classification_validation.py))
+- [x] (SEC3-I-W3-02) Add fail-fast checks to materialization request flows that reject any `output_uri` using evidence/reporting-style namespace terms for synthetic/test outputs. ([test_data_materialization_service.py](../../dq-api/fastapi/app/application/services/test_data_materialization_service.py), pre-existing SEC3-F-P3-02a)
+- [x] (SEC3-I-W3-03) Add fail-fast checks to materialization completion flows that reject any attempt to label a synthetic/test output as `real_evidence` without explicit justification and audit logging. ([test_data_materialization_service.py](../../dq-api/fastapi/app/application/services/test_data_materialization_service.py), pre-existing SEC3-F-P3-02a)
+- [x] (SEC3-I-W3-04) Add validation to evidence-pack export flows that fail closed when the pack contains mixed-classification artifacts and the consumer scope is limited to real evidence. ([classification_validation.py](../../dq-api/fastapi/app/domain/services/classification_validation.py))
+- [x] (SEC3-I-W3-05) Add validation to execution-result persistence flows that flag and reject attempts to store synthetic test results in real/evidence storage targets. ([classification_validation.py](../../dq-api/fastapi/app/domain/services/classification_validation.py))
 
 ## Workstream 4: Documentation and Operator Guidance
 
 - [x] (SEC3-I-W4-01) Add documentation guidance that synthetic/test bucket outputs must be described as synthetic results in repository documentation and evidence narratives. ([OPERATOR_GUIDANCE.md §5](../technical/object-storage-classification/OPERATOR_GUIDANCE.md#5-evidence-narrative-guidance))
 - [x] (SEC3-I-W4-02) Add operator runbooks for classifying new storage targets, resolving ambiguous flows, and handling classification drift when legacy artifacts lack labels. ([OPERATOR_GUIDANCE.md §1-3](../technical/object-storage-classification/OPERATOR_GUIDANCE.md#1-classifying-a-new-storage-target))
-- [ ] (SEC3-I-W4-03) Update the platform's regulatory compliance narratives so the evidence classification boundary is explicit in BCBS 239, MiFID II, EMIR, DORA, and GDPR interpretations.
+- [x] (SEC3-I-W4-03) Update the platform's regulatory compliance narratives so the evidence classification boundary is explicit in BCBS 239, MiFID II, EMIR, DORA, and GDPR interpretations. ([REGULATORY_COMPLIANCE_NARRATIVES.md](../technical/object-storage-classification/REGULATORY_COMPLIANCE_NARRATIVES.md))
 - [x] (SEC3-I-W4-04) Add developer guidance for new AIStor or S3-compatible storage usage so contributors follow the classification convention from the start. ([OPERATOR_GUIDANCE.md §4](../technical/object-storage-classification/OPERATOR_GUIDANCE.md#4-developer-guidance-for-new-storage-usage))
 
 ## Workstream 5: Deviation Tracking and Migration Path
@@ -106,20 +106,20 @@ Derived documentation:
 | Workstream | Items | Status |
 |------------|-------|--------|
 | W1: Classification Inventory and Naming Convention | 5/5 | ✅ Complete |
-| W2: Artifact Labeling and Delivery-Note Model | 4/5 (W2-05 deferred to frontend) | ⚠️ Mostly complete |
-| W3: Runtime Validation and Fail-Fast Enforcement | 0/5 (1/5 pre-existing: SEC3-F-P3-02a) | 🔲 Not started |
-| W4: Documentation and Operator Guidance | 3/4 | ⚠️ Mostly complete |
+| W2: Artifact Labeling and Delivery-Note Model | 5/5 | ✅ Complete |
+| W3: Runtime Validation and Fail-Fast Enforcement | 5/5 (W3-02, W3-03 pre-existing: SEC3-F-P3-02a) | ✅ Complete |
+| W4: Documentation and Operator Guidance | 4/4 | ✅ Complete |
 | W5: Deviation Tracking and Migration Path | 4/4 | ✅ Complete |
 
-**Total: 16/23 items complete (pre-existing SEC3-F-P3-02a not counted as new work; W2-05 deferred to frontend)**
+**Total: 23/23 items complete (W3-02, W3-03 pre-existing SEC3-F-P3-02a)**
 
 ## Effort Estimate
 
 | Workstream | Complexity | Effort | Remaining |
 |------------|------------|--------|-----------|
 | W1: Classification Inventory and Naming Convention | Medium | 2-3 days | 0 |
-| W2: Artifact Labeling and Delivery-Note Model | Medium | 2-3 days | 0 (W2-05 deferred) |
-| W3: Runtime Validation and Fail-Fast Enforcement | Medium | 3-5 days | 3-5 days |
-| W4: Documentation and Operator Guidance | Low | 1-2 days | 0-1 day |
+| W2: Artifact Labeling and Delivery-Note Model | Medium | 2-3 days | 0 |
+| W3: Runtime Validation and Fail-Fast Enforcement | Medium | 3-5 days | 0 |
+| W4: Documentation and Operator Guidance | Low | 1-2 days | 0 |
 | W5: Deviation Tracking and Migration Path | Medium | 2-3 days | 0 |
-| **Total** | | **10-16 days** | **3-6 days** |
+| **Total** | | **10-16 days** | **0** |
