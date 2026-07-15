@@ -1,11 +1,11 @@
 ---
 title: "Shell syntax validation for all stack lifecycle scripts using bash -n. All 8 scripts pass syntax check."
-description: "Human-readable test proof generated from test-results/test-proof/0.11.5/infra/stack-syntax-validation-2026-07-14.json."
+description: "Human-readable test proof generated from test-results/test-proof/0.11.6/infra/stack-syntax-validation-2026-07-14.json."
 ---
 
 # Shell syntax validation for all stack lifecycle scripts using bash -n. All 8 scripts pass syntax check.
 
-This page was generated from [test-results/test-proof/0.11.5/infra/stack-syntax-validation-2026-07-14.json](../../../../test-results/test-proof/0.11.5/infra/stack-syntax-validation-2026-07-14.json).
+This page was generated from [test-results/test-proof/0.11.6/infra/stack-syntax-validation-2026-07-14.json](../../../../test-results/test-proof/0.11.6/infra/stack-syntax-validation-2026-07-14.json).
 
 ## Summary
 
@@ -15,7 +15,7 @@ Shell syntax validation for all stack lifecycle scripts using bash -n. All 8 scr
 
 | Field | Value |
 | --- | --- |
-| App Version | 0.11.5 |
+| App Version | 0.11.6 |
 | Proof Id | stack-syntax-validation-2026-07-14 |
 | Proof Type | infra |
 | Feature | stack-scripts |
