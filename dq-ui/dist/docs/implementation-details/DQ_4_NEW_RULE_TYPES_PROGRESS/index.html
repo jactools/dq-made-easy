@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.10.2">
+<title data-rh="true">DQ-4 New Rule Types / Checks — Implementation Progress | DQ Made Easy Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="http://127.0.0.1/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="DQ-4 New Rule Types / Checks — Implementation Progress | DQ Made Easy Docs"><meta data-rh="true" name="description" content="Deprecated: Historical progress log for the DQ-4 typed check-type builder. New rule-contract, lowering, assistant, and capability guidance work now lives in the DQ-7 docs."><meta data-rh="true" property="og:description" content="Deprecated: Historical progress log for the DQ-4 typed check-type builder. New rule-contract, lowering, assistant, and capability guidance work now lives in the DQ-7 docs."><link data-rh="true" rel="icon" href="/docs/img/favicon.svg"><link data-rh="true" rel="canonical" href="http://127.0.0.1/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/" hreflang="en"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DQ-4 New Rule Types / Checks — Implementation Progress","item":"http://127.0.0.1/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS"}]}</script><link rel="stylesheet" href="/docs/assets/css/styles.78e6bda1.css">
+<script src="/docs/assets/js/runtime~main.876268fe.js" defer="defer"></script>
+<script src="/docs/assets/js/main.26f7bd29.js" defer="defer"></script>
+</head>
+<body>
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/docs/"><div class="navbar__logo"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">DQ Made Easy Docs</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/feature-plans/">Feature Plans</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/technical-references/">Technical</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/release-notes/">Releases</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/user-manuals/">Manuals</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/features/">Status &amp; Roadmap</a><a class="navbar__item navbar__link" href="/docs/engineering-decisions/">EDRs</a><a class="navbar__item navbar__link" href="/docs/architecture/">Architecture</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/api-reference/">API</a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/"><span class="categoryLinkLabel_W154">Start Here</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/feature-plans/"><span class="categoryLinkLabel_W154">Portal Pages</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/features/ABS_1_EXECUTION_ABSTRACTION/"><span class="categoryLinkLabel_W154">Features</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/releases/"><span class="categoryLinkLabel_W154">Releases</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/engineering-decisions/"><span class="categoryLinkLabel_W154">Engineering Decisions</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture/"><span class="categoryLinkLabel_W154">Architecture</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/test-proof/"><span class="categoryLinkLabel_W154">Test Proof</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/implementation-details/"><span class="categoryLinkLabel_W154">Implementation Details</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/"><span class="linkLabel_WmDU">Docker Compose Split - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-1 Execution Abstraction - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_1_PYSPARK_NATIVE_COMPILER_MAPPING/"><span class="linkLabel_WmDU">ABS-1 PySpark-Native Compiler Mapping</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-2 Data Catalog Materialization - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-3 Delivery-Linked Rule Execution - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">ABS-3 Delivery-Linked Rule Execution - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">API-5: Business Terms Integration - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_2_COMPLETE/"><span class="linkLabel_WmDU">API-5 Phase 2: Alias Resolution &amp; Validation Enrichment - Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_4_COMPLETE/"><span class="linkLabel_WmDU">API-5 Phase 4: Governance - Drift Detection &amp; Batch Revalidation - Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_5_UI_INTEGRATION/"><span class="linkLabel_WmDU">API-5 Phase 5: UI Integration Implementation Complete ✅</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_6_FASTAPI_MIGRATION/"><span class="linkLabel_WmDU">API-6 FastAPI API Platform Migration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_7_DATA_DELIVERY_RESOLUTION/"><span class="linkLabel_WmDU">API-7 Data Delivery Resolution Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/"><span class="linkLabel_WmDU">API-7 Real DQ Rule Execution Milestone</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ARCH_1_FRONTEND_BFF_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">ARCH-1 Frontend BFF — Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/AZURE_CONTAINER_APPS_TO_AKS_DEPLOYMENT_PLAN/"><span class="linkLabel_WmDU">Azure Container Apps to Azure Kubernetes Deployment Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/BUSINESS_KEY_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">Business Key Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DARK_THEME_IMPLEMENTATION/"><span class="linkLabel_WmDU">DARK_THEME_IMPLEMENTATION</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_MIGRATION/"><span class="linkLabel_WmDU">Docker Compose Split Migration Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE/"><span class="linkLabel_WmDU">Docker Compose Split - Quick Reference</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING/"><span class="linkLabel_WmDU">Docker Compose Split - Troubleshooting</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_1_ENHANCED_RULE_VALIDATION/"><span class="linkLabel_WmDU">DQ-1 Enhanced Rule Validation Logic — Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_1_RULE_VALIDATION_STANDARD_FEATURE_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-1 Rule Validation Standard Feature Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-10 Natural-Language Rule Drafting - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_14_DATA_CONTRACTS_SCHEMA_CHANGE_GOVERNANCE_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-14 Data Contracts, Schema-Change Governance, and Conformance Checks Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_19_MULTI_RUNTIME_LOWERERS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-19 Implementation Plan: Trino, Polars, and Dask/Dask-SQL Lowerers</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_20_EXECUTION_DISPATCH_AND_LOWERER_MODULE_SPLIT_PLAN/"><span class="linkLabel_WmDU">DQ-20 Execution Dispatch and Lowerer Module Split Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_3C_DATA_ASSETS_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-3c Data Assets - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/"><span class="linkLabel_WmDU">DQ-4 New Rule Types / Checks — Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS/"><span class="linkLabel_WmDU">DQ-7.3 Rule Compiler Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-7.4 Great Expectations Suite Orchestration - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_DSL_MOCK_DATA_2_0_0_MIGRATION_PLAN/"><span class="linkLabel_WmDU">DQ-7 Mock-Data DSL 2.0.0 Migration Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_DSL_ROLLOUT_POLICY/"><span class="linkLabel_WmDU">DQ-7 DSL Rollout Policy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-7 Engine-Independent DSL Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_ACTUALITY_DATE_CROSS_DELIVERY_PLAN/"><span class="linkLabel_WmDU">Implementation Plan: Actuality-Date Support for Cross-Delivery DQ Rules</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_RULE_TO_RUN_PLAN_FLOW/"><span class="linkLabel_WmDU">DQ Rule to Run Plan Flow</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/EXPANDED_MOCK_DATA_SUMMARY/"><span class="linkLabel_WmDU">Expanded Mock Data Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ISO_11179_OPEN_DATA_PRODUCT_SPECIFICATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ISO 11179 + Open Data Product Specification Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ISO_11179_OPENMETADATA_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ISO 11179 + OpenMetadata Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - App Cutover Matrix</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - File Checklist</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_TARGET_ARCHITECTURE/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - Target Architecture</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OBSERVABILITY_QUICKSTART/"><span class="linkLabel_WmDU">Observability Stack - Quick Start Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OBSERVABILITY_SETUP/"><span class="linkLabel_WmDU">Lightweight Observability Stack for DQ Rule Builder</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OPENTELEMETRY_IMPLEMENTATION/"><span class="linkLabel_WmDU">OpenTelemetry Implementation for DQ Rule Builder</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OPENTELEMETRY_ROLLOUT_CHECKLIST/"><span class="linkLabel_WmDU">OpenTelemetry Rollout Checklist (UI + API)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PHASE_1_TRINO_LOWERER_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">Phase 1 Implementation Plan: Trino Lowerer</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PHASE_1_TRINO_SUMMARY/"><span class="linkLabel_WmDU">Phase 1 — Trino Lowerer: Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PROFILING_IMPLEMENTATION/"><span class="linkLabel_WmDU">Data Profiling &amp; AI Suggestions Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PYTHON_FILE_SIZE_POLICY/"><span class="linkLabel_WmDU">Python File Size Policy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/refactor-gx-dispatch-modules/"><span class="linkLabel_WmDU">Refactor gx_dispatch_worker.py — Single Responsibility Module Split</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-1: Internal Service TLS Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_2_POST_QUANTUM_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-2: Post-Quantum Cryptography Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_3_RUNTIME_SECRETS_GENERATION_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-3: Runtime Secrets Generation — Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-4 Container Egress Control Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-5: End-to-End No-HTTP TLS Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY/"><span class="linkLabel_WmDU">SEC-5 No-HTTP Contract and Exception Boundary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_W6_IMPLEMENTATION_STRATEGY/"><span class="linkLabel_WmDU">SEC-5 Workstream 6 Implementation Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/"><span class="linkLabel_WmDU">SEC-5 Workstream 7-04: End-to-End Cutover Runbook</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SPARK_EXPECTATIONS_ENGINE_PLAN/"><span class="linkLabel_WmDU">Spark Expectations Engine Integration Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SCRIPT_CONTRACT/"><span class="linkLabel_WmDU">Stack Script Contract</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SCRIPT_MODULARIZATION_WORK_PLAN/"><span class="linkLabel_WmDU">Stack Script Modularization Work Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SERVICE_DEPENDENCY_MANIFEST/"><span class="linkLabel_WmDU">Stack Service Dependency Manifest</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SHARED_SHELL_PRIMITIVES_PLAN/"><span class="linkLabel_WmDU">Stack Shared Shell Primitives Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TESTS_TODO/"><span class="linkLabel_WmDU">Test Coverage TODOs</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TLS_EDGE_ARCHITECTURE_REFERENCE/"><span class="linkLabel_WmDU">TLS Edge Architecture Reference</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TLS_VALIDATION_INFRASTRUCTURE/"><span class="linkLabel_WmDU">TLS Validation Infrastructure</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/USER_MANUALS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">User Manuals Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF_6_KUBERNETES_IMAGE_DEPLOYMENT_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">WF-6 Kubernetes Image Deployment Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">WF-7 Azure Container Apps Environment Deployment Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_API_ENDPOINTS/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - API Endpoints Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_APPLICATION_SETTINGS_SCOPE/"><span class="linkLabel_WmDU">WF-3 Application Settings Scope</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_DATABASE_MIGRATION_TEST/"><span class="linkLabel_WmDU">WF-3 Database Migration Test Report ✅</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_IMPLEMENTATION_COMPLETE/"><span class="linkLabel_WmDU">WF-3 Implementation Complete - Ready for Frontend</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_IMPLEMENTATION_PHASE_1/"><span class="linkLabel_WmDU">WF-3 Implementation Progress - Phase 1: Backend Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_MANDATORY_VERSIONING_FIX/"><span class="linkLabel_WmDU">WF-3: Mandatory Versioning Implementation Fix</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_RULE_VERSIONING_SCHEMA/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - Schema Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_UI_DESIGN/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - UI Layer Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_WORKFLOW_INTEGRATION/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - Workflow Integration</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/technical/"><span class="categoryLinkLabel_W154">Technical</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/contracts/"><span class="categoryLinkLabel_W154">Contracts</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/runbooks/"><span class="categoryLinkLabel_W154">Runbooks</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/fixes/DARK_THEME_CODE_CHANGES/"><span class="categoryLinkLabel_W154">Fixes</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/user-manuals/agent-workflow-examples-and-templates/"><span class="categoryLinkLabel_W154">User Manual Source</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Implementation Details</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">DQ-4 New Rule Types / Checks — Implementation Progress</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>DQ-4 New Rule Types / Checks — Implementation Progress</h1></header>
+<blockquote>
+<p><strong>Deprecated:</strong> Historical progress log for the DQ-4 typed check-type builder. New rule-contract, lowering, assistant, and capability guidance work now lives in the DQ-7 docs.
+Use <a class="" href="/docs/technical/DQ-7_RULE_DSL_CONTRACT/">DQ-7 Rule DSL Contract</a> and <a class="" href="/docs/implementation-details/DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN/">DQ-7 Engine-Independent DSL Implementation Plan</a> for current guidance.</p>
+</blockquote>
+<p>Status: [x] Complete<br>
+<!-- -->Last updated: 2026-04-19<br>
+<!-- -->Related feature tracker: ../features/DQ_FEATURES.md</p>
+<p>Final UI acceptance gaps closed on 2026-04-19:</p>
+<ul>
+<li class="">Reports now expose check-type coverage by DAMA dimension.</li>
+<li class="">Wizard validation now surfaces field-level messages across typed check parameter forms, not only join consistency.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="coverage-delta-2026-03-28">Coverage Delta (2026-03-28)<a href="#coverage-delta-2026-03-28" class="hash-link" aria-label="Direct link to Coverage Delta (2026-03-28)" title="Direct link to Coverage Delta (2026-03-28)" translate="no">​</a></h2>
+<p>Final stabilization and coverage uplift completed across API, service, and repository test suites.</p>
+<ul>
+<li class="">Full suite result: <code>780 passed, 1 skipped</code>.</li>
+<li class="">Branch+line coverage gate: <code>90.13%</code> (fail-under target: <code>90%</code>).</li>
+<li class="">Per-file minimum coverage target (<code>&gt;=60%</code>) is satisfied.</li>
+</ul>
+<p>Primary high-impact test additions in this pass:</p>
+<ul>
+<li class=""><code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code></li>
+<li class=""><code>dq-api/fastapi/tests/application/services/test_rule_compiler.py</code></li>
+<li class=""><code>dq-api/fastapi/tests/api/test_rules_endpoint_mapping_focus.py</code></li>
+<li class=""><code>dq-api/fastapi/tests/infrastructure/unit/repositories/in_memory/test_testing_repository_focus.py</code></li>
+<li class=""><code>dq-api/fastapi/tests/infrastructure/unit/repositories/postgres/test_rules_repository_postgres.py</code></li>
+</ul>
+<p>Validation command:</p>
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; ../../venv/bin/python -m pytest tests --cov=app --cov-branch --cov-report=json:test-results/coverage.full.json --cov-fail-under=90 -q</code></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="scope">Scope<a href="#scope" class="hash-link" aria-label="Direct link to Scope" title="Direct link to Scope" translate="no">​</a></h2>
+<p>DQ-4 currently covers sixteen implemented/current executable rule check-types that can be
+defined through guided structured parameters instead of a raw expression string. Each
+implemented check-type auto-generates a DQ-7 compiler-ready expression when saved, while
+leaving existing free-form expression rules fully intact. The feature tracker now also
+captures the initial execution scope and guardrails for the newly added extended types.</p>
+<p>Implemented/current executable scope in this note:</p>
+<ul>
+<li class=""><code>THRESHOLD</code></li>
+<li class=""><code>REGEX</code></li>
+<li class=""><code>RANGE</code></li>
+<li class=""><code>ALLOWLIST</code></li>
+<li class=""><code>BLOCKLIST</code></li>
+<li class=""><code>UNIQUENESS</code></li>
+<li class=""><code>REFERENTIAL_INTEGRITY</code></li>
+<li class=""><code>FRESHNESS</code></li>
+<li class=""><code>LAG</code></li>
+<li class=""><code>FUTURE_DATE</code></li>
+<li class=""><code>CORRECT</code></li>
+<li class=""><code>PRESENT</code></li>
+<li class=""><code>RECONCILE</code></li>
+<li class=""><code>PLAUSIBLE</code></li>
+<li class=""><code>TRANSFER_MATCH</code></li>
+<li class=""><code>JOIN_CONSISTENCY</code></li>
+</ul>
+<p>Initial scope constraints for the extended taxonomy:</p>
+<ul>
+<li class=""><code>CORRECT</code> compares a source object against an authoritative reference object through declared join keys and a single comparison rule.</li>
+<li class=""><code>PRESENT</code> enforces non-null, non-blank values with optional placeholder blocking.</li>
+<li class=""><code>RECONCILE</code> supports lightweight cross-object reconciliation through one or more declared comparisons without actuality-date contract semantics.</li>
+<li class=""><code>PLAUSIBLE</code> is currently limited to <code>contextual_range</code> and <code>conditional_allowlist</code> modes.</li>
+<li class=""><code>TRANSFER_MATCH</code> is currently limited to <code>row_value_match</code> and <code>payload_hash_match</code> modes.</li>
+</ul>
+<p>Full context and acceptance criteria: <a class="" href="/docs/features/DQ_FEATURES/#dq-4-new-rule-types--checks">DQ_FEATURES.md — DQ-4 section</a></p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="gx-core-coverage-matrix-2026-04-20">GX Core Coverage Matrix (2026-04-20)<a href="#gx-core-coverage-matrix-2026-04-20" class="hash-link" aria-label="Direct link to GX Core Coverage Matrix (2026-04-20)" title="Direct link to GX Core Coverage Matrix (2026-04-20)" translate="no">​</a></h2>
+<p>This matrix distinguishes between:</p>
+<ul>
+<li class=""><code>Native GX Core</code>: the published expectation is a GX Core expectation class and the real Spark worker can execute it through GX Core <code>batch.validate(expectation)</code>.</li>
+<li class=""><code>Hybrid</code>: part of the rule type uses native GX Core, but one or more modes or sub-checks still require custom worker-backed expectations.</li>
+<li class=""><code>Custom worker</code>: the current implementation does not execute that rule type through native GX Core in the real Spark worker.</li>
+</ul>
+<table><thead><tr><th>Check-type</th><th>GX Core status</th><th>Current native GX Core coverage</th><th>Notes</th></tr></thead><tbody><tr><td><code>THRESHOLD</code></td><td>Hybrid</td><td><code>null_pct</code> only</td><td>Native GX aggregate mapping exists for <code>null_pct</code>; <code>empty_pct</code> and <code>default_val_pct</code> are not auto-published to GX Core today.</td></tr><tr><td><code>REGEX</code></td><td>Native GX Core</td><td>Full current scope</td><td>Publishes as native GX regex expectation.</td></tr><tr><td><code>RANGE</code></td><td>Native GX Core</td><td>Full current scope</td><td>Publishes as native GX between expectation, including one-sided bounds and inclusive/exclusive options.</td></tr><tr><td><code>ALLOWLIST</code></td><td>Native GX Core</td><td>Full current scope</td><td>Uses native GX <code>in_set</code> for case-sensitive lists and native regex for case-insensitive lists.</td></tr><tr><td><code>BLOCKLIST</code></td><td>Native GX Core</td><td>Full current scope</td><td>Uses native GX <code>not_in_set</code> or native regex negation depending on case sensitivity.</td></tr><tr><td><code>UNIQUENESS</code></td><td>Native GX Core</td><td>Full current scope</td><td>Uses native GX single-column uniqueness or compound-column uniqueness.</td></tr><tr><td><code>REFERENTIAL_INTEGRITY</code></td><td>Native GX Core</td><td>Narrow native scope</td><td>Current GX publication is a native not-null check on the joined <code>rhs</code> reference attribute after join materialization.</td></tr><tr><td><code>FRESHNESS</code></td><td>Custom worker</td><td>None</td><td>Uses a custom worker-backed expectation shape today; not part of the native GX execution allowlist.</td></tr><tr><td><code>LAG</code></td><td>Custom worker</td><td>None</td><td>Uses a custom lag expectation shape today; not executed through native GX Core.</td></tr><tr><td><code>FUTURE_DATE</code></td><td>Custom worker</td><td>None</td><td>Uses a custom worker-backed future-date expectation shape today; not executed through native GX Core.</td></tr><tr><td><code>CORRECT</code></td><td>Hybrid</td><td><code>exact</code> comparison mode</td><td>Exact cross-object equality uses native GX column-pair equality; <code>case_insensitive</code> and <code>numeric_tolerance</code> remain custom worker-backed.</td></tr><tr><td><code>PRESENT</code></td><td>Native GX Core</td><td>Full current scope</td><td>Implemented via native not-null plus native regex-based blank/placeholder blocking expectations.</td></tr><tr><td><code>RECONCILE</code></td><td>Hybrid</td><td><code>exact</code> comparison mode</td><td>Exact comparisons are native GX column-pair equality; non-exact comparison modes remain custom worker-backed.</td></tr><tr><td><code>PLAUSIBLE</code></td><td>Native GX Core</td><td>Full currently implemented scope</td><td><code>contextual_range</code> and <code>conditional_allowlist</code> now publish as native GX expectations scoped by GX <code>row_condition</code>.</td></tr><tr><td><code>TRANSFER_MATCH</code></td><td>Hybrid</td><td><code>payload_hash_match</code> and <code>row_value_match</code> with <code>exact</code> comparisons</td><td>Native for payload-hash equality and exact row-value equality; non-exact row-value comparisons remain custom worker-backed.</td></tr><tr><td><code>JOIN_CONSISTENCY</code></td><td>Hybrid</td><td>Exact comparison clauses only</td><td>Exact value comparisons are native GX column-pair equality; actuality-date tolerance remains custom worker-backed.</td></tr></tbody></table>
+<p>Summary:</p>
+<ul>
+<li class="">Fully native GX Core for the currently implemented scope: <code>REGEX</code>, <code>RANGE</code>, <code>ALLOWLIST</code>, <code>BLOCKLIST</code>, <code>UNIQUENESS</code>, <code>PRESENT</code>, <code>PLAUSIBLE</code>.</li>
+<li class="">Hybrid: <code>THRESHOLD</code>, <code>REFERENTIAL_INTEGRITY</code>, <code>CORRECT</code>, <code>RECONCILE</code>, <code>TRANSFER_MATCH</code>, <code>JOIN_CONSISTENCY</code>.</li>
+<li class="">Still custom worker-backed: <code>FRESHNESS</code>, <code>LAG</code>, <code>FUTURE_DATE</code>.</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-41--define-rulechecktype-taxonomy">DQ-4.1 — Define RuleCheckType Taxonomy<a href="#dq-41--define-rulechecktype-taxonomy" class="hash-link" aria-label="Direct link to DQ-4.1 — Define RuleCheckType Taxonomy" title="Direct link to DQ-4.1 — Define RuleCheckType Taxonomy" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="backend">Backend<a href="#backend" class="hash-link" aria-label="Direct link to Backend" title="Direct link to Backend" translate="no">​</a></h3>
+<p>Files to add / change:</p>
+<ul>
+<li class=""><code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> <em>(new)</em>
+<ul>
+<li class=""><code>RuleCheckType</code> enum with all currently executable values</li>
+<li class=""><code>RuleCheckTypeParams</code> union type mapping each check-type to its parameter model</li>
+</ul>
+</li>
+<li class=""><code>dq-api/fastapi/app/api/v1/schemas/rule_view.py</code> — add <code>checkType</code> / <code>checkTypeParams</code> fields to <code>RuleView</code> and <code>RuleCreateRequest</code></li>
+<li class=""><code>dq-api/fastapi/app/infrastructure/orm/models.py</code> — add <code>check_type TEXT</code>, <code>check_type_params JSONB</code> columns to <code>RuleRow</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="database">Database<a href="#database" class="hash-link" aria-label="Direct link to Database" title="Direct link to Database" translate="no">​</a></h3>
+<p>Files to change:</p>
+<ul>
+<li class=""><code>dq-db/init/01_schema.sql</code> — add <code>check_type TEXT</code>, <code>check_type_params JSONB</code> to <code>rules</code> table</li>
+<li class=""><code>dq-db/scripts/validate_seed_headers.py</code> — will auto-validate after schema change</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="frontend">Frontend<a href="#frontend" class="hash-link" aria-label="Direct link to Frontend" title="Direct link to Frontend" translate="no">​</a></h3>
+<p>Files to change:</p>
+<ul>
+<li class=""><code>dq-ui/src/types/rules.ts</code> — add <code>RuleCheckType</code> union type and <code>RuleCheckTypeParams</code> interface to <code>Rule</code></li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-42--threshold--completeness-checks">DQ-4.2 — Threshold / Completeness Checks<a href="#dq-42--threshold--completeness-checks" class="hash-link" aria-label="Direct link to DQ-4.2 — Threshold / Completeness Checks" title="Direct link to DQ-4.2 — Threshold / Completeness Checks" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Check-type: <code>THRESHOLD</code><br>
+<!-- -->DAMA dimension: Completeness<br>
+<!-- -->Parameters: <code>attribute</code>, <code>metric</code> (<code>null_pct</code> | <code>empty_pct</code> | <code>default_val_pct</code>), <code>operator</code> (<code>gt</code> | <code>gte</code> | <code>lt</code> | <code>lte</code>), <code>threshold</code> (number)</p>
+<p>Expression template:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token plain">percentage_of({attribute} IS NULL) {operator} {threshold}</span><br></div></code></pre></div></div>
+<p>Files added / changed:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> — <code>ThresholdParams</code> dataclass</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/application/services/check_type_expression_generator.py</code> — all implemented executable generators</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/application/services/__init__.py</code> — exports <code>generate_expression_from_check_type</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/api/v1/endpoints/rules.py</code> — wired <code>checkType</code>/<code>checkTypeParams</code> → generator</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/ThresholdForm.tsx</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/index.tsx</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/CheckTypeForm.css</code></li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-43--pattern--regex-checks">DQ-4.3 — Pattern / Regex Checks<a href="#dq-43--pattern--regex-checks" class="hash-link" aria-label="Direct link to DQ-4.3 — Pattern / Regex Checks" title="Direct link to DQ-4.3 — Pattern / Regex Checks" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Check-type: <code>REGEX</code><br>
+<!-- -->DAMA dimension: Accuracy<br>
+<!-- -->Parameters: <code>attribute</code>, <code>pattern</code> (string), <code>flags</code> (string, optional — e.g. <code>i</code> for case-insensitive)</p>
+<p>Expression template:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token plain">{attribute} MATCHES &#x27;{pattern}&#x27;</span><br></div></code></pre></div></div>
+<p>Files added / changed:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> — <code>RegexParams</code> dataclass</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->expression generator: <code>REGEX</code> branch in <code>check_type_expression_generator.py</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/RegexForm.tsx</code> <em>(new)</em></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/index.tsx</code> — dispatcher wiring for <code>REGEX</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code> <em>(new)</em> — regex generator unit coverage</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Primary test file: <code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code></li>
+<li class="">Regex-specific cases in that file:<!-- -->
+<ul>
+<li class=""><code>test_generate_regex_expression_without_flags</code></li>
+<li class=""><code>test_generate_regex_expression_with_flags</code></li>
+<li class=""><code>test_generate_regex_expression_requires_attribute</code></li>
+<li class=""><code>test_generate_regex_expression_requires_pattern</code></li>
+</ul>
+</li>
+<li class="">Focused command (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; ../../venv/bin/python -m pytest --no-cov tests/application/services/test_check_type_expression_generator.py -k regex -q</code></li>
+</ul>
+</li>
+<li class="">Full generator command (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; ../../venv/bin/python -m pytest --no-cov tests/application/services/test_check_type_expression_generator.py -q</code></li>
+</ul>
+</li>
+<li class="">Latest validation run (2026-03-26):<!-- -->
+<ul>
+<li class="">Command executed via FastAPI test wrapper:<!-- -->
+<ul>
+<li class=""><code>cd dq-api &amp;&amp; ./scripts/testing/run_fastapi_pytest.sh --no-cov tests/application/services/test_check_type_expression_generator.py -k regex -q</code></li>
+</ul>
+</li>
+<li class="">Result: <code>4 passed, 12 deselected in 0.36s</code></li>
+</ul>
+</li>
+<li class="">Result artifact locations (repo root):<!-- -->
+<ul>
+<li class=""><code>test-results/coverage.xml</code></li>
+<li class=""><code>test-results/coverage.json</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-44--range-checks">DQ-4.4 — Range Checks<a href="#dq-44--range-checks" class="hash-link" aria-label="Direct link to DQ-4.4 — Range Checks" title="Direct link to DQ-4.4 — Range Checks" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Check-type: <code>RANGE</code><br>
+<!-- -->DAMA dimensions: Validity / Timeliness<br>
+<!-- -->Parameters: <code>attribute</code>, <code>minValue</code> (number | date, optional), <code>maxValue</code> (number | date, optional), <code>inclusive</code> (boolean, default <code>true</code>)</p>
+<p>Expression template:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token plain">{attribute} BETWEEN {minValue} AND {maxValue}</span><br></div></code></pre></div></div>
+<p>Files added / changed:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> — <code>RangeParams</code> dataclass</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/application/services/check_type_expression_generator.py</code> — <code>RANGE</code> branch with inclusive/exclusive and one-sided bounds</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/RangeForm.tsx</code> <em>(new)</em></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/index.tsx</code> — dispatcher wiring for <code>RANGE</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Templates.tsx</code> — range defaults + range validation in Step 3 wizard flow</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code> — range generator coverage (inclusive/exclusive/one-sided/error)</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Focused command (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api &amp;&amp; ./scripts/testing/run_fastapi_pytest.sh --no-cov tests/application/services/test_check_type_expression_generator.py -k range -q</code></li>
+</ul>
+</li>
+<li class="">Latest validation run (2026-03-26):<!-- -->
+<ul>
+<li class="">Result: <code>5 passed, 12 deselected in 0.27s</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-45--allowlist-and-blocklist-checks">DQ-4.5 — Allowlist and Blocklist Checks<a href="#dq-45--allowlist-and-blocklist-checks" class="hash-link" aria-label="Direct link to DQ-4.5 — Allowlist and Blocklist Checks" title="Direct link to DQ-4.5 — Allowlist and Blocklist Checks" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Check-types: <code>ALLOWLIST</code>, <code>BLOCKLIST</code><br>
+<!-- -->DAMA dimensions: Accuracy / Validity<br>
+<!-- -->Parameters: <code>attribute</code>, <code>values[]</code> (string list), <code>caseSensitive</code> (boolean, default <code>false</code>)</p>
+<p>Expression templates:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token plain">{attribute} IN ({values})       -- ALLOWLIST</span><br></div><div class="token-line" style="color:#bfc7d5"><span class="token plain">{attribute} NOT IN ({values})   -- BLOCKLIST</span><br></div></code></pre></div></div>
+<p>Files added / changed:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> — <code>AllowlistParams</code>, <code>BlocklistParams</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/application/services/check_type_expression_generator.py</code> — <code>ALLOWLIST</code> / <code>BLOCKLIST</code> branches</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/AllowlistForm.tsx</code> <em>(new)</em></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/index.tsx</code> — dispatcher wiring for <code>ALLOWLIST</code> and <code>BLOCKLIST</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Templates.tsx</code> — allowlist/blocklist defaults and step validation</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code> — allowlist/blocklist generator coverage</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Focused command (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api &amp;&amp; ./scripts/testing/run_fastapi_pytest.sh --no-cov tests/application/services/test_check_type_expression_generator.py -k &quot;allowlist or blocklist&quot; -q</code></li>
+</ul>
+</li>
+<li class="">Latest validation run (2026-03-26):<!-- -->
+<ul>
+<li class="">Result: <code>8 passed, 15 deselected in 0.25s</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-46--uniqueness--duplicate-detection-checks">DQ-4.6 — Uniqueness / Duplicate-Detection Checks<a href="#dq-46--uniqueness--duplicate-detection-checks" class="hash-link" aria-label="Direct link to DQ-4.6 — Uniqueness / Duplicate-Detection Checks" title="Direct link to DQ-4.6 — Uniqueness / Duplicate-Detection Checks" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Check-type: <code>UNIQUENESS</code><br>
+<!-- -->DAMA dimension: Uniqueness<br>
+<!-- -->Parameters: <code>attributes[]</code> (one or more column names forming the key)</p>
+<p>Expression template:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token plain">COUNT(*) OVER (PARTITION BY {attributes}) = 1</span><br></div></code></pre></div></div>
+<p>Files added / changed:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> — <code>UniquenessParams</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/application/services/check_type_expression_generator.py</code> — <code>UNIQUENESS</code> branch</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/UniquenessForm.tsx</code> <em>(new)</em></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/index.tsx</code> — dispatcher wiring for <code>UNIQUENESS</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Templates.tsx</code> — uniqueness defaults and step validation</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code> — uniqueness generator coverage</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Focused command (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api &amp;&amp; ./scripts/testing/run_fastapi_pytest.sh --no-cov tests/application/services/test_check_type_expression_generator.py -k uniqueness -q</code></li>
+</ul>
+</li>
+<li class="">Latest validation run (2026-03-26):<!-- -->
+<ul>
+<li class="">Result: <code>3 passed, 22 deselected in 0.25s</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-47--referential-integrity-checks">DQ-4.7 — Referential Integrity Checks<a href="#dq-47--referential-integrity-checks" class="hash-link" aria-label="Direct link to DQ-4.7 — Referential Integrity Checks" title="Direct link to DQ-4.7 — Referential Integrity Checks" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Check-type: <code>REFERENTIAL_INTEGRITY</code><br>
+<!-- -->DAMA dimension: Consistency<br>
+<!-- -->Parameters: <code>attribute</code>, <code>refDataObjectId</code>, <code>refAttribute</code></p>
+<p>Expression template:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#bfc7d5"><span class="token plain">{attribute} IN (SELECT {refAttribute} FROM {refDataObject})</span><br></div></code></pre></div></div>
+<p>Version mapping note:</p>
+<ul>
+<li class="">Referential integrity now requires explicit <code>refDataObjectVersionId</code> and validates <code>refAttribute</code> against that exact version&#x27;s attribute catalog.</li>
+<li class=""><code>refDataObjectId</code> is normalized from the selected version to avoid object/version drift.</li>
+<li class="">Optional <code>refWorkspaceId</code> metadata is supported so references can point to current-workspace or external-workspace objects.</li>
+</ul>
+<p>Files added / changed:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> — <code>ReferentialIntegrityParams</code> includes <code>refDataObjectVersionId</code> and optional <code>refWorkspaceId</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/application/services/check_type_expression_generator.py</code> — <code>REFERENTIAL_INTEGRITY</code> branch enforces <code>refDataObjectVersionId</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/api/v1/endpoints/rules.py</code> — validates selected reference version exists and contains <code>refAttribute</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/ReferentialIntegrityForm.tsx</code> <em>(new)</em> — captures workspace, object ID, object version ID, and reference attribute</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Templates.tsx</code> — step validation requires reference object version ID for referential checks</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code> — referential generator coverage updated for required version ID</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Focused command (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api &amp;&amp; ./scripts/testing/run_fastapi_pytest.sh --no-cov tests/application/services/test_check_type_expression_generator.py -k referential -q</code></li>
+</ul>
+</li>
+<li class="">Latest validation run (2026-03-26):<!-- -->
+<ul>
+<li class="">Result: <code>2 passed, 24 deselected in 0.25s</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-48--timeliness-checks">DQ-4.8 — Timeliness Checks<a href="#dq-48--timeliness-checks" class="hash-link" aria-label="Direct link to DQ-4.8 — Timeliness Checks" title="Direct link to DQ-4.8 — Timeliness Checks" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Check-types: <code>FRESHNESS</code>, <code>LAG</code>, <code>FUTURE_DATE</code><br>
+<!-- -->DAMA dimension: Timeliness</p>
+<table><thead><tr><th>Sub-type</th><th>Parameters</th><th>Expression template</th></tr></thead><tbody><tr><td><code>FRESHNESS</code></td><td><code>attribute</code>, <code>maxDaysOld</code>, <code>anchor</code> (now/processing_date)</td><td><code>DATEDIFF(now(), &amp;#123;attribute&amp;#125;) &amp;lt;= &amp;#123;maxDaysOld&amp;#125;</code></td></tr><tr><td><code>LAG</code></td><td><code>startAttribute</code>, <code>endAttribute</code>, <code>maxHours</code></td><td><code>TIMESTAMPDIFF(HOUR, &amp;#123;start&amp;#125;, &amp;#123;end&amp;#125;) &amp;lt;= &amp;#123;maxHours&amp;#125;</code></td></tr><tr><td><code>FUTURE_DATE</code></td><td><code>attribute</code>, <code>referenceDate?</code></td><td><code>&amp;#123;attribute&amp;#125; &amp;lt;= {referenceDate or now()}</code></td></tr></tbody></table>
+<p>Files added / changed:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/domain/entities/rule_check_type.py</code> — <code>FreshnessParams</code>, <code>LagParams</code>, <code>FutureDateParams</code></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/application/services/check_type_expression_generator.py</code> — <code>FRESHNESS</code>, <code>LAG</code>, and <code>FUTURE_DATE</code> branches</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/TimelinessForm.tsx</code> <em>(new)</em></li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/CheckTypeForm/index.tsx</code> — dispatcher wiring for timeliness checks</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Templates.tsx</code> — timeliness defaults and step validation for freshness/lag/future-date</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/tests/application/services/test_check_type_expression_generator.py</code> — timeliness generator and validation coverage</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Focused command (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api &amp;&amp; ./scripts/testing/run_fastapi_pytest.sh --no-cov tests/application/services/test_check_type_expression_generator.py -k &quot;freshness or lag or future_date&quot; -q</code></li>
+</ul>
+</li>
+<li class="">Latest validation run (2026-03-26):<!-- -->
+<ul>
+<li class="">Result: <code>12 passed, 21 deselected in 0.25s</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-49--ui-structured-check-type-parameter-builder">DQ-4.9 — UI: Structured Check-Type Parameter Builder<a href="#dq-49--ui-structured-check-type-parameter-builder" class="hash-link" aria-label="Direct link to DQ-4.9 — UI: Structured Check-Type Parameter Builder" title="Direct link to DQ-4.9 — UI: Structured Check-Type Parameter Builder" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Goal: Replace the expression textarea with a guided parameter form when a check-type is selected in the rule editor. The text area remains available as an override (&quot;advanced&quot; mode).</p>
+<p>Files to add / change:</p>
+<ul>
+<li class=""><code>dq-ui/src/components/CheckTypeForm/index.tsx</code> <em>(new)</em> — dispatcher that renders the correct form for each check-type</li>
+<li class=""><code>dq-ui/src/components/RuleForm.tsx</code> (or <code>Rules.tsx</code>) — add check-type selector dropdown; show <code>CheckTypeForm</code> or raw expression textarea</li>
+<li class=""><code>dq-ui/src/types/rules.ts</code> — confirm <code>checkType</code> / <code>checkTypeParams</code> fields are populated from form</li>
+</ul>
+<p>Completion update (2026-03-26):</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Templates.tsx</code> now renders a check-type selector in wizard Step 3.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Templates.tsx</code> now renders <code>CheckTypeForm</code> for all typed checks and persists <code>checkType</code> / <code>checkTypeParams</code> in the create/update flow.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Step 3 validation now enforces check-type specific required fields before moving to summary.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Advanced/manual expression override mode now supports editing a raw expression while preserving typed check metadata.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/Rules.tsx</code> create and edit actions consistently route through <code>TemplatesSelectorModal</code>, so DQ-4.9 behavior applies to both new and existing rules.</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Focused frontend test (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-ui &amp;&amp; npm run test -- src/components/rules/useRulesScope.test.ts</code></li>
+</ul>
+</li>
+<li class="">Latest run (2026-03-26):<!-- -->
+<ul>
+<li class="">Result: <code>1 passed test file, 4 passed tests</code></li>
+</ul>
+</li>
+<li class="">Frontend build verification:<!-- -->
+<ul>
+<li class=""><code>cd dq-ui &amp;&amp; npm run build</code></li>
+<li class="">Result: build completed successfully (<code>vite build</code> passed)</li>
+</ul>
+</li>
+</ul>
+<p>UX notes:</p>
+<ul>
+<li class="">Selecting a check-type pre-fills the DAMA dimension automatically.</li>
+<li class="">If the user switches to advanced mode, the generated expression is copied in as a starting point.</li>
+<li class="">Validation errors on params are shown inline per field.</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-410--compiler-integration">DQ-4.10 — Compiler Integration<a href="#dq-410--compiler-integration" class="hash-link" aria-label="Direct link to DQ-4.10 — Compiler Integration" title="Direct link to DQ-4.10 — Compiler Integration" translate="no">​</a></h2>
+<p>Status: [x] Complete</p>
+<p>Goal: Typed rule parameters must produce an expression that passes the DQ-7 compiler without manual edits.</p>
+<p>Completion update (2026-03-26):</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/app/api/v1/endpoints/rules.py</code> now treats <code>generated=false</code> as an explicit manual override signal.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Create/update now auto-generate <code>expression</code> from <code>checkType</code> / <code>checkTypeParams</code> unless manual override is explicitly requested.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/components/rules/useRuleTemplateFlow.ts</code> now sends <code>generated: !useAdvancedExpression</code> so advanced mode preserves raw expression overrides.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-ui/src/contexts/RuleContext.tsx</code> now forwards <code>generated</code> in update payloads.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>dq-api/fastapi/tests/api/test_rules_endpoint_focus.py</code> now covers:<!-- -->
+<ul>
+<li class="">create + check-type generation path,</li>
+<li class="">update + check-type generation path,</li>
+<li class="">create + manual override preservation (<code>generated=false</code>),</li>
+<li class="">update + manual override preservation (<code>generated=false</code>),</li>
+<li class="">create → validate round-trip for typed check params with zero validation errors.</li>
+</ul>
+</li>
+</ul>
+<p>Validation / unit test evidence:</p>
+<ul>
+<li class="">Focused backend endpoint tests (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest --no-cov tests/api/test_rules_endpoint_focus.py -q</code></li>
+<li class="">Latest run (2026-03-26): <code>17 passed in 0.45s</code></li>
+</ul>
+</li>
+<li class="">Focused frontend regression check (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-ui &amp;&amp; npm run test -- src/components/rules/useRulesScope.test.ts</code></li>
+<li class="">Latest run (2026-03-26): <code>1 passed test file, 4 passed tests</code></li>
+</ul>
+</li>
+</ul>
+<p>Acceptance: <code>POST /api/rulebuilder/v1/rules</code> with <code>checkType</code> + <code>checkTypeParams</code> now yields compiler-valid expressions by default, and explicit advanced/manual expressions are preserved when <code>generated=false</code>; <code>POST /api/rulebuilder/v1/rules/&amp;#123;id&amp;#125;/validate</code> completes with no errors for the typed round-trip test.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-411--join-consistency-check-including-actuality-date-alignment">DQ-4.11 — Join Consistency Check (Including Actuality-Date Alignment)<a href="#dq-411--join-consistency-check-including-actuality-date-alignment" class="hash-link" aria-label="Direct link to DQ-4.11 — Join Consistency Check (Including Actuality-Date Alignment)" title="Direct link to DQ-4.11 — Join Consistency Check (Including Actuality-Date Alignment)" translate="no">​</a></h2>
+<p>Status: [~] In progress</p>
+<p>Goal: Ensure joined data objects represent the same business truth by validating both value-level consistency and time alignment.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="scope-definition">Scope Definition<a href="#scope-definition" class="hash-link" aria-label="Direct link to Scope Definition" title="Direct link to Scope Definition" translate="no">​</a></h3>
+<p>Proposed check-type: <code>JOIN_CONSISTENCY</code></p>
+<p>Core checks:</p>
+<ul>
+<li class="">Joined key mappings are valid and executable.</li>
+<li class="">Compared attribute pairs are equal (or equivalent after normalization/tolerance rules).</li>
+<li class="">Actuality dates between left/right joined objects are the same, or &quot;similar&quot; within tolerance derived from the producer-consumer data delivery contract.</li>
+</ul>
+<p>Minimum parameter contract (MVP):</p>
+<ul>
+<li class=""><code>leftDataObjectVersionId</code></li>
+<li class=""><code>rightDataObjectVersionId</code></li>
+<li class=""><code>joinKeys[]</code> (array of <code>{ leftAttribute, rightAttribute }</code>)</li>
+<li class=""><code>comparisons[]</code> (array of <code>{ leftAttribute, rightAttribute, mode }</code>)</li>
+<li class=""><code>actualityDate</code>:<!-- -->
+<ul>
+<li class=""><code>leftAttribute</code></li>
+<li class=""><code>rightAttribute</code></li>
+<li class=""><code>toleranceSource</code> (<code>DELIVERY_CONTRACT</code>)</li>
+<li class=""><code>contractId</code> (or delivery binding reference)</li>
+<li class=""><code>resolvedToleranceValue</code> <em>(read-only, resolved at validation/execution time)</em></li>
+<li class=""><code>resolvedToleranceUnit</code> (<code>minutes</code> | <code>hours</code> | <code>days</code>) <em>(read-only)</em></li>
+<li class=""><code>overrideToleranceValue?</code> <em>(optional, only when contract policy allows override)</em></li>
+<li class=""><code>overrideToleranceUnit?</code> <em>(optional, only when contract policy allows override)</em></li>
+</ul>
+</li>
+<li class=""><code>minMatchRate</code> (0-100)</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="semantics">Semantics<a href="#semantics" class="hash-link" aria-label="Direct link to Semantics" title="Direct link to Semantics" translate="no">​</a></h3>
+<p>Row outcome classification:</p>
+<ul>
+<li class=""><code>match</code>: all configured comparisons pass AND actuality-date delta is within tolerance.</li>
+<li class=""><code>mismatch</code>: one or more comparisons fail OR actuality-date delta exceeds tolerance.</li>
+<li class=""><code>out_of_scope</code>: join key missing/null according to null policy (tracked separately).</li>
+</ul>
+<p>Actuality-date rule:</p>
+<ul>
+<li class="">&quot;Same&quot; means absolute timestamp difference equals 0.</li>
+<li class="">&quot;Similar&quot; means absolute timestamp difference is less than or equal to the resolved contract tolerance.</li>
+<li class="">Contract tolerance is authoritative; user-provided overrides are optional and only valid when explicitly allowed by contract policy.</li>
+<li class="">If no delivery contract tolerance is available yet, rule save/activation must fail with actionable validation rather than silently defaulting.</li>
+</ul>
+<p>Pass condition:</p>
+<ul>
+<li class=""><code>match_rate = match_count / eligible_joined_rows</code></li>
+<li class="">Rule passes when <code>match_rate &gt;= minMatchRate</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="implementation-plan">Implementation Plan<a href="#implementation-plan" class="hash-link" aria-label="Direct link to Implementation Plan" title="Direct link to Implementation Plan" translate="no">​</a></h3>
+<p>Phase 0 — Delivery contract dependency (prerequisite):</p>
+<ul>
+<li class="">Implement/read delivery contract tolerance policy between producer and consumer (actuality-date SLA window).</li>
+<li class="">Provide a resolver API/service that returns effective tolerance for a given left/right object relationship.</li>
+<li class="">Define policy flags:<!-- -->
+<ul>
+<li class=""><code>overrideAllowed</code> (boolean)</li>
+<li class=""><code>maxOverrideTolerance</code> (optional bound)</li>
+</ul>
+</li>
+</ul>
+<p>Phase 1 — Contract and validation:</p>
+<ul>
+<li class="">Add <code>JOIN_CONSISTENCY</code> to rule-check type taxonomy and frontend type unions.</li>
+<li class="">Add backend schema model for <code>JoinConsistencyParams</code>.</li>
+<li class="">Validate:<!-- -->
+<ul>
+<li class="">referenced object versions exist,</li>
+<li class="">join/comparison attributes exist in selected versions,</li>
+<li class="">actuality attributes are date/timestamp compatible,</li>
+<li class="">referenced delivery contract/binding exists,</li>
+<li class="">effective tolerance can be resolved from contract,</li>
+<li class="">user overrides are rejected when <code>overrideAllowed=false</code>,</li>
+<li class="">user overrides do not exceed contract max override bounds,</li>
+<li class=""><code>minMatchRate</code> range is valid.</li>
+</ul>
+</li>
+</ul>
+<p>Current implementation status:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>JOIN_CONSISTENCY</code> added to backend rule-check taxonomy.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Backend schema model added for <code>JoinConsistencyParams</code>, nested join/comparison mappings, and actuality-date contract metadata.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Initial validation added for paired tolerance fields and <code>minMatchRate</code> bounds.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Catalog-backed validation added for left/right version IDs, referenced attributes, and actuality-date type compatibility.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Delivery-contract tolerance now resolves from OpenMetadata data contracts by <code>contractId</code>, with ODCS-origin contract metadata read from the OpenMetadata contract entity.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->OpenMetadata contract lookups are cached in Redis with admin-configurable TTL (<code>openMetadataContractCacheTtlSeconds</code>); when Redis is unavailable, lookup continues without cache.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->JOIN_CONSISTENCY contract resolution is enforced at dataset level; left/right object versions must resolve to the same dataset scope.</li>
+<li class="">[~] Override policy enforcement is wired, but current ODCS contracts do not yet expose explicit override-enabled policy metadata.</li>
+</ul>
+<p>Phase 2 — Expression/generator integration:</p>
+<ul>
+<li class="">Extend check-type expression generator with deterministic <code>JOIN_CONSISTENCY</code> expression output.</li>
+<li class="">Include explicit actuality-date comparison in generated expression (exact or contract-resolved tolerance window).</li>
+<li class="">Preserve manual override behavior from DQ-4.10 (<code>generated=false</code>).</li>
+</ul>
+<p>Current implementation status:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Deterministic <code>JOIN_CONSISTENCY</code> generator added.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Generator now fails fast when contract tolerance has not been resolved yet.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Generated expression includes join keys, comparison clauses, and actuality-date tolerance enforcement.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Generator output is now constrained to the current DQ-7 compiler-supported expression subset.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Endpoint create/update flows populate resolved contract tolerance before expression generation.</li>
+</ul>
+<p>Phase 3 — API + persistence wiring:</p>
+<ul>
+<li class="">Ensure create/update/validate endpoints accept and round-trip <code>JOIN_CONSISTENCY</code> params.</li>
+<li class="">Confirm payloads are preserved in <code>checkType</code> / <code>checkTypeParams</code> and exposed via view models.</li>
+</ul>
+<p>Current implementation status:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Create/update endpoints accept <code>JOIN_CONSISTENCY</code> params and normalize them before persistence.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Persisted payload includes resolved tolerance metadata derived from the referenced contract.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Focused create-to-validate round-trip proof added for backend endpoint flow.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>GET /api/rulebuilder/v1/rules/&amp;#123;id&amp;#125;</code> now exposes <code>checkType</code> / <code>checkTypeParams</code> in <code>RuleView</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>GET /api/rulebuilder/v1/rules</code> now normalizes legacy <code>check_type</code> / <code>check_type_params</code> payloads to camel-case contract fields (<code>checkType</code>, <code>checkTypeParams</code>) while preserving existing keys.</li>
+</ul>
+<p>Validation / test evidence:</p>
+<ul>
+<li class="">Focused backend endpoint tests (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; ../../venv/bin/python -m pytest --no-cov tests/api/test_rules_endpoint_focus.py -k &quot;list_rules_normalizes_check_type_contract_fields or get_rule_exposes_check_type_fields_in_rule_view&quot; -q</code></li>
+</ul>
+</li>
+<li class="">Latest run (2026-03-28):<!-- -->
+<ul>
+<li class="">Result: <code>2 passed, 24 deselected in 0.57s</code></li>
+</ul>
+</li>
+</ul>
+<p>Phase 4 — UI authoring flow:</p>
+<ul>
+<li class="">Add <code>JoinConsistencyForm</code> in check-type form suite.</li>
+<li class="">Include guided selectors for:<!-- -->
+<ul>
+<li class="">left/right object versions,</li>
+<li class="">join key mappings,</li>
+<li class="">attribute comparisons,</li>
+<li class="">actuality-date pair + contract binding.</li>
+</ul>
+</li>
+<li class="">Show resolved contract tolerance as read-only by default.</li>
+<li class="">If policy allows, render bounded override controls with contract limits shown inline.</li>
+<li class="">Add field-level error messages for invalid mappings, time compatibility issues, and contract-policy violations.</li>
+</ul>
+<p>Detailed implementation checklist (Phase 4):</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add frontend type support for <code>JOIN_CONSISTENCY</code> (<code>RuleCheckType</code>, params model, nested actuality/join/comparison payloads).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Implement <code>JoinConsistencyForm</code> component with:<!-- -->
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->left/right data object version ID inputs</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->dynamic join-key mapping rows</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->dynamic comparison mapping rows with mode selector</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->actuality-date + contract ID capture block</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->min-match-rate input</li>
+</ul>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Wire <code>JoinConsistencyForm</code> into <code>CheckTypeForm</code> dispatcher.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add <code>JOIN_CONSISTENCY</code> to check-type selector options in wizard Step 3.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add default parameter builder for <code>JOIN_CONSISTENCY</code> in template flow.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add Step 3 validation rules for required join-consistency fields.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add summary-level user-friendly rendering for join-consistency config.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add generated-expression preview fallback for join-consistency in advanced mode.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Replace version ID/attribute free-text inputs with catalog-backed guided selectors.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Surface backend-resolved tolerance and contract policy (read-only + override affordance when allowed).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add inline field-level surfacing for backend validation errors (contract scope mismatch, non-temporal actuality attrs, override policy violation).</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Add focused frontend tests for join-consistency form interactions and wizard validation.</li>
+</ul>
+<p>Current implementation status:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <code>JoinConsistencyForm</code> now uses catalog-backed selectors for version and attribute mapping.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Policy-aware contract tolerance panel and bounded override controls are implemented.</li>
+</ul>
+<p>Phase 5 — Testing and smoke coverage:</p>
+<ul>
+<li class="">Unit tests for param validation and expression generation (including tolerance boundary cases).</li>
+<li class="">API endpoint tests for create/update/validate round-trip.</li>
+<li class="">Smoke test covering:<!-- -->
+<ul>
+<li class="">exact actuality-date match,</li>
+<li class="">contract-resolved allowed tolerance,</li>
+<li class="">override allowed + within bound,</li>
+<li class="">override rejected by contract policy,</li>
+<li class="">over-tolerance mismatch.</li>
+</ul>
+</li>
+</ul>
+<p>Current implementation status:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Focused backend unit tests added for parameter validation and expression generation.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Focused API round-trip tests added for create, update validation failure, and create-to-validate success.</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""> <!-- -->Smoke coverage completed for contract-policy override matrix and dataset-scope/contract-resolution failure paths.</li>
+</ul>
+<p>Validation / smoke test evidence:</p>
+<ul>
+<li class="">Focused JOIN_CONSISTENCY smoke matrix (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest --no-cov tests/api/test_rules_endpoint_focus.py -k &quot;join_consistency and (override or cross_dataset or lookup_error or resolves_contract_tolerance or round_trips_into_validate or rejects_non_temporal)&quot; -q</code></li>
+</ul>
+</li>
+<li class="">Latest run (2026-03-28):<!-- -->
+<ul>
+<li class="">Result: <code>8 passed, 21 deselected in 0.58s</code></li>
+</ul>
+</li>
+<li class="">Full focused endpoint file sanity run (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; /Users/jacbeekers/gitrepos/dq-rulebuilder/venv/bin/python -m pytest --no-cov tests/api/test_rules_endpoint_focus.py -q</code></li>
+</ul>
+</li>
+<li class="">Latest run (2026-03-28):<!-- -->
+<ul>
+<li class="">Result: <code>29 passed in 0.35s</code></li>
+</ul>
+</li>
+</ul>
+<p>Phase 6 — Reporting and diagnostics:</p>
+<ul>
+<li class="">Expose metrics: <code>matchCount</code>, <code>mismatchCount</code>, <code>eligibleJoinedRows</code>, <code>matchRate</code>, <code>actualityDateMismatchCount</code>.</li>
+<li class="">Include diagnostics that indicate whether failures are value mismatches or actuality-date drift.</li>
+</ul>
+<p>Status: [x] Complete</p>
+<p>Goal: Surface detailed execution metrics and failure diagnostics for JOIN_CONSISTENCY rules so users understand why rules passed/failed and to support auditing and root-cause analysis.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="scope-definition-1">Scope Definition<a href="#scope-definition-1" class="hash-link" aria-label="Direct link to Scope Definition" title="Direct link to Scope Definition" translate="no">​</a></h3>
+<p>Metrics to capture:</p>
+<ul>
+<li class=""><code>matchCount</code> (integer) — rows where all comparisons AND actuality-date check passed</li>
+<li class=""><code>mismatchCount</code> (integer) — rows where at least one comparison OR actuality-date check failed</li>
+<li class=""><code>eligibleJoinedRows</code> (integer) — total rows produced by the join (used in denominator for match rate)</li>
+<li class=""><code>matchRate</code> (float 0-100) — percentage: <code>(matchCount / eligibleJoinedRows) * 100</code></li>
+<li class=""><code>actualityDateMismatchCount</code> (integer) — rows where actuality-date delta exceeded tolerance (subset of <code>mismatchCount</code>)</li>
+</ul>
+<p>Diagnostics to classify:</p>
+<ul>
+<li class=""><code>value_mismatch</code> — one or more configured comparison attributes differ between left/right</li>
+<li class=""><code>actuality_date_drift</code> — actuality-date delta exceeds contract tolerance</li>
+<li class=""><code>null_or_missing_join_key</code> — join key is null/missing; row excluded from eligible set</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="implementation-plan-1">Implementation Plan<a href="#implementation-plan-1" class="hash-link" aria-label="Direct link to Implementation Plan" title="Direct link to Implementation Plan" translate="no">​</a></h3>
+<p>Phase 6.1 — Domain and schema models:</p>
+<ul>
+<li class="">Add <code>JoinConsistencyExecutionMetrics</code> dataclass with fields: <code>matchCount</code>, <code>mismatchCount</code>, <code>eligibleJoinedRows</code>, <code>matchRate</code>, <code>actualityDateMismatchCount</code></li>
+<li class="">Add <code>FailureDiagnostic</code> dataclass with fields: <code>failureClass</code> (enum: <code>value_mismatch</code>, <code>actuality_date_drift</code>, <code>null_or_missing_join_key</code>), <code>rowIdentifier</code> (optional), <code>details</code> (string)</li>
+<li class="">Add <code>JoinConsistencyExecutionResult</code> combining metrics + array of <code>FailureDiagnostic</code> items</li>
+<li class="">Update rule execution result schema to include metrics + diagnostics</li>
+</ul>
+<p>Files to add / change:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-api/fastapi/app/domain/entities/execution_metrics.py</code> <em>(new)</em> — <code>JoinConsistencyExecutionMetrics</code>, <code>FailureDiagnostic</code>, <code>JoinConsistencyExecutionResult</code></li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-api/fastapi/app/api/v1/schemas/execution_result.py</code> — extend <code>RuleExecutionResult</code> with <code>metrics</code> field (union type) and <code>diagnostics</code> field</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-db/init/01_schema.sql</code> — extend <code>rule_execution_results</code> table with <code>metrics JSONB</code>, <code>diagnostics JSONB</code> columns</li>
+</ul>
+<p>Phase 6.2 — Metrics and diagnostics calculation:</p>
+<ul>
+<li class="">Implement metrics calculation during rule execution (post-join, post-comparison, post-tolerance check)</li>
+<li class="">Implement diagnostics classifier that produces failure reason code for each failed row</li>
+<li class="">Add diagnostics aggregation (limit to top N failures per class, or sample distribution)</li>
+</ul>
+<p>Files to add / change:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-api/fastapi/app/application/services/rule_execution_service.py</code> — wire metrics/diagnostics calculation into execution flow</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-api/fastapi/app/application/services/join_consistency_metrics_calculator.py</code> <em>(new)</em> — calculate metrics and classify diagnostics</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-api/fastapi/tests/application/services/test_join_consistency_metrics_calculator.py</code> <em>(new)</em> — unit tests for metric calculation and diagnostic classification</li>
+</ul>
+<p>Phase 6.3 — API exposure:</p>
+<ul>
+<li class="">Ensure create/update/validate endpoints return metrics + diagnostics in response</li>
+<li class="">Add diagnostics summary to rule validation failure reason (user-facing string derived from failure classes)</li>
+</ul>
+<p>Files to add / change:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-api/fastapi/app/api/v1/endpoints/rules.py</code> — update <code>POST /api/rulebuilder/v1/rules/&amp;#123;id&amp;#125;/validate</code> response schema to include metrics + diagnostics</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-api/fastapi/tests/api/test_rules_endpoint_focus.py</code> — add tests asserting metrics + diagnostics are returned and correct values</li>
+</ul>
+<p>Phase 6.4 — Frontend rendering:</p>
+<ul>
+<li class="">Add metrics display widget (match rate %, counts)</li>
+<li class="">Add diagnostics collapsible panel showing failure categories and samples</li>
+<li class="">Wire into TestResultsVisualization or similar component</li>
+</ul>
+<p>Files to add / change:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-ui/src/components/ExecutionMetricsPanel.tsx</code> <em>(new)</em> — render metrics summary</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-ui/src/components/ExecutionDiagnosticsPanel.tsx</code> <em>(new)</em> — render failure classifications with sample details</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-ui/src/components/TestResultsVisualization.tsx</code> — integrate metrics/diagnostics panels into result display</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-ui/src/types/execution.ts</code> — add <code>ExecutionMetrics</code>, <code>FailureDiagnostic</code>, <code>ExecutionDiagnosticsResult</code> types</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-ui/src/components/__tests__/ExecutionMetricsPanel.test.tsx</code> <em>(new)</em></li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>dq-ui/src/components/__tests__/ExecutionDiagnosticsPanel.test.tsx</code> <em>(new)</em></li>
+</ul>
+<p>Phase 6.5 — Testing and validation:</p>
+<ul>
+<li class="">Unit tests for metric calculation (exact match, partial mismatch, all mismatches, actuality-date only failures)</li>
+<li class="">Unit tests for diagnostics classification and aggregation</li>
+<li class="">API integration tests for metrics/diagnostics round-trip</li>
+<li class="">Frontend tests for metrics/diagnostics rendering</li>
+</ul>
+<p>Current implementation status:</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Domain models created</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Schema migrations applied</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Metrics calculator implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Diagnostics classifier implemented</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->API endpoints updated to return metrics/diagnostics</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Frontend components created and wired</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Unit tests added for calculator</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->API integration tests added</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Frontend component tests added</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Smoke test validates end-to-end metrics/diagnostics for JOIN_CONSISTENCY</li>
+</ul>
+<p>Validation / test evidence:</p>
+<ul>
+<li class="">Metrics calculator unit tests (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; ../../venv/bin/python -m pytest --no-cov tests/application/services/test_join_consistency_metrics_calculator.py -q</code></li>
+<li class="">Target result: <code>TBD passed</code></li>
+</ul>
+</li>
+<li class="">API metrics/diagnostics integration tests (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; ../../venv/bin/python -m pytest --no-cov tests/api/test_rules_endpoint_focus.py -k &quot;join_consistency and (metrics or diagnostics)&quot; -q</code></li>
+<li class="">Target result: <code>TBD passed</code></li>
+</ul>
+</li>
+<li class="">Frontend metrics/diagnostics render tests (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-ui &amp;&amp; npm run test -- src/components/__tests__/ExecutionMetricsPanel.test.tsx src/components/__tests__/ExecutionDiagnosticsPanel.test.tsx</code></li>
+<li class="">Target result: <code>TBD passed</code></li>
+</ul>
+</li>
+<li class="">Smoke end-to-end (repo root):<!-- -->
+<ul>
+<li class=""><code>cd dq-api/fastapi &amp;&amp; ../../venv/bin/python -m pytest --no-cov tests/api/test_rules_endpoint_focus.py -k &quot;join_consistency and (validate or execute)&quot; -q</code></li>
+<li class="">Target result: <code>TBD passed, metrics/diagnostics populated in result</code></li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="acceptance-criteria">Acceptance Criteria<a href="#acceptance-criteria" class="hash-link" aria-label="Direct link to Acceptance Criteria" title="Direct link to Acceptance Criteria" translate="no">​</a></h3>
+<ul>
+<li class="">Metrics are calculated correctly: match/mismatch counts, eligible row count, and derived match rate</li>
+<li class="">Diagnostics clearly classify failure reasons (value mismatch vs actuality-date drift)</li>
+<li class="">Null/missing join keys are tracked separately and excluded from denominator</li>
+<li class="">API returns metrics + diagnostics in execution result payload</li>
+<li class="">Frontend displays metrics summary and diagnostics categorization</li>
+<li class="">All calculations are validated via unit and integration tests</li>
+</ul>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="audit-and-evidence-requirements">Audit and Evidence Requirements<a href="#audit-and-evidence-requirements" class="hash-link" aria-label="Direct link to Audit and Evidence Requirements" title="Direct link to Audit and Evidence Requirements" translate="no">​</a></h3>
+<p>The items in this section are follow-on governance and evidence enhancements. They are not required to consider DQ-4.11 functionally complete for the DQ-4 rule-check taxonomy milestone.</p>
+<p>Audit scope (must be captured and queryable):</p>
+<ul>
+<li class="">Rule governance events:<!-- -->
+<ul>
+<li class="">rule created/updated/activated/deactivated,</li>
+<li class="">actor (<code>who</code>), timestamp (<code>when</code>), and changed fields (<code>what</code>).</li>
+</ul>
+</li>
+<li class="">Delivery contract resolution events:<!-- -->
+<ul>
+<li class="">contract/binding identifier,</li>
+<li class="">contract version used,</li>
+<li class="">resolved tolerance value/unit,</li>
+<li class="">resolution timestamp.</li>
+</ul>
+</li>
+<li class="">Policy enforcement events:<!-- -->
+<ul>
+<li class="">override requested (yes/no),</li>
+<li class="">override allowed by policy (yes/no),</li>
+<li class="">override accepted/rejected,</li>
+<li class="">rejection reason code.</li>
+</ul>
+</li>
+<li class="">Execution evidence events:<!-- -->
+<ul>
+<li class="">left/right data object version IDs,</li>
+<li class="">join key mapping fingerprint,</li>
+<li class="">match/mismatch counts,</li>
+<li class="">actuality-date mismatch count,</li>
+<li class="">effective tolerance used at runtime.</li>
+</ul>
+</li>
+</ul>
+<p>Evidence retention and traceability:</p>
+<ul>
+<li class="">Every execution record must link to:<!-- -->
+<ul>
+<li class="">rule version ID,</li>
+<li class="">delivery contract version,</li>
+<li class="">resolved tolerance decision.</li>
+</ul>
+</li>
+<li class="">Audit trail must support reconstruction of why a run passed/failed without relying on mutable runtime state.</li>
+<li class="">Evidence payloads should separate failure classes explicitly:<!-- -->
+<ul>
+<li class="">value mismatch,</li>
+<li class="">actuality-date drift,</li>
+<li class="">policy/contract validation failure.</li>
+</ul>
+</li>
+</ul>
+<p>Governance validation (definition of done for auditability):</p>
+<ul>
+<li class="">API tests assert audit fields are persisted for create/update/execute flows.</li>
+<li class="">Contract-policy tests assert accepted/rejected overrides produce distinct audited reason codes.</li>
+<li class="">Reporting/API contract exposes contract version and effective tolerance used for each run.</li>
+<li class="">Smoke test verifies end-to-end evidence generation for:<!-- -->
+<ul>
+<li class="">contract-resolved tolerance pass,</li>
+<li class="">over-tolerance fail,</li>
+<li class="">override-rejected fail.</li>
+</ul>
+</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="audit-event-schema-draft">Audit Event Schema (Draft)<a href="#audit-event-schema-draft" class="hash-link" aria-label="Direct link to Audit Event Schema (Draft)" title="Direct link to Audit Event Schema (Draft)" translate="no">​</a></h4>
+<table><thead><tr><th>Event</th><th>Required fields</th><th>Notes</th></tr></thead><tbody><tr><td><code>dq.join_consistency.rule_saved</code></td><td><code>eventId</code>, <code>ts</code>, <code>actorId</code>, <code>ruleId</code>, <code>ruleVersionId</code>, <code>checkType</code>, <code>changedFields[]</code></td><td>Emitted on create/update of <code>JOIN_CONSISTENCY</code> rules.</td></tr><tr><td><code>dq.join_consistency.contract_resolved</code></td><td><code>eventId</code>, <code>ts</code>, <code>ruleId</code>, <code>ruleVersionId</code>, <code>contractId</code>, <code>contractVersion</code>, <code>resolvedToleranceValue</code>, <code>resolvedToleranceUnit</code>, <code>overrideRequested</code>, <code>overrideApplied</code></td><td>Captures authoritative tolerance decision.</td></tr><tr><td><code>dq.join_consistency.policy_decision</code></td><td><code>eventId</code>, <code>ts</code>, <code>ruleId</code>, <code>ruleVersionId</code>, <code>overrideAllowed</code>, <code>decision</code> (<code>accepted</code>/<code>rejected</code>), <code>reasonCode</code></td><td>Mandatory when override is requested or denied.</td></tr><tr><td><code>dq.join_consistency.execution_completed</code></td><td><code>eventId</code>, <code>ts</code>, <code>runId</code>, <code>ruleId</code>, <code>ruleVersionId</code>, <code>leftDataObjectVersionId</code>, <code>rightDataObjectVersionId</code>, <code>matchCount</code>, <code>mismatchCount</code>, <code>actualityDateMismatchCount</code>, <code>effectiveToleranceValue</code>, <code>effectiveToleranceUnit</code>, <code>contractVersion</code></td><td>Main evidence record used in reports and audits.</td></tr><tr><td><code>dq.join_consistency.execution_failed</code></td><td><code>eventId</code>, <code>ts</code>, <code>runId</code>, <code>ruleId</code>, <code>ruleVersionId</code>, <code>failureClass</code> (<code>value_mismatch</code>/<code>actuality_date_drift</code>/<code>contract_policy_violation</code>), <code>reasonCode</code>, <code>contractVersion</code></td><td>Must classify failures for governance and RCA.</td></tr></tbody></table>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="proof-tracking-checklist">Proof Tracking Checklist<a href="#proof-tracking-checklist" class="hash-link" aria-label="Direct link to Proof Tracking Checklist" title="Direct link to Proof Tracking Checklist" translate="no">​</a></h4>
+<p>Use this checklist to track auditability evidence as implementation lands.</p>
+<ul class="contains-task-list containsTaskList_mC6p">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.A1</code> Rule create/update audit event persisted (<code>dq.join_consistency.rule_saved</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.A2</code> Contract resolution audit event persisted (<code>dq.join_consistency.contract_resolved</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.A3</code> Policy decision audit event persisted (<code>dq.join_consistency.policy_decision</code>)</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.A4</code> Execution completed/failed audit events persisted with failure classes</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.A5</code> API contract exposes <code>contractVersion</code> + effective tolerance per run</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.T1</code> Unit-test proof added for contract resolution and policy enforcement</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.T2</code> Unit-test proof added for event payload shape and required fields</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.T3</code> Integration/API proof added for end-to-end audit persistence</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.T4</code> Smoke-test proof added for pass/fail/override-rejected evidence flows</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>DQ-4.11.T5</code> Evidence links added (test command, result summary, artifact path)</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="evidence-log">Evidence Log<a href="#evidence-log" class="hash-link" aria-label="Direct link to Evidence Log" title="Direct link to Evidence Log" translate="no">​</a></h4>
+<p>Use this table to record implementation proof as each checklist item is completed.</p>
+<table><thead><tr><th>Item</th><th>Command / Validation Step</th><th>Result Summary</th><th>Artifact / Evidence Path</th><th>Date</th></tr></thead><tbody><tr><td><code>DQ-4.11.A1</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.A2</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.A3</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.A4</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.A5</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.T1</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.T2</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.T3</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.T4</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr><tr><td><code>DQ-4.11.T5</code></td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr></tbody></table>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="acceptance-criteria-1">Acceptance Criteria<a href="#acceptance-criteria-1" class="hash-link" aria-label="Direct link to Acceptance Criteria" title="Direct link to Acceptance Criteria" translate="no">​</a></h3>
+<ul>
+<li class="">User can define join consistency checks without writing raw expressions.</li>
+<li class="">Generated expression is deterministic and compiler-valid.</li>
+<li class="">Actuality dates are explicitly enforced as same or within contract-governed tolerance.</li>
+<li class="">Validation rejects incompatible actuality date fields, missing contract tolerance, and policy-invalid overrides.</li>
+<li class="">Test results clearly separate value mismatches from actuality-date mismatches.</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="progress-summary">Progress Summary<a href="#progress-summary" class="hash-link" aria-label="Direct link to Progress Summary" title="Direct link to Progress Summary" translate="no">​</a></h2>
+<p>The milestone table below tracks the implemented/current executable scope captured in
+this implementation note, including the extended taxonomy introduced for <code>CORRECT</code>,
+<code>PRESENT</code>, <code>RECONCILE</code>, <code>PLAUSIBLE</code>, and <code>TRANSFER_MATCH</code>.</p>
+<table><thead><tr><th>Work item</th><th>Status</th><th>Milestone</th></tr></thead><tbody><tr><td>DQ-4.1 RuleCheckType taxonomy</td><td>[x] Complete</td><td>A</td></tr><tr><td>DQ-4.2 Threshold / completeness</td><td>[x] Complete</td><td>B</td></tr><tr><td>DQ-4.3 Regex / pattern</td><td>[x] Complete</td><td>B</td></tr><tr><td>DQ-4.4 Range checks</td><td>[x] Complete</td><td>B</td></tr><tr><td>DQ-4.5 Allowlist / blocklist</td><td>[x] Complete</td><td>B</td></tr><tr><td>DQ-4.6 Uniqueness</td><td>[x] Complete</td><td>C</td></tr><tr><td>DQ-4.7 Referential integrity</td><td>[x] Complete</td><td>C</td></tr><tr><td>DQ-4.8 Timeliness</td><td>[x] Complete</td><td>C</td></tr><tr><td>DQ-4.9 UI check-type builder</td><td>[x] Complete</td><td>D</td></tr><tr><td>DQ-4.10 Compiler integration</td><td>[x] Complete</td><td>D</td></tr><tr><td>DQ-4.11 Join consistency + actuality date alignment</td><td>[x] Complete</td><td>E</td></tr></tbody></table></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/implementation-details/DQ_3C_DATA_ASSETS_IMPLEMENTATION_DETAILS/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">DQ-3c Data Assets - Implementation Details</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/implementation-details/DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">DQ-7.3 Rule Compiler Implementation Progress</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#coverage-delta-2026-03-28" class="table-of-contents__link toc-highlight">Coverage Delta (2026-03-28)</a></li><li><a href="#scope" class="table-of-contents__link toc-highlight">Scope</a></li><li><a href="#gx-core-coverage-matrix-2026-04-20" class="table-of-contents__link toc-highlight">GX Core Coverage Matrix (2026-04-20)</a></li><li><a href="#dq-41--define-rulechecktype-taxonomy" class="table-of-contents__link toc-highlight">DQ-4.1 — Define RuleCheckType Taxonomy</a><ul><li><a href="#backend" class="table-of-contents__link toc-highlight">Backend</a></li><li><a href="#database" class="table-of-contents__link toc-highlight">Database</a></li><li><a href="#frontend" class="table-of-contents__link toc-highlight">Frontend</a></li></ul></li><li><a href="#dq-42--threshold--completeness-checks" class="table-of-contents__link toc-highlight">DQ-4.2 — Threshold / Completeness Checks</a></li><li><a href="#dq-43--pattern--regex-checks" class="table-of-contents__link toc-highlight">DQ-4.3 — Pattern / Regex Checks</a></li><li><a href="#dq-44--range-checks" class="table-of-contents__link toc-highlight">DQ-4.4 — Range Checks</a></li><li><a href="#dq-45--allowlist-and-blocklist-checks" class="table-of-contents__link toc-highlight">DQ-4.5 — Allowlist and Blocklist Checks</a></li><li><a href="#dq-46--uniqueness--duplicate-detection-checks" class="table-of-contents__link toc-highlight">DQ-4.6 — Uniqueness / Duplicate-Detection Checks</a></li><li><a href="#dq-47--referential-integrity-checks" class="table-of-contents__link toc-highlight">DQ-4.7 — Referential Integrity Checks</a></li><li><a href="#dq-48--timeliness-checks" class="table-of-contents__link toc-highlight">DQ-4.8 — Timeliness Checks</a></li><li><a href="#dq-49--ui-structured-check-type-parameter-builder" class="table-of-contents__link toc-highlight">DQ-4.9 — UI: Structured Check-Type Parameter Builder</a></li><li><a href="#dq-410--compiler-integration" class="table-of-contents__link toc-highlight">DQ-4.10 — Compiler Integration</a></li><li><a href="#dq-411--join-consistency-check-including-actuality-date-alignment" class="table-of-contents__link toc-highlight">DQ-4.11 — Join Consistency Check (Including Actuality-Date Alignment)</a><ul><li><a href="#scope-definition" class="table-of-contents__link toc-highlight">Scope Definition</a></li><li><a href="#semantics" class="table-of-contents__link toc-highlight">Semantics</a></li><li><a href="#implementation-plan" class="table-of-contents__link toc-highlight">Implementation Plan</a></li><li><a href="#scope-definition-1" class="table-of-contents__link toc-highlight">Scope Definition</a></li><li><a href="#implementation-plan-1" class="table-of-contents__link toc-highlight">Implementation Plan</a></li><li><a href="#acceptance-criteria" class="table-of-contents__link toc-highlight">Acceptance Criteria</a></li><li><a href="#audit-and-evidence-requirements" class="table-of-contents__link toc-highlight">Audit and Evidence Requirements</a></li><li><a href="#acceptance-criteria-1" class="table-of-contents__link toc-highlight">Acceptance Criteria</a></li></ul></li><li><a href="#progress-summary" class="table-of-contents__link toc-highlight">Progress Summary</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/">Overview</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/feature-plans/">Feature Plans</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Reference</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/user-manuals/">User manuals</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/api-reference/">API reference</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/technical-references/">Technical references</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright 2026 dq-made-easy maintainers.</div></div></div></footer></div>
+</body>
+</html>

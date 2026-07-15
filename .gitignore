@@ -15,6 +15,7 @@ dq-keycloak/jaccloud-realm.json
 
 ## Build / output
 dist/
+!dq-ui/dist/
 
 build/
 .vite/

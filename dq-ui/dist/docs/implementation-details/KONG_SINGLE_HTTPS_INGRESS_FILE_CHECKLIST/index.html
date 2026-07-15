@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.10.2">
+<title data-rh="true">Kong Single HTTPS Ingress - File Checklist | DQ Made Easy Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="http://127.0.0.1/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Kong Single HTTPS Ingress - File Checklist | DQ Made Easy Docs"><meta data-rh="true" name="description" content="Superseded note"><meta data-rh="true" property="og:description" content="Superseded note"><link data-rh="true" rel="icon" href="/docs/img/favicon.svg"><link data-rh="true" rel="canonical" href="http://127.0.0.1/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/" hreflang="en"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Kong Single HTTPS Ingress - File Checklist","item":"http://127.0.0.1/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST"}]}</script><link rel="stylesheet" href="/docs/assets/css/styles.78e6bda1.css">
+<script src="/docs/assets/js/runtime~main.876268fe.js" defer="defer"></script>
+<script src="/docs/assets/js/main.26f7bd29.js" defer="defer"></script>
+</head>
+<body>
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/docs/"><div class="navbar__logo"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">DQ Made Easy Docs</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/feature-plans/">Feature Plans</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/technical-references/">Technical</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/release-notes/">Releases</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/user-manuals/">Manuals</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/features/">Status &amp; Roadmap</a><a class="navbar__item navbar__link" href="/docs/engineering-decisions/">EDRs</a><a class="navbar__item navbar__link" href="/docs/architecture/">Architecture</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/api-reference/">API</a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/"><span class="categoryLinkLabel_W154">Start Here</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/feature-plans/"><span class="categoryLinkLabel_W154">Portal Pages</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/features/ABS_1_EXECUTION_ABSTRACTION/"><span class="categoryLinkLabel_W154">Features</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/releases/"><span class="categoryLinkLabel_W154">Releases</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/engineering-decisions/"><span class="categoryLinkLabel_W154">Engineering Decisions</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture/"><span class="categoryLinkLabel_W154">Architecture</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/test-proof/"><span class="categoryLinkLabel_W154">Test Proof</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/implementation-details/"><span class="categoryLinkLabel_W154">Implementation Details</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/"><span class="linkLabel_WmDU">Docker Compose Split - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_1_EXECUTION_ABSTRACTION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-1 Execution Abstraction - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_1_PYSPARK_NATIVE_COMPILER_MAPPING/"><span class="linkLabel_WmDU">ABS-1 PySpark-Native Compiler Mapping</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_2_DATA_CATALOG_MATERIALIZATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-2 Data Catalog Materialization - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ABS-3 Delivery-Linked Rule Execution - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ABS_3_DELIVERY_LINKED_RULE_EXECUTION_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">ABS-3 Delivery-Linked Rule Execution - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">API-5: Business Terms Integration - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_2_COMPLETE/"><span class="linkLabel_WmDU">API-5 Phase 2: Alias Resolution &amp; Validation Enrichment - Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_4_COMPLETE/"><span class="linkLabel_WmDU">API-5 Phase 4: Governance - Drift Detection &amp; Batch Revalidation - Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_5_PHASE_5_UI_INTEGRATION/"><span class="linkLabel_WmDU">API-5 Phase 5: UI Integration Implementation Complete ✅</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_6_FASTAPI_MIGRATION/"><span class="linkLabel_WmDU">API-6 FastAPI API Platform Migration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_7_DATA_DELIVERY_RESOLUTION/"><span class="linkLabel_WmDU">API-7 Data Delivery Resolution Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/API_7_REAL_DQ_RULE_EXECUTION_MILESTONE/"><span class="linkLabel_WmDU">API-7 Real DQ Rule Execution Milestone</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ARCH_1_FRONTEND_BFF_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">ARCH-1 Frontend BFF — Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/AZURE_CONTAINER_APPS_TO_AKS_DEPLOYMENT_PLAN/"><span class="linkLabel_WmDU">Azure Container Apps to Azure Kubernetes Deployment Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/BUSINESS_KEY_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">Business Key Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DARK_THEME_IMPLEMENTATION/"><span class="linkLabel_WmDU">DARK_THEME_IMPLEMENTATION</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_MIGRATION/"><span class="linkLabel_WmDU">Docker Compose Split Migration Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE/"><span class="linkLabel_WmDU">Docker Compose Split - Quick Reference</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING/"><span class="linkLabel_WmDU">Docker Compose Split - Troubleshooting</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_1_ENHANCED_RULE_VALIDATION/"><span class="linkLabel_WmDU">DQ-1 Enhanced Rule Validation Logic — Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_1_RULE_VALIDATION_STANDARD_FEATURE_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-1 Rule Validation Standard Feature Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_10_NATURAL_LANGUAGE_RULE_DRAFTING_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-10 Natural-Language Rule Drafting - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_14_DATA_CONTRACTS_SCHEMA_CHANGE_GOVERNANCE_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-14 Data Contracts, Schema-Change Governance, and Conformance Checks Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_19_MULTI_RUNTIME_LOWERERS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-19 Implementation Plan: Trino, Polars, and Dask/Dask-SQL Lowerers</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_20_EXECUTION_DISPATCH_AND_LOWERER_MODULE_SPLIT_PLAN/"><span class="linkLabel_WmDU">DQ-20 Execution Dispatch and Lowerer Module Split Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_3C_DATA_ASSETS_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-3c Data Assets - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_4_NEW_RULE_TYPES_PROGRESS/"><span class="linkLabel_WmDU">DQ-4 New Rule Types / Checks — Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_3_RULE_COMPILER_IMPLEMENTATION_PROGRESS/"><span class="linkLabel_WmDU">DQ-7.3 Rule Compiler Implementation Progress</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_4_GX_SUITE_ORCHESTRATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">DQ-7.4 Great Expectations Suite Orchestration - Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_DSL_MOCK_DATA_2_0_0_MIGRATION_PLAN/"><span class="linkLabel_WmDU">DQ-7 Mock-Data DSL 2.0.0 Migration Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_DSL_ROLLOUT_POLICY/"><span class="linkLabel_WmDU">DQ-7 DSL Rollout Policy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_7_ENGINE_INDEPENDENT_DSL_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">DQ-7 Engine-Independent DSL Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_ACTUALITY_DATE_CROSS_DELIVERY_PLAN/"><span class="linkLabel_WmDU">Implementation Plan: Actuality-Date Support for Cross-Delivery DQ Rules</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/DQ_RULE_TO_RUN_PLAN_FLOW/"><span class="linkLabel_WmDU">DQ Rule to Run Plan Flow</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/EXPANDED_MOCK_DATA_SUMMARY/"><span class="linkLabel_WmDU">Expanded Mock Data Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ISO_11179_OPEN_DATA_PRODUCT_SPECIFICATION_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ISO 11179 + Open Data Product Specification Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/ISO_11179_OPENMETADATA_IMPLEMENTATION_DETAILS/"><span class="linkLabel_WmDU">ISO 11179 + OpenMetadata Implementation Details</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - App Cutover Matrix</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_FILE_CHECKLIST/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - File Checklist</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_TARGET_ARCHITECTURE/"><span class="linkLabel_WmDU">Kong Single HTTPS Ingress - Target Architecture</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OBSERVABILITY_QUICKSTART/"><span class="linkLabel_WmDU">Observability Stack - Quick Start Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OBSERVABILITY_SETUP/"><span class="linkLabel_WmDU">Lightweight Observability Stack for DQ Rule Builder</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OPENTELEMETRY_IMPLEMENTATION/"><span class="linkLabel_WmDU">OpenTelemetry Implementation for DQ Rule Builder</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/OPENTELEMETRY_ROLLOUT_CHECKLIST/"><span class="linkLabel_WmDU">OpenTelemetry Rollout Checklist (UI + API)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PHASE_1_TRINO_LOWERER_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">Phase 1 Implementation Plan: Trino Lowerer</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PHASE_1_TRINO_SUMMARY/"><span class="linkLabel_WmDU">Phase 1 — Trino Lowerer: Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PROFILING_IMPLEMENTATION/"><span class="linkLabel_WmDU">Data Profiling &amp; AI Suggestions Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/PYTHON_FILE_SIZE_POLICY/"><span class="linkLabel_WmDU">Python File Size Policy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/refactor-gx-dispatch-modules/"><span class="linkLabel_WmDU">Refactor gx_dispatch_worker.py — Single Responsibility Module Split</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_1_INTERNAL_SERVICE_TLS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-1: Internal Service TLS Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_2_POST_QUANTUM_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-2: Post-Quantum Cryptography Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_3_RUNTIME_SECRETS_GENERATION_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-3: Runtime Secrets Generation — Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_4_CONTAINER_EGRESS_CONTROL_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-4 Container Egress Control Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_END_TO_END_NO_HTTP_TLS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">SEC-5: End-to-End No-HTTP TLS Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_NO_HTTP_CONTRACT_AND_EXCEPTION_BOUNDARY/"><span class="linkLabel_WmDU">SEC-5 No-HTTP Contract and Exception Boundary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_W6_IMPLEMENTATION_STRATEGY/"><span class="linkLabel_WmDU">SEC-5 Workstream 6 Implementation Strategy</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SEC_5_W7_CUTOVER_RUNBOOK/"><span class="linkLabel_WmDU">SEC-5 Workstream 7-04: End-to-End Cutover Runbook</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/SPARK_EXPECTATIONS_ENGINE_PLAN/"><span class="linkLabel_WmDU">Spark Expectations Engine Integration Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SCRIPT_CONTRACT/"><span class="linkLabel_WmDU">Stack Script Contract</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SCRIPT_MODULARIZATION_WORK_PLAN/"><span class="linkLabel_WmDU">Stack Script Modularization Work Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SERVICE_DEPENDENCY_MANIFEST/"><span class="linkLabel_WmDU">Stack Service Dependency Manifest</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/STACK_SHARED_SHELL_PRIMITIVES_PLAN/"><span class="linkLabel_WmDU">Stack Shared Shell Primitives Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TESTS_TODO/"><span class="linkLabel_WmDU">Test Coverage TODOs</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TLS_EDGE_ARCHITECTURE_REFERENCE/"><span class="linkLabel_WmDU">TLS Edge Architecture Reference</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/TLS_VALIDATION_INFRASTRUCTURE/"><span class="linkLabel_WmDU">TLS Validation Infrastructure</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/USER_MANUALS_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">User Manuals Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF_6_KUBERNETES_IMAGE_DEPLOYMENT_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">WF-6 Kubernetes Image Deployment Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT_IMPLEMENTATION_PLAN/"><span class="linkLabel_WmDU">WF-7 Azure Container Apps Environment Deployment Implementation Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_API_ENDPOINTS/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - API Endpoints Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_APPLICATION_SETTINGS_SCOPE/"><span class="linkLabel_WmDU">WF-3 Application Settings Scope</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_DATABASE_MIGRATION_TEST/"><span class="linkLabel_WmDU">WF-3 Database Migration Test Report ✅</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_IMPLEMENTATION_COMPLETE/"><span class="linkLabel_WmDU">WF-3 Implementation Complete - Ready for Frontend</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_IMPLEMENTATION_PHASE_1/"><span class="linkLabel_WmDU">WF-3 Implementation Progress - Phase 1: Backend Complete</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_MANDATORY_VERSIONING_FIX/"><span class="linkLabel_WmDU">WF-3: Mandatory Versioning Implementation Fix</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_RULE_VERSIONING_SCHEMA/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - Schema Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_UI_DESIGN/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - UI Layer Design</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/implementation-details/WF-3_WORKFLOW_INTEGRATION/"><span class="linkLabel_WmDU">WF-3: Rule Versioning &amp; Rollback - Workflow Integration</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/technical/"><span class="categoryLinkLabel_W154">Technical</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/contracts/"><span class="categoryLinkLabel_W154">Contracts</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/runbooks/"><span class="categoryLinkLabel_W154">Runbooks</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/fixes/DARK_THEME_CODE_CHANGES/"><span class="categoryLinkLabel_W154">Fixes</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/user-manuals/agent-workflow-examples-and-templates/"><span class="categoryLinkLabel_W154">User Manual Source</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Implementation Details</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Kong Single HTTPS Ingress - File Checklist</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Kong Single HTTPS Ingress - File Checklist</h1></header>
+<blockquote>
+<p>Superseded note
+This checklist contains historical migration references. Where it mentions <code>DQ_UI_API_URL</code>, treat that name as superseded by <code>KONG_PUBLIC_URL</code> for browser-facing runtime configuration and <code>KONG_LOCAL_URL</code> for host-local usage.</p>
+</blockquote>
+<p>This document turns the Kong edge-cutover into a file-by-file implementation backlog.</p>
+<p>Goal: make one edge ingress the single public HTTPS entrypoint while supporting local <code>*.jac.dot</code> host-based routing and public <code>jacloud.nl</code> / <code>www.jacloud.nl</code> single-host path-based routing.</p>
+<p>Architecture note: Kong remains behind the edge as the dq-api gateway. Publicly, Keycloak, OpenMetadata, and optional browser apps must live behind path prefixes on the canonical public host rather than on their own public subdomains.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="scope">Scope<a href="#scope" class="hash-link" aria-label="Direct link to Scope" title="Direct link to Scope" translate="no">​</a></h2>
+<ul>
+<li class="">Browser-facing surfaces that must move behind the edge:<!-- -->
+<ul>
+<li class="">dq-made-easy UI</li>
+<li class="">dq-api</li>
+<li class="">Keycloak</li>
+<li class="">OpenMetadata</li>
+<li class="">Zammad, when the support profile is intended to be public</li>
+<li class="">Grafana, only if observability should be browser-accessible outside operator-only access</li>
+</ul>
+</li>
+<li class="">Internal-only services that should not be openly exposed through the public internet route map:<!-- -->
+<ul>
+<li class="">Kong Admin API and Kong Manager</li>
+<li class="">Postgres, Redis, AIStor, OpenTelemetry Collector, Pushgateway</li>
+<li class="">dq-engine and worker containers</li>
+<li class="">OpenMetadata ingestion and internal support containers</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="implementation-order">Implementation Order<a href="#implementation-order" class="hash-link" aria-label="Direct link to Implementation Order" title="Direct link to Implementation Order" translate="no">​</a></h2>
+<ol>
+<li class="">Add the edge ingress service and publish only <code>443</code> for public traffic.</li>
+<li class="">Implement local host-based routing for <code>*.jac.dot</code>.</li>
+<li class="">Implement public single-host path-based routing for <code>www.jacloud.nl</code> with apex redirect from <code>jacloud.nl</code>.</li>
+<li class="">Move dq-made-easy UI and dq-api behind the edge, with dq-api still routed through Kong.</li>
+<li class="">Make Keycloak and OpenMetadata path-prefix capable under <code>/iam</code> and <code>/metadata</code>.</li>
+<li class="">Move optional browser apps behind <code>/support</code> and <code>/observability</code> when needed.</li>
+<li class="">Remove direct host-port exposure and keep the edge as the only public HTTPS entrypoint.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="file-task-list">File Task List<a href="#file-task-list" class="hash-link" aria-label="Direct link to File Task List" title="Direct link to File Task List" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="docker-composeyml"><code>docker-compose.yml</code><a href="#docker-composeyml" class="hash-link" aria-label="Direct link to docker-composeyml" title="Direct link to docker-composeyml" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Add a dedicated edge ingress service that publishes <code>443:443</code>.</p>
+<ul>
+<li class="">Support local host-based routes for <code>dq-made-easy.jac.dot</code>, <code>keycloak.jac.dot</code>, <code>openmetadata.jac.dot</code>, and optional local hostnames.</li>
+<li class="">Support public path-based routes on <code>www.jacloud.nl</code> for <code>/</code>, <code>/iam</code>, <code>/metadata</code>, <code>/support</code>, <code>/observability</code>, and restricted <code>/ops/kong</code>.</li>
+<li class="">Redirect <code>jacloud.nl</code> to <code>https://www.jacloud.nl</code>.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Reduce direct public Kong exposure after the edge is working.</p>
+<ul>
+<li class="">Remove or disable the external <code>9111:8000</code> mapping.</li>
+<li class="">Remove <code>9443:8443</code> after the edge is the public HTTPS entrypoint.</li>
+<li class="">Keep Kong Admin and Manager non-public or localhost-only unless explicitly routed through restricted <code>/ops/kong</code> access.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Remove direct host <code>ports:</code> mappings for public apps after edge routes exist.</p>
+<ul>
+<li class=""><code>api</code></li>
+<li class=""><code>frontend</code></li>
+<li class=""><code>keycloak</code></li>
+<li class=""><code>openmetadata-server</code></li>
+<li class=""><code>zammad-nginx</code>, if routed through the edge</li>
+<li class=""><code>grafana</code>, if routed through the edge</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep infrastructure and worker services internal-only.</p>
+<ul>
+<li class="">Verify no new host <code>ports:</code> are added for Postgres, Redis, engines, workers, or observability backends.</li>
+<li class="">If operator-only access is needed, prefer localhost-only publication instead of public host exposure.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Update service environment for the new public URLs.</p>
+<ul>
+<li class=""><code>frontend</code>: <code>DQ_UI_API_URL</code></li>
+<li class=""><code>api</code>: <code>OIDC_REDIRECT_BASE_URL</code>, <code>DQ_UI_API_URL</code></li>
+<li class=""><code>keycloak</code>: local hostname settings and public <code>/iam</code> path settings</li>
+<li class=""><code>openmetadata-server</code>: local host settings and public <code>/metadata</code> callback / authority settings</li>
+<li class=""><code>grafana</code>: root URL and OIDC browser auth URL</li>
+<li class=""><code>zammad-*</code>: scheme, fqdn, and trusted proxies</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Preserve internal service-to-service URLs where required.</p>
+<ul>
+<li class="">Keep <code>SSO_INTERNAL_ISSUER</code> for backend and Grafana server-to-server calls.</li>
+<li class="">Keep OpenMetadata internal token and userinfo traffic on the Docker network where already expected.</li>
+<li class="">Do not replace internal dependency calls with public URLs unless the application requires that.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Add explicit mode handling for local and public edge config.</p>
+<ul>
+<li class="">Prefer separate config templates or mounted config files rather than hidden runtime conditionals.</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-kongscriptsbootstrap_kongsh"><code>dq-kong/scripts/bootstrap_kong.sh</code><a href="#dq-kongscriptsbootstrap_kongsh" class="hash-link" aria-label="Direct link to dq-kongscriptsbootstrap_kongsh" title="Direct link to dq-kongscriptsbootstrap_kongsh" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep Kong focused on dq-api route configuration and policy.</p>
+<ul>
+<li class="">Keep existing path-based dq-api routes working during migration.</li>
+<li class="">Do not add non-API browser app routing here unless there is a separate requirement.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Update public-origin assumptions to the final edge-routed URLs.</p>
+<ul>
+<li class=""><code>KONG_PUBLIC_URL</code> should represent the browser-facing API base through the edge.</li>
+<li class="">local CORS and redirect handling should align with <code>https://dq-made-easy.jac.dot</code>.</li>
+<li class="">public CORS and redirect handling should align with <code>https://www.jacloud.nl</code>.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep dq-api route protections fail-fast and explicit.</p>
+<ul>
+<li class="">Preserve JWT and ACL setup for protected API routes.</li>
+<li class="">Keep public allowlist behavior explicit for health, auth redirect/callback, and docs endpoints.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Preserve forwarded headers and host expectations for dq-api traffic arriving from the edge.</p>
+<ul>
+<li class="">Verify <code>X-Forwarded-Proto</code> and <code>Host</code> handling still produce correct redirects and secure cookies.</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="envdevexample"><code>.env.dev.example</code><a href="#envdevexample" class="hash-link" aria-label="Direct link to envdevexample" title="Direct link to envdevexample" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep <code>.env.dev.example</code> local-focused.</p>
+<ul>
+<li class="">Use <code>https://dq-made-easy.jac.dot</code> as the local UI and API base.</li>
+<li class="">Use local <code>*.jac.dot</code> hostnames for Keycloak and OpenMetadata.</li>
+<li class="">Remove stale direct-port public examples.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Add or update deployment-specific env guidance for the public <code>jacloud.nl</code> model.</p>
+<ul>
+<li class="">Use <code>.env.prod.example</code> as the public deployment template.</li>
+<li class="">Public canonical UI URL</li>
+<li class="">Public Keycloak issuer path under <code>/iam</code></li>
+<li class="">Public OpenMetadata path under <code>/metadata</code></li>
+<li class="">Optional public Grafana path under <code>/observability</code></li>
+<li class="">Optional public Zammad path under <code>/support</code></li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep internal issuer and internal upstream values separate from browser-facing values.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="env"><code>.env</code><a href="#env" class="hash-link" aria-label="Direct link to env" title="Direct link to env" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Normalize the repo-local public URLs to the target edge model.</p>
+<ul>
+<li class="">Keep local defaults on <code>https://dq-made-easy.jac.dot</code>.</li>
+<li class="">Keep local Keycloak and OpenMetadata values on local <code>*.jac.dot</code> hostnames.</li>
+<li class="">Remove direct-port public URLs for Keycloak, OpenMetadata, and Grafana.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep server-side internal URLs intact where required.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify all OIDC-related values align across UI, API, Keycloak, OpenMetadata, and Grafana.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Do not treat the local <code>.env</code> as the deployment truth for the public single-host model.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-uinginxdefaultconf"><code>dq-ui/nginx/default.conf</code><a href="#dq-uinginxdefaultconf" class="hash-link" aria-label="Direct link to dq-uinginxdefaultconf" title="Direct link to dq-uinginxdefaultconf" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Decide whether the UI container still needs to proxy <code>/api</code> internally.</p>
+<ul>
+<li class="">Preferred end state: browser calls the edge on the same public origin, and the edge forwards API paths to Kong.</li>
+<li class="">If the internal <code>/api</code> proxy is retained for compatibility, verify it still points to the correct upstream and does not bypass Kong policy unexpectedly.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep forwarded-proto and host behavior explicit if the frontend remains behind Kong.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Preserve SPA and runtime-config behavior after the edge cutover.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-uiscriptsdocker-entrypoint-runtime-configsh"><code>dq-ui/scripts/docker-entrypoint-runtime-config.sh</code><a href="#dq-uiscriptsdocker-entrypoint-runtime-configsh" class="hash-link" aria-label="Direct link to dq-uiscriptsdocker-entrypoint-runtime-configsh" title="Direct link to dq-uiscriptsdocker-entrypoint-runtime-configsh" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Update runtime API base expectations to the final public origin.</p>
+<ul>
+<li class="">Keep fail-fast behavior when <code>DQ_UI_API_URL</code> is missing.</li>
+<li class="">Ensure the configured value is the browser-facing URL, not an internal service alias.</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify generated <code>runtime-config.js</code> matches the final edge-routed URL model.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-uisrcconfigapits"><code>dq-ui/src/config/api.ts</code><a href="#dq-uisrcconfigapits" class="hash-link" aria-label="Direct link to dq-uisrcconfigapits" title="Direct link to dq-uisrcconfigapits" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify same-origin or host-routed API base behavior is correct after cutover.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Remove legacy assumptions that normalize old internal hostnames or stale ports if they become misleading after migration.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep the no-fallback contract intact: the UI must still fail fast if no API base URL is configured.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-uisrcauthbrowserauthclientts"><code>dq-ui/src/auth/browserAuthClient.ts</code><a href="#dq-uisrcauthbrowserauthclientts" class="hash-link" aria-label="Direct link to dq-uisrcauthbrowserauthclientts" title="Direct link to dq-uisrcauthbrowserauthclientts" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify browser SSO redirect construction still targets the final public auth endpoints on the edge-routed host model.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify issuer URL selection handles both local <code>https://keycloak.jac.dot</code> and public <code>https://www.jacloud.nl/iam</code> correctly.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep HTTPS-only browser SSO behavior explicit.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-uisrcauthkeycloakclientts"><code>dq-ui/src/auth/keycloakClient.ts</code><a href="#dq-uisrcauthkeycloakclientts" class="hash-link" aria-label="Direct link to dq-uisrcauthkeycloakclientts" title="Direct link to dq-uisrcauthkeycloakclientts" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Update <code>VITE_KEYCLOAK_PUBLIC_URL</code> consumers to support local hostnames and the public <code>/iam</code> path.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify login-required startup still works when Keycloak is path-prefixed publicly.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-apifastapiappapiv1endpointsauthpy"><code>dq-api/fastapi/app/api/v1/endpoints/auth.py</code><a href="#dq-apifastapiappapiv1endpointsauthpy" class="hash-link" aria-label="Direct link to dq-apifastapiappapiv1endpointsauthpy" title="Direct link to dq-apifastapiappapiv1endpointsauthpy" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify public redirect base construction uses the final browser-facing URL.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify <code>X-Forwarded-Proto</code> handling remains correct behind Kong-only HTTPS.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify callback HTML still returns the browser to the correct frontend origin after moving off direct container ports.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep fail-fast behavior for missing public API base URLs.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-apifastapiappmiddlewarerequire_kong_gatewaypy"><code>dq-api/fastapi/app/middleware/require_kong_gateway.py</code><a href="#dq-apifastapiappmiddlewarerequire_kong_gatewaypy" class="hash-link" aria-label="Direct link to dq-apifastapiappmiddlewarerequire_kong_gatewaypy" title="Direct link to dq-apifastapiappmiddlewarerequire_kong_gatewaypy" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep Kong-only enforcement for API traffic.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Verify the middleware still recognizes edge -&gt; Kong requests correctly after the new host-based edge routing is added.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Ensure no new direct bypass path is introduced when app ports are removed.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-apiscriptsgenerate_keycloak_realmpy"><code>dq-api/scripts/generate_keycloak_realm.py</code><a href="#dq-apiscriptsgenerate_keycloak_realmpy" class="hash-link" aria-label="Direct link to dq-apiscriptsgenerate_keycloak_realmpy" title="Direct link to dq-apiscriptsgenerate_keycloak_realmpy" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Update generated redirect and web-origin defaults for both the local <code>*.jac.dot</code> model and the public <code>jacloud.nl</code> model.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Remove stale direct-port examples, especially for Grafana and the main UI.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep explicit input requirements and fail-fast behavior intact.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-uideployment_guidemd"><code>dq-ui/DEPLOYMENT_GUIDE.md</code><a href="#dq-uideployment_guidemd" class="hash-link" aria-label="Direct link to dq-uideployment_guidemd" title="Direct link to dq-uideployment_guidemd" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Update the deployment guide to describe the edge ingress as the only public ingress and Kong as the API gateway behind it.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Remove direct API and direct Keycloak browser access examples.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Document the public single-host path map for <code>/iam</code>, <code>/metadata</code>, <code>/support</code>, and <code>/observability</code>.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dq-kongreadmemd"><code>dq-kong/README.md</code><a href="#dq-kongreadmemd" class="hash-link" aria-label="Direct link to dq-kongreadmemd" title="Direct link to dq-kongreadmemd" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Document the new public ingress model.</p>
+<ul>
+<li class="">edge ingress on <code>443</code></li>
+<li class="">Kong as the dq-api gateway behind the edge</li>
+<li class="">non-public admin surfaces</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Document the supported hostname inventory.</p>
+<ul>
+<li class="">local <code>*.jac.dot</code> hosts</li>
+<li class="">public <code>jacloud.nl</code> and <code>www.jacloud.nl</code></li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Document the rule that infrastructure services remain private.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="edge-config-files">Edge config files<a href="#edge-config-files" class="hash-link" aria-label="Direct link to Edge config files" title="Direct link to Edge config files" translate="no">​</a></h3>
+<ol class="contains-task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Add separate local and public edge route definitions.</p>
+<ul>
+<li class="">local host-based routes</li>
+<li class="">public single-host path-based routes</li>
+<li class="">apex redirect from <code>jacloud.nl</code> to <code>www.jacloud.nl</code></li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep route stripping / prefix preservation explicit for <code>/iam</code>, <code>/metadata</code>, <code>/support</code>, <code>/observability</code>, and <code>/ops/kong</code>.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled=""> <!-- -->Keep fail-fast startup when required certificates or route templates are missing.</p>
+</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="verification-task-list">Verification Task List<a href="#verification-task-list" class="hash-link" aria-label="Direct link to Verification Task List" title="Direct link to Verification Task List" translate="no">​</a></h2>
+<ol class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify the edge ingress starts with the new route model and no bootstrap errors.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify the UI loads successfully from the local <code>*.jac.dot</code> hostnames and from the final public hostname.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify API requests succeed through the edge and Kong, and fail when bypassing Kong.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify Keycloak login, token refresh, and logout locally and through public <code>/iam</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify OpenMetadata login and callback flow locally and through public <code>/metadata</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify Zammad login and application redirects use HTTPS and the public <code>/support</code> path when enabled.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify Grafana OIDC login and generated links use the public <code>/observability</code> path when enabled.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify no browser-facing app remains reachable on its old direct host port.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <!-- -->Verify Kong Admin API and Manager are not publicly exposed without operator restrictions.</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="definition-of-done">Definition of Done<a href="#definition-of-done" class="hash-link" aria-label="Direct link to Definition of Done" title="Direct link to Definition of Done" translate="no">​</a></h2>
+<ul>
+<li class="">The edge ingress is the only public HTTPS ingress for supported public web apps.</li>
+<li class="">Local full-stack execution works on the required <code>*.jac.dot</code> hostnames.</li>
+<li class="">Public browser-facing execution works on <code>jacloud.nl</code> and <code>www.jacloud.nl</code> without public subdomains.</li>
+<li class="">The browser no longer depends on direct container host ports for UI, API, auth, or metadata access.</li>
+<li class="">Internal service ports remain private unless explicitly justified.</li>
+<li class="">All updated applications use correct public URLs for redirects, callbacks, cookies, and generated links.</li>
+<li class="">Validation confirms no silent fallback to direct service exposure remains.</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_APP_CUTOVER_MATRIX/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Kong Single HTTPS Ingress - App Cutover Matrix</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/implementation-details/KONG_SINGLE_HTTPS_INGRESS_IMPLEMENTATION_PLAN/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Kong Single HTTPS Ingress - Implementation Plan</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#scope" class="table-of-contents__link toc-highlight">Scope</a></li><li><a href="#implementation-order" class="table-of-contents__link toc-highlight">Implementation Order</a></li><li><a href="#file-task-list" class="table-of-contents__link toc-highlight">File Task List</a><ul><li><a href="#docker-composeyml" class="table-of-contents__link toc-highlight"><code>docker-compose.yml</code></a></li><li><a href="#dq-kongscriptsbootstrap_kongsh" class="table-of-contents__link toc-highlight"><code>dq-kong/scripts/bootstrap_kong.sh</code></a></li><li><a href="#envdevexample" class="table-of-contents__link toc-highlight"><code>.env.dev.example</code></a></li><li><a href="#env" class="table-of-contents__link toc-highlight"><code>.env</code></a></li><li><a href="#dq-uinginxdefaultconf" class="table-of-contents__link toc-highlight"><code>dq-ui/nginx/default.conf</code></a></li><li><a href="#dq-uiscriptsdocker-entrypoint-runtime-configsh" class="table-of-contents__link toc-highlight"><code>dq-ui/scripts/docker-entrypoint-runtime-config.sh</code></a></li><li><a href="#dq-uisrcconfigapits" class="table-of-contents__link toc-highlight"><code>dq-ui/src/config/api.ts</code></a></li><li><a href="#dq-uisrcauthbrowserauthclientts" class="table-of-contents__link toc-highlight"><code>dq-ui/src/auth/browserAuthClient.ts</code></a></li><li><a href="#dq-uisrcauthkeycloakclientts" class="table-of-contents__link toc-highlight"><code>dq-ui/src/auth/keycloakClient.ts</code></a></li><li><a href="#dq-apifastapiappapiv1endpointsauthpy" class="table-of-contents__link toc-highlight"><code>dq-api/fastapi/app/api/v1/endpoints/auth.py</code></a></li><li><a href="#dq-apifastapiappmiddlewarerequire_kong_gatewaypy" class="table-of-contents__link toc-highlight"><code>dq-api/fastapi/app/middleware/require_kong_gateway.py</code></a></li><li><a href="#dq-apiscriptsgenerate_keycloak_realmpy" class="table-of-contents__link toc-highlight"><code>dq-api/scripts/generate_keycloak_realm.py</code></a></li><li><a href="#dq-uideployment_guidemd" class="table-of-contents__link toc-highlight"><code>dq-ui/DEPLOYMENT_GUIDE.md</code></a></li><li><a href="#dq-kongreadmemd" class="table-of-contents__link toc-highlight"><code>dq-kong/README.md</code></a></li><li><a href="#edge-config-files" class="table-of-contents__link toc-highlight">Edge config files</a></li></ul></li><li><a href="#verification-task-list" class="table-of-contents__link toc-highlight">Verification Task List</a></li><li><a href="#definition-of-done" class="table-of-contents__link toc-highlight">Definition of Done</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/">Overview</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/feature-plans/">Feature Plans</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Reference</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/user-manuals/">User manuals</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/api-reference/">API reference</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/technical-references/">Technical references</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright 2026 dq-made-easy maintainers.</div></div></div></footer></div>
+</body>
+</html>

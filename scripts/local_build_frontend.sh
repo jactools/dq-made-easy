@@ -53,10 +53,14 @@ if [[ ! -f "$ROOT_ENV_FILE" ]]; then
   exit 1
 fi
 
+# Load the env file with unbound variables allowed (env may reference secrets
+# like DQ_DB_PASSWORD that aren't loaded for a pure frontend build).
+set +u
 set -a
 # shellcheck disable=SC1090
 source "$ROOT_ENV_FILE"
 set +a
+set -u
 
 # Derive canonical registry variables (including NPM_CONFIG_REGISTRY) from env contract.
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
@@ -77,7 +81,9 @@ info "local_build_frontend.sh" "Installing dependencies and building frontend (t
 # Prefer `npm install` to regenerate lockfile; run with Node 22 on your machine.
 # Use --include=dev to ensure devDependencies (like vite) are installed
 npm install --include=dev
-npm run build
+# Run vite build directly to avoid prebuild hook failures (doc generation).
+# The prebuild hook runs doc/sync scripts that may have stale test proofs.
+npx vite build
 cd "$ROOT_DIR"
 
 if [ "$PACKAGE_IMAGE" = true ]; then

@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-features/FEATURES" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.10.2">
+<title data-rh="true">Data Quality Made Easy - Features | DQ Made Easy Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="http://127.0.0.1/docs/features/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Data Quality Made Easy - Features | DQ Made Easy Docs"><meta data-rh="true" name="description" content="FEATURES.md is the authoritative reference for all platform capabilities and features."><meta data-rh="true" property="og:description" content="FEATURES.md is the authoritative reference for all platform capabilities and features."><link data-rh="true" rel="icon" href="/docs/img/favicon.svg"><link data-rh="true" rel="canonical" href="http://127.0.0.1/docs/features/"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/features/" hreflang="en"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/features/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Data Quality Made Easy - Features","item":"http://127.0.0.1/docs/features/"}]}</script><link rel="stylesheet" href="/docs/assets/css/styles.78e6bda1.css">
+<script src="/docs/assets/js/runtime~main.876268fe.js" defer="defer"></script>
+<script src="/docs/assets/js/main.26f7bd29.js" defer="defer"></script>
+</head>
+<body>
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/docs/"><div class="navbar__logo"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/docs/img/logo.svg" alt="DQ Made Easy" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">DQ Made Easy Docs</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/feature-plans/">Feature Plans</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/technical-references/">Technical</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/release-notes/">Releases</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/user-manuals/">Manuals</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/features/">Status &amp; Roadmap</a><a class="navbar__item navbar__link" href="/docs/engineering-decisions/">EDRs</a><a class="navbar__item navbar__link" href="/docs/architecture/">Architecture</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/api-reference/">API</a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/"><span class="categoryLinkLabel_W154">Start Here</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/feature-plans/"><span class="categoryLinkLabel_W154">Portal Pages</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/docs/features/ABS_1_EXECUTION_ABSTRACTION/"><span class="categoryLinkLabel_W154">Features</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/ABS_1_EXECUTION_ABSTRACTION/"><span class="linkLabel_WmDU">ABS-1 Execution Abstraction (GX + PySpark)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/ABS_2_DATA_CATALOG_MATERIALIZATION/"><span class="linkLabel_WmDU">ABS-2 Data Catalog Materialization and Data Delivery Notes</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/ABS_3_DELIVERY_LINKED_RULE_EXECUTION/"><span class="linkLabel_WmDU">ABS-3 Delivery-Linked Rule Execution and Result Notes</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/ABSTRACTION_FEATURES/"><span class="linkLabel_WmDU">Abstraction Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/AGENTIC_AI_ECOSYSTEM_FEATURES/"><span class="linkLabel_WmDU">WS-10 Agentic AI Ecosystem Capabilities</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/ANALYTICS_REPORTING_FEATURES/"><span class="linkLabel_WmDU">Analytics and Reporting Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_1_CONNECTORS/"><span class="linkLabel_WmDU">API-1 New Data Source Connectors</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_2_WEBHOOK_NOTIFICATIONS/"><span class="linkLabel_WmDU">API-2 Webhook Notifications</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_3_RATE_LIMITING/"><span class="linkLabel_WmDU">API-3 API Rate Limiting</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_4_AUTHENTICATION_OPTIONS/"><span class="linkLabel_WmDU">API-4 Advanced Authentication Options</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_4_ENTRA_KEYCLOAK_BROKERING/"><span class="linkLabel_WmDU">API-4 Entra ID + Keycloak Brokering Architecture</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_5_METADATA_INTEGRATION/"><span class="linkLabel_WmDU">API-5 Business Metadata Integration (Source for Business Terms)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_7_REAL_DQ_RULE_EXECUTION/"><span class="linkLabel_WmDU">API-7 Real DQ Rule Execution</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/API_FEATURES/"><span class="linkLabel_WmDU">Integration and API Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/ARCH_1_FRONTEND_BFF/"><span class="linkLabel_WmDU">ARCH-1 Frontend as Backend-For-Frontend (BFF)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/BUSINESS_KEYS/"><span class="linkLabel_WmDU">Business Keys and Stable Identity Surfaces</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/CONFIG_DRIVEN_UI_REGISTRY_WORKFLOW/"><span class="linkLabel_WmDU">Config-Driven UI Registry Workflow</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/CONFIG_DRIVEN_UI_REGISTRY/"><span class="linkLabel_WmDU">Config-Driven UI Registry</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DATA_ASSETS_FEATURES/"><span class="linkLabel_WmDU">Data Assets Feature</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DOCUMENTATION_FEATURES/"><span class="linkLabel_WmDU">Documentation Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ_19_MULTI_RUNTIME_LOWERERS/"><span class="linkLabel_WmDU">DQ-19 Multi-Runtime Lowerer Expansion for Trino, Polars, and Dask</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ_FEATURES/"><span class="linkLabel_WmDU">Data Quality Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ_PLATFORM_GAP_CLOSURE_PLAN/"><span class="linkLabel_WmDU">dq-made-easy Platform Gap Closure Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ-10_NATURAL_LANGUAGE_RULE_DRAFTING_PREVIEW/"><span class="linkLabel_WmDU">DQ-10 Natural-Language Rule Drafting Preview</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ-20_REUSABLE_DQ_ENGINE_LIBRARY/"><span class="linkLabel_WmDU">DQ-20 Reusable DQ Engine Library — Pip-Installable, Offline-First</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ-5_ADVANCED_DATA_PROFILING/"><span class="linkLabel_WmDU">DQ-5 Advanced Data Profiling and Suggestions API Boundary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ-6_BATCH_RULE_EXECUTION_IMPROVEMENTS/"><span class="linkLabel_WmDU">DQ-6 Batch Rule Execution Improvements</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/DQ-7_EXECUTABLE_RULE_TRANSFORMATION/"><span class="linkLabel_WmDU">DQ-7 Executable Rule Transformation</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/FASTAPI_MIGRATION_SCOPE_BASELINE/"><span class="linkLabel_WmDU">FastAPI Migration Scope Baseline</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/FEATURE_ROADMAP_OVERVIEW/"><span class="linkLabel_WmDU">dq-made-easy Actionable Feature Roadmap Overview</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/features/"><span class="linkLabel_WmDU">Data Quality Made Easy - Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/FRONTEND_UI_PORTABILITY_FEATURES/"><span class="linkLabel_WmDU">Frontend UI Portability and Theming Abstraction</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/INTERNAL_SERVICE_TLS_MIGRATION_MATRIX/"><span class="linkLabel_WmDU">Internal Service TLS Migration Matrix</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/JWT_END_TO_END_TEST_RESULTS/"><span class="linkLabel_WmDU">JWT End-to-End Test Results</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/LLM_1_AGENT_HARNESS/"><span class="linkLabel_WmDU">LLM-1 Pi Agent Harness Integration</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/MANAGEMENT_ONE_PAGER/"><span class="linkLabel_WmDU">dq-made-easy — Executive One-Pager (Implemented + Planned)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/OBS_1_OTLP_METRICS_STREAMING/"><span class="linkLabel_WmDU">OBS-1 OTLP Metrics Streaming</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/ONBOARDING_FEATURES/"><span class="linkLabel_WmDU">Onboarding Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/PHASE7_SUMMARY/"><span class="linkLabel_WmDU">Phase 7 Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/PROFILING_REQUEST_GENERATOR_CHANGELOG/"><span class="linkLabel_WmDU">Profiling Request Generator Changelog</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/REPO_COVERAGE_TEST_PLAN/"><span class="linkLabel_WmDU">Repo Coverage Test Plan</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/RULE_STATUS_TRANSITIONS/"><span class="linkLabel_WmDU">Rule Status Transitions</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/SEC_1_INTERNAL_SERVICE_TLS/"><span class="linkLabel_WmDU">SEC-1 Internal Service-to-Service TLS</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/SEC_2_POST_QUANTUM_READINESS/"><span class="linkLabel_WmDU">SEC-2 Post-Quantum Cryptography Readiness</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/SEC_3_SYNTHETIC_TEST_BUCKET_AND_EVIDENCE_BOUNDARIES/"><span class="linkLabel_WmDU">SEC-3 Synthetic/Test Bucket and Evidence Boundaries</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/SEC_4_CONTROLLED_CONTAINER_EGRESS_AND_APPROVED_EXTERNAL_DESTINATIONS/"><span class="linkLabel_WmDU">SEC-4 Controlled Container Egress and Approved External Destinations</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/SEC_5_SENSITIVE_DATA_ENCRYPTION_AND_KEY_SEGREGATION/"><span class="linkLabel_WmDU">SEC-5 Sensitive Data Encryption-at-Rest and Key Segregation</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/SEC_6_LOCAL_VULNERABILITY_ASSESSMENT/"><span class="linkLabel_WmDU">SEC-6 Local Vulnerability Assessment</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/SEC_FEATURES/"><span class="linkLabel_WmDU">Security Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/UX_FEATURES/"><span class="linkLabel_WmDU">User Experience Features</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/WF_5_DEDICATED_ENVIRONMENT_CONTRACT/"><span class="linkLabel_WmDU">WF-5 Dedicated Environment Contract and Startup Selection</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/WF_6_KUBERNETES_IMAGE_DEPLOYMENT/"><span class="linkLabel_WmDU">WF-6 Kubernetes Image Deployment for Dev, Test, and Prod</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/WF_7_AZURE_CONTAINER_APPS_ENVIRONMENT_DEPLOYMENT/"><span class="linkLabel_WmDU">WF-7 Azure Container Apps Environment Deployment for Dev, Test, and Prod</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/WF_8_AZURE_PIPELINE_VERIFICATION_HARNESS/"><span class="linkLabel_WmDU">WF-8 Azure Pipeline Verification Harness</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/WF3_COMPREHENSIVE_SUMMARY/"><span class="linkLabel_WmDU">WF-3 Rule Version History - Comprehensive Implementation Summary</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/features/WORKFLOW_FEATURES/"><span class="linkLabel_WmDU">Workflow Enhancements</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/releases/"><span class="categoryLinkLabel_W154">Releases</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/engineering-decisions/"><span class="categoryLinkLabel_W154">Engineering Decisions</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/architecture/"><span class="categoryLinkLabel_W154">Architecture</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/test-proof/"><span class="categoryLinkLabel_W154">Test Proof</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/implementation-details/"><span class="categoryLinkLabel_W154">Implementation Details</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/technical/"><span class="categoryLinkLabel_W154">Technical</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/contracts/"><span class="categoryLinkLabel_W154">Contracts</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/runbooks/"><span class="categoryLinkLabel_W154">Runbooks</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/fixes/DARK_THEME_CODE_CHANGES/"><span class="categoryLinkLabel_W154">Fixes</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/docs/user-manuals/agent-workflow-examples-and-templates/"><span class="categoryLinkLabel_W154">User Manual Source</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/docs/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Features</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Data Quality Made Easy - Features</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Data Quality Made Easy - Features</h1></header>
+<p><strong>FEATURES.md is the authoritative reference for all platform capabilities and features.</strong></p>
+<p>For implementation status (which features are Done vs Planned) and detailed planning, see <a class="" href="/docs/features/">README.md</a>.</p>
+<p>For detailed workstream sequencing and roadmap, see <a class="" href="/docs/features/FEATURE_ROADMAP_OVERVIEW/">FEATURE_ROADMAP_OVERVIEW.md</a>.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="overview">Overview<a href="#overview" class="hash-link" aria-label="Direct link to Overview" title="Direct link to Overview" translate="no">​</a></h2>
+<p>Data Quality Made Easy is a comprehensive data quality rule management platform that enables teams to create, test, approve, and monitor data quality rules with full lifecycle management and role-based access control.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="core-components">Core Components<a href="#core-components" class="hash-link" aria-label="Direct link to Core Components" title="Direct link to Core Components" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-frontend-ui-dq-ui">1. Frontend UI (<code>dq-ui</code>)<a href="#1-frontend-ui-dq-ui" class="hash-link" aria-label="Direct link to 1-frontend-ui-dq-ui" title="Direct link to 1-frontend-ui-dq-ui" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Technology</strong>: React 18 + TypeScript + Vite</li>
+<li class=""><strong>Features</strong>: Modern, responsive UI with dark mode support</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-backend-api-dq-api">2. Backend API (<code>dq-api</code>)<a href="#2-backend-api-dq-api" class="hash-link" aria-label="Direct link to 2-backend-api-dq-api" title="Direct link to 2-backend-api-dq-api" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Technology</strong>: FastAPI + Python</li>
+<li class=""><strong>Database</strong>: PostgreSQL</li>
+<li class=""><strong>Features</strong>: RESTful API with comprehensive endpoints</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-execution-engine-dq-engine">3. Execution Engine (<code>dq-engine</code>)<a href="#3-execution-engine-dq-engine" class="hash-link" aria-label="Direct link to 3-execution-engine-dq-engine" title="Direct link to 3-execution-engine-dq-engine" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Technology</strong>: Python + Great Expectations</li>
+<li class=""><strong>Features</strong>: Rule execution and validation engine</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="authentication--authorization">Authentication &amp; Authorization<a href="#authentication--authorization" class="hash-link" aria-label="Direct link to Authentication &amp; Authorization" title="Direct link to Authentication &amp; Authorization" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="user-management">User Management<a href="#user-management" class="hash-link" aria-label="Direct link to User Management" title="Direct link to User Management" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Login/Logout System</strong> with persistent sessions</li>
+<li class="">✅ <strong>Demo Accounts</strong> for quick testing (admin, editor, reviewer, viewer)</li>
+<li class="">✅ <strong>User Profiles</strong> with avatar and role display</li>
+<li class="">✅ <strong>Keycloak Integration</strong> support for SSO</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="role-based-access-control-rbac">Role-Based Access Control (RBAC)<a href="#role-based-access-control-rbac" class="hash-link" aria-label="Direct link to Role-Based Access Control (RBAC)" title="Direct link to Role-Based Access Control (RBAC)" translate="no">​</a></h3>
+<p>Four distinct user roles with granular permissions:</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="admin">Admin<a href="#admin" class="hash-link" aria-label="Direct link to Admin" title="Direct link to Admin" translate="no">​</a></h4>
+<ul>
+<li class="">Full system access</li>
+<li class="">Create, edit, delete, approve, and activate rules</li>
+<li class="">Manage workspaces and users</li>
+<li class="">Access all reports and audit trails</li>
+<li class="">Configure system settings</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="editor">Editor<a href="#editor" class="hash-link" aria-label="Direct link to Editor" title="Direct link to Editor" translate="no">​</a></h4>
+<ul>
+<li class="">Create and edit rules</li>
+<li class="">Submit rules for testing and approval</li>
+<li class="">View reports and metrics</li>
+<li class="">Propose templates</li>
+<li class="">Cannot approve own rules</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="reviewer">Reviewer<a href="#reviewer" class="hash-link" aria-label="Direct link to Reviewer" title="Direct link to Reviewer" translate="no">​</a></h4>
+<ul>
+<li class="">Review and approve/reject rules</li>
+<li class="">Add approval comments</li>
+<li class="">View rules and reports</li>
+<li class="">Cannot create or edit rules</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="viewer">Viewer<a href="#viewer" class="hash-link" aria-label="Direct link to Viewer" title="Direct link to Viewer" translate="no">​</a></h4>
+<ul>
+<li class="">Read-only access to rules</li>
+<li class="">View reports and dashboards</li>
+<li class="">No modification permissions</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workspace-management">Workspace Management<a href="#workspace-management" class="hash-link" aria-label="Direct link to Workspace Management" title="Direct link to Workspace Management" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Multi-workspace Support</strong>: Users can be members of multiple workspaces</li>
+<li class="">✅ <strong>Workspace Switching</strong>: Quick dropdown to switch between workspaces</li>
+<li class="">✅ <strong>Role Per Workspace</strong>: Different roles in different workspaces</li>
+<li class="">✅ <strong>Workspace Isolation</strong>: Rules and data are workspace-specific</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-product-browser">Data Product Browser<a href="#data-product-browser" class="hash-link" aria-label="Direct link to Data Product Browser" title="Direct link to Data Product Browser" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="hierarchical-navigation">Hierarchical Navigation<a href="#hierarchical-navigation" class="hash-link" aria-label="Direct link to Hierarchical Navigation" title="Direct link to Hierarchical Navigation" translate="no">​</a></h3>
+<p>Complete browsable hierarchy for organizing and discovering data:</p>
+<ul>
+<li class="">✅ <strong>Data Products</strong>: Top-level business data domains (e.g., &quot;Customer Master Data&quot;)</li>
+<li class="">✅ <strong>Data Sets</strong>: Logical groupings within products (e.g., &quot;CRM Data&quot;)</li>
+<li class="">✅ <strong>Data Objects</strong>: Entity definitions within datasets (e.g., &quot;Customer&quot;)</li>
+<li class="">✅ <strong>Versions</strong>: Schema versioning with full attribute history</li>
+<li class="">✅ <strong>Deliveries</strong>: Actual data delivery instances with metadata</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="schema-management">Schema Management<a href="#schema-management" class="hash-link" aria-label="Direct link to Schema Management" title="Direct link to Schema Management" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Attribute Browsing</strong>: View all attributes for each data object version</li>
+<li class="">✅ <strong>Attribute Types</strong>: String, number, boolean, date, timestamp, decimal, array, object</li>
+<li class="">✅ <strong>Nullable Attributes</strong>: Explicit null-handling specification</li>
+<li class="">✅ <strong>Format Specifications</strong>: Format hints (email, UUID, date-time, etc.)</li>
+<li class="">✅ <strong>Schema Versioning</strong>: Track schema changes over time</li>
+<li class="">✅ <strong>Schema Comparison</strong>: Compare different versions</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-explorer">Data Explorer<a href="#data-explorer" class="hash-link" aria-label="Direct link to Data Explorer" title="Direct link to Data Explorer" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Tree View Navigation</strong>: Expandable/collapsible hierarchy</li>
+<li class="">✅ <strong>Quick Selection</strong>: Click to navigate through levels</li>
+<li class="">✅ <strong>Attribute Details</strong>: View comprehensive attribute information</li>
+<li class="">✅ <strong>Owner Information</strong>: See data ownership and responsibility</li>
+<li class="">✅ <strong>Creation Timestamps</strong>: Track when objects and versions were created</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rule-integration">Rule Integration<a href="#rule-integration" class="hash-link" aria-label="Direct link to Rule Integration" title="Direct link to Rule Integration" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Run Rules on Version</strong>: Execute rules against specific data object versions</li>
+<li class="">✅ <strong>Attribute Targeting</strong>: Rules can target specific attributes</li>
+<li class="">✅ <strong>Version-Specific Rules</strong>: Different rules for different schema versions</li>
+<li class="">✅ <strong>Rule Recommendations</strong>: Suggest applicable rules based on attributes</li>
+<li class="">✅ <strong>Delivery Tracking</strong>: Link rule executions to specific deliveries</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-governance">Data Governance<a href="#data-governance" class="hash-link" aria-label="Direct link to Data Governance" title="Direct link to Data Governance" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Owner Attribution</strong>: Track data product and dataset owners</li>
+<li class="">✅ <strong>Lineage Tracking</strong>: Understand data flow between products</li>
+<li class="">✅ <strong>Change Management</strong>: Schema evolution over time</li>
+<li class="">✅ <strong>Impact Analysis</strong>: See which rules are affected by schema changes</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="rule-management">Rule Management<a href="#rule-management" class="hash-link" aria-label="Direct link to Rule Management" title="Direct link to Rule Management" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rule-lifecycle">Rule Lifecycle<a href="#rule-lifecycle" class="hash-link" aria-label="Direct link to Rule Lifecycle" title="Direct link to Rule Lifecycle" translate="no">​</a></h3>
+<p>Complete rule lifecycle with 7 distinct stages:</p>
+<ol>
+<li class=""><strong>📝 Draft</strong> - Rule creation and initial editing</li>
+<li class=""><strong>🧪 Testing</strong> - Validation tests in progress</li>
+<li class=""><strong>✓ Tested</strong> - Tests completed with results</li>
+<li class=""><strong>📤 Pending Approval</strong> - Submitted for review</li>
+<li class=""><strong>✅ Approved</strong> - Reviewed and approved by reviewer/admin</li>
+<li class=""><strong>🚀 Activated</strong> - Active in production</li>
+<li class=""><strong>❌ Rejected</strong> - Rejected with feedback for rework</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rule-features">Rule Features<a href="#rule-features" class="hash-link" aria-label="Direct link to Rule Features" title="Direct link to Rule Features" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Create Rules</strong>: Define data quality rules with attributes</li>
+<li class="">✅ <strong>Edit Rules</strong>: Modify existing rules with version tracking</li>
+<li class="">✅ <strong>Delete Rules</strong>: Remove rules (permission-based)</li>
+<li class="">✅ <strong>Test Rules</strong>: Run validation tests with coverage metrics</li>
+<li class="">✅ <strong>Rule Attributes</strong>: Link rules to data objects and attributes</li>
+<li class="">✅ <strong>Risk Levels</strong>: Assign risk levels (low, medium, high)</li>
+<li class="">✅ <strong>Rule Types</strong>: Support for various rule types (completeness, accuracy, uniqueness, etc.)</li>
+<li class="">✅ <strong>Bulk Actions</strong>: Select and act on multiple rules at once</li>
+<li class="">✅ <strong>Search &amp; Filter</strong>: Find rules by status, name, or attributes</li>
+<li class="">✅ <strong>Pagination</strong>: Efficient browsing of large rule sets</li>
+<li class="">✅ <strong>Join Conditions</strong>: Define rules across multiple related data objects (DQ-2)</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="join-conditions-dq-2">Join Conditions (DQ-2)<a href="#join-conditions-dq-2" class="hash-link" aria-label="Direct link to Join Conditions (DQ-2)" title="Direct link to Join Conditions (DQ-2)" translate="no">​</a></h3>
+<p><strong>Define data quality rules that validate relationships and consistency across multiple data objects.</strong></p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="join-features">Join Features<a href="#join-features" class="hash-link" aria-label="Direct link to Join Features" title="Direct link to Join Features" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>Multi-Object Joins</strong>: Link 2+ data objects in a single rule</li>
+<li class="">✅ <strong>Join Types</strong>: Inner Join, Left Join, Right Join, Full Join</li>
+<li class="">✅ <strong>Join Operators</strong>: Equality (=), inequality (!=), and numeric comparisons (&gt;, &gt;=, &lt;, &lt;=)</li>
+<li class="">✅ <strong>Multiple Conditions</strong>: Chain join predicates with AND logic</li>
+<li class="">✅ <strong>Smart Test Data Generation</strong>: Automatically generates test data for all joined objects</li>
+<li class="">✅ <strong>Join Evaluation Metrics</strong>: Matched context counts during testing</li>
+<li class="">✅ <strong>Visual Join Definitions</strong>: Easy-to-read join rule display</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="join-use-cases">Join Use Cases<a href="#join-use-cases" class="hash-link" aria-label="Direct link to Join Use Cases" title="Direct link to Join Use Cases" translate="no">​</a></h4>
+<ul>
+<li class=""><strong>Cross-Object Validation</strong>: Validate orders belong to valid customers</li>
+<li class=""><strong>Relationship Integrity</strong>: Ensure employees belong to active departments</li>
+<li class=""><strong>Multi-Entity Consistency</strong>: Validate data across related tables</li>
+<li class=""><strong>Complex Business Rules</strong>: Rules requiring data from multiple sources</li>
+<li class=""><strong>Compliance Checks</strong>: Multi-entity validation for regulatory requirements</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="user-guide">User Guide<a href="#user-guide" class="hash-link" aria-label="Direct link to User Guide" title="Direct link to User Guide" translate="no">​</a></h4>
+<p>📖 See <a class="" href="/docs/user-manuals/DQ-2_JOIN_CONDITIONS_USER_GUIDE/">DQ-2 Join Conditions User Guide</a> for detailed instructions and examples.</p>
+<hr>
+<ul>
+<li class=""><strong>Test Rule</strong>: Run validation tests</li>
+<li class=""><strong>Submit for Approval</strong>: Move to approval workflow</li>
+<li class=""><strong>Approve/Reject</strong>: Reviewer actions with comments</li>
+<li class=""><strong>Activate</strong>: Make rule active in production</li>
+<li class=""><strong>Clone</strong>: Duplicate existing rules</li>
+<li class=""><strong>Export</strong>: Export rule definitions</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="approval-workflow">Approval Workflow<a href="#approval-workflow" class="hash-link" aria-label="Direct link to Approval Workflow" title="Direct link to Approval Workflow" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="approval-process">Approval Process<a href="#approval-process" class="hash-link" aria-label="Direct link to Approval Process" title="Direct link to Approval Process" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Pending Approvals Queue</strong>: Centralized view of rules awaiting review</li>
+<li class="">✅ <strong>Approval Comments</strong>: Required for rejections, optional for approvals</li>
+<li class="">✅ <strong>Approval History</strong>: Track all approval decisions</li>
+<li class="">✅ <strong>Test Results Display</strong>: View test coverage during approval</li>
+<li class="">✅ <strong>Role-Based Approval</strong>: Only reviewers and admins can approve</li>
+<li class="">✅ <strong>Self-Approval Prevention</strong>: Editors cannot approve their own rules</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="approval-features">Approval Features<a href="#approval-features" class="hash-link" aria-label="Direct link to Approval Features" title="Direct link to Approval Features" translate="no">​</a></h3>
+<ul>
+<li class="">View rule details before approval</li>
+<li class="">See test results and coverage</li>
+<li class="">Add reviewer comments</li>
+<li class="">Approve or reject with reasons</li>
+<li class="">Track approval timestamps and reviewers</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="templates">Templates<a href="#templates" class="hash-link" aria-label="Direct link to Templates" title="Direct link to Templates" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="template-library">Template Library<a href="#template-library" class="hash-link" aria-label="Direct link to Template Library" title="Direct link to Template Library" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Pre-built Templates</strong>: Common data quality rule templates</li>
+<li class="">✅ <strong>Template Categories</strong>: Organized by rule type</li>
+<li class="">✅ <strong>Use Template</strong>: Create rules from templates with one click</li>
+<li class="">✅ <strong>Custom Templates</strong>: Editors and admins can create templates</li>
+<li class="">✅ <strong>Template Preview</strong>: View template details before use</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="template-features">Template Features<a href="#template-features" class="hash-link" aria-label="Direct link to Template Features" title="Direct link to Template Features" translate="no">​</a></h3>
+<ul>
+<li class="">Completeness templates</li>
+<li class="">Accuracy templates</li>
+<li class="">Uniqueness templates</li>
+<li class="">Consistency templates</li>
+<li class="">Custom business rule templates</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="reporting--analytics">Reporting &amp; Analytics<a href="#reporting--analytics" class="hash-link" aria-label="Direct link to Reporting &amp; Analytics" title="Direct link to Reporting &amp; Analytics" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="dashboard">Dashboard<a href="#dashboard" class="hash-link" aria-label="Direct link to Dashboard" title="Direct link to Dashboard" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Rule Status Overview</strong>: Visual summary of all rule statuses</li>
+<li class="">✅ <strong>Quick Stats</strong>: Total rules, active rules, pending approvals</li>
+<li class="">✅ <strong>Recent Activity</strong>: Latest rule actions and changes</li>
+<li class="">✅ <strong>Workspace Summary</strong>: Current workspace metrics</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="reports">Reports<a href="#reports" class="hash-link" aria-label="Direct link to Reports" title="Direct link to Reports" translate="no">​</a></h3>
+<p>Multiple report types with filtering and visualization:</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="metrics--analytics">Metrics &amp; Analytics<a href="#metrics--analytics" class="hash-link" aria-label="Direct link to Metrics &amp; Analytics" title="Direct link to Metrics &amp; Analytics" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>Data Quality Metrics</strong>: Aggregate quality scores</li>
+<li class="">✅ <strong>Rule Performance</strong>: Success/failure rates</li>
+<li class="">✅ <strong>Coverage Analysis</strong>: Test coverage statistics</li>
+<li class="">✅ <strong>Trend Analysis</strong>: Quality trends over time</li>
+<li class="">✅ <strong>Risk Distribution</strong>: Rules by risk level</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="test-results">Test Results<a href="#test-results" class="hash-link" aria-label="Direct link to Test Results" title="Direct link to Test Results" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>Test Execution History</strong>: All test runs with results</li>
+<li class="">✅ <strong>Test Coverage</strong>: Coverage by data object</li>
+<li class="">✅ <strong>Pass/Fail Rates</strong>: Visual test result summaries</li>
+<li class="">✅ <strong>Test Result Details</strong>: Drill-down into specific test runs</li>
+<li class="">✅ <strong>Test Visualizations</strong>: Charts and graphs for test data</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="audit-trail">Audit Trail<a href="#audit-trail" class="hash-link" aria-label="Direct link to Audit Trail" title="Direct link to Audit Trail" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="comprehensive-audit-logging">Comprehensive Audit Logging<a href="#comprehensive-audit-logging" class="hash-link" aria-label="Direct link to Comprehensive Audit Logging" title="Direct link to Comprehensive Audit Logging" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Timeline View</strong>: Chronological display of all actions</li>
+<li class="">✅ <strong>Event Types Tracked</strong>:<!-- -->
+<ul>
+<li class="">📝 Rule Created</li>
+<li class="">✏️ Rule Modified</li>
+<li class="">✓ Rule Tested (with coverage)</li>
+<li class="">📤 Submitted for Approval</li>
+<li class="">✅ Approved (with reviewer and comments)</li>
+<li class="">❌ Rejected (with reason)</li>
+<li class="">🚀 Activated</li>
+<li class="">⏸️ Deactivated</li>
+<li class="">🗑️ Deleted</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="audit-features">Audit Features<a href="#audit-features" class="hash-link" aria-label="Direct link to Audit Features" title="Direct link to Audit Features" translate="no">​</a></h3>
+<ul>
+<li class="">User who performed action</li>
+<li class="">Timestamp with date/time</li>
+<li class="">Action details and comments</li>
+<li class="">Before/after status transitions</li>
+<li class="">Test results when applicable</li>
+<li class="">Searchable and filterable</li>
+<li class="">Export audit logs</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="settings--configuration">Settings &amp; Configuration<a href="#settings--configuration" class="hash-link" aria-label="Direct link to Settings &amp; Configuration" title="Direct link to Settings &amp; Configuration" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="user-preferences">User Preferences<a href="#user-preferences" class="hash-link" aria-label="Direct link to User Preferences" title="Direct link to User Preferences" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Theme Selection</strong>: Light, dark, or auto mode</li>
+<li class="">✅ <strong>Display Density</strong>: Compact or comfortable view</li>
+<li class="">✅ <strong>Items Per Page</strong>: Configurable pagination (10, 25, 50, 100)</li>
+<li class="">✅ <strong>Date Format</strong>: DD/MM/YYYY, MM/DD/YYYY, or YYYY-MM-DD</li>
+<li class="">✅ <strong>Preview Features</strong>: Opt-in to experimental features</li>
+<li class="">✅ <strong>Persistent Settings</strong>: Saved to localStorage</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workspace-settings-admin-only">Workspace Settings (Admin only)<a href="#workspace-settings-admin-only" class="hash-link" aria-label="Direct link to Workspace Settings (Admin only)" title="Direct link to Workspace Settings (Admin only)" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Workspace Details</strong>: Name, description, configuration</li>
+<li class="">✅ <strong>User Management</strong>: Add/remove users from workspace</li>
+<li class="">✅ <strong>Role Assignment</strong>: Assign roles to users</li>
+<li class="">✅ <strong>Workspace Defaults</strong>: Configure default behaviors</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="application-settings-admin-only">Application Settings (Admin only)<a href="#application-settings-admin-only" class="hash-link" aria-label="Direct link to Application Settings (Admin only)" title="Direct link to Application Settings (Admin only)" translate="no">​</a></h3>
+<p>Complete application-wide configuration:</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="authentication--sso">Authentication &amp; SSO<a href="#authentication--sso" class="hash-link" aria-label="Direct link to Authentication &amp; SSO" title="Direct link to Authentication &amp; SSO" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>SSO Toggle</strong>: Enable/disable Single Sign-On</li>
+<li class="">✅ <strong>SSO Provider</strong>: Keycloak, Azure AD, Okta support</li>
+<li class="">✅ <strong>SSO Configuration</strong>: Issuer URL and Client ID</li>
+<li class="">✅ <strong>Local Auth Fallback</strong>: Allow local login alongside SSO</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="api-configuration">API Configuration<a href="#api-configuration" class="hash-link" aria-label="Direct link to API Configuration" title="Direct link to API Configuration" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>API Base URL</strong>: Configure backend endpoint</li>
+<li class="">✅ <strong>API Version</strong>: Version selection</li>
+<li class="">✅ <strong>Retry Settings</strong>: Configurable retry attempts and delays</li>
+<li class="">✅ <strong>Timeout Settings</strong>: API request timeout configuration</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="admin-limits">Admin Limits<a href="#admin-limits" class="hash-link" aria-label="Direct link to Admin Limits" title="Direct link to Admin Limits" translate="no">​</a></h4>
+<ul>
+<li class=""> ✅ <strong>Max Users Per Workspace</strong>: Limit workspace membership</li>
+<li class="">✅ <strong>Max Workspaces</strong>: System-wide workspace limit</li>
+<li class="">✅ <strong>Max Rules Per Workspace</strong>: Rule creation limits</li>
+<li class="">✅ <strong>Max Templates Per Workspace</strong>: Template limits</li>
+<li class="">✅ <strong>Max Concurrent Tests</strong>: Test execution concurrency limit</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="application-behavior">Application Behavior<a href="#application-behavior" class="hash-link" aria-label="Direct link to Application Behavior" title="Direct link to Application Behavior" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>Maintenance Mode</strong>: Enable/disable with custom message</li>
+<li class="">✅ <strong>Allow Signup</strong>: Toggle user registration</li>
+<li class="">✅ <strong>Email Verification</strong>: Require email verification</li>
+<li class="">✅ <strong>Default User Role</strong>: Set default role for new users</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging--monitoring">Logging &amp; Monitoring<a href="#logging--monitoring" class="hash-link" aria-label="Direct link to Logging &amp; Monitoring" title="Direct link to Logging &amp; Monitoring" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>Log Level</strong>: Debug, Info, Warning, Error</li>
+<li class="">✅ <strong>Analytics</strong>: Enable/disable usage analytics</li>
+<li class="">✅ <strong>Crash Reporting</strong>: Error tracking toggle</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="feature-flags">Feature Flags<a href="#feature-flags" class="hash-link" aria-label="Direct link to Feature Flags" title="Direct link to Feature Flags" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>Enable Suggestions</strong>: AI-powered rule suggestions</li>
+<li class="">✅ <strong>Enable Bulk Operations</strong>: Multi-rule operations</li>
+<li class="">✅ <strong>Enable Versioning</strong>: Rule version control</li>
+<li class="">✅ <strong>Enable Export</strong>: Rule export functionality</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-retention">Data Retention<a href="#data-retention" class="hash-link" aria-label="Direct link to Data Retention" title="Direct link to Data Retention" translate="no">​</a></h4>
+<ul>
+<li class="">✅ <strong>Audit Log Retention</strong>: Configurable retention period (days)</li>
+<li class="">✅ <strong>Test Results Retention</strong>: Test data retention</li>
+<li class="">✅ <strong>Deleted Items Retention</strong>: Soft delete retention period</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="system-settings">System Settings<a href="#system-settings" class="hash-link" aria-label="Direct link to System Settings" title="Direct link to System Settings" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>API Configuration</strong>: Backend URL configuration</li>
+<li class="">✅ <strong>Notification Preferences</strong>: Alert settings</li>
+<li class="">✅ <strong>Test Settings</strong>: Default test parameters</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="navigation--ui-features">Navigation &amp; UI Features<a href="#navigation--ui-features" class="hash-link" aria-label="Direct link to Navigation &amp; UI Features" title="Direct link to Navigation &amp; UI Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="header">Header<a href="#header" class="hash-link" aria-label="Direct link to Header" title="Direct link to Header" translate="no">​</a></h3>
+<ul>
+<li class="">Company logo/branding</li>
+<li class="">Workspace selector with role display</li>
+<li class="">User avatar and name</li>
+<li class="">Login/Logout buttons</li>
+<li class="">Theme switcher</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="sidebar-navigation">Sidebar Navigation<a href="#sidebar-navigation" class="hash-link" aria-label="Direct link to Sidebar Navigation" title="Direct link to Sidebar Navigation" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Collapsible Sidebar</strong>: Expand/collapse for more screen space</li>
+<li class="">✅ <strong>Role-Based Menu</strong>: Only shows permitted sections</li>
+<li class="">✅ <strong>Active Indicators</strong>: Highlights current section</li>
+<li class="">✅ <strong>Submenu Support</strong>: Nested navigation items</li>
+<li class="">✅ <strong>Icon-Based</strong>: Clear visual indicators</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="navigation-items">Navigation Items<a href="#navigation-items" class="hash-link" aria-label="Direct link to Navigation Items" title="Direct link to Navigation Items" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Dashboard</strong>: Overview and quick stats (all roles)</li>
+<li class=""><strong>Rules</strong>: Rule management (editor, reviewer, admin)</li>
+<li class=""><strong>Approvals</strong>: Approval workflow (reviewer, admin)</li>
+<li class=""><strong>Data Products</strong>: Data product browser and schema explorer (editor, reviewer, admin)</li>
+<li class=""><strong>Reports</strong>: Analytics and metrics<!-- -->
+<ul>
+<li class="">Metrics &amp; Analytics</li>
+<li class="">Test Results</li>
+</ul>
+</li>
+<li class=""><strong>Audit Trail</strong>: Activity logs<!-- -->
+<ul>
+<li class="">All Activity</li>
+<li class="">Changes</li>
+</ul>
+</li>
+<li class=""><strong>Templates</strong>: Template library (editor, admin)</li>
+<li class=""><strong>Settings</strong>: System configuration (admin)</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="api-endpoints">API Endpoints<a href="#api-endpoints" class="hash-link" aria-label="Direct link to API Endpoints" title="Direct link to API Endpoints" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rules-api">Rules API<a href="#rules-api" class="hash-link" aria-label="Direct link to Rules API" title="Direct link to Rules API" translate="no">​</a></h3>
+<ul>
+<li class=""><code>GET /rules</code> - List all rules (with filters)</li>
+<li class=""><code>GET /rules/:id</code> - Get specific rule</li>
+<li class=""><code>POST /rules</code> - Create new rule</li>
+<li class=""><code>PUT /rules/:id</code> - Update rule</li>
+<li class=""><code>DELETE /rules/:id</code> - Delete rule</li>
+<li class=""><code>POST /rules/:id/test</code> - Test rule execution</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="approvals-api">Approvals API<a href="#approvals-api" class="hash-link" aria-label="Direct link to Approvals API" title="Direct link to Approvals API" translate="no">​</a></h3>
+<ul>
+<li class=""><code>GET /approvals</code> - List pending approvals</li>
+<li class=""><code>POST /approvals</code> - Create approval request</li>
+<li class=""><code>PUT /approvals/:id</code> - Update approval status</li>
+<li class=""><code>DELETE /approvals/:id</code> - Remove approval</li>
+<li class=""><code>GET /approvals/audit</code> - Get approval audit trail</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="workspaces-api">Workspaces API<a href="#workspaces-api" class="hash-link" aria-label="Direct link to Workspaces API" title="Direct link to Workspaces API" translate="no">​</a></h3>
+<ul>
+<li class=""><code>GET /workspaces</code> - List workspaces</li>
+<li class=""><code>POST /workspaces</code> - Create workspace</li>
+<li class=""><code>PUT /workspaces/:id</code> - Update workspace</li>
+<li class=""><code>DELETE /workspaces/:id</code> - Delete workspace</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-catalog-api">Data Catalog API<a href="#data-catalog-api" class="hash-link" aria-label="Direct link to Data Catalog API" title="Direct link to Data Catalog API" translate="no">​</a></h3>
+<ul>
+<li class=""><code>GET /data-products</code> - List data products</li>
+<li class=""><code>GET /data-sets</code> - List data sets</li>
+<li class=""><code>GET /data-objects</code> - List lifecycle-managed data objects</li>
+<li class=""><code>GET /data-objects-catalog</code> - List cataloged data objects</li>
+<li class=""><code>GET /data-object-versions</code> - List data object versions</li>
+<li class=""><code>GET /attributes-catalog</code> - List cataloged versioned attributes</li>
+<li class=""><code>GET /data-deliveries</code> - List data deliveries</li>
+<li class=""><code>GET /rule-attributes</code> - List rule-attribute mappings</li>
+<li class=""><code>POST /rule-attributes</code> - Create rule-attribute link</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="users-api">Users API<a href="#users-api" class="hash-link" aria-label="Direct link to Users API" title="Direct link to Users API" translate="no">​</a></h3>
+<ul>
+<li class=""><code>GET /users</code> - List users</li>
+<li class=""><code>GET /users/:id</code> - Get user details</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="execution-engine-features">Execution Engine Features<a href="#execution-engine-features" class="hash-link" aria-label="Direct link to Execution Engine Features" title="Direct link to Execution Engine Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rule-execution">Rule Execution<a href="#rule-execution" class="hash-link" aria-label="Direct link to Rule Execution" title="Direct link to Rule Execution" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Great Expectations Integration</strong>: Industry-standard validation library</li>
+<li class="">✅ <strong>Database Connectivity</strong>: Connect to PostgreSQL and other databases</li>
+<li class="">✅ <strong>Rule Translation</strong>: Automatic conversion to expectations</li>
+<li class="">✅ <strong>Batch Processing</strong>: Execute multiple rules at once</li>
+<li class="">✅ <strong>Result Posting</strong>: Automatic result posting to API</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="supported-rule-types">Supported Rule Types<a href="#supported-rule-types" class="hash-link" aria-label="Direct link to Supported Rule Types" title="Direct link to Supported Rule Types" translate="no">​</a></h3>
+<ul>
+<li class="">Completeness checks (null/empty validation)</li>
+<li class="">Accuracy checks (range, format validation)</li>
+<li class="">Uniqueness checks (duplicate detection)</li>
+<li class="">Consistency checks (cross-table validation)</li>
+<li class="">Timeliness checks (freshness validation)</li>
+<li class="">Custom expectations</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="execution-features">Execution Features<a href="#execution-features" class="hash-link" aria-label="Direct link to Execution Features" title="Direct link to Execution Features" translate="no">​</a></h3>
+<ul>
+<li class=""><code>POST /compile</code> - Translate rules to Great Expectations expectations</li>
+<li class=""><code>GET /health</code> and <code>GET /readiness</code> management endpoints</li>
+<li class="">Spark-based execution handled by the GX dispatch worker</li>
+<li class="">Worker result reporting and error handling</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="development--deployment-features">Development &amp; Deployment Features<a href="#development--deployment-features" class="hash-link" aria-label="Direct link to Development &amp; Deployment Features" title="Direct link to Development &amp; Deployment Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="development-tools">Development Tools<a href="#development-tools" class="hash-link" aria-label="Direct link to Development Tools" title="Direct link to Development Tools" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Hot Module Replacement</strong>: Fast development with Vite</li>
+<li class="">✅ <strong>TypeScript</strong>: Full type safety</li>
+<li class="">✅ <strong>ESLint &amp; Prettier</strong>: Code quality tools</li>
+<li class="">✅ <strong>Mock Data</strong>: MSW (Mock Service Worker) for API mocking</li>
+<li class="">✅ <strong>Local Development Scripts</strong>: Convenient start/stop scripts</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="testing">Testing<a href="#testing" class="hash-link" aria-label="Direct link to Testing" title="Direct link to Testing" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Unit Tests</strong>: Vitest for component testing</li>
+<li class="">✅ <strong>Smoke Tests</strong>: Automated endpoint validation</li>
+<li class="">✅ <strong>Integration Tests</strong>: Full stack validation</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="deployment">Deployment<a href="#deployment" class="hash-link" aria-label="Direct link to Deployment" title="Direct link to Deployment" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Docker Support</strong>: Containerized deployment</li>
+<li class="">✅ <strong>Docker Compose</strong>: Multi-service orchestration</li>
+<li class="">✅ <strong>Nginx Frontend Serving</strong>: Production-ready web server</li>
+<li class="">✅ <strong>Environment Configuration</strong>: .env file support</li>
+<li class="">✅ <strong>Health Checks</strong>: Service availability monitoring</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="scripts--automation">Scripts &amp; Automation<a href="#scripts--automation" class="hash-link" aria-label="Direct link to Scripts &amp; Automation" title="Direct link to Scripts &amp; Automation" translate="no">​</a></h3>
+<ul>
+<li class=""><code>common_startup.sh</code> - Start the usual local stack and Vite UI, with <code>--env local\|deployment</code> or <code>--env-file PATH</code></li>
+<li class=""><code>start-containers.sh</code> - Start selected Docker profile groups (<code>--with-*</code> or <code>--all</code>)</li>
+<li class=""><code>stop-all.sh</code> - Stop all services</li>
+<li class=""><code>smoke_test.sh</code> - Validate running services</li>
+<li class=""><code>build_images.sh</code> - Build Docker images</li>
+<li class=""><code>start_stack.sh</code> - Docker Compose up</li>
+<li class=""><code>stop_stack.sh</code> - Docker Compose down</li>
+<li class=""><code>seed_local_postgres.sh</code> - Initialize database</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-management">Data Management<a href="#data-management" class="hash-link" aria-label="Direct link to Data Management" title="Direct link to Data Management" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="database-features">Database Features<a href="#database-features" class="hash-link" aria-label="Direct link to Database Features" title="Direct link to Database Features" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>PostgreSQL Backend</strong>: Reliable relational database</li>
+<li class="">✅ <strong>SQL Seed Scripts</strong>: Pre-populated test data</li>
+<li class="">✅ <strong>Mock Data</strong>: CSV-based mock data files</li>
+<li class="">✅ <strong>Database Migrations</strong>: Schema version control</li>
+<li class="">✅ <strong>Connection Pooling</strong>: Efficient database connections</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-objects">Data Objects<a href="#data-objects" class="hash-link" aria-label="Direct link to Data Objects" title="Direct link to Data Objects" translate="no">​</a></h3>
+<ul>
+<li class="">Rules</li>
+<li class="">Workspaces</li>
+<li class="">Users</li>
+<li class="">Approvals</li>
+<li class="">Attributes</li>
+<li class="">Rule-Attributes (mappings)</li>
+<li class="">Data Objects</li>
+<li class="">Audit Trail</li>
+<li class="">Test Results</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="uiux-features">UI/UX Features<a href="#uiux-features" class="hash-link" aria-label="Direct link to UI/UX Features" title="Direct link to UI/UX Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="design-system">Design System<a href="#design-system" class="hash-link" aria-label="Direct link to Design System" title="Direct link to Design System" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Consistent Styling</strong>: Unified look and feel</li>
+<li class="">✅ <strong>Accessible</strong>: WCAG-compliant components</li>
+<li class="">✅ <strong>Responsive</strong>: Mobile and desktop support</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="theming">Theming<a href="#theming" class="hash-link" aria-label="Direct link to Theming" title="Direct link to Theming" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Light Mode</strong>: Default light theme</li>
+<li class="">✅ <strong>Dark Mode</strong>: Dark theme with proper contrast</li>
+<li class="">✅ <strong>Auto Mode</strong>: Follows system preference</li>
+<li class="">✅ <strong>Persistent Selection</strong>: Theme saved to localStorage</li>
+<li class="">✅ <strong>Smooth Transitions</strong>: No flicker on theme change</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="visual-elements">Visual Elements<a href="#visual-elements" class="hash-link" aria-label="Direct link to Visual Elements" title="Direct link to Visual Elements" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Status Badges</strong>: Color-coded status indicators</li>
+<li class="">✅ <strong>Risk Badges</strong>: Visual risk level display</li>
+<li class="">✅ <strong>Icons</strong>: Comprehensive app-owned icon library</li>
+<li class="">✅ <strong>Loading States</strong>: Skeleton loaders and spinners</li>
+<li class="">✅ <strong>Empty States</strong>: Helpful messages when no data</li>
+<li class="">✅ <strong>Error States</strong>: Clear error messaging</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="notifications">Notifications<a href="#notifications" class="hash-link" aria-label="Direct link to Notifications" title="Direct link to Notifications" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Toast Notifications</strong>: Non-intrusive alerts</li>
+<li class="">✅ <strong>Notification Center</strong>: Centralized notifications</li>
+<li class="">✅ <strong>Action Feedback</strong>: Confirmation of user actions</li>
+<li class="">✅ <strong>Error Alerts</strong>: Clear error communication</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="advanced-features">Advanced Features<a href="#advanced-features" class="hash-link" aria-label="Direct link to Advanced Features" title="Direct link to Advanced Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="bulk-operations">Bulk Operations<a href="#bulk-operations" class="hash-link" aria-label="Direct link to Bulk Operations" title="Direct link to Bulk Operations" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Multi-Select</strong>: Select multiple rules</li>
+<li class="">✅ <strong>Bulk Actions Toolbar</strong>: Actions for selected items</li>
+<li class="">✅ <strong>Bulk Approve</strong>: Approve multiple rules at once</li>
+<li class="">✅ <strong>Bulk Delete</strong>: Delete multiple rules</li>
+<li class="">✅ <strong>Bulk Export</strong>: Export multiple rules</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="version-control">Version Control<a href="#version-control" class="hash-link" aria-label="Direct link to Version Control" title="Direct link to Version Control" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Rule Versioning</strong>: Track rule changes over time</li>
+<li class="">✅ <strong>Version History</strong>: View previous versions</li>
+<li class="">✅ <strong>Version Comparison</strong>: Compare versions</li>
+<li class="">✅ <strong>Rollback</strong>: Revert to previous versions</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="search--filtering">Search &amp; Filtering<a href="#search--filtering" class="hash-link" aria-label="Direct link to Search &amp; Filtering" title="Direct link to Search &amp; Filtering" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Full-Text Search</strong>: Search across rule names and descriptions</li>
+<li class="">✅ <strong>Status Filters</strong>: Filter by rule status</li>
+<li class="">✅ <strong>Risk Level Filters</strong>: Filter by risk level</li>
+<li class="">✅ <strong>Multi-Criteria Filtering</strong>: Combine multiple filters</li>
+<li class="">✅ <strong>Quick Filters</strong>: Preset filter combinations</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-visualization">Data Visualization<a href="#data-visualization" class="hash-link" aria-label="Direct link to Data Visualization" title="Direct link to Data Visualization" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Charts &amp; Graphs</strong>: Visual data representation</li>
+<li class="">✅ <strong>Test Coverage Charts</strong>: Visual coverage display</li>
+<li class="">✅ <strong>Trend Lines</strong>: Historical trend visualization</li>
+<li class="">✅ <strong>Pie Charts</strong>: Distribution visualization</li>
+<li class="">✅ <strong>Bar Charts</strong>: Comparative visualizations</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="preview-features-system">Preview Features System<a href="#preview-features-system" class="hash-link" aria-label="Direct link to Preview Features System" title="Direct link to Preview Features System" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Opt-In Control</strong>: Users can enable/disable preview features in Settings</li>
+<li class="">✅ <strong>Experimental Features</strong>: Access to cutting-edge functionality</li>
+<li class="">✅ <strong>Menu Filtering</strong>: Preview-only items only appear when enabled</li>
+<li class="">✅ <strong>Feature Flags</strong>: Granular control over experimental features</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="how-to-enable-preview-features">How to Enable Preview Features<a href="#how-to-enable-preview-features" class="hash-link" aria-label="Direct link to How to Enable Preview Features" title="Direct link to How to Enable Preview Features" translate="no">​</a></h4>
+<ol>
+<li class="">Navigate to <strong>Settings &gt; Display</strong></li>
+<li class="">Scroll to <strong>Preview Features</strong> section</li>
+<li class="">Check <strong>&quot;Participate in preview features&quot;</strong></li>
+<li class="">Save changes</li>
+</ol>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="available-preview-features">Available Preview Features<a href="#available-preview-features" class="hash-link" aria-label="Direct link to Available Preview Features" title="Direct link to Available Preview Features" translate="no">​</a></h4>
+<ul>
+<li class="">
+<p>✅ <strong>AI-Powered Suggestions</strong>:</p>
+<ul>
+<li class="">Analyzes data patterns</li>
+<li class="">Recommends data quality rules automatically</li>
+<li class="">Helps identify potential data quality issues proactively</li>
+<li class="">Accessible via Suggestions menu (editors and admins only)</li>
+</ul>
+<p><strong>Suggestion Workflow:</strong></p>
+<ol>
+<li class="">
+<p><strong>Request Profiling</strong>: Select a data source and run data profiling to analyze data patterns</p>
+</li>
+<li class="">
+<p><strong>Review Suggestions</strong>: AI generates recommendations with confidence scores</p>
+</li>
+<li class="">
+<p><strong>Manage Suggestions</strong>:</p>
+<ul>
+<li class=""><strong>Accept</strong>: Review and confirm the suggestion is good (changes status to <code>accepted</code>)</li>
+<li class=""><strong>Apply as Rule</strong>: Create an actual rule from the suggestion (changes status to <code>applied</code>)</li>
+<li class=""><strong>Dismiss</strong>: Reject the suggestion (changes status to <code>dismissed</code>)</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Applied Rules</strong> enter the normal rule lifecycle:</p>
+<ul>
+<li class="">Draft → Testing → Tested → Pending Approval → Approved → Activated</li>
+</ul>
+</li>
+</ol>
+<p><strong>Note</strong>: You can accept a suggestion without immediately applying it, allowing you to review multiple suggestions before committing rules. Or skip directly to Apply as Rule to create a rule immediately.</p>
+</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="future-preview-features-planned">Future Preview Features (Planned)<a href="#future-preview-features-planned" class="hash-link" aria-label="Direct link to Future Preview Features (Planned)" title="Direct link to Future Preview Features (Planned)" translate="no">​</a></h4>
+<ul>
+<li class="">Advanced visual rule builder</li>
+<li class="">Data lineage tracing</li>
+<li class="">Custom dashboard designer</li>
+<li class="">Rule marketplace for sharing templates</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-features">Security Features<a href="#security-features" class="hash-link" aria-label="Direct link to Security Features" title="Direct link to Security Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="authentication">Authentication<a href="#authentication" class="hash-link" aria-label="Direct link to Authentication" title="Direct link to Authentication" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Session Management</strong>: Secure session handling</li>
+<li class="">✅ <strong>Token-Based Auth</strong>: Keycloak JWT support</li>
+<li class="">✅ <strong>Persistent Login</strong>: Remember user sessions</li>
+<li class="">✅ <strong>Secure Logout</strong>: Clear session on logout</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="authorization">Authorization<a href="#authorization" class="hash-link" aria-label="Direct link to Authorization" title="Direct link to Authorization" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Role-Based Access</strong>: Granular permission control</li>
+<li class="">✅ <strong>Protected Routes</strong>: Route-level protection</li>
+<li class="">✅ <strong>Component-Level Guards</strong>: Fine-grained access control</li>
+<li class="">✅ <strong>API Authorization</strong>: Backend permission checks</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-security">Data Security<a href="#data-security" class="hash-link" aria-label="Direct link to Data Security" title="Direct link to Data Security" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>CORS Configuration</strong>: Cross-origin request handling</li>
+<li class="">✅ <strong>Environment Variables</strong>: Sensitive config management</li>
+<li class="">✅ <strong>Password Hashing</strong>: Secure credential storage (when using local auth)</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="integration-features">Integration Features<a href="#integration-features" class="hash-link" aria-label="Direct link to Integration Features" title="Direct link to Integration Features" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="keycloak-integration">Keycloak Integration<a href="#keycloak-integration" class="hash-link" aria-label="Direct link to Keycloak Integration" title="Direct link to Keycloak Integration" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>SSO Support</strong>: Single sign-on capability</li>
+<li class="">✅ <strong>Realm Configuration</strong>: Pre-configured realms</li>
+<li class="">✅ <strong>Client Registration</strong>: Dedicated client ID</li>
+<li class="">✅ <strong>Token Validation</strong>: JWT token support</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="api-integration">API Integration<a href="#api-integration" class="hash-link" aria-label="Direct link to API Integration" title="Direct link to API Integration" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>RESTful API</strong>: Standard HTTP methods</li>
+<li class="">✅ <strong>JSON Format</strong>: Standard data exchange format</li>
+<li class="">✅ <strong>Error Handling</strong>: Consistent error responses</li>
+<li class="">✅ <strong>CORS Support</strong>: Cross-origin requests enabled</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="documentation">Documentation<a href="#documentation" class="hash-link" aria-label="Direct link to Documentation" title="Direct link to Documentation" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="available-documentation">Available Documentation<a href="#available-documentation" class="hash-link" aria-label="Direct link to Available Documentation" title="Direct link to Available Documentation" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>README.md</strong>: Quick start guide</li>
+<li class="">✅ <strong>AUTH_SYSTEM.md</strong>: Authentication documentation</li>
+<li class="">✅ <strong>RULE_LIFECYCLE.md</strong>: Rule workflow documentation</li>
+<li class="">✅ <strong>DEPLOYMENT_GUIDE.md</strong>: Deployment instructions</li>
+<li class="">✅ <strong>QUICK_REFERENCE.md</strong>: Quick reference guide</li>
+<li class="">✅ <strong>FILE_MANIFEST.md</strong>: File structure documentation</li>
+<li class="">✅ <strong>APP_STYLING_GUIDE.md</strong>: Styling guidelines</li>
+<li class="">✅ <strong>Architecture Info</strong>: System architecture docs</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="api-specifications">API Specifications<a href="#api-specifications" class="hash-link" aria-label="Direct link to API Specifications" title="Direct link to API Specifications" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>OpenAPI 3.0 Specification</strong>: Interactive Swagger UI at <code>/api-docs</code>
+<ul>
+<li class="">All 60+ endpoints documented with request/response schemas</li>
+<li class="">Organized by tags: Rules, Workspaces, Approvals, Users, Attributes, Data Catalog, Testing, etc.</li>
+<li class="">Try-it-out feature for testing endpoints in browser</li>
+<li class="">Export to JSON for client SDK generation</li>
+<li class="">See <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_QUICKSTART.md#api-specifications-openapi-30" target="_blank" rel="noopener noreferrer" class="">KONG_QUICKSTART.md</a> for details</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-contracts">Data Contracts<a href="#data-contracts" class="hash-link" aria-label="Direct link to Data Contracts" title="Direct link to Data Contracts" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>ODCS 3.1.0 Contracts</strong>: Open Data Contract Standard support<!-- -->
+<ul>
+<li class="">Vendor-neutral machine-readable data contract format</li>
+<li class="">Access via <code>/v1/data-contracts</code> endpoint</li>
+<li class="">Schema definitions, quality rules, SLAs, and lineage</li>
+<li class="">YAML and JSON format support</li>
+<li class="">Standards-compliant with SodaCL for quality specifications</li>
+<li class="">See <a href="https://github.com/jactools/dq-rulebuilder/blob/main/dq-api/KONG_QUICKSTART.md#data-contracts-odcs-310" target="_blank" rel="noopener noreferrer" class="">KONG_QUICKSTART.md</a> for details</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="technology-stack">Technology Stack<a href="#technology-stack" class="hash-link" aria-label="Direct link to Technology Stack" title="Direct link to Technology Stack" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="frontend">Frontend<a href="#frontend" class="hash-link" aria-label="Direct link to Frontend" title="Direct link to Frontend" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>React 18</strong> - UI library</li>
+<li class=""><strong>TypeScript</strong> - Type safety</li>
+<li class=""><strong>Vite</strong> - Build tool and dev server</li>
+<li class=""><strong>App-owned components</strong> - shared product primitives</li>
+<li class=""><strong>CSS3</strong> - Custom styling</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="backend">Backend<a href="#backend" class="hash-link" aria-label="Direct link to Backend" title="Direct link to Backend" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>FastAPI</strong> - Python web framework</li>
+<li class=""><strong>TypeScript</strong> - Type safety</li>
+<li class=""><strong>PostgreSQL</strong> - Database</li>
+<li class=""><strong>Node.js 22+</strong> - Runtime</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="execution-engine">Execution Engine<a href="#execution-engine" class="hash-link" aria-label="Direct link to Execution Engine" title="Direct link to Execution Engine" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Python 3.x</strong> - Runtime</li>
+<li class=""><strong>Great Expectations</strong> - Data validation library</li>
+<li class=""><strong>SQLAlchemy</strong> - Database ORM</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="devops">DevOps<a href="#devops" class="hash-link" aria-label="Direct link to DevOps" title="Direct link to DevOps" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Docker</strong> - Containerization</li>
+<li class=""><strong>Docker Compose</strong> - Multi-container orchestration</li>
+<li class=""><strong>Nginx</strong> - Web server</li>
+<li class=""><strong>Keycloak</strong> - Identity management</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="testing-1">Testing<a href="#testing-1" class="hash-link" aria-label="Direct link to Testing" title="Direct link to Testing" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Vitest</strong> - Unit testing</li>
+<li class=""><strong>Bash Scripts</strong> - Smoke testing</li>
+<li class=""><strong>MSW</strong> - API mocking</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="platform-support">Platform Support<a href="#platform-support" class="hash-link" aria-label="Direct link to Platform Support" title="Direct link to Platform Support" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="operating-systems">Operating Systems<a href="#operating-systems" class="hash-link" aria-label="Direct link to Operating Systems" title="Direct link to Operating Systems" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>macOS</strong> - Full support with zsh</li>
+<li class="">✅ <strong>Linux</strong> - Docker and native support</li>
+<li class="">✅ <strong>Windows</strong> - Docker support</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="browsers">Browsers<a href="#browsers" class="hash-link" aria-label="Direct link to Browsers" title="Direct link to Browsers" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Chrome/Edge</strong> - Full support</li>
+<li class="">✅ <strong>Firefox</strong> - Full support</li>
+<li class="">✅ <strong>Safari</strong> - Full support</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="deployment-platforms">Deployment Platforms<a href="#deployment-platforms" class="hash-link" aria-label="Direct link to Deployment Platforms" title="Direct link to Deployment Platforms" translate="no">​</a></h3>
+<ul>
+<li class="">✅ <strong>Local Development</strong> - Native or Docker</li>
+<li class="">✅ <strong>Docker Containers</strong> - Production deployment</li>
+<li class="">✅ <strong>Cloud Platforms</strong> - AWS, Azure, GCP compatible</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="future-enhancements-roadmap">Future Enhancements (Roadmap)<a href="#future-enhancements-roadmap" class="hash-link" aria-label="Direct link to Future Enhancements (Roadmap)" title="Direct link to Future Enhancements (Roadmap)" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="planned-features">Planned Features<a href="#planned-features" class="hash-link" aria-label="Direct link to Planned Features" title="Direct link to Planned Features" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Suggestions System</strong>: AI-powered rule suggestions (preview feature)</li>
+<li class=""><strong>Advanced Analytics</strong>: Machine learning insights</li>
+<li class=""><strong>Scheduled Execution</strong>: Automated rule runs</li>
+<li class=""><strong>Email Notifications</strong>: Alert users of important events</li>
+<li class=""><strong>API Rate Limiting</strong>: Prevent abuse</li>
+<li class=""><strong>Multi-Database Support</strong>: Support for more database types</li>
+<li class=""><strong>Real-Time Dashboard</strong>: Live updates via WebSocket</li>
+<li class=""><strong>Rule Dependencies</strong>: Define rule execution order</li>
+<li class=""><strong>Custom Validators</strong>: User-defined validation logic</li>
+<li class=""><strong>Data Profiling</strong>: Automatic data analysis</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="summary">Summary<a href="#summary" class="hash-link" aria-label="Direct link to Summary" title="Direct link to Summary" translate="no">​</a></h2>
+<p>Data Quality Made Easy is a <strong>production-ready</strong>, <strong>enterprise-grade</strong> data quality rule management platform featuring:</p>
+<ul>
+<li class="">🎯 <strong>Complete Rule Lifecycle</strong> from draft to production</li>
+<li class="">🔐 <strong>Robust RBAC</strong> with 4 distinct roles</li>
+<li class="">✅ <strong>Approval Workflow</strong> with audit trail</li>
+<li class="">📊 <strong>Comprehensive Reporting</strong> and analytics</li>
+<li class="">🎨 <strong>Modern UI</strong> with dark mode</li>
+<li class="">🔌 <strong>RESTful API</strong> for integration</li>
+<li class="">🐳 <strong>Docker-Ready</strong> for easy deployment</li>
+<li class="">📝 <strong>Full Documentation</strong> for quick onboarding</li>
+</ul>
+<p><strong>Status</strong>: Fully functional and ready for production use with mock data. Ready for backend API integration.</p>
+<hr>
+<p><em>Last Updated: February 25, 2026</em></p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/features/FEATURE_ROADMAP_OVERVIEW/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">dq-made-easy Actionable Feature Roadmap Overview</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/features/FRONTEND_UI_PORTABILITY_FEATURES/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Frontend UI Portability and Theming Abstraction</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview" class="table-of-contents__link toc-highlight">Overview</a></li><li><a href="#core-components" class="table-of-contents__link toc-highlight">Core Components</a><ul><li><a href="#1-frontend-ui-dq-ui" class="table-of-contents__link toc-highlight">1. Frontend UI (<code>dq-ui</code>)</a></li><li><a href="#2-backend-api-dq-api" class="table-of-contents__link toc-highlight">2. Backend API (<code>dq-api</code>)</a></li><li><a href="#3-execution-engine-dq-engine" class="table-of-contents__link toc-highlight">3. Execution Engine (<code>dq-engine</code>)</a></li></ul></li><li><a href="#authentication--authorization" class="table-of-contents__link toc-highlight">Authentication &amp; Authorization</a><ul><li><a href="#user-management" class="table-of-contents__link toc-highlight">User Management</a></li><li><a href="#role-based-access-control-rbac" class="table-of-contents__link toc-highlight">Role-Based Access Control (RBAC)</a></li><li><a href="#workspace-management" class="table-of-contents__link toc-highlight">Workspace Management</a></li></ul></li><li><a href="#data-product-browser" class="table-of-contents__link toc-highlight">Data Product Browser</a><ul><li><a href="#hierarchical-navigation" class="table-of-contents__link toc-highlight">Hierarchical Navigation</a></li><li><a href="#schema-management" class="table-of-contents__link toc-highlight">Schema Management</a></li><li><a href="#data-explorer" class="table-of-contents__link toc-highlight">Data Explorer</a></li><li><a href="#rule-integration" class="table-of-contents__link toc-highlight">Rule Integration</a></li><li><a href="#data-governance" class="table-of-contents__link toc-highlight">Data Governance</a></li></ul></li><li><a href="#rule-management" class="table-of-contents__link toc-highlight">Rule Management</a><ul><li><a href="#rule-lifecycle" class="table-of-contents__link toc-highlight">Rule Lifecycle</a></li><li><a href="#rule-features" class="table-of-contents__link toc-highlight">Rule Features</a></li><li><a href="#join-conditions-dq-2" class="table-of-contents__link toc-highlight">Join Conditions (DQ-2)</a></li></ul></li><li><a href="#approval-workflow" class="table-of-contents__link toc-highlight">Approval Workflow</a><ul><li><a href="#approval-process" class="table-of-contents__link toc-highlight">Approval Process</a></li><li><a href="#approval-features" class="table-of-contents__link toc-highlight">Approval Features</a></li></ul></li><li><a href="#templates" class="table-of-contents__link toc-highlight">Templates</a><ul><li><a href="#template-library" class="table-of-contents__link toc-highlight">Template Library</a></li><li><a href="#template-features" class="table-of-contents__link toc-highlight">Template Features</a></li></ul></li><li><a href="#reporting--analytics" class="table-of-contents__link toc-highlight">Reporting &amp; Analytics</a><ul><li><a href="#dashboard" class="table-of-contents__link toc-highlight">Dashboard</a></li><li><a href="#reports" class="table-of-contents__link toc-highlight">Reports</a></li></ul></li><li><a href="#audit-trail" class="table-of-contents__link toc-highlight">Audit Trail</a><ul><li><a href="#comprehensive-audit-logging" class="table-of-contents__link toc-highlight">Comprehensive Audit Logging</a></li><li><a href="#audit-features" class="table-of-contents__link toc-highlight">Audit Features</a></li></ul></li><li><a href="#settings--configuration" class="table-of-contents__link toc-highlight">Settings &amp; Configuration</a><ul><li><a href="#user-preferences" class="table-of-contents__link toc-highlight">User Preferences</a></li><li><a href="#workspace-settings-admin-only" class="table-of-contents__link toc-highlight">Workspace Settings (Admin only)</a></li><li><a href="#application-settings-admin-only" class="table-of-contents__link toc-highlight">Application Settings (Admin only)</a></li><li><a href="#system-settings" class="table-of-contents__link toc-highlight">System Settings</a></li></ul></li><li><a href="#navigation--ui-features" class="table-of-contents__link toc-highlight">Navigation &amp; UI Features</a><ul><li><a href="#header" class="table-of-contents__link toc-highlight">Header</a></li><li><a href="#sidebar-navigation" class="table-of-contents__link toc-highlight">Sidebar Navigation</a></li><li><a href="#navigation-items" class="table-of-contents__link toc-highlight">Navigation Items</a></li></ul></li><li><a href="#api-endpoints" class="table-of-contents__link toc-highlight">API Endpoints</a><ul><li><a href="#rules-api" class="table-of-contents__link toc-highlight">Rules API</a></li><li><a href="#approvals-api" class="table-of-contents__link toc-highlight">Approvals API</a></li><li><a href="#workspaces-api" class="table-of-contents__link toc-highlight">Workspaces API</a></li><li><a href="#data-catalog-api" class="table-of-contents__link toc-highlight">Data Catalog API</a></li><li><a href="#users-api" class="table-of-contents__link toc-highlight">Users API</a></li></ul></li><li><a href="#execution-engine-features" class="table-of-contents__link toc-highlight">Execution Engine Features</a><ul><li><a href="#rule-execution" class="table-of-contents__link toc-highlight">Rule Execution</a></li><li><a href="#supported-rule-types" class="table-of-contents__link toc-highlight">Supported Rule Types</a></li><li><a href="#execution-features" class="table-of-contents__link toc-highlight">Execution Features</a></li></ul></li><li><a href="#development--deployment-features" class="table-of-contents__link toc-highlight">Development &amp; Deployment Features</a><ul><li><a href="#development-tools" class="table-of-contents__link toc-highlight">Development Tools</a></li><li><a href="#testing" class="table-of-contents__link toc-highlight">Testing</a></li><li><a href="#deployment" class="table-of-contents__link toc-highlight">Deployment</a></li><li><a href="#scripts--automation" class="table-of-contents__link toc-highlight">Scripts &amp; Automation</a></li></ul></li><li><a href="#data-management" class="table-of-contents__link toc-highlight">Data Management</a><ul><li><a href="#database-features" class="table-of-contents__link toc-highlight">Database Features</a></li><li><a href="#data-objects" class="table-of-contents__link toc-highlight">Data Objects</a></li></ul></li><li><a href="#uiux-features" class="table-of-contents__link toc-highlight">UI/UX Features</a><ul><li><a href="#design-system" class="table-of-contents__link toc-highlight">Design System</a></li><li><a href="#theming" class="table-of-contents__link toc-highlight">Theming</a></li><li><a href="#visual-elements" class="table-of-contents__link toc-highlight">Visual Elements</a></li><li><a href="#notifications" class="table-of-contents__link toc-highlight">Notifications</a></li></ul></li><li><a href="#advanced-features" class="table-of-contents__link toc-highlight">Advanced Features</a><ul><li><a href="#bulk-operations" class="table-of-contents__link toc-highlight">Bulk Operations</a></li><li><a href="#version-control" class="table-of-contents__link toc-highlight">Version Control</a></li><li><a href="#search--filtering" class="table-of-contents__link toc-highlight">Search &amp; Filtering</a></li><li><a href="#data-visualization" class="table-of-contents__link toc-highlight">Data Visualization</a></li><li><a href="#preview-features-system" class="table-of-contents__link toc-highlight">Preview Features System</a></li></ul></li><li><a href="#security-features" class="table-of-contents__link toc-highlight">Security Features</a><ul><li><a href="#authentication" class="table-of-contents__link toc-highlight">Authentication</a></li><li><a href="#authorization" class="table-of-contents__link toc-highlight">Authorization</a></li><li><a href="#data-security" class="table-of-contents__link toc-highlight">Data Security</a></li></ul></li><li><a href="#integration-features" class="table-of-contents__link toc-highlight">Integration Features</a><ul><li><a href="#keycloak-integration" class="table-of-contents__link toc-highlight">Keycloak Integration</a></li><li><a href="#api-integration" class="table-of-contents__link toc-highlight">API Integration</a></li></ul></li><li><a href="#documentation" class="table-of-contents__link toc-highlight">Documentation</a><ul><li><a href="#available-documentation" class="table-of-contents__link toc-highlight">Available Documentation</a></li><li><a href="#api-specifications" class="table-of-contents__link toc-highlight">API Specifications</a></li><li><a href="#data-contracts" class="table-of-contents__link toc-highlight">Data Contracts</a></li></ul></li><li><a href="#technology-stack" class="table-of-contents__link toc-highlight">Technology Stack</a><ul><li><a href="#frontend" class="table-of-contents__link toc-highlight">Frontend</a></li><li><a href="#backend" class="table-of-contents__link toc-highlight">Backend</a></li><li><a href="#execution-engine" class="table-of-contents__link toc-highlight">Execution Engine</a></li><li><a href="#devops" class="table-of-contents__link toc-highlight">DevOps</a></li><li><a href="#testing-1" class="table-of-contents__link toc-highlight">Testing</a></li></ul></li><li><a href="#platform-support" class="table-of-contents__link toc-highlight">Platform Support</a><ul><li><a href="#operating-systems" class="table-of-contents__link toc-highlight">Operating Systems</a></li><li><a href="#browsers" class="table-of-contents__link toc-highlight">Browsers</a></li><li><a href="#deployment-platforms" class="table-of-contents__link toc-highlight">Deployment Platforms</a></li></ul></li><li><a href="#future-enhancements-roadmap" class="table-of-contents__link toc-highlight">Future Enhancements (Roadmap)</a><ul><li><a href="#planned-features" class="table-of-contents__link toc-highlight">Planned Features</a></li></ul></li><li><a href="#summary" class="table-of-contents__link toc-highlight">Summary</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/">Overview</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/feature-plans/">Feature Plans</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Reference</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/user-manuals/">User manuals</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/api-reference/">API reference</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/technical-references/">Technical references</a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright 2026 dq-made-easy maintainers.</div></div></div></footer></div>
+</body>
+</html>
