@@ -68,7 +68,7 @@ validate_openmetadata_authorization() {
     return 1
   fi
 
-  probe_url="${api_base_url%/}/api/v1/users?limit=1"
+  probe_url="${api_base_url%/}/api/v1/system/version"
   host="$(printf '%s' "$api_base_url" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^/:]+).*$#\1#')"
   if [ -z "$host" ] || [ "$host" = "$api_base_url" ]; then
     error "openmetadata.sh" "Unable to derive OpenMetadata hostname from OPENMETADATA_PUBLIC_URL=${api_base_url}"
@@ -115,28 +115,10 @@ prepare_openmetadata_access_token() {
     return 1
   fi
 
-  # Try client credentials grant first (openmetadata-admin service account).
-  # This avoids password rotation issues — the client secret doesn't change.
-  local om_admin_client_id="${OM_ADMIN_CLIENT_ID:-openmetadata-admin}"
-  local om_admin_client_secret="${OM_ADMIN_CLIENT_SECRET:-}"
-  if [ -n "$om_admin_client_secret" ]; then
-    info "openmetadata.sh" "Preparing OpenMetadata OM_TOKEN via client credentials grant..."
-    OM_TOKEN="$(CURL_CA_BUNDLE= SSL_CERT_FILE= REQUESTS_CA_BUNDLE= \
-      dq_keycloak_client_credentials_access_token \
-      "${token_url%/}/protocol/openid-connect/token" \
-      "$om_admin_client_id" \
-      "$om_admin_client_secret" \
-      -k)" || {
-      error "openmetadata.sh" "Client credentials grant failed for OM_TOKEN"
-      return 1
-    }
-    export OM_TOKEN
-    validate_openmetadata_authorization || return 1
-    info "openmetadata.sh" "✓ Prepared OpenMetadata OM_TOKEN via client credentials grant"
-    return 0
-  fi
-
-  # Fallback: password grant with seeded user credentials.
+  # Try password grant with seeded user credentials (dq-admin).
+  # This creates a token for a real OpenMetadata user that can perform
+  # admin operations (create users, seed data) unlike a service account
+  # token which has no user entity in OpenMetadata.
   if [ -z "${ROOT_DIR:-}" ] || [ ! -f "$ROOT_DIR/scripts/load_seeded_user_credentials.sh" ]; then
     error "openmetadata.sh" "ROOT_DIR must point at the repo root so seeded OpenMetadata credentials can be refreshed"
     return 1

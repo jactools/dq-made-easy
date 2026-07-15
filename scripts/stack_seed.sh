@@ -157,6 +157,9 @@ if [ "$FORCE_BUILD" = true ]; then
   docker_compose --profile auth --profile seed build keycloak-seed-artifacts 2>/dev/null || true
   docker_compose --profile auth --profile seed build db-seed 2>/dev/null || true
   docker_compose --profile core --profile gateway --profile observability build api 2>/dev/null || true
+  if [ "$SEED_OPENMETADATA" = true ]; then
+    docker_compose --profile metadata build openmetadata-configure 2>/dev/null || true
+  fi
 fi
 
 # ---------------------------------------------------------------------------

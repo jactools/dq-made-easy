@@ -28,7 +28,7 @@ services:
       POSTGRES_PASSWORD: ${OM_DB_PASSWORD:?OM_DB_PASSWORD is required}
       POSTGRES_DB: ${OM_DB_NAME:?OM_DB_NAME is required}
     ports:
-    - ${OPENMETADATA_DB_HOST_BIND:?OPENMETADATA_DB_HOST_BIND is required}:${OPENMETADATA_DB_HOST_PORT:?OPENMETADATA_DB_HOST_PORT is required}:5432
+    - ${OPENMETADATA_DB_HOST_BIND:?OPENMETADATA_DB_HOST_BIND is required}:${OPENMETADATA_DB_HOST_PORT:?OPENMETADATA_DB_HOST_PORT is required}:${OPENMETADATA_DB_CONTAINER_PORT:?OPENMETADATA_DB_CONTAINER_PORT is required}
     volumes:
     - ../tmp/certs/services/openmetadata-db:/etc/postgresql/certs:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/postgresql/internal-ca-bundle.pem:ro
@@ -209,7 +209,7 @@ services:
     command:
     - /openmetadata-https-start.sh
     ports:
-    - ${OPENMETADATA_HOST_BIND:?OPENMETADATA_HOST_BIND is required}:${OPENMETADATA_HOST_PORT:?OPENMETADATA_HOST_PORT is required}:8585
+    - ${OPENMETADATA_HOST_BIND:?OPENMETADATA_HOST_BIND is required}:${OPENMETADATA_HOST_PORT:?OPENMETADATA_HOST_PORT is required}:${OPENMETADATA_CONTAINER_PORT:?OPENMETADATA_CONTAINER_PORT is required}
     volumes:
     - ../tmp/certs/openmetadata.p12:/opt/openmetadata/conf/openmetadata.p12:ro
     - ../tmp/certs/mkcert-rootCA.pem:/etc/openmetadata/certs/mkcert-rootCA.pem:ro
@@ -234,8 +234,11 @@ services:
     depends_on:
       openmetadata-server:
         condition: service_healthy
-      keycloak:
-        condition: service_healthy
+      # keycloak is not a direct dependency; the configure script contacts Keycloak
+      # via the internal Docker network. Requiring keycloak as a dependency forces
+      # docker compose to re-run keycloak-seed-artifacts (keycloak's build-time
+      # dependency), which regenerates passwords that are not yet applied to the
+      # live Keycloak and breaks the openmetadata password grant.
     profiles:
     - metadata
     build:
@@ -321,7 +324,7 @@ services:
     - -c
     - airflow db migrate && airflow api-server -p 8080
     ports:
-    - ${OPENMETADATA_INGESTION_HOST_BIND:?OPENMETADATA_INGESTION_HOST_BIND is required}:${OPENMETADATA_INGESTION_HOST_PORT:?OPENMETADATA_INGESTION_HOST_PORT is required}:8080
+    - ${OPENMETADATA_INGESTION_HOST_BIND:?OPENMETADATA_INGESTION_HOST_BIND is required}:${OPENMETADATA_INGESTION_HOST_PORT:?OPENMETADATA_INGESTION_HOST_PORT is required}:${OPENMETADATA_INGESTION_CONTAINER_PORT:?OPENMETADATA_INGESTION_CONTAINER_PORT is required}
     volumes:
     - ../tmp/certs/services/openmetadata-ingestion/tls.crt:/etc/openmetadata/certs/openmetadata-ingestion/tls.crt:ro
     - ../tmp/certs/services/openmetadata-ingestion/tls.key:/etc/openmetadata/certs/openmetadata-ingestion/tls.key:ro

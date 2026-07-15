@@ -39,7 +39,7 @@ MAPPING_FAIL_ON_LOW_COVERAGE="${MAPPING_FAIL_ON_LOW_COVERAGE:-false}"
 # If true, try to provision glossaryTerm custom property `assetId` before LDD import.
 ENSURE_GLOSSARY_ASSET_ID="${ENSURE_GLOSSARY_ASSET_ID:-true}"
 
-INGESTION_CONTAINER="${INGESTION_CONTAINER:-$(docker ps --format '{{.Names}}' | grep -E 'dq-made-easy-openmetadata-ingestion' | head -n 1 || true)}"
+INGESTION_CONTAINER="${INGESTION_CONTAINER:-$(docker ps --format '{{.Names}}' | grep -E 'openmetadata-ingestion' | head -n 1 || true)}"
 if [[ -z "$INGESTION_CONTAINER" ]]; then
   echo "No running OpenMetadata ingestion container found."
   echo "Start it first (example): docker compose --profile metadata-ingestion up -d"

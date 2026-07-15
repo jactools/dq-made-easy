@@ -267,6 +267,8 @@ def generate_realm(
     zammad_public_url=None,
     engine_service_client_id: str | None = None,
     engine_service_client_secret: str | None = None,
+    openmetadata_client_id: str | None = None,
+    openmetadata_client_secret: str | None = None,
 ):
     # Resolve runtime defaults from environment (after .env has been loaded).
     realm_name = realm_name or os.getenv("KEYCLOAK_REALM")
@@ -445,7 +447,23 @@ def generate_realm(
                 "attributes": {
                     "access.token.lifespan": str(KEYCLOAK_SERVICE_ACCOUNT_ACCESS_TOKEN_LIFESPAN_SECONDS),
                 },
-                "defaultClientScopes": ["profile", "email", "roles"],
+                "defaultClientScopes": ["openid", "profile", "email", "roles"],
+                "protocolMappers": [
+                    {
+                        "name": "email",
+                        "protocol": "openid-connect",
+                        "protocolMapper": "oidc-hardcoded-claim-mapper",
+                        "consentRequired": False,
+                        "config": {
+                            "introspection.token.claim": "true",
+                            "id.token.claim": "true",
+                            "access.token.claim": "true",
+                            "claim.name": "email",
+                            "claim.value": "openmetadata-admin@jaccloud.nl",
+                            "jsonType.label": "String",
+                        },
+                    },
+                ],
             },
             {
                 "clientId": "zammad",
@@ -600,6 +618,7 @@ def main():
     p.add_argument("--realm-name", default=None, help="Realm name (falls back to .env KEYCLOAK_REALM)")
     p.add_argument("--realm-display-name", default=None, help="Realm display name (falls back to .env KEYCLOAK_REALM_DISPLAY_NAME)")
     p.add_argument("--openmetadata-callback", default=None, help="OpenMetadata OIDC callback URI (falls back to .env OPENMETADATA_CALLBACK)")
+    p.add_argument("--openmetadata-client-id", default=None, help="Client ID for the confidential OpenMetadata OIDC client in Keycloak (falls back to .env OPENMETADATA_CLIENT_ID)")
     p.add_argument(
         "--frontend-origin",
         action="append",
@@ -635,6 +654,11 @@ def main():
         "--browser-auth-client-secret",
         default=None,
         help="Client secret for the browser auth client (falls back to .env BROWSER_AUTH_CLIENT_SECRET)",
+    )
+    p.add_argument(
+        "--openmetadata-client-secret",
+        default=None,
+        help="Client secret for the confidential OpenMetadata OIDC client in Keycloak (falls back to .env OPENMETADATA_CLIENT_SECRET)",
     )
     p.add_argument(
         "--engine-service-client-id",
