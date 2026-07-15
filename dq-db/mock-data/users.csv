@@ -1,5 +1,6 @@
 "id","first_name","last_name","email","external_id","workspaces"
 "019e0488-9a56-766b-97f9-a908083a2026","Admin","User","dq-admin@jaccloud.nl","","retail-banking"
+"c79dda46-5753-4131-9ac3-323f400ccf73","OpenMetadata","Admin","openmetadata-admin@jaccloud.nl","","global"
 "019e0488-9a54-7f95-8b19-df83e6b355a4","Alice","Rabbithole","alice@jaccloud.nl","","retail-banking"
 "019e0488-9a54-7fc4-ba3c-7f34580f9e93","Bob","Martin","bob@jaccloud.nl","","retail-banking"
 "019e0488-9a56-73fd-9e19-c78020e55dc6","Charlie","Brown","charlie@jaccloud.nl","","retail-banking"
