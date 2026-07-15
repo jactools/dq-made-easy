@@ -265,29 +265,31 @@ discover_repositories() {
 }
 
 normalize_repository_name() {
+    # All Docker Hub repos are jacbeekers/dq-made-easy-*
+    # Accept dq-made-easy-* directly, strip dq- prefix from short names.
     case "$1" in
-        npm-base|dq-base|dq-made-easy-base) printf '%s' 'npm-base' ;;
-        dq-api|dq-made-easy-api) printf '%s' 'dq-api' ;;
-        dq-engine|dq-made-easy-engine) printf '%s' 'dq-engine' ;;
-        dq-profiling|dq-made-easy-profiling) printf '%s' 'dq-profiling' ;;
-        dq-frontend|dq-made-easy-frontend) printf '%s' 'dq-frontend' ;;
-        dq-kong|dq-made-easy-kong) printf '%s' 'dq-kong' ;;
-        dq-db|dq-made-easy-db) printf '%s' 'dq-db' ;;
-        dq-keycloak|dq-made-easy-keycloak) printf '%s' 'dq-keycloak' ;;
-        dq-kafka|dq-made-easy-kafka) printf '%s' 'dq-kafka' ;;
-        dq-kafka-consumer|dq-made-easy-kafka-consumer) printf '%s' 'dq-kafka-consumer' ;;
-        dq-trino|dq-made-easy-trino) printf '%s' 'dq-trino' ;;
-        dq-edge|dq-made-easy-edge) printf '%s' 'dq-edge' ;;
-        dq-airflow|dq-made-easy-airflow) printf '%s' 'dq-airflow' ;;
-        dq-llm|dq-made-easy-llm) printf '%s' 'dq-llm' ;;
-        dq-db-seed|dq-made-easy-db-seed) printf '%s' 'dq-db-seed' ;;
-        dq-keycloak-seed-artifacts|dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-keycloak-seed-artifacts' ;;
-        dq-openmetadata-db|dq-made-easy-openmetadata-db) printf '%s' 'dq-openmetadata-db' ;;
-        dq-openmetadata-server|dq-made-easy-openmetadata-server) printf '%s' 'dq-openmetadata-server' ;;
-        dq-metadata-configure|dq-made-easy-metadata-configure) printf '%s' 'dq-metadata-configure' ;;
-        dq-container-metrics|dq-made-easy-container-metrics) printf '%s' 'dq-container-metrics' ;;
-        dq-zammad-seed|dq-made-easy-zammad-seed) printf '%s' 'dq-zammad-seed' ;;
-        dq-zammad-origin|dq-made-easy-zammad-origin) printf '%s' 'dq-zammad-origin' ;;
+        npm-base|dq-base|dq-made-easy-base|dq-made-easy-npm-base) printf '%s' 'dq-made-easy-npm-base' ;;
+        dq-api|dq-made-easy-api) printf '%s' 'dq-made-easy-api' ;;
+        dq-engine|dq-made-easy-engine) printf '%s' 'dq-made-easy-engine' ;;
+        dq-profiling|dq-made-easy-profiling) printf '%s' 'dq-made-easy-profiling' ;;
+        dq-frontend|dq-made-easy-frontend) printf '%s' 'dq-made-easy-frontend' ;;
+        dq-kong|dq-made-easy-kong) printf '%s' 'dq-made-easy-kong' ;;
+        dq-db|dq-made-easy-db) printf '%s' 'dq-made-easy-db' ;;
+        dq-keycloak|dq-made-easy-keycloak) printf '%s' 'dq-made-easy-keycloak' ;;
+        dq-kafka|dq-made-easy-kafka) printf '%s' 'dq-made-easy-kafka' ;;
+        dq-kafka-consumer|dq-made-easy-kafka-consumer) printf '%s' 'dq-made-easy-kafka-consumer' ;;
+        dq-trino|dq-made-easy-trino) printf '%s' 'dq-made-easy-trino' ;;
+        dq-edge|dq-made-easy-edge) printf '%s' 'dq-made-easy-edge' ;;
+        dq-airflow|dq-made-easy-airflow) printf '%s' 'dq-made-easy-airflow' ;;
+        dq-llm|dq-made-easy-llm) printf '%s' 'dq-made-easy-llm' ;;
+        dq-db-seed|dq-made-easy-db-seed) printf '%s' 'dq-made-easy-db-seed' ;;
+        dq-keycloak-seed-artifacts|dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-made-easy-keycloak-seed-artifacts' ;;
+        dq-openmetadata-db|dq-made-easy-openmetadata-db) printf '%s' 'dq-made-easy-openmetadata-db' ;;
+        dq-openmetadata-server|dq-made-easy-openmetadata-server) printf '%s' 'dq-made-easy-openmetadata-server' ;;
+        dq-metadata-configure|dq-made-easy-metadata-configure) printf '%s' 'dq-made-easy-metadata-configure' ;;
+        dq-container-metrics|dq-made-easy-container-metrics) printf '%s' 'dq-made-easy-container-metrics' ;;
+        dq-zammad-seed|dq-made-easy-zammad-seed) printf '%s' 'dq-made-easy-zammad-seed' ;;
+        dq-zammad-origin|dq-made-easy-zammad-origin) printf '%s' 'dq-made-easy-zammad-origin' ;;
         *)
             return 1
             ;;

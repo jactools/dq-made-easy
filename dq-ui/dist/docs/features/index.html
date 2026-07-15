@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.10.2">
 <title data-rh="true">Data Quality Made Easy - Features | DQ Made Easy Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="http://127.0.0.1/docs/features/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Data Quality Made Easy - Features | DQ Made Easy Docs"><meta data-rh="true" name="description" content="FEATURES.md is the authoritative reference for all platform capabilities and features."><meta data-rh="true" property="og:description" content="FEATURES.md is the authoritative reference for all platform capabilities and features."><link data-rh="true" rel="icon" href="/docs/img/favicon.svg"><link data-rh="true" rel="canonical" href="http://127.0.0.1/docs/features/"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/features/" hreflang="en"><link data-rh="true" rel="alternate" href="http://127.0.0.1/docs/features/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Data Quality Made Easy - Features","item":"http://127.0.0.1/docs/features/"}]}</script><link rel="stylesheet" href="/docs/assets/css/styles.78e6bda1.css">
-<script src="/docs/assets/js/runtime~main.876268fe.js" defer="defer"></script>
-<script src="/docs/assets/js/main.26f7bd29.js" defer="defer"></script>
+<script src="/docs/assets/js/runtime~main.97ff2b63.js" defer="defer"></script>
+<script src="/docs/assets/js/main.c3615baf.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -483,13 +483,15 @@
 </ul>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="scripts--automation">Scripts &amp; Automation<a href="#scripts--automation" class="hash-link" aria-label="Direct link to Scripts &amp; Automation" title="Direct link to Scripts &amp; Automation" translate="no">​</a></h3>
 <ul>
-<li class=""><code>common_startup.sh</code> - Start the usual local stack and Vite UI, with <code>--env local\|deployment</code> or <code>--env-file PATH</code></li>
-<li class=""><code>start-containers.sh</code> - Start selected Docker profile groups (<code>--with-*</code> or <code>--all</code>)</li>
-<li class=""><code>stop-all.sh</code> - Stop all services</li>
+<li class=""><code>stack.sh</code> - Orchestrator: <code>stack.sh &amp;lt;env&amp;gt; &amp;lt;action&amp;gt;</code> (init, start, restart, stop, seed, destroy)</li>
+<li class=""><code>stack_destroy.sh</code> - Full teardown (containers, volumes, artifacts)</li>
+<li class=""><code>stack_start.sh</code> - Start containers (fresh or warm start)</li>
+<li class=""><code>stack_stop.sh</code> - Stop containers (keeps volumes)</li>
+<li class=""><code>stack_restart.sh</code> - Restart (reuse admin passwords, rotate service/user)</li>
+<li class=""><code>stack_seed.sh</code> - Seed running stack</li>
+<li class=""><code>stack_ctl.sh</code> - Image build/pull/push and status reporting</li>
 <li class=""><code>smoke_test.sh</code> - Validate running services</li>
 <li class=""><code>build_images.sh</code> - Build Docker images</li>
-<li class=""><code>start_stack.sh</code> - Docker Compose up</li>
-<li class=""><code>stop_stack.sh</code> - Docker Compose down</li>
 <li class=""><code>seed_local_postgres.sh</code> - Initialize database</li>
 </ul>
 <hr>
