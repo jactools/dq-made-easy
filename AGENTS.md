@@ -64,6 +64,16 @@ WF7 Azure Container Apps notes:
 - ACA environment provisioning uses `stateKeyPrefixEnvironment` for `environment.tfstate`; per-app deployment uses `stateKeyPrefixApp` for individual app state.
 - ACA deploy pipelines publish smoke/evidence output through `azure-pipelines/templates/dq-made-easy-container-app-smoke.yml` into `tmp/release/aca-deploy-evidence/<env>`.
 
+## Committing changes
+
+**Do not create any git commit without explicit user approval.** Before committing:
+
+1. Show the user what changed: `git diff --cached --stat` (or `git status --short` if unstaged)
+2. Explain why the change is needed
+3. Wait for the user to confirm before running `git commit`
+
+Exception: If the user has explicitly asked you to commit (e.g. "commit that", "go ahead and commit"), proceed.
+
 ## Conflict resolution
 
 If a rule conflicts with an explicit developer or system instruction, raise the conflict to the user. Do not silently override.
