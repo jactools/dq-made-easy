@@ -38,6 +38,8 @@ RUN set -eux; \
                 wget \
                 ca-certificates \
                 libssl3 \
+                && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 EXPOSE 8000
