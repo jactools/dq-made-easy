@@ -1,4 +1,4 @@
-ARG OPENMETADATA_DB_BASE_IMAGE
+ARG OPENMETADATA_DB_BASE_IMAGE=postgres:18
 FROM ${OPENMETADATA_DB_BASE_IMAGE}
 
 COPY dq-db/init/00_extensions.sql /docker-entrypoint-initdb.d/00_extensions.sql
