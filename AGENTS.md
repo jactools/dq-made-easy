@@ -70,9 +70,12 @@ WF7 Azure Container Apps notes:
 
 1. Show the user what changed: `git diff --cached --stat` (or `git status --short` if unstaged)
 2. Explain why the change is needed
-3. Wait for the user to confirm before running `git commit`
+3. Assign a short identifier (e.g. "commit `dockerhub-fix`")
+4. Ask: "Shall I commit `dockerhub-fix`?"
 
-Exception: If the user has explicitly asked you to commit (e.g. "commit that", "go ahead and commit"), proceed.
+The user will respond "Yes, commit `<identifier>`" to confirm. Only commit when the identifier matches. If multiple changes are staged and the user says just "yes", commit only the last one you asked about.
+
+Exception: If the user says "commit everything" or "commit all", proceed with all staged changes.
 
 ## Conflict resolution
 
