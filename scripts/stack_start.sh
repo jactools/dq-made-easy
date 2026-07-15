@@ -207,6 +207,18 @@ info "stack_start.sh" "Building trust bundle (JKS/P12)..."
 # ---------------------------------------------------------------------------
 if [ "$FORCE_BUILD" = true ]; then
   info "stack_start.sh" "Building images (--force-build)..."
+
+  # Build frontend assets on the host before docker-compose build packages them.
+  # The frontend Dockerfile copies dq-ui/dist/ at build time and does not run
+  # npm/vite inside the image, so dist/ must be fresh on the host first.
+  if [ -d "$ROOT_DIR/dq-ui" ]; then
+    info "stack_start.sh" "Building frontend assets on host..."
+    "$ROOT_DIR/scripts/local_build_frontend.sh" --no-docker-build || {
+      error "stack_start.sh" "Frontend asset build failed"
+      exit 1
+    }
+  fi
+
   docker_compose build --no-cache || {
     error "stack_start.sh" "Image build failed"
     exit 1

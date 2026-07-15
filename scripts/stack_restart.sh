@@ -164,6 +164,16 @@ info "stack_restart.sh" "Building trust bundle (JKS/P12)..."
 # ---------------------------------------------------------------------------
 if [ "$FORCE_BUILD" = true ]; then
   info "stack_restart.sh" "Building images (--force-build)..."
+
+  # Build frontend assets on the host before docker-compose build packages them.
+  if [ -d "$ROOT_DIR/dq-ui" ]; then
+    info "stack_restart.sh" "Building frontend assets on host..."
+    "$ROOT_DIR/scripts/local_build_frontend.sh" --no-docker-build || {
+      error "stack_restart.sh" "Frontend asset build failed"
+      exit 1
+    }
+  fi
+
   docker_compose build --no-cache || {
     error "stack_restart.sh" "Image build failed"
     exit 1

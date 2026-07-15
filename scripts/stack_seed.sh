@@ -154,6 +154,16 @@ fi
 # ---------------------------------------------------------------------------
 if [ "$FORCE_BUILD" = true ]; then
   info "stack_seed.sh" "Building seed images..."
+
+  # Build frontend assets on the host before docker-compose build packages them.
+  if [ -d "$ROOT_DIR/dq-ui" ]; then
+    info "stack_seed.sh" "Building frontend assets on host..."
+    "$ROOT_DIR/scripts/local_build_frontend.sh" --no-docker-build || {
+      error "stack_seed.sh" "Frontend asset build failed"
+      exit 1
+    }
+  fi
+
   docker_compose --profile auth --profile seed build keycloak-seed-artifacts 2>/dev/null || true
   docker_compose --profile auth --profile seed build db-seed 2>/dev/null || true
   docker_compose --profile core --profile gateway --profile observability build api 2>/dev/null || true
