@@ -412,6 +412,20 @@ EOF
     exit 33
   }
 
+  # Restart Keycloak so the entrypoint applies the new passwords from the
+  # updated seed-artifacts volume.  kcadm set-password is unreliable for
+  # bulk password rotation (token expiry, argument parsing quirks).
+  # The entrypoint's kcadm loop is deterministic and uses the correct CSV.
+  info "$my_name" "Restarting Keycloak to apply rotated passwords via entrypoint..."
+  docker_compose restart keycloak || {
+    error "$my_name" "Failed to restart Keycloak container"
+    exit 33
+  }
+  wait_for_compose_service_healthy keycloak "Keycloak" 180 3 || {
+    error "$my_name" "Keycloak did not become healthy after restart"
+    exit 33
+  }
+
   info "$my_name" "✓ Keycloak reseed completed against existing stack (${rotated_password_count} passwords applied)"
 }
 
