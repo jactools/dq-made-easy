@@ -1,11 +1,11 @@
 ---
 title: "Import and unit assertions on seed_password_rotation.py. 12 tests passed covering admin var classification, unique password generation, and admin skip behavior."
-description: "Human-readable test proof generated from test-results/test-proof/0.11.6/infra/password-rotation-2026-07-14.json."
+description: "Human-readable test proof generated from test-results/test-proof/0.11.5/infra/password-rotation-2026-07-14.json."
 ---
 
 # Import and unit assertions on seed_password_rotation.py. 12 tests passed covering admin var classification, unique password generation, and admin skip behavior.
 
-This page was generated from [test-results/test-proof/0.11.6/infra/password-rotation-2026-07-14.json](../../../../test-results/test-proof/0.11.6/infra/password-rotation-2026-07-14.json).
+This page was generated from [test-results/test-proof/0.11.5/infra/password-rotation-2026-07-14.json](../../../../test-results/test-proof/0.11.5/infra/password-rotation-2026-07-14.json).
 
 ## Summary
 
@@ -15,7 +15,7 @@ Import and unit assertions on seed_password_rotation.py. 12 tests passed coverin
 
 | Field | Value |
 | --- | --- |
-| App Version | 0.11.6 |
+| App Version | 0.11.5 |
 | Proof Id | password-rotation-2026-07-14 |
 | Proof Type | infra |
 | Feature | stack-scripts |

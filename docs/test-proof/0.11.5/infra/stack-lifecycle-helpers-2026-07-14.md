@@ -1,11 +1,11 @@
 ---
 title: "Source stack_lifecycle.sh; tested is_admin_password_var, _derive_env_suffix, _get_project_prefix, STATEFUL_VOLUME_NAMES. 24 tests passed."
-description: "Human-readable test proof generated from test-results/test-proof/0.11.6/infra/stack-lifecycle-helpers-2026-07-14.json."
+description: "Human-readable test proof generated from test-results/test-proof/0.11.5/infra/stack-lifecycle-helpers-2026-07-14.json."
 ---
 
 # Source stack_lifecycle.sh; tested is_admin_password_var, _derive_env_suffix, _get_project_prefix, STATEFUL_VOLUME_NAMES. 24 tests passed.
 
-This page was generated from [test-results/test-proof/0.11.6/infra/stack-lifecycle-helpers-2026-07-14.json](../../../../test-results/test-proof/0.11.6/infra/stack-lifecycle-helpers-2026-07-14.json).
+This page was generated from [test-results/test-proof/0.11.5/infra/stack-lifecycle-helpers-2026-07-14.json](../../../../test-results/test-proof/0.11.5/infra/stack-lifecycle-helpers-2026-07-14.json).
 
 ## Summary
 
@@ -15,7 +15,7 @@ Source stack_lifecycle.sh; tested is_admin_password_var, _derive_env_suffix, _ge
 
 | Field | Value |
 | --- | --- |
-| App Version | 0.11.6 |
+| App Version | 0.11.5 |
 | Proof Id | stack-lifecycle-helpers-2026-07-14 |
 | Proof Type | infra |
 | Feature | stack-scripts |
