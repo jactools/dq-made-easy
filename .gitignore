@@ -14,8 +14,8 @@ package-lock.json
 dq-keycloak/jaccloud-realm.json
 
 ## Build / output
-dist/
 !dq-ui/dist/
+dist/
 
 build/
 .vite/
