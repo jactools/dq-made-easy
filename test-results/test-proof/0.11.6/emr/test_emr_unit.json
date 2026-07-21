@@ -1,0 +1,40 @@
+{
+  "test_proof": {
+    "version": "0.11.6",
+    "proof_type": "emr",
+    "date": "2026-07-21",
+    "tests": [
+      {
+        "name": "test_emr_app_imports",
+        "file": "dq-api/fastapi/emr/tests/test_emr_app.py",
+        "status": "passed",
+        "description": "Verify EMR app can be imported and created"
+      },
+      {
+        "name": "test_emr_app_has_routes",
+        "file": "dq-api/fastapi/emr/tests/test_emr_app.py",
+        "status": "passed",
+        "description": "Verify EMR app has health check and /v1 routes"
+      },
+      {
+        "name": "test_emr_repository_imports",
+        "file": "dq-api/fastapi/emr/tests/test_emr_app.py",
+        "status": "passed",
+        "description": "Verify EMR repository can be imported and instantiated"
+      },
+      {
+        "name": "test_emr_entities_imports",
+        "file": "dq-api/fastapi/emr/tests/test_emr_app.py",
+        "status": "passed",
+        "description": "Verify EMR entities can be imported and created"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "duration": "0.18s"
+    },
+    "evidence": "test-results/evidence/0.11.6/emr/test_emr_unit.log"
+  }
+}
