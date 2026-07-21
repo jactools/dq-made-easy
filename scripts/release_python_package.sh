@@ -40,6 +40,9 @@ ALL_PACKAGE_KEYS=(
   dq-domain-validation
   dq-airflow-sdk
   dq-airflow-operator
+  emr-utils
+  emr-delivery-sdk
+  emr-delivery-cli
 )
 
 usage() {
@@ -52,6 +55,9 @@ Packages:
   dq-domain-validation | dq-made-easy-domain-validation | release_dq_domain_validation.sh
   dq-airflow-sdk | dq-made-easy-airflow-sdk | release_dq_airflow_sdk.sh
   dq-airflow-operator | dq-made-easy-airflow-operator | release_dq_airflow_operator.sh
+  emr-utils | release_emr_utils.sh
+  emr-delivery-sdk | release_emr_delivery_sdk.sh
+  emr-delivery-cli | release_emr_delivery_cli.sh
 
 Options:
   --all                  Build and optionally publish every repo package
@@ -116,6 +122,18 @@ resolve_package() {
     dq-airflow-operator|dq-made-easy-airflow-operator|release_dq_airflow_operator.sh)
       PACKAGE_DIR="${ROOT_DIR}/dq-airflow-operator"
       PACKAGE_LABEL="dq-made-easy-airflow-operator"
+      ;;
+    emr-utils|release_emr_utils.sh)
+      PACKAGE_DIR="${ROOT_DIR}/emr-utils"
+      PACKAGE_LABEL="emr-utils"
+      ;;
+    emr-delivery-sdk|release_emr_delivery_sdk.sh)
+      PACKAGE_DIR="${ROOT_DIR}/emr-delivery-sdk"
+      PACKAGE_LABEL="emr-delivery-sdk"
+      ;;
+    emr-delivery-cli|release_emr_delivery_cli.sh)
+      PACKAGE_DIR="${ROOT_DIR}/emr-delivery-cli"
+      PACKAGE_LABEL="emr-delivery-cli"
       ;;
     *)
       error "$my_name" "Unknown package selector: $package_key"

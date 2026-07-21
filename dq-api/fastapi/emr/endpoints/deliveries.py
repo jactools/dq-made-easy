@@ -26,6 +26,7 @@ from emr.schemas import (
     EmrDeliveryMetadataResponseView,
 )
 from emr.dependencies import get_emr_repository
+from emr_delivery_sdk import generate_delivery_time_event
 
 router = APIRouter(prefix="/deliveries", tags=["emr"])
 
@@ -39,14 +40,13 @@ async def register_delivery(
 
     Generates a delivery_time_event (UUIDv7) if not provided.
     """
-    import uuid
     from emr.domain.entities import EmrDeliveryEntity
 
     delivery = EmrDeliveryEntity.model_validate(body.model_dump(mode="python"))
 
-    # Generate delivery_time_event if not provided
+    # Generate delivery_time_event if not provided using EMR Delivery SDK
     if not delivery.delivery_time_event or not delivery.delivery_time_event.strip():
-        delivery.delivery_time_event = f"emr-{uuid.uuid4().hex[:12]}"
+        delivery.delivery_time_event = generate_delivery_time_event()
 
     result = repository.register_delivery(delivery)
     return EmrDeliveryResponseView.model_validate(result.model_dump())

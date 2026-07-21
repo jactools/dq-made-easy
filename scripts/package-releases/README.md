@@ -7,6 +7,9 @@ This folder contains canonical build and publish scripts for the repo Python pac
 - `dq-made-easy-domain-validation` via `release_dq_domain_validation.sh`
 - `dq-made-easy-airflow-sdk` via `release_dq_airflow_sdk.sh`
 - `dq-made-easy-airflow-operator` via `release_dq_airflow_operator.sh`
+- `emr-utils` via `release_emr_utils.sh`
+- `emr-delivery-sdk` via `release_emr_delivery_sdk.sh`
+- `emr-delivery-cli` via `release_emr_delivery_cli.sh`
 
 Wheel-only build helpers for Airflow image artifacts:
 
@@ -38,6 +41,9 @@ scripts/package-releases/release_dq_utils.sh --dry-run
 scripts/package-releases/release_dq_domain_validation.sh --dry-run
 scripts/package-releases/release_dq_airflow_sdk.sh --dry-run
 scripts/package-releases/release_dq_airflow_operator.sh --dry-run
+scripts/package-releases/release_emr_utils.sh --dry-run
+scripts/package-releases/release_emr_delivery_sdk.sh --dry-run
+scripts/package-releases/release_emr_delivery_cli.sh --dry-run
 ```
 
 ## Publish examples
@@ -48,6 +54,9 @@ scripts/package-releases/release_dq_utils.sh --repository pypi
 scripts/package-releases/release_dq_domain_validation.sh --repository pypi
 scripts/package-releases/release_dq_airflow_sdk.sh --repository pypi
 scripts/package-releases/release_dq_airflow_operator.sh --repository pypi
+scripts/package-releases/release_emr_utils.sh --repository pypi
+scripts/package-releases/release_emr_delivery_sdk.sh --repository pypi
+scripts/package-releases/release_emr_delivery_cli.sh --repository pypi
 ```
 
 If your target repository is configured in `~/.pypirc` (for example, `nexus`), replace `pypi` with that repository name.
@@ -59,6 +68,9 @@ The generic wrapper builds a wheel for one package at a time or everything with 
 ```bash
 scripts/release_python_package.sh dq-utils
 scripts/release_python_package.sh dq-cli
+scripts/release_python_package.sh emr-utils
+scripts/release_python_package.sh emr-delivery-sdk
+scripts/release_python_package.sh emr-delivery-cli
 scripts/release_python_package.sh --all
 ```
 

@@ -9,11 +9,17 @@ ARG PIP_INDEX_URL
 
 COPY dq-utils /app/dq-utils
 COPY dq-domain-validation /workspace/tmp/dq-domain-validation
+COPY emr-utils /workspace/tmp/emr-utils
+COPY emr-delivery-sdk /workspace/tmp/emr-delivery-sdk
 COPY dq-api/fastapi/requirements.txt /workspace/tmp/requirements.txt
 RUN PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r /workspace/tmp/requirements.txt && \
     PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -e /app/dq-utils
 RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip wheel --no-deps --wheel-dir /workspace/tmp/wheels /workspace/tmp/dq-domain-validation && \
     pip install --no-cache-dir /workspace/tmp/wheels/dq_made_easy_domain_validation-*.whl
+RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip wheel --no-deps --wheel-dir /workspace/tmp/wheels /workspace/tmp/emr-utils && \
+    pip install --no-cache-dir /workspace/tmp/wheels/emr_utils-*.whl
+RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip wheel --no-deps --wheel-dir /workspace/tmp/wheels /workspace/tmp/emr-delivery-sdk && \
+    pip install --no-cache-dir /workspace/tmp/wheels/emr_delivery_sdk-*.whl
 
 COPY dq-api/fastapi /app
 COPY docs/contracts/internal-api /app/docs/contracts/internal-api

@@ -158,6 +158,9 @@ content_hash_api="$(calculate_image_hash \
     dq-api/Dockerfile.fastapi \
     dq-utils \
     dq-domain-validation \
+    emr-utils \
+    emr-delivery-sdk \
+    emr-delivery-cli \
     dq-api/fastapi \
     docs/contracts/internal-api \
     data_sources/contracts \

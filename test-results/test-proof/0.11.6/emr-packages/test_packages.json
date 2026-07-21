@@ -1,0 +1,112 @@
+{
+  "test_proof": {
+    "version": "0.11.6",
+    "proof_type": "emr-packages",
+    "date": "2026-07-21",
+    "packages": [
+      "emr-utils",
+      "emr-delivery-sdk",
+      "emr-delivery-cli"
+    ],
+    "tests": [
+      {
+        "name": "emr_utils.generate_uuid7",
+        "status": "passed",
+        "description": "Generate unique UUIDv7"
+      },
+      {
+        "name": "emr_utils.uuid7_from_timestamp",
+        "status": "passed",
+        "description": "UUIDv7 from specific timestamp"
+      },
+      {
+        "name": "emr_delivery_sdk.DeliveryId",
+        "status": "passed",
+        "description": "Deterministic DeliveryId generation"
+      },
+      {
+        "name": "emr_delivery_sdk.DeliveryId.from_string",
+        "status": "passed",
+        "description": "Parse DeliveryId from string"
+      },
+      {
+        "name": "emr_delivery_sdk.generate_delivery_time_event",
+        "status": "passed",
+        "description": "Generate UUIDv7 delivery time event"
+      },
+      {
+        "name": "emr_delivery_sdk.DdnBuilder",
+        "status": "passed",
+        "description": "Build Data Delivery Note with defaults"
+      },
+      {
+        "name": "emr_delivery_sdk.DdnBuilder.correction",
+        "status": "passed",
+        "description": "Build correction DDN with predecessor"
+      },
+      {
+        "name": "emr_delivery_sdk.enums",
+        "status": "passed",
+        "description": "DeliveryType and DeliveryStatus enums"
+      },
+      {
+        "name": "emr_delivery_cli.parse-id",
+        "status": "passed",
+        "description": "CLI parse and validate DeliveryId"
+      },
+      {
+        "name": "emr_delivery_cli.generate-event",
+        "status": "passed",
+        "description": "CLI generate UUIDv7"
+      },
+      {
+        "name": "emr_delivery_cli.generate-id",
+        "status": "passed",
+        "description": "CLI generate DeliveryId"
+      },
+      {
+        "name": "emr_delivery_cli.generate-ddn",
+        "status": "passed",
+        "description": "CLI generate full DDN with delivery_id and delivery_time_event"
+      },
+      {
+        "name": "emr_app_integration",
+        "status": "passed",
+        "description": "EMR app mounted under /emr/ in DQ API"
+      },
+      {
+        "name": "emr_sdk_integration",
+        "status": "passed",
+        "description": "EMR endpoints use SDK for delivery_time_event"
+      }
+    ],
+    "wheel_builds": [
+      {
+        "package": "emr-utils",
+        "artifact": "emr_utils-0.1.0-py3-none-any.whl",
+        "status": "success"
+      },
+      {
+        "package": "emr-delivery-sdk",
+        "artifact": "emr_delivery_sdk-0.1.0-py3-none-any.whl",
+        "status": "success"
+      },
+      {
+        "package": "emr-delivery-cli",
+        "artifact": "emr_delivery_cli-0.1.0-py3-none-any.whl",
+        "status": "success"
+      }
+    ],
+    "summary": {
+      "total": 14,
+      "passed": 14,
+      "failed": 0
+    },
+    "dependency_chain": [
+      "emr-utils (no deps)",
+      "emr-delivery-sdk -> emr-utils, pydantic",
+      "emr-delivery-cli -> emr-delivery-sdk, pyyaml",
+      "dq-api/emr -> emr-delivery-sdk (mounted under /emr/)"
+    ]
+  }
+}

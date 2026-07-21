@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emr-delivery-cli"
+version = "0.1.0"
+description = "EMR Delivery CLI — generate and manage DeliveryIds and Data Delivery Notes"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "emr-delivery-sdk>=0.1.0",
+  "PyYAML>=6.0.2",
+]
+
+[project.scripts]
+emr-delivery = "emr_delivery_cli.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+packages = ["emr_delivery_cli"]
