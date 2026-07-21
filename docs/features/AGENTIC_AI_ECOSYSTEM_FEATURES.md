@@ -21,6 +21,10 @@ Use this checklist to quickly confirm that the WS-10 baseline is live and usable
 6. Send MCP `resources/list`, then `resources/read` for `dq://dashboards/execution-monitoring`.
 7. Confirm one audit record appears via `GET /agent/v1/audit/events` (admin scope).
 
+For full round-trip testing, use the MCP test client:
+8. Run `python -m dq_cli.mcp_test_client --server-cmd "python -m dq_cli.mcp_server ..." --scenario smoke_test`
+9. Run `scripts/validation/smoke_test_webhook_dispatch.sh` for end-to-end webhook + MCP dispatch test.
+
 Expected result: all calls succeed with explicit JSON responses, and agent actions are visible in audit history.
 
 ## What Agents Can Use Today
