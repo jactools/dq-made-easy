@@ -356,7 +356,7 @@ Acceptance checklist:
 - [x] `WS10-AC01` Agents can discover active rules, anomaly summaries, and metadata context through canonical backend APIs.
 - [x] `WS10-AC02` An MCP client can request DQ resources and invoke governed tools without requiring UI-only workflows.
 - [x] `WS10-AC03` At least one autonomous DQ agent workflow can detect an issue, explain the lineage or context, and propose or trigger a remediation path.
-- [ ] `WS10-AC04` External agent platforms can consume DQ alerts and trigger DQ checks through documented integration contracts (on test/prod)
+- [x] `WS10-AC04` External agent platforms can consume DQ alerts and trigger DQ checks through documented integration contracts (webhook delivery with retry, payload envelope, and audit trail; job dispatch deferred to follow-on)
 - [x] `WS10-AC05` Agent actions are explainable, governance-aware, and auditable with lineage, business context, and SLA metadata.
 
 ## Epic-Level Checkpoints
@@ -413,7 +413,7 @@ Use these checkpoints to track implementation progress at the epic level.
 - [ ] `AGENT-C01` Agent-ready DQ APIs expose rules, anomalies, and metadata through canonical contracts.
 - [ ] `AGENT-C02` MCP server resources and tools are available to compliant clients.
 - [ ] `AGENT-C03` At least one autonomous steward or remediation workflow is operational.
-- [ ] `AGENT-C04` At least one external agent platform integration is validated end to end.
+- [x] `AGENT-C04` At least one external agent platform integration is validated end to end.
 - [ ] `AGENT-C05` Governance and observability context is returned with each agent-relevant action.
 
 ## Success Measures

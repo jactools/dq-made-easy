@@ -7,6 +7,7 @@ This document summarizes what is already implemented for WS10-A01, WS10-A02, and
 - WS10-A01: implemented
 - WS10-A02: implemented
 - WS10-A03: implemented baseline workflows
+- WS10-A04: implemented webhook dispatch with retry, payload envelope, and audit trail (job dispatch deferred)
 
 ## First 5-Minute Smoke Flow
 
@@ -357,5 +358,4 @@ Primary tests:
 
 The following WS-10 items are still open and should not be assumed complete:
 
-- WS10-A04 external agent platform integrations
 - WS10-A05 richer governance and observability context for each agent action

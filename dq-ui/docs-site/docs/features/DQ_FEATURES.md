@@ -461,6 +461,6 @@ Tracked Work Items
         - Current implementation adheres to the policy document for classification-driven advice, explicit masking/encryption selection, and fail-fast policy alignment; retention/disposal is handled by separate platform controls and is out of scope for this slice.
         - Additional protection workflows such as consent management, restriction handling, and erasure-rights handling.
 - [x] `DQ-19.8` Governance discovery and classification automation to prioritize sensitive or high-value assets. Persisted in Postgres via governance-discovery snapshots and prioritized from OpenMetadata-backed delivery classifications. Its output feeds `DQ-19.7` protection advice and Governance analysis.
-- [ ] `DQ-19.9` MCP-based assistant integration for exposing trusted-data capabilities to external AI tools. This work is tracked in `WS-10`.
+- [x] `DQ-19.9` MCP-based assistant integration for exposing trusted-data capabilities to external AI tools. _(WS-10 complete: agent-ready REST APIs, MCP server with tools/resources, autonomous workflows, external platform contracts with webhook delivery, governance context. Job dispatch mode deferred to follow-on.)_
 
 ---

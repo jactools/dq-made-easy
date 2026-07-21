@@ -17,6 +17,9 @@ from app.api.v1.schemas import DataObjectView
 from app.api.v1.schemas import DeliveryExceptionSummaryView
 from app.api.v1.schemas.ontology_view import OntologyGraphQueryRequestView
 from app.api.v1.schemas.ontology_view import OntologyGraphQueryResultView
+from app.application.services.agent_dispatch_service import AgentDispatchError
+from app.application.services.agent_dispatch_service import build_webhook_payload
+from app.application.services.agent_dispatch_service import dispatch_webhook
 from app.core.auth import has_required_scope
 from app.core.dependencies import get_admin_repository
 from app.core.dependencies import get_agent_request_audit_repository
@@ -223,12 +226,14 @@ class AgentPlatformDispatchRequestView(SnakeModel):
 
 class AgentPlatformDispatchResponseView(SnakeModel):
     dispatch_id: str
-    status: str
+    status: str  # accepted, delivered, failed
     platform: str
     dispatch_mode: str
     event_type: str
     target: dict[str, Any] = Field(default_factory=dict)
     queued_at: str
+    delivered_at: str | None = None
+    delivery_result: dict[str, Any] | None = None
     contract_version: str = "1.0"
 
 
@@ -672,6 +677,8 @@ def _classify_error_response_type(exc: HTTPException) -> str:
         "invalid_event_type",
     }:
         return "integration_validation_error_response"
+    if error_code == "webhook_dispatch_failed":
+        return "integration_dispatch_failed_response"
     if error_code in {
         "repository_unavailable",
         "downstream_unavailable",
@@ -916,18 +923,81 @@ async def dispatch_agent_platform_integration(
             allowlisted_platforms=allowlisted_platforms,
         )
 
-        response = AgentPlatformDispatchResponseView.model_validate(
-            {
-                "dispatch_id": f"agent-dispatch-{uuid4().hex}",
-                "status": "accepted",
-                "platform": platform,
-                "dispatch_mode": dispatch_mode,
-                "event_type": event_type,
-                "target": target,
-                "queued_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-                "contract_version": "1.0",
-            }
+        queued_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+        if dispatch_mode == "webhook":
+            webhook_url = str(target.get("webhook_url") or "").strip()
+            webhook_headers = dict(body.webhook_headers or {})
+            dispatch_id = f"agent-dispatch-{uuid4().hex}"
+
+            outbound_payload = build_webhook_payload(
+                platform=platform,
+                event_type=event_type,
+                payload=body.payload,
+                dispatch_id=dispatch_id,
+            )
+
+            delivery_result = await dispatch_webhook(
+                webhook_url=webhook_url,
+                payload=outbound_payload,
+                webhook_headers=webhook_headers if webhook_headers else None,
+            )
+
+            response = AgentPlatformDispatchResponseView.model_validate(
+                {
+                    "dispatch_id": delivery_result.dispatch_id,
+                    "status": delivery_result.status,
+                    "platform": platform,
+                    "dispatch_mode": dispatch_mode,
+                    "event_type": event_type,
+                    "target": target,
+                    "queued_at": queued_at,
+                    "delivered_at": queued_at if delivery_result.status == "delivered" else None,
+                    "delivery_result": delivery_result.as_dict(),
+                    "contract_version": "1.0",
+                }
+            )
+        else:
+            # Job dispatch mode: accept for deferred execution
+            response = AgentPlatformDispatchResponseView.model_validate(
+                {
+                    "dispatch_id": f"agent-dispatch-{uuid4().hex}",
+                    "status": "accepted",
+                    "platform": platform,
+                    "dispatch_mode": dispatch_mode,
+                    "event_type": event_type,
+                    "target": target,
+                    "queued_at": queued_at,
+                    "contract_version": "1.0",
+                }
+            )
+    except AgentDispatchError as exc:
+        # Webhook delivery failed after retries — return 502 so the
+        # caller knows the dispatch did not complete successfully.
+        await _record_agent_audit_event(
+            request=request,
+            repository=audit_repository,
+            action="dispatch_platform_integration",
+            response_type="integration_dispatch_failed_response",
+            status_code=502,
+            success=False,
+            actor_id=user_id,
+            details={
+                "platform": body.platform,
+                "dispatch_mode": body.dispatch_mode,
+                "event_type": body.event_type,
+                "dispatch_error": str(exc),
+            },
         )
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "error": "webhook_dispatch_failed",
+                "message": "Failed to deliver dispatch to external platform",
+                "detail": str(exc),
+            },
+        ) from exc
+
     except HTTPException as exc:
         await _record_agent_audit_event(
             request=request,
@@ -945,6 +1015,17 @@ async def dispatch_agent_platform_integration(
         )
         raise
 
+    # Record delivery details in audit trail
+    delivery_details: dict[str, Any] = {
+        "dispatch_id": response.dispatch_id,
+        "platform": response.platform,
+        "dispatch_mode": response.dispatch_mode,
+        "event_type": response.event_type,
+        "delivery_status": response.status,
+    }
+    if response.delivery_result:
+        delivery_details["delivery_result"] = response.delivery_result
+
     await _record_agent_audit_event(
         request=request,
         repository=audit_repository,
@@ -953,12 +1034,7 @@ async def dispatch_agent_platform_integration(
         status_code=200,
         success=True,
         actor_id=user_id,
-        details={
-            "dispatch_id": response.dispatch_id,
-            "platform": response.platform,
-            "dispatch_mode": response.dispatch_mode,
-            "event_type": response.event_type,
-        },
+        details=delivery_details,
     )
     return response
 
