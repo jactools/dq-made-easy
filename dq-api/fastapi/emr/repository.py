@@ -1,14 +1,14 @@
 """In-memory EMR repository for the Canonical Delivery Registry.
 
 Provides a mock implementation for testing and development.
+Uses emr-delivery-sdk for all ID generation (UUIDv7 via generate_delivery_time_event).
 """
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime, timezone
-from typing import Any
 
+from emr.domain.dq_result import EmrDqResultEntity, EmrDqResultPageEntity
 from emr.domain.entities import (
     EmrDeliveryEntity,
     EmrDeliveryErrorEntity,
@@ -16,7 +16,7 @@ from emr.domain.entities import (
     EmrDeliveryMetadataEntity,
     EmrDeliveryPageEntity,
 )
-from emr_delivery_sdk import (DeliveryId, DeliveryIdBuilder, generate_delivery_time_event)
+from emr_delivery_sdk import generate_delivery_time_event
 
 
 class InMemoryEmrRepository:
@@ -27,6 +27,7 @@ class InMemoryEmrRepository:
         self._lifecycle_events: list[EmrDeliveryLifecycleEventEntity] = []
         self._errors: list[EmrDeliveryErrorEntity] = []
         self._metadata: dict[str, EmrDeliveryMetadataEntity] = {}
+        self._dq_results: list[EmrDqResultEntity] = []
 
     def _now(self) -> str:
         return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -39,9 +40,9 @@ class InMemoryEmrRepository:
             delivery.updated_at = now
         self._deliveries[delivery.delivery_time_event] = delivery
 
-        # Record lifecycle event
+        # Record lifecycle event with UUIDv7 ID
         event = EmrDeliveryLifecycleEventEntity(
-            id=f"evt-{uuid.uuid4().hex[:12]}",
+            id=f"evt-{generate_delivery_time_event()}",
             delivery_time_event=delivery.delivery_time_event,
             event_type="registered",
             event_kind="instantaneous",
@@ -87,9 +88,9 @@ class InMemoryEmrRepository:
         if data_object_logical_name:
             items = [d for d in items if d.data_object_logical_name == data_object_logical_name]
         if delivery_type:
-            items = [d for d in items if d.delivery_type == delivery_type]
+            items = [d for d in items if d.delivery_type.value == delivery_type]
         if status:
-            items = [d for d in items if d.status == status]
+            items = [d for d in items if d.status.value == status]
 
         total = len(items)
         start = (page - 1) * limit
@@ -112,9 +113,9 @@ class InMemoryEmrRepository:
         delivery.status = status
         delivery.updated_at = now
 
-        # Record lifecycle event
+        # Record lifecycle event with UUIDv7 ID
         event = EmrDeliveryLifecycleEventEntity(
-            id=f"evt-{uuid.uuid4().hex[:12]}",
+            id=f"evt-{generate_delivery_time_event()}",
             delivery_time_event=delivery_time_event,
             event_type=status,
             event_kind="instantaneous",
@@ -130,7 +131,7 @@ class InMemoryEmrRepository:
         self, event: EmrDeliveryLifecycleEventEntity
     ) -> EmrDeliveryLifecycleEventEntity:
         if not event.id:
-            event.id = f"evt-{uuid.uuid4().hex[:12]}"
+            event.id = f"evt-{generate_delivery_time_event()}"
         if not event.created_at:
             event.created_at = self._now()
         self._lifecycle_events.append(event)
@@ -146,7 +147,7 @@ class InMemoryEmrRepository:
 
     def record_error(self, error: EmrDeliveryErrorEntity) -> EmrDeliveryErrorEntity:
         if not error.id:
-            error.id = f"err-{uuid.uuid4().hex[:12]}"
+            error.id = f"err-{generate_delivery_time_event()}"
         if not error.created_at:
             error.created_at = self._now()
         self._errors.append(error)
@@ -168,3 +169,58 @@ class InMemoryEmrRepository:
 
     def get_metadata(self, delivery_time_event: str) -> EmrDeliveryMetadataEntity | None:
         return self._metadata.get(delivery_time_event)
+
+    # ------------------------------------------------------------------
+    # DQ Results
+    # ------------------------------------------------------------------
+
+    def store_dq_result(self, result: EmrDqResultEntity) -> EmrDqResultEntity:
+        """Store a DQ result linked to a delivery."""
+        now = self._now()
+        if not result.id:
+            result.id = f"dq-{generate_delivery_time_event()}"
+        if not result.created_at:
+            result.created_at = now
+        self._dq_results.append(result)
+        return result
+
+    def get_dq_results_by_delivery(
+        self,
+        delivery_time_event: str,
+        *,
+        page: int = 1,
+        limit: int = 100,
+    ) -> EmrDqResultPageEntity:
+        """Get all DQ results for a specific delivery occurrence."""
+        items = [
+            r for r in self._dq_results
+            if r.delivery_time_event == delivery_time_event
+        ]
+        total = len(items)
+        start = (page - 1) * limit
+        end = start + limit
+        return EmrDqResultPageEntity(
+            items=items[start:end],
+            total=total,
+            page=page,
+            limit=limit,
+        )
+
+    def get_dq_results_by_stream(
+        self,
+        delivery_id: str,
+        *,
+        page: int = 1,
+        limit: int = 100,
+    ) -> EmrDqResultPageEntity:
+        """Get all DQ results for a delivery stream (all occurrences)."""
+        items = [r for r in self._dq_results if r.delivery_id == delivery_id]
+        total = len(items)
+        start = (page - 1) * limit
+        end = start + limit
+        return EmrDqResultPageEntity(
+            items=items[start:end],
+            total=total,
+            page=page,
+            limit=limit,
+        )

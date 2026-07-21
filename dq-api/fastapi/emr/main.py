@@ -15,6 +15,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from emr.endpoints.deliveries import router as deliveries_router
+from emr.endpoints.dq_results import router as dq_results_router
 
 app = FastAPI(
     title="EMR — Canonical Delivery Registry",
@@ -24,9 +25,10 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# Mount delivery endpoints under /v1/
+# Mount endpoints under /v1/
 v1_router = FastAPI()
 v1_router.include_router(deliveries_router)
+v1_router.include_router(dq_results_router)
 app.mount("/v1", v1_router)
 
 

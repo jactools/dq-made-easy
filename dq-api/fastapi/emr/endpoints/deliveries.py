@@ -26,7 +26,7 @@ from emr.schemas import (
     EmrDeliveryMetadataResponseView,
 )
 from emr.dependencies import get_emr_repository
-from emr_delivery_sdk import generate_delivery_time_event
+from emr_delivery_sdk import DeliveryId, DeliveryIdBuilder, generate_delivery_time_event
 
 router = APIRouter(prefix="/deliveries", tags=["emr"])
 
@@ -43,6 +43,18 @@ async def register_delivery(
     from emr.domain.entities import EmrDeliveryEntity
 
     delivery = EmrDeliveryEntity.model_validate(body.model_dump(mode="python"))
+
+    # Validate DeliveryId format using SDK
+    try:
+        DeliveryId.from_string(delivery.delivery_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "invalid_delivery_id",
+                "message": f"Invalid DeliveryId format: {str(e)}",
+            },
+        )
 
     # Generate delivery_time_event if not provided using EMR Delivery SDK
     if not delivery.delivery_time_event or not delivery.delivery_time_event.strip():
