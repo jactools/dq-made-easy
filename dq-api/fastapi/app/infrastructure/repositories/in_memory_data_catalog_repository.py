@@ -325,6 +325,12 @@ class InMemoryDataCatalogRepository(DataCatalogRepository):
             checksum=note.get("checksum"),
             checksum_algorithm=note.get("checksum_algorithm"),
             metadata_json=metadata_json,
+            # DPSG-compliant redelivery fields
+            delivery_type=str(note.get("delivery_type") or "initial").strip() or "initial",
+            predecessor_time_event=str(note.get("predecessor_time_event") or "").strip() or None,
+            superseded_by_time_event=str(note.get("superseded_by_time_event") or "").strip() or None,
+            correction_reason=str(note.get("correction_reason") or "").strip() or None,
+            delivered_by=str(note.get("delivered_by") or "").strip() or None,
         )
 
     def create_materialized_delivery_note(self, payload: dict[str, Any]) -> DataDeliveryNoteEntity:
@@ -360,6 +366,12 @@ class InMemoryDataCatalogRepository(DataCatalogRepository):
             "checksum": str(payload.get("checksum") or "").strip() or None,
             "checksum_algorithm": str(payload.get("checksum_algorithm") or "").strip() or None,
             "metadata_json": payload.get("metadata_json") if isinstance(payload.get("metadata_json"), dict) else None,
+            # DPSG-compliant redelivery fields
+            "delivery_type": str(payload.get("delivery_type") or "initial").strip() or "initial",
+            "predecessor_time_event": str(payload.get("predecessor_time_event") or "").strip() or None,
+            "superseded_by_time_event": str(payload.get("superseded_by_time_event") or "").strip() or None,
+            "correction_reason": str(payload.get("correction_reason") or "").strip() or None,
+            "delivered_by": str(payload.get("delivered_by") or "").strip() or None,
         }
         note = self.get_data_delivery_note(delivery_id)
         if note is None:
