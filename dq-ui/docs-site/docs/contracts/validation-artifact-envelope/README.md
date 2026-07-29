@@ -15,6 +15,7 @@ Contract rules:
 - YAML examples are documentation only and must mirror the JSON example.
 - `engine_artifact.payload` remains engine-native on purpose. For GX, that nested payload can preserve the current GX envelope shape without lossy normalization while the outer envelope stays runtime-neutral.
 - `engine_type = pyspark_native` is now supported when the nested payload conforms to the PySpark-native artifact envelope contract.
+- Execution outcomes are not part of this input-artifact contract. See the [dq-results](/docs/contracts/dq-results/) contract for rule outcomes, threshold comparisons, and record counts.
 
 Versioning rules:
 

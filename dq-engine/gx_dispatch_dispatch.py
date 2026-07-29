@@ -38,6 +38,7 @@ from gx_dispatch_config import (
 )
 from gx_dispatch_expectations import evaluate_expectations_spark
 from gx_dispatch_expectations import _column_is_available
+from gx_dispatch_results import build_summary as build_gx_result_summary
 from gx_dispatch_payload import (
     SourceLocation,
     _assert_runnable_suite,
@@ -70,6 +71,24 @@ from dq_plan_execution_types import GxWorkerExecutionError
 # ---------------------------------------------------------------------------
 # Payload coercion helpers (thin wrappers around execution_dispatch)
 # ---------------------------------------------------------------------------
+
+
+def _build_enriched_result_summary(
+    *,
+    expectations: list[dict[str, Any]],
+    summary: dict[str, Any],
+    diagnostics: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return build_gx_result_summary(
+        expectations=expectations,
+        passed=int(summary.get("passed_expectation_count") or 0),
+        failed=int(summary.get("failed_expectation_count") or 0),
+        row_count=int(summary.get("row_count") or 0),
+        diagnostics=diagnostics,
+        rule_results=summary.get("rule_results") if isinstance(summary.get("rule_results"), list) else None,
+    )
+
+
 # Grouped dispatch processing
 # ---------------------------------------------------------------------------
 
@@ -261,7 +280,11 @@ def _process_grouped_dispatch_message(
                             "suite_version": suite_version,
                             "rule_ids": rule_ids,
                             "ok": ok,
-                            "summary": summary,
+                            "summary": _build_enriched_result_summary(
+                                expectations=expectations,
+                                summary=summary,
+                                diagnostics=diagnostics,
+                            ),
                         }
                     )
                     total_suite_count += 1
@@ -630,7 +653,11 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                     ),
                     "storage_format": join_pair_location.format,
                     "ok": ok,
-                    "summary": summary,
+                    "summary": _build_enriched_result_summary(
+                        expectations=expectations,
+                        summary=summary,
+                        diagnostics=diagnostics,
+                    ),
                 }
             ],
         }
@@ -779,7 +806,11 @@ def process_dispatch_message(config: GxWorkerConfig, *, raw_message: str) -> Non
                         "storage_uri": normalized_uri,
                         "storage_format": location.format,
                         "ok": ok,
-                        "summary": summary,
+                        "summary": _build_enriched_result_summary(
+                            expectations=expectations,
+                            summary=summary,
+                            diagnostics=diagnostics,
+                        ),
                     }
                 )
                 if not ok:
