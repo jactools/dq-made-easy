@@ -123,6 +123,10 @@ fi
 
 if docker build $NO_CACHE \
     "${DOCKER_BUILD_SECRETS[@]}" \
+    --build-arg PYTHON_REGISTRY="${REGISTRY}" \
+    --build-arg PYTHON_NAMESPACE= \
+    --build-arg PYTHON_IMAGE=dq-made-easy-python-base \
+    --build-arg PYTHON_TAG=latest \
     --build-arg DQ_BASE_REGISTRY="${DQ_BASE_REGISTRY}" \
     --build-arg DQ_BASE_NAMESPACE="${DQ_BASE_NAMESPACE}" \
     --build-arg DQ_BASE_IMAGE="${DQ_BASE_IMAGE}" \

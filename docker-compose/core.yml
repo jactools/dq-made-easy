@@ -1,4 +1,22 @@
 services:
+  python-base:
+    profiles:
+    - base
+    image: ${REGISTRY:?REGISTRY is required}dq-made-easy-python-base:latest
+    build:
+      context: ../dq-python-base
+      dockerfile: Dockerfile.base
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-python-base
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-python-base,mode=max
+      args:
+        SOURCE_PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        SOURCE_PYTHON_NAMESPACE: ""
+        SOURCE_PYTHON_IMAGE: python
+        SOURCE_PYTHON_TAG: 3.13-slim-bookworm
+    networks:
+    - dq-network
   base:
     profiles:
     - base
@@ -6,6 +24,12 @@ services:
     build:
       context: ../dq-base
       dockerfile: Dockerfile.base
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-base
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-base,mode=max
+      secrets:
+      - repo_npmrc
       args:
         NODE_REGISTRY: ${NODE_REGISTRY:?NODE_REGISTRY is required}
         NODE_NAMESPACE: ${NODE_NAMESPACE:-}
@@ -217,8 +241,17 @@ services:
     build:
       context: ..
       dockerfile: dq-api/Dockerfile.fastapi
+      extra_hosts:
+      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
+      secrets:
+      - pip_index_url
       args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
+        PIP_EXTRA_INDEX_URL: ${PIP_EXTRA_INDEX_URL:?PIP_EXTRA_INDEX_URL is required}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:?PIP_TRUSTED_HOST is required}
     entrypoint:
     - /bin/sh
     - -lc
@@ -308,8 +341,17 @@ services:
     build:
       context: ..
       dockerfile: dq-api/Dockerfile.fastapi
+      extra_hosts:
+      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
+      secrets:
+      - pip_index_url
       args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
+        PIP_EXTRA_INDEX_URL: ${PIP_EXTRA_INDEX_URL:?PIP_EXTRA_INDEX_URL is required}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:?PIP_TRUSTED_HOST is required}
     ports:
     - ${API_HOST_BIND:?API_HOST_BIND is required}:${API_HOST_PORT:?API_HOST_PORT is required}:4010
     env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}

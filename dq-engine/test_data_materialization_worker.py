@@ -14,9 +14,9 @@ from typing import Any, Iterable
 import redis
 import requests
 
-from dq_utils.auth_utils import AuthConfigError
-from dq_utils.auth_utils import TokenProvider
-from dq_utils.auth_utils import build_oidc_token_provider_from_env
+from platform_foundation import AuthConfigError
+from platform_foundation import TokenProvider
+from platform_foundation import build_oidc_token_provider_from_env
 from dq_utils.spark_runtime import build_spark_session_builder
 from dq_utils.spark_runtime import resolve_spark_master
 from dq_utils.spark_runtime import resolve_spark_ui_port

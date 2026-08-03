@@ -1,16 +1,18 @@
 # syntax=docker/dockerfile:1.7
-ARG PYTHON_REGISTRY="docker.io/"
-ARG PYTHON_IMAGE="library/python"
-ARG PYTHON_TAG="3.13-slim-bookworm"
+ARG PYTHON_REGISTRY=""
+ARG PYTHON_NAMESPACE="jacbeekers/"
+ARG PYTHON_IMAGE="dq-made-easy-python-base"
+ARG PYTHON_TAG="latest"
 
-FROM ${PYTHON_REGISTRY}${PYTHON_IMAGE}:${PYTHON_TAG}
+FROM ${PYTHON_REGISTRY}${PYTHON_NAMESPACE}${PYTHON_IMAGE}:${PYTHON_TAG}
 
 LABEL version="0.3.0"
 LABEL description="Data Quality rule execution engine (Python/FastAPI)"
 
 WORKDIR /app
 
-ARG PIP_INDEX_URL
+ARG PIP_EXTRA_INDEX_URL
+ARG PIP_TRUSTED_HOST
 ARG MAVEN_REPOSITORIES
 ARG SKIP_SPARK_WARMUP=false
 ARG MKCERT_ROOT_CA
@@ -62,16 +64,21 @@ RUN useradd --create-home --shell /bin/bash appuser \
 COPY --chown=appuser:appuser dq-utils/ /app/dq-utils/
 
 # Copy the local spark-expectations source so the editable dependency resolves during the image build.
-COPY --chown=appuser:appuser tmp/spark-expectations-2.10.1/ /app/tmp/spark-expectations-2.10.1/
+COPY --chown=appuser:appuser tmp/vendor/spark-expectations-2.10.1/ /app/tmp/vendor/spark-expectations-2.10.1/
 
 # Copy requirements first (cached unless requirements.txt changes)
 COPY --chown=appuser:appuser dq-engine/requirements.txt /app/requirements.txt
 
+RUN --mount=type=secret,id=pip_index_url \
+	PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" \
+	python -m pip install --no-cache-dir --upgrade pip \
+	&& PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" \
+	python -m pip install --no-cache-dir -r requirements.txt \
+	&& PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" \
+	python -m pip install --no-cache-dir --no-build-isolation -e /app/dq-utils
+
 USER appuser
 ENV HOME=/home/appuser
-RUN PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir --upgrade pip \
-	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -e /app/dq-utils \
-	&& PIP_INDEX_URL="$PIP_INDEX_URL" python -m pip install --no-cache-dir -r requirements.txt
 
 # -- Spark jar warmup (runs BEFORE app-code copy so the download layer is cached --)
 # Copy only the warmup script; the rest of scripts/ is copied later with app code.

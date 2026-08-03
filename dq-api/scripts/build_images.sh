@@ -4,6 +4,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+: "${REGISTRY:?REGISTRY is required to build the API image against the shared Python base}"
+
 FRONT_TAG="${FRONT_TAG:-dq-rules-ui-frontend:local}"
 API_TAG="${API_TAG:-dq-rules-ui-api:local}"
 DB_TAG="${DB_TAG:-dq-rules-ui-db:local}"
@@ -53,7 +55,12 @@ if docker image inspect "$API_TAG" >/dev/null 2>&1; then
   echo "Removing existing image $API_TAG"
   docker rmi -f "$API_TAG" || true
 fi
-docker build $BUILD_OPTS -f dq-api/Dockerfile.fastapi -t "$API_TAG" .
+docker build $BUILD_OPTS \
+  --build-arg PYTHON_REGISTRY="${REGISTRY:-}" \
+  --build-arg PYTHON_NAMESPACE= \
+  --build-arg PYTHON_IMAGE=dq-made-easy-python-base \
+  --build-arg PYTHON_TAG=latest \
+  -f dq-api/Dockerfile.fastapi -t "$API_TAG" .
 
 echo "(skipping DB image — using official postgres image)"
 

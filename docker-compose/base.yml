@@ -51,6 +51,8 @@ volumes:
 # SECRETS: Shared secrets for all services
 # ============================================================================
 secrets:
+  pip_index_url:
+    environment: PIP_INDEX_URL
   repo_npmrc:
     file: ${REPO_NPMRC_FILE:?REPO_NPMRC_FILE is required}
   internal_mkcert_root_ca:

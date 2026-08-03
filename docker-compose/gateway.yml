@@ -75,6 +75,10 @@ services:
     build:
       context: ../dq-kong
       dockerfile: Dockerfile.kong
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-kong
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-kong,mode=max
       secrets:
       - internal_corporate_root_ca
     container_name: dq-made-easy-kong

@@ -16,7 +16,7 @@ from uuid import uuid4
 import requests
 
 from dq_utils.logging_utils import log_event
-from dq_utils.auth_utils import TokenProvider
+from platform_foundation import TokenProvider
 from dq_plan_execution import (
     build_execution_progress,
     coerce_str,

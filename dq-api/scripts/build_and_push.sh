@@ -96,6 +96,13 @@ if [ -z "${DQ_BASE_REGISTRY:-}" ] || [ -z "${DQ_BASE_NAMESPACE:-}" ] || [ -z "${
     exit 1
 fi
 
+for variable in PIP_INDEX_URL PIP_EXTRA_INDEX_URL PIP_TRUSTED_HOST PYPI_SERVER_DNS; do
+    if [ -z "${!variable:-}" ]; then
+        echo "ERROR: $variable is required for the dq-api image build"
+        exit 1
+    fi
+done
+
 IMAGE_NAME="${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:${DQ_API_TAG}"
 LATEST_NAME="${DQ_API_REGISTRY}${DQ_API_NAMESPACE}${DQ_API_IMAGE}:latest"
 
@@ -112,11 +119,18 @@ echo ""
 
 echo "Starting build..."
 if docker build $NO_CACHE \
+    --add-host "${PYPI_SERVER_DNS}:host-gateway" \
+    --secret id=pip_index_url,env=PIP_INDEX_URL \
+    --build-arg PYTHON_REGISTRY="${REGISTRY}" \
+    --build-arg PYTHON_NAMESPACE= \
+    --build-arg PYTHON_IMAGE=dq-made-easy-python-base \
+    --build-arg PYTHON_TAG=latest \
     --build-arg DQ_BASE_REGISTRY="${DQ_BASE_REGISTRY}" \
     --build-arg DQ_BASE_NAMESPACE="${DQ_BASE_NAMESPACE}" \
     --build-arg DQ_BASE_IMAGE="${DQ_BASE_IMAGE}" \
     --build-arg DQ_BASE_TAG="${DQ_BASE_TAG}" \
-    --build-arg PIP_INDEX_URL="${PIP_INDEX_URL:-}" \
+    --build-arg PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL}" \
+    --build-arg PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST}" \
     -f "$DOCKER_DIR/dq-api/Dockerfile.fastapi" \
     -t "$IMAGE_NAME" \
     -t "$LATEST_NAME" \

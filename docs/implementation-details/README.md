@@ -1,11 +1,16 @@
-# Docker Compose Split - Implementation Details
+# Implementation Details
 
-This directory contains documentation for the Docker Compose split migration from a monolithic file to modular files.
+This directory contains implementation-oriented documentation for multiple workstreams.
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
+| [Shared Platform Inventory and Boundary](./SHARED_PLATFORM_INVENTORY_AND_BOUNDARY.md) | Completed Workstream 1 inventory and boundary summary |
+| [Shared Platform Ingestion Inventory](./SHARED_PLATFORM_INGESTION_INVENTORY.md) | Real-data, metadata, synthetic, and DQ-owned ingestion classification |
+| [Shared Platform SSO and JWKS Inventory](./SHARED_PLATFORM_SSO_JWKS_INVENTORY.md) | Shared protocol/security primitives vs consumer auth policy |
+| [Shared Platform Image and Build Inventory](./SHARED_PLATFORM_IMAGE_INVENTORY.md) | Shared image candidates and duplicated build mechanics |
+| [Shared Auth Token Provider Extraction Task](./SHARED_AUTH_TOKEN_PROVIDER_EXTRACTION_TASK.md) | First concrete extraction task for the shared auth primitive |
 | [DOCKER_COMPOSE_SPLIT_MIGRATION.md](./DOCKER_COMPOSE_SPLIT_MIGRATION.md) | Complete migration guide with step-by-step instructions |
 | [DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE.md](./DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE.md) | Quick reference for common commands and usage patterns |
 | [DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING.md](./DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING.md) | Troubleshooting guide for common issues |

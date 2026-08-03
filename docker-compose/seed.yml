@@ -29,7 +29,15 @@ services:
     build:
       context: ..
       dockerfile: dq-db/Dockerfile.dq-db.seed
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-db-seed
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-db-seed,mode=max
       args:
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         INTERNAL_CORPORATE_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
       secrets:
@@ -60,8 +68,21 @@ services:
     build:
       context: ..
       dockerfile: dq-engine/Dockerfile.engine
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-engine
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-engine,mode=max
+      extra_hosts:
+      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
+      secrets:
+      - pip_index_url
       args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
+        PIP_EXTRA_INDEX_URL: ${PIP_EXTRA_INDEX_URL:?PIP_EXTRA_INDEX_URL is required}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:?PIP_TRUSTED_HOST is required}
         MAVEN_REPOSITORIES: ${MAVEN_REPOSITORIES:-}
         SKIP_SPARK_WARMUP: ${SKIP_SPARK_WARMUP:?SKIP_SPARK_WARMUP is required}
         MKCERT_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}

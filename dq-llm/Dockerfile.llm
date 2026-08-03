@@ -1,4 +1,9 @@
-FROM python:3.14-slim AS builder
+ARG PYTHON_REGISTRY=""
+ARG PYTHON_NAMESPACE="jacbeekers/"
+ARG PYTHON_IMAGE="dq-made-easy-python-base"
+ARG PYTHON_TAG="latest"
+
+FROM ${PYTHON_REGISTRY}${PYTHON_NAMESPACE}${PYTHON_IMAGE}:${PYTHON_TAG} AS builder
 
 WORKDIR /app
 ARG PIP_INDEX_URL
@@ -26,7 +31,7 @@ RUN PIP_CERT=/etc/ssl/certs/ca-certificates.crt \
 
 COPY . .
 
-FROM python:3.14-slim AS runtime
+FROM ${PYTHON_REGISTRY}${PYTHON_NAMESPACE}${PYTHON_IMAGE}:${PYTHON_TAG} AS runtime
 
 WORKDIR /app
 ARG PIP_INDEX_URL

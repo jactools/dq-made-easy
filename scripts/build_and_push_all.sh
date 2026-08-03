@@ -27,6 +27,7 @@ my_name="build_and_push_all.sh"
 
 NO_CACHE=false
 NO_PUSH=false
+SKIP_SPARK_WARMUP_BUILD=false
 VERSION_TAG=""
 BUILD_SCOPE="core"
 SELECTED_IMAGES=()
@@ -76,6 +77,7 @@ Options:
   --image <name>       Build only the named repo-managed image (repeatable)
   --no-cache           Build without Docker cache
   --no-push            Build only, do not push images
+  --skip-spark-warmup  Skip the Spark jar warmup layer for dq-made-easy-engine
   --version <tag>      Use a specific version tag for all built images
   -h, --help           Show this help message
 
@@ -188,6 +190,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-push)
       NO_PUSH=true
+      shift
+      ;;
+    --skip-spark-warmup)
+      SKIP_SPARK_WARMUP_BUILD=true
       shift
       ;;
     --version)
@@ -329,6 +335,10 @@ run_script_step() {
   local step_name="$1"
   local step_script="$2"
   local tag_var
+  local -a step_args=("${SCRIPT_ARGS[@]}")
+  if [ "$step_name" = "dq-made-easy-engine" ] && [ "${#ENGINE_SCRIPT_ARGS[@]}" -gt 0 ]; then
+    step_args+=("${ENGINE_SCRIPT_ARGS[@]}")
+  fi
   tag_var="$(printf '%s' "$step_name" | tr '[:lower:]-' '[:upper:]_')_TAG"
 
   if [ "$step_name" = "dq-made-easy-frontend" ]; then
@@ -348,7 +358,7 @@ run_script_step() {
   fi
 
   export "$tag_var=$tag_value"
-  "$step_script" "${SCRIPT_ARGS[@]}"
+  "$step_script" "${step_args[@]}"
 
   refresh_docker_hub_description "$step_name"
 }
@@ -508,6 +518,10 @@ if [ "$NO_CACHE" = true ]; then
 fi
 if [ "$NO_PUSH" = true ]; then
   SCRIPT_ARGS+=("--no-push")
+fi
+ENGINE_SCRIPT_ARGS=()
+if [ "$SKIP_SPARK_WARMUP_BUILD" = true ]; then
+  ENGINE_SCRIPT_ARGS+=("--skip-spark-warmup")
 fi
 
 info "$my_name" "========================================"

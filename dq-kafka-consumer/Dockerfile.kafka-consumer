@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1.7
-ARG PYTHON_REGISTRY="docker.io/"
-ARG PYTHON_IMAGE="library/python"
-ARG PYTHON_TAG="3.13-slim-bookworm"
+ARG PYTHON_REGISTRY=""
+ARG PYTHON_NAMESPACE="jacbeekers/"
+ARG PYTHON_IMAGE="dq-made-easy-python-base"
+ARG PYTHON_TAG="latest"
 
-FROM ${PYTHON_REGISTRY}${PYTHON_IMAGE}:${PYTHON_TAG}
+FROM ${PYTHON_REGISTRY}${PYTHON_NAMESPACE}${PYTHON_IMAGE}:${PYTHON_TAG}
 
 LABEL version="0.1.0"
 LABEL description="Lightweight Kafka consumer worker (batch mode)"

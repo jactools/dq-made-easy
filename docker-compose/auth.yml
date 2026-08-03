@@ -8,6 +8,11 @@ services:
     build:
       context: ..
       dockerfile: dq-keycloak/Dockerfile.keycloak.seed
+      args:
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
     environment:
       ENVIRONMENT: ${ENVIRONMENT?ENVIRONMENT is required}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM?KEYCLOAK_REALM is required}

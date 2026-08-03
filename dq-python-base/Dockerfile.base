@@ -1,0 +1,20 @@
+ARG SOURCE_PYTHON_REGISTRY=""
+ARG SOURCE_PYTHON_NAMESPACE=""
+ARG SOURCE_PYTHON_IMAGE="python"
+ARG SOURCE_PYTHON_TAG="3.13-slim-bookworm"
+
+FROM ${SOURCE_PYTHON_REGISTRY}${SOURCE_PYTHON_NAMESPACE}${SOURCE_PYTHON_IMAGE}:${SOURCE_PYTHON_TAG}
+
+LABEL version="0.1.0"
+LABEL description="Base image for DQ Python applications with shared build tools"
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+  set -eux; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    ca-certificates; \
+  rm -rf /var/lib/apt/lists/*

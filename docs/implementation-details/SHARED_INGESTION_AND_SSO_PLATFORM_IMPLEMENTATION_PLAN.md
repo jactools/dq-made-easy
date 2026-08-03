@@ -1,8 +1,9 @@
 # Shared Ingestion and SSO Platform Implementation Plan
 
-**Status**: Proposed  
+**Status**: In progress  
 **Target**: Shared ingestion runtime, shared SSO/OIDC support, and centralized reusable container images for `dq-made-easy` and MaaS  
-**Date**: 2026-08-03
+**Date**: 2026-08-03  
+**Last updated**: 2026-08-03
 
 Related ADR: [ADR-036 Shared Ingestion and SSO Platform Boundary and Image Ownership](../../architecture/adr/ADR-036-shared-ingestion-and-sso-platform-boundary-and-image-ownership.md)
 Related design: [Shared Ingestion and SSO Platform Design](../design/SHARED_INGESTION_AND_SSO_PLATFORM_DESIGN.md)
@@ -17,6 +18,21 @@ This plan turns the shared-platform design into an executable migration path.
 The goal is to extract reusable ingestion and SSO capabilities out of the application repositories, while centralizing the reusable container images in one place. Both `dq-made-easy` and MaaS should remain thin consumers of that shared foundation.
 
 This is intentionally a staged migration: inventory first, then extraction, then centralized image ownership, then application adoption, then cleanup.
+
+## Progress Summary
+
+| Area | Status | Evidence |
+|---|---|---|
+| Shared repository and package boundary | Complete | `platform-foundation/packages/platform-foundation` |
+| Local wheel distribution | Complete | Docker pypiserver at the env-derived `packages.dev.jac.dot` URL |
+| Clean build verification | Partial | `dq-api` built successfully against the local index; `dq-engine` now reaches its package-install stage but is still blocked by external Debian/Spark network timeouts |
+| First shared OIDC primitive extraction | Complete | `platform_foundation` auth modules; direct `dq-made-easy` imports |
+| dq-engine execution-type cleanup | Complete | `SourceLocation` now lives only in `dq_plan_execution_types`; duplicate definition removed from `gx_dispatch_payload.py` |
+| DQ engine shared-type consolidation | Complete | `dq_engine` runtime now uses the single shared `SourceLocation` type and tests cover the default options path |
+| Workstream 1 inventories | Complete | Ingestion, SSO/JWKS, and image inventories are linked from the boundary summary |
+| Ingestion extraction | Not started | Workstream 2 remains open; file-to-object-storage kernel selected first |
+| MaaS auth adoption | Not started | Workstream 5 remains open |
+| Shared image centralization | Inventory complete | Workstream 4 implementation remains open |
 
 ## Scope Definition
 
@@ -40,11 +56,13 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Workstream 1: Inventory and Boundary Definition
 
-- [ ] (SHARED-I-W1-01) Catalog all real-data ingestion code paths in `dq-made-easy` and classify each one as shared or app-specific.
-- [ ] (SHARED-I-W1-02) Catalog all SSO/OIDC code paths in `dq-made-easy` and classify each one as shared or app-specific.
-- [ ] (SHARED-I-W1-03) Identify shared container images and identify duplicate Dockerfiles or build logic.
-- [ ] (SHARED-I-W1-04) Decide the shared platform home: a new repository, or an explicitly versioned shared package area if the team prefers to stage extraction incrementally.
-- [ ] (SHARED-I-W1-05) Record the boundary rules so future changes do not reintroduce duplication.
+- [x] (SHARED-I-W1-01) Catalog all real-data ingestion code paths in `dq-made-easy` and classify each one as shared or app-specific. See [ingestion inventory](./SHARED_PLATFORM_INGESTION_INVENTORY.md).
+- [x] (SHARED-I-W1-02) Catalog all SSO/OIDC code paths in `dq-made-easy` and classify each one as shared or app-specific. See [SSO/JWKS inventory](./SHARED_PLATFORM_SSO_JWKS_INVENTORY.md).
+- [x] (SHARED-I-W1-03) Identify shared container images and identify duplicate Dockerfiles or build logic. See [image inventory](./SHARED_PLATFORM_IMAGE_INVENTORY.md).
+- [x] (SHARED-I-W1-04) Decide the shared platform home: use the `platform-foundation` repository with packages under `packages/`.
+- [x] (SHARED-I-W1-05) Record the boundary rules so future changes do not reintroduce duplication.
+- [x] (SHARED-I-W1-06) Establish the MaaS-style package layout at `platform-foundation/packages/platform-foundation`.
+- [x] (SHARED-I-W1-07) Establish NexusCloud-only wheel builds and a Docker-based local pypiserver for cross-repo wheel sharing.
 
 ## Workstream 2: Extract Shared Ingestion Capability
 
@@ -56,11 +74,13 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Workstream 3: Extract Shared SSO / OIDC Capability
 
-- [ ] (SHARED-I-W3-01) Move common OIDC configuration helpers into the shared platform.
+- [x] (SHARED-I-W3-01) Move common OIDC configuration helpers into the shared platform.
 - [ ] (SHARED-I-W3-02) Move issuer/JWKS validation helpers into the shared platform.
 - [ ] (SHARED-I-W3-03) Move claims-to-role mapping helpers into the shared platform where the behavior is common.
-- [ ] (SHARED-I-W3-04) Keep application-specific authorization policy inside each repository.
+- [x] (SHARED-I-W3-04) Keep application-specific authorization policy inside each repository.
 - [ ] (SHARED-I-W3-05) Define the environment-variable contract that both apps will use for shared auth settings.
+- [x] (SHARED-I-W3-06) Remove the `dq_utils.auth_utils` compatibility layer and migrate DQ consumers to direct `platform_foundation` imports.
+- [x] (SHARED-I-W3-07) Add shared-package unit tests and verify affected DQ API and engine consumers.
 
 ## Workstream 4: Centralize Shared Images
 
@@ -88,16 +108,17 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Recommended Sequencing
 
-1. Finish Workstream 1 before extracting anything.
-2. Finish Workstream 2 and Workstream 3 before cutting over consumers.
-3. Land Workstream 4 before removing duplicate image definitions.
-4. Use Workstream 5 to migrate `dq-made-easy` first, then MaaS.
-5. Use Workstream 6 to delete legacy copies and enforce the new boundary.
+1. Use the completed Workstream 1 inventories as the gate for all additional extraction targets.
+2. Finish the remaining Workstream 3 auth contract and validation work before MaaS adoption.
+3. Use Workstream 2 to extract the selected file-to-object-storage ingestion kernel.
+4. Land Workstream 4 before removing duplicate image definitions.
+5. Use Workstream 5 to migrate `dq-made-easy` first, then MaaS, for each shared capability.
+6. Use Workstream 6 to delete legacy copies and enforce the new boundary.
 
 ## Acceptance Criteria
 
 - [ ] (SHARED-I-AC-01) Reusable ingestion logic exists in one shared location rather than being copied into both repositories.
-- [ ] (SHARED-I-AC-02) Reusable SSO/OIDC helpers exist in one shared location rather than being copied into both repositories.
+- [x] (SHARED-I-AC-02) Reusable SSO/OIDC token-provider helpers exist in one shared location rather than being copied into both repositories.
 - [ ] (SHARED-I-AC-03) Shared images are built and published once and are consumed by both repositories through versioned tags.
 - [ ] (SHARED-I-AC-04) `dq-made-easy` and MaaS keep only thin adapters around shared ingestion and auth capabilities.
 - [ ] (SHARED-I-AC-05) Duplicate code paths and duplicate image definitions have been removed or explicitly justified.
@@ -115,9 +136,9 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Next Steps
 
-1. Approve the shared boundary and image ownership model.
-2. Use the repo migration checklist to confirm the first extraction candidates.
-3. Identify the first reusable ingestion module to extract.
-4. Identify the first reusable auth helper to extract.
-5. Define the shared image naming and tagging scheme.
-6. Start the extraction with `dq-made-easy` as the first consumer.
+1. Finish the remaining `dq-engine` build blocker so the clean build proof can complete end-to-end.
+2. Implement the shared fail-closed JWKS/JWT validator from the completed SSO inventory.
+3. Define the shared auth environment-variable contract for both consumers.
+4. Extract the file-to-object-storage ingestion kernel selected by the completed ingestion inventory.
+5. Adopt the shared auth package in MaaS.
+6. Define the shared ingestion-runner image naming and tagging scheme.

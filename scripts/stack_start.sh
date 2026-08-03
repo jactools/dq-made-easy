@@ -29,7 +29,6 @@ source "$ROOT_DIR/scripts/supporting/compose/invocation.sh"
 source "$ROOT_DIR/scripts/supporting/readiness.sh"
 source "$ROOT_DIR/scripts/supporting/keycloak_readiness.sh"
 source "$ROOT_DIR/scripts/supporting/stack_lifecycle.sh"
-source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 
 init_root_env_file "$ROOT_DIR"
 
@@ -167,6 +166,11 @@ else
   error "stack_start.sh" "Rotated env file not found: $ENV_PASSWORDS_FILE"
   exit 1
 fi
+
+# Load the derived runtime environment only after the selected env file and
+# generated password files are in place, so compose build guards see the
+# Nexus-derived PIP/Maven settings before any build step runs.
+source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 
 # ---------------------------------------------------------------------------
 # Step 3: Remove stale volumes on fresh start

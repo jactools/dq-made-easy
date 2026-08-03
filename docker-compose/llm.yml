@@ -9,7 +9,15 @@ services:
     build:
       context: ../dq-llm
       dockerfile: Dockerfile.llm
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-llm
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-llm,mode=max
       args:
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
     env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     ports:

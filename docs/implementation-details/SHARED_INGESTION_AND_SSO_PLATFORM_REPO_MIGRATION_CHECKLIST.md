@@ -29,68 +29,44 @@ The first goal is to identify the earliest reusable extraction points in `dq-mad
 
 ## First Concrete Extraction Candidates from `dq-made-easy`
 
-### Candidate 1: Delivery object seeding / verification ingestion
+### Candidate 1: File-to-object-storage real-data ingestion
+
+**Source file**
+
+- `scripts/stage_local_csv_to_s3_parquet.py`
+
+**Why this is the first candidate**
+
+- It is the only identified production path that ingests caller-supplied row data.
+- It transforms CSV data to Parquet and uploads it to S3-compatible storage.
+- Its transport and transformation mechanics can be separated from DQ join-pair naming and catalog resolution.
+
+**What should move to the shared platform**
+
+- explicit source-file validation
+- CSV-to-Parquet transformation
+- reusable S3-compatible client configuration
+- bucket/prefix writes and checksums
+- typed ingestion result with row/file counts
+
+**What should stay in `dq-made-easy`**
+
+- join-pair case/role/version naming
+- DQ catalog and delivery resolution
+- DQ-specific destination policy and wrapper CLI
+
+---
+
+### Candidate 2: Delivery object synthetic verification generation
 
 **Source files**
 
 - `scripts/seed_delivery_objects.py`
-- `dq-db/mock-data/data-deliveries.csv`
-- `dq-db/mock-data/data-delivery-notes.csv`
-- `dq-db/mock-data/data-objects.csv`
-- `dq-db/mock-data/data-object-versions.csv`
-- `dq-db/mock-data/attributes-catalog.csv`
+- related `dq-db/mock-data` delivery and schema CSVs
 
-**Why this is the first candidate**
+This is a valuable second candidate, but it generates synthetic data rather than ingesting real source rows. Share the schema-driven multi-format generation and upload mechanics; keep DQ seed catalogs and delivery semantics in DQ.
 
-- It is a real data ingestion path, not just mock seeding.
-- It generates and uploads delivery objects into AIStor/S3-compatible storage.
-- The logic is broadly useful for verification and demo scenarios.
-- The script already depends on reusable Spark/runtime setup, which makes it a good candidate for a shared containerized ingestion runner.
-
-**What should move to the shared platform**
-
-- delivery-plan parsing and validation
-- delivery-format generation helpers
-- object-key and URI normalization helpers
-- Spark runtime configuration helpers for supported delivery formats
-- reusable upload/publish service logic
-- shared fixture loading for delivery and note CSVs
-
-**What should stay in `dq-made-easy`**
-
-- product-specific defaults
-- DQ domain assumptions tied to the current seed data model
-- repo-specific CLI wrappers or operator entrypoints
-
----
-
-### Candidate 2: Playground source bundle ingestion
-
-**Source files**
-
-- `dq-api/fastapi/app/application/services/playground_source_bundles.py`
-- `scripts/ingest_playground_source_bundles.py`
-
-**Why this is the second candidate**
-
-- It already implements a reusable ingestion workflow into AIStor.
-- The pattern is generic: build records, store JSON payloads, skip duplicates, fail fast on missing config.
-- The service already has a clean boundary between orchestration and storage behavior.
-- It is a strong model for the shared ingestion style that MaaS can later consume.
-
-**What should move to the shared platform**
-
-- bucket/prefix bootstrapping
-- object existence checks and idempotent ingest behavior
-- payload hashing and record creation
-- generic S3 client creation from env
-- reusable ingestion service scaffolding
-
-**What should stay in `dq-made-easy`**
-
-- the specific bundle catalog content
-- the DQ-branded bundle list if it is product-specific
-- application-specific wrappers and CLI flags
+The playground source bundle flow is not a real-data candidate: it stores JSON metadata records containing URLs and licenses, not the referenced datasets.
 
 ---
 
@@ -98,13 +74,11 @@ The first goal is to identify the earliest reusable extraction points in `dq-mad
 
 **Source files**
 
-- `dq-utils/src/dq_utils/auth_utils.py`
+- `platform-foundation/packages/platform-foundation/src/platform_foundation`
 
-**Why this is the first auth candidate**
+**Status**: Extracted for DQ; MaaS adoption remains.
 
-- The module already contains the reusable auth/token-provider primitives.
-- MaaS can reuse the same env-to-provider behavior.
-- The code is the natural shared foundation for client-credentials and token URL resolution.
+The package now owns token providers, retry/caching behavior, token URL resolution, and env-driven factories. DQ imports it directly without a compatibility shim.
 
 **What should move or be standardized for MaaS**
 
@@ -153,25 +127,25 @@ The first goal is to identify the earliest reusable extraction points in `dq-mad
 
 ### Phase 1: Inventory and boundaries
 
-- [ ] Confirm the shared platform home: separate repository or versioned shared package area.
-- [ ] Classify each ingestion/auth file as shared, adapter, or app-specific.
-- [ ] Identify all Dockerfiles and image build paths that would be duplicated across repos.
+- [x] Confirm the shared platform home: `platform-foundation` with packages under `packages/`.
+- [x] Classify each ingestion/auth file as shared, adapter, or app-specific.
+- [x] Identify all Dockerfiles and image build paths that would be duplicated across repos.
 - [ ] Record the exact env var contract that the shared platform will own.
 
 ### Phase 2: Extract the first ingestion candidate
 
-- [ ] Lift the delivery object seeding logic into a shared ingestion package or shared service module.
-- [ ] Move Spark/runtime setup helpers into the shared platform.
-- [ ] Move CSV/fixture loading helpers into the shared platform.
-- [ ] Keep the DQ-specific wrapper script as a thin entrypoint only.
-- [ ] Add tests for the shared ingestion package independent of `dq-made-easy`.
+- [ ] Extract the generic file-to-object-storage kernel from `stage_local_csv_to_s3_parquet.py`.
+- [ ] Move CSV-to-Parquet and S3 upload helpers into the shared platform.
+- [ ] Keep DQ join-pair/catalog behavior in a thin DQ entrypoint.
+- [ ] Add shared-package tests with one explicit real CSV fixture.
+- [ ] Prove both DQ and MaaS can consume the same ingestion result contract.
 
 ### Phase 3: Extract the first auth candidate
 
-- [ ] Promote `dq-utils.auth_utils` to the canonical shared auth foundation for MaaS and `dq-made-easy`.
-- [ ] Extract or normalize JWKS/JWT claim helper logic from the Airflow adapter.
-- [ ] Keep app-specific role mapping and authorization policy in each consuming application.
-- [ ] Add tests proving both apps can build token providers from the same env contract.
+- [x] Extract token-provider primitives to `platform_foundation` and migrate DQ consumers directly.
+- [ ] Extract fail-closed JWKS/JWT validation from the Airflow-proven mechanics.
+- [x] Keep app-specific role mapping and authorization policy in each consuming application.
+- [ ] Add tests proving both apps can use the same auth env contract.
 
 ### Phase 4: Centralize images
 
@@ -199,19 +173,19 @@ The first goal is to identify the earliest reusable extraction points in `dq-mad
 
 ## Suggested Execution Order
 
-1. Extract **Delivery object seeding**.
-2. Extract **shared OIDC token-provider behavior**.
-3. Centralize the first shared images.
-4. Extract **Playground source bundle ingestion** if it is approved as shared beyond `dq-made-easy`.
-5. Extract **Airflow Keycloak adapter helpers**.
-6. Repeat the same pattern in MaaS.
+1. Extract the **file-to-object-storage real-data ingestion kernel**.
+2. Extract **fail-closed JWKS/JWT validation**.
+3. Define the shared auth environment contract and adopt it in MaaS.
+4. Add **delivery object synthetic multi-format generation**.
+5. Build the shared ingestion runner image.
+6. Revisit connector providers after comparing the MaaS connector contract.
 
 ---
 
 ## Acceptance Criteria
 
 - [ ] The first reusable ingestion path has a shared home outside `dq-made-easy`.
-- [ ] The first reusable auth foundation exists in one shared location.
+- [x] The first reusable auth foundation exists in one shared location.
 - [ ] The shared images are published once and referenced by both repos.
 - [ ] `dq-made-easy` keeps only thin adapters around the shared functionality.
 - [ ] MaaS can adopt the same shared artifacts without copy-paste.
@@ -221,16 +195,16 @@ The first goal is to identify the earliest reusable extraction points in `dq-mad
 
 ## Open Questions
 
-1. Should the shared platform be a separate repository from day one, or should it start as a versioned package area?
-2. Is `scripts/seed_delivery_objects.py` the first shared ingestion target, or should `playground_source_bundles` be extracted first because it is smaller?
-3. Should the shared platform own only auth primitives, or also the Airflow/JWKS adapter layer?
-4. What image names and tags should become the canonical shared contract?
+1. What exact auth environment names become the shared contract?
+2. Should password-grant support remain in the shared package after all browser and service flows migrate?
+3. Which registry namespace and tags should own the ingestion, Keycloak, and trust-bundle images?
+4. Which MaaS real CSV dataset should prove the first shared ingestion vertical slice?
 
 ---
 
 ## Next Steps
 
-1. Approve the first extraction candidate list.
-2. Decide the shared platform home.
-3. Split the first extraction into a work item with test coverage.
-4. Start with `scripts/seed_delivery_objects.py` unless there is a stronger priority from MaaS.
+1. Create the file-to-object-storage extraction task with module boundaries and test fixtures.
+2. Define and implement the provider-neutral JWKS/JWT validator.
+3. Define the shared auth env contract.
+4. Wire clean DQ installs through the local pypiserver.

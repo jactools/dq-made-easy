@@ -23,7 +23,7 @@ from uuid import uuid4
 
 from dq_utils.logging_utils import configure_logging
 from dq_utils.logging_utils import log_event
-from dq_utils.auth_utils import TokenProvider
+from platform_foundation import TokenProvider
 
 from gx_dispatch_api import _coerce_reported_failure
 from gx_dispatch_api import _report_dispatch_failure

@@ -140,9 +140,17 @@ fi
 
 if [ -n "${NEXUSCLOUD_NPM_REGISTRY:-}" ]; then
     NPM_CONFIG_REGISTRY="$NEXUSCLOUD_NPM_REGISTRY"
-else
-    NPM_CONFIG_REGISTRY="https://registry.npmjs.org/"
+    export NPM_CONFIG_REGISTRY
 fi
+
+if [ -z "${TLS_INTERNAL_CA_BUNDLE:-}" ]; then
+    TLS_INTERNAL_CA_BUNDLE="$ROOT_DIR/tmp/certs/internal-ca-bundle.pem"
+fi
+if [ ! -f "$TLS_INTERNAL_CA_BUNDLE" ]; then
+    error "$my_name" "TLS_INTERNAL_CA_BUNDLE is required and must point to an existing file: $TLS_INTERNAL_CA_BUNDLE"
+    return 1
+fi
+export TLS_INTERNAL_CA_BUNDLE
 
 REPO_NPMRC_FILE="${REPO_NPMRC_FILE:-}"
 if [ -n "$REPO_NPMRC_FILE" ] && [ ! -f "$REPO_NPMRC_FILE" ]; then
@@ -153,14 +161,8 @@ if [ -z "$REPO_NPMRC_FILE" ]; then
     if [ -f "$ROOT_DIR/.npmrc" ]; then
         REPO_NPMRC_FILE="$ROOT_DIR/.npmrc"
     else
-        mkdir -p "$ROOT_DIR/tmp"
-        REPO_NPMRC_FILE="$ROOT_DIR/tmp/public.npmrc"
-        if [ ! -f "$REPO_NPMRC_FILE" ]; then
-            cat > "$REPO_NPMRC_FILE" <<'EOF'
-registry=https://registry.npmjs.org/
-EOF
-        fi
-        warning "$my_name" "Repo-root .npmrc not found; using public npm registry fallback"
+        error "$my_name" "Repo-root .npmrc not found; refusing to fall back to the public npm registry"
+        return 1
     fi
 fi
 
@@ -210,6 +212,15 @@ fi
 
 if [ -n "${PIP_INDEX_URL:-}" ]; then
     export PIP_INDEX_URL
+fi
+if [ -n "${PIP_EXTRA_INDEX_URL:-}" ]; then
+    export PIP_EXTRA_INDEX_URL
+fi
+if [ -n "${PIP_TRUSTED_HOST:-}" ]; then
+    export PIP_TRUSTED_HOST
+fi
+if [ -n "${PYPI_SERVER_NETWORK_NAME:-}" ]; then
+    export PYPI_SERVER_NETWORK_NAME
 fi
 
 # ---------------------------------------------------------------------------
@@ -491,12 +502,11 @@ if [ -n "${DOCKER_DOMAIN:-}" ]; then
     # Force base image registries through Nexus group.
     NODE_REGISTRY="${DOCKER_DOMAIN}/"
     NGINX_REGISTRY="${DOCKER_DOMAIN}/"
-    if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ]; then
-        PYTHON_REGISTRY=""
-    else
-        PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
-    fi
-    export NODE_REGISTRY NGINX_REGISTRY PYTHON_REGISTRY
+    PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
+    PYTHON_NAMESPACE=""
+    PYTHON_IMAGE="dq-made-easy-python-base"
+    PYTHON_TAG="latest"
+    export NODE_REGISTRY NGINX_REGISTRY PYTHON_REGISTRY PYTHON_NAMESPACE PYTHON_IMAGE PYTHON_TAG
 
     # Ensure Docker is authenticated to Docker Hub for public base-image pulls.
     if [ -n "${DOCKER_HUB_USERNAME:-}" ] && [ -n "${DOCKER_HUB_TOKEN:-}" ]; then

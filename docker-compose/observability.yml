@@ -202,7 +202,15 @@ services:
     build:
       context: ../observability/container-metrics
       dockerfile: Dockerfile.container-metrics
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/container-metrics
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/container-metrics,mode=max
       args:
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
       secrets:
       - internal_corporate_root_ca
