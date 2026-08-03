@@ -11,8 +11,8 @@ from typing import Any, Callable
 
 import requests
 
-from platform_foundation import TokenProvider
-from platform_foundation import build_oidc_token_provider_from_env
+from platform_auth import TokenProvider
+from platform_auth import build_oidc_token_provider_from_env
 
 from dq_plan_execution_types import DqWorkerConfig, DqWorkerConfigError, DqWorkerExecutionError
 

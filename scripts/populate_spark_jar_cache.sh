@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # Name: populate_spark_jar_cache.sh
-# Description: Pre-populate tmp/spark-jars-cache/ so dq-engine builds
+# Description: Pre-populate spark-jars-cache/ so dq-engine builds
 #              do not depend on external Maven/Debian network access.
 # Usage: ./scripts/populate_spark_jar_cache.sh
 ###
@@ -10,7 +10,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CACHE_DIR="$REPO_ROOT/tmp/spark-jars-cache"
+CACHE_DIR="$REPO_ROOT/spark-jars-cache"
 
 echo "========================================"
 echo "Populating Spark jar cache"

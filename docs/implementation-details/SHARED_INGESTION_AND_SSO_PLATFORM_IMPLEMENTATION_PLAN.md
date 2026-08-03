@@ -28,11 +28,18 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | Clean build verification | Complete | `dq-api` and `dq-engine` both build successfully against the local pypiserver. Java moved into `dq-python-base` (no Debian apt-get at build time). Spark jars pre-cached in `tmp/spark-jars-cache/` (no Maven network access at build time). See dq-engine build proof below. |
 | First shared OIDC primitive extraction | Complete | `platform_foundation` auth modules; direct `dq-made-easy` imports |
 | Shared JWKS/JWT validator extraction | Complete | `JwksCache` + `JwtValidator` + `JwtValidationResult` in `platform_foundation`; 25 unit tests, fail-closed with cryptographic signature verification |
+| Shared auth env-var contract | Complete | `AuthConfig` + `load_auth_config()` in `platform_foundation`; canonical `PLATFORM_AUTH_*` prefix with derivation logic |
+| Shared claims-to-scope mapping | Complete | `ScopeResolver` + `get_scopes_from_claims()` + `create_dq_scope_resolver()` in `platform_foundation`; hierarchical wildcard + expansion rules; 33 unit tests |
+| Shared errors and health packages | Complete | `platform-errors` + `platform-health` in `platform-foundation`; mirrors `metadata-errors` + `metadata-health` with `PLATFORM-*` error IDs |
 | dq-engine execution-type cleanup | Complete | `SourceLocation` now lives only in `dq_plan_execution_types`; duplicate definition removed from `gx_dispatch_payload.py` |
 | DQ engine shared-type consolidation | Complete | `dq_engine` runtime now uses the single shared `SourceLocation` type and tests cover the default options path |
 | Workstream 1 inventories | Complete | Ingestion, SSO/JWKS, and image inventories are linked from the boundary summary |
 | Ingestion extraction | Not started | Workstream 2 remains open; file-to-object-storage kernel selected first |
+| Shared logging and telemetry packages | Complete | `platform-logging` + `platform-telemetry` in `platform-foundation`; mirrors `metadata-logging` + `metadata-telemetry` |
+| Auth extracted to standalone `platform-auth` package | Complete | All auth modules (JWKS/JWT, token providers, auth config, scope mapping) moved to `platform-auth`; `platform-foundation` reverts to config-only. 91 unit tests. No re-exports. |
+| dq-made-easy consumers migrated to `platform-auth` | Complete | 10 files across dq-api and dq-engine switched from `platform_foundation` → `platform_auth` imports. requirements.txt updated. |
 | MaaS auth adoption | Not started | Workstream 5 remains open |
+| Shared package test count | 92 tests pass | 9 existing auth + 25 JWKS/JWT + 25 auth_config + 33 scope_mapping |
 | Shared image centralization | Inventory complete | Workstream 4 implementation remains open |
 
 ## Scope Definition
@@ -77,9 +84,9 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 - [x] (SHARED-I-W3-01) Move common OIDC configuration helpers into the shared platform.
 - [x] (SHARED-I-W3-02) Move issuer/JWKS validation helpers into the shared platform.
-- [ ] (SHARED-I-W3-03) Move claims-to-role mapping helpers into the shared platform where the behavior is common.
+- [x] (SHARED-I-W3-03) Move claims-to-role mapping helpers into the shared platform where the behavior is common.
 - [x] (SHARED-I-W3-04) Keep application-specific authorization policy inside each repository.
-- [ ] (SHARED-I-W3-05) Define the environment-variable contract that both apps will use for shared auth settings.
+- [x] (SHARED-I-W3-05) Define the environment-variable contract that both apps will use for shared auth settings.
 - [x] (SHARED-I-W3-06) Remove the `dq_utils.auth_utils` compatibility layer and migrate DQ consumers to direct `platform_foundation` imports.
 - [x] (SHARED-I-W3-07) Add shared-package unit tests and verify affected DQ API and engine consumers.
 
@@ -137,9 +144,9 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Next Steps
 
-1. Define the shared auth environment-variable contract for both consumers (SHARED-I-W3-05).
-2. Move claims-to-role mapping helpers into the shared platform (SHARED-I-W3-03).
-3. Extract the file-to-object-storage ingestion kernel selected by the completed ingestion inventory (SHARED-I-W2).
-4. Adopt the shared auth package in MaaS (SHARED-I-W5).
-5. Define the shared ingestion-runner image naming and tagging scheme.
-6. Remove duplicate code paths and enforce the new boundary (SHARED-I-W6).
+1. Extract the file-to-object-storage ingestion kernel selected by the completed ingestion inventory (SHARED-I-W2).
+2. Adopt the shared auth package in MaaS (SHARED-I-W5).
+3. Define the shared ingestion-runner image naming and tagging scheme.
+4. Remove duplicate code paths and enforce the new boundary (SHARED-I-W6).
+5. Rebuild and publish `platform_foundation-0.1.1` with auth config + scope mapping to pypiserver.
+6. Wire `dq-api` consumers to use `platform_foundation` scope resolver instead of local `auth.py` helpers.

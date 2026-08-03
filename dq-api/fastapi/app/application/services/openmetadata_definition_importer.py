@@ -7,12 +7,12 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request as UrlRequest, urlopen
 
-from platform_foundation import AuthConfigError
-from platform_foundation import OidcClientCredentialsTokenProvider
-from platform_foundation import OidcPasswordTokenProvider
-from platform_foundation import StaticTokenProvider
-from platform_foundation import TokenProvider
-from platform_foundation import resolve_oidc_token_url
+from platform_auth import AuthConfigError
+from platform_auth import OidcClientCredentialsTokenProvider
+from platform_auth import OidcPasswordTokenProvider
+from platform_auth import StaticTokenProvider
+from platform_auth import TokenProvider
+from platform_auth import resolve_oidc_token_url
 
 
 class OpenMetadataDefinitionImportError(RuntimeError):

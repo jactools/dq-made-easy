@@ -37,6 +37,9 @@ dq-ui/docs-site/docs/test-proof/
 .env.*.local
 
 tmp/
+vendor/
+spark-jars-cache/
+*.bak
 
 ## Logs
 logs/

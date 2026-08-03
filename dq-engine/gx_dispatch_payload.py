@@ -27,7 +27,7 @@ from dq_plan_execution_types import GxWorkerConfig
 from dq_plan_execution_types import GxWorkerExecutionError
 from dq_plan_execution_types import SourceLocation
 
-from platform_foundation import TokenProvider
+from platform_auth import TokenProvider
 
 
 _parse_dispatch_payload = parse_dispatch_payload

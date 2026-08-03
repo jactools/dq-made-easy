@@ -56,7 +56,7 @@ RUN useradd --create-home --shell /bin/bash appuser \
 COPY --chown=appuser:appuser dq-utils/ /app/dq-utils/
 
 # Copy the local spark-expectations source so the editable dependency resolves during the image build.
-COPY --chown=appuser:appuser tmp/vendor/spark-expectations-2.10.1/ /app/tmp/vendor/spark-expectations-2.10.1/
+COPY --chown=appuser:appuser vendor/spark-expectations-2.10.1/ /app/tmp/vendor/spark-expectations-2.10.1/
 
 # Copy requirements first (cached unless requirements.txt changes)
 COPY --chown=appuser:appuser dq-engine/requirements.txt /app/requirements.txt
@@ -77,8 +77,8 @@ ENV HOME=/home/appuser
 COPY --chown=appuser:appuser scripts/warmup_spark_jars.py /app/scripts/warmup_spark_jars.py
 
 # Copy pre-cached Spark jars so the build does not depend on external Maven access.
-# Populate with: python scripts/warmup_spark_jars.py --cache-dir tmp/spark-jars-cache
-COPY --chown=appuser:appuser tmp/spark-jars-cache/ /tmp/spark-jars-cache/
+# Populate with: python scripts/warmup_spark_jars.py --cache-dir spark-jars-cache
+COPY --chown=appuser:appuser spark-jars-cache/ /tmp/spark-jars-cache/
 
 RUN mkdir -p /home/appuser/.cache/tmp /home/appuser/.cache/spark-local /home/appuser/.dq-spark-jars
 
@@ -89,7 +89,7 @@ ENV SPARK_LOCAL_DIRS=/home/appuser/.cache/spark-local
 ENV JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/home/appuser/.cache/tmp
 
 # Warm the Spark package cache so runtime seeding does not depend on network access.
-# Uses pre-cached jars from tmp/spark-jars-cache/ when available (no Maven access needed).
+# Uses pre-cached jars from spark-jars-cache/ when available (no Maven access needed).
 # Falls back to Ivy resolution if cache is stale or missing.
 RUN [ "${SKIP_SPARK_WARMUP:-false}" = "true" ] || python scripts/warmup_spark_jars.py \
 	--ivy-dir /home/appuser/.ivy2 \

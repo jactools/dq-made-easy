@@ -3,7 +3,7 @@ wheel>=0.45
 fastapi==0.139.0
 uvicorn[standard]==0.51.0
 requests==2.34.2
-platform-foundation==0.1.0
+platform-auth==0.1.0
 great-expectations==1.18.2
 -e tmp/vendor/spark-expectations-2.10.1
 trino==0.326.0
