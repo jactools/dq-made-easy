@@ -25,8 +25,9 @@ This is intentionally a staged migration: inventory first, then extraction, then
 |---|---|---|
 | Shared repository and package boundary | Complete | `platform-foundation/packages/platform-foundation` |
 | Local wheel distribution | Complete | Docker pypiserver at the env-derived `packages.dev.jac.dot` URL |
-| Clean build verification | Partial | `dq-api` built successfully against the local index; `dq-engine` now reaches its package-install stage but is still blocked by external Debian/Spark network timeouts |
+| Clean build verification | Complete | `dq-api` and `dq-engine` both build successfully against the local pypiserver. Java moved into `dq-python-base` (no Debian apt-get at build time). Spark jars pre-cached in `tmp/spark-jars-cache/` (no Maven network access at build time). See dq-engine build proof below. |
 | First shared OIDC primitive extraction | Complete | `platform_foundation` auth modules; direct `dq-made-easy` imports |
+| Shared JWKS/JWT validator extraction | Complete | `JwksCache` + `JwtValidator` + `JwtValidationResult` in `platform_foundation`; 25 unit tests, fail-closed with cryptographic signature verification |
 | dq-engine execution-type cleanup | Complete | `SourceLocation` now lives only in `dq_plan_execution_types`; duplicate definition removed from `gx_dispatch_payload.py` |
 | DQ engine shared-type consolidation | Complete | `dq_engine` runtime now uses the single shared `SourceLocation` type and tests cover the default options path |
 | Workstream 1 inventories | Complete | Ingestion, SSO/JWKS, and image inventories are linked from the boundary summary |
@@ -75,7 +76,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 ## Workstream 3: Extract Shared SSO / OIDC Capability
 
 - [x] (SHARED-I-W3-01) Move common OIDC configuration helpers into the shared platform.
-- [ ] (SHARED-I-W3-02) Move issuer/JWKS validation helpers into the shared platform.
+- [x] (SHARED-I-W3-02) Move issuer/JWKS validation helpers into the shared platform.
 - [ ] (SHARED-I-W3-03) Move claims-to-role mapping helpers into the shared platform where the behavior is common.
 - [x] (SHARED-I-W3-04) Keep application-specific authorization policy inside each repository.
 - [ ] (SHARED-I-W3-05) Define the environment-variable contract that both apps will use for shared auth settings.
@@ -136,9 +137,9 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Next Steps
 
-1. Finish the remaining `dq-engine` build blocker so the clean build proof can complete end-to-end.
-2. Implement the shared fail-closed JWKS/JWT validator from the completed SSO inventory.
-3. Define the shared auth environment-variable contract for both consumers.
-4. Extract the file-to-object-storage ingestion kernel selected by the completed ingestion inventory.
-5. Adopt the shared auth package in MaaS.
-6. Define the shared ingestion-runner image naming and tagging scheme.
+1. Define the shared auth environment-variable contract for both consumers (SHARED-I-W3-05).
+2. Move claims-to-role mapping helpers into the shared platform (SHARED-I-W3-03).
+3. Extract the file-to-object-storage ingestion kernel selected by the completed ingestion inventory (SHARED-I-W2).
+4. Adopt the shared auth package in MaaS (SHARED-I-W5).
+5. Define the shared ingestion-runner image naming and tagging scheme.
+6. Remove duplicate code paths and enforce the new boundary (SHARED-I-W6).

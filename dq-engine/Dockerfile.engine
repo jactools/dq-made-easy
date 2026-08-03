@@ -23,23 +23,15 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 ENV SPARK_JARS_REPOSITORIES=${MAVEN_REPOSITORIES:-}
 ENV MAVEN_REPOSITORIES=${MAVEN_REPOSITORIES:-}
 
-# Install system deps (cached unless this line changes)
-# - Java runtime is required for PySpark.
-# - Use default-jre-headless to stay compatible across Debian releases.
+# NOTE: build-essential, git, ca-certificates, default-jre-headless,
+# and ca-certificates-java are provided by the python-base image.
+# Import the corporate root CA from a build secret (not baked into the image).
 RUN set -eux; \
 	if [ -f /run/secrets/internal_corporate_root_ca ]; then \
 		cp /run/secrets/internal_corporate_root_ca /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt; \
 	fi; \
-	apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		build-essential \
-		git \
-		default-jre-headless \
-		ca-certificates \
-		ca-certificates-java \
-	&& rm -f /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt \
-	&& update-ca-certificates --fresh \
-	&& rm -rf /var/lib/apt/lists/*
+	rm -f /usr/local/share/ca-certificates/internal-corporate-root-ca2.crt \
+	&& update-ca-certificates --fresh
 
 # Optionally import a mkcert root CA provided as a base64-encoded build-arg
 RUN if [ -n "${MKCERT_ROOT_CA:-}" ] && [ -f "${MKCERT_ROOT_CA}" ]; then \
@@ -84,6 +76,10 @@ ENV HOME=/home/appuser
 # Copy only the warmup script; the rest of scripts/ is copied later with app code.
 COPY --chown=appuser:appuser scripts/warmup_spark_jars.py /app/scripts/warmup_spark_jars.py
 
+# Copy pre-cached Spark jars so the build does not depend on external Maven access.
+# Populate with: python scripts/warmup_spark_jars.py --cache-dir tmp/spark-jars-cache
+COPY --chown=appuser:appuser tmp/spark-jars-cache/ /tmp/spark-jars-cache/
+
 RUN mkdir -p /home/appuser/.cache/tmp /home/appuser/.cache/spark-local /home/appuser/.dq-spark-jars
 
 ENV DQ_SPARK_JAR_DIR=/home/appuser/.dq-spark-jars
@@ -93,26 +89,36 @@ ENV SPARK_LOCAL_DIRS=/home/appuser/.cache/spark-local
 ENV JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/home/appuser/.cache/tmp
 
 # Warm the Spark package cache so runtime seeding does not depend on network access.
-# This layer is cached as long as the warmup script and package list do not change.
+# Uses pre-cached jars from tmp/spark-jars-cache/ when available (no Maven access needed).
+# Falls back to Ivy resolution if cache is stale or missing.
 RUN [ "${SKIP_SPARK_WARMUP:-false}" = "true" ] || python scripts/warmup_spark_jars.py \
 	--ivy-dir /home/appuser/.ivy2 \
 	--jar-dir /home/appuser/.dq-spark-jars \
+	--cache-dir /tmp/spark-jars-cache \
 	--packages "org.apache.spark:spark-avro_2.13:4.1.1,org.apache.hadoop:hadoop-aws:3.4.2,io.delta:delta-spark_2.13:4.1.0,org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.1"
 
+# Copy any additional jars resolved by Ivy (only when --cache-dir fast path was not taken).
+# When cache was used, jars are already in .dq-spark-jars — just verify.
 RUN [ "${SKIP_SPARK_WARMUP:-true}" = "true" ] && echo "Skipping spark jars copy (warm-up skipped)" || python - <<'PY'
 from pathlib import Path
 import shutil
 
-source_dir = Path("/home/appuser/.ivy2/jars")
 target_dir = Path("/home/appuser/.dq-spark-jars")
-target_dir.mkdir(parents=True, exist_ok=True)
+ivy_jars = Path("/home/appuser/.ivy2/jars")
 
-jar_paths = sorted(path for path in source_dir.glob("*.jar") if path.is_file())
-if not jar_paths:
-    raise SystemExit("No Spark jars were downloaded during the dq-engine image build")
+# If Ivy jars exist, copy them (network resolution path)
+if ivy_jars.is_dir():
+    jar_paths = sorted(p for p in ivy_jars.glob("*.jar") if p.is_file())
+    for jar_path in jar_paths:
+        dst = target_dir / jar_path.name
+        if not dst.exists():
+            shutil.copy2(jar_path, dst)
 
-for jar_path in jar_paths:
-    shutil.copy2(jar_path, target_dir / jar_path.name)
+# Final safety check
+existing = sorted(p for p in target_dir.glob("*.jar") if p.is_file())
+if not existing:
+    raise SystemExit("No Spark jars found in target after warm-up; build cannot proceed")
+print(f"Verified {len(existing)} Spark jars in {target_dir}")
 PY
 
 # -- Application code (changes frequently, invalidates only from here down) --

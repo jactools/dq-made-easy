@@ -16,5 +16,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     build-essential \
     curl \
     git \
-    ca-certificates; \
+    ca-certificates \
+    default-jre-headless \
+    ca-certificates-java; \
   rm -rf /var/lib/apt/lists/*
