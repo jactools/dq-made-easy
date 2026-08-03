@@ -347,12 +347,12 @@ This gives the teams:
 
 ---
 
-## 14. Open Questions
+## 14. Open Questions and some answers
 
-1. Should the shared platform be a new repository or an existing repository split into a shared package area?
+1. Should the shared platform be a new repository or an existing repository split into a shared package area? ==> repo platform-foundation
 2. Which ingestion jobs are truly reusable versus product-specific?
-3. Should the shared platform publish Python packages, container images, or both on day one?
-4. What identity provider assumptions are common to both apps?
+3. Should the shared platform publish Python packages, container images, or both on day one? ==> Yes
+4. What identity provider assumptions are common to both apps? ==> Keycloak using one single realm
 5. Which build pipeline should become the canonical image publisher?
 
 ---
