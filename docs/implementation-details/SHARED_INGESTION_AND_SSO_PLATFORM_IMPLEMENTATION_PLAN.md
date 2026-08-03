@@ -39,6 +39,8 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | Auth extracted to standalone `platform-auth` package | Complete | All auth modules (JWKS/JWT, token providers, auth config, scope mapping) moved to `platform-auth`; `platform-foundation` reverts to config-only. 91 unit tests. No re-exports. |
 | dq-made-easy consumers migrated to `platform-auth` | Complete | 10 files across dq-api and dq-engine switched from `platform_foundation` → `platform_auth` imports. requirements.txt updated. |
 | MaaS auth adoption | Not started | Workstream 5 remains open |
+| Shared ingestion kernel extracted | Complete | `platform-ingestion` package with S3 client, bucket/prefix ops, CSV→Parquet via Spark, and `stage_csv_to_parquet()`. 17 unit tests. Published to pypiserver. |
+| Shared test data generator | Complete | `platform-testdata` package with schema-driven deterministic generation, 6 output formats, and Spark column expression builders. 25 unit tests. Published to pypiserver. |
 | Shared package test count | 92 tests pass | 9 existing auth + 25 JWKS/JWT + 25 auth_config + 33 scope_mapping |
 | Shared image centralization | Inventory complete | Workstream 4 implementation remains open |
 
@@ -74,8 +76,8 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Workstream 2: Extract Shared Ingestion Capability
 
-- [ ] (SHARED-I-W2-01) Move reusable ingestion connectors and helpers into the shared platform.
-- [ ] (SHARED-I-W2-02) Move reusable test-data generation or fixture-backed real data sources into the shared platform.
+- [x] (SHARED-I-W2-01) Move reusable ingestion connectors and helpers into the shared platform.
+- [x] (SHARED-I-W2-02) Move reusable test-data generation or fixture-backed real data sources into the shared platform.
 - [ ] (SHARED-I-W2-03) Provide a shared CLI or job entrypoint for running the ingestion workloads.
 - [ ] (SHARED-I-W2-04) Keep application-specific orchestration wrappers in `dq-made-easy` and MaaS.
 - [ ] (SHARED-I-W2-05) Add tests that prove the shared ingestion package can be consumed without copying code into the app repos.
