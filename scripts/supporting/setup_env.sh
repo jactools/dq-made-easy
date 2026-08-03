@@ -18,8 +18,31 @@ fi
 
 source "$SCRIPT_DIR/logging.sh"
 my_name="setup_env.sh"
+debug "$my_name" "Sourcing setup_env.sh from $SCRIPT_DIR"
+debug "$my_name" "ROOT_DIR: $ROOT_DIR"
 
 debug "$my_name" "Setting up environment variables..."
+
+resolve_tls_internal_ca_bundle_file() {
+    local bundle_file="$1"
+
+    if [ -f "$bundle_file" ]; then
+        printf '%s' "$bundle_file"
+        return 0
+    fi
+
+    if [ -n "${ROOT_DIR:-}" ] && [ -f "$ROOT_DIR/$bundle_file" ]; then
+        printf '%s' "$ROOT_DIR/$bundle_file"
+        return 0
+    fi
+
+    if [ -n "${ROOT_DIR:-}" ] && [ -f "$ROOT_DIR/docker-compose/$bundle_file" ]; then
+        printf '%s' "$ROOT_DIR/docker-compose/$bundle_file"
+        return 0
+    fi
+
+    return 1
+}
 
 VITE_KEYCLOAK_PUBLIC_URL="${VITE_KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_PUBLIC_URL:-}}"
 VITE_SSO_ISSUER_URL="${VITE_SSO_ISSUER_URL:-${SSO_PUBLIC_ISSUER_URL:-}}"
@@ -143,10 +166,9 @@ if [ -n "${NEXUSCLOUD_NPM_REGISTRY:-}" ]; then
     export NPM_CONFIG_REGISTRY
 fi
 
-if [ -z "${TLS_INTERNAL_CA_BUNDLE:-}" ]; then
-    TLS_INTERNAL_CA_BUNDLE="$ROOT_DIR/tmp/certs/internal-ca-bundle.pem"
-fi
-if [ ! -f "$TLS_INTERNAL_CA_BUNDLE" ]; then
+if resolved_tls_internal_ca_bundle_file="$(resolve_tls_internal_ca_bundle_file "$TLS_INTERNAL_CA_BUNDLE")"; then
+    TLS_INTERNAL_CA_BUNDLE="$resolved_tls_internal_ca_bundle_file"
+else
     error "$my_name" "TLS_INTERNAL_CA_BUNDLE is required and must point to an existing file: $TLS_INTERNAL_CA_BUNDLE"
     return 1
 fi

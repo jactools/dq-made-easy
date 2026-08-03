@@ -221,6 +221,8 @@ if ! source_selected_root_env_file; then
 fi
 
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+debug "$my_name" "Using root env file: $ROOT_ENV_FILE"
+debug "$my_name" "ROOT_DIR: $ROOT_DIR"
 
 export ROOT_ENV_FILE
 
