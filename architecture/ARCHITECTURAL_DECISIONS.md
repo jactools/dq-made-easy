@@ -33,4 +33,5 @@ This document captures key architectural decisions made for the DQ API Gateway t
 - [ADR-030: EU Financial Regulatory Baseline and Control Mapping](./adr/ADR-030-eu-financial-regulatory-baseline-and-control-mapping.md)
 - [ADR-031: Synthetic/Test Object Storage Buckets and Synthetic Evidence Boundaries](./adr/ADR-031-synthetic-test-object-storage-buckets-and-synthetic-evidence-boundaries.md)
 - [ADR-033: Business Term and Technical Attribute Terminology for Governance Screens](./adr/ADR-033-business-term-and-technical-attribute-terminology-for-governance-screens.md)
+- [ADR-036: Shared Ingestion and SSO Platform Boundary and Image Ownership](./adr/ADR-036-shared-ingestion-and-sso-platform-boundary-and-image-ownership.md)
 
