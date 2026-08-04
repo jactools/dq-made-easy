@@ -23,6 +23,16 @@ CAMELCASE_RE = re.compile(r"[a-z][A-Z]")
 # Directories to scan for JSON fixtures/specs
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+# Python source directories — supports both DDD packages/ and legacy layout
+PYTHON_SOURCE_DIRS = [
+    "packages",
+    # Legacy dq-made-easy source directories
+    "dq-api/fastapi",
+    "dq-engine",
+    "dq-utils/src",
+    "dq-profiling/python",
+]
+
 
 def find_json_files(directory: Path, pattern: str) -> list[Path]:
     """Find JSON files matching a glob pattern."""
@@ -64,12 +74,23 @@ def _to_snake(name: str) -> str:
     return re.sub(r"([a-z\d])([A-Z])", r"\1_\2", s1).lower()
 
 
+def _find_python_sources() -> list[Path]:
+    """Find Python source files across all configured source directories."""
+    paths: list[Path] = []
+    for src_dir in PYTHON_SOURCE_DIRS:
+        d = REPO_ROOT / src_dir
+        if d.is_dir():
+            paths.extend(d.rglob("*.py"))
+    return [
+        p for p in paths
+        if "__pycache__" not in str(p) and "build/" not in str(p)
+    ]
+
+
 def check_pydantic_aliases() -> list[str]:
     """Check Pydantic models for Field(alias="camelCase") patterns."""
     violations: list[str] = []
-    for py_file in REPO_ROOT.glob("packages/**/*.py"):
-        if "__pycache__" in str(py_file) or "build/" in str(py_file):
-            continue
+    for py_file in _find_python_sources():
         content = py_file.read_text()
 
         # Match Field(alias="camelCase") patterns
@@ -131,9 +152,7 @@ def main() -> int:
 
     # 5. Check Python enum values are ALL_CAPS
     print("Checking enum values are ALL_CAPS...")
-    for py_file in REPO_ROOT.glob("packages/**/*.py"):
-        if "__pycache__" in str(py_file) or "build/" in str(py_file):
-            continue
+    for py_file in _find_python_sources():
         content = py_file.read_text()
 
         # Match class definitions that inherit from Enum

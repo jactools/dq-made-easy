@@ -5,13 +5,6 @@
 repos:
   - repo: local
     hooks:
-      - id: python-file-sizes
-        name: Python file size check (< 1000 lines)
-        entry: bash scripts/validate_python_file_sizes.sh --files
-        language: system
-        stages: [pre-commit]
-        pass_filenames: true
-
       - id: validate-module-rules
         name: Validate module rules (LOC < 1000, SRP)
         entry: venv/bin/python scripts/validate_module_rules.py

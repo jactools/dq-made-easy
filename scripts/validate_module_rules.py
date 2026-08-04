@@ -22,8 +22,15 @@ from pathlib import Path
 
 MAX_LINES = 1000
 
-# Packages to scan by default
+# Default scan targets — supports both DDD packages/ and legacy layout
 DEFAULT_PACKAGES = Path("packages")
+DEFAULT_SCAN_DIRS = [
+    # Legacy dq-made-easy source directories
+    "dq-api/fastapi/app",
+    "dq-engine",
+    "dq-utils/src",
+    "dq-profiling/python",
+]
 
 # Directories to skip
 SKIP_DIRS = {"__pycache__", "build", "dist", ".venv", "venv", "node_modules", ".git"}
@@ -253,9 +260,14 @@ def main() -> int:
             else:
                 print(f"Warning: {arg} not found", file=sys.stderr)
     else:
-        # Default: scan all packages/
+        # Default: scan packages/ (DDD) or legacy layout directories
         if DEFAULT_PACKAGES.exists():
             paths = list(DEFAULT_PACKAGES.rglob("*.py"))
+        else:
+            for scan_dir in DEFAULT_SCAN_DIRS:
+                d = Path(scan_dir)
+                if d.is_dir():
+                    paths.extend(d.rglob("*.py"))
 
     # Filter
     paths = [
