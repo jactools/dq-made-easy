@@ -149,9 +149,9 @@ The package now owns token providers, retry/caching behavior, token URL resoluti
 
 ### Phase 4: Centralize images
 
-- [ ] Create one canonical build pipeline for the shared ingestion/auth images.
-- [ ] Publish images with versioned tags in one registry namespace.
-- [ ] Update `dq-made-easy` to consume those tags instead of rebuilding duplicate images.
+- [x] Create one canonical build pipeline for the shared ingestion/auth images.
+- [x] Publish images with versioned tags in one registry namespace.
+- [x] Update `dq-made-easy` to consume those tags instead of rebuilding duplicate images.
 - [ ] Update MaaS to consume the same tags.
 - [ ] Remove duplicate Dockerfiles after both consumers have switched.
 

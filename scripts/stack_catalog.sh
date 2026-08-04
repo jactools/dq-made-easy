@@ -75,6 +75,11 @@ repo_image_values() {
     dq-zammad-seed
 }
 
+shared_image_values() {
+  printf '%s\n' \
+    platform-ingestion-runner
+}
+
 core_repo_image_values() {
   printf '%s\n' \
     dq-base \
@@ -101,6 +106,17 @@ is_core_repo_image() {
 is_repo_managed_image() {
   case "$1" in
     dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak|dq-kafka|dq-kafka-consumer|dq-trino|dq-edge|dq-airflow|dq-llm|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_shared_image() {
+  case "$1" in
+    platform-ingestion-runner)
       return 0
       ;;
     *)
@@ -220,6 +236,17 @@ repo_image_env_vars() {
       ;;
     dq-zammad-seed)
       printf '%s\n' DQ_ZAMMAD_SEED_REGISTRY DQ_ZAMMAD_SEED_NAMESPACE DQ_ZAMMAD_SEED_IMAGE DQ_ZAMMAD_SEED_TAG
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+shared_image_env_vars() {
+  case "$1" in
+    platform-ingestion-runner)
+      printf '%s\n' PLATFORM_SHARED_REGISTRY PLATFORM_SHARED_NAMESPACE PLATFORM_SHARED_INGESTION_RUNNER_IMAGE PLATFORM_SHARED_INGESTION_RUNNER_TAG
       ;;
     *)
       return 1

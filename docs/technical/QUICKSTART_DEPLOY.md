@@ -32,6 +32,9 @@ The orchestrator handles secrets generation, TLS certificates, image builds, con
 # Pull latest versions
 ./scripts/pull_images.sh
 
+# Or pull only the shared platform image scope
+./scripts/pull_images.sh --scope shared
+
 # Or pull a shared manual override tag
 ./scripts/pull_images.sh v0.10.5
 
