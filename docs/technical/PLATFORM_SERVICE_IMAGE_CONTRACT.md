@@ -77,12 +77,14 @@ The same `--scope platform` pull command works with any profile:
 
 Platform services follow the `platform-<service>` naming convention:
 
-| Service | Image name | Namespace |
-|---|---|---|
-| Keycloak | `platform-keycloak` | `jacbeekers/` |
-| Airflow | `platform-airflow` | `jacbeekers/` |
-| LLM | `platform-llm` | `jacbeekers/` |
-| Trino | `platform-trino` | `jacbeekers/` |
+| Service | Image name | Namespace | Notes |
+|---|---|---|---|
+| Kong | `platform-kong` | `jacbeekers/` | Gateway |
+| Keycloak | `platform-keycloak` | `jacbeekers/` | SSO |
+| Kafka | `platform-kafka` | `jacbeekers/` | Messaging |
+| LLM | `platform-llm` | `jacbeekers/` | AI inference (consumer app code as build context) |
+| Airflow | `platform-airflow` | `jacbeekers/` | DAGs deployed via API |
+| Trino | `platform-trino` | `jacbeekers/` | Catalog configs mounted by consumer |
 | Loki | `platform-observability-loki` | `jacbeekers/` |
 | Prometheus | `platform-observability-prometheus` | `jacbeekers/` |
 | Grafana | `platform-observability-grafana` | `jacbeekers/` |
@@ -118,7 +120,9 @@ Each platform service is pinned through a dedicated environment variable in the 
 
 | Service | Env var |
 |---|---|
+| Kong | `PLATFORM_KONG_TAG` |
 | Keycloak | `PLATFORM_KEYCLOAK_TAG` |
+| Kafka | `PLATFORM_KAFKA_TAG` |
 | Airflow | `PLATFORM_AIRFLOW_TAG` |
 | LLM | `PLATFORM_LLM_TAG` |
 | Trino | `PLATFORM_TRINO_TAG` |

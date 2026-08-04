@@ -80,7 +80,7 @@ Core images:
 Auxiliary repo images:
   dq-made-easy-db-seed dq-made-easy-keycloak-seed-artifacts dq-made-easy-openmetadata-db dq-made-easy-openmetadata-server
   dq-made-easy-metadata-configure dq-made-easy-container-metrics dq-made-easy-zammad-seed dq-made-easy-llm
-  dq-made-easy-kafka dq-made-easy-kafka-consumer dq-made-easy-trino dq-made-easy-edge dq-made-easy-airflow
+  dq-made-easy-kafka-consumer dq-made-easy-trino dq-made-easy-edge dq-made-easy-airflow
 
 Platform service images:
   platform-ingestion-runner
@@ -138,12 +138,12 @@ normalize_repo_image_name() {
     dq-made-easy-kong) printf '%s' 'dq-kong' ;; # Kong image moved to platform-foundation; retained for alias compat
     dq-made-easy-db) printf '%s' 'dq-db' ;;
     dq-made-easy-keycloak) printf '%s' 'dq-keycloak' ;;
-    dq-made-easy-kafka) printf '%s' 'dq-kafka' ;;
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     dq-made-easy-kafka-consumer) printf '%s' 'dq-kafka-consumer' ;;
-    dq-made-easy-trino) printf '%s' 'dq-trino' ;;
+    # Trino image/container lifecycle managed by platform-foundation (platform-trino).
     dq-made-easy-edge) printf '%s' 'dq-edge' ;;
-    dq-made-easy-airflow) printf '%s' 'dq-airflow' ;;
-    dq-made-easy-llm) printf '%s' 'dq-llm' ;;
+    # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+    # LLM image/container lifecycle managed by platform-foundation (platform-llm).
     dq-made-easy-db-seed) printf '%s' 'dq-db-seed' ;;
     dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-keycloak-seed-artifacts' ;;
     dq-made-easy-openmetadata-db) printf '%s' 'dq-openmetadata-db' ;;
@@ -184,29 +184,18 @@ set_aux_image_defaults() {
   DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
   DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
-  DQ_KAFKA_REGISTRY="${DQ_KAFKA_REGISTRY:-docker-registry.dev.jac.dot/}"
-  DQ_KAFKA_NAMESPACE="${DQ_KAFKA_NAMESPACE:-jacbeekers/}"
-  DQ_KAFKA_IMAGE="${DQ_KAFKA_IMAGE:-dq-made-easy-kafka}"
-
+  # Kafka broker is managed by platform-foundation (platform-kafka).
   DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_KAFKA_CONSUMER_NAMESPACE="${DQ_KAFKA_CONSUMER_NAMESPACE:-jacbeekers/}"
   DQ_KAFKA_CONSUMER_IMAGE="${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}"
 
-  DQ_TRINO_REGISTRY="${DQ_TRINO_REGISTRY:-docker-registry.dev.jac.dot/}"
-  DQ_TRINO_NAMESPACE="${DQ_TRINO_NAMESPACE:-jacbeekers/}"
-  DQ_TRINO_IMAGE="${DQ_TRINO_IMAGE:-dq-made-easy-trino}"
-
+  # Trino image/container lifecycle managed by platform-foundation (platform-trino).
   DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_EDGE_NAMESPACE="${DQ_EDGE_NAMESPACE:-jacbeekers/}"
   DQ_EDGE_IMAGE="${DQ_EDGE_IMAGE:-dq-made-easy-edge}"
 
-  DQ_AIRFLOW_REGISTRY="${DQ_AIRFLOW_REGISTRY:-docker-registry.dev.jac.dot/}"
-  DQ_AIRFLOW_NAMESPACE="${DQ_AIRFLOW_NAMESPACE:-jacbeekers/}"
-  DQ_AIRFLOW_IMAGE="${DQ_AIRFLOW_IMAGE:-dq-made-easy-airflow}"
-
-  DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker-registry.dev.jac.dot/}"
-  DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
-  DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
 
   PLATFORM_REGISTRY="${PLATFORM_REGISTRY:-docker-registry.dev.jac.dot/}"
   PLATFORM_NAMESPACE="${PLATFORM_NAMESPACE:-jacbeekers/}"
@@ -229,12 +218,12 @@ auto_resolve_tags_from_calculated_versions() {
     # Keycloak image/container lifecycle managed by platform-foundation
     DQ_DB_SEED_TAG
     DQ_KEYCLOAK_SEED_TAG
-    DQ_KAFKA_TAG
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     DQ_KAFKA_CONSUMER_TAG
-    DQ_TRINO_TAG
+    # Trino image/container lifecycle managed by platform-foundation (platform-trino).
     DQ_EDGE_TAG
-    DQ_AIRFLOW_TAG
-    DQ_LLM_TAG
+    # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+    # LLM image/container lifecycle managed by platform-foundation (platform-llm).
     DQ_OPENMETADATA_DB_TAG
     DQ_OPENMETADATA_SERVER_TAG
     DQ_METADATA_CONFIGURE_TAG

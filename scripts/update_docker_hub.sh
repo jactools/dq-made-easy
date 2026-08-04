@@ -276,12 +276,12 @@ normalize_repository_name() {
         # Kong image/container lifecycle managed by platform-foundation
         dq-db|dq-made-easy-db) printf '%s' 'dq-made-easy-db' ;;
         # Keycloak image/container lifecycle managed by platform-foundation
-        dq-kafka|dq-made-easy-kafka) printf '%s' 'dq-made-easy-kafka' ;;
+        # Kafka broker is managed by platform-foundation (platform-kafka).
         dq-kafka-consumer|dq-made-easy-kafka-consumer) printf '%s' 'dq-made-easy-kafka-consumer' ;;
-        dq-trino|dq-made-easy-trino) printf '%s' 'dq-made-easy-trino' ;;
+        # Trino image/container lifecycle managed by platform-foundation (platform-trino).
         dq-edge|dq-made-easy-edge) printf '%s' 'dq-made-easy-edge' ;;
-        dq-airflow|dq-made-easy-airflow) printf '%s' 'dq-made-easy-airflow' ;;
-        dq-llm|dq-made-easy-llm) printf '%s' 'dq-made-easy-llm' ;;
+        # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+        # LLM image/container lifecycle managed by platform-foundation (platform-llm).
         dq-db-seed|dq-made-easy-db-seed) printf '%s' 'dq-made-easy-db-seed' ;;
         dq-keycloak-seed-artifacts|dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-made-easy-keycloak-seed-artifacts' ;;
         dq-openmetadata-db|dq-made-easy-openmetadata-db) printf '%s' 'dq-made-easy-openmetadata-db' ;;

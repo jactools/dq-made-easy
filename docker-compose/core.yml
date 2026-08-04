@@ -168,61 +168,8 @@ services:
     - dq-network
     labels:
     - monitoring=true
-  kafka:
-    profiles:
-    - engine
-    - core
-    - gateway
-    - observability
-    image: ${DQ_KAFKA_REGISTRY:?DQ_KAFKA_REGISTRY is required}${DQ_KAFKA_NAMESPACE:-}${DQ_KAFKA_IMAGE:?DQ_KAFKA_IMAGE is required}:${DQ_KAFKA_TAG:?DQ_KAFKA_TAG is required}
-    build:
-      context: ../dq-kafka
-      dockerfile: Dockerfile.kafka
-    container_name: dq-made-easy-kafka
-    environment:
-      TZ: UTC
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: SSL://:9092,BROKER://:9094,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: SSL://${KAFKA_ADVERTISED_HOST:?KAFKA_ADVERTISED_HOST is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required},BROKER://kafka:9094
-      KAFKA_CERT_HOST: ${KAFKA_CERT_HOST?KAFKA_CERT_HOST is required}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.p12
-      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_keystore_creds
-      KAFKA_SSL_KEY_CREDENTIALS: kafka_key_creds
-      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
-      KAFKA_SSL_CLIENT_AUTH: none
-      KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED:?KAFKA_TLS_ENABLED is required}
-      KAFKA_TLS_KEYSTORE_PASSWORD: ${KAFKA_TLS_KEYSTORE_PASSWORD:?KAFKA_TLS_KEYSTORE_PASSWORD is required}
-      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
-    command:
-    - /opt/kafka/bin/start-kafka.sh
-    ports:
-    - ${KAFKA_HOST_BIND:?KAFKA_HOST_BIND is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required}:9092
-    volumes:
-    - kafka_data:/var/lib/kafka/data
-    - ../tmp/certs:/etc/kafka/certs:ro
-    networks:
-    - dq-network
-    restart: unless-stopped
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - echo | openssl s_client -connect ${KAFKA_HEALTHCHECK_HOST:?KAFKA_HEALTHCHECK_HOST is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required}
-        -servername ${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required} -CAfile /etc/kafka/certs/mkcert-rootCA.pem
-        >/dev/null 2>&1 || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 15s
+  # Kafka is managed by platform-foundation/docker-compose/messaging.yml
+  # Consumer repos provision topics via kafka-topics.sh (no mounts into platform Kafka).
   api-migrate:
     depends_on:
       db:

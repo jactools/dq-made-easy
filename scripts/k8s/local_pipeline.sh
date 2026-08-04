@@ -208,12 +208,12 @@ map_build_target() {
     dq-made-easy-kong) echo "kong" ;; # Kong managed by platform-foundation
     dq-made-easy-db) echo "dq-db" ;;
     dq-made-easy-keycloak) echo "dq-keycloak" ;;
-    dq-made-easy-kafka) echo "dq-kafka" ;;
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     dq-made-easy-kafka-consumer) echo "dq-kafka-consumer" ;;
-    dq-made-easy-trino) echo "dq-trino" ;;
+    # Trino image/container lifecycle managed by platform-foundation (platform-trino).
     dq-made-easy-edge) echo "dq-edge" ;;
-    dq-made-easy-airflow) echo "dq-airflow" ;;
-    dq-made-easy-llm) echo "dq-llm" ;;
+    # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+    # LLM image/container lifecycle managed by platform-foundation (platform-llm).
     *) return 1 ;;
   esac
 }
@@ -276,7 +276,7 @@ derive_image_name_parts() {
 
 service_repo_image_key() {
   case "$1" in
-    dq-api|dq-engine|dq-profiling|dq-frontend|dq-db|dq-llm)
+    dq-api|dq-engine|dq-profiling|dq-frontend|dq-db)
       printf '%s' "$1"
       ;;
     *)

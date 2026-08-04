@@ -61,10 +61,7 @@ repo_image_values() {
     # Keycloak image/container lifecycle managed by platform-foundation
     dq-kong \
     dq-kafka-consumer \
-    dq-trino \
     dq-edge \
-    dq-airflow \
-    dq-llm \
     dq-db-seed \
     dq-keycloak-seed-artifacts \
     dq-openmetadata-db \
@@ -103,7 +100,7 @@ is_core_repo_image() {
 
 is_repo_managed_image() {
   case "$1" in
-    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-db|dq-kafka|dq-kafka-consumer|dq-trino|dq-edge|dq-airflow|dq-llm|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
+    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-db|dq-kafka|dq-kafka-consumer|dq-edge|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
       return 0
       ;;
     *)
@@ -191,24 +188,16 @@ repo_image_env_vars() {
       printf '%s\n' DQ_DB_REGISTRY DQ_DB_NAMESPACE DQ_DB_IMAGE DQ_DB_TAG
       ;;
     # Keycloak image/container lifecycle managed by platform-foundation
-    dq-kafka)
-      printf '%s\n' DQ_KAFKA_REGISTRY DQ_KAFKA_NAMESPACE DQ_KAFKA_IMAGE DQ_KAFKA_TAG
-      ;;
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     dq-kafka-consumer)
       printf '%s\n' DQ_KAFKA_CONSUMER_REGISTRY DQ_KAFKA_CONSUMER_NAMESPACE DQ_KAFKA_CONSUMER_IMAGE DQ_KAFKA_CONSUMER_TAG
       ;;
-    dq-trino)
-      printf '%s\n' DQ_TRINO_REGISTRY DQ_TRINO_NAMESPACE DQ_TRINO_IMAGE DQ_TRINO_TAG
-      ;;
+    # Trino image/container lifecycle managed by platform-foundation (platform-trino).
     dq-edge)
       printf '%s\n' DQ_EDGE_REGISTRY DQ_EDGE_NAMESPACE DQ_EDGE_IMAGE DQ_EDGE_TAG
       ;;
-    dq-airflow)
-      printf '%s\n' DQ_AIRFLOW_REGISTRY DQ_AIRFLOW_NAMESPACE DQ_AIRFLOW_IMAGE DQ_AIRFLOW_TAG
-      ;;
-    dq-llm)
-      printf '%s\n' DQ_LLM_REGISTRY DQ_LLM_NAMESPACE DQ_LLM_IMAGE DQ_LLM_TAG
-      ;;
+    # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+    # LLM image/container lifecycle managed by platform-foundation (platform-llm).
     dq-db-seed)
       printf '%s\n' DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE DQ_DB_SEED_TAG
       ;;

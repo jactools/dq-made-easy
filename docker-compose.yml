@@ -16,7 +16,6 @@
 #   docker-compose/gateway.yml         - API Gateway (Kong) + Edge
 #   docker-compose/llm.yml             - LLM services
 #   docker-compose/seed.yml            - Initialization/seed services
-#   docker-compose/trino.yml           - Trino
 #   docker-compose/airflow.yml         - Airflow
 
 include:
@@ -30,5 +29,4 @@ include:
   - docker-compose/gateway.yml
   - docker-compose/llm.yml
   - docker-compose/seed.yml
-  - docker-compose/trino.yml
   - docker-compose/airflow.yml

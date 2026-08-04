@@ -5,20 +5,18 @@
 services:
   dq-made-easy-llm:
     profiles: ["llm"]
-    image: ${DQ_LLM_REGISTRY:?DQ_LLM_REGISTRY is required}${DQ_LLM_NAMESPACE:?DQ_LLM_NAMESPACE is required}${DQ_LLM_IMAGE:?DQ_LLM_IMAGE is required}:${DQ_LLM_TAG:?DQ_LLM_TAG is required}
+    # Platform LLM image: build with consumer app code as context.
+    # Platform provides: Dockerfile, start script, requirements.txt (shared deps).
+    # Consumer provides: entrypoint.py, agents/, telemetry.py (app code in ../dq-llm).
+    # Runtime model config via env vars (DQ_LLM_MODEL_ID, DQ_LLM_CHAT_PROVIDER, etc.).
+    image: ${PLATFORM_REGISTRY:?PLATFORM_REGISTRY is required}${PLATFORM_NAMESPACE:?PLATFORM_NAMESPACE is required}platform-llm:${PLATFORM_LLM_TAG:?PLATFORM_LLM_TAG is required}
     build:
       context: ../dq-llm
-      dockerfile: Dockerfile.llm
+      dockerfile: ../../platform-foundation/docker/llm/Dockerfile.llm
       cache_from:
       - type=local,src=../tmp/buildkit-cache/dq-llm
       cache_to:
       - type=local,dest=../tmp/buildkit-cache/dq-llm,mode=max
-      args:
-        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
-        PYTHON_NAMESPACE: ""
-        PYTHON_IMAGE: dq-made-easy-python-base
-        PYTHON_TAG: latest
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
     env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}
     ports:
       - "${DQ_LLM_HOST_BIND:-127.0.0.1}:${DQ_LLM_HOST_PORT:-8123}:8000"

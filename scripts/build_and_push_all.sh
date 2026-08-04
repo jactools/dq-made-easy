@@ -62,13 +62,9 @@ Repo scope (repo) builds the core set plus auxiliary repo-managed images:
  13) dq-made-easy-metadata-configure
  14) dq-made-easy-container-metrics
  15) dq-made-easy-zammad-seed
- 16) dq-made-easy-llm
- 17) dq-made-easy-kafka
- 18) dq-made-easy-kafka-consumer
- 19) dq-made-easy-trino
- 20) dq-made-easy-edge
- 21) dq-made-easy-airflow
- 22) dq-made-easy-zammad-origin
+ 16) dq-made-easy-kafka-consumer
+ 17) dq-made-easy-edge
+ 18) dq-made-easy-zammad-origin
 
 Options:
   --scope <core|repo>  Select image scope (default: core)
@@ -422,30 +418,18 @@ DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-
 DQ_KEYCLOAK_SEED_NAMESPACE="${DQ_KEYCLOAK_SEED_NAMESPACE:-${DQ_KEYCLOAK_NAMESPACE:-jacbeekers/}}"
 DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-made-easy-keycloak-seed-artifacts}"
 
-DQ_KAFKA_REGISTRY="${DQ_KAFKA_REGISTRY:-docker.io/}"
-DQ_KAFKA_NAMESPACE="${DQ_KAFKA_NAMESPACE:-jacbeekers/}"
-DQ_KAFKA_IMAGE="${DQ_KAFKA_IMAGE:-dq-made-easy-kafka}"
-
+# Kafka broker is managed by platform-foundation (platform-kafka).
 DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker.io/}"
 DQ_KAFKA_CONSUMER_NAMESPACE="${DQ_KAFKA_CONSUMER_NAMESPACE:-jacbeekers/}"
 DQ_KAFKA_CONSUMER_IMAGE="${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}"
 
-DQ_TRINO_REGISTRY="${DQ_TRINO_REGISTRY:-docker.io/}"
-DQ_TRINO_NAMESPACE="${DQ_TRINO_NAMESPACE:-jacbeekers/}"
-DQ_TRINO_IMAGE="${DQ_TRINO_IMAGE:-dq-made-easy-trino}"
-
+# Trino image/container lifecycle managed by platform-foundation (platform-trino).
 DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker.io/}"
 DQ_EDGE_NAMESPACE="${DQ_EDGE_NAMESPACE:-jacbeekers/}"
 DQ_EDGE_IMAGE="${DQ_EDGE_IMAGE:-dq-made-easy-edge}"
 
-DQ_AIRFLOW_REGISTRY="${DQ_AIRFLOW_REGISTRY:-docker.io/}"
-DQ_AIRFLOW_NAMESPACE="${DQ_AIRFLOW_NAMESPACE:-jacbeekers/}"
-DQ_AIRFLOW_IMAGE="${DQ_AIRFLOW_IMAGE:-dq-made-easy-airflow}"
-
-DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker.io/}"
-DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
-DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
-
+# Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+# LLM image/container lifecycle managed by platform-foundation (platform-llm).
 DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker.io/}"
 DQ_OPENMETADATA_DB_NAMESPACE="${DQ_OPENMETADATA_DB_NAMESPACE:-jacbeekers/}"
 DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}"
@@ -472,12 +456,12 @@ DQ_ZAMMAD_ORIGIN_IMAGE="${DQ_ZAMMAD_ORIGIN_IMAGE:-dq-made-easy-zammad-origin}"
 
 export DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE
 export DQ_KEYCLOAK_SEED_REGISTRY DQ_KEYCLOAK_SEED_NAMESPACE DQ_KEYCLOAK_SEED_IMAGE
-export DQ_KAFKA_REGISTRY DQ_KAFKA_NAMESPACE DQ_KAFKA_IMAGE
+# Kafka broker is managed by platform-foundation (platform-kafka).
 export DQ_KAFKA_CONSUMER_REGISTRY DQ_KAFKA_CONSUMER_NAMESPACE DQ_KAFKA_CONSUMER_IMAGE
-export DQ_TRINO_REGISTRY DQ_TRINO_NAMESPACE DQ_TRINO_IMAGE
+# Trino image/container lifecycle managed by platform-foundation (platform-trino).
 export DQ_EDGE_REGISTRY DQ_EDGE_NAMESPACE DQ_EDGE_IMAGE
-export DQ_AIRFLOW_REGISTRY DQ_AIRFLOW_NAMESPACE DQ_AIRFLOW_IMAGE
-export DQ_LLM_REGISTRY DQ_LLM_NAMESPACE DQ_LLM_IMAGE
+# Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+# LLM image/container lifecycle managed by platform-foundation (platform-llm).
 export DQ_OPENMETADATA_DB_REGISTRY DQ_OPENMETADATA_DB_NAMESPACE DQ_OPENMETADATA_DB_IMAGE
 export DQ_OPENMETADATA_SERVER_REGISTRY DQ_OPENMETADATA_SERVER_NAMESPACE DQ_OPENMETADATA_SERVER_IMAGE
 export DQ_METADATA_CONFIGURE_REGISTRY DQ_METADATA_CONFIGURE_NAMESPACE DQ_METADATA_CONFIGURE_IMAGE
@@ -500,12 +484,12 @@ else
   # Keycloak image/container lifecycle managed by platform-foundation
   export DQ_DB_SEED_TAG="$VERSION_TAG"
   export DQ_KEYCLOAK_SEED_TAG="$VERSION_TAG"
-  export DQ_KAFKA_TAG="$VERSION_TAG"
+  # Kafka broker is managed by platform-foundation (platform-kafka).
   export DQ_KAFKA_CONSUMER_TAG="$VERSION_TAG"
-  export DQ_TRINO_TAG="$VERSION_TAG"
+  # Trino image/container lifecycle managed by platform-foundation (platform-trino).
   export DQ_EDGE_TAG="$VERSION_TAG"
-  export DQ_AIRFLOW_TAG="$VERSION_TAG"
-  export DQ_LLM_TAG="$VERSION_TAG"
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
   export DQ_OPENMETADATA_DB_TAG="$VERSION_TAG"
   export DQ_OPENMETADATA_SERVER_TAG="$VERSION_TAG"
   export DQ_METADATA_CONFIGURE_TAG="$VERSION_TAG"
@@ -656,25 +640,9 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
   fi
 
-  if image_selected "dq-made-easy-llm"; then
-    run_direct_build_step \
-      "dq-made-easy-llm" \
-      "DQ_LLM_TAG" \
-      "${DQ_LLM_REGISTRY}${DQ_LLM_NAMESPACE}${DQ_LLM_IMAGE}" \
-      "$ROOT_DIR/dq-llm/Dockerfile.llm" \
-      "$ROOT_DIR/dq-llm" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
-  fi
-
-  if image_selected "dq-made-easy-kafka"; then
-    run_direct_build_step \
-      "dq-made-easy-kafka" \
-      "DQ_KAFKA_TAG" \
-      "${DQ_KAFKA_REGISTRY}${DQ_KAFKA_NAMESPACE}${DQ_KAFKA_IMAGE}" \
-      "$ROOT_DIR/dq-kafka/Dockerfile.kafka" \
-      "$ROOT_DIR/dq-kafka"
-  fi
-
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
+  # Kafka broker is managed by platform-foundation (platform-kafka).
+  # DQ-specific consumer remains here.
   if image_selected "dq-made-easy-kafka-consumer"; then
     run_direct_build_step \
       "dq-made-easy-kafka-consumer" \
@@ -685,16 +653,7 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
   fi
 
-  if image_selected "dq-made-easy-trino"; then
-    run_direct_build_step \
-      "dq-made-easy-trino" \
-      "DQ_TRINO_TAG" \
-      "${DQ_TRINO_REGISTRY}${DQ_TRINO_NAMESPACE}${DQ_TRINO_IMAGE}" \
-      "$ROOT_DIR/dq-trino/Dockerfile.trino" \
-      "$ROOT_DIR/dq-trino" \
-      "TRINO_BASE_IMAGE=${TRINO_BASE_IMAGE:-trinodb/trino:482}"
-  fi
-
+  # Trino image/container lifecycle managed by platform-foundation (platform-trino).
   if image_selected "dq-made-easy-edge"; then
     run_direct_build_step \
       "dq-made-easy-edge" \
@@ -704,18 +663,7 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "$ROOT_DIR/dq-edge"
   fi
 
-  if image_selected "dq-made-easy-airflow"; then
-    info "$my_name" "Preparing Airflow build artifacts..."
-    bash "$ROOT_DIR/scripts/package-releases/build_dq_airflow_wheels.sh"
-    bash "$ROOT_DIR/scripts/package-releases/build_dq_airflow_dag_artifact.sh"
-    run_direct_build_step \
-      "dq-made-easy-airflow" \
-      "DQ_AIRFLOW_TAG" \
-      "${DQ_AIRFLOW_REGISTRY}${DQ_AIRFLOW_NAMESPACE}${DQ_AIRFLOW_IMAGE}" \
-      "$ROOT_DIR/docker/airflow/Dockerfile.airflow" \
-      "$ROOT_DIR"
-  fi
-
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
   if image_selected "dq-made-easy-zammad-origin"; then
     run_direct_build_step \
       "dq-made-easy-zammad-origin" \

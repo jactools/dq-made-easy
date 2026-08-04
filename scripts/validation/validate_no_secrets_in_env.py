@@ -415,10 +415,7 @@ _NON_SECRET_PREFIXES = [
     "KONG_CERT_FILE",
     "KONG_KEY_FILE",
     "GRAFANA_KEY_FILE",
-    "DQ_KAFKA_REGISTRY",
-    "DQ_KAFKA_NAMESPACE",
-    "DQ_KAFKA_IMAGE",
-    "DQ_KAFKA_TAG",
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     "DQ_LLM_BASE_URL",
     "PYTHON_IMAGE",
     "PYTHON_REGISTRY",

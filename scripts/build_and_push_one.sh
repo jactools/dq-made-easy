@@ -44,12 +44,11 @@ Images:
   dq-frontend
   dq-db
   # Keycloak image/container lifecycle managed by platform-foundation
-  dq-kafka
+  # Kafka broker is managed by platform-foundation (platform-kafka).
   dq-kafka-consumer
-  dq-trino
   dq-edge
-  dq-airflow
-  dq-llm
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
 
 Options:
   --no-cache         Build without Docker cache
@@ -136,36 +135,20 @@ case "$SERVICE" in
     TAG_VAR="DQ_DB_TAG"
     ;;
   # Keycloak image/container lifecycle managed by platform-foundation
-  dq-kafka)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_KAFKA_TAG"
-    REPO_IMAGE="dq-made-easy-kafka"
-    ;;
+  # Kafka broker is managed by platform-foundation (platform-kafka).
   dq-kafka-consumer)
     STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
     TAG_VAR="DQ_KAFKA_CONSUMER_TAG"
     REPO_IMAGE="dq-made-easy-kafka-consumer"
     ;;
-  dq-trino)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_TRINO_TAG"
-    REPO_IMAGE="dq-made-easy-trino"
-    ;;
+  # Trino image/container lifecycle managed by platform-foundation (platform-trino).
   dq-edge)
     STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
     TAG_VAR="DQ_EDGE_TAG"
     REPO_IMAGE="dq-made-easy-edge"
     ;;
-  dq-airflow)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_AIRFLOW_TAG"
-    REPO_IMAGE="dq-made-easy-airflow"
-    ;;
-  dq-llm)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_LLM_TAG"
-    REPO_IMAGE="dq-made-easy-llm"
-    ;;
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
   *)
     error "$my_name" "Unknown image '$SERVICE'"
     usage
