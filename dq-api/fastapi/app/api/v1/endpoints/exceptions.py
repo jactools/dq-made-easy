@@ -22,7 +22,7 @@ from app.core.dependencies import get_gx_execution_run_repository
 from app.core.dependencies import get_gx_suite_repository
 from app.core.dependencies import get_validation_run_plan_repository
 from app.core.dependencies import get_rules_repository
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 from app.domain.interfaces import DataCatalogRepository
 from app.domain.interfaces import AdminRepository
 from app.domain.interfaces import ExceptionAnalysisSessionRepository

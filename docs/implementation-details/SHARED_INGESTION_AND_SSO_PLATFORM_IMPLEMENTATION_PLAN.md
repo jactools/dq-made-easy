@@ -106,9 +106,9 @@ This is intentionally a staged migration: inventory first, then extraction, then
 ## Workstream 5: Adopt in `dq-made-easy`
 
 - [x] (SHARED-I-W5-01) Update `dq-made-easy` to consume the shared ingestion package and shared auth helpers.
-- [ ] (SHARED-I-W5-02) Add repo-specific adapters only where product behavior diverges.
-- [ ] (SHARED-I-W5-03) Verify that `dq-made-easy` builds and runs against the same published images.
-- [ ] (SHARED-I-W5-04) Remove temporary compatibility shims once the consumer is stable.
+- [x] (SHARED-I-W5-02) Add repo-specific adapters only where product behavior diverges.
+- [x] (SHARED-I-W5-03) Verify that `dq-made-easy` builds and runs against the same published images.
+- [x] (SHARED-I-W5-04) Remove temporary compatibility shims once the consumer is stable.
 
 ## Workstream 6: Cleanup, Validation, and Evidence
 
@@ -149,7 +149,6 @@ This is intentionally a staged migration: inventory first, then extraction, then
 ## Next Steps
 
 1. Finish the dq-made-easy adoption tasks for shared auth, ingestion, and shared image consumption (SHARED-I-W5).
-2. Verify that dq-made-easy builds and runs against the published shared images.
-3. Remove duplicate code paths and compatibility shims once the shared path is stable (SHARED-I-W6).
-4. Rebuild and publish `platform_foundation-0.1.1` with auth config + scope mapping to pypiserver.
-5. Wire `dq-api` consumers to use `platform_foundation` scope resolver instead of local `auth.py` helpers.
+2. Remove duplicate code paths and compatibility shims once the shared path is stable (SHARED-I-W6).
+3. Rebuild and publish `platform_foundation-0.1.1` with auth config + scope mapping to pypiserver.
+4. Wire `dq-api` consumers to use `platform_foundation` scope resolver instead of local `auth.py` helpers.

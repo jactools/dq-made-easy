@@ -9,7 +9,7 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import update
 
-from app.core.auth import expand_granted_scopes
+from app.core.auth_scopes import expand_granted_scopes
 from app.domain.entities.admin import AdminRoleEntity, AdminUserEntity, ExceptionFactAccessRequestEntity, UserWorkspaceRoleEntity
 from app.domain.interfaces.v1.admin_repository import AdminRepository
 from app.domain.user_names import compose_user_display_name, name_parts_from_profile, normalize_user_name_parts

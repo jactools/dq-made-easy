@@ -20,7 +20,7 @@ from app.api.v1.schemas.ontology_view import OntologyGraphQueryResultView
 from app.application.services.agent_dispatch_service import AgentDispatchError
 from app.application.services.agent_dispatch_service import build_webhook_payload
 from app.application.services.agent_dispatch_service import dispatch_webhook
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 from app.core.dependencies import get_admin_repository
 from app.core.dependencies import get_agent_request_audit_repository
 from app.core.dependencies import get_app_config_repository

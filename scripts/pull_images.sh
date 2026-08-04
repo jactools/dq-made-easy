@@ -452,21 +452,16 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      case "$1" in
-        core|repo|shared)
-          # Backward-compatible fallback: accept bare scope values without --scope.
-          PULL_SCOPE="$1"
-          shift
-          ;;
-        *)
-          if [ -n "$VERSION" ]; then
-            error "$my_name" "Multiple VERSION values supplied"
-            exit 1
-          fi
-          VERSION="$1"
-          shift
-          ;;
-      esac
+      if [[ "$1" == core || "$1" == repo || "$1" == shared ]]; then
+        error "$my_name" "Bare scope values are no longer supported; use --scope $1"
+        exit 1
+      fi
+      if [ -n "$VERSION" ]; then
+        error "$my_name" "Multiple VERSION values supplied"
+        exit 1
+      fi
+      VERSION="$1"
+      shift
       ;;
   esac
  done
@@ -509,7 +504,10 @@ for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
   full_image="$(resolve_full_image_name "$image")"
   info "$my_name" "Pulling: $full_image"
 
-  if docker pull "$full_image"; then
+  if docker image inspect "$full_image" >/dev/null 2>&1; then
+    success "$my_name" "already present locally $image"
+    success_count=$((success_count+1))
+  elif docker pull "$full_image"; then
     success "$my_name" "pulled $image"
     success_count=$((success_count+1))
   else

@@ -1,4 +1,4 @@
-from app.core.auth import expand_granted_scopes
+from app.core.auth_scopes import expand_granted_scopes
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 

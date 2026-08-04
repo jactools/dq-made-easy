@@ -135,14 +135,23 @@ append_unique_service() {
 
 append_unique_image() {
   local value="$1"
-  if ! contains_value "$value" "${SELECTED_IMAGES[@]}"; then
+  if ! contains_value "$value" ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; then
     SELECTED_IMAGES+=("$value")
+  fi
+}
+
+image_ref_name() {
+  local ref="$1"
+  if [[ "$ref" == *:* ]]; then
+    printf '%s' "${ref%%:*}"
+  else
+    printf '%s' "$ref"
   fi
 }
 
 append_unique_seed_target() {
   local value="$1"
-  if ! contains_value "$value" "${SELECTED_SEED_TARGETS[@]}"; then
+  if ! contains_value "$value" ${SELECTED_SEED_TARGETS[@]+"${SELECTED_SEED_TARGETS[@]}"}; then
     SELECTED_SEED_TARGETS+=("$value")
   fi
 }
@@ -199,7 +208,7 @@ resolve_image_selection() {
     esac
   fi
 
-  for profile in "${SELECTED_PROFILES[@]}"; do
+  for profile in ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"}; do
     if profile_images="$(image_targets_for_profile "$profile" 2>/dev/null)"; then
       while IFS= read -r image; do
         if [ -n "$image" ]; then
@@ -291,11 +300,11 @@ resolve_reconciliation_profiles() {
     return 0
   fi
 
-  for profile in "${SELECTED_PROFILES[@]}"; do
+  for profile in ${SELECTED_PROFILES[@]+"${SELECTED_PROFILES[@]}"}; do
     if ! is_reconciliation_profile "$profile"; then
       fail "reconcile accepts only --all, --profile gateway, --profile auth, and --profile metadata"
     fi
-    if ! contains_value "$profile" "${RECONCILE_PROFILES[@]}"; then
+    if ! contains_value "$profile" ${RECONCILE_PROFILES[@]+"${RECONCILE_PROFILES[@]}"}; then
       RECONCILE_PROFILES+=("$profile")
     fi
   done
@@ -308,13 +317,13 @@ resolve_reconciliation_profiles() {
 collect_reconciliation_args() {
   RECONCILE_ARGS=(--env-file "$ROOT_ENV_FILE")
 
-  if contains_value gateway "${RECONCILE_PROFILES[@]}"; then
+  if contains_value gateway ${RECONCILE_PROFILES[@]+"${RECONCILE_PROFILES[@]}"}; then
     RECONCILE_ARGS+=(--gateway)
   fi
-  if contains_value auth "${RECONCILE_PROFILES[@]}"; then
+  if contains_value auth ${RECONCILE_PROFILES[@]+"${RECONCILE_PROFILES[@]}"}; then
     RECONCILE_ARGS+=(--keycloak)
   fi
-  if contains_value metadata "${RECONCILE_PROFILES[@]}"; then
+  if contains_value metadata ${RECONCILE_PROFILES[@]+"${RECONCILE_PROFILES[@]}"}; then
     RECONCILE_ARGS+=(--metadata)
   fi
 }
@@ -338,13 +347,13 @@ show_resolved_plan() {
       if [ -n "$VERSION_TAG" ]; then
         planned_args+=(--version "$VERSION_TAG")
       fi
-      for item in "${SELECTED_IMAGES[@]}"; do
+      for item in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
         planned_args+=(--image "$item")
       done
       planned_command="$(printf '%s ' "${planned_args[@]}")"
       info "Plan: ${planned_command% }"
       info "Resolved images:"
-      for item in "${SELECTED_IMAGES[@]}"; do
+      for item in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
         info "  - $item"
       done
       ;;
@@ -354,13 +363,13 @@ show_resolved_plan() {
       if [ -n "$VERSION_TAG" ]; then
         planned_args+=(--version "$VERSION_TAG")
       fi
-      for item in "${SELECTED_IMAGES[@]}"; do
+      for item in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
         planned_args+=(--image "$item")
       done
       planned_command="$(printf '%s ' "${planned_args[@]}")"
       info "Plan: ${planned_command% }"
       info "Resolved images:"
-      for item in "${SELECTED_IMAGES[@]}"; do
+      for item in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
         info "  - $item"
       done
       ;;
@@ -396,12 +405,12 @@ show_resolved_plan() {
     reconcile)
       validate_selected_root_env_file "$ROOT_DIR" full
       resolve_reconciliation_profiles
-      profile_csv="$(join_csv "${RECONCILE_PROFILES[@]}")"
+      profile_csv="$(join_csv ${RECONCILE_PROFILES[@]+"${RECONCILE_PROFILES[@]}"})"
       if ! planned="$(stack_dependency_plan_services "$ROOT_ENV_FILE" "$profile_csv" "" start)"; then
         fail "Unable to resolve dependency plan for reconcile"
       fi
       while IFS= read -r service; do
-        if [ -n "$service" ] && ! contains_value "$service" "${RESOLVED_SERVICES[@]}"; then
+        if [ -n "$service" ] && ! contains_value "$service" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}; then
           RESOLVED_SERVICES+=("$service")
         fi
       done <<EOF
@@ -411,7 +420,7 @@ EOF
       planned_command="$(printf '%s ' "$ROOT_DIR/scripts/reconcile_stack.sh" "${RECONCILE_ARGS[@]}")"
       info "Plan: ${planned_command% }"
       info "Ordered services:"
-      for item in "${RESOLVED_SERVICES[@]}"; do
+      for item in ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}; do
         info "  - $item"
       done
       ;;
@@ -424,7 +433,7 @@ EOF
         if [ "${#SELECTED_SEED_TARGETS[@]}" -eq 0 ]; then
           fail "Select --all or --seed-target for seed"
         fi
-        for item in "${SELECTED_SEED_TARGETS[@]}"; do
+        for item in ${SELECTED_SEED_TARGETS[@]+"${SELECTED_SEED_TARGETS[@]}"}; do
           planned_args+=("$(seed_flag_for_target "$item")")
         done
       fi
@@ -443,7 +452,7 @@ EOF
       if [ "$ALL" = true ]; then
         info "  - all"
       else
-        for item in "${SELECTED_SEED_TARGETS[@]}"; do
+        for item in ${SELECTED_SEED_TARGETS[@]+"${SELECTED_SEED_TARGETS[@]}"}; do
           info "  - $item"
         done
       fi
@@ -457,8 +466,12 @@ validate_action_selectors() {
       if [ "${#SELECTED_SERVICES[@]}" -gt 0 ] || [ "${#SELECTED_SEED_TARGETS[@]}" -gt 0 ]; then
         fail "$ACTION accepts only --all, --profile, --image, --scope, --version, and --no-cache"
       fi
-      if [ "$ACTION" != "pull" ] && contains_value platform-ingestion-runner ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; then
-        fail "shared images are pull-only; use pull --scope shared or the platform-foundation build script"
+      if [ "$ACTION" != "pull" ]; then
+        for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
+          if [ "$(image_ref_name "$image")" = "platform-ingestion-runner" ]; then
+            fail "shared images are pull-only; use pull --scope shared or the platform-foundation build script"
+          fi
+        done
       fi
       ;;
     start|restart|stop)
@@ -536,7 +549,20 @@ while [[ $# -gt 0 ]]; do
       if [[ -z "${2:-}" ]]; then
         fail "--image requires an image name"
       fi
-      if is_repo_managed_image "$2" || is_shared_image "$2"; then
+      image_name_arg="$(image_ref_name "$2")"
+      image_tag_arg=""
+      if [[ "$2" == *:* ]]; then
+        image_tag_arg="${2##*:}"
+      fi
+      if is_repo_managed_image "$image_name_arg"; then
+        if [ -n "$image_tag_arg" ]; then
+          fail "Repo-managed images must use --version instead of a tag in --image '$2'"
+        fi
+        append_unique_image "$image_name_arg"
+      elif is_shared_image "$image_name_arg"; then
+        if [ -n "$image_tag_arg" ] && [ "$ACTION" != "pull" ]; then
+          fail "shared images are pull-only; use pull --scope shared or the platform-foundation build script"
+        fi
         append_unique_image "$2"
       else
         fail "Unsupported image '$2'"
@@ -633,18 +659,22 @@ case "$ACTION" in
     if [ -n "$VERSION_TAG" ]; then
       build_args+=(--version "$VERSION_TAG")
     fi
-    for image in "${SELECTED_IMAGES[@]}"; do
+    for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
       build_args+=(--image "$image")
     done
     "$ROOT_DIR/scripts/build_and_push_all.sh" "${build_args[@]}"
     ;;
   pull)
+    if [ "$DRY_RUN" = true ]; then
+      show_resolved_plan
+      exit 0
+    fi
     resolve_image_selection
     pull_args=(--env-file "$ROOT_ENV_FILE" --scope "$IMAGE_SCOPE")
     if [ -n "$VERSION_TAG" ]; then
       pull_args+=(--version "$VERSION_TAG")
     fi
-    for image in "${SELECTED_IMAGES[@]}"; do
+    for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
       pull_args+=(--image "$image")
     done
     "$ROOT_DIR/scripts/pull_images.sh" "${pull_args[@]}"
@@ -706,12 +736,12 @@ case "$ACTION" in
     fi
     validate_selected_root_env_file "$ROOT_DIR" full
     resolve_reconciliation_profiles
-    profile_csv="$(join_csv "${RECONCILE_PROFILES[@]}")"
+    profile_csv="$(join_csv ${RECONCILE_PROFILES[@]+"${RECONCILE_PROFILES[@]}"})"
     if ! planned="$(stack_dependency_plan_services "$ROOT_ENV_FILE" "$profile_csv" "" start)"; then
       fail "Unable to resolve dependency plan for reconcile"
     fi
     while IFS= read -r service; do
-      if [ -n "$service" ] && ! contains_value "$service" "${RESOLVED_SERVICES[@]}"; then
+      if [ -n "$service" ] && ! contains_value "$service" ${RESOLVED_SERVICES[@]+"${RESOLVED_SERVICES[@]}"}; then
         RESOLVED_SERVICES+=("$service")
       fi
     done <<EOF
@@ -734,7 +764,7 @@ EOF
       if [ "${#SELECTED_SEED_TARGETS[@]}" -eq 0 ]; then
         fail "Select --all or --seed-target for seed"
       fi
-      for seed_target in "${SELECTED_SEED_TARGETS[@]}"; do
+      for seed_target in ${SELECTED_SEED_TARGETS[@]+"${SELECTED_SEED_TARGETS[@]}"}; do
         seed_args+=("$(seed_flag_for_target "$seed_target")")
       done
     fi

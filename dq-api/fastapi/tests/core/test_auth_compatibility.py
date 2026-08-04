@@ -1,3 +1,7 @@
+"""classification: unit"""
+
+import pytest
+
 from app.core.auth import (
     build_principal,
     build_principal_trusted,
@@ -10,6 +14,9 @@ from app.core.auth import (
     normalize_auth_path,
 )
 from app.core.config import Settings
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_normalize_auth_path_strips_api_prefix() -> None:

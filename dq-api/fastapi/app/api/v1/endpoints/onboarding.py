@@ -6,7 +6,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.application.services.onboarding_service import OnboardingService
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 from app.core.dependencies import (
     get_data_asset_repository,
     get_data_catalog_repository,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 
 
 COMMENT_STATE_NEW = "new"

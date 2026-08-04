@@ -21,7 +21,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.api.v1.schemas import LoginResponseView, LogoutResponseView
 from app.application.resolvers import resolve_login_response_view
-from app.core.auth import SESSION_COOKIE_NAME, expand_granted_scopes
+from app.core.auth import SESSION_COOKIE_NAME
+from app.core.auth_scopes import expand_granted_scopes
 from app.core.auth_login_metrics import record_login_event
 from app.core.config import get_settings
 from app.core.dependencies import get_admin_repository

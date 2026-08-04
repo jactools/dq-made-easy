@@ -6,12 +6,10 @@ from urllib.parse import urlparse, urlunparse
 
 from fastapi import Request
 
+from app.core.auth_scopes import expand_granted_scopes as _expand_granted_scopes
+from app.core.auth_scopes import get_scopes_from_payload as _get_scopes_from_payload
+from app.core.auth_scopes import has_required_scope as _has_required_scope
 from app.core.config import Settings
-from platform_auth import create_dq_scope_resolver
-from platform_auth import get_scopes_from_claims
-
-
-_DQ_SCOPE_RESOLVER = create_dq_scope_resolver()
 
 
 PUBLIC_PREFIXES = (
@@ -329,7 +327,7 @@ def is_jwt_payload_valid(payload: dict[str, Any] | None, settings: Settings) -> 
 
 
 def get_scopes_from_payload(payload: dict[str, Any]) -> list[str]:
-    return get_scopes_from_claims(payload)
+    return _get_scopes_from_payload(payload)
 
 
 def get_consumer_groups_from_header(raw_groups: str | None) -> list[str]:
@@ -345,11 +343,11 @@ def get_consumer_groups_from_header(raw_groups: str | None) -> list[str]:
 
 
 def expand_granted_scopes(granted: list[str]) -> set[str]:
-    return _DQ_SCOPE_RESOLVER.expand_scopes(granted)
+    return _expand_granted_scopes(granted)
 
 
 def has_required_scope(granted: list[str], required: list[str]) -> bool:
-    return _DQ_SCOPE_RESOLVER.has_any_scope(granted, required)
+    return _has_required_scope(granted, required)
 
 
 def build_principal(

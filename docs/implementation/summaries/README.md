@@ -6,6 +6,9 @@ This directory contains implementation summaries for significant architectural o
 
 | Date | Summary | Status | Scope |
 |---|---|---|---|
+| 2026-08-04 | [dq-made-easy shared image verification](./2026-08-04_dq-made-easy-shared-image-verification.md) | Complete | Verified the shared runner image through the repo pull path and container runtime |
+| 2026-08-04 | [dq-made-easy shared image compatibility cleanup](./2026-08-04_dq-made-easy-shared-image-compatibility-cleanup.md) | Complete | Removed the bare shared-image scope shim and tightened operator dry-run planning |
+| 2026-08-04 | [dq-api shared scope adapter extraction](./2026-08-04_dq-api-shared-scope-adapter-extraction.md) | Complete | Split dq-api scope delegation into a dedicated adapter module |
 | 2026-08-04 | [dq-api shared scope resolver adoption](./2026-08-04_dq-api-shared-scope-resolver-adoption.md) | Complete | Moved dq-api scope extraction and matching onto `platform_auth` |
 | 2026-08-04 | [Pre-commit hook alignment](./2026-08-04_pre-commit-hook-alignment.md) | Complete | Matched the shared validator hooks to the metadata-as-a-service style |
 | 2026-08-04 | [Validation hooks for module rules and snake_case](./2026-08-04_validation-hooks-module-rules-snake-case.md) | Complete | Wired the copied validators into pre-commit and repo validation discovery |
