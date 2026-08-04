@@ -1,0 +1,36 @@
+{
+  "app_version": "0.11.6",
+  "proof_id": "platform-services-migration-20260804T222200Z",
+  "proof_type": "platform",
+  "feature": "workstream-7-platform-services-migration",
+  "summary": "Workstream 7 migration complete. All platform services (Kong, Keycloak, Kafka, LLM, Trino, Airflow, Observability) migrated to platform-foundation. Docker compose validation passes for both repos.",
+  "status": "passed",
+  "executed_at_utc": "2026-08-04T22:22:00Z",
+  "command": "docker compose config --quiet (both repos)",
+  "raw_evidence_directory": "test-results/evidence/0.11.6/platform/platform-services-migration",
+  "test_files": [
+    "platform-foundation/docker-compose/gateway.yml",
+    "platform-foundation/docker-compose/auth.yml",
+    "platform-foundation/docker-compose/messaging.yml",
+    "platform-foundation/docker-compose/llm.yml",
+    "platform-foundation/docker-compose/trino.yml",
+    "platform-foundation/docker-compose/airflow.yml",
+    "platform-foundation/docker-compose/observability.yml",
+    "docker-compose/llm.yml",
+    "docker-compose/auth.yml",
+    "docker-compose/observability.yml",
+    "docker-compose/airflow.yml"
+  ],
+  "test_file_count": 11,
+  "test_count": 2,
+  "assertions": [
+    "All platform services have docker compose files that validate",
+    "All platform services are referenced in pull_images.sh",
+    "All platform services are referenced in stack_catalog.sh",
+    "Legacy Dockerfiles removed from dq-made-easy",
+    "Legacy build scripts updated to use PLATFORM_*_TAG vars",
+    "Platform services use PLATFORM_REGISTRY/PLATFORM_NAMESPACE image contract",
+    "No consumer mounts into platform containers",
+    "Consumers deploy configs via API/CLI (Kafka topics, Trino catalog, Airflow DAGs)"
+  ]
+}

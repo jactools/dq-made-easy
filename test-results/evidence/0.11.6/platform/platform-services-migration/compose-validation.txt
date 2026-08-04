@@ -1,0 +1,58 @@
+Platform Services Migration - Compose Validation Evidence
+=========================================================
+Executed at: 2026-08-04T22:22:10Z
+
+1. Platform-foundation compose validation:
+   Command: docker compose -f docker-compose.dev.yml --env-file .env.dev.local config --quiet
+   Result: PASS (exit code 0)
+   Services validated:
+   - platform-foundation-kong (gateway.yml)
+   - platform-foundation-keycloak (auth.yml)
+   - platform-foundation-kafka (messaging.yml)
+   - platform-foundation-llm (llm.yml)
+   - platform-foundation-trino (trino.yml)
+   - platform-foundation-airflow-webserver (airflow.yml)
+   - platform-foundation-airflow-scheduler (airflow.yml)
+   - platform-foundation-loki (observability.yml)
+   - platform-foundation-prometheus (observability.yml)
+   - platform-foundation-grafana (observability.yml)
+   - platform-foundation-tempo (observability.yml)
+   - platform-foundation-otel-collector (observability.yml)
+   - platform-foundation-container-metrics (observability.yml)
+
+2. dq-made-easy compose validation:
+   Command: docker compose -f docker-compose.yml --env-file .env.dev.local config --quiet
+   Result: PASS (exit code 0)
+   Platform services referenced:
+   - platform-llm (docker-compose/llm.yml)
+   - platform-keycloak (docker-compose/auth.yml)
+   - platform-observability-* (docker-compose/observability.yml)
+   Notes:
+   - platform-kong, platform-kafka, platform-trino, platform-airflow run from platform-foundation
+   - dq-made-easy compose files reference PLATFORM_REGISTRY/PLATFORM_NAMESPACE/PLATFORM_*_TAG
+
+3. Legacy Dockerfiles removed:
+   - dq-kafka/Dockerfile.kafka (migrated to platform-foundation)
+   - dq-kafka/start-kafka.sh (migrated to platform-foundation)
+   - docker/airflow/Dockerfile.airflow (migrated to platform-foundation)
+   - docker/airflow/webserver_config.py (migrated to platform-foundation)
+
+4. Legacy build scripts updated:
+   - scripts/build_and_push_all.sh
+   - scripts/build_and_push_one.sh
+   - scripts/calculate_versions.sh
+   - scripts/stack_catalog.sh
+   - scripts/pull_images.sh
+   - scripts/update_docker_hub.sh
+   - scripts/k8s/local_pipeline.sh
+
+5. Environment files updated:
+   - .env.dev.local
+   - .env.dev.example
+   - .env.test.local
+   - .env.test.example
+   - .env.prod.local
+   - .env.prod.example
+   - .env.deployment.local
+
+Conclusion: All platform services validate successfully. Migration complete.

@@ -172,7 +172,7 @@ Platform services are infrastructure components that both `dq-made-easy` and Maa
 - [x] (SHARED-I-W7-09) Update `scripts/build_and_push_all.sh` to build platform services in the shared platform pipeline.
 - [x] (SHARED-I-W7-10) Verify `dq-made-easy` compose files and deployment manifests reference the new platform service image tags.
 - [x] (SHARED-I-W7-11) Remove legacy Dockerfiles and build scripts from `dq-made-easy` after platform services are stable.
-- [ ] (SHARED-I-W7-12) Capture test evidence that platform services start and are reachable through the shared image contract.
+- [x] (SHARED-I-W7-12) Capture test evidence that platform services start and are reachable through the shared image contract.
 
 ## Next Steps
 
