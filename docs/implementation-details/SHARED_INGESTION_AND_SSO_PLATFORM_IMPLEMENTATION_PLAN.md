@@ -3,7 +3,7 @@
 **Status**: In progress  
 **Target**: Shared ingestion runtime, shared SSO/OIDC support, and centralized reusable container images for `dq-made-easy` and MaaS  
 **Date**: 2026-08-03  
-**Last updated**: 2026-08-03
+**Last updated**: 2026-08-04
 
 Related ADR: [ADR-036 Shared Ingestion and SSO Platform Boundary and Image Ownership](../../architecture/adr/ADR-036-shared-ingestion-and-sso-platform-boundary-and-image-ownership.md)
 Related design: [Shared Ingestion and SSO Platform Design](../design/SHARED_INGESTION_AND_SSO_PLATFORM_DESIGN.md)
@@ -44,7 +44,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | dq-made-easy ingestion adapter | Complete | `scripts/stage_local_csv_to_s3_parquet.py` now delegates execution through `platform_ingestion_cli` and registers a DQ-specific runner for the selected transform. 2 adapter tests. |
 | Shared test data generator | Complete | `platform-testdata` package with schema-driven deterministic generation, 6 output formats, and Spark column expression builders. 25 unit tests. Published to pypiserver. |
 | Shared package test count | 92 tests pass | 9 existing auth + 25 JWKS/JWT + 25 auth_config + 33 scope_mapping |
-| Shared image centralization | Inventory complete | Workstream 4 implementation remains open |
+| Shared image centralization | In progress | `platform-foundation/scripts/build_shared_images.sh`; `platform-foundation/docker/ingestion-runner/Dockerfile` |
 
 ## Scope Definition
 
@@ -96,7 +96,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Workstream 4: Centralize Shared Images
 
-- [ ] (SHARED-I-W4-01) Create or adapt the shared image build pipeline so reusable images are built in one place.
+- [x] (SHARED-I-W4-01) Create or adapt the shared image build pipeline so reusable images are built in one place. See `platform-foundation/scripts/build_shared_images.sh` and `platform-foundation/docker/ingestion-runner/Dockerfile`.
 - [ ] (SHARED-I-W4-02) Publish shared images to a registry under a stable namespace and version scheme.
 - [ ] (SHARED-I-W4-03) Replace duplicate image build definitions in the application repos with references to the shared tags.
 - [ ] (SHARED-I-W4-04) Provide local-development overrides only where repo-specific debugging genuinely requires them.
