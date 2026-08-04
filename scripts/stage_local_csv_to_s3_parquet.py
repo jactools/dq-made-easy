@@ -15,6 +15,11 @@ from boto3 import client as boto3_client
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
+from platform_ingestion import IngestionResult
+from platform_ingestion_cli.application.services.csv_to_parquet_job import CsvToParquetJobConfig
+from platform_ingestion_cli.application.services.csv_to_parquet_job import execute_csv_parquet_job
+from platform_ingestion_cli.application.services.runner_registry import register_csv_to_parquet_runner
+
 
 ROOT_DIR = Path(__file__).resolve().parent
 if str(ROOT_DIR) not in sys.path:
@@ -385,7 +390,18 @@ TRANSFORMS = {
 }
 
 
-def stage_csv_to_parquet(*, input_csv: Path, transform: str, output_uri: str) -> dict[str, str]:
+def build_dq_csv_to_parquet_runner(transform: str):
+    def _runner(config: CsvToParquetJobConfig) -> IngestionResult:
+        return stage_csv_to_parquet(
+            input_csv=config.input_csv,
+            transform=transform,
+            output_uri=config.output_uri,
+        )
+
+    return _runner
+
+
+def stage_csv_to_parquet(*, input_csv: Path, transform: str, output_uri: str) -> IngestionResult:
     if not input_csv.is_file():
         raise SystemExit(f"Input CSV does not exist: {input_csv}")
     if input_csv.stat().st_size < 1:
@@ -410,14 +426,21 @@ def stage_csv_to_parquet(*, input_csv: Path, transform: str, output_uri: str) ->
         if transformed.rdd.isEmpty():
             raise SystemExit(f"Transform '{transform}' produced no rows for {input_csv}")
 
+        row_count = transformed.count()
         transformed.write.mode("overwrite").parquet(str(output_dir))
+
+        file_count = sum(
+            1
+            for path in output_dir.rglob("*")
+            if path.is_file() and not path.name.startswith(".") and not path.name.startswith("_") and not path.name.endswith(".crc")
+        )
 
         bucket, key_prefix = parse_s3_uri(output_uri)
         client = make_s3_client()
         ensure_bucket(client, bucket=bucket)
         clear_prefix(client, bucket=bucket, prefix=key_prefix)
         upload_directory(client, bucket=bucket, key_prefix=key_prefix, local_dir=output_dir)
-        return {"output_uri": output_uri, "output_format": "parquet"}
+        return IngestionResult(output_uri=output_uri, output_format="parquet", row_count=row_count, file_count=file_count)
     finally:
         spark.stop()
         shutil.rmtree(working_dir, ignore_errors=True)
@@ -431,6 +454,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--version-id", required=True)
     parser.add_argument("--input-csv", required=True)
     parser.add_argument("--transform", required=True)
+    parser.add_argument("--engine-type", default=os.getenv("DQ_INGESTION_ENGINE_TYPE", "dq_spark"))
     parser.add_argument("--output-uri", default="")
     return parser.parse_args()
 
@@ -443,12 +467,29 @@ def main() -> int:
         role=args.role,
         version_id=args.version_id,
     )
-    result = stage_csv_to_parquet(
-        input_csv=Path(args.input_csv).resolve(),
-        transform=args.transform,
-        output_uri=output_uri,
+
+    register_csv_to_parquet_runner(
+        args.engine_type,
+        build_dq_csv_to_parquet_runner(args.transform),
     )
-    print(json.dumps(result))
+
+    result = execute_csv_parquet_job(
+        CsvToParquetJobConfig(
+            input_csv=Path(args.input_csv).resolve(),
+            output_uri=output_uri,
+            endpoint_url=resolve_endpoint(),
+            access_key_id=resolve_access_key(),
+            secret_access_key=resolve_secret_key(),
+            engine_type=args.engine_type,
+            region_name=resolve_region() or "",
+            ssl_enabled=resolve_ssl_enabled(),
+            clear_before_upload=True,
+            spark_master="local[*]",
+            spark_app_name="stage_local_csv_to_s3_parquet",
+            spark_time_zone="UTC",
+        )
+    )
+    print(json.dumps(result.as_dict()))
     return 0
 
 

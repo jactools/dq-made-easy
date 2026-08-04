@@ -40,6 +40,8 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | dq-made-easy consumers migrated to `platform-auth` | Complete | 10 files across dq-api and dq-engine switched from `platform_foundation` → `platform_auth` imports. requirements.txt updated. |
 | MaaS auth adoption | Not started | Workstream 5 remains open |
 | Shared ingestion kernel extracted | Complete | `platform-ingestion` package with S3 client, bucket/prefix ops, CSV→Parquet via Spark, and `stage_csv_to_parquet()`. 17 unit tests. Published to pypiserver. |
+| Shared ingestion CLI/job entrypoint | Complete | `platform-ingestion-cli` package with engine-agnostic `engine_type` / `runner_type` dispatch; consumers provide the runtime environment. 7 unit tests. |
+| dq-made-easy ingestion adapter | Complete | `scripts/stage_local_csv_to_s3_parquet.py` now delegates execution through `platform_ingestion_cli` and registers a DQ-specific runner for the selected transform. 2 adapter tests. |
 | Shared test data generator | Complete | `platform-testdata` package with schema-driven deterministic generation, 6 output formats, and Spark column expression builders. 25 unit tests. Published to pypiserver. |
 | Shared package test count | 92 tests pass | 9 existing auth + 25 JWKS/JWT + 25 auth_config + 33 scope_mapping |
 | Shared image centralization | Inventory complete | Workstream 4 implementation remains open |
@@ -78,9 +80,9 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 - [x] (SHARED-I-W2-01) Move reusable ingestion connectors and helpers into the shared platform.
 - [x] (SHARED-I-W2-02) Move reusable test-data generation or fixture-backed real data sources into the shared platform.
-- [ ] (SHARED-I-W2-03) Provide a shared CLI or job entrypoint for running the ingestion workloads.
+- [x] (SHARED-I-W2-03) Provide a shared CLI or job entrypoint for running the ingestion workloads.
 - [ ] (SHARED-I-W2-04) Keep application-specific orchestration wrappers in `dq-made-easy` and MaaS.
-- [ ] (SHARED-I-W2-05) Add tests that prove the shared ingestion package can be consumed without copying code into the app repos.
+- [x] (SHARED-I-W2-05) Add tests that prove the shared ingestion package can be consumed without copying code into the app repos.
 
 ## Workstream 3: Extract Shared SSO / OIDC Capability
 
