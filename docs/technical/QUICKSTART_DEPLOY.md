@@ -38,6 +38,9 @@ The orchestrator handles secrets generation, TLS certificates, image builds, con
 # Or pull a shared manual override tag
 ./scripts/pull_images.sh v0.10.5
 
+# Local-debugging-only shared image override guidance
+# docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md
+
 # Then start with seeding
 ./scripts/stack.sh prod start --seed
 ```

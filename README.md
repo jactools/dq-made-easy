@@ -387,6 +387,10 @@ To pull and run pre-built Docker images on a different machine:
 ./scripts/pull_images.sh --scope shared   # pulls shared platform images
 ./scripts/pull_images.sh 0.3.2           # pulls specific version
 
+# Local-development override for the shared ingestion runner (debugging only)
+# See: docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md
+# PLATFORM_SHARED_INGESTION_RUNNER_TAG=dev-local
+
 # 2. Start services
 docker compose --env-file .env.prod.local up -d
 ```

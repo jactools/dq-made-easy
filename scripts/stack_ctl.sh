@@ -51,7 +51,7 @@ Usage: $(basename "$0") <action> [OPTIONS]
 
 Actions:
   build         Build local repo-managed images
-  pull          Pull repo-managed images from the configured registry
+  pull          Pull repo-managed and shared images from the configured registry
   push          Build and push repo-managed images
   start         Start or recreate compose services
   restart       Recreate compose services
@@ -69,14 +69,14 @@ Selectors:
   --all                    Select the full action-specific default set
   --profile NAME           Select a runtime compose profile (repeatable)
   --service NAME           Select a compose service (repeatable)
-  --image NAME             Select a repo-managed image (repeatable)
+  --image NAME             Select a repo-managed or shared image (repeatable)
   --seed-target NAME       Select a seed target (repeatable)
 
 Plan options:
   --dry-run                Show the resolved plan without changing runtime state
 
 Image action options:
-  --scope core|repo        Default image scope for --all (stack_ctl defaults to repo)
+  --scope core|repo|shared Default image scope for --all (shared is only valid for pull)
   --version TAG            Override image tags for pull/build/push
   --no-cache               Disable Docker build cache for build/push
 
@@ -92,6 +92,7 @@ Examples:
   $(basename "$0") build --all
   $(basename "$0") build --image dq-api --image dq-frontend --no-cache
   $(basename "$0") pull --profile core --profile gateway
+  $(basename "$0") pull --scope shared --image platform-ingestion-runner:dev-local
   $(basename "$0") start --profile core --profile gateway --profile auth
   $(basename "$0") restart --service api --service frontend
   $(basename "$0") stop --profile support
@@ -183,6 +184,14 @@ resolve_image_selection() {
         while IFS= read -r image; do
           append_unique_image "$image"
         done < <(repo_image_values)
+        ;;
+      shared)
+        if [ "$ACTION" != "pull" ]; then
+          fail "Unsupported image scope '$IMAGE_SCOPE' for $ACTION; shared images are pull-only"
+        fi
+        while IFS= read -r image; do
+          append_unique_image "$image"
+        done < <(shared_image_values)
         ;;
       *)
         fail "Unsupported image scope '$IMAGE_SCOPE'"
@@ -448,6 +457,9 @@ validate_action_selectors() {
       if [ "${#SELECTED_SERVICES[@]}" -gt 0 ] || [ "${#SELECTED_SEED_TARGETS[@]}" -gt 0 ]; then
         fail "$ACTION accepts only --all, --profile, --image, --scope, --version, and --no-cache"
       fi
+      if [ "$ACTION" != "pull" ] && contains_value platform-ingestion-runner ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; then
+        fail "shared images are pull-only; use pull --scope shared or the platform-foundation build script"
+      fi
       ;;
     start|restart|stop)
       if [ "${#SELECTED_IMAGES[@]}" -gt 0 ] || [ "${#SELECTED_SEED_TARGETS[@]}" -gt 0 ]; then
@@ -478,6 +490,9 @@ show_targets() {
   echo ""
   echo "Repo-managed images:"
   repo_image_values | sed 's/^/  - /'
+  echo ""
+  echo "Shared images:"
+  shared_image_values | sed 's/^/  - /'
   echo ""
   echo "Seed targets:"
   seed_target_values | sed 's/^/  - /'
@@ -519,12 +534,13 @@ while [[ $# -gt 0 ]]; do
       ;;
     --image)
       if [[ -z "${2:-}" ]]; then
-        fail "--image requires a repo-managed image name"
+        fail "--image requires an image name"
       fi
-      if ! is_repo_managed_image "$2"; then
+      if is_repo_managed_image "$2" || is_shared_image "$2"; then
+        append_unique_image "$2"
+      else
         fail "Unsupported image '$2'"
       fi
-      append_unique_image "$2"
       shift 2
       ;;
     --seed-target)
@@ -539,10 +555,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --scope)
       if [[ -z "${2:-}" ]]; then
-        fail "--scope requires core or repo"
+        fail "--scope requires core, repo, or shared"
       fi
       case "$2" in
-        core|repo)
+        core|repo|shared)
           IMAGE_SCOPE="$2"
           ;;
         *)
