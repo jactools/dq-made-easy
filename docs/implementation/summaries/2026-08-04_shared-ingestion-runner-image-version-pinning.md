@@ -36,7 +36,6 @@ The scope of the change was:
 - `README.md`
 - `docs/technical/QUICKSTART_DEPLOY.md`
 - `docs/implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_IMPLEMENTATION_PLAN.md`
-- `docs/implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_REPO_MIGRATION_CHECKLIST.md`
 - `docs/implementation/summaries/README.md`
 
 ## Known Issues or Remaining Work
