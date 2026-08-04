@@ -18,8 +18,12 @@ boto3==1.43.46
 cryptography==48.0.1
 rapidfuzz==3.14.5
 platform-auth==0.1.0
+metadata-utils==1.0.20
+metadata-delivery-id==1.0.2+192
+metadata-models==1.0.20
+metadata-sdk==0.1.32
 
-# Repo-local emr packages are built as wheels by dq-api/Dockerfile.fastapi.
+# Delivery registry support packages are installed from the package index.
 
 # OpenTelemetry (latest stable baseline, selected 2026-07-13)
 # Note: instrumentation-* packages must match the SDK minor version to avoid

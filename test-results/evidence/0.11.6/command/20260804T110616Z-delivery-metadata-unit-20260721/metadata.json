@@ -1,0 +1,9 @@
+{
+  "app_version": "0.11.6",
+  "mode": "command",
+  "label": "delivery-metadata-unit-20260721",
+  "timestamp_utc": "20260804T110616Z",
+  "cwd": "/Users/Jac.Beekers/gitrepos/dq-made-easy",
+  "evidence_directory": "test-results/evidence/0.11.6/command/20260804T110616Z-delivery-metadata-unit-20260721",
+  "status": 0
+}

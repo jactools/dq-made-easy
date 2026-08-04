@@ -28,11 +28,7 @@
     "aistor": "latest",
     "grafana-init": "latest"
   },
-  "packages": {
-    "emr-utils": "0.1.0",
-    "emr-delivery-sdk": "0.1.0",
-    "emr-delivery-cli": "0.1.0"
-  },
+  "packages": {},
   "components": {
     "Approval": "0.9.0",
     "Rules": "0.9.0",

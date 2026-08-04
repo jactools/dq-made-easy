@@ -1,0 +1,9 @@
+{
+  "app_version": "0.11.6",
+  "mode": "api",
+  "label": "shared-ingestion-w2-04-boundary-clarification",
+  "timestamp_utc": "20260804T102759Z",
+  "cwd": "/Users/Jac.Beekers/gitrepos/dq-made-easy/dq-api/fastapi",
+  "evidence_directory": "test-results/evidence/0.11.6/api/20260804T102759Z-shared-ingestion-w2-04-boundary-clarification",
+  "status": 0
+}

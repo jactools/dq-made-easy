@@ -81,7 +81,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 - [x] (SHARED-I-W2-01) Move reusable ingestion connectors and helpers into the shared platform.
 - [x] (SHARED-I-W2-02) Move reusable test-data generation or fixture-backed real data sources into the shared platform.
 - [x] (SHARED-I-W2-03) Provide a shared CLI or job entrypoint for running the ingestion workloads.
-- [ ] (SHARED-I-W2-04) Keep application-specific orchestration wrappers in `dq-made-easy` and MaaS.
+- [x] (SHARED-I-W2-04) Keep application-specific orchestration wrappers in `dq-made-easy`.
 - [x] (SHARED-I-W2-05) Add tests that prove the shared ingestion package can be consumed without copying code into the app repos.
 
 ## Workstream 3: Extract Shared SSO / OIDC Capability
