@@ -455,7 +455,7 @@ Complete application-wide configuration:
 - `stack_seed.sh` - Seed running stack
 - `stack_ctl.sh` - Image build/pull/push and status reporting
 - `smoke_test.sh` - Validate running services
-- `build_images.sh` - Build Docker images
+- `build_and_push_all.sh` - Build and push Docker images
 - `seed_local_postgres.sh` - Initialize database
 
 ---

@@ -112,8 +112,8 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Workstream 6: Cleanup, Validation, and Evidence
 
-- [ ] (SHARED-I-W6-01) Remove duplicate code that has been superseded by the shared platform.
-- [ ] (SHARED-I-W6-02) Remove duplicate Dockerfiles and image build paths that are no longer needed.
+- [x] (SHARED-I-W6-01) Remove duplicate code that has been superseded by the shared platform.
+- [x] (SHARED-I-W6-02) Remove duplicate Dockerfiles and image build paths that are no longer needed.
 - [x] (SHARED-I-W6-03) Add validation that flags reintroduced duplication in future changes.
 - [ ] (SHARED-I-W6-04) Capture evidence that the shared ingestion paths and SSO paths work in both repos.
 - [ ] (SHARED-I-W6-05) Record any remaining exceptions explicitly instead of leaving them implicit.

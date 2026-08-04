@@ -240,7 +240,7 @@ node ./scripts/determine_versions.js --write
 ```
 Modify any file in a service directory (even whitespace):
 ```bash
-echo "" >> dq-api/Dockerfile.api.archive
+echo "" >> dq-api/Dockerfile.fastapi
 ./scripts/build_and_push_all.sh
 ```
 
