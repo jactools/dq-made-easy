@@ -1,11 +1,29 @@
+# Pre-commit hooks for the dq-made-easy repository.
+# Run manually: pre-commit run --all-files
+# Install git hook: pre-commit install
+
 repos:
   - repo: local
     hooks:
       - id: python-file-sizes
         name: Python file size check (< 1000 lines)
-        entry: python3 scripts/validation/validate_python_file_sizes.py --allow-list scripts/validation/python-file-allow-list.txt --files
-        args: []
+        entry: bash scripts/validate_python_file_sizes.sh --files
         language: system
-        types: [python]
         stages: [pre-commit]
         pass_filenames: true
+
+      - id: validate-module-rules
+        name: Validate module rules (LOC < 1000, SRP)
+        entry: venv/bin/python scripts/validate_module_rules.py
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+        always_run: true
+
+      - id: validate-snake-case
+        name: Validate snake_case API payloads
+        entry: venv/bin/python scripts/validate_snake_case.py
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+        always_run: true

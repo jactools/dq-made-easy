@@ -1,7 +1,7 @@
 # Shared Ingestion and SSO Platform Implementation Plan
 
 **Status**: In progress  
-**Target**: Shared ingestion runtime, shared SSO/OIDC support, and centralized reusable container images for `dq-made-easy` and MaaS  
+**Target**: Shared ingestion runtime, shared SSO/OIDC support, and centralized reusable container images for `dq-made-easy`
 **Date**: 2026-08-03  
 **Last updated**: 2026-08-04
 
@@ -15,7 +15,7 @@ Related checklist: [Shared Ingestion and SSO Platform Repo Migration Checklist](
 
 This plan turns the shared-platform design into an executable migration path.
 
-The goal is to extract reusable ingestion and SSO capabilities out of the application repositories, while centralizing the reusable container images in one place. Both `dq-made-easy` and MaaS should remain thin consumers of that shared foundation.
+The goal is to extract reusable ingestion and SSO capabilities out of the application repositories, while centralizing the reusable container images in one place. The application repositories should remain thin consumers of that shared foundation, but Workstream 5 in this plan is limited to `dq-made-easy`; MaaS adoption is tracked separately in `metadata-as-a-service`.
 
 This is intentionally a staged migration: inventory first, then extraction, then centralized image ownership, then application adoption, then cleanup.
 
@@ -38,7 +38,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | Shared logging and telemetry packages | Complete | `platform-logging` + `platform-telemetry` in `platform-foundation`; mirrors `metadata-logging` + `metadata-telemetry` |
 | Auth extracted to standalone `platform-auth` package | Complete | All auth modules (JWKS/JWT, token providers, auth config, scope mapping) moved to `platform-auth`; `platform-foundation` reverts to config-only. 91 unit tests. No re-exports. |
 | dq-made-easy consumers migrated to `platform-auth` | Complete | 10 files across dq-api and dq-engine switched from `platform_foundation` → `platform_auth` imports. requirements.txt updated. |
-| MaaS auth adoption | Not started | Workstream 5 remains open |
+| MaaS adoption | Out of scope | Tracked in `metadata-as-a-service/docs/implementation/IMPLEMENTATION_Shared_Platform_Adoption.md` |
 | Shared ingestion kernel extracted | Complete | `platform-ingestion` package with S3 client, bucket/prefix ops, CSV→Parquet via Spark, and `stage_csv_to_parquet()`. 17 unit tests. Published to pypiserver. |
 | Shared ingestion CLI/job entrypoint | Complete | `platform-ingestion-cli` package with engine-agnostic `engine_type` / `runner_type` dispatch; consumers provide the runtime environment. 7 unit tests. |
 | dq-made-easy ingestion adapter | Complete | `scripts/stage_local_csv_to_s3_parquet.py` now delegates execution through `platform_ingestion_cli` and registers a DQ-specific runner for the selected transform. 2 adapter tests. |
@@ -56,13 +56,14 @@ This is intentionally a staged migration: inventory first, then extraction, then
 - Extraction of reusable ingestion helpers, fixtures, and runtime support
 - Extraction of reusable SSO/OIDC helpers
 - Centralized build/publish flow for shared runtime images
-- Adoption wiring in `dq-made-easy` and MaaS
+- Adoption wiring in `dq-made-easy`
 - Removal of duplicate code paths and image definitions
 
 ### Out of Scope for the First Cut
 
 - Rewriting app-specific DQ workflows
 - Reworking MaaS domain logic beyond the shared integration seam
+- MaaS adoption and cleanup; tracked in `metadata-as-a-service`
 - Replacing the identity provider itself
 - Redesigning unrelated service containers
 
@@ -102,38 +103,37 @@ This is intentionally a staged migration: inventory first, then extraction, then
 - [x] (SHARED-I-W4-04) Provide local-development overrides only where repo-specific debugging genuinely requires them. Local-only shared-image tag overrides are documented in `docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md`.
 - [x] (SHARED-I-W4-05) Document how image version pinning and upgrades should work for consumers. Version pinning and upgrade guidance now lives in `docs/technical/SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md`.
 
-## Workstream 5: Adopt in `dq-made-easy` and MaaS
+## Workstream 5: Adopt in `dq-made-easy`
 
 - [ ] (SHARED-I-W5-01) Update `dq-made-easy` to consume the shared ingestion package and shared auth helpers.
-- [ ] (SHARED-I-W5-02) Update MaaS to consume the same shared ingestion package and shared auth helpers.
-- [ ] (SHARED-I-W5-03) Add repo-specific adapters only where product behavior diverges.
-- [ ] (SHARED-I-W5-04) Verify that both repositories build and run against the same published images.
-- [ ] (SHARED-I-W5-05) Remove temporary compatibility shims once both consumers are stable.
+- [ ] (SHARED-I-W5-02) Add repo-specific adapters only where product behavior diverges.
+- [ ] (SHARED-I-W5-03) Verify that `dq-made-easy` builds and runs against the same published images.
+- [ ] (SHARED-I-W5-04) Remove temporary compatibility shims once the consumer is stable.
 
 ## Workstream 6: Cleanup, Validation, and Evidence
 
 - [ ] (SHARED-I-W6-01) Remove duplicate code that has been superseded by the shared platform.
 - [ ] (SHARED-I-W6-02) Remove duplicate Dockerfiles and image build paths that are no longer needed.
-- [ ] (SHARED-I-W6-03) Add validation that flags reintroduced duplication in future changes.
+- [x] (SHARED-I-W6-03) Add validation that flags reintroduced duplication in future changes.
 - [ ] (SHARED-I-W6-04) Capture evidence that the shared ingestion paths and SSO paths work in both repos.
 - [ ] (SHARED-I-W6-05) Record any remaining exceptions explicitly instead of leaving them implicit.
 
 ## Recommended Sequencing
 
 1. Use the completed Workstream 1 inventories as the gate for all additional extraction targets.
-2. Finish the remaining Workstream 3 auth contract and validation work before MaaS adoption.
+2. Finish the remaining Workstream 3 auth contract and validation work before dq-made-easy adoption.
 3. Use Workstream 2 to extract the selected file-to-object-storage ingestion kernel.
 4. Land Workstream 4 before removing duplicate image definitions.
-5. Use Workstream 5 to migrate `dq-made-easy` first, then MaaS, for each shared capability.
+5. Use Workstream 5 to migrate `dq-made-easy` onto the shared platform artifacts.
 6. Use Workstream 6 to delete legacy copies and enforce the new boundary.
 
 ## Acceptance Criteria
 
 - [ ] (SHARED-I-AC-01) Reusable ingestion logic exists in one shared location rather than being copied into both repositories.
 - [x] (SHARED-I-AC-02) Reusable SSO/OIDC token-provider helpers exist in one shared location rather than being copied into both repositories.
-- [ ] (SHARED-I-AC-03) Shared images are built and published once and are consumed by both repositories through versioned tags.
-- [ ] (SHARED-I-AC-04) `dq-made-easy` and MaaS keep only thin adapters around shared ingestion and auth capabilities.
-- [ ] (SHARED-I-AC-05) Duplicate code paths and duplicate image definitions have been removed or explicitly justified.
+- [ ] (SHARED-I-AC-03) Shared images are built and published once and are consumed by `dq-made-easy` through versioned tags.
+- [ ] (SHARED-I-AC-04) `dq-made-easy` keeps only thin adapters around shared ingestion and auth capabilities.
+- [ ] (SHARED-I-AC-05) Duplicate code paths and duplicate image definitions in `dq-made-easy` have been removed or explicitly justified.
 - [ ] (SHARED-I-AC-06) The migration is documented with enough detail for future maintenance and upgrades.
 
 ## Risks and Mitigations
@@ -148,9 +148,8 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Next Steps
 
-1. Extract the file-to-object-storage ingestion kernel selected by the completed ingestion inventory (SHARED-I-W2).
-2. Adopt the shared auth package in MaaS (SHARED-I-W5).
-3. Update MaaS to consume the shared ingestion runner and other shared images.
-4. Remove duplicate code paths and enforce the new boundary (SHARED-I-W6).
-5. Rebuild and publish `platform_foundation-0.1.1` with auth config + scope mapping to pypiserver.
-6. Wire `dq-api` consumers to use `platform_foundation` scope resolver instead of local `auth.py` helpers.
+1. Finish the dq-made-easy adoption tasks for shared auth, ingestion, and shared image consumption (SHARED-I-W5).
+2. Verify that dq-made-easy builds and runs against the published shared images.
+3. Remove duplicate code paths and compatibility shims once the shared path is stable (SHARED-I-W6).
+4. Rebuild and publish `platform_foundation-0.1.1` with auth config + scope mapping to pypiserver.
+5. Wire `dq-api` consumers to use `platform_foundation` scope resolver instead of local `auth.py` helpers.

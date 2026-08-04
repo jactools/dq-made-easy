@@ -6,6 +6,9 @@ This directory contains implementation summaries for significant architectural o
 
 | Date | Summary | Status | Scope |
 |---|---|---|---|
+| 2026-08-04 | [Pre-commit hook alignment](./2026-08-04_pre-commit-hook-alignment.md) | Complete | Matched the shared validator hooks to the metadata-as-a-service style |
+| 2026-08-04 | [Validation hooks for module rules and snake_case](./2026-08-04_validation-hooks-module-rules-snake-case.md) | Complete | Wired the copied validators into pre-commit and repo validation discovery |
+| 2026-08-04 | [Shared platform adoption scope split](./2026-08-04_shared-platform-adoption-scope-split.md) | Complete | Split dq-made-easy and MaaS adoption into separate plans |
 | 2026-08-04 | [Shared ingestion runner image version pinning](./2026-08-04_shared-ingestion-runner-image-version-pinning.md) | Complete | Documented how consumers should pin, upgrade, and roll back the shared ingestion runner image |
 | 2026-08-04 | [Shared ingestion runner image local overrides](./2026-08-04_shared-ingestion-runner-image-local-overrides.md) | Complete | Documented the approved local debugging path for the shared ingestion runner image |
 | 2026-08-04 | [Shared ingestion runner image consumption](./2026-08-04_shared-ingestion-runner-image-consumption.md) | Complete | Exposed the shared ingestion runner image through `dq-made-easy` pull tooling and environment defaults |
