@@ -6,6 +6,7 @@ This directory contains implementation summaries for significant architectural o
 
 | Date | Summary | Status | Scope |
 |---|---|---|---|
+| 2026-08-04 | [Shared ingestion runner image version pinning](./2026-08-04_shared-ingestion-runner-image-version-pinning.md) | Complete | Documented how consumers should pin, upgrade, and roll back the shared ingestion runner image |
 | 2026-08-04 | [Shared ingestion runner image local overrides](./2026-08-04_shared-ingestion-runner-image-local-overrides.md) | Complete | Documented the approved local debugging path for the shared ingestion runner image |
 | 2026-08-04 | [Shared ingestion runner image consumption](./2026-08-04_shared-ingestion-runner-image-consumption.md) | Complete | Exposed the shared ingestion runner image through `dq-made-easy` pull tooling and environment defaults |
 | 2026-08-04 | [Shared ingestion runner image publish contract](./2026-08-04_shared-ingestion-runner-image-publish-contract.md) | Complete | Defined the stable registry namespace and versioning contract for the shared ingestion runner |

@@ -153,6 +153,7 @@ The package now owns token providers, retry/caching behavior, token URL resoluti
 - [x] Publish images with versioned tags in one registry namespace.
 - [x] Update `dq-made-easy` to consume those tags instead of rebuilding duplicate images.
 - [x] Document local-development override guidance for shared images.
+- [x] Document image version pinning and upgrade behavior for consumers.
 - [ ] Update MaaS to consume the same tags.
 - [ ] Remove duplicate Dockerfiles after both consumers have switched.
 
@@ -178,7 +179,7 @@ The package now owns token providers, retry/caching behavior, token URL resoluti
 2. Extract **fail-closed JWKS/JWT validation**.
 3. Define the shared auth environment contract and adopt it in MaaS.
 4. Add **delivery object synthetic multi-format generation**.
-5. Build the shared ingestion runner image.
+5. Update MaaS to consume the shared ingestion runner and other shared images.
 6. Revisit connector providers after comparing the MaaS connector contract.
 
 ---

@@ -98,6 +98,18 @@ docker compose --env-file .env.prod.local logs -f
 
 ## Version Management
 
+### Shared Image Pinning and Upgrades
+
+Shared platform images should be pinned like any other deployment artifact.
+Use the shared runner tag in your env file to select the published version you
+want to run.
+
+- `PLATFORM_SHARED_INGESTION_RUNNER_TAG=<published-version>`
+- keep `PLATFORM_SHARED_REGISTRY` and `PLATFORM_SHARED_NAMESPACE` on the
+  published contract unless you are explicitly debugging a private registry
+
+For the full workflow, see [Shared Image Version Pinning and Upgrades](./SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md).
+
 ### Using Latest Tags
 
 By default, the repo-managed public deployment flow uses `.env.prod.local`:
@@ -305,8 +317,8 @@ Usage:
 chmod +x pull-images.sh
 ./pull-images.sh
 
-# Pull a shared manual override tag, if all images were published with one
-./pull-images.sh v0.10.1
+# Pull a specific shared runner tag
+./pull-images.sh --scope shared --image platform-ingestion-runner:v0.10.1
 ```
 
 Note: the standard repo release flow produces per-service deterministic tags such as `0.10-7a9c018` and `0.10-bd861ee`, not a single identical tag for every image. Use `.env.prod.local` or your external prod env file to pin the current tested release-line image set.

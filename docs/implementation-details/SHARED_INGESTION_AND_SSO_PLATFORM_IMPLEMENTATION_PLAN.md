@@ -44,7 +44,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | dq-made-easy ingestion adapter | Complete | `scripts/stage_local_csv_to_s3_parquet.py` now delegates execution through `platform_ingestion_cli` and registers a DQ-specific runner for the selected transform. 2 adapter tests. |
 | Shared test data generator | Complete | `platform-testdata` package with schema-driven deterministic generation, 6 output formats, and Spark column expression builders. 25 unit tests. Published to pypiserver. |
 | Shared package test count | 92 tests pass | 9 existing auth + 25 JWKS/JWT + 25 auth_config + 33 scope_mapping |
-| Shared image centralization | In progress | `platform-foundation/scripts/build_shared_images.sh`; `platform-foundation/docker/ingestion-runner/Dockerfile`; `platform-foundation/docs/infra/INGESTION_RUNNER_IMAGE.md`; `scripts/pull_images.sh` shared image scope; `docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md` |
+| Shared image centralization | Complete | `platform-foundation/scripts/build_shared_images.sh`; `platform-foundation/docker/ingestion-runner/Dockerfile`; `platform-foundation/docs/infra/INGESTION_RUNNER_IMAGE.md`; `scripts/pull_images.sh` shared image scope; `docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md`; `docs/technical/SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md` |
 
 ## Scope Definition
 
@@ -100,7 +100,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 - [x] (SHARED-I-W4-02) Publish shared images to a registry under a stable namespace and version scheme. The ingestion runner now defaults to `docker.io/jacbeekers/platform-ingestion-runner` and publishes both the version tag and `latest` alias.
 - [x] (SHARED-I-W4-03) Replace duplicate image build definitions in the application repos with references to the shared tags. `dq-made-easy` now exposes `platform-ingestion-runner` as a pullable shared-image scope via `scripts/pull_images.sh`.
 - [x] (SHARED-I-W4-04) Provide local-development overrides only where repo-specific debugging genuinely requires them. Local-only shared-image tag overrides are documented in `docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md`.
-- [ ] (SHARED-I-W4-05) Document how image version pinning and upgrades should work for consumers.
+- [x] (SHARED-I-W4-05) Document how image version pinning and upgrades should work for consumers. Version pinning and upgrade guidance now lives in `docs/technical/SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md`.
 
 ## Workstream 5: Adopt in `dq-made-easy` and MaaS
 
@@ -150,7 +150,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 1. Extract the file-to-object-storage ingestion kernel selected by the completed ingestion inventory (SHARED-I-W2).
 2. Adopt the shared auth package in MaaS (SHARED-I-W5).
-3. Document how image version pinning and upgrades should work for consumers.
+3. Update MaaS to consume the shared ingestion runner and other shared images.
 4. Remove duplicate code paths and enforce the new boundary (SHARED-I-W6).
 5. Rebuild and publish `platform_foundation-0.1.1` with auth config + scope mapping to pypiserver.
 6. Wire `dq-api` consumers to use `platform_foundation` scope resolver instead of local `auth.py` helpers.
