@@ -33,7 +33,7 @@ fi
 CLOUD_PROVIDER="aks"
 CLUSTER_RUNTIME="auto"
 SERVICES_CSV="dq-api,dq-engine,dq-frontend"
-ALL_SERVICES_CSV="dq-api,dq-engine,dq-frontend,dq-kong,dq-db,dq-keycloak,dq-profiling,dq-llm"
+ALL_SERVICES_CSV="dq-api,dq-engine,dq-frontend,dq-db,dq-keycloak,dq-profiling,dq-llm"
 IMAGE_TAG_PREFIX="local"
 IMAGE_TAG_OVERRIDE=""
 TEST_COMMAND="./scripts/validate.sh"
@@ -74,7 +74,6 @@ Service aliases:
   dq-api        -> jacbeekers/dq-made-easy-api
   dq-engine     -> jacbeekers/dq-made-easy-engine
   dq-frontend   -> jacbeekers/dq-made-easy-frontend
-  dq-kong       -> jacbeekers/dq-made-easy-kong
   dq-db         -> jacbeekers/dq-made-easy-db
   dq-keycloak   -> jacbeekers/dq-made-easy-keycloak
   dq-profiling  -> jacbeekers/dq-made-easy-profiling
@@ -194,7 +193,6 @@ map_image_name() {
     dq-api) echo "jacbeekers/dq-made-easy-api" ;;
     dq-engine) echo "jacbeekers/dq-made-easy-engine" ;;
     dq-frontend) echo "jacbeekers/dq-made-easy-frontend" ;;
-    dq-kong) echo "jacbeekers/dq-made-easy-kong" ;;
     dq-db) echo "jacbeekers/dq-made-easy-db" ;;
     dq-keycloak) echo "jacbeekers/dq-made-easy-keycloak" ;;
     dq-profiling) echo "jacbeekers/dq-made-easy-profiling" ;;

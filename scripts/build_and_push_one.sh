@@ -42,9 +42,8 @@ Images:
   dq-engine
   dq-profiling
   dq-frontend
-  dq-kong
   dq-db
-  dq-keycloak
+  # Keycloak image/container lifecycle managed by platform-foundation
   dq-kafka
   dq-kafka-consumer
   dq-trino
@@ -131,18 +130,12 @@ case "$SERVICE" in
     STEP_SCRIPT="$ROOT_DIR/dq-ui/scripts/build_and_push.sh"
     TAG_VAR="DQ_FRONTEND_TAG"
     ;;
-  dq-kong)
-    STEP_SCRIPT="$ROOT_DIR/dq-kong/scripts/build_and_push.sh"
-    TAG_VAR="DQ_KONG_TAG"
-    ;;
+  # Kong image/container lifecycle managed by platform-foundation
   dq-db)
     STEP_SCRIPT="$ROOT_DIR/dq-db/scripts/build_and_push.sh"
     TAG_VAR="DQ_DB_TAG"
     ;;
-  dq-keycloak)
-    STEP_SCRIPT="$ROOT_DIR/dq-keycloak/scripts/build_and_push.sh"
-    TAG_VAR="DQ_KEYCLOAK_TAG"
-    ;;
+  # Keycloak image/container lifecycle managed by platform-foundation
   dq-kafka)
     STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
     TAG_VAR="DQ_KAFKA_TAG"

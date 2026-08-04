@@ -273,9 +273,9 @@ normalize_repository_name() {
         dq-engine|dq-made-easy-engine) printf '%s' 'dq-made-easy-engine' ;;
         dq-profiling|dq-made-easy-profiling) printf '%s' 'dq-made-easy-profiling' ;;
         dq-frontend|dq-made-easy-frontend) printf '%s' 'dq-made-easy-frontend' ;;
-        dq-kong|dq-made-easy-kong) printf '%s' 'dq-made-easy-kong' ;;
+        # Kong image/container lifecycle managed by platform-foundation
         dq-db|dq-made-easy-db) printf '%s' 'dq-made-easy-db' ;;
-        dq-keycloak|dq-made-easy-keycloak) printf '%s' 'dq-made-easy-keycloak' ;;
+        # Keycloak image/container lifecycle managed by platform-foundation
         dq-kafka|dq-made-easy-kafka) printf '%s' 'dq-made-easy-kafka' ;;
         dq-kafka-consumer|dq-made-easy-kafka-consumer) printf '%s' 'dq-made-easy-kafka-consumer' ;;
         dq-trino|dq-made-easy-trino) printf '%s' 'dq-made-easy-trino' ;;

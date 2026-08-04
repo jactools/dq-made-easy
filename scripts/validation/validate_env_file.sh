@@ -276,7 +276,7 @@ run_full_validation() {
       validate_prod_tag DQ_ENGINE_TAG
       validate_prod_tag DQ_PROFILING_TAG
       validate_prod_tag DQ_FRONTEND_TAG
-      validate_prod_tag DQ_KONG_TAG
+      # Kong image/container lifecycle managed by platform-foundation
       validate_prod_tag DQ_DB_TAG
       validate_prod_tag DQ_KEYCLOAK_TAG
       validate_prod_tag DQ_LLM_TAG

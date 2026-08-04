@@ -353,15 +353,10 @@ export DQ_PROFILING_NAMESPACE
 export DQ_PROFILING_IMAGE
 export DQ_PROFILING_TAG
 
-export DQ_KONG_REGISTRY
-export DQ_KONG_NAMESPACE
-export DQ_KONG_IMAGE
-export DQ_KONG_TAG
+# Kong image/container lifecycle managed by platform-foundation
+# (DQ_KONG_* vars removed; bootstrap_kong.sh retained for route/ACL deployment)
 
-export DQ_KEYCLOAK_REGISTRY
-export DQ_KEYCLOAK_NAMESPACE
-export DQ_KEYCLOAK_IMAGE
-export DQ_KEYCLOAK_TAG
+# Keycloak image/container lifecycle managed by platform-foundation
 
 export DQ_DB_REGISTRY
 export DQ_DB_NAMESPACE

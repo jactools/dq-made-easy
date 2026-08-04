@@ -57,10 +57,9 @@ repo_image_values() {
     dq-engine \
     dq-profiling \
     dq-frontend \
-    dq-kong \
     dq-db \
-    dq-keycloak \
-    dq-kafka \
+    # Keycloak image/container lifecycle managed by platform-foundation
+    dq-kong \
     dq-kafka-consumer \
     dq-trino \
     dq-edge \
@@ -87,14 +86,13 @@ core_repo_image_values() {
     dq-engine \
     dq-profiling \
     dq-frontend \
-    dq-kong \
-    dq-db \
-    dq-keycloak
+    dq-db
+    # Keycloak image/container lifecycle managed by platform-foundation
 }
 
 is_core_repo_image() {
   case "$1" in
-    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak)
+    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-db)
       return 0
       ;;
     *)
@@ -105,7 +103,7 @@ is_core_repo_image() {
 
 is_repo_managed_image() {
   case "$1" in
-    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak|dq-kafka|dq-kafka-consumer|dq-trino|dq-edge|dq-airflow|dq-llm|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
+    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-db|dq-kafka|dq-kafka-consumer|dq-trino|dq-edge|dq-airflow|dq-llm|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
       return 0
       ;;
     *)
@@ -134,10 +132,10 @@ image_targets_for_profile() {
       printf '%s\n' dq-db dq-api dq-frontend
       ;;
     gateway)
-      printf '%s\n' dq-kong
+      return 2
       ;;
     auth)
-      printf '%s\n' dq-keycloak dq-keycloak-seed-artifacts
+      printf '%s\n' dq-keycloak-seed-artifacts
       ;;
     engine)
       printf '%s\n' dq-engine dq-db-seed
@@ -189,15 +187,10 @@ repo_image_env_vars() {
     dq-frontend)
       printf '%s\n' DQ_FRONTEND_REGISTRY DQ_FRONTEND_NAMESPACE DQ_FRONTEND_IMAGE DQ_FRONTEND_TAG
       ;;
-    dq-kong)
-      printf '%s\n' DQ_KONG_REGISTRY DQ_KONG_NAMESPACE DQ_KONG_IMAGE DQ_KONG_TAG
-      ;;
     dq-db)
       printf '%s\n' DQ_DB_REGISTRY DQ_DB_NAMESPACE DQ_DB_IMAGE DQ_DB_TAG
       ;;
-    dq-keycloak)
-      printf '%s\n' DQ_KEYCLOAK_REGISTRY DQ_KEYCLOAK_NAMESPACE DQ_KEYCLOAK_IMAGE DQ_KEYCLOAK_TAG
-      ;;
+    # Keycloak image/container lifecycle managed by platform-foundation
     dq-kafka)
       printf '%s\n' DQ_KAFKA_REGISTRY DQ_KAFKA_NAMESPACE DQ_KAFKA_IMAGE DQ_KAFKA_TAG
       ;;

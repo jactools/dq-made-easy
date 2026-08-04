@@ -205,7 +205,7 @@ map_build_target() {
     dq-made-easy-engine) echo "dq-engine" ;;
     dq-made-easy-profiling) echo "dq-profiling" ;;
     dq-made-easy-frontend) echo "dq-frontend" ;;
-    dq-made-easy-kong) echo "dq-kong" ;;
+    dq-made-easy-kong) echo "kong" ;; # Kong managed by platform-foundation
     dq-made-easy-db) echo "dq-db" ;;
     dq-made-easy-keycloak) echo "dq-keycloak" ;;
     dq-made-easy-kafka) echo "dq-kafka" ;;
@@ -276,7 +276,7 @@ derive_image_name_parts() {
 
 service_repo_image_key() {
   case "$1" in
-    dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak|dq-llm)
+    dq-api|dq-engine|dq-profiling|dq-frontend|dq-db|dq-llm)
       printf '%s' "$1"
       ;;
     *)

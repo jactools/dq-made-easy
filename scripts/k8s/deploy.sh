@@ -246,7 +246,7 @@ if [ "$DRY_RUN" = "true" ]; then
 elif [ "$WAIT_ROLLOUT" = "true" ]; then
   info "$SCRIPT_NAME" "Waiting for workload rollout"
   kubectl -n "$NAMESPACE" rollout status deployment/dq-api --timeout=300s
-  kubectl -n "$NAMESPACE" rollout status deployment/dq-kong --timeout=300s
+  # Kong rollout managed by platform-foundation
   kubectl -n "$NAMESPACE" rollout status deployment/dq-frontend --timeout=300s
 fi
 

@@ -75,7 +75,7 @@ Options:
   -h, --help               Show this help message
 
 Core images:
-  dq-made-easy-base dq-made-easy-api dq-made-easy-engine dq-made-easy-profiling dq-made-easy-frontend dq-made-easy-kong dq-made-easy-db dq-made-easy-keycloak
+  dq-made-easy-base dq-made-easy-api dq-made-easy-engine dq-made-easy-profiling dq-made-easy-frontend dq-made-easy-db dq-made-easy-keycloak
 
 Auxiliary repo images:
   dq-made-easy-db-seed dq-made-easy-keycloak-seed-artifacts dq-made-easy-openmetadata-db dq-made-easy-openmetadata-server
@@ -135,7 +135,7 @@ normalize_repo_image_name() {
     dq-made-easy-engine) printf '%s' 'dq-engine' ;;
     dq-made-easy-profiling) printf '%s' 'dq-profiling' ;;
     dq-made-easy-frontend) printf '%s' 'dq-frontend' ;;
-    dq-made-easy-kong) printf '%s' 'dq-kong' ;;
+    dq-made-easy-kong) printf '%s' 'dq-kong' ;; # Kong image moved to platform-foundation; retained for alias compat
     dq-made-easy-db) printf '%s' 'dq-db' ;;
     dq-made-easy-keycloak) printf '%s' 'dq-keycloak' ;;
     dq-made-easy-kafka) printf '%s' 'dq-kafka' ;;
@@ -225,9 +225,8 @@ auto_resolve_tags_from_calculated_versions() {
     DQ_ENGINE_TAG
     DQ_PROFILING_TAG
     DQ_FRONTEND_TAG
-    DQ_KONG_TAG
     DQ_DB_TAG
-    DQ_KEYCLOAK_TAG
+    # Keycloak image/container lifecycle managed by platform-foundation
     DQ_DB_SEED_TAG
     DQ_KEYCLOAK_SEED_TAG
     DQ_KAFKA_TAG

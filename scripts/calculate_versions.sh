@@ -193,12 +193,7 @@ content_hash_ui="$(calculate_image_hash \
 )"
 export DQ_FRONTEND_TAG="${MAJOR_MINOR}-${content_hash_ui}"
 
-content_hash_kong="$(calculate_image_hash \
-    "" \
-    dq-kong/Dockerfile.kong \
-    dq-kong/scripts
-)"
-export DQ_KONG_TAG="${MAJOR_MINOR}-${content_hash_kong}"
+
 
 content_hash_db="$(calculate_image_hash \
     "" \
@@ -209,12 +204,7 @@ content_hash_db="$(calculate_image_hash \
 )"
 export DQ_DB_TAG="${MAJOR_MINOR}-${content_hash_db}"
 
-content_hash_keycloak="$(calculate_image_hash \
-    "" \
-    dq-keycloak/Dockerfile.keycloak \
-    dq-keycloak/docker-entrypoint.sh
-)"
-export DQ_KEYCLOAK_TAG="${MAJOR_MINOR}-${content_hash_keycloak}"
+
 
 content_hash_kafka="$(calculate_image_hash \
     "" \
@@ -367,9 +357,7 @@ if [ "${1:-}" = "--display" ] || [ "${1:-}" = "--show" ]; then
     info "$my_name" "DQ_ENGINE_TAG:              $DQ_ENGINE_TAG"
     info "$my_name" "DQ_PROFILING_TAG:           $DQ_PROFILING_TAG"
     info "$my_name" "DQ_FRONTEND_TAG:            $DQ_FRONTEND_TAG"
-    info "$my_name" "DQ_KONG_TAG:                $DQ_KONG_TAG"
     info "$my_name" "DQ_DB_TAG:                  $DQ_DB_TAG"
-    info "$my_name" "DQ_KEYCLOAK_TAG:            $DQ_KEYCLOAK_TAG"
     info "$my_name" "DQ_KAFKA_TAG:               $DQ_KAFKA_TAG"
     info "$my_name" "DQ_KAFKA_CONSUMER_TAG:      $DQ_KAFKA_CONSUMER_TAG"
     info "$my_name" "DQ_TRINO_TAG:               $DQ_TRINO_TAG"

@@ -51,9 +51,8 @@ Default scope (core):
   3) dq-made-easy-engine
   4) dq-made-easy-profiling
   5) dq-made-easy-frontend
-  6) dq-made-easy-kong
-  7) dq-made-easy-db
-  8) dq-made-easy-keycloak
+  6) dq-made-easy-db
+  7) dq-made-easy-keycloak
 
 Repo scope (repo) builds the core set plus auxiliary repo-managed images:
   9) dq-made-easy-db-seed
@@ -496,9 +495,9 @@ else
   export DQ_ENGINE_TAG="$VERSION_TAG"
   export DQ_PROFILING_TAG="$VERSION_TAG"
   export DQ_FRONTEND_TAG="$VERSION_TAG"
-  export DQ_KONG_TAG="$VERSION_TAG"
+  # Kong image/container lifecycle managed by platform-foundation
   export DQ_DB_TAG="$VERSION_TAG"
-  export DQ_KEYCLOAK_TAG="$VERSION_TAG"
+  # Keycloak image/container lifecycle managed by platform-foundation
   export DQ_DB_SEED_TAG="$VERSION_TAG"
   export DQ_KEYCLOAK_SEED_TAG="$VERSION_TAG"
   export DQ_KAFKA_TAG="$VERSION_TAG"
@@ -576,15 +575,13 @@ fi
 if image_selected "dq-made-easy-frontend"; then
   run_script_step "dq-made-easy-frontend" "$ROOT_DIR/dq-ui/scripts/build_and_push.sh"
 fi
-if image_selected "dq-made-easy-kong"; then
-  run_script_step "dq-made-easy-kong" "$ROOT_DIR/dq-kong/scripts/build_and_push.sh"
-fi
+# Kong image/container lifecycle managed by platform-foundation
+# (bootstrap_kong.sh retained in dq-made-easy for route/ACL deployment)
 if image_selected "dq-made-easy-db"; then
   run_script_step "dq-made-easy-db" "$ROOT_DIR/dq-db/scripts/build_and_push.sh"
 fi
-if image_selected "dq-made-easy-keycloak"; then
-  run_script_step "dq-made-easy-keycloak" "$ROOT_DIR/dq-keycloak/scripts/build_and_push.sh"
-fi
+# Keycloak image/container lifecycle managed by platform-foundation
+# (seed artifacts retained in dq-made-easy for realm/user generation)
 
 if [ "$BUILD_SCOPE" = "repo" ]; then
   ensure_buildx_builder

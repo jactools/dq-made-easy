@@ -79,7 +79,6 @@ Platform services follow the `platform-<service>` naming convention:
 
 | Service | Image name | Namespace |
 |---|---|---|
-| Kong | `platform-kong` | `jacbeekers/` |
 | Keycloak | `platform-keycloak` | `jacbeekers/` |
 | Airflow | `platform-airflow` | `jacbeekers/` |
 | LLM | `platform-llm` | `jacbeekers/` |
@@ -119,7 +118,6 @@ Each platform service is pinned through a dedicated environment variable in the 
 
 | Service | Env var |
 |---|---|
-| Kong | `PLATFORM_KONG_TAG` |
 | Keycloak | `PLATFORM_KEYCLOAK_TAG` |
 | Airflow | `PLATFORM_AIRFLOW_TAG` |
 | LLM | `PLATFORM_LLM_TAG` |
@@ -151,7 +149,7 @@ A full image reference is resolved as:
 
 Example:
 ```
-docker-registry.dev.jac.dot/jacbeekers/platform-kong:0.1.0
+docker-registry.dev.jac.dot/jacbeekers/platform-keycloak:0.1.0
 ```
 
 ---
@@ -167,11 +165,11 @@ docker-registry.dev.jac.dot/jacbeekers/platform-kong:0.1.0
 Example:
 ```bash
 cd ../platform-foundation
-scripts/build_shared_images.sh --image kong --version 0.1.1 --push
+scripts/build_shared_images.sh --image keycloak --version 0.1.1 --push
 
 cd ../dq-made-easy
-# update PLATFORM_KONG_TAG=0.1.1 in the selected env file
-./scripts/pull_images.sh --scope platform --image platform-kong:0.1.1
+# update PLATFORM_KEYCLOAK_TAG=0.1.1 in the selected env file
+./scripts/pull_images.sh --scope platform --image platform-keycloak:0.1.1
 ```
 
 ---
@@ -181,8 +179,8 @@ cd ../dq-made-easy
 Revert the consumer env file to the previous known good tag and repeat the pull/start cycle:
 
 ```bash
-PLATFORM_KONG_TAG=0.1.0
-./scripts/pull_images.sh --scope platform --image platform-kong:0.1.0
+PLATFORM_KEYCLOAK_TAG=0.1.0
+./scripts/pull_images.sh --scope platform --image platform-keycloak:0.1.0
 ```
 
 ---
@@ -194,11 +192,11 @@ Only the tag should change during local debugging. Do not override `PLATFORM_REG
 ```bash
 # Build local image in platform-foundation
 cd ../platform-foundation
-scripts/build_shared_images.sh --image kong --version dev-local
+scripts/build_shared_images.sh --image keycloak --version dev-local
 
 # Override tag in consumer env
-PLATFORM_KONG_TAG=dev-local
-./scripts/pull_images.sh --scope platform --image platform-kong:dev-local
+PLATFORM_KEYCLOAK_TAG=dev-local
+./scripts/pull_images.sh --scope platform --image platform-keycloak:dev-local
 ```
 
 Remove the override from `.env.dev.local` when debugging is done.
@@ -211,7 +209,7 @@ Remove the override from `.env.dev.local` when debugging is done.
 # .env.dev.local
 PLATFORM_REGISTRY="docker-registry.dev.jac.dot/"
 PLATFORM_NAMESPACE="jacbeekers/"
-PLATFORM_KONG_TAG="dev-local"
+PLATFORM_KEYCLOAK_TAG="dev-local"
 ```
 
 ### Corporate — pull-only mirror
@@ -220,7 +218,7 @@ PLATFORM_KONG_TAG="dev-local"
 # .env.corporate.local
 PLATFORM_REGISTRY="registry.corp.internal/"
 PLATFORM_NAMESPACE="jacbeekers/"
-PLATFORM_KONG_TAG="0.1.0"
+PLATFORM_KEYCLOAK_TAG="0.1.0"
 ```
 
 ### Public (Docker Hub) — external distribution
@@ -229,7 +227,7 @@ PLATFORM_KONG_TAG="0.1.0"
 # .env.prod.local
 PLATFORM_REGISTRY="docker.io/"
 PLATFORM_NAMESPACE="jacbeekers/"
-PLATFORM_KONG_TAG="0.1.0"
+PLATFORM_KEYCLOAK_TAG="0.1.0"
 ```
 
 ---
@@ -240,7 +238,7 @@ Platform service images provide the runtime baseline. App-specific configuration
 
 | Service | What stays in dq-made-easy |
 |---|---|
-| Kong | Routes, services, consumers, ACLs, bootstrap scripts |
+| Kong | `bootstrap_kong.sh` — deploys routes, services, consumers, ACLs (Kong image/container managed by platform-foundation) |
 | Keycloak | Realm JSON, roles, clients, users, redirects |
 | Airflow | DAGs, SDK/operator wheels, FAB role mapping |
 | LLM | DQ-specific agent logic, prompt templates, datasets |
@@ -249,9 +247,48 @@ Platform service images provide the runtime baseline. App-specific configuration
 
 ---
 
-## 11. Related Documents
+## 11. Kong (managed by platform-foundation)
+
+Kong image and container lifecycle are managed by `platform-foundation`.
+The `platform-kong` image is built, versioned, and deployed from there.
+
+**What stays in dq-made-easy:**
+
+- `dq-kong/scripts/bootstrap_kong.sh` — deploys routes, services, consumers, and ACLs to Kong
+- `dq-kong/scripts/build_and_push.sh` — Kong image push helper (legacy, retained)
+
+**Bootstrap env vars** — the `bootstrap_kong.sh` script requires these variables
+(which are supplied by the platform-foundation Kong service deployment):
+
+| Variable | Required | Description |
+|---|---|---|
+| `DQ_API_INTERNAL_URL` | Yes | Internal URL of the DQ API service |
+| `KEYCLOAK_INTERNAL_URL` | Yes | Internal URL of the Keycloak service |
+| `KEYCLOAK_ADMIN_REALM` | Yes | Keycloak admin realm |
+| `KEYCLOAK_SYSTEM_ADMIN_USERNAME` | Yes | Keycloak system admin username |
+| `KEYCLOAK_SYSTEM_ADMIN_PASSWORD` | Yes | Keycloak system admin password |
+| `KEYCLOAK_REALM` | Yes | Application realm name |
+| `DQ_ENGINE_OIDC_CLIENT_ID` | Yes | OIDC client ID for the DQ engine |
+| `UI_VITE_LOCAL_URL` | Yes | Internal URL of the Vite dev server |
+| `UI_NGINX_LOCAL_URL` | Yes | Internal URL of the Nginx UI |
+| `KONG_OTEL_ENDPOINT` | Yes | OTLP endpoint for tracing |
+| `SSO_ENABLED` | No | Enable/disable JWT enforcement |
+| `SSO_PUBLIC_ISSUER_URL` | No | Public OIDC issuer URL |
+| `KONG_ADMIN_INTERNAL_URL` | No | Kong Admin API URL (default: `https://localhost:8444`) |
+| `KONG_LUA_SSL_TRUSTED_CERTIFICATE` | No | CA bundle for Kong Lua SSL |
+| `MAX_RETRIES` | No | Max boot retry count (default: `60`) |
+| `CURL_CA_BUNDLE` | No | CA bundle for curl |
+| `TRUST_PROXY_AUTH` | No | When `true`, enables JWT + ACL on routes |
+| `JWT_JWKS_URL` | No | Override JWKS endpoint |
+| `GRAFANA_OIDC_CLIENT_ID` | No | Grafana OIDC client ID (default: `grafana`) |
+
+---
+
+## 12. Related Documents
 
 - [Shared Image Local Development Overrides](./SHARED_IMAGE_LOCAL_DEVELOPMENT.md)
 - [Shared Image Version Pinning and Upgrades](./SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md)
+- [Shared Ingestion and SSO Platform Implementation Plan](../implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_IMPLEMENTATION_PLAN.md)
+- [Shared Platform Exceptions Log](../implementation-details/SHARED_PLATFORM_EXCEPTIONS_LOG.md)
 - [Shared Ingestion and SSO Platform Implementation Plan](../implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_IMPLEMENTATION_PLAN.md)
 - [Shared Platform Exceptions Log](../implementation-details/SHARED_PLATFORM_EXCEPTIONS_LOG.md)
