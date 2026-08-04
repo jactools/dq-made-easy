@@ -29,10 +29,9 @@ EDGE_MODE=local
 KONG_PUBLIC_URL=https://kong.dev.example
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-DQ_LLM_REGISTRY=dq
-DQ_LLM_NAMESPACE=local
-DQ_LLM_IMAGE=dq-made-easy-llm
-DQ_LLM_TAG=dev
+PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_NAMESPACE=jacbeekers/
+PLATFORM_LLM_TAG=dev
 DQ_LLM_HOST_BIND=0.0.0.0
 DQ_LLM_HOST_PORT=18480
 DQ_LLM_MODEL_ID=tiny-local-model
@@ -50,10 +49,9 @@ EDGE_MODE=local
 KONG_PUBLIC_URL=https://kong.test.example:19443
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:15432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-DQ_LLM_REGISTRY=dq
-DQ_LLM_NAMESPACE=local
-DQ_LLM_IMAGE=dq-made-easy-llm
-DQ_LLM_TAG=test
+PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_NAMESPACE=jacbeekers/
+PLATFORM_LLM_TAG=test
 DQ_LLM_HOST_BIND=127.0.0.1
 DQ_LLM_HOST_PORT=28480
 DQ_LLM_MODEL_ID=tiny-local-model
@@ -81,10 +79,9 @@ EDGE_MODE=public
 KONG_PUBLIC_URL=https://prod.example
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-DQ_LLM_REGISTRY=dq
-DQ_LLM_NAMESPACE=local
-DQ_LLM_IMAGE=dq-made-easy-llm
-DQ_LLM_TAG=0.9-9999999
+PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_NAMESPACE=jacbeekers/
+PLATFORM_LLM_TAG=0.9-9999999
 DQ_LLM_HOST_BIND=127.0.0.1
 DQ_LLM_HOST_PORT=38480
 DQ_LLM_MODEL_ID=tiny-local-model
@@ -102,7 +99,8 @@ DQ_PROFILING_TAG=0.9-4444444
 DQ_FRONTEND_TAG=0.9-5555555
 # Kong image/container lifecycle managed by platform-foundation
 DQ_DB_TAG=0.9-7777777
-DQ_KEYCLOAK_TAG=0.9-8888888
+# Keycloak image/container lifecycle managed by platform-foundation
+PLATFORM_KEYCLOAK_TAG=0.9-8888888
 DB_HOST_BIND=127.0.0.1
 REDIS_HOST_BIND=127.0.0.1
 API_HOST_BIND=127.0.0.1
@@ -138,10 +136,9 @@ EDGE_MODE=public
 KONG_PUBLIC_URL=https://prod.example
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-DQ_LLM_REGISTRY=dq
-DQ_LLM_NAMESPACE=local
-DQ_LLM_IMAGE=dq-made-easy-llm
-DQ_LLM_TAG=0.9-9999999
+PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_NAMESPACE=jacbeekers/
+PLATFORM_LLM_TAG=0.9-9999999
 DQ_LLM_HOST_BIND=127.0.0.1
 DQ_LLM_HOST_PORT=38480
 DQ_LLM_MODEL_ID=tiny-local-model
@@ -159,7 +156,8 @@ DQ_PROFILING_TAG=0.9-4444444
 DQ_FRONTEND_TAG=latest
 # Kong image/container lifecycle managed by platform-foundation
 DQ_DB_TAG=0.9-7777777
-DQ_KEYCLOAK_TAG=0.9-8888888
+# Keycloak image/container lifecycle managed by platform-foundation
+PLATFORM_KEYCLOAK_TAG=0.9-8888888
 DB_HOST_BIND=127.0.0.1
 REDIS_HOST_BIND=127.0.0.1
 API_HOST_BIND=127.0.0.1

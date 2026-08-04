@@ -26,7 +26,7 @@ IMAGE_TAG_VARS=(
   # Kong image/container lifecycle managed by platform-foundation
   DQ_DB_TAG
   # Keycloak image/container lifecycle managed by platform-foundation
-  DQ_LLM_TAG
+  PLATFORM_LLM_TAG
   DQ_OPENMETADATA_DB_TAG
   DQ_OPENMETADATA_SERVER_TAG
   DQ_METADATA_CONFIGURE_TAG

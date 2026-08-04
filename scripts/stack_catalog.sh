@@ -114,6 +114,15 @@ is_platform_image() {
     platform-ingestion-runner)
       return 0
       ;;
+    platform-kong|platform-keycloak|platform-kafka|platform-llm|platform-trino|platform-airflow)
+      return 0
+      ;;
+    platform-observability-loki|platform-observability-prometheus|platform-observability-grafana|platform-observability-tempo)
+      return 0
+      ;;
+    platform-observability-container-metrics|platform-observability-otel-collector)
+      return 0
+      ;;
     *)
       return 1
       ;;
@@ -225,10 +234,46 @@ repo_image_env_vars() {
   esac
 }
 
-shared_image_env_vars() {
+platform_image_env_vars() {
   case "$1" in
     platform-ingestion-runner)
       printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_INGESTION_RUNNER_IMAGE PLATFORM_SHARED_INGESTION_RUNNER_TAG
+      ;;
+    platform-kong)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_KONG_TAG
+      ;;
+    platform-keycloak)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_KEYCLOAK_TAG
+      ;;
+    platform-kafka)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_KAFKA_TAG
+      ;;
+    platform-llm)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_LLM_TAG
+      ;;
+    platform-trino)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_TRINO_TAG
+      ;;
+    platform-airflow)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_AIRFLOW_TAG
+      ;;
+    platform-observability-loki)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_LOKI_TAG
+      ;;
+    platform-observability-prometheus)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_PROMETHEUS_TAG
+      ;;
+    platform-observability-grafana)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_GRAFANA_TAG
+      ;;
+    platform-observability-tempo)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_TEMPO_TAG
+      ;;
+    platform-observability-container-metrics)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_CONTAINER_METRICS_TAG
+      ;;
+    platform-observability-otel-collector)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_OTEL_COLLECTOR_TAG
       ;;
     *)
       return 1

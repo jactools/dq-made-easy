@@ -84,6 +84,18 @@ Auxiliary repo images:
 
 Platform service images:
   platform-ingestion-runner
+  platform-kong
+  platform-keycloak
+  platform-kafka
+  platform-llm
+  platform-trino
+  platform-airflow
+  platform-observability-loki
+  platform-observability-prometheus
+  platform-observability-grafana
+  platform-observability-tempo
+  platform-observability-container-metrics
+  platform-observability-otel-collector
 
 Examples:
   $(basename "$0")
@@ -91,6 +103,7 @@ Examples:
   $(basename "$0") --scope platform
   $(basename "$0") --image dq-made-easy-api --image dq-made-easy-frontend
   $(basename "$0") --image platform-ingestion-runner:latest
+  $(basename "$0") --image platform-kong:0.1.0
   $(basename "$0") --env prod --scope repo --version 0.9.0
 EOF
 }
@@ -201,6 +214,18 @@ set_aux_image_defaults() {
   PLATFORM_NAMESPACE="${PLATFORM_NAMESPACE:-jacbeekers/}"
   PLATFORM_INGESTION_RUNNER_IMAGE="${PLATFORM_INGESTION_RUNNER_IMAGE:-platform-ingestion-runner}"
   PLATFORM_SHARED_INGESTION_RUNNER_TAG="${PLATFORM_SHARED_INGESTION_RUNNER_TAG:-latest}"
+  PLATFORM_KONG_TAG="${PLATFORM_KONG_TAG:-latest}"
+  PLATFORM_KEYCLOAK_TAG="${PLATFORM_KEYCLOAK_TAG:-latest}"
+  PLATFORM_KAFKA_TAG="${PLATFORM_KAFKA_TAG:-latest}"
+  PLATFORM_LLM_TAG="${PLATFORM_LLM_TAG:-latest}"
+  PLATFORM_TRINO_TAG="${PLATFORM_TRINO_TAG:-latest}"
+  PLATFORM_AIRFLOW_TAG="${PLATFORM_AIRFLOW_TAG:-latest}"
+  PLATFORM_OBS_LOKI_TAG="${PLATFORM_OBS_LOKI_TAG:-latest}"
+  PLATFORM_OBS_PROMETHEUS_TAG="${PLATFORM_OBS_PROMETHEUS_TAG:-latest}"
+  PLATFORM_OBS_GRAFANA_TAG="${PLATFORM_OBS_GRAFANA_TAG:-latest}"
+  PLATFORM_OBS_TEMPO_TAG="${PLATFORM_OBS_TEMPO_TAG:-latest}"
+  PLATFORM_OBS_CONTAINER_METRICS_TAG="${PLATFORM_OBS_CONTAINER_METRICS_TAG:-latest}"
+  PLATFORM_OBS_OTEL_COLLECTOR_TAG="${PLATFORM_OBS_OTEL_COLLECTOR_TAG:-latest}"
 }
 
 auto_resolve_tags_from_calculated_versions() {
@@ -466,7 +491,9 @@ resolve_selected_images
 if [ -n "$VERSION" ]; then
   for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
     if is_platform_image "$image"; then
-      error "$my_name" "--version is not supported with platform images; use --image platform-ingestion-runner:<tag>"
+      # Platform images use individual tag variables (PLATFORM_*_TAG)
+      # --version is not supported; use --image platform-kong:0.1.0 instead
+      error "$my_name" "--version is not supported with platform images; use --image $image:<tag>"
       exit 1
     fi
   done

@@ -168,10 +168,10 @@ Platform services are infrastructure components that both `dq-made-easy` and Maa
 - [x] (SHARED-I-W7-13) Migrate `dq-kafka` to `platform-foundation/docker/kafka/` as `platform-kafka` with shared TLS keystore setup. Kafka broker container lifecycle created in `platform-foundation/docker-compose/messaging.yml`. Consumer repos provision topics/config via kafka-topics.sh (no mounts). DQ-specific consumer (kafka-consumer) remains in `dq-made-easy`.
 - [x] (SHARED-I-W7-14) Migrate `dq-llm` to `platform-foundation/docker/llm/` as `platform-llm`. Platform provides: Dockerfile, start script, requirements.txt (shared deps). Consumer builds with own app code (entrypoint.py, agents/, etc.) as build context. Runtime model config via env vars (DQ_LLM_MODEL_ID, DQ_LLM_CHAT_PROVIDER, etc.). Container lifecycle in `platform-foundation/docker-compose/llm.yml`.
 - [x] (SHARED-I-W7-15) Migrate `dq-trino` to `platform-foundation/docker/trino/` as `platform-trino`. Platform provides: Dockerfile, catalog config, trust store setup, container lifecycle. Consumer repos deploy DQ-specific catalog configs via Trino CLI (no mounts, no builds). `dq-trino/` retained only for catalog config reference.
-- [ ] (SHARED-I-W7-08) Update `scripts/pull_images.sh` and `scripts/stack_catalog.sh` to include all platform service images.
-- [ ] (SHARED-I-W7-09) Update `scripts/build_and_push_all.sh` to build platform services in the shared platform pipeline.
-- [ ] (SHARED-I-W7-10) Verify `dq-made-easy` compose files and deployment manifests reference the new platform service image tags.
-- [ ] (SHARED-I-W7-11) Remove legacy Dockerfiles and build scripts from `dq-made-easy` after platform services are stable.
+- [x] (SHARED-I-W7-08) Update `scripts/pull_images.sh` and `scripts/stack_catalog.sh` to include all platform service images.
+- [x] (SHARED-I-W7-09) Update `scripts/build_and_push_all.sh` to build platform services in the shared platform pipeline.
+- [x] (SHARED-I-W7-10) Verify `dq-made-easy` compose files and deployment manifests reference the new platform service image tags.
+- [x] (SHARED-I-W7-11) Remove legacy Dockerfiles and build scripts from `dq-made-easy` after platform services are stable.
 - [ ] (SHARED-I-W7-12) Capture test evidence that platform services start and are reachable through the shared image contract.
 
 ## Next Steps
