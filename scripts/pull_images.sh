@@ -69,7 +69,7 @@ Canonical env options:
   --env-file PATH          Use an explicit env file
 
 Options:
-  --scope <core|repo|shared> Pull the default core, full repo-managed, or shared image scope (default: repo)
+  --scope <core|repo|platform> Pull the default core, full repo-managed, or platform image scope (default: repo)
   --image <name[:tag]>      Pull only the named image (repeatable)
   --version <tag>          Override tags for this pull operation
   -h, --help               Show this help message
@@ -82,13 +82,13 @@ Auxiliary repo images:
   dq-made-easy-metadata-configure dq-made-easy-container-metrics dq-made-easy-zammad-seed dq-made-easy-llm
   dq-made-easy-kafka dq-made-easy-kafka-consumer dq-made-easy-trino dq-made-easy-edge dq-made-easy-airflow
 
-Shared platform images:
+Platform service images:
   platform-ingestion-runner
 
 Examples:
   $(basename "$0")
   $(basename "$0") --scope repo
-  $(basename "$0") --scope shared
+  $(basename "$0") --scope platform
   $(basename "$0") --image dq-made-easy-api --image dq-made-easy-frontend
   $(basename "$0") --image platform-ingestion-runner:latest
   $(basename "$0") --env prod --scope repo --version 0.9.0
@@ -156,61 +156,61 @@ normalize_repo_image_name() {
 }
 
 set_aux_image_defaults() {
-  DQ_DB_SEED_REGISTRY="${DQ_DB_SEED_REGISTRY:-${DQ_DB_REGISTRY:-docker.io/}}"
+  DQ_DB_SEED_REGISTRY="${DQ_DB_SEED_REGISTRY:-${DQ_DB_REGISTRY:-docker-registry.dev.jac.dot/}}"
   DQ_DB_SEED_NAMESPACE="${DQ_DB_SEED_NAMESPACE:-${DQ_DB_NAMESPACE:-jacbeekers/}}"
   DQ_DB_SEED_IMAGE="${DQ_DB_SEED_IMAGE:-dq-made-easy-db-seed}"
 
-  DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-docker.io/}}"
+  DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-docker-registry.dev.jac.dot/}}"
   DQ_KEYCLOAK_SEED_NAMESPACE="${DQ_KEYCLOAK_SEED_NAMESPACE:-${DQ_KEYCLOAK_NAMESPACE:-jacbeekers/}}"
   DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-made-easy-keycloak-seed-artifacts}"
 
-  DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker.io/}"
+  DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_OPENMETADATA_DB_NAMESPACE="${DQ_OPENMETADATA_DB_NAMESPACE:-jacbeekers/}"
   DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}"
 
-  DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker.io/}"
+  DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_OPENMETADATA_SERVER_NAMESPACE="${DQ_OPENMETADATA_SERVER_NAMESPACE:-jacbeekers/}"
   DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata-server}"
 
-  DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker.io/}"
+  DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_METADATA_CONFIGURE_NAMESPACE="${DQ_METADATA_CONFIGURE_NAMESPACE:-jacbeekers/}"
   DQ_METADATA_CONFIGURE_IMAGE="${DQ_METADATA_CONFIGURE_IMAGE:-dq-made-easy-metadata-configure}"
 
-  DQ_CONTAINER_METRICS_REGISTRY="${DQ_CONTAINER_METRICS_REGISTRY:-docker.io/}"
+  DQ_CONTAINER_METRICS_REGISTRY="${DQ_CONTAINER_METRICS_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_CONTAINER_METRICS_NAMESPACE="${DQ_CONTAINER_METRICS_NAMESPACE:-jacbeekers/}"
   DQ_CONTAINER_METRICS_IMAGE="${DQ_CONTAINER_METRICS_IMAGE:-dq-made-easy-container-metrics}"
 
-  DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker.io/}"
+  DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
   DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
-  DQ_KAFKA_REGISTRY="${DQ_KAFKA_REGISTRY:-docker.io/}"
+  DQ_KAFKA_REGISTRY="${DQ_KAFKA_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_KAFKA_NAMESPACE="${DQ_KAFKA_NAMESPACE:-jacbeekers/}"
   DQ_KAFKA_IMAGE="${DQ_KAFKA_IMAGE:-dq-made-easy-kafka}"
 
-  DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker.io/}"
+  DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_KAFKA_CONSUMER_NAMESPACE="${DQ_KAFKA_CONSUMER_NAMESPACE:-jacbeekers/}"
   DQ_KAFKA_CONSUMER_IMAGE="${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}"
 
-  DQ_TRINO_REGISTRY="${DQ_TRINO_REGISTRY:-docker.io/}"
+  DQ_TRINO_REGISTRY="${DQ_TRINO_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_TRINO_NAMESPACE="${DQ_TRINO_NAMESPACE:-jacbeekers/}"
   DQ_TRINO_IMAGE="${DQ_TRINO_IMAGE:-dq-made-easy-trino}"
 
-  DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker.io/}"
+  DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_EDGE_NAMESPACE="${DQ_EDGE_NAMESPACE:-jacbeekers/}"
   DQ_EDGE_IMAGE="${DQ_EDGE_IMAGE:-dq-made-easy-edge}"
 
-  DQ_AIRFLOW_REGISTRY="${DQ_AIRFLOW_REGISTRY:-docker.io/}"
+  DQ_AIRFLOW_REGISTRY="${DQ_AIRFLOW_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_AIRFLOW_NAMESPACE="${DQ_AIRFLOW_NAMESPACE:-jacbeekers/}"
   DQ_AIRFLOW_IMAGE="${DQ_AIRFLOW_IMAGE:-dq-made-easy-airflow}"
 
-  DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker.io/}"
+  DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
   DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
 
-  PLATFORM_SHARED_REGISTRY="${PLATFORM_SHARED_REGISTRY:-docker.io/}"
-  PLATFORM_SHARED_NAMESPACE="${PLATFORM_SHARED_NAMESPACE:-jacbeekers/}"
-  PLATFORM_SHARED_INGESTION_RUNNER_IMAGE="${PLATFORM_SHARED_INGESTION_RUNNER_IMAGE:-platform-ingestion-runner}"
+  PLATFORM_REGISTRY="${PLATFORM_REGISTRY:-docker-registry.dev.jac.dot/}"
+  PLATFORM_NAMESPACE="${PLATFORM_NAMESPACE:-jacbeekers/}"
+  PLATFORM_INGESTION_RUNNER_IMAGE="${PLATFORM_INGESTION_RUNNER_IMAGE:-platform-ingestion-runner}"
   PLATFORM_SHARED_INGESTION_RUNNER_TAG="${PLATFORM_SHARED_INGESTION_RUNNER_TAG:-latest}"
 }
 
@@ -319,10 +319,10 @@ resolve_selected_images() {
         append_unique_image "$image"
       done < <(repo_image_values)
       ;;
-    shared)
+    platform)
       while IFS= read -r image; do
         append_unique_image "$image"
-      done < <(shared_image_values)
+      done < <(platform_image_values)
       ;;
     *)
       error "$my_name" "Unsupported scope '$PULL_SCOPE'"
@@ -345,8 +345,8 @@ resolve_full_image_name() {
 
   if is_repo_managed_image "$image"; then
     vars=( $(repo_image_env_vars "$image") )
-  elif is_shared_image "$image"; then
-    vars=( $(shared_image_env_vars "$image") )
+  elif is_platform_image "$image"; then
+    vars=( $(platform_image_env_vars "$image") )
   else
     error "$my_name" "Missing image configuration for $image"
     exit 1
@@ -385,7 +385,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --scope)
       if [[ -z "${2:-}" ]]; then
-        error "$my_name" "--scope requires core, repo, or shared"
+        error "$my_name" "--scope requires core, repo, or platform"
         exit 1
       fi
       case "$2" in
@@ -422,7 +422,7 @@ while [[ $# -gt 0 ]]; do
         if ! is_core_repo_image "$normalized_image"; then
           PULL_SCOPE="repo"
         fi
-      elif is_shared_image "$normalized_image"; then
+      elif is_platform_image "$normalized_image"; then
         append_unique_image "$normalized_image"
         if [[ -n "$image_tag_arg" ]]; then
           PLATFORM_SHARED_INGESTION_RUNNER_TAG="$image_tag_arg"
@@ -477,8 +477,8 @@ resolve_selected_images
 
 if [ -n "$VERSION" ]; then
   for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
-    if is_shared_image "$image"; then
-      error "$my_name" "--version is not supported with shared images; use --image platform-ingestion-runner:<tag>"
+    if is_platform_image "$image"; then
+      error "$my_name" "--version is not supported with platform images; use --image platform-ingestion-runner:<tag>"
       exit 1
     fi
   done

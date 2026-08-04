@@ -318,7 +318,7 @@ chmod +x pull-images.sh
 ./pull-images.sh
 
 # Pull a specific shared runner tag
-./pull-images.sh --scope shared --image platform-ingestion-runner:v0.10.1
+./scripts/pull_images.sh --scope platform --image platform-ingestion-runner:0.1.0
 ```
 
 Note: the standard repo release flow produces per-service deterministic tags such as `0.10-7a9c018` and `0.10-bd861ee`, not a single identical tag for every image. Use `.env.prod.local` or your external prod env file to pin the current tested release-line image set.

@@ -386,7 +386,7 @@ To pull and run pre-built Docker images on a different machine:
 ./scripts/pull_images.sh                 # pulls repo-managed images
 
 # 1b. Pull shared platform images separately
-./scripts/pull_images.sh --scope shared   # pulls shared platform images
+./scripts/pull_images.sh --scope platform   # pulls shared platform images
 ./scripts/pull_images.sh --image platform-ingestion-runner:latest
 
 # Local-development override for the shared ingestion runner (debugging only)

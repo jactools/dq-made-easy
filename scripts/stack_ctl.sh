@@ -92,7 +92,7 @@ Examples:
   $(basename "$0") build --all
   $(basename "$0") build --image dq-api --image dq-frontend --no-cache
   $(basename "$0") pull --profile core --profile gateway
-  $(basename "$0") pull --scope shared --image platform-ingestion-runner:dev-local
+  $(basename "$0") pull --scope platform --image platform-ingestion-runner:dev-local
   $(basename "$0") start --profile core --profile gateway --profile auth
   $(basename "$0") restart --service api --service frontend
   $(basename "$0") stop --profile support
@@ -469,7 +469,7 @@ validate_action_selectors() {
       if [ "$ACTION" != "pull" ]; then
         for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
           if [ "$(image_ref_name "$image")" = "platform-ingestion-runner" ]; then
-            fail "shared images are pull-only; use pull --scope shared or the platform-foundation build script"
+            fail "shared images are pull-only; use pull --scope platform or the platform-foundation build script"
           fi
         done
       fi
@@ -559,9 +559,9 @@ while [[ $# -gt 0 ]]; do
           fail "Repo-managed images must use --version instead of a tag in --image '$2'"
         fi
         append_unique_image "$image_name_arg"
-      elif is_shared_image "$image_name_arg"; then
+      elif is_platform_image "$image_name_arg"; then
         if [ -n "$image_tag_arg" ] && [ "$ACTION" != "pull" ]; then
-          fail "shared images are pull-only; use pull --scope shared or the platform-foundation build script"
+          fail "shared images are pull-only; use pull --scope platform or the platform-foundation build script"
         fi
         append_unique_image "$2"
       else

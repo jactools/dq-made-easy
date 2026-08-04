@@ -1,13 +1,13 @@
 # Shared Image Local Development Overrides
 
-This guide documents the only supported local-development override pattern for shared images.
+This guide documents the only supported local-development override pattern for shared and platform images.
 
 ## Default rule
 
 Use the published shared image tags by default:
 
-- `docker.io/jacbeekers/platform-ingestion-runner:<version>`
-- `docker.io/jacbeekers/platform-ingestion-runner:latest`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-ingestion-runner:<version>`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-ingestion-runner:latest`
 
 Do **not** change the shared registry or namespace in normal workstation work. The canonical image should come from the shared platform publish pipeline.
 
@@ -39,20 +39,42 @@ Typical cases:
 3. Pull or run the shared image through the repo tooling:
 
    ```bash
-   ./scripts/pull_images.sh --scope shared
+   ./scripts/pull_images.sh --scope platform
    ./scripts/pull_images.sh --image platform-ingestion-runner:dev-local
-   ./scripts/stack_ctl.sh pull --scope shared --image platform-ingestion-runner:dev-local
+   ./scripts/stack_ctl.sh pull --scope platform --image platform-ingestion-runner:dev-local
    ```
+
+### Registry overrides
+
+The `PLATFORM_REGISTRY` env var controls which registry is used. Override it
+in your environment file to switch profiles:
+
+```bash
+# Default (Nexus) — local development
+PLATFORM_REGISTRY="docker-registry.dev.jac.dot/"
+
+# Corporate mirror — pull-only
+PLATFORM_REGISTRY="registry.corp.internal/"
+
+# Docker Hub — external distribution
+PLATFORM_REGISTRY="docker.io/"
+```
+
+See [Platform Service Image Contract](./PLATFORM_SERVICE_IMAGE_CONTRACT.md) for details.
 
 ## What not to override
 
 Avoid changing these values unless you are deliberately testing against a private or temporary registry:
 
-- `PLATFORM_SHARED_REGISTRY`
-- `PLATFORM_SHARED_NAMESPACE`
+- `PLATFORM_REGISTRY`
+- `PLATFORM_NAMESPACE`
 
 For most debugging scenarios, only the shared image tag should change.
 
 ## Cleanup rule
 
 Remove the override from `.env.dev.local` when the debugging session is done so the workstation returns to the published shared-image contract.
+
+## Related documents
+
+- [Platform Service Image Contract](./PLATFORM_SERVICE_IMAGE_CONTRACT.md)

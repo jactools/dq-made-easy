@@ -33,7 +33,7 @@ The orchestrator handles secrets generation, TLS certificates, image builds, con
 ./scripts/pull_images.sh
 
 # Pull the shared platform image set separately
-./scripts/pull_images.sh --scope shared
+./scripts/pull_images.sh --scope platform
 
 # Pull a specific shared runner tag
 ./scripts/pull_images.sh --image platform-ingestion-runner:v0.10.5

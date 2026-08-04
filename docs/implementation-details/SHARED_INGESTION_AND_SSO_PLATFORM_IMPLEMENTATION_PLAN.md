@@ -158,7 +158,7 @@ Platform services are infrastructure components that both `dq-made-easy` and Maa
 | Trino | `dq-trino/Dockerfile.trino` | `platform-trino` |
 | Observability | `observability/` (Loki, Grafana, Prometheus, Tempo, container-metrics, OTel collector) | `platform-observability-*` |
 
-- [ ] (SHARED-I-W7-01) Define the platform service image contract: naming, tagging, registry, and version pinning for Kong, Keycloak, Airflow, LLM, Trino, and observability stack.
+- [x] (SHARED-I-W7-01) Define the platform service image contract: naming, tagging, registry, and version pinning for Kong, Keycloak, Airflow, LLM, Trino, and observability stack. See [Platform Service Image Contract](../technical/PLATFORM_SERVICE_IMAGE_CONTRACT.md).
 - [ ] (SHARED-I-W7-02) Migrate `dq-kong` to `platform-foundation/docker/kong/` as `platform-kong` with shared TLS/trust and plugin baseline. Keep DQ routes and bootstrap in `dq-made-easy`.
 - [ ] (SHARED-I-W7-03) Migrate `dq-keycloak` to `platform-foundation/docker/keycloak/` as `platform-keycloak` with shared TLS, trust, health, and startup mechanics. Keep realm artifacts in `dq-made-easy`.
 - [ ] (SHARED-I-W7-04) Migrate `docker/airflow` to `platform-foundation/docker/airflow/` as `platform-airflow` with shared OIDC/Keycloak adapter baseline. Keep DAGs and SDK/operator wheels in `dq-made-easy`.

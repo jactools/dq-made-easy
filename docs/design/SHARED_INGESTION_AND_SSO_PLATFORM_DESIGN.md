@@ -6,7 +6,6 @@
 **Related systems**: `dq-made-easy`, `metadata-as-a-service`
 **Related decision**: [ADR-036 Shared Ingestion and SSO Platform Boundary and Image Ownership](../../architecture/adr/ADR-036-shared-ingestion-and-sso-platform-boundary-and-image-ownership.md)
 **Related implementation plan**: [Shared Ingestion and SSO Platform Implementation Plan](../implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_IMPLEMENTATION_PLAN.md)
-**Related checklist**: [Shared Ingestion and SSO Platform Repo Migration Checklist](../implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_REPO_MIGRATION_CHECKLIST.md)
 
 ---
 

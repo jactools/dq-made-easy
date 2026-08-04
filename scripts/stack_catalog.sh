@@ -114,7 +114,7 @@ is_repo_managed_image() {
   esac
 }
 
-is_shared_image() {
+is_platform_image() {
   case "$1" in
     platform-ingestion-runner)
       return 0
@@ -246,7 +246,7 @@ repo_image_env_vars() {
 shared_image_env_vars() {
   case "$1" in
     platform-ingestion-runner)
-      printf '%s\n' PLATFORM_SHARED_REGISTRY PLATFORM_SHARED_NAMESPACE PLATFORM_SHARED_INGESTION_RUNNER_IMAGE PLATFORM_SHARED_INGESTION_RUNNER_TAG
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_INGESTION_RUNNER_IMAGE PLATFORM_SHARED_INGESTION_RUNNER_TAG
       ;;
     *)
       return 1

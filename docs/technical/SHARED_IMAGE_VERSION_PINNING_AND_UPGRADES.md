@@ -1,17 +1,23 @@
 # Shared Image Version Pinning and Upgrades
 
 This guide documents how consumers should pin and upgrade the shared platform
-image tags for the ingestion runner.
+image tags for the ingestion runner and platform services.
 
 ## Scope
 
-This guidance currently applies to the shared ingestion runner image:
+This guidance applies to all shared and platform images published to
+`docker-registry.dev.jac.dot`:
 
-- `docker.io/jacbeekers/platform-ingestion-runner`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-ingestion-runner`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-kong`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-keycloak`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-airflow`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-llm`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-trino`
+- `docker-registry.dev.jac.dot/jacbeekers/platform-observability-*`
 
-Keycloak and trust-bundle image contracts may be added later, but the pinning
-rules should stay the same: pin a published version for repeatability, and
-only use a moving alias for ad hoc local testing.
+The pinning rules are the same for all images: pin a published version for
+repeatability, and only use a moving alias for ad hoc local testing.
 
 ## Pinning rule
 
@@ -19,6 +25,9 @@ Consumers should pin the shared image tag in their environment file or
 runtime override file:
 
 - `PLATFORM_SHARED_INGESTION_RUNNER_TAG=<published-version>`
+- `PLATFORM_KONG_TAG=<published-version>`
+- `PLATFORM_KEYCLOAK_TAG=<published-version>`
+- etc. (see [Platform Service Image Contract](./PLATFORM_SERVICE_IMAGE_CONTRACT.md))
 
 Recommended sources of truth:
 
@@ -39,9 +48,9 @@ Use these tag patterns:
 ## Upgrade workflow
 
 1. Publish the new shared image in `platform-foundation`.
-2. Confirm the versioned tag exists in the registry.
+2. Confirm the versioned tag exists in `docker-registry.dev.jac.dot`.
 3. Update the consumer env file to the new tag.
-4. Pull the shared image scope or the specific tag.
+4. Pull the platform image scope or the specific tag.
 5. Start the stack and run the relevant validation flow.
 
 Example:
@@ -52,8 +61,8 @@ scripts/build_shared_images.sh --image ingestion-runner --version 0.1.1 --push
 
 cd ../dq-made-easy
 # update PLATFORM_SHARED_INGESTION_RUNNER_TAG=0.1.1 in the selected env file
-./scripts/pull_images.sh --scope shared --image platform-ingestion-runner:0.1.1
-./scripts/stack_ctl.sh pull --scope shared --image platform-ingestion-runner:0.1.1
+./scripts/pull_images.sh --scope platform --image platform-ingestion-runner:0.1.1
+./scripts/stack_ctl.sh pull --scope platform --image platform-ingestion-runner:0.1.1
 ```
 
 ## Rollback workflow
@@ -63,7 +72,7 @@ good tag and repeat the pull/start cycle.
 
 ```bash
 PLATFORM_SHARED_INGESTION_RUNNER_TAG=0.1.0
-./scripts/pull_images.sh --scope shared --image platform-ingestion-runner:0.1.0
+./scripts/pull_images.sh --scope platform --image platform-ingestion-runner:0.1.0
 ```
 
 ## Why pin tags instead of overriding the registry
@@ -71,11 +80,12 @@ PLATFORM_SHARED_INGESTION_RUNNER_TAG=0.1.0
 Pinning the tag keeps the shared image source consistent while still allowing
 consumer repos to move deliberately.
 
-Do not change `PLATFORM_SHARED_REGISTRY` or `PLATFORM_SHARED_NAMESPACE` for
+Do not change `PLATFORM_REGISTRY` or `PLATFORM_NAMESPACE` for
 normal upgrades. Those values represent the shared publication contract.
 
 ## Relation to other guides
 
+- [Platform Service Image Contract](./PLATFORM_SERVICE_IMAGE_CONTRACT.md)
 - [Shared Image Local Development Overrides](./SHARED_IMAGE_LOCAL_DEVELOPMENT.md)
 - [Deployment Guide](./DEPLOYMENT.md)
 - [Automatic Docker Image Versioning](./AUTOMATIC_VERSIONING.md)
