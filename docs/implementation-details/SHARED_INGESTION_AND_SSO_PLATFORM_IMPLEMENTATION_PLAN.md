@@ -105,7 +105,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Workstream 5: Adopt in `dq-made-easy`
 
-- [ ] (SHARED-I-W5-01) Update `dq-made-easy` to consume the shared ingestion package and shared auth helpers.
+- [x] (SHARED-I-W5-01) Update `dq-made-easy` to consume the shared ingestion package and shared auth helpers.
 - [ ] (SHARED-I-W5-02) Add repo-specific adapters only where product behavior diverges.
 - [ ] (SHARED-I-W5-03) Verify that `dq-made-easy` builds and runs against the same published images.
 - [ ] (SHARED-I-W5-04) Remove temporary compatibility shims once the consumer is stable.

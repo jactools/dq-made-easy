@@ -6,6 +6,7 @@ This directory contains implementation summaries for significant architectural o
 
 | Date | Summary | Status | Scope |
 |---|---|---|---|
+| 2026-08-04 | [dq-api shared scope resolver adoption](./2026-08-04_dq-api-shared-scope-resolver-adoption.md) | Complete | Moved dq-api scope extraction and matching onto `platform_auth` |
 | 2026-08-04 | [Pre-commit hook alignment](./2026-08-04_pre-commit-hook-alignment.md) | Complete | Matched the shared validator hooks to the metadata-as-a-service style |
 | 2026-08-04 | [Validation hooks for module rules and snake_case](./2026-08-04_validation-hooks-module-rules-snake-case.md) | Complete | Wired the copied validators into pre-commit and repo validation discovery |
 | 2026-08-04 | [Shared platform adoption scope split](./2026-08-04_shared-platform-adoption-scope-split.md) | Complete | Split dq-made-easy and MaaS adoption into separate plans |
