@@ -171,6 +171,45 @@ The package now owns token providers, retry/caching behavior, token URL resoluti
 - [ ] Add validation that flags reintroduced duplication.
 - [ ] Document the final ownership model.
 
+## Phase 7: Platform Services Migration
+
+Platform services (Kong, Keycloak, Airflow, LLM, Trino, observability stack) move to `platform-foundation` as shared platform responsibility.
+
+### Platform Service Inventory
+
+| Service | Source | Platform target | Status |
+|---|---|---|---|
+| Kong | `dq-kong/Dockerfile.kong` | `platform-kong` | Planned |
+| Keycloak | `dq-keycloak/Dockerfile.keycloak` | `platform-keycloak` | Planned |
+| Airflow | `docker/airflow/Dockerfile.airflow` | `platform-airflow` | Planned |
+| LLM | `dq-llm/Dockerfile.llm` | `platform-llm` | Planned |
+| Trino | `dq-trino/Dockerfile.trino` | `platform-trino` | Planned |
+| Observability | `observability/` | `platform-observability-*` | Planned |
+
+### Platform Service Migration Tasks
+
+- [ ] Define platform service image contract (naming, tagging, registry, version pinning)
+- [ ] Migrate `dq-kong` → `platform-foundation/docker/kong/` (shared TLS/trust/plugin baseline)
+- [ ] Migrate `dq-keycloak` → `platform-foundation/docker/keycloak/` (shared TLS/trust/health/startup)
+- [ ] Migrate `docker/airflow` → `platform-foundation/docker/airflow/` (shared OIDC/Keycloak adapter)
+- [ ] Migrate `dq-llm` → `platform-foundation/docker/llm/` (shared agent runtime/model cache)
+- [ ] Migrate `dq-trino` → `platform-foundation/docker/trino/` (shared catalog/connector baseline)
+- [ ] Migrate `observability/` → `platform-foundation/docker/observability/` (Loki, Prometheus, Grafana, Tempo, container-metrics, OTel collector)
+- [ ] Update `scripts/pull_images.sh` and `scripts/stack_catalog.sh` with platform service images
+- [ ] Update `scripts/build_and_push_all.sh` to build platform services in shared pipeline
+- [ ] Verify compose files and deployment manifests reference new platform service image tags
+- [ ] Remove legacy Dockerfiles and build scripts from `dq-made-easy` after platform services are stable
+- [ ] Capture test evidence that platform services start and are reachable through shared image contract
+
+### What stays in dq-made-easy
+
+- Kong routes, services, consumers, ACLs, and gateway topology
+- Keycloak realm, roles, clients, users, and redirects
+- Airflow DAGs, SDK/operator wheels, and FAB role mapping
+- LLM DQ-specific agent logic and prompt templates
+- Trino DQ catalog configuration and connector settings
+- Observability DQ-specific dashboards, alert rules, and retention policies
+
 ---
 
 ## Suggested Execution Order

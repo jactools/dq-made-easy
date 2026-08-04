@@ -14,9 +14,9 @@ The repository therefore needs an explicit boundary for what is shared once and 
 
 ## Decision
 
-Adopt a **shared platform boundary** for real ingestion support, SSO/OIDC helpers, and reusable container images.
+Adopt a **shared platform boundary** for real ingestion support, SSO/OIDC helpers, reusable container images, and platform services.
 
-The decision has four parts:
+The decision has five parts:
 
 1. **Reusable ingestion logic lives outside the application repos.**
    - Source connectors, generic load utilities, fixture-backed real data feeds, and shared ingestion harness code belong in a shared platform package or repository.
@@ -30,7 +30,13 @@ The decision has four parts:
    - Reusable ingestion and auth-support images are built in the shared platform and published to a registry.
    - Application repositories reference versioned image tags instead of maintaining parallel copies of the same Dockerfile/image definition.
 
-4. **Application repositories keep thin adapters.**
+4. **Platform services are owned by the shared platform.**
+   - Kong, Keycloak, Airflow, LLM, Trino, and the observability stack (Loki, Prometheus, Grafana, Tempo, container-metrics, OpenTelemetry collector) are classified as platform services.
+   - Their Dockerfiles, runtime configuration, TLS/trust mechanics, and version pinning move to `platform-foundation`.
+   - Application repositories reference platform service images through the shared image contract.
+   - App-specific deployment configuration (routes, DAGs, agents, datasets) stays in each consuming repository.
+
+5. **Application repositories keep thin adapters.**
    - `dq-made-easy` and MaaS own only the glue code needed to configure, invoke, and expose the shared capabilities in their own domain contexts.
    - If behavior differs by product, the difference belongs in the consuming application, not in the shared foundation.
 

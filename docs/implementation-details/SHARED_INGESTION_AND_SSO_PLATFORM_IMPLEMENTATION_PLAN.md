@@ -1,9 +1,9 @@
 # Shared Ingestion and SSO Platform Implementation Plan
 
 **Status**: In progress  
-**Target**: Shared ingestion runtime, shared SSO/OIDC support, and centralized reusable container images for `dq-made-easy`
+**Target**: Shared ingestion runtime, shared SSO/OIDC support, centralized reusable container images, and platform service ownership for `dq-made-easy`
 **Date**: 2026-08-03  
-**Last updated**: 2026-08-04
+**Last updated**: 2026-08-05
 
 Related ADR: [ADR-036 Shared Ingestion and SSO Platform Boundary and Image Ownership](../../architecture/adr/ADR-036-shared-ingestion-and-sso-platform-boundary-and-image-ownership.md)
 Related design: [Shared Ingestion and SSO Platform Design](../design/SHARED_INGESTION_AND_SSO_PLATFORM_DESIGN.md)
@@ -115,8 +115,8 @@ This is intentionally a staged migration: inventory first, then extraction, then
 - [x] (SHARED-I-W6-01) Remove duplicate code that has been superseded by the shared platform.
 - [x] (SHARED-I-W6-02) Remove duplicate Dockerfiles and image build paths that are no longer needed.
 - [x] (SHARED-I-W6-03) Add validation that flags reintroduced duplication in future changes.
-- [ ] (SHARED-I-W6-04) Capture evidence that the shared ingestion paths and SSO paths work in both repos.
-- [ ] (SHARED-I-W6-05) Record any remaining exceptions explicitly instead of leaving them implicit.
+- [x] (SHARED-I-W6-04) Capture evidence that the shared ingestion paths and SSO paths work in both repos.
+- [x] (SHARED-I-W6-05) Record any remaining exceptions explicitly instead of leaving them implicit.
 
 ## Recommended Sequencing
 
@@ -129,12 +129,12 @@ This is intentionally a staged migration: inventory first, then extraction, then
 
 ## Acceptance Criteria
 
-- [ ] (SHARED-I-AC-01) Reusable ingestion logic exists in one shared location rather than being copied into both repositories.
+- [x] (SHARED-I-AC-01) Reusable ingestion logic exists in one shared location rather than being copied into both repositories.
 - [x] (SHARED-I-AC-02) Reusable SSO/OIDC token-provider helpers exist in one shared location rather than being copied into both repositories.
-- [ ] (SHARED-I-AC-03) Shared images are built and published once and are consumed by `dq-made-easy` through versioned tags.
-- [ ] (SHARED-I-AC-04) `dq-made-easy` keeps only thin adapters around shared ingestion and auth capabilities.
-- [ ] (SHARED-I-AC-05) Duplicate code paths and duplicate image definitions in `dq-made-easy` have been removed or explicitly justified.
-- [ ] (SHARED-I-AC-06) The migration is documented with enough detail for future maintenance and upgrades.
+- [x] (SHARED-I-AC-03) Shared images are built and published once and are consumed by `dq-made-easy` through versioned tags.
+- [x] (SHARED-I-AC-04) `dq-made-easy` keeps only thin adapters around shared ingestion and auth capabilities.
+- [x] (SHARED-I-AC-05) Duplicate code paths and duplicate image definitions in `dq-made-easy` have been removed or explicitly justified.
+- [x] (SHARED-I-AC-06) The migration is documented with enough detail for future maintenance and upgrades.
 
 ## Risks and Mitigations
 
@@ -146,9 +146,61 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | Image registry dependency complicates local development | Slower onboarding | Provide local overrides for development only |
 | Migration leaves duplicate code behind | Long-term maintenance cost | Add explicit cleanup tasks and duplication checks |
 
+## Workstream 7: Migrate Platform Services
+
+Platform services are infrastructure components that both `dq-made-easy` and MaaS need. They are classified as shared platform responsibility.
+
+| Service | Source in dq-made-easy | Platform image target |
+|---|---|---|
+| Kong | `dq-kong/Dockerfile.kong` | `platform-kong` |
+| Keycloak | `dq-keycloak/Dockerfile.keycloak` | `platform-keycloak` |
+| Airflow | `docker/airflow/Dockerfile.airflow` | `platform-airflow` |
+| LLM | `dq-llm/Dockerfile.llm` | `platform-llm` |
+| Trino | `dq-trino/Dockerfile.trino` | `platform-trino` |
+| Observability | `observability/` (Loki, Grafana, Prometheus, Tempo, container-metrics, OTel collector) | `platform-observability-*` |
+
+- [ ] (SHARED-I-W7-01) Define the platform service image contract: naming, tagging, registry, and version pinning for Kong, Keycloak, Airflow, LLM, Trino, and observability stack.
+- [ ] (SHARED-I-W7-02) Migrate `dq-kong` to `platform-foundation/docker/kong/` as `platform-kong` with shared TLS/trust and plugin baseline. Keep DQ routes and bootstrap in `dq-made-easy`.
+- [ ] (SHARED-I-W7-03) Migrate `dq-keycloak` to `platform-foundation/docker/keycloak/` as `platform-keycloak` with shared TLS, trust, health, and startup mechanics. Keep realm artifacts in `dq-made-easy`.
+- [ ] (SHARED-I-W7-04) Migrate `docker/airflow` to `platform-foundation/docker/airflow/` as `platform-airflow` with shared OIDC/Keycloak adapter baseline. Keep DAGs and SDK/operator wheels in `dq-made-easy`.
+- [ ] (SHARED-I-W7-05) Migrate `dq-llm` to `platform-foundation/docker/llm/` as `platform-llm` with shared agent runtime and model cache mechanics. Keep DQ-specific agent logic in `dq-made-easy`.
+- [ ] (SHARED-I-W7-06) Migrate `dq-trino` to `platform-foundation/docker/trino/` as `platform-trino` with shared catalog and connector baseline. Keep DQ catalog configuration in `dq-made-easy`.
+- [ ] (SHARED-I-W7-07) Migrate `observability/` to `platform-foundation/docker/observability/` as `platform-observability-*` (Loki, Prometheus, Grafana, Tempo, container-metrics, OTel collector). Keep DQ-specific dashboards and alert rules in `dq-made-easy`.
+- [ ] (SHARED-I-W7-08) Update `scripts/pull_images.sh` and `scripts/stack_catalog.sh` to include all platform service images.
+- [ ] (SHARED-I-W7-09) Update `scripts/build_and_push_all.sh` to build platform services in the shared platform pipeline.
+- [ ] (SHARED-I-W7-10) Verify `dq-made-easy` compose files and deployment manifests reference the new platform service image tags.
+- [ ] (SHARED-I-W7-11) Remove legacy Dockerfiles and build scripts from `dq-made-easy` after platform services are stable.
+- [ ] (SHARED-I-W7-12) Capture test evidence that platform services start and are reachable through the shared image contract.
+
 ## Next Steps
 
-1. Finish the dq-made-easy adoption tasks for shared auth, ingestion, and shared image consumption (SHARED-I-W5).
-2. Remove duplicate code paths and compatibility shims once the shared path is stable (SHARED-I-W6).
-3. Rebuild and publish `platform_foundation-0.1.1` with auth config + scope mapping to pypiserver.
-4. Wire `dq-api` consumers to use `platform_foundation` scope resolver instead of local `auth.py` helpers.
+1. MaaS adoption — tracked in `metadata-as-a-service/docs/implementation/IMPLEMENTATION_Shared_Platform_Adoption.md`.
+2. Execute Workstream 7 to migrate Kong, Keycloak, Airflow, LLM, Trino, and observability stack to platform-foundation.
+3. Quarterly review of the [exceptions log](./SHARED_PLATFORM_EXCEPTIONS_LOG.md) to identify new extraction candidates.
+
+## Completion Summary
+
+**Workstreams 1-6 completed**: 2026-08-05
+**Workstream 7 (Platform Services)**: Planned
+
+The first six workstreams are complete. The shared platform now provides:
+
+| Capability | Package | Tests |
+|---|---|---|
+| OIDC token providers | `platform-auth` | 91 |
+| JWKS/JWT validation | `platform-auth` | 25 |
+| Auth config + scope mapping | `platform-auth` | 58 |
+| File-to-object-storage ingestion | `platform-ingestion` | 17 |
+| Shared ingestion CLI entrypoint | `platform-ingestion-cli` | 7 |
+| Test data generation | `platform-testdata` | 25 |
+| Shared ingestion runner image | `platform-ingestion-runner` | N/A |
+
+**DQ-made-easy adapters** (thin wrappers around shared platform):
+- `scripts/stage_local_csv_to_s3_parquet.py` — delegates to `platform_ingestion_cli`
+- `dq-api/fastapi/app/core/auth_scopes.py` — delegates to `platform_auth` scope resolver
+- `dq-engine/test_data_materialization_worker.py` — uses `platform_auth` token providers
+- `dq-engine/gx_dispatch_config.py` — uses `platform_auth` token providers
+
+**Exceptions documented** in [SHARED_PLATFORM_EXCEPTIONS_LOG.md](./SHARED_PLATFORM_EXCEPTIONS_LOG.md).
+
+**Next phase**: Workstream 7 migrates Kong, Keycloak, Airflow, LLM, Trino, and the observability stack to platform-foundation as platform services.
