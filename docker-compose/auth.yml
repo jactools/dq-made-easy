@@ -91,7 +91,7 @@ services:
       - dq-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", 'bash -lc "exec 3<>/dev/tcp/127.0.0.1/${KC_HTTPS_PORT:-8443}"'
+      test: ["CMD-SHELL", 'bash -lc "exec 3<>/dev/tcp/127.0.0.1/${KC_HTTPS_PORT:-8443}"']
       interval: 10s
       timeout: 10s
       retries: 5
