@@ -135,10 +135,6 @@ nexuscloud_password_base64="${NEXUSCLOUD_PASSWORD_BASE64:-}"
 nexuscloud_group_repo="${NEXUSCLOUD_PYPI_GROUP_REPO:-}"
 nexuscloud_maven_group_repo="${NEXUSCLOUD_MAVEN_GROUP_REPO:-${NEXUSCLOUD_MPM_GROUP_REPO:-}}"
 
-if [ -z "$nexuscloud_hostname" ] && [ -n "$nexuscloud_dns" ]; then
-    nexuscloud_hostname="${nexuscloud_dns#//}"
-fi
-
 if [ -n "$nexuscloud_hostname" ]; then
     nexuscloud_dns="//${nexuscloud_hostname}"
     NEXUSCLOUD_HOSTNAME="$nexuscloud_hostname"
@@ -160,6 +156,31 @@ if [ -n "$nexuscloud_hostname" ] || [ -n "$nexuscloud_registry" ]; then
         warning "$my_name" "Nexus Cloud is configured but no shared npm auth value is available"
     fi
 fi
+
+dependency_source="${DEPENDENCY_SOURCE:-local}"
+
+build_corporate_pypi_index_url() {
+    if [ -z "$nexuscloud_hostname" ]; then
+        error "$my_name" "corporate dependency source requires NEXUSCLOUD_HOSTNAME or NEXUSCLOUD_DNS"
+        return 1
+    fi
+
+    if [ -z "$nexuscloud_group_repo" ]; then
+        error "$my_name" "corporate dependency source requires NEXUSCLOUD_PYPI_GROUP_REPO"
+        return 1
+    fi
+
+    if [ -z "$nexuscloud_username" ] || [ -z "$nexuscloud_password" ]; then
+        error "$my_name" "corporate dependency source requires NEXUSCLOUD_USERNAME and NEXUSCLOUD_PASSWORD"
+        return 1
+    fi
+
+    printf 'https://%s:%s@%s/repository/%s/simple/' \
+        "$nexuscloud_username" \
+        "$nexuscloud_password" \
+        "$nexuscloud_hostname" \
+        "$nexuscloud_group_repo"
+}
 
 if [ -n "${NEXUSCLOUD_NPM_REGISTRY:-}" ]; then
     NPM_CONFIG_REGISTRY="$NEXUSCLOUD_NPM_REGISTRY"
@@ -222,15 +243,24 @@ if [ -n "$nexuscloud_hostname" ]; then
     export NEXUSCLOUD_PYPI_URL NEXUSCLOUD_PYPI_URL_NO_AUTH
 fi
 
-if [ -z "${PIP_INDEX_URL:-}" ]; then
-    if [ -n "${NEXUSCLOUD_PYPI_URL:-}" ]; then
-        PIP_INDEX_URL="$NEXUSCLOUD_PYPI_URL"
-    elif [ -n "${NEXUSCLOUD_PYPI_URL_NO_AUTH:-}" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
-        pip_index_host="${NEXUSCLOUD_PYPI_URL_NO_AUTH#https://}"
-        pip_index_host="${pip_index_host%%/repository/*}"
-        PIP_INDEX_URL="https://${nexuscloud_username}:${nexuscloud_password}@${pip_index_host}/repository/${nexuscloud_group_repo}/simple"
-    fi
-fi
+case "$dependency_source" in
+    local)
+        PIP_INDEX_URL="https://pypi.org/simple/"
+        PIP_EXTRA_INDEX_URL=""
+        PIP_TRUSTED_HOST=""
+        ;;
+    corporate)
+        PIP_INDEX_URL="$(build_corporate_pypi_index_url)"
+        PIP_EXTRA_INDEX_URL=""
+        if [ -n "$nexuscloud_hostname" ]; then
+            PIP_TRUSTED_HOST="$nexuscloud_hostname"
+        fi
+        ;;
+    *)
+        error "$my_name" "Unsupported dependency source: $dependency_source"
+        return 1
+        ;;
+esac
 
 if [ -n "${PIP_INDEX_URL:-}" ]; then
     export PIP_INDEX_URL

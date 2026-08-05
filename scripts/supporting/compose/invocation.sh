@@ -156,8 +156,8 @@ docker_compose() {
   export ROOT_ENV_FILE="$relative_root_env_file"
 
   # Enforce the single Nexus->PIP_INDEX_URL contract for image builds.
-  # If Nexus is configured, setup_env.sh must have derived PIP_INDEX_URL before
-  # any compose build path runs.
+  # If corporate dependency source is selected, setup_env.sh must have derived
+  # PIP_INDEX_URL before any compose build path runs.
   local is_build_command=false
   local arg=""
   for arg in "$@"; do
@@ -175,8 +175,8 @@ docker_compose() {
     fi
     local nexus_maven_group_repo="${NEXUSCLOUD_MAVEN_GROUP_REPO:-${NEXUSCLOUD_MPM_GROUP_REPO:-}}"
 
-    if [ -n "$nexus_host" ] && [ -z "${PIP_INDEX_URL:-}" ]; then
-      error "compose/invocation.sh" "Nexus is configured (NEXUSCLOUD_HOSTNAME/NEXUSCLOUD_DNS), but PIP_INDEX_URL is empty"
+    if [ "${DEPENDENCY_SOURCE:-local}" = "corporate" ] && [ -z "${PIP_INDEX_URL:-}" ]; then
+      error "compose/invocation.sh" "Corporate dependency source selected, but PIP_INDEX_URL is empty"
       error "compose/invocation.sh" "Ensure scripts/supporting/setup_env.sh is sourced before docker_compose build paths"
       return 1
     fi

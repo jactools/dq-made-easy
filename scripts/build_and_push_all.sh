@@ -44,6 +44,7 @@ Build repository Docker images.
 Canonical env options:
   --env dev|test|prod      Use .env.dev.local, .env.test.local, or .env.prod.local
   --env-file PATH          Use an explicit env file
+  --source local|corporate  Use public PyPI or corporate Nexus for dependency resolution
 
 Default scope (core):
   1) dq-made-easy-base

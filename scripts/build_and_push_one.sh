@@ -35,6 +35,7 @@ Build and optionally push one image.
 Canonical env options:
   --env dev|test|prod      Use .env.dev.local, .env.test.local, or .env.prod.local
   --env-file PATH          Use an explicit env file
+  --source local|corporate  Use public PyPI or corporate Nexus for dependency resolution
 
 Images:
   dq-base
