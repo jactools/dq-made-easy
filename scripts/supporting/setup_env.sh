@@ -245,9 +245,9 @@ fi
 
 case "$dependency_source" in
     local)
-        PIP_INDEX_URL="https://pypi.org/simple/"
-        PIP_EXTRA_INDEX_URL=""
-        PIP_TRUSTED_HOST=""
+        PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.org/simple/}"
+        PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}"
+        PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-}"
         ;;
     corporate)
         PIP_INDEX_URL="$(build_corporate_pypi_index_url)"
