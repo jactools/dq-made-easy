@@ -53,19 +53,18 @@ Default scope (core):
   4) dq-made-easy-profiling
   5) dq-made-easy-frontend
   6) dq-made-easy-db
-  7) dq-made-easy-keycloak
 
 Repo scope (repo) builds the core set plus auxiliary repo-managed images:
-  9) dq-made-easy-db-seed
- 10) dq-made-easy-keycloak-seed-artifacts
- 11) dq-made-easy-openmetadata-db
- 12) dq-made-easy-openmetadata-server
- 13) dq-made-easy-metadata-configure
- 14) dq-made-easy-container-metrics
- 15) dq-made-easy-zammad-seed
- 16) dq-made-easy-kafka-consumer
- 17) dq-made-easy-edge
- 18) dq-made-easy-zammad-origin
+  7) dq-made-easy-db-seed
+  8) dq-made-easy-keycloak-seed-artifacts
+  9) dq-made-easy-openmetadata-db
+ 10) dq-made-easy-openmetadata-server
+ 11) dq-made-easy-metadata-configure
+ 12) dq-made-easy-container-metrics
+ 13) dq-made-easy-zammad-seed
+ 14) dq-made-easy-kafka-consumer
+ 15) dq-made-easy-edge
+ 16) dq-made-easy-zammad-origin
 
 Options:
   --scope <core|repo>  Select image scope (default: core)
@@ -86,6 +85,11 @@ Notes:
   - --no-push keeps repo-managed wrapper images local-only via a single-platform build/load.
 EOF
 }
+
+if [ "$#" -eq 0 ]; then
+  usage
+  exit 0
+fi
 
 image_selected() {
   local candidate="$1"
