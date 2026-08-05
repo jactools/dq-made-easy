@@ -6,6 +6,7 @@ This directory contains implementation summaries for significant architectural o
 
 | Date | Summary | Status | Scope |
 |---|---|---|---|
+| 2026-08-05 | [MaaS target rollout matrix](./2026-08-05_maas-target-rollout-matrix.md) | Complete | Repo-local target/service/instance rollout contract for MaaS workloads |
 | 2026-08-04 | [dq-made-easy shared image verification](./2026-08-04_dq-made-easy-shared-image-verification.md) | Complete | Verified the shared runner image through the repo pull path and container runtime |
 | 2026-08-04 | [dq-made-easy shared image compatibility cleanup](./2026-08-04_dq-made-easy-shared-image-compatibility-cleanup.md) | Complete | Removed the bare shared-image scope shim and tightened operator dry-run planning |
 | 2026-08-04 | [dq-api shared scope adapter extraction](./2026-08-04_dq-api-shared-scope-adapter-extraction.md) | Complete | Split dq-api scope delegation into a dedicated adapter module |

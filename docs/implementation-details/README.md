@@ -11,6 +11,7 @@ This directory contains implementation-oriented documentation for multiple works
 | [Shared Platform SSO and JWKS Inventory](./SHARED_PLATFORM_SSO_JWKS_INVENTORY.md) | Shared protocol/security primitives vs consumer auth policy |
 | [Shared Platform Image and Build Inventory](./SHARED_PLATFORM_IMAGE_INVENTORY.md) | Shared image candidates and duplicated build mechanics |
 | [Shared Auth Token Provider Extraction Task](./SHARED_AUTH_TOKEN_PROVIDER_EXTRACTION_TASK.md) | First concrete extraction task for the shared auth primitive |
+| [MaaS Target Rollout Matrix](./MAAS_TARGET_ROLLOUT_MATRIX.md) | Repo-local target/service/instance rollout contract for MaaS-related workloads |
 | [DOCKER_COMPOSE_SPLIT_MIGRATION.md](./DOCKER_COMPOSE_SPLIT_MIGRATION.md) | Complete migration guide with step-by-step instructions |
 | [DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE.md](./DOCKER_COMPOSE_SPLIT_QUICK_REFERENCE.md) | Quick reference for common commands and usage patterns |
 | [DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING.md](./DOCKER_COMPOSE_SPLIT_TROUBLESHOOTING.md) | Troubleshooting guide for common issues |
