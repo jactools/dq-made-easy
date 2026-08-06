@@ -1,10 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: dq-made-easy-dev
+
 resources:
+  - ../../base/shared
   - ../../base/engine
   - config/service-config.yaml
   - config/service-secrets-placeholder.yaml
+
+patches:
+  - path: namespace-patch.yaml
+  - path: common-config-patch.yaml
 
 replicas:
   - name: dq-engine
