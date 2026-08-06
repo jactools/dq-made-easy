@@ -1,57 +1,135 @@
-# MaaS Target Rollout Matrix for `dq-made-easy`
+# MaaS Target Rollout Matrix — dq-made-easy
 
-**Date**: 2026-08-05  
-**Status**: Complete
+**Status**: Draft  
+**Date**: 2026-08-06
 
-## Purpose
+Authoritative per-target rollout matrix for the `dq-made-easy` tenant.
 
-This document is the repo-local source of truth for where `dq-made-easy` services run, how they are named, and whether they register with MaaS.
+This matrix is maintained by the `dq-made-easy` team and defines which services are deployed, their instance names, and their MaaS registration status for each of the 16 MaaS targets.
 
-It reflects the shared target matrix from `platform-foundation`, but the authoritative rollout details live here in the `dq-made-easy` repository.
+## 16 MaaS targets
 
-## Scope
+| target_id | Region | Provider |
+|---|---|---|
+| `AZ-EU` | Europe | Azure |
+| `AWS-EU` | Europe | AWS |
+| `EC-EU` | Europe | European Cloud |
+| `OP-EU` | Europe | Oracle |
+| `AZ-RANZ` | Australia & New Zealand | Azure |
+| `AWS-RANZ` | Australia & New Zealand | AWS |
+| `EC-RANZ` | Australia & New Zealand | European Cloud |
+| `OP-RANZ` | Australia & New Zealand | Oracle |
+| `AZ-NA` | North America | Azure |
+| `AWS-NA` | North America | AWS |
+| `EC-NA` | North America | European Cloud |
+| `OP-NA` | North America | Oracle |
+| `AZ-SA` | South America | Azure |
+| `AWS-SA` | South America | AWS |
+| `EC-SA` | South America | European Cloud |
+| `OP-SA` | South America | Oracle |
 
-- all 16 MaaS target combinations from `docs/targets.md`
-- the `dq-made-easy` UI
-- the `dq-made-easy` API
-- DQ/ETL jobs executed as Kubernetes jobs or pods
-- internal-only exposure for the UI
-- MaaS registration for long-lived services only
+## Rollout matrix
 
-## Service contract
+### Zone services (per-target)
 
-| Service | Workload kind | Exposure | MaaS registration | Instance naming |
+| target_id | Service | workload-kind | MaaS register | Instance name | K8s resource | Namespace |
+|---|---|---|---|---|---|---|
+| `AZ-EU` | `dq-api` | service | true | `dq-api-AZ-EU-0` | Deployment | `<env>` |
+| `AZ-EU` | `dq-engine` | service | true | `dq-engine-AZ-EU-0` | Deployment | `<env>` |
+| `AWS-EU` | `dq-api` | service | true | `dq-api-AWS-EU-0` | Deployment | `<env>` |
+| `AWS-EU` | `dq-engine` | service | true | `dq-engine-AWS-EU-0` | Deployment | `<env>` |
+| `EC-EU` | `dq-api` | service | true | `dq-api-EC-EU-0` | Deployment | `<env>` |
+| `EC-EU` | `dq-engine` | service | true | `dq-engine-EC-EU-0` | Deployment | `<env>` |
+| `OP-EU` | `dq-api` | service | true | `dq-api-OP-EU-0` | Deployment | `<env>` |
+| `OP-EU` | `dq-engine` | service | true | `dq-engine-OP-EU-0` | Deployment | `<env>` |
+| `AZ-RANZ` | `dq-api` | service | true | `dq-api-AZ-RANZ-0` | Deployment | `<env>` |
+| `AZ-RANZ` | `dq-engine` | service | true | `dq-engine-AZ-RANZ-0` | Deployment | `<env>` |
+| `AWS-RANZ` | `dq-api` | service | true | `dq-api-AWS-RANZ-0` | Deployment | `<env>` |
+| `AWS-RANZ` | `dq-engine` | service | true | `dq-engine-AWS-RANZ-0` | Deployment | `<env>` |
+| `EC-RANZ` | `dq-api` | service | true | `dq-api-EC-RANZ-0` | Deployment | `<env>` |
+| `EC-RANZ` | `dq-engine` | service | true | `dq-engine-EC-RANZ-0` | Deployment | `<env>` |
+| `OP-RANZ` | `dq-api` | service | true | `dq-api-OP-RANZ-0` | Deployment | `<env>` |
+| `OP-RANZ` | `dq-engine` | service | true | `dq-engine-OP-RANZ-0` | Deployment | `<env>` |
+| `AZ-NA` | `dq-api` | service | true | `dq-api-AZ-NA-0` | Deployment | `<env>` |
+| `AZ-NA` | `dq-engine` | service | true | `dq-engine-AZ-NA-0` | Deployment | `<env>` |
+| `AWS-NA` | `dq-api` | service | true | `dq-api-AWS-NA-0` | Deployment | `<env>` |
+| `AWS-NA` | `dq-engine` | service | true | `dq-engine-AWS-NA-0` | Deployment | `<env>` |
+| `EC-NA` | `dq-api` | service | true | `dq-api-EC-NA-0` | Deployment | `<env>` |
+| `EC-NA` | `dq-engine` | service | true | `dq-engine-EC-NA-0` | Deployment | `<env>` |
+| `OP-NA` | `dq-api` | service | true | `dq-api-OP-NA-0` | Deployment | `<env>` |
+| `OP-NA` | `dq-engine` | service | true | `dq-engine-OP-NA-0` | Deployment | `<env>` |
+| `AZ-SA` | `dq-api` | service | true | `dq-api-AZ-SA-0` | Deployment | `<env>` |
+| `AZ-SA` | `dq-engine` | service | true | `dq-engine-AZ-SA-0` | Deployment | `<env>` |
+| `AWS-SA` | `dq-api` | service | true | `dq-api-AWS-SA-0` | Deployment | `<env>` |
+| `AWS-SA` | `dq-engine` | service | true | `dq-engine-AWS-SA-0` | Deployment | `<env>` |
+| `EC-SA` | `dq-api` | service | true | `dq-api-EC-SA-0` | Deployment | `<env>` |
+| `EC-SA` | `dq-engine` | service | true | `dq-engine-EC-SA-0` | Deployment | `<env>` |
+| `OP-SA` | `dq-api` | service | true | `dq-api-OP-SA-0` | Deployment | `<env>` |
+| `OP-SA` | `dq-engine` | service | true | `dq-engine-OP-SA-0` | Deployment | `<env>` |
+
+### Cluster-wide services
+
+| Service | workload-kind | MaaS register | Instance name | K8s resource | Namespace |
+|---|---|---|---|---|---|
+| `dq-ui` | service | true | `dq-ui-CLUSTER-0` | Deployment | `<env>` |
+
+### Ephemeral jobs (no MaaS registration)
+
+| Workload | workload-kind | MaaS register | Spawns from | Telemetry |
 |---|---|---|---|---|
-| `dq-made-easy-ui` | service | internal-only ingress / internal load balancer | yes | `dq-made-easy-ui-<target_id>-<replica_index>` |
-| `dq-made-easy-api` | service | internal service-to-service only | yes | `dq-made-easy-api-<target_id>-<replica_index>` |
-| `dq-made-easy-dq-job` | job | no ingress | no | `dq-made-easy-dq-job-<target_id>-<run_id>` |
+| Spark jobs | job | false | `dq-engine` | `job.runner.*` |
+| Profiling workers | job | false | `dq-api` | `job.runner.*` |
+| Airflow DAGs | job | false | Platform Airflow | `job.runner.*` |
 
-## Target rollout matrix
+## Dev/test rollout
 
-Namespace naming uses the lowercase target id suffix, for example `dq-made-easy-az-eu` and `dq-made-easy-op-na`.
-
-| Target | Namespace | `dq-made-easy-ui` | `dq-made-easy-api` | `dq-made-easy-dq-job` |
+| target_id | Environment | dq-api | dq-engine | dq-ui |
 |---|---|---|---|---|
-| Europe / AZ-EU | `dq-made-easy-az-eu` | internal-only / registered / `dq-made-easy-ui-AZ-EU-<replica_index>` | internal-only / registered / `dq-made-easy-api-AZ-EU-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AZ-EU-<run_id>` |
-| Europe / AWS-EU | `dq-made-easy-aws-eu` | internal-only / registered / `dq-made-easy-ui-AWS-EU-<replica_index>` | internal-only / registered / `dq-made-easy-api-AWS-EU-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AWS-EU-<run_id>` |
-| Europe / EC-EU | `dq-made-easy-ec-eu` | internal-only / registered / `dq-made-easy-ui-EC-EU-<replica_index>` | internal-only / registered / `dq-made-easy-api-EC-EU-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-EC-EU-<run_id>` |
-| Europe / OP-EU | `dq-made-easy-op-eu` | internal-only / registered / `dq-made-easy-ui-OP-EU-<replica_index>` | internal-only / registered / `dq-made-easy-api-OP-EU-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-OP-EU-<run_id>` |
-| Australia & New Zealand / AZ-RANZ | `dq-made-easy-az-ranz` | internal-only / registered / `dq-made-easy-ui-AZ-RANZ-<replica_index>` | internal-only / registered / `dq-made-easy-api-AZ-RANZ-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AZ-RANZ-<run_id>` |
-| Australia & New Zealand / AWS-RANZ | `dq-made-easy-aws-ranz` | internal-only / registered / `dq-made-easy-ui-AWS-RANZ-<replica_index>` | internal-only / registered / `dq-made-easy-api-AWS-RANZ-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AWS-RANZ-<run_id>` |
-| Australia & New Zealand / EC-RANZ | `dq-made-easy-ec-ranz` | internal-only / registered / `dq-made-easy-ui-EC-RANZ-<replica_index>` | internal-only / registered / `dq-made-easy-api-EC-RANZ-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-EC-RANZ-<run_id>` |
-| Australia & New Zealand / OP-RANZ | `dq-made-easy-op-ranz` | internal-only / registered / `dq-made-easy-ui-OP-RANZ-<replica_index>` | internal-only / registered / `dq-made-easy-api-OP-RANZ-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-OP-RANZ-<run_id>` |
-| North America / AZ-NA | `dq-made-easy-az-na` | internal-only / registered / `dq-made-easy-ui-AZ-NA-<replica_index>` | internal-only / registered / `dq-made-easy-api-AZ-NA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AZ-NA-<run_id>` |
-| North America / AWS-NA | `dq-made-easy-aws-na` | internal-only / registered / `dq-made-easy-ui-AWS-NA-<replica_index>` | internal-only / registered / `dq-made-easy-api-AWS-NA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AWS-NA-<run_id>` |
-| North America / EC-NA | `dq-made-easy-ec-na` | internal-only / registered / `dq-made-easy-ui-EC-NA-<replica_index>` | internal-only / registered / `dq-made-easy-api-EC-NA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-EC-NA-<run_id>` |
-| North America / OP-NA | `dq-made-easy-op-na` | internal-only / registered / `dq-made-easy-ui-OP-NA-<replica_index>` | internal-only / registered / `dq-made-easy-api-OP-NA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-OP-NA-<run_id>` |
-| South America / AZ-SA | `dq-made-easy-az-sa` | internal-only / registered / `dq-made-easy-ui-AZ-SA-<replica_index>` | internal-only / registered / `dq-made-easy-api-AZ-SA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AZ-SA-<run_id>` |
-| South America / AWS-SA | `dq-made-easy-aws-sa` | internal-only / registered / `dq-made-easy-ui-AWS-SA-<replica_index>` | internal-only / registered / `dq-made-easy-api-AWS-SA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-AWS-SA-<run_id>` |
-| South America / EC-SA | `dq-made-easy-ec-sa` | internal-only / registered / `dq-made-easy-ui-EC-SA-<replica_index>` | internal-only / registered / `dq-made-easy-api-EC-SA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-EC-SA-<run_id>` |
-| South America / OP-SA | `dq-made-easy-op-sa` | internal-only / registered / `dq-made-easy-ui-OP-SA-<replica_index>` | internal-only / registered / `dq-made-easy-api-OP-SA-<replica_index>` | job only / unregistered / `dq-made-easy-dq-job-OP-SA-<run_id>` |
+| `DEV-LOCAL` | dev (Kind local) | `dq-api-DEV-LOCAL-0` | `dq-engine-DEV-LOCAL-0` | `dq-ui-CLUSTER-0` |
+| `TEST-REMOTE` | test (Kind Debian) | `dq-api-TEST-REMOTE-0` | `dq-engine-TEST-REMOTE-0` | `dq-ui-CLUSTER-0` |
 
-## Notes
+## Rollout status
 
-- The UI must remain internal-only; no public edge exposure is permitted for the target rollout contract.
-- Long-lived service instances register with MaaS on start and de-register on stop or completion.
-- ETL and DQ jobs are deliberately excluded from MaaS registration.
-- If a future deployment adds more long-lived services, extend this document in the repo that owns the workload.
+| target_id | Region | Provider | Status | Last deploy | Image tag |
+|---|---|---|---|---|---|
+| `AZ-EU` | Europe | Azure | Not deployed | — | — |
+| `AWS-EU` | Europe | AWS | Not deployed | — | — |
+| `EC-EU` | Europe | European Cloud | Not deployed | — | — |
+| `OP-EU` | Europe | Oracle | Not deployed | — | — |
+| `AZ-RANZ` | Australia & New Zealand | Azure | Not deployed | — | — |
+| `AWS-RANZ` | Australia & New Zealand | AWS | Not deployed | — | — |
+| `EC-RANZ` | Australia & New Zealand | European Cloud | Not deployed | — | — |
+| `OP-RANZ` | Australia & New Zealand | Oracle | Not deployed | — | — |
+| `AZ-NA` | North America | Azure | Not deployed | — | — |
+| `AWS-NA` | North America | AWS | Not deployed | — | — |
+| `EC-NA` | North America | European Cloud | Not deployed | — | — |
+| `OP-NA` | North America | Oracle | Not deployed | — | — |
+| `AZ-SA` | South America | Azure | Not deployed | — | — |
+| `AWS-SA` | South America | AWS | Not deployed | — | — |
+| `EC-SA` | South America | European Cloud | Not deployed | — | — |
+| `OP-SA` | South America | Oracle | Not deployed | — | — |
+| `DEV-LOCAL` | N/A | Kind (local) | Planned | — | 0.1.0 |
+| `TEST-REMOTE` | N/A | Kind (Debian) | Planned | — | 0.1.0 |
+
+## Rollout process
+
+1. **Build**: CI builds `dq-api`, `dq-engine`, `dq-ui` images with pinned tag
+2. **Publish**: Images pushed to shared registry
+3. **Update config**: `platform-argocd-apps/environments/<env>/image-registry-config.yml` updated with new tag
+4. **Update overlay**: Consumer overlay `kustomization.yml` `images:` patch updated
+5. **Sync**: ArgoCD syncs the overlay to the target Kind cluster
+6. **Validate**: Health checks pass, smoke tests run, MaaS registration confirmed
+
+## Ownership
+
+- **Rollout matrix**: Owned by `dq-made-easy` team (this document)
+- **ArgoCD Applications**: Defined in `platform-argocd-apps/apps/tenants/dq/`
+- **Image publishing**: Owned by `dq-made-easy` CI pipeline, consumed by platform registry
+- **Platform services**: Owned by `platform-foundation` (Kong, Keycloak, observability)
+
+## Related documents
+
+- [Platform Kubernetes Service Design](../../platform-foundation/docs/infra/PLATFORM_KUBERNETES_SERVICE_DESIGN.md)
+- [Environment and Deployment Contract](../../platform-foundation/docs/infra/LOCAL_TO_PRODUCTION_HANDBOFF_CONTRACT.md)
+- [Tenant overlay (platform-argocd-apps)](../../platform-argocd-apps/apps/tenants/dq/README.md)
+- [Service split](../../platform-argocd-apps/apps/tenants/dq/service-split.md)
