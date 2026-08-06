@@ -1,0 +1,17 @@
+apiVersion: builtin
+kind: AnnotationsTransformer
+metadata:
+  name: dq-traceability-annotations
+annotations:
+  dq.jaccloud.nl/traceability-contract: wf6-v1
+  dq.jaccloud.nl/version-manifest-path: VERSION_MANIFEST.json
+  dq.jaccloud.nl/release-channel: promoted
+fieldSpecs:
+  - path: metadata/annotations
+    create: true
+  - path: spec/template/metadata/annotations
+    create: true
+    kind: Deployment
+  - path: spec/template/metadata/annotations
+    create: true
+    kind: Job
