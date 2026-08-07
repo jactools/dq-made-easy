@@ -18,8 +18,6 @@ replicas:
     count: 1
   - name: dq-profiling
     count: 1
-  - name: dq-trino
-    count: 1
   - name: dq-llm
     count: 1
   - name: dq-openmetadata-db

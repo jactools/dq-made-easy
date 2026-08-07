@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - engine.yaml
   - profiling-worker.yaml
-  - trino.yaml
   - llm.yaml
   - openmetadata-db.yaml
   - openmetadata-server.yaml

@@ -4,10 +4,6 @@ kind: Kustomization
 resources:
   - api.yaml
   - db.yaml
-  - kong.yaml
-  - keycloak.yaml
-  - kafka.yaml
-  - airflow.yaml
 
 transformers:
   - metadata/labels.yaml

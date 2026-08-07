@@ -11,31 +11,3 @@ metadata:
   name: dq-db-config
 data:
   POSTGRES_DB: dq
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dq-kong-config
-data:
-  KONG_PROXY_LISTEN_PORT: "8443"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dq-keycloak-config
-data:
-  KEYCLOAK_HTTP_PORT: "8080"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dq-kafka-config
-data:
-  KAFKA_LISTENER_PORT: "9092"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dq-airflow-config
-data:
-  AIRFLOW_HTTP_PORT: "8080"

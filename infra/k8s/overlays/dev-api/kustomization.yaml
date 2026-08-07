@@ -16,11 +16,5 @@ patches:
 replicas:
   - name: dq-api
     count: 1
-  - name: dq-kong
-    count: 1
-  - name: dq-keycloak
-    count: 1
-  - name: dq-kafka
-    count: 1
-  - name: dq-airflow
+  - name: dq-db
     count: 1

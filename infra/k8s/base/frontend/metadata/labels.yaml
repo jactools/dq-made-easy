@@ -3,7 +3,7 @@ kind: LabelTransformer
 metadata:
   name: dq-traceability-labels
 labels:
-  app.kubernetes.io/managed-by: dq-made-easy-wf6
+  app.kubernetes.io/managed-by: argocd
   app.kubernetes.io/version: from-version-manifest
   dq.jaccloud.nl/traceability: enabled
 fieldSpecs:

@@ -5,8 +5,9 @@ resources:
   - namespace.yaml
   - config/common-config.yaml
   - ingress/frontend.yaml
-  - ingress/keycloak.yaml
   - ingress/openmetadata.yaml
   - jobs/api-migrate.yaml
-  - jobs/kong-migrate.yaml
-  - jobs/openmetadata-seed.yaml
+
+transformers:
+  - metadata/labels.yaml
+  - metadata/annotations.yaml
