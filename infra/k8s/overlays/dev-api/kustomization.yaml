@@ -6,7 +6,6 @@ namespace: dq-made-easy-dev
 resources:
   - ../../base/api
   - config/service-config.yaml
-  - config/service-secrets-placeholder.yaml
 
 replicas:
   - name: dq-api

@@ -5,7 +5,6 @@ resources:
   - namespace.yaml
   - config/common-config.yaml
   - ingress/frontend.yaml
-  - ingress/keycloak.yaml
   - ingress/openmetadata.yaml
   - jobs/api-migrate.yaml
   - jobs/keycloak-seed.yaml

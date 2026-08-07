@@ -18,8 +18,9 @@ spec:
       restartPolicy: Never
       containers:
         - name: keycloak-seed
-          image: docker.io/jacbeekers/dq-made-easy-keycloak:0.1.0
+          image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
           imagePullPolicy: IfNotPresent
+          command: ["/app/scripts/bootstrap_keycloak.sh"]
           envFrom:
             - configMapRef:
                 name: dq-common-config

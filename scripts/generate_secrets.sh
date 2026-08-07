@@ -1,314 +1,211 @@
 #!/usr/bin/env bash
-# Purpose: Generate runtime secrets for the stack and write them to tmp/secrets.{env}.env.
+# ============================================================================
+# generate_secrets.sh — Generate real secrets for DQ services.
 #
-# What it does:
-# - Accepts --env dev|test|prod or --env-file PATH to determine environment.
-# - Generates random passwords, encryption keys, and tokens.
-# - Writes output to tmp/secrets.{env}.env (shell-sourceable).
-# - Idempotent: preserves existing secrets unless --force is used.
-# - Secrets are NOT committed or baked into Docker images.
+# Generates random passwords for all DQ service secrets, applies them to
+# the Kubernetes cluster, and stores credentials in tmp/.credentials.
 #
-# Version: 1.0
-# Last modified: 2026-07-13
-
+# Usage: scripts/generate_secrets.sh [options]
+# ============================================================================
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-source "$ROOT_DIR/scripts/supporting/logging.sh"
-my_name="generate_secrets.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# ---------------------------------------------------------------------------
-# Usage
-# ---------------------------------------------------------------------------
+NAMESPACE="${NAMESPACE:-dq-made-easy-dev}"
+CREDENTIALS_FILE="${REPO_ROOT}/tmp/.credentials"
+APPLY_K8S="${APPLY_K8S:-true}"
 
-print_usage() {
-  printf '%s\n' \
-    "Usage: $my_name [OPTIONS]" \
-    "" \
-    "Options:" \
-    "  --env dev|test|prod      Use .env.dev.local, .env.test.local, or .env.prod.local" \
-    "  --env-file PATH          Use an explicit env file to derive environment name" \
-    "  --force                  Regenerate all secrets even if tmp/secrets.{env}.env exists" \
-    "  --reuse-admin            Reuse admin passwords from existing secrets (implies --force)" \
-    "  -h, --help               Show this help"
+usage() {
+  cat <<'USAGE'
+Usage: scripts/generate_secrets.sh [options]
+
+Generate random passwords for all DQ service secrets.
+
+Options:
+  --namespace NS      Target namespace (default: dq-made-easy-dev)
+  --skip-k8s          Skip applying secrets to cluster
+  --force             Overwrite existing secrets (default: always generate new)
+  --help              Show this help
+
+Secrets created:
+  - dq-api-secrets             (API_SECRET_PLACEHOLDER, APP_CONFIG_ENCRYPTION_KEY)
+  - dq-db-secrets              (POSTGRES_PASSWORD)
+  - dq-frontend-secrets        (FRONTEND_SECRET_PLACEHOLDER)
+  - dq-engine-secrets          (ENGINE_SECRET_PLACEHOLDER)
+  - dq-profiling-secrets       (PROFILING_SECRET_PLACEHOLDER)
+  - dq-llm-secrets             (DQ_LLM_API_KEY)
+  - dq-kafka-consumer-secrets  (KAFKA_CONSUMER_DB_URL)
+  - dq-openmetadata-db-secrets (OM_DB_PASSWORD)
+  - dq-openmetadata-server-secrets (OM_TOKEN)
+
+Credentials are stored in tmp/.credentials.
+USAGE
 }
 
-# ---------------------------------------------------------------------------
-# Argument parsing
-# ---------------------------------------------------------------------------
-
-FORCE=false
-REUSE_ADMIN=false
-ROOT_ENV_FILE=""
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --env)
-      if [[ -n "${2:-}" ]]; then
-        case "$2" in
-          dev|test|prod)
-            ROOT_ENV_FILE="$ROOT_DIR/.env.${2}.local"
-            shift 2
-            ;;
-          *)
-            error "$my_name" "Invalid env selector: $2 (must be dev, test, or prod)"
-            exit 1
-            ;;
-        esac
-      else
-        error "$my_name" "--env requires a value (dev, test, or prod)"
-        exit 1
-      fi
-      ;;
-    --env-file)
-      if [[ -n "${2:-}" ]]; then
-        ROOT_ENV_FILE="$2"
-        shift 2
-      else
-        error "$my_name" "--env-file requires a path"
-        exit 1
-      fi
-      ;;
-    --force) FORCE=true; shift ;;
-    --reuse-admin) REUSE_ADMIN=true; FORCE=true; shift ;;
-    -h|--help) print_usage; exit 0 ;;
-    *)
-      error "$my_name" "Unknown option: $1"
-      print_usage
-      exit 1
-      ;;
-  esac
-done
-
-# Default to dev if not specified
-if [[ -z "$ROOT_ENV_FILE" ]]; then
-  ROOT_ENV_FILE="$ROOT_DIR/.env.dev.local"
-fi
-
-# Resolve relative paths
-if [[ "$ROOT_ENV_FILE" != /* ]]; then
-  ROOT_ENV_FILE="$ROOT_DIR/$ROOT_ENV_FILE"
-fi
-
-# ---------------------------------------------------------------------------
-# Derive environment suffix from ROOT_ENV_FILE
-# ---------------------------------------------------------------------------
-
-derive_env_suffix() {
-  local env_file="$1"
-  local basename
-  basename="$(basename "$env_file")"
-
-  # Strip .local suffix
-  if [[ "$basename" == *.local ]]; then
-    basename="${basename%.local}"
-  fi
-
-  # Strip .env prefix
-  if [[ "$basename" == .env.* ]]; then
-    basename="${basename#.env.}"
-  fi
-
-  # Normalize known values
-  case "$basename" in
-    dev|development) printf 'dev' ;;
-    test|testing) printf 'test' ;;
-    prod|production) printf 'prod' ;;
-    *) printf 'local' ;;
-  esac
-}
-
-ENV_SUFFIX="$(derive_env_suffix "$ROOT_ENV_FILE")"
-SECRETS_FILE="$ROOT_DIR/tmp/secrets.${ENV_SUFFIX}.env"
-SECRETS_DIR="$(dirname "$SECRETS_FILE")"
-
-info "$my_name" "Environment suffix: $ENV_SUFFIX"
-info "$my_name" "Output file: $SECRETS_FILE"
-
-# Admin password variable names (persisted in stateful volumes, must match DB)
-_ADMIN_PASSWORD_VARS=(
-  DQ_DB_PASSWORD
-  KONG_DB_PASSWORD
-  OM_DB_PASSWORD
-  OM_DB_ROOT_PASSWORD
-  OPENMETADATA_SEARCH_PASSWORD
-  ZAMMAD_POSTGRES_PASSWORD
-  KEYCLOAK_SYSTEM_ADMIN_PASSWORD
-)
-
-# Load admin passwords from existing secrets file (--reuse-admin mode)
-_admin_passwords_json=""
-if [[ "$REUSE_ADMIN" = true ]] && [[ -f "$SECRETS_FILE" ]]; then
-  info "$my_name" "--reuse-admin: loading admin passwords from existing $SECRETS_FILE"
-  while IFS= read -r line; do
-    [[ "$line" =~ ^[[:space:]]*# ]] && continue
-    [[ -z "$line" ]] && continue
-    _var_name="${line%%=*}"
-    _var_value="${line#*=}"
-    _var_value="${_var_value#\"}"
-    _var_value="${_var_value%\"}"
-    for _admin_var in "${_ADMIN_PASSWORD_VARS[@]}"; do
-      if [ "$_var_name" = "$_admin_var" ]; then
-        _admin_passwords_json="${_admin_passwords_json}${_admin_var}=${_var_value}
-"
-        break
-      fi
-    done
-  done < "$SECRETS_FILE"
-fi
-
-_get_admin_password() {
-  local var_name="$1"
-  local line
-  while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    local name="${line%%=*}"
-    local value="${line#*=}"
-    if [ "$name" = "$var_name" ]; then
-      printf '%s' "$value"
-      return 0
-    fi
-  done <<<"$_admin_passwords_json"
-  return 1
-}
-
-# Check if secrets file already exists
-if [[ -f "$SECRETS_FILE" ]] && [[ "$FORCE" != true ]]; then
-  info "$my_name" "Secrets file already exists: $SECRETS_FILE"
-  info "$my_name" "Use --force to regenerate all secrets"
-
-  # Source existing secrets file to verify it's valid
-  set -a
-  # shellcheck disable=SC1090
-  source "$SECRETS_FILE"
-  set +a
-
-  info "$my_name" "✓ Existing secrets loaded successfully"
-  exit 0
-fi
-
-# ---------------------------------------------------------------------------
-# Helper: generate random password
-# ---------------------------------------------------------------------------
+log()  { printf '[dq-secrets] %s\n' "$*" >&2; }
+info() { printf '[dq-secrets] ✓ %s\n' "$*" >&2; }
+err()  { printf '[dq-secrets] ✗ %s\n' "$*" >&2; }
+warn() { printf '[dq-secrets] ⚠ %s\n' "$*" >&2; }
 
 generate_password() {
-  openssl rand -base64 24 | tr -dc 'a-zA-Z0-9_-' | head -c 32
+  openssl rand -base64 32 | tr -d '\n'
 }
 
-# ---------------------------------------------------------------------------
-# Helper: generate encryption key (Fernet-compatible)
-# ---------------------------------------------------------------------------
+generate_fernet_key() {
+  python3 -c "
+import base64, os
+print(base64.urlsafe_b64encode(os.urandom(32)).decode())
+" 2>/dev/null || openssl rand -base64 32 | tr -d '\n'
+}
 
-generate_encryption_key() {
-  # Use python_arm64.sh if available, otherwise fall back to openssl
-  # Fernet keys must be exactly 32 url-safe base64-encoded bytes (44 chars with padding)
-  local python_runner="$ROOT_DIR/scripts/python_arm64.sh"
-  local python_bin=""
-
-  # Try to find a python with cryptography module
-  if [[ -x "$ROOT_DIR/venv/bin/python" ]]; then
-    python_bin="$ROOT_DIR/venv/bin/python"
-  elif [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
-    python_bin="$ROOT_DIR/.venv/bin/python"
-  fi
-
-  if [[ -x "$python_runner" && -n "$python_bin" ]]; then
-    "$python_runner" --python-bin "$python_bin" -c "
-from cryptography.fernet import Fernet
-print(Fernet.generate_key().decode())
-" 2>/dev/null
-  elif command -v openssl >/dev/null 2>&1; then
-    # Fallback: generate 32 random bytes and base64url encode them
-    # The padding '=' is required for Fernet to work
-    openssl rand -base64 32 | tr '+/' '-_'
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    err "Missing required command: $1"
+    exit 1
   fi
 }
 
-# ---------------------------------------------------------------------------
-# Generate secrets
-# ---------------------------------------------------------------------------
+apply_secret() {
+  local name="$1"
+  shift
+  local literals=("$@")
 
-mkdir -p "$SECRETS_DIR"
-
-# Helper: emit an admin password (reuse if available, else generate new)
-_emit_admin_password() {
-  local var_name="$1"
-  local reused_value
-  if reused_value="$(_get_admin_password "$var_name")"; then
-    echo "${var_name}=\"${reused_value}\""
-  else
-    echo "${var_name}=\"$(generate_password)\""
+  if [[ "$APPLY_K8S" != "true" ]]; then
+    log "Skipping K8s secret $name (--skip-k8s)"
+    return 0
   fi
+
+  local args=()
+  for lit in "${literals[@]}"; do
+    args+=(--from-literal="$lit")
+  done
+
+  kubectl create secret generic "$name" \
+    "${args[@]}" \
+    --dry-run=client -o yaml \
+    | kubectl apply -f - -n "$NAMESPACE" 2>/dev/null && \
+    info "Secret $name applied to $NAMESPACE" || \
+    warn "Could not apply secret $name (cluster may not be running)"
 }
 
-# Start the secrets file with a header
-{
-  echo "# Auto-generated by generate_secrets.sh"
-  echo "# Environment: $ENV_SUFFIX"
-  echo "# Generated at: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-  if [[ "$REUSE_ADMIN" = true ]]; then
-    echo "# Mode: --reuse-admin (admin passwords reused from prior secrets)"
-  fi
-  echo "# Do not commit — regenerated on each startup."
-  echo ""
-  echo "# ============================================================"
-  echo "# Database & Storage Credentials"
-  echo "# ============================================================"
-  _emit_admin_password DQ_DB_PASSWORD
-  _emit_admin_password KONG_DB_PASSWORD
-  _emit_admin_password OM_DB_PASSWORD
-  _emit_admin_password OM_DB_ROOT_PASSWORD
-  _emit_admin_password OPENMETADATA_SEARCH_PASSWORD
-  _emit_admin_password ZAMMAD_POSTGRES_PASSWORD
-  echo "AISTOR_ROOT_PASSWORD=\"$(generate_password)\""
-  echo "DQ_S3_SECRET_KEY=\"$(generate_password)\""
-  echo "GX_EXCEPTION_STORAGE_SECRET_KEY=\"$(generate_password)\""
-  echo "KONG_ADMIN_PASSWORD=\"$(generate_password)\""
-  echo ""
-  echo "# ============================================================"
-  echo "# Application Secrets"
-  echo "# ============================================================"
-  echo "APP_CONFIG_ENCRYPTION_KEY=\"$(generate_encryption_key)\""
-  echo "AIRFLOW_FAB_CLIENT_SECRET=\"$(generate_password)\""
-  echo "DQ_ENGINE_OIDC_CLIENT_SECRET=\"$(generate_password)\""
-  echo "GRAFANA_OIDC_SECRET=\"$(generate_password)\""
-  echo "OM_AIRFLOW_SECRET_KEY=\"$(generate_password)\""
-  echo "CATALOG_OIDC_PASSWORD=\"$(generate_password)\""
-  echo "GRAFANA_ADMIN_PASSWORD=\"$(generate_password)\""
-  echo ""
-  echo "# ============================================================"
-  echo "# Keystore/Truststore Passwords"
-  echo "# ============================================================"
-  echo "KAFKA_TLS_KEYSTORE_PASSWORD=\"$(generate_password)\""
-  echo "KEYCLOAK_HTTPS_KEYSTORE_PASSWORD=\"$(generate_password)\""
-  # KEYCLOAK_SYSTEM_ADMIN_PASSWORD must equal KEYCLOAK_ADMIN_PASS so that
-  # the Keycloak entrypoint (which uses KEYCLOAK_ADMIN* for initial setup)
-  # and the seeding scripts (which use KEYCLOAK_SYSTEM_ADMIN*) agree.
-  _kc_admin_pass="$(_get_admin_password KEYCLOAK_SYSTEM_ADMIN_PASSWORD)" || true
-  if [ -z "$_kc_admin_pass" ]; then
-    _kc_admin_pass="$(generate_password)"
-  fi
-  echo "KEYCLOAK_ADMIN_PASS=\"${_kc_admin_pass}\""
-  echo "KEYCLOAK_SYSTEM_ADMIN_PASSWORD=\"${_kc_admin_pass}\""
-  echo "KEYCLOAK_USER_PASSWORD=\"$(generate_password)\""
-  echo "OPENMETADATA_OIDC_SEED_PASSWORD=\"$(generate_password)\""
-  echo ""
-  echo "# ============================================================"
-  echo "# Seeded User Credentials (initial values, rotated during seed)"
-  echo "# ============================================================"
-  echo "KEYCLOAK_JACCLOUD_PASSWORD=\"$(generate_password)\""
-  echo "SMOKE_LOGIN_PASSWORD=\"$(generate_password)\""
-  echo "OPERATOR_LOGIN_PASSWORD=\"$(generate_password)\""
-  echo "AUDITOR_LOGIN_PASSWORD=\"$(generate_password)\""
-  echo "REGULATOR_LOGIN_PASSWORD=\"$(generate_password)\""
-} > "$SECRETS_FILE"
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
-# Restrict permissions on the secrets file
-chmod 600 "$SECRETS_FILE"
+main() {
+  require_cmd openssl
+  mkdir -p "${REPO_ROOT}/tmp"
 
-info "$my_name" "✓ Generated secrets written to $SECRETS_FILE"
-info "$my_name" "✓ Permissions set to 600 (owner read/write only)"
+  # --- Generate all passwords ---
+  # API
+  local api_secret
+  api_secret="$(generate_password)"
+  local api_encryption_key
+  api_encryption_key="$(generate_fernet_key)"
 
-# Export the secrets file path for downstream scripts
-echo ""
-echo "SECRETS_ENV_FILE=$SECRETS_FILE"
+  # Database
+  local db_password
+  db_password="$(generate_password)"
+
+  # Frontend
+  local frontend_secret
+  frontend_secret="$(generate_password)"
+
+  # Engine
+  local engine_secret
+  engine_secret="$(generate_password)"
+
+  # Profiling
+  local profiling_secret
+  profiling_secret="$(generate_password)"
+
+  # LLM
+  local llm_api_key
+  llm_api_key="$(generate_password)"
+
+  # Kafka consumer (DB URL for consumer's own state DB)
+  # This is a connection string, not a password — placeholder for now
+  local kafka_consumer_db_url="postgresql://postgres:${db_password}@dq-db:5432/dq_consumer"
+
+  # OpenMetadata DB
+  local om_db_password
+  om_db_password="$(generate_password)"
+
+  # OpenMetadata Server
+  local om_token
+  om_token="$(generate_password)"
+
+  # --- Apply secrets to cluster ---
+  apply_secret "dq-api-secrets" \
+    "API_SECRET_PLACEHOLDER=${api_secret}" \
+    "APP_CONFIG_ENCRYPTION_KEY=${api_encryption_key}"
+
+  apply_secret "dq-db-secrets" \
+    "POSTGRES_PASSWORD=${db_password}"
+
+  apply_secret "dq-frontend-secrets" \
+    "FRONTEND_SECRET_PLACEHOLDER=${frontend_secret}"
+
+  apply_secret "dq-engine-secrets" \
+    "ENGINE_SECRET_PLACEHOLDER=${engine_secret}"
+
+  apply_secret "dq-profiling-secrets" \
+    "PROFILING_SECRET_PLACEHOLDER=${profiling_secret}"
+
+  apply_secret "dq-llm-secrets" \
+    "DQ_LLM_API_KEY=${llm_api_key}"
+
+  apply_secret "dq-kafka-consumer-secrets" \
+    "KAFKA_CONSUMER_DB_URL=${kafka_consumer_db_url}"
+
+  apply_secret "dq-openmetadata-db-secrets" \
+    "OM_DB_PASSWORD=${om_db_password}"
+
+  apply_secret "dq-openmetadata-server-secrets" \
+    "OM_TOKEN=${om_token}"
+
+  # --- Store credentials ---
+  cat > "$CREDENTIALS_FILE" << EOF
+# DQ Service Credentials
+# Generated: $(date -u '+%Y-%m-%dT%H:%M:%SZ')
+# Namespace: ${NAMESPACE}
+# ⚠️  DO NOT COMMIT THIS FILE TO GIT
+
+[API]
+API_SECRET_PLACEHOLDER=${api_secret}
+APP_CONFIG_ENCRYPTION_KEY=${api_encryption_key}
+
+[Database]
+POSTGRES_PASSWORD=${db_password}
+connection_string=postgresql://postgres:${db_password}@dq-db.${NAMESPACE}.svc.cluster.local:5432/dq
+
+[Frontend]
+FRONTEND_SECRET_PLACEHOLDER=${frontend_secret}
+
+[Engine]
+ENGINE_SECRET_PLACEHOLDER=${engine_secret}
+
+[Profiling]
+PROFILING_SECRET_PLACEHOLDER=${profiling_secret}
+
+[LLM]
+DQ_LLM_API_KEY=${llm_api_key}
+
+[Kafka Consumer]
+KAFKA_CONSUMER_DB_URL=${kafka_consumer_db_url}
+
+[OpenMetadata DB]
+OM_DB_PASSWORD=${om_db_password}
+
+[OpenMetadata Server]
+OM_TOKEN=${om_token}
+EOF
+
+  chmod 600 "$CREDENTIALS_FILE"
+  info "Credentials stored in $CREDENTIALS_FILE (mode 600)"
+  echo ""
+  info "All secrets generated successfully"
+}
+
+main "$@"

@@ -91,3 +91,4 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 **/*.egg-info/
+/tmp/.credentials

@@ -13,18 +13,6 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: dq-ingress-keycloak
-spec:
-  tls:
-    - hosts:
-        - keycloak.dev.jac.dot
-      secretName: dq-dev-keycloak-tls-cert
-  rules:
-    - host: keycloak.dev.jac.dot
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
   name: dq-ingress-openmetadata
 spec:
   tls:

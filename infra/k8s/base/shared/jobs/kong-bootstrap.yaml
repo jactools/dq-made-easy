@@ -18,9 +18,9 @@ spec:
       restartPolicy: Never
       containers:
         - name: kong-bootstrap
-          image: docker.io/jacbeekers/dq-made-easy-kong:0.1.0
+          image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
           imagePullPolicy: IfNotPresent
-          command: ["/app/bootstrap_kong.sh"]
+          command: ["/app/scripts/bootstrap_kong.sh"]
           envFrom:
             - configMapRef:
                 name: dq-common-config

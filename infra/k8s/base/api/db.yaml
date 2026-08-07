@@ -30,6 +30,9 @@ spec:
                 name: dq-db-config
             - secretRef:
                 name: dq-db-secrets
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
           readinessProbe:
             tcpSocket:
               port: postgres
@@ -44,6 +47,9 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
+      volumes:
+        - name: db-data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

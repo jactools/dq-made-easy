@@ -18,8 +18,15 @@ spec:
       restartPolicy: Never
       containers:
         - name: trino-catalog
-          image: docker.io/jacbeekers/dq-made-easy-trino:0.1.0
+          image: docker.io/trinodb/trino:451
           imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              trino --catalog memory --schema public \
+                --server "${TRINO_SERVER:-trino.platform-trino.svc.cluster.local:8080}" \
+                -f /app/scripts/catalog.sql
           envFrom:
             - configMapRef:
                 name: dq-common-config

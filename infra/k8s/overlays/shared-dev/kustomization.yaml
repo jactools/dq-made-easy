@@ -18,13 +18,11 @@ patches:
     path: namespace-name-patch.yaml
 
 images:
-  - name: docker.io/jacbeekers/dq-made-easy-keycloak
-    newTag: "0.1.0"
-  - name: docker.io/jacbeekers/dq-made-easy-kong
-    newTag: "0.1.0"
-  - name: docker.io/jacbeekers/dq-made-easy-trino
+  - name: docker.io/jacbeekers/dq-made-easy-api
     newTag: "0.1.0"
   - name: docker.io/jacbeekers/dq-made-easy-metadata-configure
     newTag: "0.1.0"
-  - name: docker.io/jacbeekers/dq-made-easy-api
-    newTag: "0.1.0"
+  - name: docker.io/trinodb/trino
+    newTag: "451"
+  - name: docker.io/apache/kafka
+    newTag: "3.9.1"
