@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: dq-api
-          image: docker.io/jacbeekers/dq-made-easy-api:latest
-          imagePullPolicy: Always
+          image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
               name: http
@@ -30,6 +30,22 @@ spec:
                 name: dq-api-config
             - secretRef:
                 name: dq-api-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service

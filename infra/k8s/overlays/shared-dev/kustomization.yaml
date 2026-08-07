@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dq-made-easy-dev
+
+resources:
+  - ../../base/shared
+
+patches:
+  - path: namespace-patch.yaml
+  - path: common-config-patch.yaml
+  - path: ingress-hosts-patch.yaml
+  - target:
+      group: ""
+      version: v1
+      kind: Namespace
+      name: dq-made-easy
+    path: namespace-name-patch.yaml
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-keycloak
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-kong
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-trino
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-metadata-configure
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-api
+    newTag: "0.1.0"

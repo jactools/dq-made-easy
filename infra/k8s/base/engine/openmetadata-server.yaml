@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: dq-openmetadata-server
-          image: docker.io/jacbeekers/dq-made-easy-openmetadata:latest
-          imagePullPolicy: Always
+          image: docker.io/jacbeekers/dq-made-easy-openmetadata:0.1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8585
               name: https
@@ -30,6 +30,22 @@ spec:
                 name: dq-openmetadata-server-config
             - secretRef:
                 name: dq-openmetadata-server-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: https
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: https
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service

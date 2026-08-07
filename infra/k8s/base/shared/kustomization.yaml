@@ -5,8 +5,14 @@ resources:
   - namespace.yaml
   - config/common-config.yaml
   - ingress/frontend.yaml
+  - ingress/keycloak.yaml
   - ingress/openmetadata.yaml
   - jobs/api-migrate.yaml
+  - jobs/keycloak-seed.yaml
+  - jobs/kong-bootstrap.yaml
+  - jobs/kafka-topics.yaml
+  - jobs/trino-catalog.yaml
+  - jobs/openmetadata-seed.yaml
 
 transformers:
   - metadata/labels.yaml

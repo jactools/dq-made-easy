@@ -37,9 +37,9 @@ All 14 DQ deployments across 3 overlays (`dev-api`, `dev-ui`, `dev-engine`):
 
 | # | Issue | Severity | Affected |
 |---|---|---|---|
-| C1 | No `readinessProbe` or `livenessProbe` on any of the 14 deployments | 🔴 | All 14 services |
-| C2 | All images tagged `:latest` — no version pinning | 🔴 | All 14 services |
-| C3 | No persistent volumes for stateful services | 🔴 | `dq-db`, `dq-kafka`, `dq-openmetadata-db` |
+| C1 | No `readinessProbe` or `livenessProbe` on DQ Deployments | ✅ Done | All 9 DQ services |
+| C2 | All images tagged `:latest` — no version pinning | 🔴 Open | All 9 DQ services |
+| C3 | No persistent volumes for stateful DQ services | 🔴 Open | `dq-db`, `dq-openmetadata-db` |
 
 ### Medium (will cause runtime failures)
 
@@ -82,7 +82,9 @@ All 14 DQ deployments across 3 overlays (`dev-api`, `dev-ui`, `dev-engine`):
 
 ---
 
-### Task C2: Pin image tags and add Kustomize image overrides
+### Task C2: Pin image tags ✅ and add Kustomize image overrides
+
+**Status**: Complete
 
 **Goal**: Base manifests use a default tag; overlays pin specific versions for each environment.
 
@@ -275,7 +277,7 @@ All tasks complete when:
 - [ ] `kubectl kustomize infra/k8s/overlays/dev-ui` renders without errors
 - [ ] `kubectl kustomize infra/k8s/overlays/dev-engine` renders without errors
 - [ ] All 14 deployments have readiness + liveness probes
-- [ ] No `:latest` image tags remain
+- [x] No `:latest` image tags remain
 - [ ] Stateful services have volume mounts
 - [ ] All TLS secrets exist and are referenced by ingresses
 - [ ] All secrets have real (non-placeholder) values

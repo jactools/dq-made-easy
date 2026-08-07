@@ -4,17 +4,18 @@ kind: Kustomization
 namespace: dq-made-easy-dev
 
 resources:
-  - ../../base/shared
   - ../../base/api
   - config/service-config.yaml
   - config/service-secrets-placeholder.yaml
-
-patches:
-  - path: namespace-patch.yaml
-  - path: common-config-patch.yaml
 
 replicas:
   - name: dq-api
     count: 1
   - name: dq-db
     count: 1
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-api
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-db
+    newTag: "0.1.0"

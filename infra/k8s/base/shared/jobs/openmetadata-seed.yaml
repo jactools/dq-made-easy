@@ -17,8 +17,8 @@ spec:
       restartPolicy: Never
       containers:
         - name: openmetadata-seed
-          image: docker.io/jacbeekers/dq-made-easy-metadata-configure:latest
-          imagePullPolicy: Always
+          image: docker.io/jacbeekers/dq-made-easy-metadata-configure:0.1.0
+          imagePullPolicy: IfNotPresent
           env:
             - name: SEED_ALL
               value: "true"

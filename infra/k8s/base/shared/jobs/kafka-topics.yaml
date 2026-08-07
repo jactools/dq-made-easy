@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-job-kafka-topics
+  labels:
+    app.kubernetes.io/name: dq-job-kafka-topics
+    app.kubernetes.io/part-of: dq-made-easy
+    app.kubernetes.io/component: kafka-config
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-job-kafka-topics
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: kafka-topics
+          image: docker.io/apache/kafka:3.9.1
+          imagePullPolicy: IfNotPresent
+          command: ["/opt/kafka/bin/kafka-topics.sh"]
+          args:
+            - --bootstrap-server
+            - kafka.platform-kafka.svc.cluster.local:9092
+            - --create
+            - --if-not-exists
+            - --topic
+            - dq-events
+            - --partitions
+            - "1"
+            - --replication-factor
+            - "1"
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-kafka-config

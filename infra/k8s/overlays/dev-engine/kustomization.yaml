@@ -4,14 +4,9 @@ kind: Kustomization
 namespace: dq-made-easy-dev
 
 resources:
-  - ../../base/shared
   - ../../base/engine
   - config/service-config.yaml
   - config/service-secrets-placeholder.yaml
-
-patches:
-  - path: namespace-patch.yaml
-  - path: common-config-patch.yaml
 
 replicas:
   - name: dq-engine
@@ -26,3 +21,17 @@ replicas:
     count: 1
   - name: dq-kafka-consumer
     count: 1
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-engine
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-profiling
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-llm
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-kafka-consumer
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-openmetadata-db
+    newTag: "0.1.0"
+  - name: docker.io/jacbeekers/dq-made-easy-openmetadata
+    newTag: "0.1.0"

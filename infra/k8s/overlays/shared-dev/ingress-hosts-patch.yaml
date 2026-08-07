@@ -5,10 +5,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - dq-made-easy.jac.dot
+        - dq-made-easy.dev.jac.dot
       secretName: dq-dev-tls-cert
   rules:
-    - host: dq-made-easy.jac.dot
+    - host: dq-made-easy.dev.jac.dot
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -17,10 +17,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - keycloak.jac.dot
+        - keycloak.dev.jac.dot
       secretName: dq-dev-keycloak-tls-cert
   rules:
-    - host: keycloak.jac.dot
+    - host: keycloak.dev.jac.dot
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -29,7 +29,7 @@ metadata:
 spec:
   tls:
     - hosts:
-        - openmetadata.jac.dot
+        - openmetadata.dev.jac.dot
       secretName: dq-dev-openmetadata-tls-cert
   rules:
-    - host: openmetadata.jac.dot
+    - host: openmetadata.dev.jac.dot

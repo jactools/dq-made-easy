@@ -4,15 +4,14 @@ kind: Kustomization
 namespace: dq-made-easy-dev
 
 resources:
-  - ../../base/shared
   - ../../base/frontend
   - config/service-config.yaml
   - config/service-secrets-placeholder.yaml
 
-patches:
-  - path: namespace-patch.yaml
-  - path: common-config-patch.yaml
-
 replicas:
   - name: dq-frontend
     count: 1
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-frontend
+    newTag: "0.1.0"

@@ -17,8 +17,8 @@ spec:
       restartPolicy: Never
       containers:
         - name: api-migrate
-          image: docker.io/jacbeekers/dq-made-easy-api:latest
-          imagePullPolicy: Always
+          image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
+          imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-lc"]
           args:
             - cd /app && python -m alembic -c alembic.ini upgrade heads

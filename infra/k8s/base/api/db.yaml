@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: dq-db
-          image: docker.io/jacbeekers/dq-made-easy-db:latest
-          imagePullPolicy: Always
+          image: docker.io/jacbeekers/dq-made-easy-db:0.1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
               name: postgres
@@ -30,6 +30,20 @@ spec:
                 name: dq-db-config
             - secretRef:
                 name: dq-db-secrets
+          readinessProbe:
+            tcpSocket:
+              port: postgres
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: postgres
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
