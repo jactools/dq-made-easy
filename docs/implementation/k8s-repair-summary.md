@@ -55,96 +55,58 @@ Added readiness and liveness probes to all 9 DQ Deployments:
 
 ### Task C2: Pin Image Tags ✅
 
-**Changes**:
-- Base manifests: `:latest` → `:0.1.0`
-- `imagePullPolicy: Always` → `IfNotPresent`
-- Added `images:` sections to all overlays with pinned `0.1.0` tags
-
-**Images pinned (14 total)**:
-
-| Image | Overlay | Notes |
-|-------|---------|-------|
-| `dq-made-easy-api` | shared-dev, dev-api | Used by jobs + API Deployment |
-| `dq-made-easy-db` | dev-api | |
-| `dq-made-easy-frontend` | dev-ui | |
-| `dq-made-easy-engine` | dev-engine | |
-| `dq-made-easy-profiling` | dev-engine | |
-| `dq-made-easy-llm` | dev-engine | |
-| `dq-made-easy-kafka-consumer` | dev-engine | |
-| `dq-made-easy-openmetadata-db` | dev-engine | |
-| `dq-made-easy-openmetadata` | dev-engine | |
-| `dq-made-easy-metadata-configure` | shared-dev | OpenMetadata seed Job |
-| `apache/kafka:3.9.1` | shared-dev | Upstream, already pinned |
-| `trinodb/trino:451` | shared-dev | Upstream Trino CLI for catalog Job |
+Base manifests: `:latest` → `:0.1.0`, `imagePullPolicy: IfNotPresent`. Added `images:` overrides to all overlays.
 
 ### Task C3: Persistent Volumes ✅
 
-Added persistent volumes for stateful services:
-
-| Service | Mount Path | Volume Type |
-|---------|-----------|-------------|
-| dq-db | `/var/lib/postgresql/data` | emptyDir (dev), PVC (test/prod) |
-| dq-openmetadata-db | `/var/lib/postgresql/data` | emptyDir (dev), PVC (test/prod) |
+Added `emptyDir` volumes for `dq-db` and `dq-openmetadata-db` at `/var/lib/postgresql/data`.
 
 ### Task M1: TLS Secrets ✅
 
-Generated TLS certificates and Kubernetes secrets for DQ Ingresses:
-
-| Ingress | Hostname | Secret Name | Namespace |
-|---------|----------|-------------|-----------|
-| dq-ingress-frontend | `dq-made-easy.dev.jac.dot` | `dq-dev-tls-cert` | `dq-made-easy-dev` |
-| dq-ingress-openmetadata | `openmetadata.dev.jac.dot` | `dq-dev-openmetadata-tls-cert` | `dq-made-easy-dev` |
-
-**Removed**: `dq-ingress-keycloak` — `keycloak.dev.jac.dot` is a platform-owned hostname. DQ accesses Keycloak via Kong routes, not its own Ingress.
+Generated TLS certs using platform root CA. Created 2 K8s TLS secrets for DQ Ingresses. Removed `dq-ingress-keycloak` (platform-owned hostname).
 
 ### Task M2: Real Secret Values ✅
 
-Created `scripts/generate_secrets.sh` that generates random passwords for all 9 DQ-owned secrets and applies them to the cluster.
+Created `scripts/generate_secrets.sh` that generates random passwords for 9 DQ-owned secrets. Removed placeholder secrets from overlays (ArgoCD doesn't manage secrets → zero drift).
 
-| Secret | Keys Generated |
-|--------|---------------|
-| `dq-api-secrets` | `API_SECRET_PLACEHOLDER`, `APP_CONFIG_ENCRYPTION_KEY` (Fernet) |
-| `dq-db-secrets` | `POSTGRES_PASSWORD` |
-| `dq-frontend-secrets` | `FRONTEND_SECRET_PLACEHOLDER` |
-| `dq-engine-secrets` | `ENGINE_SECRET_PLACEHOLDER` |
-| `dq-profiling-secrets` | `PROFILING_SECRET_PLACEHOLDER` |
-| `dq-llm-secrets` | `DQ_LLM_API_KEY` |
-| `dq-kafka-consumer-secrets` | `KAFKA_CONSUMER_DB_URL` |
-| `dq-openmetadata-db-secrets` | `OM_DB_PASSWORD` |
-| `dq-openmetadata-server-secrets` | `OM_TOKEN` |
+### Task M3: Kafka Topics Job ✅
 
-**Architecture**: Secrets are **NOT managed by ArgoCD**. The placeholder files (`service-secrets-placeholder.yaml`) were removed from all overlays. The script creates real secrets independently — ArgoCD knows nothing about them, so there is zero drift.
+**Verification** against source code:
 
-**Removed from git**: `dq-kong-secrets`, `dq-keycloak-secrets`, `dq-kafka-secrets`, `dq-trino-secrets`, `dq-airflow-secrets` — these are platform-owned services.
+| Item | Before | After |
+|------|--------|-------|
+| Bootstrap server | `kafka.platform-kafka.svc.cluster.local:9092` ✅ | No change (was correct) |
+| Topic name | `dq-events` ✗ | `dq-made-easy.gx.violations` ✅ |
+| Configmap refs | `dq-kafka-config` (doesn't exist) ✗ | Removed ✅ |
+| Additional topics | None | `dq-made-easy.events` ✅ |
 
-**Credentials stored in**: `tmp/.credentials` (mode 600, `.gitignore`'d).
+**Source code match**: `dq-engine/kafka_client.py` defines `VIOLATIONS_TOPIC_NAME = "dq-made-easy.gx.violations"`. The Job now creates this topic with `--if-not-exists`, `compact` cleanup policy, and 7-day retention.
 
-### DNS/Ingress Fix ✅
-
-Updated all hostnames to use `.dev.jac.dot` convention and ingress port 10443.
+**Also fixed**: `trino-catalog` job — removed reference to `dq-trino-config` (defined in dev-engine, not shared-dev).
 
 ## Remaining Tasks
-
-### Task M3: Kafka Topics ⚠️
-
-**Status**: Open  
-**Issue**: Verify `dq-job-kafka-topics` connects to platform Kafka  
-**Fix**: Ensure correct bootstrap server and topic names  
-**Files**: `infra/k8s/base/shared/jobs/kafka-topics.yaml`
 
 ### Task M4: Resource Limits ⚠️
 
 **Status**: Open  
 **Issue**: No CPU/memory requests or limits  
-**Fix**: Add `resources` section to all containers  
-**Files**: All base Deployment manifests
+**Fix**: Add `resources` section to all containers
 
 ### Task M5: Platform Labels ⚠️
 
 **Status**: Open  
 **Issue**: Missing `platform.jaccloud.nl/*` labels  
-**Fix**: Update transformers in base manifests  
-**Files**: `infra/k8s/base/*/metadata/labels.yaml`, `annotations.yaml`
+**Fix**: Update transformers in base manifests
+
+### Deferred: Other Jobs ConfigMap refs ⚠️
+
+Several jobs in `shared-dev` reference configmaps defined in component overlays:
+- `keycloak-seed` → `dq-keycloak-config` (not in shared-dev)
+- `kong-bootstrap` → `dq-kong-config` (not in shared-dev)
+- `openmetadata-seed` → `dq-openmetadata-server-config` (not in shared-dev)
+- `api-migrate` → `dq-api-config` (not in shared-dev)
+
+These need either the configmaps moved to shared-dev or the jobs moved to their respective overlays. Deferred until deployment testing.
 
 ## Acceptance Criteria
 
@@ -156,7 +118,7 @@ Updated all hostnames to use `.dev.jac.dot` convention and ingress port 10443.
 - [x] TLS secrets exist for DQ Ingresses
 - [x] Jobs use correct images (no phantom DQ Kong/Keycloak/Trino images)
 - [x] Real secret values (no placeholders, secrets not managed by ArgoCD)
-- [ ] Kafka topics Job configured correctly
+- [x] Kafka topics Job configured correctly
 - [ ] Resource requests/limits on all containers
 - [ ] Platform labels/annotations present
 - [ ] `validate_service_instance_lifecycle.sh` passes

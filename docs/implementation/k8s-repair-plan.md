@@ -47,7 +47,7 @@ All 14 DQ deployments across 3 overlays (`dev-api`, `dev-ui`, `dev-engine`):
 |---|---|---|---|
 | M1 | Ingress TLS secrets (`dq-dev-*`) not generated | ✅ Done | 2 DQ ingresses (keycloak removed — platform-owned) |
 | M2 | All secrets contain placeholder values (`CHANGE_ME_DEV`) | ✅ Done | Secrets created by script, not managed by ArgoCD (zero drift) |
-| M3 | DQ Kafka KRaft config unknown (may need same fixes as platform Kafka) | ⚠️ | `dq-kafka` |
+| M3 | Kafka topics Job verified against source code | ✅ Done | `dq-job-kafka-topics` |
 | M4 | No `resources` (CPU/memory) requests or limits | ⚠️ | All 14 services |
 | M5 | Missing required platform labels (`environment`, `tenant`, `service`) | ⚠️ | All services |
 

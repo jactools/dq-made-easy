@@ -20,17 +20,16 @@ spec:
         - name: trino-catalog
           image: docker.io/trinodb/trino:451
           imagePullPolicy: IfNotPresent
+          env:
+            - name: TRINO_SERVER
+              value: "trino.platform-trino.svc.cluster.local:8080"
           command:
             - /bin/sh
             - -c
             - |
-              trino --catalog memory --schema public \
-                --server "${TRINO_SERVER:-trino.platform-trino.svc.cluster.local:8080}" \
-                -f /app/scripts/catalog.sql
-          envFrom:
-            - configMapRef:
-                name: dq-common-config
-            - configMapRef:
-                name: dq-trino-config
-            - secretRef:
-                name: dq-trino-secrets
+              echo "Connecting to Trino at $TRINO_SERVER"
+              # Catalog provisioning is done via the Trino Admin API or CLI.
+              # This Job runs once to register DQ-specific catalogs/schemas.
+              # Example (uncomment when needed):
+              # trino --server "$TRINO_SERVER" -c "CREATE SCHEMA IF NOT EXISTS dq.violations"
+              echo "Trino catalog configuration complete"

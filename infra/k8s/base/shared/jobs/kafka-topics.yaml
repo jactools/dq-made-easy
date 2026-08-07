@@ -20,20 +20,32 @@ spec:
         - name: kafka-topics
           image: docker.io/apache/kafka:3.9.1
           imagePullPolicy: IfNotPresent
-          command: ["/opt/kafka/bin/kafka-topics.sh"]
-          args:
-            - --bootstrap-server
-            - kafka.platform-kafka.svc.cluster.local:9092
-            - --create
-            - --if-not-exists
-            - --topic
-            - dq-events
-            - --partitions
-            - "1"
-            - --replication-factor
-            - "1"
-          envFrom:
-            - configMapRef:
-                name: dq-common-config
-            - configMapRef:
-                name: dq-kafka-config
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka.platform-kafka.svc.cluster.local:9092"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Create topics if they don't exist
+              /opt/kafka/bin/kafka-topics.sh \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVERS" \
+                --create --if-not-exists \
+                --topic dq-made-easy.gx.violations \
+                --partitions 1 \
+                --replication-factor 1 \
+                --config retention.ms=604800000 \
+                --config cleanup.policy=compact
+
+              /opt/kafka/bin/kafka-topics.sh \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVERS" \
+                --create --if-not-exists \
+                --topic dq-made-easy.events \
+                --partitions 1 \
+                --replication-factor 1 \
+                --config retention.ms=2592000000
+
+              # List topics to verify
+              /opt/kafka/bin/kafka-topics.sh \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVERS" \
+                --list
