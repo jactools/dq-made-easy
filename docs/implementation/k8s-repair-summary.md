@@ -104,11 +104,13 @@ Added `resources` section to all 9 DQ Deployments:
 
 ## Remaining Tasks
 
-### Task M5: Platform Labels ⚠️
+### Task M5: Platform Labels ✅
 
-**Status**: Open  
-**Issue**: Missing `platform.jaccloud.nl/*` labels  
-**Fix**: Update transformers in base manifests
+**Status**: Complete
+
+**Applied**: Added `platform.jaccloud.nl/tenant: dq-made-easy` and `platform.jaccloud.nl/environment: dev` to all resources.
+
+**Resources covered**: 9 Deployments, 6 Jobs, 13 ConfigMaps, 10 Services, 2 Ingresses, 1 Namespace.
 
 ### Deferred: Other Jobs ConfigMap refs ⚠️
 
@@ -132,7 +134,7 @@ These need either the configmaps moved to shared-dev or the jobs moved to their 
 - [x] Real secret values (no placeholders, secrets not managed by ArgoCD)
 - [x] Kafka topics Job configured correctly
 - [x] Resource requests/limits on all containers
-- [ ] Platform labels/annotations present
+- [x] Platform labels/annotations present
 - [ ] `validate_service_instance_lifecycle.sh` passes
 
 ## Related Documents
@@ -140,3 +142,46 @@ These need either the configmaps moved to shared-dev or the jobs moved to their 
 - [K8s Repair Plan](./k8s-repair-plan.md)
 - [Consumer Onboarding Guide](https://github.com/org/platform-foundation/blob/main/docs/infra/CONSUMER_ONBOARDING.md)
 - [Operator Manual](https://github.com/org/platform-foundation/blob/main/docs/infra/OPERATOR_MANUAL.md)
+
+## Scripts and Deployment
+
+### Deploy Script Rewrite
+
+**Removed (broken)**:
+- `scripts/k8s/deploy.sh` — referenced non-existent `infra/k8s/overlays/dev` and `providers/` structure
+- `scripts/k8s/render.sh` — same broken references
+- `scripts/k8s/local_pipeline.sh` — depended on broken deploy.sh
+- `scripts/k8s/local_pipeline_batch.sh` — depended on broken deploy.sh
+
+**Removed (broken overlays)**:
+- `infra/k8s/overlays/dev/` — referenced deleted `services/*.yaml` and `namespace.yaml`
+- `infra/k8s/overlays/test/` — same broken references
+- `infra/k8s/overlays/prod/` — same broken references
+
+**Created**:
+- `scripts/k8s/deploy.sh` — deploys all 4 overlays, generates secrets, waits for rollout
+- `scripts/k8s/render.sh` — renders manifests from overlays with filtering support
+- `scripts/k8s/ensure_local_cluster.sh` — kept (generic cluster management)
+
+**Deploy flow**:
+1. Validate overlays render (kubectl kustomize)
+2. Generate TLS certs and secrets (delegates to generate_tls_secrets.sh)
+3. Generate service secrets (delegates to generate_secrets.sh)
+4. Apply all overlays via kubectl apply -k
+5. Wait for rollout to complete
+
+**Usage**:
+```bash
+# Full deploy
+./scripts/k8s/deploy.sh --env dev
+
+# Dry run (validate only)
+./scripts/k8s/deploy.sh --dry-run
+
+# Skip secrets (already exist)
+./scripts/k8s/deploy.sh --skip-secrets --skip-tls
+
+# Render manifests without applying
+./scripts/k8s/render.sh
+./scripts/k8s/render.sh --overlay shared-dev --filter Job
+```

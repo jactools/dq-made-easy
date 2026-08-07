@@ -1,253 +1,254 @@
 #!/usr/bin/env bash
+# ============================================================================
+# deploy.sh — Deploy DQ Made Easy to Kubernetes.
+#
+# Renders and applies the 4 overlays (shared-dev, dev-api, dev-ui, dev-engine),
+# generates secrets and TLS certs, then waits for rollout.
+#
+# Usage: scripts/k8s/deploy.sh [options]
+# ============================================================================
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SCRIPT_NAME="deploy.sh"
 
-source "$ROOT_DIR/scripts/supporting/logging.sh"
-source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+NAMESPACE="${NAMESPACE:-dq-made-easy-dev}"
+SKIP_SECRETS="${SKIP_SECRETS:-false}"
+SKIP_TLS="${SKIP_TLS:-false}"
+SKIP_RENDER="${SKIP_RENDER:-false}"
+SKIP_ROLLOUT="${SKIP_ROLLOUT:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-300}"
 
-set_log_level INFO
-init_root_env_file "$ROOT_DIR"
-
-if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
-  exit 1
-fi
-
-set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
-
-DEPLOY_ENV=""
-if [ -n "${ROOT_ENV_SELECTION_ENV:-}" ]; then
-  DEPLOY_ENV="$ROOT_ENV_SELECTION_ENV"
-elif [ -n "${ROOT_ENV_SELECTION_ENV_FILE:-}" ]; then
-  case "$(basename "$ROOT_ENV_SELECTION_ENV_FILE")" in
-    .env.dev.local) DEPLOY_ENV="dev" ;;
-    .env.test.local) DEPLOY_ENV="test" ;;
-    .env.prod.local) DEPLOY_ENV="prod" ;;
-    *) DEPLOY_ENV="dev" ;;
-  esac
-else
-  DEPLOY_ENV="dev"
-fi
-
-SEED_MODE="auto"
-ALLOW_PROD_SEED="false"
-SKIP_MIGRATIONS="false"
-JOB_TIMEOUT_SECONDS="600"
-WAIT_ROLLOUT="true"
-CLOUD_PROVIDER="aks"
-SKIP_PREFLIGHT="false"
-DRY_RUN="false"
+OVERLAYS=(
+  "shared-dev"
+  "dev-api"
+  "dev-ui"
+  "dev-engine"
+)
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/k8s/deploy.sh [--env dev|test|prod] [OPTIONS]
+Usage: ./scripts/k8s/deploy.sh [OPTIONS]
 
-Canonical env options:
-  --env dev|test|prod      Use .env.dev.local, .env.test.local, or .env.prod.local
-  --env-file PATH          Use explicit env file for diagnostics/CI
+Deploy DQ Made Easy services to Kubernetes.
 
-Lifecycle options:
-  --cloud-provider aks|eks|gke
-                           Select provider-specific overlay and preflight checks (default: aks)
-  --seed-mode auto|always|never
-                           auto: run seed jobs in dev/test, skip in prod
-                           always: run seed jobs in all envs (requires --allow-prod-seed for prod)
-                           never: never run seed jobs
-  --skip-preflight         Skip provider capability preflight validation
-  --dry-run                Preview deploy actions and run kubectl server-side validation only
-  --allow-prod-seed        Required to run seed jobs in prod
-  --skip-migrations        Skip migration jobs
-  --job-timeout-seconds N  Timeout for each migration/seed job wait (default: 600)
-  --no-rollout-wait        Apply manifests without waiting for deployment rollout
+Options:
+  --namespace NS           Target namespace (default: dq-made-easy-dev)
+  --skip-secrets           Skip generating service secrets
+  --skip-tls               Skip generating TLS secrets
+  --skip-render            Skip rendering validation (assumes valid overlays)
+  --skip-rollout           Apply without waiting for rollout
+  --rollout-timeout N      Rollout timeout in seconds (default: 300)
+  --dry-run                Preview only (validate + render, no apply)
   -h, --help               Show this help
+
+Steps:
+  1. Validate overlays render (kubectl kustomize)
+  2. Generate TLS certs and secrets
+  3. Generate service secrets
+  4. Apply all overlays via kubectl apply -k
+  5. Wait for rollout to complete
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --cloud-provider)
-      CLOUD_PROVIDER="${2:-}"
-      shift 2
-      ;;
-    --seed-mode)
-      SEED_MODE="${2:-}"
-      shift 2
-      ;;
-    --skip-preflight)
-      SKIP_PREFLIGHT="true"
-      shift
-      ;;
-    --dry-run)
-      DRY_RUN="true"
-      shift
-      ;;
-    --allow-prod-seed)
-      ALLOW_PROD_SEED="true"
-      shift
-      ;;
-    --skip-migrations)
-      SKIP_MIGRATIONS="true"
-      shift
-      ;;
-    --job-timeout-seconds)
-      JOB_TIMEOUT_SECONDS="${2:-}"
-      shift 2
-      ;;
-    --no-rollout-wait)
-      WAIT_ROLLOUT="false"
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      error "$SCRIPT_NAME" "Unknown argument: $1"
-      usage
-      exit 1
-      ;;
-  esac
-done
+log()  { printf '[deploy] %s\n' "$*" >&2; }
+info() { printf '[deploy] ✓ %s\n' "$*" >&2; }
+warn() { printf '[deploy] ⚠ %s\n' "$*" >&2; }
+err()  { printf '[deploy] ✗ %s\n' "$*" >&2; }
 
-case "$DEPLOY_ENV" in
-  dev|test|prod) ;;
-  *)
-    error "$SCRIPT_NAME" "Unsupported environment: $DEPLOY_ENV"
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    err "Missing required command: $1"
     exit 1
-    ;;
-esac
-
-case "$SEED_MODE" in
-  auto|always|never) ;;
-  *)
-    error "$SCRIPT_NAME" "Invalid --seed-mode: $SEED_MODE"
-    exit 1
-    ;;
-esac
-
-case "$CLOUD_PROVIDER" in
-  aks|eks|gke) ;;
-  *)
-    error "$SCRIPT_NAME" "Unsupported --cloud-provider value: $CLOUD_PROVIDER"
-    exit 1
-    ;;
-esac
-
-PROVIDER_OVERLAY_DIR="$ROOT_DIR/infra/k8s/providers/$CLOUD_PROVIDER/$DEPLOY_ENV"
-if [ -d "$PROVIDER_OVERLAY_DIR" ]; then
-  OVERLAY_DIR="$PROVIDER_OVERLAY_DIR"
-else
-  OVERLAY_DIR="$ROOT_DIR/infra/k8s/overlays/$DEPLOY_ENV"
-fi
-
-if [ ! -d "$OVERLAY_DIR" ]; then
-  error "$SCRIPT_NAME" "Overlay directory not found: $OVERLAY_DIR"
-  exit 1
-fi
-
-NAMESPACE="dq-made-easy-$DEPLOY_ENV"
-if [ "$DEPLOY_ENV" = "prod" ]; then
-  NAMESPACE="dq-made-easy-prod"
-fi
-
-if ! command -v kubectl >/dev/null 2>&1; then
-  error "$SCRIPT_NAME" "kubectl is required"
-  exit 1
-fi
-
-MIGRATION_JOBS=(
-  "api-migrate.yaml:dq-job-api-migrate"
-  "kong-migrate.yaml:dq-job-kong-migrate"
-)
-SEED_JOBS=(
-  "openmetadata-seed.yaml:dq-job-openmetadata-seed"
-)
-
-run_job_manifest() {
-  local manifest_file="$1"
-  local job_name="$2"
-
-  info "$SCRIPT_NAME" "Running job $job_name in namespace $NAMESPACE"
-  kubectl -n "$NAMESPACE" delete job "$job_name" --ignore-not-found >/dev/null 2>&1 || true
-  kubectl -n "$NAMESPACE" apply -f "$ROOT_DIR/infra/k8s/base/jobs/$manifest_file" >/dev/null
-  kubectl -n "$NAMESPACE" wait --for=condition=complete --timeout="${JOB_TIMEOUT_SECONDS}s" "job/$job_name"
-}
-
-should_run_seed_jobs() {
-  case "$SEED_MODE" in
-    never)
-      return 1
-      ;;
-    always)
-      if [ "$DEPLOY_ENV" = "prod" ] && [ "$ALLOW_PROD_SEED" != "true" ]; then
-        error "$SCRIPT_NAME" "Refusing to run seed jobs in prod without --allow-prod-seed"
-        exit 1
-      fi
-      return 0
-      ;;
-    auto)
-      if [ "$DEPLOY_ENV" = "prod" ]; then
-        return 1
-      fi
-      return 0
-      ;;
-  esac
-}
-
-info "$SCRIPT_NAME" "Deploying WF6 overlay: env=$DEPLOY_ENV namespace=$NAMESPACE seed_mode=$SEED_MODE dry_run=$DRY_RUN"
-
-if [ "$SKIP_PREFLIGHT" != "true" ]; then
-  preflight_script="$ROOT_DIR/scripts/validation/validate_k8s_cluster_capabilities.sh"
-  if [ -x "$preflight_script" ]; then
-    "$preflight_script" --provider "$CLOUD_PROVIDER" --namespace "$NAMESPACE"
-  else
-    warning "$SCRIPT_NAME" "Preflight script not executable or missing: $preflight_script"
   fi
-else
-  warning "$SCRIPT_NAME" "Skipping preflight validation due to --skip-preflight"
-fi
+}
 
-info "$SCRIPT_NAME" "Using overlay path: $OVERLAY_DIR"
+# ---------------------------------------------------------------------------
+# Step 1: Validate overlays render
+# ---------------------------------------------------------------------------
 
-if [ "$DRY_RUN" = "true" ]; then
-  info "$SCRIPT_NAME" "Dry-run: validating overlay with server-side apply"
-  kubectl apply --dry-run=server -k "$OVERLAY_DIR"
-else
-  kubectl apply -k "$OVERLAY_DIR"
-fi
-
-if [ "$DRY_RUN" = "true" ]; then
-  info "$SCRIPT_NAME" "Dry-run: skipping migration and seed job execution"
-elif [ "$SKIP_MIGRATIONS" != "true" ]; then
-  for job_spec in "${MIGRATION_JOBS[@]}"; do
-    manifest_file="${job_spec%%:*}"
-    job_name="${job_spec##*:}"
-    run_job_manifest "$manifest_file" "$job_name"
+validate_overlays() {
+  log "Step 1/5: Validating overlays..."
+  for overlay in "${OVERLAYS[@]}"; do
+    local overlay_dir="${ROOT_DIR}/infra/k8s/overlays/${overlay}"
+    if [[ ! -d "$overlay_dir" ]]; then
+      err "Overlay directory not found: $overlay_dir"
+      exit 1
+    fi
+    if kubectl kustomize "$overlay_dir" >/dev/null 2>&1; then
+      info "Overlay $overlay renders OK"
+    else
+      err "Overlay $overlay failed to render"
+      kubectl kustomize "$overlay_dir" 2>&1
+      exit 1
+    fi
   done
-else
-  warning "$SCRIPT_NAME" "Skipping migration jobs due to --skip-migrations"
-fi
+}
 
-if [ "$DRY_RUN" = "true" ]; then
-  :
-elif should_run_seed_jobs; then
-  for job_spec in "${SEED_JOBS[@]}"; do
-    manifest_file="${job_spec%%:*}"
-    job_name="${job_spec##*:}"
-    run_job_manifest "$manifest_file" "$job_name"
+# ---------------------------------------------------------------------------
+# Step 2: Generate TLS secrets
+# ---------------------------------------------------------------------------
+
+generate_tls() {
+  if [[ "$SKIP_TLS" == "true" ]]; then
+    log "Step 2/5: Skipping TLS generation (--skip-tls)"
+    return 0
+  fi
+
+  log "Step 2/5: Generating TLS secrets..."
+  local tls_script="${ROOT_DIR}/scripts/generate_tls_secrets.sh"
+  if [[ -x "$tls_script" ]]; then
+    "$tls_script" --namespace "$NAMESPACE" --force
+    info "TLS secrets generated"
+  else
+    warn "TLS script not found or not executable: $tls_script"
+    warn "TLS secrets must be created manually"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Step 3: Generate service secrets
+# ---------------------------------------------------------------------------
+
+generate_secrets() {
+  if [[ "$SKIP_SECRETS" == "true" ]]; then
+    log "Step 3/5: Skipping secrets generation (--skip-secrets)"
+    return 0
+  fi
+
+  log "Step 3/5: Generating service secrets..."
+  local secrets_script="${ROOT_DIR}/scripts/generate_secrets.sh"
+  if [[ -x "$secrets_script" ]]; then
+    "$secrets_script" --namespace "$NAMESPACE" --force
+    info "Service secrets generated"
+  else
+    warn "Secrets script not found or not executable: $secrets_script"
+    warn "Secrets must be created manually"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Step 4: Apply overlays
+# ---------------------------------------------------------------------------
+
+apply_overlays() {
+  log "Step 4/5: Applying overlays..."
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    log "Dry-run: previewing manifests..."
+    for overlay in "${OVERLAYS[@]}"; do
+      local overlay_dir="${ROOT_DIR}/infra/k8s/overlays/${overlay}"
+      info "=== $overlay ==="
+      kubectl kustomize "$overlay_dir"
+    done
+    info "Dry-run complete (no changes applied)"
+    return 0
+  fi
+
+  # Create namespace if needed
+  kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f - 2>/dev/null || true
+  info "Namespace $NAMESPACE ready"
+
+  # Apply each overlay
+  for overlay in "${OVERLAYS[@]}"; do
+    local overlay_dir="${ROOT_DIR}/infra/k8s/overlays/${overlay}"
+    if kubectl apply -k "$overlay_dir" 2>/dev/null; then
+      info "Overlay $overlay applied"
+    else
+      err "Overlay $overlay failed to apply"
+      exit 1
+    fi
   done
-else
-  info "$SCRIPT_NAME" "Seed jobs not scheduled for env=$DEPLOY_ENV with seed_mode=$SEED_MODE"
-fi
+}
 
-if [ "$DRY_RUN" = "true" ]; then
-  info "$SCRIPT_NAME" "Dry-run: skipping rollout status checks"
-elif [ "$WAIT_ROLLOUT" = "true" ]; then
-  info "$SCRIPT_NAME" "Waiting for workload rollout"
-  kubectl -n "$NAMESPACE" rollout status deployment/dq-api --timeout=300s
-  # Kong rollout managed by platform-foundation
-  kubectl -n "$NAMESPACE" rollout status deployment/dq-frontend --timeout=300s
-fi
+# ---------------------------------------------------------------------------
+# Step 5: Wait for rollout
+# ---------------------------------------------------------------------------
 
-info "$SCRIPT_NAME" "Deployment flow completed for env=$DEPLOY_ENV"
+wait_for_rollout() {
+  if [[ "$SKIP_ROLLOUT" == "true" || "$DRY_RUN" == "true" ]]; then
+    log "Step 5/5: Skipping rollout wait"
+    return 0
+  fi
+
+  log "Step 5/5: Waiting for rollout..."
+
+  local deployments=(
+    "dq-api"
+    "dq-db"
+    "dq-frontend"
+    "dq-engine"
+    "dq-profiling"
+    "dq-llm"
+    "dq-kafka-consumer"
+    "dq-openmetadata-db"
+    "dq-openmetadata-server"
+  )
+
+  local failed=false
+  for deploy in "${deployments[@]}"; do
+    if kubectl rollout status "deployment/$deploy" -n "$NAMESPACE" --timeout="${ROLLOUT_TIMEOUT}s" >/dev/null 2>&1; then
+      info "Deployment $deploy rolled out successfully"
+    else
+      warn "Deployment $deploy failed or timed out (check with kubectl get pods -n $NAMESPACE)"
+      failed=true
+    fi
+  done
+
+  if [[ "$failed" == "true" ]]; then
+    warn "Some deployments did not roll out successfully"
+    log "Pod status:"
+    kubectl get pods -n "$NAMESPACE" 2>/dev/null || true
+    return 1
+  fi
+
+  info "All deployments rolled out successfully"
+}
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+main() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --namespace)
+        if [[ -z "${2:-}" ]]; then err "--namespace requires a value"; exit 2; fi
+        NAMESPACE="$2"; shift 2 ;;
+      --skip-secrets) SKIP_SECRETS=true; shift ;;
+      --skip-tls) SKIP_TLS=true; shift ;;
+      --skip-render) SKIP_RENDER=true; shift ;;
+      --skip-rollout) SKIP_ROLLOUT=true; shift ;;
+      --rollout-timeout)
+        if [[ -z "${2:-}" ]]; then err "--rollout-timeout requires a value"; exit 2; fi
+        ROLLOUT_TIMEOUT="$2"; shift 2 ;;
+      --dry-run) DRY_RUN=true; shift ;;
+      -h|--help) usage; exit 0 ;;
+      *) err "Unknown option: $1"; usage; exit 2 ;;
+    esac
+  done
+
+  require_cmd kubectl
+  require_cmd openssl
+
+  echo ""
+  info "Deploying DQ Made Easy to namespace $NAMESPACE"
+  echo ""
+
+  if [[ "$SKIP_RENDER" != "true" ]]; then
+    validate_overlays
+  fi
+  generate_tls
+  generate_secrets
+  apply_overlays
+  wait_for_rollout
+
+  echo ""
+  info "Deployment complete!"
+  log "Namespace: $NAMESPACE"
+  log "To check status: kubectl get all -n $NAMESPACE"
+}
+
+main "$@"
