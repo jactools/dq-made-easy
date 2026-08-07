@@ -30,6 +30,13 @@ spec:
                 name: dq-openmetadata-db-config
             - secretRef:
                 name: dq-openmetadata-db-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
           volumeMounts:
             - name: db-data
               mountPath: /var/lib/postgresql/data

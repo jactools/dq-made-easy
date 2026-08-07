@@ -84,13 +84,25 @@ Created `scripts/generate_secrets.sh` that generates random passwords for 9 DQ-o
 
 **Also fixed**: `trino-catalog` job — removed reference to `dq-trino-config` (defined in dev-engine, not shared-dev).
 
+### Task M4: Resource Limits ✅
+
+Added `resources` section to all 9 DQ Deployments:
+
+| Service | CPU req | CPU lim | Mem req | Mem lim |
+|---------|---------|---------|---------|---------|
+| dq-api | 100m | 500m | 256Mi | 1Gi |
+| dq-db | 100m | 500m | 256Mi | 1Gi |
+| dq-frontend | 50m | 200m | 128Mi | 512Mi |
+| dq-engine | 100m | 500m | 256Mi | 1Gi |
+| dq-profiling | 100m | 500m | 256Mi | 1Gi |
+| dq-llm | 100m | 500m | 256Mi | 1Gi |
+| dq-kafka-consumer | 100m | 500m | 256Mi | 512Mi |
+| dq-openmetadata-db | 100m | 500m | 256Mi | 1Gi |
+| dq-openmetadata-server | 100m | 500m | 256Mi | 1Gi |
+
+**Verified**: All 9 containers have requests + limits in rendered manifests.
+
 ## Remaining Tasks
-
-### Task M4: Resource Limits ⚠️
-
-**Status**: Open  
-**Issue**: No CPU/memory requests or limits  
-**Fix**: Add `resources` section to all containers
 
 ### Task M5: Platform Labels ⚠️
 
@@ -119,7 +131,7 @@ These need either the configmaps moved to shared-dev or the jobs moved to their 
 - [x] Jobs use correct images (no phantom DQ Kong/Keycloak/Trino images)
 - [x] Real secret values (no placeholders, secrets not managed by ArgoCD)
 - [x] Kafka topics Job configured correctly
-- [ ] Resource requests/limits on all containers
+- [x] Resource requests/limits on all containers
 - [ ] Platform labels/annotations present
 - [ ] `validate_service_instance_lifecycle.sh` passes
 
