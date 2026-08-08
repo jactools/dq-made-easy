@@ -121,17 +121,19 @@ if [ -f "$DOCKER_DIR/.npmrc" ]; then
     DOCKER_BUILD_SECRETS+=("--secret" "id=npmrc,src=$DOCKER_DIR/.npmrc")
 fi
 
-if docker build $NO_CACHE \
+if docker build --add-host "packages.host.dev.jac.dot=192.168.1.17" --add-host "docker-registery.host.dev.jac.dot=192.168.1.17" $NO_CACHE \
     "${DOCKER_BUILD_SECRETS[@]}" \
-    --build-arg PYTHON_REGISTRY="${REGISTRY}" \
-    --build-arg PYTHON_NAMESPACE= \
-    --build-arg PYTHON_IMAGE=dq-made-easy-python-base \
-    --build-arg PYTHON_TAG=latest \
+    --build-arg PYTHON_DOCKER_REGISTRY="${PYTHON_DOCKER_REGISTRY}" \
+    --build-arg PYTHON_DOCKER_NAMESPACE="${PYTHON_DOCKER_NAMESPACE}" \
+    --build-arg PYTHON_DOCKER_IMAGE="${PYTHON_DOCKER_IMAGE}" \
+    --build-arg PYTHON_DOCKER_TAG="${PYTHON_DOCKER_TAG}" \
     --build-arg DQ_BASE_REGISTRY="${DQ_BASE_REGISTRY}" \
     --build-arg DQ_BASE_NAMESPACE="${DQ_BASE_NAMESPACE}" \
     --build-arg DQ_BASE_IMAGE="${DQ_BASE_IMAGE}" \
     --build-arg DQ_BASE_TAG="${DQ_BASE_TAG}" \
     --build-arg PIP_INDEX_URL="${PIP_INDEX_URL:-}" \
+    --build-arg PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
+    --build-arg PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-}" \
     -f "$DOCKER_DIR/Dockerfile.profiling" \
     -t "$IMAGE_NAME" \
     -t "$LATEST_NAME" \

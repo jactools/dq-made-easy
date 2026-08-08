@@ -2,12 +2,12 @@
 # syntax=docker/dockerfile:1.7
 FROM docker:cli AS docker-cli
 
-ARG PYTHON_REGISTRY=""
-ARG PYTHON_NAMESPACE="jacbeekers/"
-ARG PYTHON_IMAGE="dq-made-easy-python-base"
-ARG PYTHON_TAG="latest"
+ARG PYTHON_DOCKER_REGISTRY=""
+ARG PYTHON_DOCKER_NAMESPACE="jacbeekers/"
+ARG PYTHON_DOCKER_IMAGE="dq-made-easy-python-base"
+ARG PYTHON_DOCKER_TAG="latest"
 
-FROM ${PYTHON_REGISTRY}${PYTHON_NAMESPACE}${PYTHON_IMAGE}:${PYTHON_TAG}
+FROM ${PYTHON_DOCKER_REGISTRY}${PYTHON_DOCKER_NAMESPACE}${PYTHON_DOCKER_IMAGE}:${PYTHON_DOCKER_TAG}
 
 # docker CLI (needed to restart openmetadata-server and exec into ingestion container)
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker

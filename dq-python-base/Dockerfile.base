@@ -20,3 +20,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     default-jre-headless \
     ca-certificates-java; \
   rm -rf /var/lib/apt/lists/*
+
+# Install build tools for vendored packages (hatch-vcs, hatchling)
+RUN pip install --no-cache-dir hatch-vcs hatchling setuptools-scm editables

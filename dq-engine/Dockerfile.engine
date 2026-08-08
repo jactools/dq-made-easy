@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1.7
-ARG PYTHON_REGISTRY=""
-ARG PYTHON_NAMESPACE="jacbeekers/"
-ARG PYTHON_IMAGE="dq-made-easy-python-base"
-ARG PYTHON_TAG="latest"
+ARG PYTHON_DOCKER_REGISTRY=""
+ARG PYTHON_DOCKER_NAMESPACE="jacbeekers/"
+ARG PYTHON_DOCKER_IMAGE="dq-made-easy-python-base"
+ARG PYTHON_DOCKER_TAG="latest"
 
-FROM ${PYTHON_REGISTRY}${PYTHON_NAMESPACE}${PYTHON_IMAGE}:${PYTHON_TAG}
+FROM ${PYTHON_DOCKER_REGISTRY}${PYTHON_DOCKER_NAMESPACE}${PYTHON_DOCKER_IMAGE}:${PYTHON_DOCKER_TAG}
 
 LABEL version="0.3.0"
 LABEL description="Data Quality rule execution engine (Python/FastAPI)"
@@ -55,77 +55,31 @@ RUN useradd --create-home --shell /bin/bash appuser \
 # Copy shared utils package and install it (cached unless dq-utils changes)
 COPY --chown=appuser:appuser dq-utils/ /app/dq-utils/
 
-# Copy the local spark-expectations source so the editable dependency resolves during the image build.
-COPY --chown=appuser:appuser vendor/spark-expectations-2.10.1/ /app/tmp/vendor/spark-expectations-2.10.1/
+# Copy the engine source (cached unless dq-engine changes)
+COPY --chown=appuser:appuser dq-engine/ /app/dq-engine/
 
-# Copy requirements first (cached unless requirements.txt changes)
-COPY --chown=appuser:appuser dq-engine/requirements.txt /app/requirements.txt
-
+# Install all dependencies
 RUN --mount=type=secret,id=pip_index_url \
 	PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" \
 	python -m pip install --no-cache-dir --upgrade pip \
 	&& PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" \
-	python -m pip install --no-cache-dir -r requirements.txt \
+	python -m pip install --no-cache-dir -r /app/dq-engine/requirements.txt \
 	&& PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" \
 	python -m pip install --no-cache-dir --no-build-isolation -e /app/dq-utils
 
+# Copy the warmup script
+COPY --chown=appuser:appuser dq-engine/scripts/ /app/dq-engine/scripts/
+
+# Optionally run the spark warmup script at build time (cached unless dq-engine or vendor changes)
+RUN if [ "${SKIP_SPARK_WARMUP}" = "false" ]; then \
+	chmod +x /app/dq-engine/scripts/warmup_spark.sh; \
+	/app/dq-engine/scripts/warmup_spark.sh; \
+	fi
+
 USER appuser
-ENV HOME=/home/appuser
 
-# -- Spark jar warmup (runs BEFORE app-code copy so the download layer is cached --)
-# Copy only the warmup script; the rest of scripts/ is copied later with app code.
-COPY --chown=appuser:appuser scripts/warmup_spark_jars.py /app/scripts/warmup_spark_jars.py
+WORKDIR /app/dq-engine
 
-# Copy pre-cached Spark jars so the build does not depend on external Maven access.
-# Populate with: python scripts/warmup_spark_jars.py --cache-dir spark-jars-cache
-COPY --chown=appuser:appuser spark-jars-cache/ /tmp/spark-jars-cache/
-
-RUN mkdir -p /home/appuser/.cache/tmp /home/appuser/.cache/spark-local /home/appuser/.dq-spark-jars
-
-ENV DQ_SPARK_JAR_DIR=/home/appuser/.dq-spark-jars
-ENV DQ_SPARK_TMP_DIR=/home/appuser/.cache/tmp
-ENV TMPDIR=/home/appuser/.cache/tmp
-ENV SPARK_LOCAL_DIRS=/home/appuser/.cache/spark-local
-ENV JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/home/appuser/.cache/tmp
-
-# Warm the Spark package cache so runtime seeding does not depend on network access.
-# Uses pre-cached jars from spark-jars-cache/ when available (no Maven access needed).
-# Falls back to Ivy resolution if cache is stale or missing.
-RUN [ "${SKIP_SPARK_WARMUP:-false}" = "true" ] || python scripts/warmup_spark_jars.py \
-	--ivy-dir /home/appuser/.ivy2 \
-	--jar-dir /home/appuser/.dq-spark-jars \
-	--cache-dir /tmp/spark-jars-cache \
-	--packages "org.apache.spark:spark-avro_2.13:4.1.1,org.apache.hadoop:hadoop-aws:3.4.2,io.delta:delta-spark_2.13:4.1.0,org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.1"
-
-# Copy any additional jars resolved by Ivy (only when --cache-dir fast path was not taken).
-# When cache was used, jars are already in .dq-spark-jars — just verify.
-RUN [ "${SKIP_SPARK_WARMUP:-true}" = "true" ] && echo "Skipping spark jars copy (warm-up skipped)" || python - <<'PY'
-from pathlib import Path
-import shutil
-
-target_dir = Path("/home/appuser/.dq-spark-jars")
-ivy_jars = Path("/home/appuser/.ivy2/jars")
-
-# If Ivy jars exist, copy them (network resolution path)
-if ivy_jars.is_dir():
-    jar_paths = sorted(p for p in ivy_jars.glob("*.jar") if p.is_file())
-    for jar_path in jar_paths:
-        dst = target_dir / jar_path.name
-        if not dst.exists():
-            shutil.copy2(jar_path, dst)
-
-# Final safety check
-existing = sorted(p for p in target_dir.glob("*.jar") if p.is_file())
-if not existing:
-    raise SystemExit("No Spark jars found in target after warm-up; build cannot proceed")
-print(f"Verified {len(existing)} Spark jars in {target_dir}")
-PY
-
-# -- Application code (changes frequently, invalidates only from here down) --
-COPY --chown=appuser:appuser dq-engine/ /app/
-COPY --chown=appuser:appuser scripts/ /app/scripts/
-COPY --chown=appuser:appuser dq-db/mock-data/ /app/dq-db/mock-data/
-
-ENV PORT=8000
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--ssl-certfile", "/etc/engine/certs/tls.crt", "--ssl-keyfile", "/etc/engine/certs/tls.key"]
+
+CMD ["uvicorn", "--app-dir", ".", "main:app", "--host", "0.0.0.0", "--port", "8000"]

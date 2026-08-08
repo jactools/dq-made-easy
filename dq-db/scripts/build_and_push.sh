@@ -28,11 +28,7 @@ if [ -n "$SAVED_DQ_DB_TAG" ]; then
     DQ_DB_TAG="$SAVED_DQ_DB_TAG"
 fi
 
-# Sensible defaults for environments that haven't added dq-made-easy-db vars yet.
-DQ_DB_REGISTRY="${DQ_DB_REGISTRY:-docker.io/}"
-DQ_DB_NAMESPACE="${DQ_DB_NAMESPACE:-jacbeekers/}"
-DQ_DB_IMAGE="${DQ_DB_IMAGE:-dq-made-easy-db}"
-DQ_DB_TAG="${DQ_DB_TAG:-latest}"
+
 
 NO_CACHE=""
 NO_PUSH=false
@@ -104,7 +100,11 @@ echo "========================================"
 echo ""
 
 echo "Starting build..."
-if docker build $NO_CACHE \
+if docker build --add-host "packages.host.dev.jac.dot=192.168.1.17" --add-host "docker-registery.host.dev.jac.dot=192.168.1.17" $NO_CACHE \
+    --build-arg PYTHON_DOCKER_REGISTRY="${PYTHON_DOCKER_REGISTRY}" \
+    --build-arg PYTHON_DOCKER_NAMESPACE="${PYTHON_DOCKER_NAMESPACE}" \
+    --build-arg PYTHON_DOCKER_IMAGE="${PYTHON_DOCKER_IMAGE}" \
+    --build-arg PYTHON_DOCKER_TAG="${PYTHON_DOCKER_TAG}" \
     --build-arg PIP_INDEX_URL="${PIP_INDEX_URL:-}" \
     -f "$DOCKER_DIR/Dockerfile.db" \
     -t "$IMAGE_NAME" \

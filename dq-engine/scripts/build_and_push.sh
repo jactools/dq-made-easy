@@ -130,13 +130,13 @@ echo "========================================"
 echo ""
 
 echo "Starting build..."
-if docker build $NO_CACHE \
-    --add-host "${PYPI_SERVER_DNS}:host-gateway" \
+if docker build --add-host "packages.host.dev.jac.dot=192.168.1.17" --add-host "docker-registery.host.dev.jac.dot=192.168.1.17" $NO_CACHE \
+    --add-host "${PYPI_SERVER_HOST_DNS:-packages.host.dev.jac.dot}=192.168.1.17" \
     --secret id=pip_index_url,env=PIP_INDEX_URL \
-    --build-arg PYTHON_REGISTRY="${REGISTRY}" \
-    --build-arg PYTHON_NAMESPACE= \
-    --build-arg PYTHON_IMAGE=dq-made-easy-python-base \
-    --build-arg PYTHON_TAG=latest \
+    --build-arg PYTHON_DOCKER_REGISTRY="${PYTHON_DOCKER_REGISTRY}" \
+    --build-arg PYTHON_DOCKER_NAMESPACE="${PYTHON_DOCKER_NAMESPACE}" \
+    --build-arg PYTHON_DOCKER_IMAGE="${PYTHON_DOCKER_IMAGE}" \
+    --build-arg PYTHON_DOCKER_TAG="${PYTHON_DOCKER_TAG}" \
     --build-arg PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL}" \
     --build-arg PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST}" \
     --build-arg MAVEN_REPOSITORIES="${MAVEN_REPOSITORIES:-}" \

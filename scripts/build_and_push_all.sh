@@ -221,6 +221,11 @@ if ! source_selected_root_env_file; then
 fi
 
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
+
+# Export PIP_INDEX_URL so child build scripts can inherit it
+export PIP_INDEX_URL="${PIP_INDEX_URL:-}"
+export PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}"
+export PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-}"
 debug "$my_name" "Using root env file: $ROOT_ENV_FILE"
 debug "$my_name" "ROOT_DIR: $ROOT_DIR"
 
@@ -399,12 +404,34 @@ run_direct_build_step() {
   if [ "$NO_CACHE" = true ]; then
     docker_cmd+=(--no-cache)
   fi
+
+  # Add host mapping so public pypi-server hostname resolves through ingress
+  docker_cmd+=(--add-host "packages.host.dev.jac.dot=192.168.1.17")
+  docker_cmd+=()
+
+  # Handle pip_index_url secret for BuildKit mounts
+  local pip_index_url_secret=""
   for build_arg in "$@"; do
-    docker_cmd+=(--build-arg "$build_arg")
+    if [[ "$build_arg" == PIP_INDEX_URL=* ]]; then
+      local pip_url="${build_arg#PIP_INDEX_URL=}"
+      if [[ -n "$pip_url" ]]; then
+        pip_index_url_secret=$(mktemp /tmp/pip_index.XXXXXX)
+        echo "$pip_url" > "$pip_index_url_secret"
+        docker_cmd+=(--secret "id=pip_index_url,src=$pip_index_url_secret")
+      fi
+    else
+      docker_cmd+=(--build-arg "$build_arg")
+    fi
   done
+
   docker_cmd+=(-f "$dockerfile_path" -t "$image_name" -t "$latest_name" "$build_context")
 
+  # Cleanup pip_index_url secret after build
+  local cleanup_secret="$pip_index_url_secret"
   "${docker_cmd[@]}"
+  if [[ -n "$cleanup_secret" && -f "$cleanup_secret" ]]; then
+    rm -f "$cleanup_secret"
+  fi
 
   if [ "$NO_PUSH" = true ]; then
     info "$my_name" "Skipping push (--no-push specified); loaded local image for platform ${build_platform}"
@@ -415,49 +442,19 @@ run_direct_build_step() {
 
 docker_login
 
-DQ_DB_SEED_REGISTRY="${DQ_DB_SEED_REGISTRY:-${DQ_DB_REGISTRY:-docker.io/}}"
-DQ_DB_SEED_NAMESPACE="${DQ_DB_SEED_NAMESPACE:-${DQ_DB_NAMESPACE:-jacbeekers/}}"
-DQ_DB_SEED_IMAGE="${DQ_DB_SEED_IMAGE:-dq-made-easy-db-seed}"
 
-DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-docker.io/}}"
-DQ_KEYCLOAK_SEED_NAMESPACE="${DQ_KEYCLOAK_SEED_NAMESPACE:-${DQ_KEYCLOAK_NAMESPACE:-jacbeekers/}}"
-DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-made-easy-keycloak-seed-artifacts}"
 
 # Kafka broker is managed by platform-foundation (platform-kafka).
-DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker.io/}"
-DQ_KAFKA_CONSUMER_NAMESPACE="${DQ_KAFKA_CONSUMER_NAMESPACE:-jacbeekers/}"
-DQ_KAFKA_CONSUMER_IMAGE="${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}"
 
 # Trino image/container lifecycle managed by platform-foundation (platform-trino).
-DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker.io/}"
-DQ_EDGE_NAMESPACE="${DQ_EDGE_NAMESPACE:-jacbeekers/}"
-DQ_EDGE_IMAGE="${DQ_EDGE_IMAGE:-dq-made-easy-edge}"
 
 # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
 # LLM image/container lifecycle managed by platform-foundation (platform-llm).
-DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker.io/}"
-DQ_OPENMETADATA_DB_NAMESPACE="${DQ_OPENMETADATA_DB_NAMESPACE:-jacbeekers/}"
-DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}"
 
-DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker.io/}"
-DQ_OPENMETADATA_SERVER_NAMESPACE="${DQ_OPENMETADATA_SERVER_NAMESPACE:-jacbeekers/}"
-DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata-server}"
 
-DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker.io/}"
-DQ_METADATA_CONFIGURE_NAMESPACE="${DQ_METADATA_CONFIGURE_NAMESPACE:-jacbeekers/}"
-DQ_METADATA_CONFIGURE_IMAGE="${DQ_METADATA_CONFIGURE_IMAGE:-dq-made-easy-metadata-configure}"
 
-DQ_CONTAINER_METRICS_REGISTRY="${DQ_CONTAINER_METRICS_REGISTRY:-docker.io/}"
-DQ_CONTAINER_METRICS_NAMESPACE="${DQ_CONTAINER_METRICS_NAMESPACE:-jacbeekers/}"
-DQ_CONTAINER_METRICS_IMAGE="${DQ_CONTAINER_METRICS_IMAGE:-dq-made-easy-container-metrics}"
 
-DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker.io/}"
-DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
-DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
-DQ_ZAMMAD_ORIGIN_REGISTRY="${DQ_ZAMMAD_ORIGIN_REGISTRY:-docker.io/}"
-DQ_ZAMMAD_ORIGIN_NAMESPACE="${DQ_ZAMMAD_ORIGIN_NAMESPACE:-jacbeekers/}"
-DQ_ZAMMAD_ORIGIN_IMAGE="${DQ_ZAMMAD_ORIGIN_IMAGE:-dq-made-easy-zammad-origin}"
 
 export DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE
 export DQ_KEYCLOAK_SEED_REGISTRY DQ_KEYCLOAK_SEED_NAMESPACE DQ_KEYCLOAK_SEED_IMAGE
@@ -582,7 +579,11 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "${DQ_DB_SEED_REGISTRY}${DQ_DB_SEED_NAMESPACE}${DQ_DB_SEED_IMAGE}" \
       "$ROOT_DIR/dq-db/Dockerfile.dq-db.seed" \
       "$ROOT_DIR" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
+      "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
+      "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
+      "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
+      "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
+      "PIP_INDEX_URL=${PIP_INDEX_URL}"
   fi
 
   if image_selected "dq-made-easy-keycloak-seed-artifacts"; then
@@ -611,7 +612,7 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "${DQ_OPENMETADATA_SERVER_REGISTRY}${DQ_OPENMETADATA_SERVER_NAMESPACE}${DQ_OPENMETADATA_SERVER_IMAGE}" \
       "$ROOT_DIR/dq-metadata/Dockerfile.openmetadata-server" \
       "$ROOT_DIR" \
-      "OPENMETADATA_BASE_IMAGE=${OPENMETADATA_REGISTRY:-docker.io/}${OPENMETADATA_NAMESPACE:-}${OPENMETADATA_IMAGE:-openmetadata/server}:${OPENMETADATA_TAG:-latest}" \
+      "OPENMETADATA_BASE_IMAGE=${OPENMETADATA_REGISTRY}${OPENMETADATA_NAMESPACE}${OPENMETADATA_IMAGE}:${OPENMETADATA_TAG}" \
         "OTEL_JAVAAGENT_HELPER_IMAGE=${OTEL_JAVAAGENT_HELPER_IMAGE?OTEL_JAVAAGENT_HELPER_IMAGE is required}" \
       "OTEL_JAVAAGENT_VERSION=${OTEL_JAVAAGENT_VERSION:-2.16.0}"
   fi
@@ -632,7 +633,11 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "${DQ_CONTAINER_METRICS_REGISTRY}${DQ_CONTAINER_METRICS_NAMESPACE}${DQ_CONTAINER_METRICS_IMAGE}" \
       "$ROOT_DIR/observability/container-metrics/Dockerfile.container-metrics" \
       "$ROOT_DIR/observability/container-metrics" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
+      "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
+      "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
+      "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
+      "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
+      "PIP_INDEX_URL=${PIP_INDEX_URL}"
   fi
 
   if image_selected "dq-made-easy-zammad-seed"; then
@@ -642,7 +647,11 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "${DQ_ZAMMAD_SEED_REGISTRY}${DQ_ZAMMAD_SEED_NAMESPACE}${DQ_ZAMMAD_SEED_IMAGE}" \
       "$ROOT_DIR/docker/Dockerfile.zammad.seed" \
       "$ROOT_DIR" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
+      "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
+      "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
+      "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
+      "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
+      "PIP_INDEX_URL=${PIP_INDEX_URL}"
   fi
 
   # LLM image/container lifecycle managed by platform-foundation (platform-llm).
@@ -655,7 +664,11 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "${DQ_KAFKA_CONSUMER_REGISTRY}${DQ_KAFKA_CONSUMER_NAMESPACE}${DQ_KAFKA_CONSUMER_IMAGE}" \
       "$ROOT_DIR/dq-kafka-consumer/Dockerfile.kafka-consumer" \
       "$ROOT_DIR/dq-kafka-consumer" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL:-}"
+      "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
+      "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
+      "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
+      "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
+      "PIP_INDEX_URL=${PIP_INDEX_URL}"
   fi
 
   # Trino image/container lifecycle managed by platform-foundation (platform-trino).
@@ -676,7 +689,7 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "${DQ_ZAMMAD_ORIGIN_REGISTRY}${DQ_ZAMMAD_ORIGIN_NAMESPACE}${DQ_ZAMMAD_ORIGIN_IMAGE}" \
       "$ROOT_DIR/docker/Dockerfile.zammad-origin" \
       "$ROOT_DIR" \
-      "ZAMMAD_IMAGE=${ZAMMAD_IMAGE:-ghcr.io/zammad/zammad:7.0.1-0000}"
+      "ZAMMAD_IMAGE=${ZAMMAD_REGISTRY}${ZAMMAD_NAMESPACE}${ZAMMAD_IMAGE}:${ZAMMAD_TAG}"
   fi
 fi
 
