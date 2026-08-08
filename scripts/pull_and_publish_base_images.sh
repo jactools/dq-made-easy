@@ -79,6 +79,9 @@ BASE_IMAGES=(
   "node:26-bookworm dq-made-easy-node:latest"
   "ubuntu:latest dq-made-easy-ubuntu:latest"
   "axllent/mailpit:latest dq-made-easy-mailpit:latest"
+  "openmetadata/server:1.12.7 openmetadata/server:1.12.7"
+  "debian:bookworm-slim otel-javaagent-helper:bookworm-slim"
+  "ghcr.io/zammad/zammad:7.0.1-0000 zammad/zammad:7.0.1-0000"
 )
 
 # Pull and publish each base image

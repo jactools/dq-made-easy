@@ -583,7 +583,9 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
       "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
       "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL}"
+      "PIP_INDEX_URL=${PIP_INDEX_URL}" \
+      "PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}" \
+      "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
   fi
 
   if image_selected "dq-made-easy-keycloak-seed-artifacts"; then
@@ -592,7 +594,11 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "DQ_KEYCLOAK_SEED_TAG" \
       "${DQ_KEYCLOAK_SEED_REGISTRY}${DQ_KEYCLOAK_SEED_NAMESPACE}${DQ_KEYCLOAK_SEED_IMAGE}" \
       "$ROOT_DIR/dq-keycloak/Dockerfile.keycloak.seed" \
-      "$ROOT_DIR"
+      "$ROOT_DIR" \
+      "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
+      "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
+      "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
+      "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}"
   fi
 
   if image_selected "dq-made-easy-openmetadata-db"; then
@@ -623,21 +629,33 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "DQ_METADATA_CONFIGURE_TAG" \
       "${DQ_METADATA_CONFIGURE_REGISTRY}${DQ_METADATA_CONFIGURE_NAMESPACE}${DQ_METADATA_CONFIGURE_IMAGE}" \
       "$ROOT_DIR/dq-metadata/Dockerfile.configure" \
-      "$ROOT_DIR"
-  fi
-
-  if image_selected "dq-made-easy-container-metrics"; then
-    run_direct_build_step \
-      "dq-made-easy-container-metrics" \
-      "DQ_CONTAINER_METRICS_TAG" \
-      "${DQ_CONTAINER_METRICS_REGISTRY}${DQ_CONTAINER_METRICS_NAMESPACE}${DQ_CONTAINER_METRICS_IMAGE}" \
-      "$ROOT_DIR/observability/container-metrics/Dockerfile.container-metrics" \
-      "$ROOT_DIR/observability/container-metrics" \
+      "$ROOT_DIR" \
       "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
       "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
       "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
       "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL}"
+      "PIP_INDEX_URL=${PIP_INDEX_URL}" \
+      "PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}" \
+      "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
+  fi
+
+  if image_selected "dq-made-easy-container-metrics"; then
+    if [ -d "$ROOT_DIR/observability/container-metrics" ]; then
+      run_direct_build_step \
+        "dq-made-easy-container-metrics" \
+        "DQ_CONTAINER_METRICS_TAG" \
+        "${DQ_CONTAINER_METRICS_REGISTRY}${DQ_CONTAINER_METRICS_NAMESPACE}${DQ_CONTAINER_METRICS_IMAGE}" \
+        "$ROOT_DIR/observability/container-metrics/Dockerfile.container-metrics" \
+        "$ROOT_DIR/observability/container-metrics" \
+        "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
+        "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
+        "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
+        "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
+        "PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}" \
+        "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
+    else
+      warning "$my_name" "Skipping dq-made-easy-container-metrics: $ROOT_DIR/observability/container-metrics not found"
+    fi
   fi
 
   if image_selected "dq-made-easy-zammad-seed"; then
@@ -651,7 +669,9 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
       "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
       "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL}"
+      "PIP_INDEX_URL=${PIP_INDEX_URL}" \
+      "PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}" \
+      "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
   fi
 
   # LLM image/container lifecycle managed by platform-foundation (platform-llm).
@@ -668,7 +688,8 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
       "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
       "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
-      "PIP_INDEX_URL=${PIP_INDEX_URL}"
+      "PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}" \
+      "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
   fi
 
   # Trino image/container lifecycle managed by platform-foundation (platform-trino).
