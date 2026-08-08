@@ -5,16 +5,20 @@ namespace: dq-made-easy-dev
 
 resources:
   - ../../base/api
-  - config/service-config.yaml
+  # api-migrate job is now in shared-dev overlay
 
-replicas:
-  - name: dq-api
-    count: 1
-  - name: dq-db
-    count: 1
+
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq-made-easy
+      platform.jaccloud.nl/environment: dev
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-api
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-api
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-db
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-db
+    newTag: "0.11"

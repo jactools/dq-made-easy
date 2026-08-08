@@ -5,24 +5,21 @@ namespace: dq-made-easy-dev
 
 resources:
   - ../../base/shared
+  # trino-catalog and kafka-topics jobs are deferred until platform services are available
+  # - ../../base/shared/jobs/trino-catalog.yaml
+  # - ../../base/shared/jobs/kafka-topics.yaml
 
-patches:
-  - path: namespace-patch.yaml
-  - path: common-config-patch.yaml
-  - path: ingress-hosts-patch.yaml
-  - target:
-      group: ""
-      version: v1
-      kind: Namespace
-      name: dq-made-easy
-    path: namespace-name-patch.yaml
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq-made-easy
+      platform.jaccloud.nl/environment: dev
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-api
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-api
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-metadata-configure
-    newTag: "0.1.0"
-  - name: docker.io/trinodb/trino
-    newTag: "451"
-  - name: docker.io/apache/kafka
-    newTag: "3.9.1"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-metadata-configure
+    newTag: "0.11"

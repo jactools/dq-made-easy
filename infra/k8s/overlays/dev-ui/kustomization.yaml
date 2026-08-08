@@ -5,12 +5,15 @@ namespace: dq-made-easy-dev
 
 resources:
   - ../../base/frontend
-  - config/service-config.yaml
 
-replicas:
-  - name: dq-frontend
-    count: 1
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq-made-easy
+      platform.jaccloud.nl/environment: dev
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-frontend
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-frontend
+    newTag: "0.11"

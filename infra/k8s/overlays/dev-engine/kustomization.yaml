@@ -5,32 +5,30 @@ namespace: dq-made-easy-dev
 
 resources:
   - ../../base/engine
-  - config/service-config.yaml
 
-replicas:
-  - name: dq-engine
-    count: 1
-  - name: dq-profiling
-    count: 1
-  - name: dq-llm
-    count: 1
-  - name: dq-openmetadata-db
-    count: 1
-  - name: dq-openmetadata-server
-    count: 1
-  - name: dq-kafka-consumer
-    count: 1
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq-made-easy
+      platform.jaccloud.nl/environment: dev
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-engine
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-engine
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-profiling
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-profiling
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-llm
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-llm
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-kafka-consumer
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-kafka-consumer
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-openmetadata-db
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-openmetadata-db
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-openmetadata
-    newTag: "0.1.0"
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-openmetadata-server
+    newTag: "0.11"
