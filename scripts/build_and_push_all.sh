@@ -27,13 +27,16 @@ my_name="build_and_push_all.sh"
 
 NO_CACHE=false
 NO_PUSH=false
-SKIP_SPARK_WARMUP_BUILD=false
+SKIP_SPARK_WARMUP=false
 VERSION_TAG=""
 BUILD_SCOPE="core"
 SELECTED_IMAGES=()
 REPO_BUILD_PLATFORMS="${REPO_BUILD_PLATFORMS:-linux/amd64,linux/arm64}"
 LOCAL_BUILD_PLATFORM="${LOCAL_BUILD_PLATFORM:-}"
 BUILDX_BUILDER_NAME="${BUILDX_BUILDER_NAME:-dqbuilder}"
+OVERRIDE_REGISTRY=""
+BUILT_IMAGES=0
+PUSHED_IMAGES=0
 
 usage() {
   cat <<EOF
@@ -60,11 +63,10 @@ Repo scope (repo) builds the core set plus auxiliary repo-managed images:
   9) dq-made-easy-openmetadata-db
  10) dq-made-easy-openmetadata-server
  11) dq-made-easy-metadata-configure
- 12) dq-made-easy-container-metrics
- 13) dq-made-easy-zammad-seed
- 14) dq-made-easy-kafka-consumer
- 15) dq-made-easy-edge
- 16) dq-made-easy-zammad-origin
+ 12) dq-made-easy-zammad-seed
+ 13) dq-made-easy-kafka-consumer
+ 14) dq-made-easy-edge
+ 15) dq-made-easy-zammad-origin
 
 Options:
   --scope <core|repo>  Select image scope (default: core)
@@ -74,7 +76,13 @@ Options:
   --no-push            Build only, do not push images
   --skip-spark-warmup  Skip the Spark jar warmup layer for dq-made-easy-engine
   --version <tag>      Use a specific version tag for all built images
+  --registry <target>  Override target registry: LOCAL, CORPORATE, or PUBLIC
   -h, --help           Show this help message
+
+Target registries:
+  LOCAL      Push to LOCAL_DOCKER_REGISTRY (default from REPO_SWITCH)
+  CORPORATE  Push to CORPORATE_DOCKER_REGISTRY
+  PUBLIC     Push to PUBLIC_DOCKER_REGISTRY (docker.io)
 
 Notes:
   - By default, tags are generated from actual Docker build inputs per image.
@@ -193,8 +201,20 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --skip-spark-warmup)
-      SKIP_SPARK_WARMUP_BUILD=true
+      SKIP_SPARK_WARMUP=true
       shift
+      ;;
+    --registry)
+      if [[ -z "${2:-}" ]]; then
+        error "$my_name" "--registry requires a target (LOCAL, CORPORATE, or PUBLIC)"
+        exit 1
+      fi
+      OVERRIDE_REGISTRY="${2^^}"  # uppercase
+      if [[ "$OVERRIDE_REGISTRY" != "LOCAL" && "$OVERRIDE_REGISTRY" != "CORPORATE" && "$OVERRIDE_REGISTRY" != "PUBLIC" ]]; then
+        error "$my_name" "Invalid registry target '$OVERRIDE_REGISTRY' (expected LOCAL, CORPORATE, or PUBLIC)"
+        exit 1
+      fi
+      shift 2
       ;;
     --version)
       if [[ -z "${2:-}" ]]; then
@@ -218,6 +238,33 @@ done
 
 if ! source_selected_root_env_file; then
   exit 1
+fi
+
+# Override registry vars when --registry is specified
+if [ -n "$OVERRIDE_REGISTRY" ]; then
+  case "$OVERRIDE_REGISTRY" in
+    LOCAL)     target="LOCAL_DOCKER_REGISTRY" ;;
+    CORPORATE) target="CORPORATE_DOCKER_REGISTRY" ;;
+    PUBLIC)    target="PUBLIC_DOCKER_REGISTRY" ;;
+  esac
+  local_registry="${!target}"
+  if [ -z "$local_registry" ]; then
+    error "$my_name" "$target is not set in $ROOT_ENV_FILE"
+    exit 1
+  fi
+  REPO_SWITCH="$OVERRIDE_REGISTRY"
+  info "$my_name" "Override: all registries -> $target ($local_registry)"
+
+  # Override all image registry vars
+  export REGISTRY="$local_registry"
+  for var in PG_REGISTRY KEYCLOAK_REGISTRY NODE_REGISTRY REDIS_REGISTRY \
+             DQ_BASE_REGISTRY DQ_API_REGISTRY DQ_ENGINE_REGISTRY DQ_PROFILING_REGISTRY \
+             DQ_DB_REGISTRY DQ_FRONTEND_REGISTRY DQ_DB_SEED_REGISTRY DQ_KEYCLOAK_SEED_REGISTRY \
+             DQ_KAFKA_CONSUMER_REGISTRY DQ_OPENMETADATA_DB_REGISTRY DQ_OPENMETADATA_SERVER_REGISTRY \
+             DQ_METADATA_CONFIGURE_REGISTRY DQ_CONTAINER_METRICS_REGISTRY DQ_ZAMMAD_SEED_REGISTRY \
+             DQ_ZAMMAD_ORIGIN_REGISTRY DQ_KAFKA_REGISTRY DQ_LLM_REGISTRY PYTHON_DOCKER_REGISTRY; do
+    export "$var=$local_registry"
+  done
 fi
 
 source "$ROOT_DIR/scripts/supporting/setup_env.sh"
@@ -334,8 +381,19 @@ refresh_docker_hub_description() {
     return 0
   fi
 
+  # Only update Docker Hub description when pushing to Docker Hub
+  case "${REPO_SWITCH:-LOCAL}" in
+    CORPORATE|PUBLIC) ;;
+    *) return 0 ;;
+  esac
+
+  if [ -z "${DOCKER_HUB_TOKEN:-}" ]; then
+    debug "$my_name" "Skipping Docker Hub description update (DOCKER_HUB_TOKEN not set)"
+    return 0
+  fi
+
   info "$my_name" "Refreshing Docker Hub description for $image_name..."
-  bash "$ROOT_DIR/scripts/update_docker_hub.sh" --image "$image_name"
+  bash "$ROOT_DIR/scripts/update_docker_hub.sh" --image "$image_name" || true
 }
 
 run_script_step() {
@@ -367,6 +425,11 @@ run_script_step() {
   export "$tag_var=$tag_value"
   "$step_script" "${step_args[@]}"
 
+  BUILT_IMAGES=$((BUILT_IMAGES + 1))
+  if [ "$NO_PUSH" = false ]; then
+    PUSHED_IMAGES=$((PUSHED_IMAGES + 1))
+  fi
+
   refresh_docker_hub_description "$step_name"
 }
 
@@ -389,7 +452,15 @@ run_direct_build_step() {
   local -a docker_cmd
   local build_platform=""
 
+  # Also tag with base version (e.g. 0.11-b3f8d57 -> 0.11)
+  local base_tag="${tag_value%%-*}"
+  local version_name=""
+  if [ "$base_tag" != "$tag_value" ]; then
+      version_name="${image_repo}:${base_tag}"
+  fi
+
   emit_step_header "$step_name" "$dockerfile_path" "$tag_value"
+  [ -n "$version_name" ] && info "$my_name" "Version tag: $version_name"
 
   if [ "$NO_PUSH" = true ]; then
     if [ -z "$LOCAL_BUILD_PLATFORM" ]; then
@@ -424,13 +495,20 @@ run_direct_build_step() {
     fi
   done
 
-  docker_cmd+=(-f "$dockerfile_path" -t "$image_name" -t "$latest_name" "$build_context")
+  docker_cmd+=(-f "$dockerfile_path" -t "$image_name" -t "$latest_name")
+  [ -n "$version_name" ] && docker_cmd+=(-t "$version_name")
+  docker_cmd+=("$build_context")
 
   # Cleanup pip_index_url secret after build
   local cleanup_secret="$pip_index_url_secret"
   "${docker_cmd[@]}"
   if [[ -n "$cleanup_secret" && -f "$cleanup_secret" ]]; then
     rm -f "$cleanup_secret"
+  fi
+
+  BUILT_IMAGES=$((BUILT_IMAGES + 1))
+  if [ "$NO_PUSH" = false ]; then
+    PUSHED_IMAGES=$((PUSHED_IMAGES + 1))
   fi
 
   if [ "$NO_PUSH" = true ]; then
@@ -507,7 +585,7 @@ if [ "$NO_PUSH" = true ]; then
   SCRIPT_ARGS+=("--no-push")
 fi
 ENGINE_SCRIPT_ARGS=()
-if [ "$SKIP_SPARK_WARMUP_BUILD" = true ]; then
+if [ "$SKIP_SPARK_WARMUP" = true ]; then
   ENGINE_SCRIPT_ARGS+=("--skip-spark-warmup")
 fi
 
@@ -639,25 +717,6 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
   fi
 
-  if image_selected "dq-made-easy-container-metrics"; then
-    if [ -d "$ROOT_DIR/observability/container-metrics" ]; then
-      run_direct_build_step \
-        "dq-made-easy-container-metrics" \
-        "DQ_CONTAINER_METRICS_TAG" \
-        "${DQ_CONTAINER_METRICS_REGISTRY}${DQ_CONTAINER_METRICS_NAMESPACE}${DQ_CONTAINER_METRICS_IMAGE}" \
-        "$ROOT_DIR/observability/container-metrics/Dockerfile.container-metrics" \
-        "$ROOT_DIR/observability/container-metrics" \
-        "PYTHON_DOCKER_REGISTRY=${PYTHON_DOCKER_REGISTRY}" \
-        "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
-        "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
-        "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
-        "PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}" \
-        "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
-    else
-      warning "$my_name" "Skipping dq-made-easy-container-metrics: $ROOT_DIR/observability/container-metrics not found"
-    fi
-  fi
-
   if image_selected "dq-made-easy-zammad-seed"; then
     run_direct_build_step \
       "dq-made-easy-zammad-seed" \
@@ -718,6 +777,8 @@ info "$my_name" ""
 info "$my_name" "========================================"
 success "$my_name" "Build/push steps completed successfully"
 info "$my_name" "Scope: $BUILD_SCOPE"
+info "$my_name" "Images built: $BUILT_IMAGES"
+info "$my_name" "Images pushed: $PUSHED_IMAGES (target: $REGISTRY)"
 if [ -z "$VERSION_TAG" ]; then
   info "$my_name" "Images were tagged from Docker-input content hashes"
 else

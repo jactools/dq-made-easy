@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # Name: build_and_push.sh
-# Description: Build and push dq-made-easy-profiling image to Docker Hub
+# Description: Build and push image to configured registry
 # Usage: ./build_and_push.sh [--no-cache] [--no-push]
 ###
 
@@ -54,7 +54,7 @@ Build and push the dq-made-easy-profiling Docker image.
 
 Options:
     --no-cache    Build without using Docker cache
-    --no-push     Build only, do not push to Docker Hub
+    --no-push     Build only, do not push to registry
     -h, --help    Show this help message
 
 Environment variables (from the selected root env file):
@@ -65,8 +65,8 @@ Environment variables (from the selected root env file):
 
 Full image name: ${DQ_PROFILING_REGISTRY:-}${DQ_PROFILING_NAMESPACE:-}${DQ_PROFILING_IMAGE:-}:${DQ_PROFILING_TAG:-}
 
-Before pushing to Docker Hub, make sure you're logged in:
-    docker login docker.io
+Before pushing to registry, make sure you're logged in:
+    docker login <registry>
 
 EOF
             exit 0
@@ -100,11 +100,20 @@ fi
 IMAGE_NAME="${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:${DQ_PROFILING_TAG}"
 LATEST_NAME="${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:latest"
 
+# Also tag with base version (e.g. 0.11-608c9b1 -> 0.11)
+BASE_TAG="${DQ_PROFILING_TAG%%-*}"
+if [ "$BASE_TAG" != "$DQ_PROFILING_TAG" ]; then
+    VERSION_NAME="${DQ_PROFILING_REGISTRY}${DQ_PROFILING_NAMESPACE}${DQ_PROFILING_IMAGE}:${BASE_TAG}"
+else
+    VERSION_NAME=""
+fi
+
 echo "========================================"
 echo "Building dq-made-easy-profiling Docker image"
 echo "========================================"
 echo "Image: $IMAGE_NAME"
 echo "Latest: $LATEST_NAME"
+[ -n "$VERSION_NAME" ] && echo "Version: $VERSION_NAME"
 echo "Build directory: $DOCKER_DIR"
 echo "Cache: $([ -z "$NO_CACHE" ] && echo "enabled" || echo "disabled")"
 echo "Push to registry: $([ "$NO_PUSH" = false ] && echo "yes" || echo "no")"
@@ -121,6 +130,9 @@ if [ -f "$DOCKER_DIR/.npmrc" ]; then
     DOCKER_BUILD_SECRETS+=("--secret" "id=npmrc,src=$DOCKER_DIR/.npmrc")
 fi
 
+docker_build_tags=(-t "$IMAGE_NAME" -t "$LATEST_NAME")
+[ -n "$VERSION_NAME" ] && docker_build_tags+=(-t "$VERSION_NAME")
+
 if docker build --add-host "packages.host.dev.jac.dot=192.168.1.17" --add-host "docker-registery.host.dev.jac.dot=192.168.1.17" $NO_CACHE \
     "${DOCKER_BUILD_SECRETS[@]}" \
     --build-arg PYTHON_DOCKER_REGISTRY="${PYTHON_DOCKER_REGISTRY}" \
@@ -135,8 +147,7 @@ if docker build --add-host "packages.host.dev.jac.dot=192.168.1.17" --add-host "
     --build-arg PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}" \
     --build-arg PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-}" \
     -f "$DOCKER_DIR/Dockerfile.profiling" \
-    -t "$IMAGE_NAME" \
-    -t "$LATEST_NAME" \
+    "${docker_build_tags[@]}" \
     "$DOCKER_DIR"; then
     echo ""
     echo "✓ Build successful!"
@@ -149,30 +160,35 @@ fi
 
 if [ "$NO_PUSH" = false ]; then
     echo "========================================"
-    echo "Pushing to Docker Hub"
+    echo "Pushing to registry"
     echo "========================================"
     echo "Image: $IMAGE_NAME"
     echo ""
 
     if ! docker info | grep -q "Username"; then
-        echo "WARNING: You may not be logged in to Docker Hub."
-        echo "If push fails, please run: docker login docker.io"
+        echo "WARNING: You may not be logged in to the registry."
+        echo "If push fails, please run: docker login <registry>"
         echo ""
     fi
 
     echo "Pushing image..."
-    if docker push "$IMAGE_NAME" && docker push "$LATEST_NAME"; then
+    push_ok=true
+    docker push "$IMAGE_NAME" || push_ok=false
+    docker push "$LATEST_NAME" || push_ok=false
+    [ -n "$VERSION_NAME" ] && { docker push "$VERSION_NAME" || push_ok=false; }
+    if [ "$push_ok" = true ]; then
         echo ""
-        echo "✓ Successfully pushed to Docker Hub!"
+        echo "✓ Successfully pushed to registry!"
         echo "  Image: $IMAGE_NAME"
         echo "  Latest: $LATEST_NAME"
+        [ -n "$VERSION_NAME" ] && echo "  Version: $VERSION_NAME"
         echo ""
     else
         echo ""
         echo "✗ Push failed!"
         echo ""
         echo "If authentication failed, please login:"
-        echo "  docker login docker.io"
+        echo "  docker login <registry>"
         echo ""
         echo "Then run this script again (build will be cached):"
         echo "  ./scripts/build_and_push.sh"

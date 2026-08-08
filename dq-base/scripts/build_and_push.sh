@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # Name: build_and_push.sh
-# Description: Build and push dq-base image to Docker Hub
+# Description: Build and push image to configured registry
 # Usage: ./build_and_push.sh [--no-cache] [--no-push]
 ###
 
@@ -47,11 +47,11 @@ while [[ $# -gt 0 ]]; do
             cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
-Build and push the dq-base Docker image to Docker Hub.
+Build and push image to configured registry.
 
 Options:
     --no-cache    Build without using Docker cache
-    --no-push     Build only, do not push to Docker Hub
+    --no-push     Build only, do not push to registry
     -h, --help    Show this help message
 
 Environment variables (from the selected root env file):
@@ -61,8 +61,8 @@ Environment variables (from the selected root env file):
 
 Full image name: ${DQ_BASE_REGISTRY}${DQ_BASE_NAMESPACE}${DQ_BASE_IMAGE}
 
-Before pushing to Docker Hub, make sure you're logged in:
-    docker login docker.io
+Before pushing to registry, make sure you're logged in:
+    docker login <registry>
 
 EOF
             exit 0
@@ -89,11 +89,20 @@ IMAGE_NAME="${DQ_BASE_REGISTRY}${DQ_BASE_NAMESPACE}${DQ_BASE_IMAGE}"
 FULL_IMAGE_NAME="${IMAGE_NAME}:${DQ_BASE_TAG}"
 LATEST_IMAGE_NAME="${IMAGE_NAME}:latest"
 
+# Also tag with base version (e.g. 0.11-608c9b1 -> 0.11)
+BASE_TAG="${DQ_BASE_TAG%%-*}"
+if [ "$BASE_TAG" != "$DQ_BASE_TAG" ]; then
+    VERSION_NAME="${IMAGE_NAME}:${BASE_TAG}"
+else
+    VERSION_NAME=""
+fi
+
 echo "========================================"
 echo "Building dq-base Docker image"
 echo "========================================"
 echo "Image: $FULL_IMAGE_NAME"
 echo "Latest: $LATEST_IMAGE_NAME"
+[ -n "$VERSION_NAME" ] && echo "Version: $VERSION_NAME"
 echo "Build directory: $SCRIPT_DIR"
 echo "Cache: $([ -z "$NO_CACHE" ] && echo "enabled" || echo "disabled")"
 echo "Push to registry: $([ "$NO_PUSH" = false ] && echo "yes" || echo "no")"
@@ -109,6 +118,9 @@ try_build() {
     local node_image="$3"
     local node_tag="$4"
 
+    docker_build_tags=(-t "$FULL_IMAGE_NAME" -t "$LATEST_IMAGE_NAME")
+    [ -n "$VERSION_NAME" ] && docker_build_tags+=(-t "$VERSION_NAME")
+
     docker build $NO_CACHE \
         --build-arg NODE_REGISTRY="$node_registry" \
         --build-arg NODE_NAMESPACE="$node_namespace" \
@@ -116,8 +128,7 @@ try_build() {
         --build-arg NODE_TAG="$node_tag" \
     --build-arg APK_REPOSITORIES="${APK_REPOSITORIES:-}" \
         -f "$DOCKER_DIR/Dockerfile.base" \
-        -t "$FULL_IMAGE_NAME" \
-        -t "$LATEST_IMAGE_NAME" \
+        "${docker_build_tags[@]}" \
         "$DOCKER_DIR"
 }
 
@@ -146,31 +157,36 @@ fi
 # Push to Docker Hub if requested
 if [ "$NO_PUSH" = false ]; then
     echo "========================================"
-    echo "Pushing to Docker Hub"
+    echo "Pushing to registry"
     echo "========================================"
     echo "Image: $IMAGE_NAME"
     echo ""
     
-    # Check if logged in to Docker Hub
+    # Check if logged in to the registry
     if ! docker info | grep -q "Username"; then
-        echo "WARNING: You may not be logged in to Docker Hub."
-        echo "If push fails, please run: docker login docker.io"
+        echo "WARNING: You may not be logged in to the registry."
+        echo "If push fails, please run: docker login <registry>"
         echo ""
     fi
     
     echo "Pushing image..."
-    if docker push "$FULL_IMAGE_NAME" && docker push "$LATEST_IMAGE_NAME"; then
+    push_ok=true
+    docker push "$FULL_IMAGE_NAME" || push_ok=false
+    docker push "$LATEST_IMAGE_NAME" || push_ok=false
+    [ -n "$VERSION_NAME" ] && { docker push "$VERSION_NAME" || push_ok=false; }
+    if [ "$push_ok" = true ]; then
         echo ""
-        echo "✓ Successfully pushed to Docker Hub!"
+        echo "✓ Successfully pushed to registry!"
         echo "  Image: $FULL_IMAGE_NAME"
         echo "  Latest: $LATEST_IMAGE_NAME"
+        [ -n "$VERSION_NAME" ] && echo "  Version: $VERSION_NAME"
         echo ""
     else
         echo ""
         echo "✗ Push failed!"
         echo ""
         echo "If authentication failed, please login:"
-        echo "  docker login docker.io"
+        echo "  docker login <registry>"
         echo ""
         echo "Then run this script again (build will be cached):"
         echo "  ./build_and_push.sh"
