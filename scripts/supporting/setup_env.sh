@@ -157,7 +157,7 @@ if [ -n "$nexuscloud_hostname" ] || [ -n "$nexuscloud_registry" ]; then
     fi
 fi
 
-dependency_source="${DEPENDENCY_SOURCE:-local}"
+dependency_source="${INFRA_SOURCE:-CORPORATE}"
 
 build_corporate_pypi_index_url() {
     if [ -z "$nexuscloud_hostname" ]; then
@@ -244,12 +244,17 @@ if [ -n "$nexuscloud_hostname" ]; then
 fi
 
 case "$dependency_source" in
-    local)
+    HOME)
+        # HOME: use local pypi-server (custom wheels) + public pypi.org fallback
+        # .env.dev.local already sets:
+        #   PIP_INDEX_URL=http://packages.dev.jac.dot:10091/simple/
+        #   PIP_EXTRA_INDEX_URL=https://pypi.org/simple/
+        # Preserve these values from .env
         PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.org/simple/}"
         PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}"
         PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-}"
         ;;
-    corporate)
+    CORPORATE)
         PIP_INDEX_URL="$(build_corporate_pypi_index_url)"
         PIP_EXTRA_INDEX_URL=""
         if [ -n "$nexuscloud_hostname" ]; then
@@ -257,7 +262,7 @@ case "$dependency_source" in
         fi
         ;;
     *)
-        error "$my_name" "Unsupported dependency source: $dependency_source"
+        error "$my_name" "Unsupported INFRA_SOURCE: $dependency_source (expected CORPORATE or HOME)"
         return 1
         ;;
 esac
