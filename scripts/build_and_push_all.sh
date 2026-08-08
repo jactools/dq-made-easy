@@ -186,7 +186,14 @@ while [[ $# -gt 0 ]]; do
         error "$my_name" "Unsupported image '$2'"
         exit 1
       fi
-      append_unique_selected_image "$2"
+      # Convert short names to full names (e.g. dq-kafka-consumer -> dq-made-easy-kafka-consumer)
+      image_name="$2"
+      case "$image_name" in
+        dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-db|dq-kafka|dq-kafka-consumer|dq-edge|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
+          image_name="dq-made-easy-${image_name#dq-}"
+          ;;
+      esac
+      append_unique_selected_image "$image_name"
       if ! is_core_repo_image "$2"; then
         BUILD_SCOPE="repo"
       fi
