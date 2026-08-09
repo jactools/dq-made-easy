@@ -20,6 +20,12 @@ spec:
         - name: frontend-tls-certs
           secret:
             secretName: dq-dev-tls-cert
+        - name: frontend-ca-bundle
+          configMap:
+            name: dq-platform-ca-bundle
+            items:
+              - key: ca-bundle.pem
+                path: internal-ca-bundle.pem
       containers:
         - name: dq-frontend
           image: docker.io/jacbeekers/dq-made-easy-frontend:0.1.0
@@ -42,6 +48,9 @@ spec:
           volumeMounts:
             - name: frontend-tls-certs
               mountPath: /etc/nginx/certs
+              readOnly: true
+            - name: frontend-ca-bundle
+              mountPath: /etc/nginx/certs/trust
               readOnly: true
           resources:
             requests:

@@ -308,7 +308,7 @@ main() {
     "ENVIRONMENT=dev" \
     "KONG_PUBLIC_URL=https://kong.dev.jac.dot:10443" \
     "KONG_SERVICE_FQDN=kong.dev.jac.dot" \
-    "SSL_VERIFY=off"
+    "SSL_VERIFY=on"
 
   apply_configmap "dq-engine-config" \
     "ENVIRONMENT=dev"
@@ -362,6 +362,19 @@ main() {
     rotate_postgres_password "dq-db-secrets" "$db_password" "postgres" "dq" "dq-db"
     rotate_postgres_password "dq-openmetadata-db-secrets" "$om_db_password" "openmetadata" "openmetadata" "dq-openmetadata-db"
     log "Password rotation complete"
+  fi
+
+  # --- Apply platform CA bundle ConfigMap ---
+  local CA_BUNDLE_PATH="${REPO_ROOT}/../platform-foundation/tmp/certs/mkcert-rootCA.pem"
+  if [ -f "$CA_BUNDLE_PATH" ]; then
+    kubectl create configmap dq-platform-ca-bundle \
+      --from-file=ca-bundle.pem="$CA_BUNDLE_PATH" \
+      --dry-run=client -o yaml \
+      | kubectl apply -f - -n "$NAMESPACE" 2>/dev/null && \
+      info "ConfigMap dq-platform-ca-bundle applied to $NAMESPACE" || \
+      warn "Could not apply configmap dq-platform-ca-bundle (cluster may not be running)"
+  else
+    warn "Platform CA bundle not found at $CA_BUNDLE_PATH; skipping"
   fi
 
   # --- Store credentials ---

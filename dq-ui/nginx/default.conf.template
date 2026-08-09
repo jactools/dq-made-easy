@@ -72,6 +72,8 @@ server {
     proxy_ssl_server_name on;
     proxy_ssl_name {{KONG_SERVICE_FQDN}};
     proxy_ssl_verify {{SSL_VERIFY}};
+    proxy_ssl_trusted_certificate /etc/nginx/certs/trust/internal-ca-bundle.pem;
+    proxy_ssl_verify_depth 2;
   }
 
   # proxy API requests to the api service on the docker network
@@ -87,6 +89,8 @@ server {
     proxy_ssl_server_name on;
     proxy_ssl_name {{KONG_SERVICE_FQDN}};
     proxy_ssl_verify {{SSL_VERIFY}};
+    proxy_ssl_trusted_certificate /etc/nginx/certs/trust/internal-ca-bundle.pem;
+    proxy_ssl_verify_depth 2;
   }
 
   # proxy browser OTLP exports to the local collector without exposing its port to the UI
@@ -105,6 +109,8 @@ server {
     proxy_ssl_server_name on;
     proxy_ssl_name dq-made-easy-otel-collector;
     proxy_ssl_verify {{SSL_VERIFY}};
+    proxy_ssl_trusted_certificate /etc/nginx/certs/trust/internal-ca-bundle.pem;
+    proxy_ssl_verify_depth 2;
   }
 
   # Optional: increase buffer for larger JSON payloads
