@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - api.yaml
   - db.yaml
+  - db-config.yaml
 
 transformers:
   - metadata/labels.yaml
