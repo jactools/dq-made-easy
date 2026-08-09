@@ -311,13 +311,15 @@ cp "$RULE_VERSION_METADATA_SOURCE" "$RULE_VERSION_METADATA_TARGET"
 info "$my_name" "Generating external_id patch from Keycloak..."
 python "$ROOT_DIR/scripts/generate_external_id_patch.py" --output-file "$PATCH_FILE" --unmatched-file "$UNMATCHED_FILE"
 
-info "$my_name" "Resetting schema..."
-SEED_ROOT="$INIT_DIR" bash "$ROOT_DIR/dq-db/scripts/reseed_in_container.sh"
-
-info "$my_name" "Applying Alembic migrations..."
+info "$my_name" "Resetting schema via Alembic..."
 (
   cd "$FASTAPI_DIR"
-  python -m alembic -c "$FASTAPI_DIR/alembic.ini" upgrade heads
+  # Stamp to head first so Alembic knows the current state (even if tables are partial)
+  python -m alembic -c "$FASTAPI_DIR/alembic.ini" stamp head 2>/dev/null || true
+  # Downgrade to base — Alembic drops all its tables cleanly
+  python -m alembic -c "$FASTAPI_DIR/alembic.ini" downgrade base
+  # Upgrade to head — Alembic creates all tables from scratch
+  python -m alembic -c "$FASTAPI_DIR/alembic.ini" upgrade head
 )
 
 info "$my_name" "Applying generated seed SQL files..."
