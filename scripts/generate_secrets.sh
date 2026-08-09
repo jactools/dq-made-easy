@@ -322,7 +322,8 @@ main() {
 
   apply_configmap "dq-kafka-consumer-config" \
     "ENVIRONMENT=dev" \
-    "KAFKA_BOOTSTRAP_SERVERS=kafka.platform-kafka.svc.cluster.local:9092"
+    "KAFKA_BOOTSTRAP_SERVERS=kafka.platform-kafka.svc.cluster.local:9092" \
+    "KAFKA_TOPIC=dq-made-easy.gx.violations"
 
   apply_configmap "dq-openmetadata-db-config" \
     "ENVIRONMENT=dev" \
