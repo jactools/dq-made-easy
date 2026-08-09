@@ -18,13 +18,33 @@ spec:
       restartPolicy: Never
       containers:
         - name: keycloak-seed
-          image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
+          image: docker.io/jacbeekers/dq-made-easy-keycloak-seed-artifacts:0.1.0
           imagePullPolicy: IfNotPresent
-          command: ["/app/scripts/bootstrap_keycloak.sh"]
           envFrom:
             - configMapRef:
                 name: dq-common-config
             - configMapRef:
                 name: dq-keycloak-config
+            - configMapRef:
+                name: dq-kong-config
             - secretRef:
                 name: dq-keycloak-secrets
+          env:
+            - name: KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dq-keycloak-secrets
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: CURL_CA_BUNDLE
+              value: /etc/ssl/certs/trust/internal-ca-bundle.pem
+          volumeMounts:
+            - name: ca-bundle
+              mountPath: /etc/ssl/certs/trust
+              readOnly: true
+      volumes:
+        - name: ca-bundle
+          configMap:
+            name: dq-platform-ca-bundle
+            items:
+              - key: ca-bundle.pem
+                path: internal-ca-bundle.pem
