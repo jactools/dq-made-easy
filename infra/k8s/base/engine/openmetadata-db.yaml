@@ -39,7 +39,7 @@ spec:
               memory: "1Gi"
           volumeMounts:
             - name: db-data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
           readinessProbe:
             tcpSocket:
               port: postgres
