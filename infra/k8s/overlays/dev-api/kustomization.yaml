@@ -22,3 +22,5 @@ images:
   - name: docker.io/jacbeekers/dq-made-easy-db
     newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-db
     newTag: "0.10"
+
+    newTag: "0.10"
