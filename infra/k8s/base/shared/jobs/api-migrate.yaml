@@ -2,6 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: dq-job-api-migrate
+  annotations:
+    argocd.argoproj.io/hook: Pre-Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
   labels:
     app.kubernetes.io/name: dq-job-api-migrate
     app.kubernetes.io/part-of: dq-made-easy
