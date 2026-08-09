@@ -32,12 +32,10 @@ spec:
             - configMapRef:
                 name: dq-keycloak-config
             - secretRef:
-                name: dq-db-secrets
-            - secretRef:
                 name: dq-keycloak-secrets
           env:
             - name: PGHOST
-              value: dq-db.dq-made-easy-dev.svc.cluster.local
+              value: dq-db
             - name: PGPORT
               value: "5432"
             - name: PGPASSWORD

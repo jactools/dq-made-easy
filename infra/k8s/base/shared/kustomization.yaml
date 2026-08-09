@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - config/common-config.yaml
+  - config/keycloak-config.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
   - jobs/db-seed.yaml
