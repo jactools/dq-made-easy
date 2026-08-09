@@ -306,7 +306,8 @@ main() {
 
   apply_configmap "dq-frontend-config" \
     "ENVIRONMENT=dev" \
-    "KONG_PUBLIC_URL=https://kong.dev.jac.dot:10443"
+    "KONG_PUBLIC_URL=https://kong.dev.jac.dot:10443" \
+    "KONG_SERVICE_FQDN=kong.dev.jac.dot"
 
   apply_configmap "dq-engine-config" \
     "ENVIRONMENT=dev"
