@@ -42,16 +42,3 @@ spec:
               value: http://localhost:4318
             - name: TRUST_PROXY_AUTH
               value: "true"
-            - name: CURL_CA_BUNDLE
-              value: /etc/nginx/certs/trust/internal-ca-bundle.pem
-          volumeMounts:
-            - name: ca-bundle
-              mountPath: /etc/nginx/certs/trust
-              readOnly: true
-      volumes:
-        - name: ca-bundle
-          configMap:
-            name: dq-platform-ca-bundle
-            items:
-              - key: ca-bundle.pem
-                path: internal-ca-bundle.pem
