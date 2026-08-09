@@ -7,7 +7,6 @@ resources:
   - ../../base/api
   # api-migrate job is now in shared-dev overlay
 
-
 labels:
   - includeSelectors: true
     pairs:
@@ -21,6 +20,4 @@ images:
     newTag: "0.10"
   - name: docker.io/jacbeekers/dq-made-easy-db
     newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-db
-    newTag: "0.10"
-
-    newTag: "0.10"
+    newTag: "0.11"

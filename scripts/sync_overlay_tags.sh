@@ -1,73 +1,100 @@
 #!/usr/bin/env bash
 # ============================================================================
 # sync_overlay_tags.sh — Update Kustomize overlay image tags from env file.
-#
-# Reads DQ_*_TAG values from .env.<env>.local, extracts base versions,
-# and updates the overlay kustomization.yaml files with newTag.
-#
-# Usage: scripts/sync_overlay_tags.sh [--env dev|test|prod]
 # ============================================================================
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+export ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENV="${ENV:-dev}"
 
 source "${ROOT_DIR}/.env.${ENV}.local"
 
 # Extract base versions (strip commit hash: 0.10-7a9c018 -> 0.10)
 get_base_tag() {
-  local full_tag="${!1}"
-  echo "${full_tag%%-*}"
-}
-
-API_TAG=$(get_base_tag DQ_API_TAG)
-ENGINE_TAG=$(get_base_tag DQ_ENGINE_TAG)
-FRONTEND_TAG=$(get_base_tag DQ_FRONTEND_TAG)
-PROFILING_TAG=$(get_base_tag DQ_PROFILING_TAG)
-BASE_TAG=$(get_base_tag DQ_BASE_TAG)
-DB_TAG=$(get_base_tag DQ_DB_TAG 2>/dev/null || echo "$BASE_TAG")
-METADATA_TAG=$(get_base_tag DQ_METADATA_CONFIGURE_TAG 2>/dev/null || echo "$BASE_TAG")
-KEYCLOAK_TAG=$(get_base_tag DQ_KEYCLOAK_SEED_ARTIFACTS_TAG 2>/dev/null || echo "$BASE_TAG")
-KAFKA_CONSUMER_TAG=$(get_base_tag DQ_KAFKA_CONSUMER_TAG 2>/dev/null || echo "$BASE_TAG")
-
-overlay_dir="${ROOT_DIR}/infra/k8s/overlays"
-updated=0
-
-update_tag() {
-  local file="$1"
-  local image_name="$2"
-  local tag="$3"
-  if grep -q "$image_name" "$file" 2>/dev/null; then
-    sed -i '' "/${image_name}/{n;s/newTag: \"[^\"]*\"/newTag: \"${tag}\"/}" "$file"
-    updated=$((updated + 1))
-    echo "  ${file##*/}: ${image_name} -> ${tag}"
+  local var_name="$1"
+  local full_tag="${!var_name:-}"
+  if [ -z "$full_tag" ]; then
+    echo "${DEFAULT_TAG}"
+  else
+    echo "${full_tag%%-*}"
   fi
 }
 
-echo "Syncing overlay tags for env=${ENV}..."
-echo "  Base: api=${API_TAG} engine=${ENGINE_TAG} frontend=${FRONTEND_TAG} profiling=${PROFILING_TAG}"
+export TAG_DEFAULT="${DQ_BASE_TAG%%-*}"
+export TAG_API="${DQ_API_TAG%%-*}"
+export TAG_ENGINE="${DQ_ENGINE_TAG%%-*}"
+export TAG_FRONTEND="${DQ_FRONTEND_TAG%%-*}"
+export TAG_PROFILING="${DQ_PROFILING_TAG%%-*}"
+export TAG_DB="${DQ_DB_TAG%%-*}"
+export TAG_METADATA="${DQ_METADATA_CONFIGURE_TAG%%-*}"
+export TAG_KEYCLOAK="${DQ_KEYCLOAK_SEED_ARTIFACTS_TAG:-$TAG_DEFAULT}"
+export TAG_KAFKA_CONSUMER="${DQ_KAFKA_CONSUMER_TAG%%-*}"
 
-echo "dev-api:"
-update_tag "${overlay_dir}/dev-api/kustomization.yaml" "dq-made-easy-api" "$API_TAG"
-update_tag "${overlay_dir}/dev-api/kustomization.yaml" "dq-made-easy-db" "${DB_TAG}"
+python3 << 'PYEOF'
+import re, os, sys
 
-echo "dev-engine:"
-update_tag "${overlay_dir}/dev-engine/kustomization.yaml" "dq-made-easy-engine" "$ENGINE_TAG"
-update_tag "${overlay_dir}/dev-engine/kustomization.yaml" "dq-made-easy-profiling" "$PROFILING_TAG"
-update_tag "${overlay_dir}/dev-engine/kustomization.yaml" "dq-made-easy-llm" "$BASE_TAG"
-update_tag "${overlay_dir}/dev-engine/kustomization.yaml" "dq-made-easy-kafka-consumer" "$KAFKA_CONSUMER_TAG"
-update_tag "${overlay_dir}/dev-engine/kustomization.yaml" "dq-made-easy-openmetadata-db" "$BASE_TAG"
-update_tag "${overlay_dir}/dev-engine/kustomization.yaml" "dq-made-easy-openmetadata" "$BASE_TAG"
+tags = {
+    "dq-made-easy-api": os.environ["TAG_API"],
+    "dq-made-easy-db": os.environ["TAG_DB"],
+    "dq-made-easy-engine": os.environ["TAG_ENGINE"],
+    "dq-made-easy-profiling": os.environ["TAG_PROFILING"],
+    "dq-made-easy-llm": os.environ["TAG_DEFAULT"],
+    "dq-made-easy-kafka-consumer": os.environ["TAG_KAFKA_CONSUMER"],
+    "dq-made-easy-openmetadata-db": os.environ["TAG_DEFAULT"],
+    "dq-made-easy-openmetadata-server": os.environ["TAG_DEFAULT"],
+    "dq-made-easy-frontend": os.environ["TAG_FRONTEND"],
+    "dq-made-easy-metadata-configure": os.environ["TAG_METADATA"],
+    "dq-made-easy-keycloak-seed-artifacts": os.environ["TAG_KEYCLOAK"],
+}
 
-echo "dev-ui:"
-update_tag "${overlay_dir}/dev-ui/kustomization.yaml" "dq-made-easy-frontend" "$FRONTEND_TAG"
+root_dir = os.environ["ROOT_DIR"]
+overlay_dir = os.path.join(root_dir, "infra/k8s/overlays")
+updated = 0
 
-echo "shared-dev:"
-update_tag "${overlay_dir}/shared-dev/kustomization.yaml" "dq-made-easy-api" "$API_TAG"
-update_tag "${overlay_dir}/shared-dev/kustomization.yaml" "dq-made-easy-metadata-configure" "$METADATA_TAG"
-update_tag "${overlay_dir}/shared-dev/kustomization.yaml" "dq-made-easy-keycloak-seed" "$KEYCLOAK_TAG"
+for root, dirs, files in os.walk(overlay_dir):
+    for f in files:
+        if f != "kustomization.yaml":
+            continue
+        path = os.path.join(root, f)
+        with open(path) as fh:
+            lines = fh.readlines()
 
-echo ""
-echo "Updated ${updated} image tags across overlays."
-echo "Commit these changes before ArgoCD sync."
+        new_lines = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            new_lines.append(line)
+            # Look for name: ...dq-made-easy-xxx...
+            match = re.search(r'name:.*?(dq-made-easy-\S+)', line)
+            if match:
+                image = match.group(1)
+                if image in tags:
+                    # Next non-empty line should be newName, then newTag
+                    j = i + 1
+                    while j < len(lines) and lines[j].strip() == '':
+                        new_lines.append(lines[j])
+                        j += 1
+                    # newName line
+                    if j < len(lines) and 'newName' in lines[j]:
+                        new_lines.append(lines[j])
+                        j += 1
+                    # newTag line - replace it
+                    if j < len(lines) and 'newTag' in lines[j]:
+                        indent = re.match(r'(\s+)', lines[j]).group(1) or '    '
+                        new_lines.append(f'{indent}newTag: "{tags[image]}"\n')
+                        j += 1
+                    else:
+                        # Add newTag if missing
+                        new_lines.append('    newTag: "{}"\n'.format(tags[image]))
+                    updated += 1
+                    print(f"  {os.path.basename(root)}: {image} -> {tags[image]}")
+                    i = j
+                    continue
+            i += 1
+
+        with open(path, 'w') as fh:
+            fh.writelines(new_lines)
+
+print(f"\nUpdated {updated} image tags across overlays.")
+PYEOF
