@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/part-of: dq-made-easy
 data:
-  PGPORT: "5432"
+  POSTGRES_DB: dq
   PGDATABASE: dq
+  PGPORT: "5432"
   DATABASE_SCHEMA: dq
