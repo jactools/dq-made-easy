@@ -30,6 +30,7 @@ KONG_PUBLIC_URL="$(escape_js "$CONFIGURED_API_URL")"
 FRONTEND_CERT_FILE="${FRONTEND_CERT_FILE:-}"
 FRONTEND_KEY_FILE="${FRONTEND_KEY_FILE:-}"
 KONG_SERVICE_FQDN="${KONG_SERVICE_FQDN:-}"
+SSL_VERIFY="${SSL_VERIFY:-on}"
 
 if [ -z "$FRONTEND_CERT_FILE" ]; then
   echo "FRONTEND_CERT_FILE must be set (e.g. dq-made-easy.jac.dot+3.pem)." >&2
@@ -56,6 +57,7 @@ if [ -f "$NGINX_CONF_TEMPLATE" ]; then
     -e "s|{{FRONTEND_CERT_FILE}}|${FRONTEND_CERT_FILE}|g" \
     -e "s|{{FRONTEND_KEY_FILE}}|${FRONTEND_KEY_FILE}|g" \
     -e "s|{{KONG_SERVICE_FQDN}}|${KONG_SERVICE_FQDN}|g" \
+    -e "s|{{SSL_VERIFY}}|${SSL_VERIFY}|g" \
     "$NGINX_CONF_TEMPLATE" > "$NGINX_CONF"
 else
   echo "Missing nginx config template: $NGINX_CONF_TEMPLATE" >&2
