@@ -6,6 +6,7 @@ resources:
   - config/common-config.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
+  - jobs/db-seed.yaml
   - jobs/api-migrate.yaml
   - jobs/keycloak-seed.yaml
   - jobs/kong-bootstrap.yaml

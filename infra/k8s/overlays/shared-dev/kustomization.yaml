@@ -26,4 +26,7 @@ images:
   - name: docker.io/jacbeekers/dq-made-easy-keycloak-seed-artifacts
     newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-keycloak-seed-artifacts
     newTag: "0.11"
+  - name: docker.io/jacbeekers/dq-made-easy-db-seed
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-db-seed
+    newTag: "0.11"
 

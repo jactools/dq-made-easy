@@ -513,6 +513,12 @@ run_direct_build_step() {
     rm -f "$cleanup_secret"
   fi
 
+  # Ensure local tags exist after push (push --platform doesn't create local tags)
+  if [ "$NO_PUSH" = false ]; then
+    docker tag "$image_name" "$latest_name" >/dev/null 2>&1 || true
+    [ -n "$version_name" ] && docker tag "$image_name" "$version_name" >/dev/null 2>&1 || true
+  fi
+
   BUILT_IMAGES=$((BUILT_IMAGES + 1))
   if [ "$NO_PUSH" = false ]; then
     PUSHED_IMAGES=$((PUSHED_IMAGES + 1))

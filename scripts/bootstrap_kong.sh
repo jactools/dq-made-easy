@@ -561,8 +561,8 @@ disable_jwt_for_route() {
   done
 }
 
-create_service "dq-api" "https://api:4010"
-create_route "dq-api" "dq-api-auth-v1" "/auth/v1"
+create_service "dq-api" "https://dq-api.dq-made-easy-dev.svc.cluster.local:4010"
+create_route "dq-api" "dq-api-auth-v1" "/api/auth/v1"
 create_route "dq-api" "dq-api-admin-v1" "/admin/v1"
 create_route "dq-api" "dq-api-admin-v1-users" "/admin/v1/users"
 create_route "dq-api" "dq-api-admin-v1-roles" "/admin/v1/roles"
@@ -582,10 +582,10 @@ create_route "dq-api" "dq-api-rulebuilder-v1-approvals-write" "/rulebuilder/v1/a
 create_route "dq-api" "dq-api-health" "/health"
 create_route "dq-api" "dq-api-admin-v1-me" "/admin/v1/me"
 set_route_regex_priority "dq-api-admin-v1-me" 100
-create_route "dq-api" "dq-api-auth-v1-redirect" "/auth/v1/redirect"
-create_route "dq-api" "dq-api-auth-v1-callback" "/auth/v1/callback"
-create_route "dq-api" "dq-api-auth-v1-logout" "/auth/v1/logout"
-create_route "dq-api" "dq-api-auth-v1-login" "/auth/v1/login"
+create_route "dq-api" "dq-api-auth-v1-redirect" "/api/auth/v1/redirect"
+create_route "dq-api" "dq-api-auth-v1-callback" "/api/auth/v1/callback"
+create_route "dq-api" "dq-api-auth-v1-logout" "/api/auth/v1/logout"
+create_route "dq-api" "dq-api-auth-v1-login" "/api/auth/v1/login"
 create_route "dq-api" "dq-api-system-v1-version-catalog" "/system/v1/version-catalog"
 create_route "dq-api" "dq-api-system-v1-system-info" "/system/v1/system-info"
 create_route "dq-api" "dq-api-system-v1-health" "/system/v1/health"

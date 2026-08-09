@@ -15,6 +15,7 @@ WORKDIR /workspace
 ARG PIP_EXTRA_INDEX_URL
 ARG PIP_TRUSTED_HOST
 ARG INTERNAL_CORPORATE_ROOT_CA
+ARG CURL_CA_BUNDLE_PATH
 
 COPY dq-api/fastapi/requirements.txt /tmp/requirements.txt
 
@@ -70,3 +71,17 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
     && rm -f /usr/local/share/ca-certificates/internal-*.crt \
     && update-ca-certificates --fresh \
     && rm -rf /var/lib/apt/lists/*
+
+# Copy workspace contents baked into the image (replaces docker-compose volume mounts)
+COPY VERSION_MANIFEST.json /workspace/VERSION_MANIFEST.json
+COPY dq-utils /workspace/dq-utils
+COPY dq-api/fastapi /workspace/dq-api/fastapi
+COPY dq-api/scripts/generate_sql_seeds.py /workspace/dq-api/scripts/generate_sql_seeds.py
+COPY dq-api/scripts/quote_mock_data.py /workspace/dq-api/scripts/quote_mock_data.py
+COPY dq-db/mock-data /workspace/dq-db/mock-data
+COPY dq-db/scripts /workspace/dq-db/scripts
+COPY scripts /workspace/scripts
+COPY dq-api/fastapi/docs/contracts/internal-api /workspace/dq-api/fastapi/docs/contracts/internal-api
+COPY data_sources/contracts /workspace/dq-api/fastapi/data_sources/contracts
+
+ENTRYPOINT ["/bin/bash", "/workspace/dq-db/scripts/run_db_seed_container.sh"]

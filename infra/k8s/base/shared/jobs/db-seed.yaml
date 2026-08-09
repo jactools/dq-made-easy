@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-job-db-seed
+  labels:
+    app.kubernetes.io/name: dq-job-db-seed
+    app.kubernetes.io/part-of: dq-made-easy
+    app.kubernetes.io/component: db-seed
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-job-db-seed
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-seed
+          image: docker.io/jacbeekers/dq-made-easy-db-seed:0.1.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-keycloak-config
+            - configMapRef:
+                name: dq-db-config
+            - secretRef:
+                name: dq-db-secrets
+            - secretRef:
+                name: dq-keycloak-secrets
+          env:
+            - name: DQ_DB_INTERNAL_URL
+              value: postgresql://postgres:$(PGPASSWORD)@dq-db.dq-made-easy-dev.svc.cluster.local:5432/dq
+            - name: DATABASE_SCHEMA
+              value: dq
+            - name: REQUIRE_DATABASE
+              value: "true"
+            - name: KEYCLOAK_PUBLIC_URL
+              value: https://keycloak.dev.jac.dot:10443
+            - name: SSO_INTERNAL_ISSUER_URL
+              value: https://keycloak.platform-keycloak.svc.cluster.local:8443/realms/dq-made-easy
+            - name: KEYCLOAK_TOKEN_REALM
+              value: dq-made-easy
+            - name: KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dq-keycloak-secrets
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KEYCLOAK_ADMIN_USER
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: dq-keycloak-secrets
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: CURL_CA_BUNDLE
+              value: /etc/ssl/certs/trust/internal-ca-bundle.pem
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/certs/trust/internal-ca-bundle.pem
+          volumeMounts:
+            - name: ca-bundle
+              mountPath: /etc/ssl/certs/trust
+              readOnly: true
+      volumes:
+        - name: ca-bundle
+          configMap:
+            name: dq-platform-ca-bundle
+            items:
+              - key: ca-bundle.pem
+                path: internal-ca-bundle.pem
