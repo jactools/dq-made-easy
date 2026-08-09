@@ -5,6 +5,8 @@ ARG PYTHON_DOCKER_TAG
 
 FROM ${PYTHON_DOCKER_REGISTRY}${PYTHON_DOCKER_NAMESPACE}${PYTHON_DOCKER_IMAGE}:${PYTHON_DOCKER_TAG}
 
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY dq-api/scripts/generate_keycloak_realm.py /app/generate_keycloak_realm.py
