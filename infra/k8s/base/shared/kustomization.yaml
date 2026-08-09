@@ -6,11 +6,9 @@ resources:
   - config/common-config.yaml
   - config/keycloak-config.yaml
   - config/kong-config.yaml
-  - config/platform-ca-bundle.yaml
-  - config/platform-root-ca.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
-  # Jobs are excluded from ArgoCD sync — they exist as templates for manual trigger via scripts/trigger_jobs.sh
+  # CA bundle ConfigMaps (dq-platform-ca-bundle, platform-root-ca) are managed by generate_dev_certs.sh
 
 transformers:
   - metadata/labels.yaml
