@@ -35,13 +35,17 @@ export DQ_DB_INTERNAL_URL KEYCLOAK_INTERNAL_URL KEYCLOAK_PUBLIC_URL KEYCLOAK_REA
 wait_for_db() {
   local attempt
   local probe_output
-  for attempt in $(seq 1 90); do
-    info "$my_name" "Waiting for database... (${attempt}/90)"
+  for attempt in $(seq 1 5); do
+    info "$my_name" "Waiting for database... (${attempt}/5)"
     if probe_output="$(psql "$DQ_DB_INTERNAL_URL" -c 'select 1' 2>&1)"; then
       info "$my_name" "database is ready at ${DQ_DB_INTERNAL_URL}"
       return 0
     fi
-    info "$my_name" "  probe error: ${probe_output}"
+    error "$my_name" "  probe error: ${probe_output}"
+    if [ "$attempt" -eq 5 ]; then
+      error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL} after 5 attempts"
+      exit 1
+    fi
     sleep 5
   done
   error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL}"

@@ -503,8 +503,8 @@ enable_jwt_for_route() {
   fi
 
   if [ "$sso_enabled" != "true" ] || [ -z "$sso_issuer" ]; then
-    echo "[kong-bootstrap] SSO disabled or missing issuer; skipping JWT setup"
-    return 0
+    echo "[kong-bootstrap] SSO disabled or missing issuer — bootstrap aborted"
+    exit 1
   fi
 
   local route_id

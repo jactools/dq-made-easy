@@ -20,20 +20,35 @@ spec:
         - name: db-seed
           image: docker.io/jacbeekers/dq-made-easy-db-seed:0.1.0
           imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -c
+            - |
+              export DQ_DB_INTERNAL_URL="postgresql://postgres:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
+              exec /bin/bash /workspace/dq-db/scripts/run_db_seed_container.sh
           envFrom:
             - configMapRef:
                 name: dq-common-config
             - configMapRef:
                 name: dq-keycloak-config
-            - configMapRef:
-                name: dq-db-config
             - secretRef:
                 name: dq-db-secrets
             - secretRef:
                 name: dq-keycloak-secrets
           env:
-            - name: DQ_DB_INTERNAL_URL
-              value: postgresql://postgres:$(PGPASSWORD)@dq-db.dq-made-easy-dev.svc.cluster.local:5432/dq
+            - name: PGHOST
+              value: dq-db.dq-made-easy-dev.svc.cluster.local
+            - name: PGPORT
+              value: "5432"
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dq-db-secrets
+                  key: POSTGRES_PASSWORD
+            - name: PGUSER
+              value: postgres
+            - name: PGDATABASE
+              value: dq
             - name: DATABASE_SCHEMA
               value: dq
             - name: REQUIRE_DATABASE
@@ -42,6 +57,8 @@ spec:
               value: https://keycloak.dev.jac.dot:10443
             - name: SSO_INTERNAL_ISSUER_URL
               value: https://keycloak.platform-keycloak.svc.cluster.local:8443/realms/dq-made-easy
+            - name: KEYCLOAK_REALM
+              value: dq-made-easy
             - name: KEYCLOAK_TOKEN_REALM
               value: dq-made-easy
             - name: KEYCLOAK_SYSTEM_ADMIN_PASSWORD
