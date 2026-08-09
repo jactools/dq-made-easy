@@ -366,7 +366,7 @@ main() {
   fi
 
   # --- Apply platform CA bundle ConfigMap ---
-  local CA_BUNDLE_PATH="${REPO_ROOT}/../platform-foundation/tmp/certs/mkcert-rootCA.pem"
+  local CA_BUNDLE_PATH="${REPO_ROOT}/../platform-foundation/certs/mkcert-rootCA.pem"
   if [ -f "$CA_BUNDLE_PATH" ]; then
     kubectl create configmap dq-platform-ca-bundle \
       --from-file=ca-bundle.pem="$CA_BUNDLE_PATH" \
@@ -428,6 +428,15 @@ EOF
 
   chmod 600 "$CREDENTIALS_FILE"
   info "Credentials stored in $CREDENTIALS_FILE (mode 600)"
+  echo ""
+  
+  # Generate TLS secrets for Ingresses
+  local tls_script="${SCRIPT_DIR}/generate_tls_secrets.sh"
+  if [[ -f "$tls_script" ]]; then
+    log "Generating TLS secrets..."
+    bash "$tls_script" --namespace "$NAMESPACE" 2>&1 || warn "TLS secret generation failed (cluster may not be running)"
+  fi
+  
   echo ""
   info "All secrets and configmaps generated successfully"
 }
