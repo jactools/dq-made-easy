@@ -8,5 +8,5 @@ metadata:
 data:
   ENVIRONMENT: dev
   KEYCLOAK_ADMIN_REALM: master
-  KEYCLOAK_INTERNAL_URL: https://keycloak.platform-keycloak.svc.cluster.local:8443
+  KEYCLOAK_INTERNAL_URL: https://keycloak.platform-keycloak.svc.cluster.local:8443/auth
   KEYCLOAK_REALM: dq-made-easy
