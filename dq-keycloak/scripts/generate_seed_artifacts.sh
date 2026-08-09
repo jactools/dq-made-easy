@@ -124,3 +124,27 @@ printf '.'
 printf '.'
 printf '.'
 printf '.'
+
+# Import realm into Keycloak via Admin API
+keycloak_url="${KEYCLOAK_SYSTEM_ADMIN_URL:-https://keycloak:8443}"
+keycloak_url="${keycloak_url%/}"
+admin_user="${KEYCLOAK_ADMIN:-admin}"
+admin_password="${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:-changeme}"
+ca_bundle="${CURL_CA_BUNDLE:-}"
+
+# Get admin token
+admin_token=$(curl -sk --cacert "$ca_bundle" -X POST "$keycloak_url/auth/realms/master/protocol/openid-connect/token" \
+  -d "grant_type=password" \
+  -d "client_id=admin-cli" \
+  -d "username=$admin_user" \
+  -d "password=$admin_password" \
+  | python -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || true)
+
+if [ -n "$admin_token" ]; then
+  echo "Importing realm $realm_name into Keycloak..."
+  curl -sk --cacert "$ca_bundle" -X POST "$keycloak_url/auth/admin/realms" \
+    -H "Authorization: Bearer $admin_token" \
+    -H "Content-Type: application/json" \
+    --data-binary "@$seed_dir/${realm_name}-realm.json" \
+    && echo "Realm $realm_name imported successfully" || echo "Failed to import realm $realm_name" >&2
+fi

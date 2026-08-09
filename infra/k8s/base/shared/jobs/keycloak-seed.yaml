@@ -35,6 +35,8 @@ spec:
                   key: KEYCLOAK_ADMIN_PASSWORD
             - name: KEYCLOAK_PUBLIC_URL
               value: https://keycloak.dev.jac.dot:10443
+            - name: KEYCLOAK_SYSTEM_ADMIN_URL
+              value: https://keycloak.platform-keycloak.svc.cluster.local:8443
             - name: KEYCLOAK_REALM_DISPLAY_NAME
               value: DQ Made Easy Realm
             - name: KONG_PUBLIC_URL
@@ -49,6 +51,14 @@ spec:
               value: https://zammad.dev.jac.dot:10443
             - name: DQ_ENGINE_OIDC_CLIENT_ID
               value: dq-engine
+            - name: OPENMETADATA_CALLBACK
+              value: https://openmetadata.dev.jac.dot/callback
+            - name: GRAFANA_PUBLIC_URL
+              value: https://grafana.dev.jac.dot
+            - name: GRAFANA_OIDC_SECRET
+              value: changeme
+            - name: DQ_ENGINE_OIDC_CLIENT_SECRET
+              value: changeme
             - name: SMOKE_LOGIN_EMAIL
               value: alice@jaccloud.nl
             - name: OPERATOR_LOGIN_EMAIL
