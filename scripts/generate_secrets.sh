@@ -16,6 +16,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 NAMESPACE="${NAMESPACE:-dq-made-easy-dev}"
 CREDENTIALS_FILE="${REPO_ROOT}/tmp/.credentials"
 APPLY_K8S="${APPLY_K8S:-true}"
+ROTATE_PASSWORDS=false
 
 usage() {
   cat <<'USAGE'
@@ -26,7 +27,12 @@ Generate secrets and configmaps for all DQ services.
 Options:
   --namespace NS      Target namespace (default: dq-made-easy-dev)
   --skip-k8s          Skip applying to cluster
+  --rotate            Generate NEW passwords and rotate them in the database
   --help              Show this help
+
+Behavior:
+  By default, passwords are generated ONCE and reused on subsequent runs.
+  Use --rotate to generate new passwords and update the running database.
 
 Secrets created:
   - dq-api-secrets              (DQ_DB_INTERNAL_URL, API_SECRET_PLACEHOLDER, APP_CONFIG_ENCRYPTION_KEY)
@@ -128,6 +134,36 @@ apply_configmap() {
 }
 
 # ---------------------------------------------------------------------------
+# Password rotation
+# ---------------------------------------------------------------------------
+
+rotate_postgres_password() {
+  local secret_name="$1"
+  local new_password="$2"
+  local user="$3"
+  local db="$4"
+  local host="$5"
+
+  local old_password
+  old_password="$(kubectl get secret "$secret_name" -n "$NAMESPACE" -o jsonpath='{.data.POSTGRES_PASSWORD}' 2>/dev/null | base64 -d || true)"
+
+  if [ -z "$old_password" ]; then
+    warn "Could not read old password from $secret_name; skipping rotation"
+    return 0
+  fi
+
+  if [ "$old_password" = "$new_password" ]; then
+    log "Password unchanged for $secret_name; skipping rotation"
+    return 0
+  fi
+
+  log "Rotating password for $secret_name (user=$user, db=$db)"
+  PGPASSWORD="$old_password" psql -h "$host" -U "$user" -d "$db" \
+    -c "ALTER USER $user WITH PASSWORD '$new_password';" || \
+    warn "Could not rotate password in database $host/$db (may not be running)"
+}
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -135,14 +171,51 @@ main() {
   require_cmd openssl
   mkdir -p "${REPO_ROOT}/tmp"
 
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --namespace)
+        NAMESPACE="$2"
+        shift 2
+        ;;
+      --skip-k8s)
+        APPLY_K8S=false
+        shift
+        ;;
+      --rotate)
+        ROTATE_PASSWORDS=true
+        shift
+        ;;
+      --help)
+        usage
+        exit 0
+        ;;
+      *)
+        warn "Unknown option: $1"
+        usage
+        exit 1
+        ;;
+    esac
+  done
+
   # --- Generate all passwords ---
+  # Preserve existing passwords unless --rotate is passed
   local api_secret
   api_secret="$(generate_password)"
   local api_encryption_key
   api_encryption_key="$(generate_fernet_key)"
 
+  # DB passwords: preserve unless --rotate
   local db_password
-  db_password="$(generate_password)"
+  local existing_db_password
+  existing_db_password="$(kubectl get secret dq-db-secrets -n "$NAMESPACE" -o jsonpath='{.data.POSTGRES_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [ "$ROTATE_PASSWORDS" = true ] || [ -z "$existing_db_password" ]; then
+    db_password="$(generate_password)"
+    log "${ROTATE_PASSWORDS:+Rotated} new DB password"
+  else
+    db_password="$existing_db_password"
+    log "Reusing existing DB password (use --rotate to change)"
+  fi
 
   local frontend_secret
   frontend_secret="$(generate_password)"
@@ -156,8 +229,17 @@ main() {
   local llm_api_key
   llm_api_key="$(generate_password)"
 
+  # OpenMetadata DB password: preserve unless --rotate
   local om_db_password
-  om_db_password="$(generate_password)"
+  local existing_om_db_password
+  existing_om_db_password="$(kubectl get secret dq-openmetadata-db-secrets -n "$NAMESPACE" -o jsonpath='{.data.POSTGRES_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [ "$ROTATE_PASSWORDS" = true ] || [ -z "$existing_om_db_password" ]; then
+    om_db_password="$(generate_password)"
+    log "${ROTATE_PASSWORDS:+Rotated} new OpenMetadata DB password"
+  else
+    om_db_password="$existing_om_db_password"
+    log "Reusing existing OpenMetadata DB password (use --rotate to change)"
+  fi
 
   local om_token
   om_token="$(generate_password)"
@@ -271,6 +353,14 @@ main() {
     "DQ_ENGINE_OIDC_CLIENT_ID=dq-engine" \
     "UI_VITE_LOCAL_URL=https://dq-frontend.dev.jac.dot:10443" \
     "UI_NGINX_LOCAL_URL=https://dq-frontend.dev.jac.dot:10443"
+
+  # --- Rotate database passwords (if --rotate was passed) ---
+  if [ "$ROTATE_PASSWORDS" = true ]; then
+    log "Rotating database passwords..."
+    rotate_postgres_password "dq-db-secrets" "$db_password" "postgres" "dq" "dq-db"
+    rotate_postgres_password "dq-openmetadata-db-secrets" "$om_db_password" "openmetadata" "openmetadata" "dq-openmetadata-db"
+    log "Password rotation complete"
+  fi
 
   # --- Store credentials ---
   cat > "$CREDENTIALS_FILE" << EOF
