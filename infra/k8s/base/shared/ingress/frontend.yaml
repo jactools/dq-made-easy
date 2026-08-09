@@ -12,10 +12,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - dq-frontend.dev.jac.dot
+        - dq-made-easy.dev.jac.dot
       secretName: dq-dev-tls-cert
   rules:
-    - host: dq-frontend.dev.jac.dot
+    - host: dq-made-easy.dev.jac.dot
       http:
         paths:
           - path: /
