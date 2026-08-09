@@ -8,9 +8,6 @@ metadata:
 
 spec:
   backoffLimit: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: dq-job-api-migrate
   ttlSecondsAfterFinished: 3600
   template:
     metadata:

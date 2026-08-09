@@ -7,9 +7,6 @@ metadata:
     app.kubernetes.io/part-of: dq-made-easy
 spec:
   backoffLimit: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: dq-job-openmetadata-seed
   ttlSecondsAfterFinished: 3600
   template:
     metadata:

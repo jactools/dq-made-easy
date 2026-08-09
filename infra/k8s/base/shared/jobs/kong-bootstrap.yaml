@@ -9,9 +9,6 @@ metadata:
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 300
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: dq-job-kong-bootstrap
   template:
     metadata:
       labels:

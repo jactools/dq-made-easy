@@ -9,9 +9,6 @@ metadata:
 spec:
   backoffLimit: 1
   ttlSecondsAfterFinished: 3600
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: dq-job-db-seed
   template:
     metadata:
       labels:
