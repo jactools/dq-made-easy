@@ -12,16 +12,16 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - dq-placeholder.local
-      secretName: dq-tls-cert
+        - dq-frontend.dev.jac.dot
+      secretName: dq-dev-tls-cert
   rules:
-    - host: dq-placeholder.local
+    - host: dq-frontend.dev.jac.dot
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: dq-kong
+                name: dq-frontend
                 port:
-                  number: 8443
+                  number: 443
