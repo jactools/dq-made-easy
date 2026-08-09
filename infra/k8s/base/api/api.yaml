@@ -16,6 +16,10 @@ spec:
         app.kubernetes.io/name: dq-api
         app.kubernetes.io/part-of: dq-made-easy
     spec:
+      volumes:
+        - name: api-tls-certs
+          secret:
+            secretName: dq-dev-tls-cert
       containers:
         - name: dq-api
           image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
@@ -30,6 +34,10 @@ spec:
                 name: dq-api-config
             - secretRef:
                 name: dq-api-secrets
+          volumeMounts:
+            - name: api-tls-certs
+              mountPath: /etc/api/certs
+              readOnly: true
           resources:
             requests:
               cpu: "100m"
