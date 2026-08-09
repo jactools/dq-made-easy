@@ -16,6 +16,10 @@ spec:
         app.kubernetes.io/name: dq-frontend
         app.kubernetes.io/part-of: dq-made-easy
     spec:
+      volumes:
+        - name: frontend-tls-certs
+          secret:
+            secretName: dq-dev-tls-cert
       containers:
         - name: dq-frontend
           image: docker.io/jacbeekers/dq-made-easy-frontend:0.1.0
@@ -23,10 +27,6 @@ spec:
           ports:
             - containerPort: 443
               name: https
-      volumes:
-        - name: frontend-tls-certs
-          secret:
-            secretName: dq-dev-tls-cert
           env:
             - name: FRONTEND_CERT_FILE
               value: /etc/nginx/certs/tls.crt
