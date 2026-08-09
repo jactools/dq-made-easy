@@ -23,6 +23,15 @@ spec:
           ports:
             - containerPort: 443
               name: https
+      volumes:
+        - name: frontend-tls-certs
+          secret:
+            secretName: dq-dev-tls-cert
+          env:
+            - name: FRONTEND_CERT_FILE
+              value: /etc/nginx/certs/tls.crt
+            - name: FRONTEND_KEY_FILE
+              value: /etc/nginx/certs/tls.key
           envFrom:
             - configMapRef:
                 name: dq-common-config
@@ -30,6 +39,10 @@ spec:
                 name: dq-frontend-config
             - secretRef:
                 name: dq-frontend-secrets
+          volumeMounts:
+            - name: frontend-tls-certs
+              mountPath: /etc/nginx/certs
+              readOnly: true
           resources:
             requests:
               cpu: "50m"
