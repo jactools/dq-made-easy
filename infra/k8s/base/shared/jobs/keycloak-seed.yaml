@@ -25,8 +25,6 @@ spec:
                 name: dq-common-config
             - configMapRef:
                 name: dq-keycloak-config
-            - configMapRef:
-                name: dq-kong-config
             - secretRef:
                 name: dq-keycloak-secrets
           env:
@@ -35,6 +33,30 @@ spec:
                 secretKeyRef:
                   name: dq-keycloak-secrets
                   key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KEYCLOAK_PUBLIC_URL
+              value: https://keycloak.dev.jac.dot:10443
+            - name: KEYCLOAK_REALM_DISPLAY_NAME
+              value: DQ Made Easy Realm
+            - name: KONG_PUBLIC_URL
+              value: https://kong.dev.jac.dot:10443
+            - name: OIDC_REDIRECT_BASE_URL
+              value: https://kong.dev.jac.dot:10443
+            - name: UI_VITE_LOCAL_URL
+              value: https://dq-made-easy.dev.jac.dot:10443
+            - name: UI_NGINX_LOCAL_URL
+              value: https://dq-made-easy.dev.jac.dot:10443
+            - name: ZAMMAD_PUBLIC_URL
+              value: https://zammad.dev.jac.dot:10443
+            - name: DQ_ENGINE_OIDC_CLIENT_ID
+              value: dq-engine
+            - name: SMOKE_LOGIN_EMAIL
+              value: alice@jaccloud.nl
+            - name: OPERATOR_LOGIN_EMAIL
+              value: alice@jaccloud.nl
+            - name: AUDITOR_LOGIN_EMAIL
+              value: auditor@jaccloud.nl
+            - name: REGULATOR_LOGIN_EMAIL
+              value: regulator@jaccloud.nl
             - name: CURL_CA_BUNDLE
               value: /etc/ssl/certs/trust/internal-ca-bundle.pem
           volumeMounts:
