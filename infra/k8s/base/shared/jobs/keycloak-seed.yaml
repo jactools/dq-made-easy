@@ -9,6 +9,9 @@ metadata:
 spec:
   backoffLimit: 3
   ttlSecondsAfterFinished: 300
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-job-keycloak-seed
   template:
     metadata:
       labels:

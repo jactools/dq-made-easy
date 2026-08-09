@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/component: kafka-config
 spec:
   backoffLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-job-kafka-topics
   ttlSecondsAfterFinished: 300
   template:
     metadata:
