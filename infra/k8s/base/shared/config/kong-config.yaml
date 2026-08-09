@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-kong-config
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+data:
+  KONG_ADMIN_INTERNAL_URL: "https://kong-admin.platform-kong.svc.cluster.local:8444"
+  KONG_LUA_SSL_TRUSTED_CERTIFICATE: "/etc/kong/certs/trust/internal-ca-bundle.pem"
+  KONG_PUBLIC_URL: "https://kong.dev.jac.dot:10443"

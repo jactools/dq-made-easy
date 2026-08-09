@@ -5,6 +5,9 @@ resources:
   - namespace.yaml
   - config/common-config.yaml
   - config/keycloak-config.yaml
+  - config/kong-config.yaml
+  - config/platform-ca-bundle.yaml
+  - config/platform-root-ca.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
   - jobs/db-seed.yaml
