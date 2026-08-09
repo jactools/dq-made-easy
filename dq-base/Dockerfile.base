@@ -24,7 +24,8 @@ RUN --mount=type=secret,id=repo_npmrc \
     apt-get install -y --no-install-recommends \
       build-essential \
       curl \
-      ca-certificates; \
+      ca-certificates \
+      jq; \
     NPM_CONFIG_USERCONFIG=/run/secrets/repo_npmrc npm install -g npm@11.14.1; \
     npm --version; \
     rm -rf /var/lib/apt/lists/*; \
@@ -35,7 +36,8 @@ RUN --mount=type=secret,id=repo_npmrc \
     apk add --no-cache \
       build-base \
       curl \
-      ca-certificates; \
+      ca-certificates \
+      jq; \
     NPM_CONFIG_USERCONFIG=/run/secrets/repo_npmrc npm install -g npm@11.14.1; \
     npm --version; \
   else \
