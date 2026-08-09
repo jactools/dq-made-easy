@@ -23,7 +23,21 @@ spec:
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-lc"]
           args:
-            - cd /app && python -m alembic -c alembic.ini upgrade heads
+            - |
+              # Wait for database to be ready
+              echo "Waiting for database..."
+              for i in $(seq 1 30); do
+                if psql "$DATABASE_URL" -c '\q' >/dev/null 2>&1; then
+                  echo "Database is ready"
+                  break
+                fi
+                if [[ $i -eq 30 ]]; then
+                  echo "Database not ready after 30 attempts"
+                  exit 1
+                fi
+                sleep 2
+              done
+              cd /app && python -m alembic -c alembic.ini upgrade heads
           envFrom:
             - configMapRef:
                 name: dq-common-config
