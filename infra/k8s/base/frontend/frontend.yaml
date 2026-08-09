@@ -35,9 +35,9 @@ spec:
               name: https
           env:
             - name: FRONTEND_CERT_FILE
-              value: /etc/nginx/certs/tls.crt
+              value: tls.crt
             - name: FRONTEND_KEY_FILE
-              value: /etc/nginx/certs/tls.key
+              value: tls.key
           envFrom:
             - configMapRef:
                 name: dq-common-config
