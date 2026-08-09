@@ -343,13 +343,13 @@ main() {
   # Keycloak-seed job connects to platform-foundation Keycloak
   apply_configmap "dq-keycloak-config" \
     "ENVIRONMENT=dev" \
-    "KEYCLOAK_INTERNAL_URL=https://keycloak.dev.jac.dot:10443" \
+    "KEYCLOAK_INTERNAL_URL=https://keycloak.platform-keycloak.svc.cluster.local:8443" \
     "KEYCLOAK_ADMIN_REALM=master"
 
   # Kong-bootstrap job connects to platform-foundation Kong
   apply_configmap "dq-kong-config" \
     "ENVIRONMENT=dev" \
-    "KONG_ADMIN_INTERNAL_URL=https://kong-admin.dev.jac.dot:10443" \
+    "KONG_ADMIN_INTERNAL_URL=https://kong-admin.platform-kong.svc.cluster.local:8444" \
     "DQ_API_INTERNAL_URL=https://dq-api.dev.jac.dot:10443" \
     "KEYCLOAK_REALM=dq-made-easy" \
     "KEYCLOAK_SYSTEM_ADMIN_USERNAME=admin" \
