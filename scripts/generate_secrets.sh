@@ -137,9 +137,29 @@ main() {
   om_token="$(generate_password)"
 
   # --- Apply secrets to cluster ---
+  # API secrets + DB connection string
+  local api_db_url="postgresql://postgres:${db_password}@dq-db:5432/dq"
   apply_secret "dq-api-secrets" \
     "API_SECRET_PLACEHOLDER=${api_secret}" \
-    "APP_CONFIG_ENCRYPTION_KEY=${api_encryption_key}"
+    "APP_CONFIG_ENCRYPTION_KEY=${api_encryption_key}" \
+    "DQ_DB_INTERNAL_URL=${api_db_url}"
+
+  # Kafka consumer needs DB URL for its own state + bootstrap servers
+  apply_secret "dq-kafka-consumer-secrets" \
+    "KAFKA_CONSUMER_DB_URL=${kafka_consumer_db_url}" \
+    "KAFKA_BOOTSTRAP_SERVERS=kafka.platform-kafka.svc.cluster.local:9092"
+
+  # OpenMetadata DB also needs POSTGRES_PASSWORD for the postgres image
+  apply_secret "dq-openmetadata-db-secrets" \
+    "OM_DB_PASSWORD=${om_db_password}" \
+    "POSTGRES_PASSWORD=${om_db_password}" \
+    "POSTGRES_DB=openmetadata"
+
+  # OpenMetadata server needs DB connection string
+  local om_db_url="mysql://openmetadata:${om_db_password}@dq-openmetadata-db:3306/openmetadata"
+  apply_secret "dq-openmetadata-server-secrets" \
+    "OM_TOKEN=${om_token}" \
+    "AM_DB_URL=${om_db_url}"
 
   apply_secret "dq-db-secrets" \
     "POSTGRES_PASSWORD=${db_password}"
@@ -147,23 +167,14 @@ main() {
   apply_secret "dq-frontend-secrets" \
     "FRONTEND_SECRET_PLACEHOLDER=${frontend_secret}"
 
+  # Frontend also needs KONG_PUBLIC_URL (configmap-level, not secret)
+  # Handled by deploy.sh or env file
+
   apply_secret "dq-engine-secrets" \
     "ENGINE_SECRET_PLACEHOLDER=${engine_secret}"
 
-  apply_secret "dq-profiling-secrets" \
-    "PROFILING_SECRET_PLACEHOLDER=${profiling_secret}"
-
   apply_secret "dq-llm-secrets" \
     "DQ_LLM_API_KEY=${llm_api_key}"
-
-  apply_secret "dq-kafka-consumer-secrets" \
-    "KAFKA_CONSUMER_DB_URL=${kafka_consumer_db_url}"
-
-  apply_secret "dq-openmetadata-db-secrets" \
-    "OM_DB_PASSWORD=${om_db_password}"
-
-  apply_secret "dq-openmetadata-server-secrets" \
-    "OM_TOKEN=${om_token}"
 
   # --- Store credentials ---
   cat > "$CREDENTIALS_FILE" << EOF
