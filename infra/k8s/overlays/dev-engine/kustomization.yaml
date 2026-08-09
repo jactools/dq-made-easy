@@ -33,4 +33,3 @@ images:
     newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-openmetadata-server
     newTag: "0.10"
 
-    newTag: "0.10"
