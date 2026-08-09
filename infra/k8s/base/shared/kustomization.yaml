@@ -10,14 +10,7 @@ resources:
   - config/platform-root-ca.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
-  - jobs/db-seed.yaml
-  - jobs/api-migrate.yaml
-  - jobs/keycloak-seed.yaml
-  - jobs/kong-bootstrap.yaml
-  # kafka-topics and trino-catalog jobs deferred until platform services are available
-  # - jobs/kafka-topics.yaml
-  # - jobs/trino-catalog.yaml
-  - jobs/openmetadata-seed.yaml
+  # Jobs are excluded from ArgoCD sync — they exist as templates for manual trigger via scripts/trigger_jobs.sh
 
 transformers:
   - metadata/labels.yaml
