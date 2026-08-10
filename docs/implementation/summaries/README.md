@@ -6,6 +6,7 @@ This directory contains implementation summaries for significant architectural o
 
 | Date | Summary | Status | Scope |
 |---|---|---|---|
+| 2026-08-10 | [Kong bootstrap — SSL verification, route paths, SSO session resolution](./2026-08-10_kong-bootstrap-ssl-sso-fix.md) | Complete | Fixed kong-bootstrap job readiness checks, route path drift, Keycloak admin password, and TRUST_PROXY_AUTH |
 | 2026-08-05 | [MaaS target rollout matrix](./2026-08-05_maas-target-rollout-matrix.md) | Complete | Repo-local target/service/instance rollout contract for MaaS workloads |
 | 2026-08-04 | [dq-made-easy shared image verification](./2026-08-04_dq-made-easy-shared-image-verification.md) | Complete | Verified the shared runner image through the repo pull path and container runtime |
 | 2026-08-04 | [dq-made-easy shared image compatibility cleanup](./2026-08-04_dq-made-easy-shared-image-compatibility-cleanup.md) | Complete | Removed the bare shared-image scope shim and tightened operator dry-run planning |

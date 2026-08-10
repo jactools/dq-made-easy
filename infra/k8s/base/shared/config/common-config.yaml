@@ -6,3 +6,4 @@ metadata:
     app.kubernetes.io/part-of: dq-made-easy
 data:
   ENVIRONMENT: dev
+  TRUST_PROXY_AUTH: 'true'
