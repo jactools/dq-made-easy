@@ -6,4 +6,8 @@ metadata:
     platform.jaccloud.nl/tenant: dq-made-easy
     platform.jaccloud.nl/environment: dev
 data:
+  ENVIRONMENT: dev
   FRONTEND_HTTPS_PORT: '443'
+  KONG_PUBLIC_URL: https://kong.dev.jac.dot:10443
+  KONG_SERVICE_FQDN: kong-proxy.platform-kong.svc.cluster.local
+  SSL_VERIFY: 'on'
