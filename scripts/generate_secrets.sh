@@ -316,16 +316,31 @@ main() {
   fi
   log "Using Kong admin password from platform secret"
 
-  # Redis credentials: read from platform secret (owned by platform-foundation)
-  local redis_username
-  local redis_password
-  redis_username="$(kubectl get secret redis-credentials -n platform-redis -o jsonpath='{.data.REDIS_ADMIN_USERNAME}' 2>/dev/null | base64 -d || true)"
-  redis_password="$(kubectl get secret redis-credentials -n platform-redis -o jsonpath='{.data.REDIS_ADMIN_PASSWORD}' 2>/dev/null | base64 -d || true)"
-  if [[ -z "$redis_username" || -z "$redis_password" ]]; then
-    err "Platform Redis credentials not found — run generate_secrets.sh in platform-foundation first"
+  # Redis credentials: read per-principal from platform secrets (owned by platform-foundation)
+  local dq_api_redis_username="dq-api"
+  local dq_api_redis_password
+  dq_api_redis_password="$(kubectl get secret redis-credentials-dq-api -n platform-redis -o jsonpath='{.data.REDIS_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [[ -z "$dq_api_redis_password" ]]; then
+    err "Platform Redis credentials for dq-api not found — run generate_secrets.sh in platform-foundation first"
     exit 1
   fi
-  log "Using Redis credentials from platform secret"
+
+  local dq_engine_redis_username="dq-engine"
+  local dq_engine_redis_password
+  dq_engine_redis_password="$(kubectl get secret redis-credentials-dq-engine -n platform-redis -o jsonpath='{.data.REDIS_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [[ -z "$dq_engine_redis_password" ]]; then
+    err "Platform Redis credentials for dq-engine not found — run generate_secrets.sh in platform-foundation first"
+    exit 1
+  fi
+
+  local dq_profiling_redis_username="dq-profiling"
+  local dq_profiling_redis_password
+  dq_profiling_redis_password="$(kubectl get secret redis-credentials-dq-profiling -n platform-redis -o jsonpath='{.data.REDIS_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [[ -z "$dq_profiling_redis_password" ]]; then
+    err "Platform Redis credentials for dq-profiling not found — run generate_secrets.sh in platform-foundation first"
+    exit 1
+  fi
+  log "Using per-principal Redis credentials from platform secrets"
 
   local redis_host="redis.platform-redis.svc.cluster.local"
   local redis_port="6379"
@@ -348,7 +363,7 @@ main() {
     "DQ_DB_INTERNAL_URL=${api_db_url}" \
     "API_SECRET_PLACEHOLDER=${api_secret}" \
     "APP_CONFIG_ENCRYPTION_KEY=${api_encryption_key}" \
-    "REDIS_PASSWORD=${redis_password}"
+    "REDIS_PASSWORD=${dq_api_redis_password}"
 
   apply_secret "dq-db-secrets" \
     "POSTGRES_PASSWORD=${db_password}"
@@ -358,11 +373,11 @@ main() {
 
   apply_secret "dq-engine-secrets" \
     "ENGINE_SECRET_PLACEHOLDER=${engine_secret}" \
-    "REDIS_PASSWORD=${redis_password}"
+    "REDIS_PASSWORD=${dq_engine_redis_password}"
 
   apply_secret "dq-profiling-secrets" \
     "PROFILING_SECRET_PLACEHOLDER=${profiling_secret}" \
-    "REDIS_PASSWORD=${redis_password}"
+    "REDIS_PASSWORD=${dq_profiling_redis_password}"
 
   apply_secret "dq-llm-secrets" \
     "DQ_LLM_API_KEY=${llm_api_key}"
