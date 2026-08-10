@@ -820,8 +820,6 @@ async def list_agents(
 ) -> list[AgentCapabilitySummaryView]:
     _require_any_scope(scopes, required_scopes=["dq:rules:read"])
     return _AGENT_CAPABILITIES
-    except HTTPException:
-        raise
 
 
 @router.post(
