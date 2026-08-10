@@ -111,7 +111,18 @@ create_route() {
   local route_name="$2"
   local path="$3"
   local methods_json="${4:-[\"GET\",\"POST\",\"PUT\",\"DELETE\",\"PATCH\",\"OPTIONS\"]}"
-  if ! curl -s "$KONG_ADMIN_INTERNAL_URL/services/$service/routes" | grep -q "\"name\":\"$route_name\""; then
+  local existing_route
+  existing_route=$(curl -s "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" 2>&1)
+  if [ -n "$existing_route" ] && echo "$existing_route" | jq -e '.id' >/dev/null 2>&1; then
+    local existing_path
+    existing_path=$(echo "$existing_route" | jq -r '.paths[0] // empty')
+    if [ "$existing_path" != "$path" ]; then
+      echo "[kong-bootstrap] updating route $route_name path: $existing_path -> $path"
+      curl -s -X PATCH "$KONG_ADMIN_INTERNAL_URL/routes/$route_name" \
+        -H 'Content-Type: application/json' \
+        -d "{\"paths\":[\"$path\"]}" >/dev/null
+    fi
+  else
     curl -s -X POST "$KONG_ADMIN_INTERNAL_URL/services/$service/routes" \
       -H 'Content-Type: application/json' \
       -d "{\"name\":\"$route_name\",\"paths\":[\"$path\"],\"methods\":$methods_json,\"strip_path\":false}" >/dev/null
