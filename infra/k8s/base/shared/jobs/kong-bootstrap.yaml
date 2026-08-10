@@ -32,6 +32,16 @@ spec:
           value: 'true'
         - name: CURL_CA_BUNDLE
           value: /etc/ssl/certs/platform-root-ca.pem
+        - name: DQ_API_INTERNAL_URL
+          value: https://dq-api.dq-made-easy-dev.svc.cluster.local:4010
+        - name: KEYCLOAK_SYSTEM_ADMIN_USERNAME
+          value: admin
+        - name: DQ_ENGINE_OIDC_CLIENT_ID
+          value: dq-engine
+        - name: UI_VITE_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:10443
+        - name: UI_NGINX_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:10443
         envFrom:
         - configMapRef:
             name: dq-common-config
