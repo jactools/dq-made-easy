@@ -46,6 +46,9 @@ router = APIRouter(tags=["auth"])
 _log = logging.getLogger(__name__)
 _ca_bundle = os.environ.get("CURL_CA_BUNDLE")
 
+def _get_ca_bundle() -> str | None:
+    return os.environ.get("CURL_CA_BUNDLE")
+
 
 def _to_base64_url(value: str) -> str:
     return base64.urlsafe_b64encode(value.encode("utf-8")).decode("utf-8").rstrip("=")
@@ -272,7 +275,7 @@ def _build_backend_issuer(issuer: str) -> str:
 async def _fetch_oidc_metadata(backend_issuer: str) -> dict[str, Any]:
     discovery_url = f"{backend_issuer.rstrip('/')}/.well-known/openid-configuration"
     try:
-        async with httpx.AsyncClient(timeout=15.0, verify=_ca_bundle) as client:
+        async with httpx.AsyncClient(timeout=15.0, verify=_get_ca_bundle()) as client:
             response = await client.get(discovery_url)
     except httpx.RequestError as exc:
         raise HTTPException(status_code=503, detail="OIDC discovery failed") from exc
@@ -385,7 +388,7 @@ async def _exchange_oidc_code(
     if client_secret:
         payload["client_secret"] = client_secret
 
-    async with httpx.AsyncClient(timeout=15.0, verify=_ca_bundle) as client:
+    async with httpx.AsyncClient(timeout=15.0, verify=_get_ca_bundle()) as client:
         response = await client.post(
             token_endpoint,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -416,7 +419,7 @@ async def _refresh_oidc_token(
     if client_secret:
         payload["client_secret"] = client_secret
 
-    async with httpx.AsyncClient(timeout=15.0, verify=_ca_bundle) as client:
+    async with httpx.AsyncClient(timeout=15.0, verify=_get_ca_bundle()) as client:
         response = await client.post(
             token_endpoint,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -434,7 +437,7 @@ async def _load_oidc_profile(backend_issuer: str, access_token: str, id_token: s
         "userinfo_endpoint",
     )
     userinfo_url = _rewrite_oidc_endpoint_to_backend(userinfo_url, backend_issuer)
-    async with httpx.AsyncClient(timeout=15.0, verify=_ca_bundle) as client:
+    async with httpx.AsyncClient(timeout=15.0, verify=_get_ca_bundle()) as client:
         response = await client.get(
             userinfo_url,
             headers={"Authorization": f"Bearer {access_token}"},
