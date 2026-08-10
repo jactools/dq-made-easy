@@ -3,19 +3,19 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - config/common-config.yaml
-  - ingress/frontend.yaml
-  - jobs/api-migrate.yaml
-  - services/api.yaml
-  - services/db.yaml
-  - services/frontend.yaml
-  - services/engine.yaml
-  - services/profiling-worker.yaml
-  - services/llm.yaml
-  - services/kafka-consumer.yaml
-  - services/openmetadata-db.yaml
-  - services/openmetadata-server.yaml
+  - shared/config/common-config.yaml
+  - shared/ingress/frontend.yaml
+  - shared/ingress/openmetadata.yaml
+  - api/api.yaml
+  - api/db.yaml
+  - frontend/frontend.yaml
+  - engine/engine.yaml
+  - profiling/profiling-worker.yaml
+  - kafka-consumer/kafka-consumer.yaml
+  - openmetadata/openmetadata-db.yaml
+  - openmetadata/openmetadata-server.yaml
+  - llm/llm.yaml
 
 transformers:
-  - metadata/labels.yaml
-  - metadata/annotations.yaml
+  - engine/metadata/labels.yaml
+  - engine/metadata/annotations.yaml

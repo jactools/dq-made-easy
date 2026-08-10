@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: dq-made-easy-dev
 
 resources:
-  - ../../base/engine
+  - ../../base/kafka-consumer
   - config/service-config.yaml
 
 labels:
@@ -15,6 +15,6 @@ labels:
       platform.jaccloud.nl/environment: dev
 
 images:
-  - name: docker.io/jacbeekers/dq-made-easy-engine
-    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-engine
+  - name: docker.io/jacbeekers/dq-made-easy-kafka-consumer
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-kafka-consumer
     newTag: "0.11"
