@@ -114,16 +114,24 @@ test -s "$workspace_credentials_env"
 cp -f "$seed_dir/dq_engine_oidc.env" "$workspace_engine_oidc_env"
 test -s "$workspace_engine_oidc_env"
 
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+
+# Output credentials to stdout for K8s job logging
+echo ""
+echo "=== KEYCLOAK SEED CREDENTIALS ==="
+cat "$credentials_csv"
+echo ""
+echo "=== KEYCLOAK SEED CREDENTIALS END ==="
+echo ""
 
 # Import realm into Keycloak via Admin API
 keycloak_url="${KEYCLOAK_SYSTEM_ADMIN_URL:-https://keycloak:8443}"

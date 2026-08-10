@@ -74,6 +74,8 @@ spec:
         - mountPath: /etc/ssl/certs/trust
           name: ca-bundle
           readOnly: true
+        - mountPath: /seed-data
+          name: seed-data
       restartPolicy: Never
       volumes:
       - configMap:
@@ -82,4 +84,6 @@ spec:
             path: internal-ca-bundle.pem
           name: dq-platform-ca-bundle
         name: ca-bundle
+      - emptyDir: {}
+        name: seed-data
   ttlSecondsAfterFinished: 300

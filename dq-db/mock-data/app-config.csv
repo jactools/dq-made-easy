@@ -3,7 +3,7 @@
 "sso_provider","keycloak","string","2025-01-01T00:00:00Z"
 "icon_provider","tabler","string","2026-05-28T00:00:00Z"
 "style_package","data-web-css","string","2026-05-31T00:00:00Z"
-"sso_issuer","https://keycloak.jac.dot:9444/realms/jaccloud","string","2026-02-27T00:00:00Z"
+"sso_issuer","https://keycloak.dev.jac.dot:10443/auth/realms/dq-made-easy","string","2026-02-27T00:00:00Z"
 "sso_client_id","dq-rules-ui","string","2026-02-27T00:00:00Z"
 "sso_enabled","true","boolean","2025-01-01T00:00:00Z"
 "allow_local_auth","true","boolean","2026-02-27T00:00:00Z"
