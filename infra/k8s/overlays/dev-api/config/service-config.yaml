@@ -8,13 +8,3 @@ metadata:
 data:
   DQ_API_PORT: '8000'
   SSO_INTERNAL_ISSUER_URL: https://keycloak.platform-keycloak.svc.cluster.local:8443/auth/realms/dq-made-easy
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dq-db-config
-  labels:
-    platform.jaccloud.nl/tenant: dq-made-easy
-    platform.jaccloud.nl/environment: dev
-data:
-  POSTGRES_DB: dq
