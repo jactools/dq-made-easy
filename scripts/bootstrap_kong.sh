@@ -25,7 +25,7 @@ KONG_ADMIN_INTERNAL_URL="${KONG_ADMIN_INTERNAL_URL:-https://localhost:8444}"
 DQ_API_INTERNAL_URL="$(require_env DQ_API_INTERNAL_URL)"
 APP_CONFIG_INTERNAL_URL="${DQ_API_INTERNAL_URL%/}/api/system/v1/app-config"
 KONG_LUA_SSL_TRUSTED_CERTIFICATE="${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-/etc/kong/certs/trust/internal-ca-bundle.pem}"
-MAX_RETRIES="${MAX_RETRIES:-60}"
+MAX_RETRIES="${MAX_RETRIES:-120}"
 RETRY_COUNT=0
 KEYCLOAK_INTERNAL_URL="$(require_env KEYCLOAK_INTERNAL_URL)"
 KEYCLOAK_ADMIN_REALM="$(require_env KEYCLOAK_ADMIN_REALM)"
@@ -563,10 +563,10 @@ disable_jwt_for_route() {
 
 create_service "dq-api" "https://dq-api.dq-made-easy-dev.svc.cluster.local:4010"
 create_route "dq-api" "dq-api-auth-v1" "/api/auth/v1"
-create_route "dq-api" "dq-api-admin-v1" "/admin/v1"
-create_route "dq-api" "dq-api-admin-v1-users" "/admin/v1/users"
-create_route "dq-api" "dq-api-admin-v1-roles" "/admin/v1/roles"
-create_route "dq-api" "dq-api-admin-v1-rules" "/admin/v1/rules"
+create_route "dq-api" "dq-api-admin-v1" "/api/admin/v1"
+create_route "dq-api" "dq-api-admin-v1-users" "/api/admin/v1/users"
+create_route "dq-api" "dq-api-admin-v1-roles" "/api/admin/v1/roles"
+create_route "dq-api" "dq-api-admin-v1-rules" "/api/admin/v1/rules"
 create_route "dq-api" "dq-api-system-v1" "/system/v1"
 create_route "dq-api" "dq-api-system-v1-app-config-read" "/system/v1/app-config" '["GET","HEAD","OPTIONS"]'
 create_route "dq-api" "dq-api-system-v1-app-config-write" "/system/v1/app-config" '["POST","PUT","PATCH","DELETE"]'
@@ -580,7 +580,7 @@ create_route "dq-api" "dq-api-rulebuilder-v1-approvals-write" "/rulebuilder/v1/a
 
 # Public allowlisted endpoints (must NOT require JWT at Kong)
 create_route "dq-api" "dq-api-health" "/health"
-create_route "dq-api" "dq-api-admin-v1-me" "/admin/v1/me"
+create_route "dq-api" "dq-api-admin-v1-me" "/api/admin/v1/me"
 set_route_regex_priority "dq-api-admin-v1-me" 100
 create_route "dq-api" "dq-api-auth-v1-redirect" "/api/auth/v1/redirect"
 create_route "dq-api" "dq-api-auth-v1-callback" "/api/auth/v1/callback"
