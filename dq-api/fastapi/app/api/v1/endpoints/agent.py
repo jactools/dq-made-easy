@@ -816,25 +816,10 @@ _AGENT_CAPABILITIES: list[AgentCapabilitySummaryView] = [
 async def list_agents(
     request: Request,
     scopes: list[str] = Depends(get_scopes),
-    config_repository: AppConfigRepository = Depends(get_app_config_repository),
     user_id: str = Depends(get_user_id),
-    audit_repository: AgentRequestAuditRepository = Depends(get_agent_request_audit_repository),
 ) -> list[AgentCapabilitySummaryView]:
-    try:
-        _require_any_scope(scopes, required_scopes=["dq:rules:read"])
-        _require_allowed_agent(request, config_repository.get_app_config())
-        agents = _AGENT_CAPABILITIES
-        await _record_agent_audit_event(
-            request=request,
-            repository=audit_repository,
-            action="list_agents",
-            response_type="agent_list",
-            status_code=200,
-            success=True,
-            actor_id=user_id,
-            details={"agent_count": len(agents)},
-        )
-        return agents
+    _require_any_scope(scopes, required_scopes=["dq:rules:read"])
+    return _AGENT_CAPABILITIES
     except HTTPException:
         raise
 
