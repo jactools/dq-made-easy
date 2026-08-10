@@ -270,8 +270,9 @@ def _build_backend_issuer(issuer: str) -> str:
 
 async def _fetch_oidc_metadata(backend_issuer: str) -> dict[str, Any]:
     discovery_url = f"{backend_issuer.rstrip('/')}/.well-known/openid-configuration"
+    ca_bundle = os.environ.get("CURL_CA_BUNDLE")
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=15.0, verify=ca_bundle) as client:
             response = await client.get(discovery_url)
     except httpx.RequestError as exc:
         raise HTTPException(status_code=503, detail="OIDC discovery failed") from exc
