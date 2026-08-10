@@ -766,6 +766,79 @@ async def _record_agent_audit_event(
     await repository.record_event(event)
 
 
+class AgentCapabilitySummaryView(SnakeModel):
+    """Agent capability summary returned to the UI."""
+
+    id: str = Field(description="Agent identifier")
+    name: str = Field(description="Human-readable name")
+    description: str = Field(description="Short description")
+    capabilities: list[str] = Field(default_factory=list, description="List of capability labels")
+    tools: list[str] = Field(default_factory=list, description="List of tool names")
+    status: str = Field(default="available", description="Agent status")
+
+
+_AGENT_CAPABILITIES: list[AgentCapabilitySummaryView] = [
+    AgentCapabilitySummaryView(
+        id="general",
+        name="General DQ Assistant",
+        description="General-purpose data quality assistant for rule and delivery questions.",
+        capabilities=["explain_rules", "explain_deliveries", "explain_metadata"],
+        tools=["rules_read", "catalog_read", "metadata_read"],
+        status="available",
+    ),
+    AgentCapabilitySummaryView(
+        id="anomaly_inspector",
+        name="Anomaly Inspector",
+        description="Inspect delivery anomalies and drill into root causes.",
+        capabilities=["inspect_anomalies", "trace_lineage"],
+        tools=["anomalies_read", "lineage_read"],
+        status="available",
+    ),
+    AgentCapabilitySummaryView(
+        id="rule_assistant",
+        name="Rule Builder Assistant",
+        description="Help with creating, debugging, and optimising data quality rules.",
+        capabilities=["suggest_rules", "debug_rules"],
+        tools=["rules_read", "rules_write", "ontology_read"],
+        status="available",
+    ),
+]
+
+
+@router.get(
+    "/agents",
+    response_model=list[AgentCapabilitySummaryView],
+    responses={
+        200: {"description": "List of available agent capabilities."},
+        403: {"description": "Insufficient scope or agent not allowed."},
+    },
+)
+async def list_agents(
+    request: Request,
+    scopes: list[str] = Depends(get_scopes),
+    config_repository: AppConfigRepository = Depends(get_app_config_repository),
+    user_id: str = Depends(get_user_id),
+    audit_repository: AgentRequestAuditRepository = Depends(get_agent_request_audit_repository),
+) -> list[AgentCapabilitySummaryView]:
+    try:
+        _require_any_scope(scopes, required_scopes=["dq:rules:read"])
+        _require_allowed_agent(request, config_repository.get_app_config())
+        agents = _AGENT_CAPABILITIES
+        await _record_agent_audit_event(
+            request=request,
+            repository=audit_repository,
+            action="list_agents",
+            response_type="agent_list",
+            status_code=200,
+            success=True,
+            actor_id=user_id,
+            details={"agent_count": len(agents)},
+        )
+        return agents
+    except HTTPException:
+        raise
+
+
 @router.post(
     "/rules/execute-batch",
     response_model=BatchValidationResponseView,

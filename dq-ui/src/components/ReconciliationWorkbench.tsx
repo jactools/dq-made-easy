@@ -202,7 +202,7 @@ export const ReconciliationWorkbench: React.FC = () => {
     }
 
     const response = await fetch(
-      `${apiBaseUrl}/gx/runs/reconciliation?workspaceId=${encodeURIComponent(workspaceId)}&limit=10`,
+      `${apiBaseUrl}/runs/reconciliation?workspaceId=${encodeURIComponent(workspaceId)}&limit=10`,
       {
         headers: tokenHeaders,
       },
@@ -269,7 +269,7 @@ export const ReconciliationWorkbench: React.FC = () => {
         throw new Error('Reconciliation history cannot be persisted without an authentication token.')
       }
 
-      const createResponse = await fetch(`${apiBaseUrl}/gx/runs/reconciliation`, {
+      const createResponse = await fetch(`${apiBaseUrl}/runs/reconciliation`, {
         method: 'POST',
         headers: {
           ...tokenHeaders,
@@ -295,7 +295,7 @@ export const ReconciliationWorkbench: React.FC = () => {
       }
 
       const createdRun = snakeToCamel<{ id: string }>(await createResponse.json())
-      const reportResponse = await fetch(`${apiBaseUrl}/gx/runs/${createdRun.id}/report`, {
+      const reportResponse = await fetch(`${apiBaseUrl}/runs/${createdRun.id}/report`, {
         method: 'POST',
         headers: {
           ...tokenHeaders,

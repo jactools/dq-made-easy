@@ -336,7 +336,7 @@ export const ValidationPlans: React.FC = () => {
       })
 
       try {
-        const recentRunsResponse = await fetch(`${apiBaseUrl}/gx/runs/stats?${recentRunsParams.toString()}`, {
+        const recentRunsResponse = await fetch(`${apiBaseUrl}/runs/stats?${recentRunsParams.toString()}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
         const recentRunsPayload = await recentRunsResponse.json().catch(() => null)

@@ -291,7 +291,7 @@ export const GxSuitesAdmin: React.FC = () => {
       params.set('status', status)
       params.set('latestOnly', latestOnly ? 'true' : 'false')
 
-      const response = await fetch(`${apiBaseUrl}/gx/suites?${params.toString()}`, {
+      const response = await fetch(`${apiBaseUrl}/suites?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
 
