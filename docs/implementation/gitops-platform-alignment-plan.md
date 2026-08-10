@@ -167,3 +167,7 @@ DQ deploys through the shared platform contract with a clean split between its r
 2. Create the dedicated platform-config base and overlays.
 3. Align the DQ ArgoCD source paths with the new overlay names.
 4. Validate runtime sync and platform-config Job execution separately.
+
+Related adoption work:
+
+- [Redis Platform Adoption Plan](redis-platform-adoption-plan.md)
