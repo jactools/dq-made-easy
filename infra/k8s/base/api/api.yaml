@@ -20,6 +20,9 @@ spec:
         - name: api-tls-certs
           secret:
             secretName: dq-dev-tls-cert
+        - name: platform-root-ca
+          configMap:
+            name: platform-root-ca
       containers:
         - name: dq-api
           image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
@@ -27,6 +30,15 @@ spec:
           ports:
             - containerPort: 4010
               name: https
+          env:
+            - name: CURL_CA_BUNDLE
+              value: /etc/ssl/certs/platform-root-ca.pem
+            - name: SSO_INTERNAL_ISSUER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: dq-api-config
+                  key: SSO_INTERNAL_ISSUER_URL
+                  optional: true
           envFrom:
             - configMapRef:
                 name: dq-common-config
@@ -37,6 +49,10 @@ spec:
           volumeMounts:
             - name: api-tls-certs
               mountPath: /etc/api/certs
+              readOnly: true
+            - name: platform-root-ca
+              mountPath: /etc/ssl/certs/platform-root-ca.pem
+              subPath: rootCA.pem
               readOnly: true
           resources:
             requests:
