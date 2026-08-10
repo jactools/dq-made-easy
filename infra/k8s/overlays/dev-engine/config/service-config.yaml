@@ -7,6 +7,15 @@ metadata:
     platform.jaccloud.nl/environment: dev
 data:
   DQ_ENGINE_PORT: '8000'
+  REDIS_HOST: redis.platform-redis.svc.cluster.local
+  REDIS_PORT: '6379'
+  REDIS_DB: '0'
+  REDIS_USERNAME: platform-admin
+  REDIS_TLS_ENABLED: 'true'
+  REDIS_CA_BUNDLE: /etc/ssl/certs/platform-root-ca.pem
+  GX_EXECUTION_QUEUE_KEY: dq-made-easy:gx-execution
+  GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: dq-made-easy:gx-join-pair-materialization
+  TEST_DATA_MATERIALIZATION_QUEUE_KEY: dq-made-easy:test-data-materialization
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -17,6 +26,14 @@ metadata:
     platform.jaccloud.nl/environment: dev
 data:
   DQ_PROFILING_METRICS_PORT: '8001'
+  REDIS_HOST: redis.platform-redis.svc.cluster.local
+  REDIS_PORT: '6379'
+  REDIS_DB: '0'
+  REDIS_USERNAME: platform-admin
+  REDIS_TLS_ENABLED: 'true'
+  REDIS_CA_BUNDLE: /etc/ssl/certs/platform-root-ca.pem
+  PROFILING_QUEUE_KEY: dq-made-easy:profiling
+  TEST_DATA_MATERIALIZATION_QUEUE_KEY: dq-made-easy:test-data-materialization
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -46,6 +46,7 @@ Secrets created:
   - dq-openmetadata-server-secrets (OM_TOKEN)
   - dq-keycloak-secrets         (KEYCLOAK_ADMIN_PASSWORD)
   - dq-kong-secrets             (KONG_ADMIN_PASSWORD)
+  - dq-api-secrets / dq-engine-secrets / dq-profiling-secrets also carry platform Redis credentials
 
 Configmaps created:
   - dq-api-config              (ENVIRONMENT)
@@ -315,6 +316,28 @@ main() {
   fi
   log "Using Kong admin password from platform secret"
 
+  # Redis credentials: read from platform secret (owned by platform-foundation)
+  local redis_username
+  local redis_password
+  redis_username="$(kubectl get secret redis-credentials -n platform-redis -o jsonpath='{.data.REDIS_ADMIN_USERNAME}' 2>/dev/null | base64 -d || true)"
+  redis_password="$(kubectl get secret redis-credentials -n platform-redis -o jsonpath='{.data.REDIS_ADMIN_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [[ -z "$redis_username" || -z "$redis_password" ]]; then
+    err "Platform Redis credentials not found — run generate_secrets.sh in platform-foundation first"
+    exit 1
+  fi
+  log "Using Redis credentials from platform secret"
+
+  local redis_host="redis.platform-redis.svc.cluster.local"
+  local redis_port="6379"
+  local redis_db="0"
+  local redis_tls_enabled="true"
+  local redis_ca_bundle="/etc/ssl/certs/platform-root-ca.pem"
+  local gx_execution_queue_key="dq-made-easy:gx-execution"
+  local gx_join_pair_materialization_queue_key="dq-made-easy:gx-join-pair-materialization"
+  local profiling_queue_key="dq-made-easy:profiling"
+  local natural_language_draft_queue_key="dq-made-easy:natural-language-draft"
+  local test_data_materialization_queue_key="dq-made-easy:test-data-materialization"
+
   # --- Build connection strings ---
   local api_db_url="postgresql://postgres:${db_password}@dq-db:5432/dq"
   local kafka_consumer_db_url="postgresql://postgres:${db_password}@dq-db:5432/dq_consumer"
@@ -324,7 +347,8 @@ main() {
   apply_secret "dq-api-secrets" \
     "DQ_DB_INTERNAL_URL=${api_db_url}" \
     "API_SECRET_PLACEHOLDER=${api_secret}" \
-    "APP_CONFIG_ENCRYPTION_KEY=${api_encryption_key}"
+    "APP_CONFIG_ENCRYPTION_KEY=${api_encryption_key}" \
+    "REDIS_PASSWORD=${redis_password}"
 
   apply_secret "dq-db-secrets" \
     "POSTGRES_PASSWORD=${db_password}"
@@ -333,10 +357,12 @@ main() {
     "FRONTEND_SECRET_PLACEHOLDER=${frontend_secret}"
 
   apply_secret "dq-engine-secrets" \
-    "ENGINE_SECRET_PLACEHOLDER=${engine_secret}"
+    "ENGINE_SECRET_PLACEHOLDER=${engine_secret}" \
+    "REDIS_PASSWORD=${redis_password}"
 
   apply_secret "dq-profiling-secrets" \
-    "PROFILING_SECRET_PLACEHOLDER=${profiling_secret}"
+    "PROFILING_SECRET_PLACEHOLDER=${profiling_secret}" \
+    "REDIS_PASSWORD=${redis_password}"
 
   apply_secret "dq-llm-secrets" \
     "DQ_LLM_API_KEY=${llm_api_key}"
@@ -362,7 +388,18 @@ main() {
 
   # --- Apply configmaps ---
   apply_configmap "dq-api-config" \
-    "ENVIRONMENT=dev"
+    "ENVIRONMENT=dev" \
+    "REDIS_HOST=${redis_host}" \
+    "REDIS_PORT=${redis_port}" \
+    "REDIS_DB=${redis_db}" \
+    "REDIS_USERNAME=${redis_username}" \
+    "REDIS_TLS_ENABLED=${redis_tls_enabled}" \
+    "REDIS_CA_BUNDLE=${redis_ca_bundle}" \
+    "GX_EXECUTION_QUEUE_KEY=${gx_execution_queue_key}" \
+    "GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY=${gx_join_pair_materialization_queue_key}" \
+    "PROFILING_QUEUE_KEY=${profiling_queue_key}" \
+    "NATURAL_LANGUAGE_DRAFT_QUEUE_KEY=${natural_language_draft_queue_key}" \
+    "TEST_DATA_MATERIALIZATION_QUEUE_KEY=${test_data_materialization_queue_key}"
 
   apply_configmap "dq-db-config" \
     "ENVIRONMENT=dev" \
@@ -376,11 +413,28 @@ main() {
     "SSL_VERIFY=on"
 
   apply_configmap "dq-engine-config" \
-    "ENVIRONMENT=dev"
+    "ENVIRONMENT=dev" \
+    "REDIS_HOST=${redis_host}" \
+    "REDIS_PORT=${redis_port}" \
+    "REDIS_DB=${redis_db}" \
+    "REDIS_USERNAME=${redis_username}" \
+    "REDIS_TLS_ENABLED=${redis_tls_enabled}" \
+    "REDIS_CA_BUNDLE=${redis_ca_bundle}" \
+    "GX_EXECUTION_QUEUE_KEY=${gx_execution_queue_key}" \
+    "GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY=${gx_join_pair_materialization_queue_key}" \
+    "TEST_DATA_MATERIALIZATION_QUEUE_KEY=${test_data_materialization_queue_key}"
 
   apply_configmap "dq-profiling-config" \
     "ENVIRONMENT=dev" \
-    "KONG_INTERNAL_URL=http://kong.platform-kong.svc.cluster.local:8001"
+    "KONG_INTERNAL_URL=http://kong.platform-kong.svc.cluster.local:8001" \
+    "REDIS_HOST=${redis_host}" \
+    "REDIS_PORT=${redis_port}" \
+    "REDIS_DB=${redis_db}" \
+    "REDIS_USERNAME=${redis_username}" \
+    "REDIS_TLS_ENABLED=${redis_tls_enabled}" \
+    "REDIS_CA_BUNDLE=${redis_ca_bundle}" \
+    "PROFILING_QUEUE_KEY=${profiling_queue_key}" \
+    "TEST_DATA_MATERIALIZATION_QUEUE_KEY=${test_data_materialization_queue_key}"
 
   apply_configmap "dq-llm-config" \
     "ENVIRONMENT=dev"

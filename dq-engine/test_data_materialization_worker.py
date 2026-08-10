@@ -10,6 +10,8 @@ from pathlib import Path
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any, Iterable
+from urllib.parse import quote
+from urllib.parse import urlencode
 
 import redis
 import requests
@@ -80,7 +82,26 @@ def _resolve_config() -> WorkerConfig:
         or str(os.getenv("REDIS_URL") or "").strip()
     )
     if not redis_url:
-        raise RuntimeError("Missing TEST_DATA_MATERIALIZATION_REDIS_URL/REDIS_URL")
+        redis_host = str(os.getenv("REDIS_HOST") or "").strip()
+        if not redis_host:
+            raise RuntimeError("Missing TEST_DATA_MATERIALIZATION_REDIS_URL/REDIS_URL or REDIS_HOST")
+        redis_port = int(os.getenv("REDIS_PORT") or 6379)
+        redis_db = int(os.getenv("REDIS_DB") or 0)
+        redis_username = str(os.getenv("REDIS_USERNAME") or "").strip()
+        redis_password = str(os.getenv("REDIS_PASSWORD") or "").strip()
+        redis_tls_enabled = str(os.getenv("REDIS_TLS_ENABLED") or "false").strip().lower() in {"1", "true", "yes", "on"}
+        redis_ca_bundle = str(os.getenv("REDIS_CA_BUNDLE") or os.getenv("SSL_CERT_FILE") or "/etc/ssl/certs/platform-root-ca.pem").strip()
+        auth = ""
+        if redis_username and redis_password:
+            auth = f"{quote(redis_username, safe='')}:{quote(redis_password, safe='')}@"
+        elif redis_username:
+            auth = f"{quote(redis_username, safe='')}@"
+        elif redis_password:
+            auth = f":{quote(redis_password, safe='')}@"
+        scheme = "rediss" if redis_tls_enabled else "redis"
+        redis_url = f"{scheme}://{auth}{redis_host}:{redis_port}/{redis_db}"
+        if redis_tls_enabled:
+            redis_url = f"{redis_url}?{urlencode({'ssl_cert_reqs': 'required', 'ssl_ca_certs': redis_ca_bundle, 'ssl_check_hostname': 'true'})}"
 
     queue_key = (
         str(os.getenv("TEST_DATA_MATERIALIZATION_QUEUE_KEY") or "").strip()

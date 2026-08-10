@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import os
 from collections.abc import Callable, Iterable
-from urllib.parse import quote
 
 from opentelemetry import metrics
 from opentelemetry.metrics import CallbackOptions, Observation
 
 from app.core.config import get_settings
+from app.core.redis_connection import build_redis_url
 from app.core.runtime_queues import resolve_gx_execution_queue_key as _resolve_runtime_execution_queue_key
 from app.core.runtime_queues import resolve_gx_join_pair_materialization_queue_key as _resolve_runtime_gx_join_pair_materialization_queue_key
 from app.core.runtime_queues import resolve_natural_language_draft_queue_key as _resolve_runtime_natural_language_draft_queue_key
@@ -158,41 +157,11 @@ def _is_execution_failure_surface(surface: str) -> bool:
 
 
 def _resolve_gx_dispatch_redis_url() -> str | None:
-    explicit_url = os.environ.get("GX_EXECUTION_REDIS_URL") or os.environ.get("REDIS_URL")
-    if explicit_url:
-        text = str(explicit_url).strip()
-        return text or None
-
-    settings = get_settings()
-    redis_host = str(settings.redis_host or "").strip()
-    if not redis_host:
-        return None
-
-    redis_port = int(settings.redis_port)
-    redis_db = int(settings.redis_db)
-    redis_password = settings.redis_password
-    if redis_password:
-        return f"redis://:{quote(str(redis_password), safe='')}@{redis_host}:{redis_port}/{redis_db}"
-    return f"redis://{redis_host}:{redis_port}/{redis_db}"
+    return build_redis_url(get_settings(), explicit_env_names=("GX_EXECUTION_REDIS_URL",))
 
 
 def _resolve_profiling_redis_url() -> str | None:
-    explicit_url = os.environ.get("PROFILING_REDIS_URL") or os.environ.get("REDIS_URL")
-    if explicit_url:
-        text = str(explicit_url).strip()
-        return text or None
-
-    settings = get_settings()
-    redis_host = str(settings.redis_host or "").strip()
-    if not redis_host:
-        return None
-
-    redis_port = int(settings.redis_port)
-    redis_db = int(settings.redis_db)
-    redis_password = settings.redis_password
-    if redis_password:
-        return f"redis://:{quote(str(redis_password), safe='')}@{redis_host}:{redis_port}/{redis_db}"
-    return f"redis://{redis_host}:{redis_port}/{redis_db}"
+    return build_redis_url(get_settings(), explicit_env_names=("PROFILING_REDIS_URL",))
 
 
 def _resolve_gx_execution_queue_key() -> str:
@@ -230,22 +199,7 @@ _QUEUE_BACKLOG_GAUGE = _METER.create_observable_gauge(
 
 
 def _resolve_natural_language_draft_redis_url() -> str | None:
-    explicit_url = os.environ.get("NATURAL_LANGUAGE_DRAFT_REDIS_URL") or os.environ.get("REDIS_URL")
-    if explicit_url:
-        text = str(explicit_url).strip()
-        return text or None
-
-    settings = get_settings()
-    redis_host = str(settings.redis_host or "").strip()
-    if not redis_host:
-        return None
-
-    redis_port = int(settings.redis_port)
-    redis_db = int(settings.redis_db)
-    redis_password = settings.redis_password
-    if redis_password:
-        return f"redis://:{quote(str(redis_password), safe='')}@{redis_host}:{redis_port}/{redis_db}"
-    return f"redis://{redis_host}:{redis_port}/{redis_db}"
+    return build_redis_url(get_settings(), explicit_env_names=("NATURAL_LANGUAGE_DRAFT_REDIS_URL",))
 
 
 def _resolve_natural_language_draft_queue_key() -> str:

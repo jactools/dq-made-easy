@@ -65,7 +65,10 @@ class Settings(BaseSettings):
     redis_host: str | None = None
     redis_port: int = 6379
     redis_db: int = 0
+    redis_username: str | None = None
     redis_password: str | None = None
+    redis_tls_enabled: bool = False
+    redis_ca_bundle: str | None = None
     redis_contract_cache_key_prefix: str = "dq:openmetadata:contract-policy"
 
     model_config = SettingsConfigDict(

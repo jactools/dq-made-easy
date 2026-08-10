@@ -11,6 +11,7 @@ from fastapi import HTTPException
 
 from app.core.runtime_queues import resolve_test_data_materialization_queue_key as _resolve_runtime_materialization_queue_key
 from app.core.otel_metrics import record_async_queue_event
+from app.core.redis_connection import build_redis_url
 
 
 _REAL_EVIDENCE_OUTPUT_URI_TERMS = (
@@ -24,22 +25,7 @@ _REAL_EVIDENCE_OUTPUT_URI_TERMS = (
 
 
 def resolve_test_data_redis_url(settings: Any) -> str | None:
-	explicit_url = os.environ.get("PROFILING_REDIS_URL") or os.environ.get("REDIS_URL")
-	if explicit_url:
-		return explicit_url
-
-	redis_host = str(getattr(settings, "redis_host", "") or "").strip()
-	if not redis_host:
-		return None
-
-	redis_port = int(getattr(settings, "redis_port", 0) or 0)
-	redis_db = int(getattr(settings, "redis_db", 0) or 0)
-	redis_password = getattr(settings, "redis_password", None)
-	if redis_password:
-		from urllib.parse import quote
-
-		return f"redis://:{quote(redis_password, safe='')}@{redis_host}:{redis_port}/{redis_db}"
-	return f"redis://{redis_host}:{redis_port}/{redis_db}"
+	return build_redis_url(settings, explicit_env_names=("PROFILING_REDIS_URL",))
 
 
 def resolve_test_data_materialization_queue_key() -> str:

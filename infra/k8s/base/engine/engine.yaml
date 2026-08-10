@@ -16,6 +16,10 @@ spec:
         app.kubernetes.io/name: dq-engine
         app.kubernetes.io/part-of: dq-made-easy
     spec:
+      volumes:
+        - name: platform-root-ca
+          configMap:
+            name: platform-root-ca
       containers:
         - name: dq-engine
           image: docker.io/jacbeekers/dq-made-easy-engine:0.1.0
@@ -30,6 +34,11 @@ spec:
                 name: dq-engine-config
             - secretRef:
                 name: dq-engine-secrets
+          volumeMounts:
+            - name: platform-root-ca
+              mountPath: /etc/ssl/certs/platform-root-ca.pem
+              subPath: rootCA.pem
+              readOnly: true
           resources:
             requests:
               cpu: "100m"

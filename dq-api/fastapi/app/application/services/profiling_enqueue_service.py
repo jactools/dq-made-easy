@@ -5,9 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 import json
 import logging
-import os
 from typing import Any
-from urllib.parse import quote
 from uuid import uuid4
 
 from opentelemetry import propagate
@@ -16,6 +14,7 @@ from fastapi import HTTPException
 
 from app.core.runtime_queues import resolve_profiling_queue_key as _resolve_runtime_profiling_queue_key
 from app.core.otel_metrics import record_async_queue_event
+from app.core.redis_connection import build_redis_url
 from app.core.telemetry import traced_span
 from app.domain.entities import SuggestionProfilingRequestEntity
 from app.domain.entities.profiling_request import ProfilingRequest
@@ -82,20 +81,7 @@ def _resolve_queue_key() -> str:
 
 
 def _resolve_redis_url(settings: Any) -> str | None:
-    explicit_url = os.environ.get("PROFILING_REDIS_URL") or os.environ.get("REDIS_URL")
-    if explicit_url:
-        return explicit_url
-
-    redis_host = str(settings.redis_host or "").strip()
-    if not redis_host:
-        return None
-
-    redis_port = int(settings.redis_port)
-    redis_db = int(settings.redis_db)
-    redis_password = settings.redis_password
-    if redis_password:
-        return f"redis://:{quote(redis_password, safe='')}@{redis_host}:{redis_port}/{redis_db}"
-    return f"redis://{redis_host}:{redis_port}/{redis_db}"
+    return build_redis_url(settings, explicit_env_names=("PROFILING_REDIS_URL",))
 
 
 def _inject_trace_headers(payload: dict[str, Any]) -> None:
