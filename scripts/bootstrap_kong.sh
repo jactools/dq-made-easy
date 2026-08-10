@@ -25,7 +25,7 @@ KONG_ADMIN_INTERNAL_URL="${KONG_ADMIN_INTERNAL_URL:-https://localhost:8444}"
 DQ_API_INTERNAL_URL="$(require_env DQ_API_INTERNAL_URL)"
 APP_CONFIG_INTERNAL_URL="${DQ_API_INTERNAL_URL%/}/api/system/v1/app-config"
 KONG_LUA_SSL_TRUSTED_CERTIFICATE="${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-/etc/kong/certs/trust/internal-ca-bundle.pem}"
-MAX_RETRIES="${MAX_RETRIES:-120}"
+MAX_RETRIES="${MAX_RETRIES:-60}"
 RETRY_COUNT=0
 KEYCLOAK_INTERNAL_URL="$(require_env KEYCLOAK_INTERNAL_URL)"
 KEYCLOAK_ADMIN_REALM="$(require_env KEYCLOAK_ADMIN_REALM)"
@@ -45,18 +45,41 @@ ADMIN_ONLY_GROUPS='["admin"]'
 REALM_CONSUMERS_SYNCED=false
 
 CURL_CA_BUNDLE="${CURL_CA_BUNDLE:-${KONG_LUA_SSL_TRUSTED_CERTIFICATE:-}}"
-KONG_ADMIN_CURL_ARGS=(-s -f -k)
-if [ -n "$CURL_CA_BUNDLE" ] && [ -f "$CURL_CA_BUNDLE" ]; then
-  KONG_ADMIN_CURL_ARGS=(-s -f --cacert "$CURL_CA_BUNDLE")
-fi
-# Do NOT override with --cacert for admin API; the admin listener uses Kong's
-# default self-signed cert, not our internal CA cert. Keep -k for admin API access.
+KONG_ADMIN_CURL_ARGS=(-s --cacert "$CURL_CA_BUNDLE")
+# Use CA bundle for all Kong Admin API calls — SSL verification is mandatory
+
+is_unrecoverable_error() {
+  local response="$1"
+  # Fail fast on SSL/TLS errors — retrying won't help
+  if echo "$response" | grep -qiE "ssl.*verify.*failed|certificate.*verify.*failed|unable to get.*issuer|handshake.*failed|certificate has expired|not yet valid"; then
+    return 0
+  fi
+  # Fail fast on auth errors — retrying won't help
+  if echo "$response" | grep -qiE "HTTP 401|HTTP 403|unauthorized|forbidden|invalid credentials"; then
+    return 0
+  fi
+  return 1
+}
+
+http_ok() {
+  # Returns 0 if response starts with HTTP/1.x 2xx or HTTP/2 2xx
+  local status_code
+  status_code=$(printf '%s' "$1" | head -1 | grep -oE 'HTTP/[0-9.]\s+[0-9]{3}' | grep -oE '[0-9]{3}' || true)
+  [[ "$status_code" =~ ^2[0-9]{2}$ ]]
+}
 
 echo "[kong-bootstrap] waiting for Kong Admin API at ${KONG_ADMIN_INTERNAL_URL}"
 export KONG_LUA_SSL_TRUSTED_CERTIFICATE
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
-  if curl "${KONG_ADMIN_CURL_ARGS[@]}" "$KONG_ADMIN_INTERNAL_URL/" >/dev/null 2>&1; then
+  local_response=$(curl "${KONG_ADMIN_CURL_ARGS[@]}" "$KONG_ADMIN_INTERNAL_URL/" 2>&1)
+  if http_ok "$local_response"; then
     break
+  fi
+  # Check for unrecoverable errors
+  if is_unrecoverable_error "$local_response"; then
+    echo "[kong-bootstrap] Kong Admin API returned unrecoverable error:"
+    echo "$local_response" | head -5
+    exit 1
   fi
   RETRY_COUNT=$((RETRY_COUNT + 1))
   sleep 1
@@ -261,11 +284,19 @@ PY
 wait_for_keycloak() {
   local ready_url="${KEYCLOAK_INTERNAL_URL%/}/realms/${KEYCLOAK_ADMIN_REALM}/.well-known/openid-configuration"
   local retry_count=0
+  local keycloak_response
 
   echo "[kong-bootstrap] waiting for Keycloak at ${ready_url}" >&2
   while [ "$retry_count" -lt "$MAX_RETRIES" ]; do
-    if curl -s -f "$ready_url" >/dev/null 2>&1; then
+    keycloak_response=$(curl -s --cacert "$CURL_CA_BUNDLE" "$ready_url" 2>&1)
+    if http_ok "$keycloak_response"; then
       return 0
+    fi
+    # Check for unrecoverable errors
+    if is_unrecoverable_error "$keycloak_response"; then
+      echo "[kong-bootstrap] Keycloak returned unrecoverable error:"
+      echo "$keycloak_response" | head -5 >&2
+      exit 1
     fi
     retry_count=$((retry_count + 1))
     sleep 1
@@ -292,7 +323,7 @@ keycloak_admin_token() {
   wait_for_keycloak
 
   local token_response token_value
-  token_response=$(curl -fsS -X POST "${KEYCLOAK_INTERNAL_URL%/}/realms/${KEYCLOAK_ADMIN_REALM}/protocol/openid-connect/token" \
+  token_response=$(curl -s --cacert "$CURL_CA_BUNDLE" -X POST "${KEYCLOAK_INTERNAL_URL%/}/realms/${KEYCLOAK_ADMIN_REALM}/protocol/openid-connect/token" \
     -H 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode 'grant_type=password' \
     --data-urlencode 'client_id=admin-cli' \
@@ -310,7 +341,7 @@ keycloak_admin_token() {
 keycloak_api_get() {
   local token="$1"
   local path="$2"
-  curl -fsS -H "Authorization: Bearer ${token}" "${KEYCLOAK_INTERNAL_URL%/}${path}"
+  curl -s --cacert "$CURL_CA_BUNDLE" -H "Authorization: Bearer ${token}" "${KEYCLOAK_INTERNAL_URL%/}${path}"
 }
 
 keycloak_user_roles_json() {
