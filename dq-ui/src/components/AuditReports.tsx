@@ -805,7 +805,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({ ruleId, initialTab = 'al
 
       try {
         const payload = await fetchJson<ValidationRunHistoryRow[]>(
-          `${apiBase}/gx/runs/${encodeURIComponent(selectedValidationRunId)}/status-history`,
+          `${apiBase}/runs/${encodeURIComponent(selectedValidationRunId)}/status-history`,
           `Unable to load validation history for ${selectedValidationRunId}.`,
         )
         if (cancelled) {
