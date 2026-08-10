@@ -12,10 +12,6 @@ labels:
       platform.jaccloud.nl/tenant: dq-made-easy
     includeSelectors: true
 
-annotations:
-  dq.jaccloud.nl/traceability-contract: wf6-v1
-  dq.jaccloud.nl/version-manifest-path: VERSION_MANIFEST/VERSION_MANIFEST.json
-
 commonAnnotations:
   dq.jaccloud.nl/traceability-contract: wf6-v1
   dq.jaccloud.nl/version-manifest-path: VERSION_MANIFEST.json
