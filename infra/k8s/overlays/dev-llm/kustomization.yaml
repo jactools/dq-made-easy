@@ -5,6 +5,7 @@ namespace: dq-made-easy-dev
 
 resources:
   - ../../base/llm
+  - config/service-config.yaml
 
 labels:
   - includeSelectors: true

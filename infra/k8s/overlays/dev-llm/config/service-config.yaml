@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-llm-config
+  labels:
+    platform.jaccloud.nl/tenant: dq-made-easy
+    platform.jaccloud.nl/environment: dev
+data:
+  DQ_LLM_PORT: '8000'

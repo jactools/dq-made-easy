@@ -4,6 +4,15 @@ kind: Kustomization
 resources:
   - profiling-worker.yaml
 
-transformers:
-  - ../engine/metadata/labels.yaml
-  - ../engine/metadata/annotations.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/managed-by: argocd
+      app.kubernetes.io/version: from-version-manifest
+      dq.jaccloud.nl/traceability: enabled
+      platform.jaccloud.nl/tenant: dq-made-easy
+    includeSelectors: true
+
+commonAnnotations:
+  dq.jaccloud.nl/traceability-contract: wf6-v1
+  dq.jaccloud.nl/version-manifest-path: VERSION_MANIFEST.json
+  dq.jaccloud.nl/release-channel: promoted
