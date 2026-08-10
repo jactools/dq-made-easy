@@ -201,9 +201,26 @@ main() {
   # --- Generate all passwords ---
   # Preserve existing passwords unless --rotate is passed
   local api_secret
-  api_secret="$(generate_password)"
+  local existing_api_secret
+  existing_api_secret="$(kubectl get secret dq-api-secrets -n "$NAMESPACE" -o jsonpath='{.data.API_SECRET_PLACEHOLDER}' 2>/dev/null | base64 -d || true)"
+  if [[ "$ROTATE_PASSWORDS" == true ]] || [[ -z "$existing_api_secret" ]]; then
+    api_secret="$(generate_password)"
+    log "Generated new API secret"
+  else
+    api_secret="$existing_api_secret"
+    log "Reusing existing API secret (use --rotate to change)"
+  fi
+
   local api_encryption_key
-  api_encryption_key="$(generate_fernet_key)"
+  local existing_api_encryption_key
+  existing_api_encryption_key="$(kubectl get secret dq-api-secrets -n "$NAMESPACE" -o jsonpath='{.data.APP_CONFIG_ENCRYPTION_KEY}' 2>/dev/null | base64 -d || true)"
+  if [[ "$ROTATE_PASSWORDS" == true ]] || [[ -z "$existing_api_encryption_key" ]]; then
+    api_encryption_key="$(generate_fernet_key)"
+    log "Generated new API encryption key"
+  else
+    api_encryption_key="$existing_api_encryption_key"
+    log "Reusing existing API encryption key (use --rotate to change)"
+  fi
 
   # DB passwords: preserve unless --rotate
   local db_password
@@ -217,17 +234,53 @@ main() {
     log "Reusing existing DB password (use --rotate to change)"
   fi
 
+  # Frontend secret: preserve existing
   local frontend_secret
-  frontend_secret="$(generate_password)"
+  local existing_frontend_secret
+  existing_frontend_secret="$(kubectl get secret dq-frontend-secrets -n "$NAMESPACE" -o jsonpath='{.data.FRONTEND_SECRET_PLACEHOLDER}' 2>/dev/null | base64 -d || true)"
+  if [[ "$ROTATE_PASSWORDS" == true ]] || [[ -z "$existing_frontend_secret" ]]; then
+    frontend_secret="$(generate_password)"
+    log "Generated new frontend secret"
+  else
+    frontend_secret="$existing_frontend_secret"
+    log "Reusing existing frontend secret (use --rotate to change)"
+  fi
 
+  # Engine secret: preserve existing
   local engine_secret
-  engine_secret="$(generate_password)"
+  local existing_engine_secret
+  existing_engine_secret="$(kubectl get secret dq-engine-secrets -n "$NAMESPACE" -o jsonpath='{.data.ENGINE_SECRET_PLACEHOLDER}' 2>/dev/null | base64 -d || true)"
+  if [[ "$ROTATE_PASSWORDS" == true ]] || [[ -z "$existing_engine_secret" ]]; then
+    engine_secret="$(generate_password)"
+    log "Generated new engine secret"
+  else
+    engine_secret="$existing_engine_secret"
+    log "Reusing existing engine secret (use --rotate to change)"
+  fi
 
+  # Profiling secret: preserve existing
   local profiling_secret
-  profiling_secret="$(generate_password)"
+  local existing_profiling_secret
+  existing_profiling_secret="$(kubectl get secret dq-profiling-secrets -n "$NAMESPACE" -o jsonpath='{.data.PROFILING_SECRET_PLACEHOLDER}' 2>/dev/null | base64 -d || true)"
+  if [[ "$ROTATE_PASSWORDS" == true ]] || [[ -z "$existing_profiling_secret" ]]; then
+    profiling_secret="$(generate_password)"
+    log "Generated new profiling secret"
+  else
+    profiling_secret="$existing_profiling_secret"
+    log "Reusing existing profiling secret (use --rotate to change)"
+  fi
 
+  # LLM API key: preserve existing
   local llm_api_key
-  llm_api_key="$(generate_password)"
+  local existing_llm_key
+  existing_llm_key="$(kubectl get secret dq-llm-secrets -n "$NAMESPACE" -o jsonpath='{.data.DQ_LLM_API_KEY}' 2>/dev/null | base64 -d || true)"
+  if [[ "$ROTATE_PASSWORDS" == true ]] || [[ -z "$existing_llm_key" ]]; then
+    llm_api_key="$(generate_password)"
+    log "Generated new LLM API key"
+  else
+    llm_api_key="$existing_llm_key"
+    log "Reusing existing LLM API key (use --rotate to change)"
+  fi
 
   # OpenMetadata DB password: preserve unless --rotate
   local om_db_password
@@ -244,11 +297,23 @@ main() {
   local om_token
   om_token="$(generate_password)"
 
+  # Keycloak admin password: read from platform secret (owned by platform-foundation)
   local keycloak_admin_password
-  keycloak_admin_password="$(generate_password)"
+  keycloak_admin_password="$(kubectl get secret keycloak-admin -n platform-keycloak -o jsonpath='{.data.KEYCLOAK_ADMIN_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [[ -z "$keycloak_admin_password" ]]; then
+    err "Platform Keycloak admin password not found — run generate_secrets.sh in platform-foundation first"
+    exit 1
+  fi
+  log "Using Keycloak admin password from platform secret"
 
+  # Kong admin password: read from platform secret (owned by platform-foundation)
   local kong_admin_password
-  kong_admin_password="$(generate_password)"
+  kong_admin_password="$(kubectl get secret kong-admin-credentials -n platform-kong -o jsonpath='{.data.ADMIN_PASSWORD}' 2>/dev/null | base64 -d || true)"
+  if [[ -z "$kong_admin_password" ]]; then
+    err "Platform Kong admin password not found — run generate_secrets.sh in platform-foundation first"
+    exit 1
+  fi
+  log "Using Kong admin password from platform secret"
 
   # --- Build connection strings ---
   local api_db_url="postgresql://postgres:${db_password}@dq-db:5432/dq"
