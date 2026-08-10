@@ -38,6 +38,12 @@ Fix the `dq-job-kong-bootstrap` job so it completes successfully with strict TLS
 | `scripts/bootstrap_kong.sh` | Fixed `http_ok()` to use HTTP status codes; added route PATCH logic for path drift; added Keycloak readiness HTTP status check |
 | `infra/k8s/base/shared/jobs/kong-bootstrap.yaml` | Added `SSO_ENABLED=true` and `SSO_PUBLIC_ISSUER_URL` env vars |
 | `infra/k8s/base/shared/config/common-config.yaml` | Added `TRUST_PROXY_AUTH: 'true'` |
+| `dq-ui/nginx/runtime-config.template.js` | Changed `API_BASE_URL` from `KONG_PUBLIC_URL/api` to `/api` (same-origin) |
+| `dq-ui/nginx/default.conf.template` | Reverted to HTTPS proxy_pass to Kong on 8443 (was temporarily HTTP 8000) |
+| `platform-argocd-apps/apps/platform/kong/base/configmap.yml` | Added `0.0.0.0:8443 ssl` to `KONG_PROXY_LISTEN`; added `KONG_SSL_CERT` and `KONG_SSL_CERT_KEY` |
+| `platform-argocd-apps/apps/platform/kong/base/deployment.yml` | Added `kong-tls` and `kong-admin-tls` volume mounts; added `KONG_ADMIN_SSL_CERT` env vars |
+| `platform-argocd-apps/apps/platform/kong/base/service.yml` | Added `proxy-https` port 8443 to `kong-proxy` service |
+| `platform-foundation/scripts/generate_dev_certs.sh` | Added `kong-proxy.platform-kong.svc.cluster.local` SAN to Kong proxy cert |
 | `platform-foundation/.env.dev.local` | Removed hardcoded `KEYCLOAK_ADMIN_PASSWORD=admin` so secrets script generates a random value |
 
 ## Known issues or remaining work

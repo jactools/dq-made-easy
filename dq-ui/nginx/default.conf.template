@@ -76,9 +76,8 @@ server {
     proxy_ssl_verify_depth 2;
   }
 
-  # proxy API requests to the api service on the docker network
+  # proxy API requests to Kong — no rewrite, Kong routes use full /api/... paths
   location /api {
-    rewrite ^/api(?=/|$) / break;
     proxy_pass https://{{KONG_SERVICE_FQDN}}:8443;
     proxy_http_version 1.1;
     proxy_set_header Host $host;

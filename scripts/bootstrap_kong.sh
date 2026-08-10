@@ -611,31 +611,31 @@ create_route "dq-api" "dq-api-admin-v1" "/api/admin/v1"
 create_route "dq-api" "dq-api-admin-v1-users" "/api/admin/v1/users"
 create_route "dq-api" "dq-api-admin-v1-roles" "/api/admin/v1/roles"
 create_route "dq-api" "dq-api-admin-v1-rules" "/api/admin/v1/rules"
-create_route "dq-api" "dq-api-system-v1" "/system/v1"
-create_route "dq-api" "dq-api-system-v1-app-config-read" "/system/v1/app-config" '["GET","HEAD","OPTIONS"]'
-create_route "dq-api" "dq-api-system-v1-app-config-write" "/system/v1/app-config" '["POST","PUT","PATCH","DELETE"]'
+create_route "dq-api" "dq-api-system-v1" "/api/system/v1"
+create_route "dq-api" "dq-api-system-v1-app-config-read" "/api/system/v1/app-config" '["GET","HEAD","OPTIONS"]'
+create_route "dq-api" "dq-api-system-v1-app-config-write" "/api/system/v1/app-config" '["POST","PUT","PATCH","DELETE"]'
 create_route "dq-api" "dq-api-system-v1-ui-registry" "/api/system/v1/ui-registry"
-create_route "dq-api" "dq-api-data-catalog-v1" "/data-catalog/v1"
-create_route "dq-api" "dq-api-rulebuilder-v1" "/rulebuilder/v1"
-create_route "dq-api" "dq-api-agent-v1" "/agent/v1"
-create_route "dq-api" "dq-api-v1" "/v1"
-create_route "dq-api" "dq-api-rulebuilder-v1-approvals-read" "/rulebuilder/v1/approvals" '["GET","HEAD","OPTIONS"]'
-create_route "dq-api" "dq-api-rulebuilder-v1-approvals-write" "/rulebuilder/v1/approvals" '["POST","PUT","PATCH","DELETE"]'
+create_route "dq-api" "dq-api-data-catalog-v1" "/api/data-catalog/v1"
+create_route "dq-api" "dq-api-rulebuilder-v1" "/api/rulebuilder/v1"
+create_route "dq-api" "dq-api-agent-v1" "/api/agent/v1"
+create_route "dq-api" "dq-api-v1" "/api/v1"
+create_route "dq-api" "dq-api-rulebuilder-v1-approvals-read" "/api/rulebuilder/v1/approvals" '["GET","HEAD","OPTIONS"]'
+create_route "dq-api" "dq-api-rulebuilder-v1-approvals-write" "/api/rulebuilder/v1/approvals" '["POST","PUT","PATCH","DELETE"]'
 
 # Public allowlisted endpoints (must NOT require JWT at Kong)
-create_route "dq-api" "dq-api-health" "/health"
+create_route "dq-api" "dq-api-health" "/api/health"
 create_route "dq-api" "dq-api-admin-v1-me" "/api/admin/v1/me"
 set_route_regex_priority "dq-api-admin-v1-me" 100
 create_route "dq-api" "dq-api-auth-v1-redirect" "/api/auth/v1/redirect"
 create_route "dq-api" "dq-api-auth-v1-callback" "/api/auth/v1/callback"
 create_route "dq-api" "dq-api-auth-v1-logout" "/api/auth/v1/logout"
 create_route "dq-api" "dq-api-auth-v1-login" "/api/auth/v1/login"
-create_route "dq-api" "dq-api-system-v1-version-catalog" "/system/v1/version-catalog"
-create_route "dq-api" "dq-api-system-v1-system-info" "/system/v1/system-info"
-create_route "dq-api" "dq-api-system-v1-health" "/system/v1/health"
-create_route "dq-api" "dq-api-system-v1-readiness" "/system/v1/readiness"
-create_route "dq-api" "dq-api-system-v1-live" "/system/v1/live"
-create_route "dq-api" "dq-api-system-v1-ready" "/system/v1/ready"
+create_route "dq-api" "dq-api-system-v1-version-catalog" "/api/system/v1/version-catalog"
+create_route "dq-api" "dq-api-system-v1-system-info" "/api/system/v1/system-info"
+create_route "dq-api" "dq-api-system-v1-health" "/api/system/v1/health"
+create_route "dq-api" "dq-api-system-v1-readiness" "/api/system/v1/readiness"
+create_route "dq-api" "dq-api-system-v1-live" "/api/system/v1/live"
+create_route "dq-api" "dq-api-system-v1-ready" "/api/system/v1/ready"
 create_route "dq-api" "dq-api-docs" "/api-docs"
 create_route "dq-api" "dq-api-docs-json" "/api-docs-json"
 
