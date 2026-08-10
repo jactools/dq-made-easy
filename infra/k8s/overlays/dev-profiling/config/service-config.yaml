@@ -7,6 +7,7 @@ metadata:
     platform.jaccloud.nl/environment: dev
 data:
   DQ_PROFILING_METRICS_PORT: '8001'
+  KONG_INTERNAL_URL: https://kong-admin.platform-kong.svc.cluster.local:8444
   REDIS_HOST: redis.platform-redis.svc.cluster.local
   REDIS_PORT: '6379'
   REDIS_DB: '0'
