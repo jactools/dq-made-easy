@@ -44,9 +44,9 @@ DQ does not own Redis infrastructure, tenant ACL rules, or platform Redis lifecy
 
 | Workstream | Status | Tasks | Complete | Progress |
 |---|---|---:|---:|---:|
-| W1. Map DQ Redis usage | Not started | 5 | 0 | 0% |
-| W2. Add DQ Redis config surfaces | Not started | 6 | 0 | 0% |
-| W3. Wire DQ workloads to platform Redis | Not started | 6 | 0 | 0% |
+| W1. Map DQ Redis usage | In progress | 5 | 5 | 100% |
+| W2. Add DQ Redis config surfaces | In progress | 6 | 6 | 100% |
+| W3. Wire DQ workloads to platform Redis | In progress | 6 | 5 | 83% |
 | W4. Validate Redis-backed DQ behavior | Not started | 6 | 0 | 0% |
 
 ## Workstream 1: Map DQ Redis usage
@@ -57,11 +57,11 @@ Confirm exactly which DQ features and workloads depend on Redis.
 
 ### Tasks
 
-- [ ] Inventory all queue-dependent DQ endpoints and background workloads
-- [ ] Confirm the required Redis env vars for each workload
-- [ ] Define DQ queue keys and key prefixes under the tenant contract
-- [ ] Confirm whether DQ uses a single logical Redis DB or additional partitioning
-- [ ] Document DQ-specific validation flows for Redis-backed features
+- [x] Inventory all queue-dependent DQ endpoints and background workloads
+- [x] Confirm the required Redis env vars for each workload
+- [x] Define DQ queue keys and key prefixes under the tenant contract
+- [x] Confirm whether DQ uses a single logical Redis DB or additional partitioning
+- [x] Document DQ-specific validation flows for Redis-backed features
 
 ### Deliverable
 
@@ -75,12 +75,12 @@ Add DQ-side config and secret references without embedding platform infra logic.
 
 ### Tasks
 
-- [ ] Create or update DQ ConfigMaps for `REDIS_HOST`, `REDIS_PORT`, `REDIS_TLS_ENABLED`, optional `REDIS_DB`, and queue defaults
-- [ ] Create or update DQ Secrets for `REDIS_USERNAME`, `REDIS_PASSWORD`, and trust-bundle references
-- [ ] Ensure DQ manifest structure keeps Redis connection settings in DQ-owned config only
-- [ ] Keep queue keys and key prefixes DQ-specific
-- [ ] Ensure DQ workloads reference tenant-issued Redis credentials only
-- [ ] Document the mapping from the platform contract to DQ config names
+- [x] Create or update DQ ConfigMaps for `REDIS_HOST`, `REDIS_PORT`, `REDIS_TLS_ENABLED`, optional `REDIS_DB`, and queue defaults
+- [x] Create or update DQ Secrets for `REDIS_USERNAME`, `REDIS_PASSWORD`, and trust-bundle references
+- [x] Ensure DQ manifest structure keeps Redis connection settings in DQ-owned config only
+- [x] Keep queue keys and key prefixes DQ-specific
+- [x] Ensure DQ workloads reference tenant-issued Redis credentials only
+- [x] Document the mapping from the platform contract to DQ config names
 
 ### Deliverable
 
@@ -94,11 +94,11 @@ Make Redis-backed DQ features use the platform Redis service through DQ-owned wo
 
 ### Tasks
 
-- [ ] Update API workloads that depend on Redis-backed queues
-- [ ] Update any worker, consumer, or background workloads that depend on Redis
-- [ ] Ensure DQ queue keys stay under the DQ tenant prefix
-- [ ] Ensure TLS trust-bundle references are mounted where Redis clients need them
-- [ ] Keep all rollout changes declarative through DQ manifests
+- [x] Update API workloads that depend on Redis-backed queues
+- [x] Update any worker, consumer, or background workloads that depend on Redis
+- [x] Ensure DQ queue keys stay under the DQ tenant prefix
+- [x] Ensure TLS trust-bundle references are mounted where Redis clients need them
+- [x] Keep all rollout changes declarative through DQ manifests
 - [ ] Align dev and test overlays with the same Redis contract shape
 
 ### Deliverable
@@ -124,17 +124,58 @@ Verify that DQ features using Redis behave correctly in Kubernetes.
 
 DQ can use platform Redis successfully without owning or mutating Redis infrastructure.
 
+## Immediate next actions
+
+### DQ dev rollout verification
+
+- [ ] Sync or restart DQ workloads that consume Redis:
+  - `tenant-dq-shared`
+  - `tenant-dq-api`
+  - `tenant-dq-engine`
+- [ ] Verify runtime Redis env/config inside DQ pods:
+  - `REDIS_HOST`
+  - `REDIS_USERNAME`
+  - `REDIS_TLS_ENABLED=true`
+  - `REDIS_CA_BUNDLE=/etc/ssl/certs/platform-root-ca.pem`
+- [ ] Verify Redis-backed API behavior in dev:
+  - validation plan replay no longer fails from missing Redis configuration
+- [ ] Verify worker connectivity in dev:
+  - `dq-engine` connects to Redis successfully
+  - `dq-profiling` connects to Redis successfully when deployed
+
+### DQ test alignment
+
+- [ ] Mirror the Redis contract from dev into test overlays:
+  - API config
+  - engine config
+  - profiling config
+  - CA bundle mounts where needed
+- [ ] Ensure DQ test secret generation also reads platform Redis credentials
+
+### DQ consumer credential transition
+
+- [ ] Update `dq-made-easy/scripts/generate_secrets.sh` to switch from platform admin Redis credentials to application-principal Redis credentials when platform issuance is available
+- [ ] Map consumer principals explicitly:
+  - API -> `dq-api`
+  - engine -> `dq-engine`
+  - profiling -> `dq-profiling`
+
+### DQ test verification
+
+- [ ] Validate Redis-backed endpoints and workers in test after the test overlay is aligned
+- [ ] Capture an implementation summary after dev/test verification is complete
+
 ## Acceptance criteria
 
-- [ ] DQ stores Redis connection references only in DQ-owned manifests and secrets
-- [ ] DQ queue names and key prefixes are tenant-specific
-- [ ] DQ does not modify platform Redis infrastructure components
-- [ ] DQ workload rollout stays declarative through ArgoCD-managed manifests
+- [x] DQ stores Redis connection references only in DQ-owned manifests and secrets
+- [x] DQ queue names and key prefixes are tenant-specific
+- [x] DQ does not modify platform Redis infrastructure components
+- [x] DQ workload rollout stays declarative through ArgoCD-managed manifests
 - [ ] Redis-backed DQ endpoints and workers validate successfully in dev and test
 
 ## Next steps
 
-1. Wait for the platform Redis consumer contract to land.
-2. Map DQ queue usage and env vars.
-3. Add DQ Redis Secrets and ConfigMaps.
-4. Validate queue-dependent DQ flows after ArgoCD sync.
+1. Complete rollout and live verification in dev after image build/load + Argo sync.
+2. Validate queue-dependent DQ flows after ArgoCD sync.
+3. Align test overlays with the same Redis contract shape.
+4. Capture implementation summary after verification is complete.
