@@ -62,17 +62,17 @@ is_unrecoverable_error() {
 }
 
 http_ok() {
-  # Returns 0 if response starts with HTTP/1.x 2xx or HTTP/2 2xx
-  local status_code
-  status_code=$(printf '%s' "$1" | head -1 | grep -oE 'HTTP/[0-9.]\s+[0-9]{3}' | grep -oE '[0-9]{3}' || true)
+  local status_code="$1"
   [[ "$status_code" =~ ^2[0-9]{2}$ ]]
 }
 
 echo "[kong-bootstrap] waiting for Kong Admin API at ${KONG_ADMIN_INTERNAL_URL}"
 export KONG_LUA_SSL_TRUSTED_CERTIFICATE
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
-  local_response=$(curl "${KONG_ADMIN_CURL_ARGS[@]}" "$KONG_ADMIN_INTERNAL_URL/" 2>&1)
-  if http_ok "$local_response"; then
+  local_response=$(curl -w '\n%{http_code}' "${KONG_ADMIN_CURL_ARGS[@]}" "$KONG_ADMIN_INTERNAL_URL/" 2>&1)
+  local_status=$(printf '%s' "$local_response" | tail -1)
+  local_body=$(printf '%s' "$local_response" | sed '$d')
+  if http_ok "$local_status"; then
     break
   fi
   # Check for unrecoverable errors
@@ -288,8 +288,10 @@ wait_for_keycloak() {
 
   echo "[kong-bootstrap] waiting for Keycloak at ${ready_url}" >&2
   while [ "$retry_count" -lt "$MAX_RETRIES" ]; do
-    keycloak_response=$(curl -s --cacert "$CURL_CA_BUNDLE" "$ready_url" 2>&1)
-    if http_ok "$keycloak_response"; then
+    keycloak_response=$(curl -s -w '\n%{http_code}' --cacert "$CURL_CA_BUNDLE" "$ready_url" 2>&1)
+    keycloak_status=$(printf '%s' "$keycloak_response" | tail -1)
+    keycloak_body=$(printf '%s' "$keycloak_response" | sed '$d')
+    if http_ok "$keycloak_status"; then
       return 0
     fi
     # Check for unrecoverable errors

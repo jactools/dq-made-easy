@@ -32,6 +32,10 @@ spec:
           value: 'true'
         - name: CURL_CA_BUNDLE
           value: /etc/ssl/certs/platform-root-ca.pem
+        - name: SSO_ENABLED
+          value: 'true'
+        - name: SSO_PUBLIC_ISSUER_URL
+          value: https://keycloak.dev.jac.dot:10443/auth/realms/dq-made-easy
         - name: DQ_API_INTERNAL_URL
           value: https://dq-api.dq-made-easy-dev.svc.cluster.local:4010
         - name: KEYCLOAK_SYSTEM_ADMIN_USERNAME
