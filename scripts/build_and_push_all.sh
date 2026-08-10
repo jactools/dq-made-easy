@@ -269,7 +269,7 @@ if [ -n "$OVERRIDE_REGISTRY" ]; then
              DQ_DB_REGISTRY DQ_FRONTEND_REGISTRY DQ_DB_SEED_REGISTRY DQ_KEYCLOAK_SEED_REGISTRY \
              DQ_KAFKA_CONSUMER_REGISTRY DQ_OPENMETADATA_DB_REGISTRY DQ_OPENMETADATA_SERVER_REGISTRY \
              DQ_METADATA_CONFIGURE_REGISTRY DQ_CONTAINER_METRICS_REGISTRY DQ_ZAMMAD_SEED_REGISTRY \
-             DQ_ZAMMAD_ORIGIN_REGISTRY DQ_KAFKA_REGISTRY DQ_LLM_REGISTRY PYTHON_DOCKER_REGISTRY; do
+             DQ_ZAMMAD_ORIGIN_REGISTRY DQ_KAFKA_REGISTRY PYTHON_DOCKER_REGISTRY; do
     export "$var=$local_registry"
   done
 fi
@@ -540,12 +540,6 @@ docker_login
 # Trino image/container lifecycle managed by platform-foundation (platform-trino).
 
 # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
-# LLM image/container lifecycle managed by platform-foundation (platform-llm).
-
-
-
-
-
 
 export DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE
 export DQ_KEYCLOAK_SEED_REGISTRY DQ_KEYCLOAK_SEED_NAMESPACE DQ_KEYCLOAK_SEED_IMAGE
@@ -553,8 +547,6 @@ export DQ_KEYCLOAK_SEED_REGISTRY DQ_KEYCLOAK_SEED_NAMESPACE DQ_KEYCLOAK_SEED_IMA
 export DQ_KAFKA_CONSUMER_REGISTRY DQ_KAFKA_CONSUMER_NAMESPACE DQ_KAFKA_CONSUMER_IMAGE
 # Trino image/container lifecycle managed by platform-foundation (platform-trino).
 export DQ_EDGE_REGISTRY DQ_EDGE_NAMESPACE DQ_EDGE_IMAGE
-# Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
-# LLM image/container lifecycle managed by platform-foundation (platform-llm).
 export DQ_OPENMETADATA_DB_REGISTRY DQ_OPENMETADATA_DB_NAMESPACE DQ_OPENMETADATA_DB_IMAGE
 export DQ_OPENMETADATA_SERVER_REGISTRY DQ_OPENMETADATA_SERVER_NAMESPACE DQ_OPENMETADATA_SERVER_IMAGE
 export DQ_METADATA_CONFIGURE_REGISTRY DQ_METADATA_CONFIGURE_NAMESPACE DQ_METADATA_CONFIGURE_IMAGE
@@ -581,8 +573,6 @@ else
   export DQ_KAFKA_CONSUMER_TAG="$VERSION_TAG"
   # Trino image/container lifecycle managed by platform-foundation (platform-trino).
   export DQ_EDGE_TAG="$VERSION_TAG"
-  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
-  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
   export DQ_OPENMETADATA_DB_TAG="$VERSION_TAG"
   export DQ_OPENMETADATA_SERVER_TAG="$VERSION_TAG"
   export DQ_METADATA_CONFIGURE_TAG="$VERSION_TAG"
@@ -746,8 +736,6 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
   fi
 
-  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
-  # Kafka broker is managed by platform-foundation (platform-kafka).
   # DQ-specific consumer remains here.
   if image_selected "dq-made-easy-kafka-consumer"; then
     run_direct_build_step \
