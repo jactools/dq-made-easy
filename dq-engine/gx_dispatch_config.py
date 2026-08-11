@@ -68,7 +68,9 @@ def _resolve_redis_url() -> str:
     username = str(os.getenv("REDIS_USERNAME") or "").strip()
     password = str(os.getenv("REDIS_PASSWORD") or "").strip()
     tls_enabled = str(os.getenv("REDIS_TLS_ENABLED") or "false").strip().lower() in {"1", "true", "yes", "on"}
-    ca_bundle = str(os.getenv("REDIS_CA_BUNDLE") or os.getenv("SSL_CERT_FILE") or "/etc/ssl/certs/platform-root-ca.pem").strip()
+    ca_bundle = str(os.getenv("REDIS_CA_BUNDLE") or "").strip()
+    if not ca_bundle:
+        raise RuntimeError("REDIS_CA_BUNDLE is required")
 
     auth = ""
     if username and password:

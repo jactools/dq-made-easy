@@ -90,7 +90,9 @@ def _resolve_config() -> WorkerConfig:
         redis_username = str(os.getenv("REDIS_USERNAME") or "").strip()
         redis_password = str(os.getenv("REDIS_PASSWORD") or "").strip()
         redis_tls_enabled = str(os.getenv("REDIS_TLS_ENABLED") or "false").strip().lower() in {"1", "true", "yes", "on"}
-        redis_ca_bundle = str(os.getenv("REDIS_CA_BUNDLE") or os.getenv("SSL_CERT_FILE") or "/etc/ssl/certs/platform-root-ca.pem").strip()
+        redis_ca_bundle = str(os.getenv("REDIS_CA_BUNDLE") or "").strip()
+        if not redis_ca_bundle:
+            raise RuntimeError("REDIS_CA_BUNDLE is required")
         auth = ""
         if redis_username and redis_password:
             auth = f"{quote(redis_username, safe='')}:{quote(redis_password, safe='')}@"

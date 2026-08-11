@@ -263,14 +263,22 @@ def _resolve_redis_url() -> str:
 
     redis_host = str(os.environ.get("REDIS_HOST") or "").strip()
     if not redis_host:
-        return "redis://localhost:6379/0"
+        raise RuntimeError("REDIS_HOST is required")
+
+    redis_tls_enabled_str = str(os.environ.get("REDIS_TLS_ENABLED") or "").strip().lower()
+    if not redis_tls_enabled_str:
+        raise RuntimeError("REDIS_TLS_ENABLED is required")
+    redis_tls_enabled = redis_tls_enabled_str in {"1", "true", "yes", "on"}
+    if not redis_tls_enabled:
+        raise RuntimeError("REDIS_TLS_ENABLED must be true")
 
     redis_port = int(os.environ.get("REDIS_PORT", "6379"))
     redis_db = int(os.environ.get("REDIS_DB", "0"))
     redis_username = str(os.environ.get("REDIS_USERNAME") or "").strip()
     redis_password = str(os.environ.get("REDIS_PASSWORD") or "").strip()
-    redis_tls_enabled = str(os.environ.get("REDIS_TLS_ENABLED") or "false").strip().lower() in {"1", "true", "yes", "on"}
-    redis_ca_bundle = str(os.environ.get("REDIS_CA_BUNDLE") or os.environ.get("SSL_CERT_FILE") or "/etc/ssl/certs/platform-root-ca.pem").strip()
+    redis_ca_bundle = str(os.environ.get("REDIS_CA_BUNDLE") or "").strip()
+    if not redis_ca_bundle:
+        raise RuntimeError("REDIS_CA_BUNDLE is required")
 
     auth = ""
     if redis_username and redis_password:
