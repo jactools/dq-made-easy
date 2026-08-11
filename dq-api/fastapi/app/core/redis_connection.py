@@ -6,19 +6,10 @@ from urllib.parse import urlencode
 
 
 def resolve_redis_ca_bundle() -> str | None:
-    for value in (
-        "REDIS_CA_BUNDLE",
-        "SSL_CERT_FILE",
-    ):
+    for value in ("REDIS_CA_BUNDLE", "SSL_CERT_FILE"):
         candidate = str(__import__("os").environ.get(value) or "").strip()
         if candidate:
             return candidate
-    for fallback in (
-        "/etc/ssl/certs/platform-root-ca.pem",
-        "/etc/openmetadata/certs/internal-ca-bundle.pem",
-    ):
-        if fallback:
-            return fallback
     return None
 
 
@@ -48,7 +39,7 @@ def build_redis_url(
     redis_db = int(getattr(settings, "redis_db", 0))
     redis_username = str(getattr(settings, "redis_username", "") or "").strip()
     redis_password = str(getattr(settings, "redis_password", "") or "").strip()
-    redis_tls_enabled = bool(getattr(settings, "redis_tls_enabled", False))
+    redis_tls_enabled = getattr(settings, "redis_tls_enabled", None)
     redis_ca_bundle = str(getattr(settings, "redis_ca_bundle", "") or "").strip() or resolve_redis_ca_bundle() or ""
 
     auth = ""
@@ -116,6 +107,6 @@ def build_redis_client_kwargs_from_settings(settings: Any) -> dict[str, Any] | N
         redis_db=int(getattr(settings, "redis_db", 0)),
         redis_username=str(getattr(settings, "redis_username", "") or "").strip() or None,
         redis_password=str(getattr(settings, "redis_password", "") or "").strip() or None,
-        redis_tls_enabled=bool(getattr(settings, "redis_tls_enabled", False)),
+        redis_tls_enabled=getattr(settings, "redis_tls_enabled", None),
         redis_ca_bundle=str(getattr(settings, "redis_ca_bundle", "") or "").strip() or None,
     )
