@@ -410,7 +410,9 @@ def run_worker():
             r.ping()
         except Exception as exc:
             record_redis_failure("connect", _failure_type_from_exception(exc))
-            LOG.error("Cannot connect to Redis at %s: %s", redis_url, exc)
+            import re
+            safe_url = re.sub(r'://(.*?)(@|$)', '://****:****@', redis_url)
+            LOG.error("Cannot connect to Redis at %s: %s", safe_url, exc)
             return 2
 
     LOG.info("Listening on local queue key=%s", queue_key)
