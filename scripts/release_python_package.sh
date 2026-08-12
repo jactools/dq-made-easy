@@ -33,6 +33,9 @@ PRINT_WHEEL_PATH="${PACKAGE_RELEASE_PRINT_WHEEL_PATH:-true}"
 REPOSITORY_NAME="${PACKAGE_RELEASE_REPOSITORY:-}"
 REPOSITORY_URL="${PACKAGE_RELEASE_REPOSITORY_URL:-}"
 WHEEL_PATH=""
+PACKAGE_VERSION_OVERRIDE=""
+PACKAGE_USE_BUILD_ISOLATION="false"
+PACKAGE_SKIP_TWINE_CHECK="false"
 
 ALL_PACKAGE_KEYS=(
   dq-cli
@@ -40,6 +43,7 @@ ALL_PACKAGE_KEYS=(
   dq-domain-validation
   dq-airflow-sdk
   dq-airflow-operator
+  spark-expectations
 )
 
 usage() {
@@ -52,6 +56,7 @@ Packages:
   dq-domain-validation | dq-made-easy-domain-validation | release_dq_domain_validation.sh
   dq-airflow-sdk | dq-made-easy-airflow-sdk | release_dq_airflow_sdk.sh
   dq-airflow-operator | dq-made-easy-airflow-operator | release_dq_airflow_operator.sh
+  spark-expectations | release_spark_expectations.sh
 
 Options:
   --all                  Build and optionally publish every repo package
@@ -97,6 +102,10 @@ require_cmd() {
 resolve_package() {
   local package_key="$1"
 
+  PACKAGE_VERSION_OVERRIDE=""
+  PACKAGE_USE_BUILD_ISOLATION="false"
+  PACKAGE_SKIP_TWINE_CHECK="false"
+
   case "$package_key" in
     dq-cli|dq-made-easy-cli|release_dq_made_easy_cli.sh)
       PACKAGE_DIR="${ROOT_DIR}/dq-cli"
@@ -118,6 +127,13 @@ resolve_package() {
       PACKAGE_DIR="${ROOT_DIR}/dq-airflow-operator"
       PACKAGE_LABEL="dq-made-easy-airflow-operator"
       ;;
+    spark-expectations|release_spark_expectations.sh)
+      PACKAGE_DIR="${ROOT_DIR}/vendor/spark-expectations-2.10.1"
+      PACKAGE_LABEL="spark-expectations"
+      PACKAGE_VERSION_OVERRIDE="2.10.1"
+      PACKAGE_USE_BUILD_ISOLATION="true"
+      PACKAGE_SKIP_TWINE_CHECK="true"
+      ;;
     *)
       error "$my_name" "Unknown package selector: $package_key"
       usage
@@ -130,6 +146,20 @@ resolve_package() {
   BUILD_DIR="${ROOT_DIR}/tmp/${PACKAGE_DIR##*/}-build"
 }
 
+apply_package_build_overrides() {
+  if [[ -z "$PACKAGE_VERSION_OVERRIDE" ]]; then
+    return 0
+  fi
+
+  if [[ ! -f "$BUILD_DIR/pyproject.toml" ]]; then
+    error "$my_name" "Missing package metadata at $BUILD_DIR/pyproject.toml"
+    exit 1
+  fi
+
+  perl -0pi -e 's/dynamic = \["version"\]/version = "'"$PACKAGE_VERSION_OVERRIDE"'"/' "$BUILD_DIR/pyproject.toml"
+  perl -0pi -e 's/\n\[tool\.hatch\.version\]\nsource = "vcs"\nstyle = "semver"\n/\n/' "$BUILD_DIR/pyproject.toml"
+}
+
 resolve_publish_target() {
   if [[ -n "$REPOSITORY_URL" ]]; then
     return 0
@@ -139,12 +169,44 @@ resolve_publish_target() {
     return 0
   fi
 
+  if [[ -n "${TWINE_REPOSITORY_URL:-}" ]]; then
+    REPOSITORY_URL="${TWINE_REPOSITORY_URL}"
+    return 0
+  fi
+
   if [[ -n "${NEXUSCLOUD_PYPI_URL:-}" ]]; then
     REPOSITORY_URL="${NEXUSCLOUD_PYPI_URL}"
     return 0
   fi
 
   REPOSITORY_NAME="pypi"
+}
+
+upload_wheel_to_repository_url() {
+  local wheel_path="$1"
+  local target_url="$2"
+  local package_label="$3"
+  local twine_output_file="${ROOT_DIR}/tmp/twine-upload-output.log"
+  local pypi_container_name="${PYPI_CONTAINER_NAME:-platform-pypi-server}"
+  local pypi_storage_dir=""
+  local local_pypi_host="${PYPI_SERVER_DNS:-}"
+
+  rm -f "$twine_output_file"
+
+  if [[ -n "$local_pypi_host" && "$target_url" == *"://${local_pypi_host}"* ]]; then
+    pypi_storage_dir="$(docker inspect "$pypi_container_name" --format '{{range .Mounts}}{{if eq .Destination "/data/packages"}}{{println .Source}}{{end}}{{end}}' 2>/dev/null | head -n 1 | tr -d '\r')"
+    if [[ -n "$pypi_storage_dir" && -d "$pypi_storage_dir" ]]; then
+      cp "$wheel_path" "$pypi_storage_dir/$(basename "$wheel_path")"
+      return 0
+    fi
+  fi
+
+  if TWINE_REPOSITORY_URL="$target_url" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --non-interactive "$wheel_path" >"$twine_output_file" 2>&1; then
+    return 0
+  fi
+
+  cat "$twine_output_file" >&2
+  return 1
 }
 
 build_package() {
@@ -162,9 +224,14 @@ build_package() {
   mkdir -p "$DIST_DIR"
 
   cp -R "$PACKAGE_DIR"/. "$BUILD_DIR"/
+  apply_package_build_overrides
 
   info "$my_name" "Building $PACKAGE_LABEL wheel"
-  if ! (cd "$BUILD_DIR" && "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m pip wheel --no-deps --no-build-isolation --wheel-dir "$DIST_DIR" . >/dev/null); then
+  build_wheel_args=(--no-deps --wheel-dir "$DIST_DIR" .)
+  if [[ "$PACKAGE_USE_BUILD_ISOLATION" != "true" ]]; then
+    build_wheel_args=(--no-deps --no-build-isolation --wheel-dir "$DIST_DIR" .)
+  fi
+  if ! (cd "$BUILD_DIR" && "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m pip wheel "${build_wheel_args[@]}" >/dev/null); then
     error "$my_name" "Failed to build wheel for $PACKAGE_LABEL"
     exit 1
   fi
@@ -194,28 +261,30 @@ build_package() {
 
   resolve_publish_target
 
-  info "$my_name" "Checking wheel metadata before publishing"
-  if ! "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine check "$WHEEL_PATH" >/dev/null; then
-    error "$my_name" "twine check failed for $(basename "$WHEEL_PATH")"
-    exit 1
+  if [[ "$PACKAGE_SKIP_TWINE_CHECK" != "true" ]]; then
+    info "$my_name" "Checking wheel metadata before publishing"
+    if ! "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine check "$WHEEL_PATH" >/dev/null; then
+      error "$my_name" "twine check failed for $(basename "$WHEEL_PATH")"
+      exit 1
+    fi
   fi
 
   if [[ -n "$REPOSITORY_URL" ]]; then
     info "$my_name" "Publishing $PACKAGE_LABEL to configured repository URL"
     if [[ -n "${NEXUSCLOUD_USERNAME:-}" && -n "${NEXUSCLOUD_PASSWORD:-}" ]]; then
-      if ! TWINE_REPOSITORY_URL="$REPOSITORY_URL" TWINE_USERNAME="$NEXUSCLOUD_USERNAME" TWINE_PASSWORD="$NEXUSCLOUD_PASSWORD" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --non-interactive "$WHEEL_PATH"; then
+      if ! TWINE_USERNAME="$NEXUSCLOUD_USERNAME" TWINE_PASSWORD="$NEXUSCLOUD_PASSWORD" upload_wheel_to_repository_url "$WHEEL_PATH" "$REPOSITORY_URL" "$PACKAGE_LABEL"; then
         error "$my_name" "Failed to publish $PACKAGE_LABEL to configured repository URL"
         exit 1
       fi
     else
-      if ! TWINE_REPOSITORY_URL="$REPOSITORY_URL" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --non-interactive "$WHEEL_PATH"; then
+      if ! upload_wheel_to_repository_url "$WHEEL_PATH" "$REPOSITORY_URL" "$PACKAGE_LABEL"; then
         error "$my_name" "Failed to publish $PACKAGE_LABEL to configured repository URL"
         exit 1
       fi
     fi
   else
     info "$my_name" "Publishing $PACKAGE_LABEL to $REPOSITORY_NAME"
-    if ! TWINE_REPOSITORY="$REPOSITORY_NAME" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --non-interactive "$WHEEL_PATH"; then
+    if ! TWINE_REPOSITORY="$REPOSITORY_NAME" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --skip-existing --non-interactive "$WHEEL_PATH"; then
       error "$my_name" "Failed to publish $PACKAGE_LABEL to $REPOSITORY_NAME"
       exit 1
     fi
@@ -290,6 +359,19 @@ done
 
 if ! source_selected_root_env_file; then
   exit 1
+fi
+
+source "${ROOT_DIR}/scripts/supporting/setup_env.sh"
+
+LOCAL_MKCERT_CA_FILE="${ROOT_DIR}/certs/mkcert-rootCA.pem"
+if [[ -f "${LOCAL_MKCERT_CA_FILE}" ]]; then
+  export TWINE_CERT="${LOCAL_MKCERT_CA_FILE}"
+  export REQUESTS_CA_BUNDLE="${LOCAL_MKCERT_CA_FILE}"
+  export SSL_CERT_FILE="${LOCAL_MKCERT_CA_FILE}"
+elif [[ -n "${TLS_INTERNAL_CA_BUNDLE:-}" && -f "${TLS_INTERNAL_CA_BUNDLE}" ]]; then
+  export TWINE_CERT="${TLS_INTERNAL_CA_BUNDLE}"
+  export REQUESTS_CA_BUNDLE="${TLS_INTERNAL_CA_BUNDLE}"
+  export SSL_CERT_FILE="${TLS_INTERNAL_CA_BUNDLE}"
 fi
 
 PUBLISH="${PACKAGE_RELEASE_PUBLISH:-$PUBLISH}"

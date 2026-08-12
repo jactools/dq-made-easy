@@ -12,7 +12,8 @@ LABEL description="Lightweight Kafka consumer worker (batch mode)"
 WORKDIR /app
 
 ARG PIP_INDEX_URL
-ENV PIP_INDEX_URL=${PIP_INDEX_URL}
+ARG PIP_EXTRA_INDEX_URL
+ARG PIP_TRUSTED_HOST
 
 # System dependencies for psycopg2
 RUN apt-get update && \
@@ -22,7 +23,30 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=secret,id=internal_mkcert_root_ca,required=false \
+    --mount=type=secret,id=internal_root_ca,required=false \
+    --mount=type=secret,id=internal_ca_bundle,required=false \
+    --mount=type=secret,id=pip_index_url,required=false \
+    set -eux; \
+    if [ -f /run/secrets/internal_mkcert_root_ca ]; then \
+        cp /run/secrets/internal_mkcert_root_ca /usr/local/share/ca-certificates/internal-mkcert-rootCA.crt; \
+    fi; \
+    if [ -f /run/secrets/internal_root_ca ]; then \
+        cp /run/secrets/internal_root_ca /usr/local/share/ca-certificates/internal-root-ca-2024.crt; \
+    fi; \
+    if [ -f /run/secrets/internal_ca_bundle ]; then \
+        cp /run/secrets/internal_ca_bundle /usr/local/share/ca-certificates/internal-ca-bundle.pem; \
+    fi; \
+    update-ca-certificates || true; \
+    if [ -f /run/secrets/pip_index_url ]; then \
+        export PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)"; \
+    else \
+        export PIP_INDEX_URL="$PIP_INDEX_URL"; \
+    fi; \
+    export PIP_CERT=/etc/ssl/certs/ca-certificates.crt; \
+    export PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-https://pypi.org/simple/}"; \
+    export PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-packages.host.dev.jac.dot}"; \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY kafka_consumer_worker.py /app/
 

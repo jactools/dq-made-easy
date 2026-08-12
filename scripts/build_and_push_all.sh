@@ -334,6 +334,23 @@ detect_local_platform() {
 }
 
 ensure_buildx_builder() {
+  local builder_container_name="buildx_buildkit_${BUILDX_BUILDER_NAME}0"
+  local builder_network_mode=""
+  local buildkitd_config_path="$ROOT_DIR/tmp/buildkitd.${BUILDX_BUILDER_NAME}.toml"
+  local registry_authority="${PYTHON_DOCKER_REGISTRY:-${REGISTRY:-}}"
+  local registry_ca_file="$ROOT_DIR/certs/mkcert-rootCA.pem"
+  local create_args=(--use --name "$BUILDX_BUILDER_NAME" --driver-opt network=host)
+
+  registry_authority="${registry_authority%/}"
+  if [ -n "$registry_authority" ] && [ -f "$registry_ca_file" ]; then
+    mkdir -p "$ROOT_DIR/tmp"
+    cat > "$buildkitd_config_path" <<EOF
+[registry."$registry_authority"]
+  ca=["$registry_ca_file"]
+EOF
+    create_args+=(--buildkitd-config "$buildkitd_config_path")
+  fi
+
   if ! docker buildx version >/dev/null 2>&1; then
     error "$my_name" "docker buildx is required to publish repo-managed images"
     exit 1
@@ -341,8 +358,15 @@ ensure_buildx_builder() {
 
   if ! docker buildx inspect "$BUILDX_BUILDER_NAME" >/dev/null 2>&1; then
     info "$my_name" "Creating docker buildx builder '$BUILDX_BUILDER_NAME'..."
-    docker buildx create --use --name "$BUILDX_BUILDER_NAME" >/dev/null
+    docker buildx create "${create_args[@]}" >/dev/null
   else
+    builder_network_mode="$(docker inspect "$builder_container_name" --format '{{.HostConfig.NetworkMode}}' 2>/dev/null || true)"
+    if [ "$builder_network_mode" != "host" ] || ! docker exec "$builder_container_name" test -f /etc/buildkit/buildkitd.toml >/dev/null 2>&1; then
+      warning "$my_name" "Recreating docker buildx builder '$BUILDX_BUILDER_NAME' with local registry access and CA trust"
+      docker buildx rm "$BUILDX_BUILDER_NAME" >/dev/null 2>&1 || true
+      docker buildx create "${create_args[@]}" >/dev/null
+      return 0
+    fi
     docker buildx use "$BUILDX_BUILDER_NAME" >/dev/null 2>&1 || true
   fi
 }
@@ -483,9 +507,38 @@ run_direct_build_step() {
     docker_cmd+=(--no-cache)
   fi
 
-  # Add host mapping so public pypi-server hostname resolves through ingress
-  docker_cmd+=(--add-host "packages.host.dev.jac.dot=192.168.1.17")
-  docker_cmd+=()
+  local pypi_build_host="${PYPI_SERVER_HOST_DNS:-${PYPI_SERVER_DNS:-}}"
+  local mkcert_root_ca_file=""
+  local internal_root_ca_file="${ROOT_DIR}/tmp/certs/internal-root-ca-2024.crt"
+  local internal_ca_bundle_file="${INTERNAL_CA_BUNDLE_FILE:-}"
+  if [[ -z "${DOCKER_HOST_IP:-}" ]]; then
+    error "$my_name" "DOCKER_HOST_IP is required for local image builds"
+    return 1
+  fi
+  if [[ -z "$pypi_build_host" ]]; then
+    error "$my_name" "PYPI_SERVER_HOST_DNS or PYPI_SERVER_DNS is required for local image builds"
+    return 1
+  fi
+
+  docker_cmd+=(--add-host "${pypi_build_host}=${DOCKER_HOST_IP}")
+  if [[ -n "${PYPI_SERVER_DNS:-}" && "${PYPI_SERVER_DNS}" != "$pypi_build_host" ]]; then
+    docker_cmd+=(--add-host "${PYPI_SERVER_DNS}=${DOCKER_HOST_IP}")
+  fi
+
+  if [[ -f "$ROOT_DIR/certs/mkcert-rootCA.pem" ]]; then
+    mkcert_root_ca_file="$ROOT_DIR/certs/mkcert-rootCA.pem"
+  elif [[ -f "$ROOT_DIR/tmp/certs/mkcert-rootCA.pem" ]]; then
+    mkcert_root_ca_file="$ROOT_DIR/tmp/certs/mkcert-rootCA.pem"
+  fi
+  if [[ -n "$mkcert_root_ca_file" ]]; then
+    docker_cmd+=(--secret "id=internal_mkcert_root_ca,src=$mkcert_root_ca_file")
+  fi
+  if [[ -f "$internal_root_ca_file" ]]; then
+    docker_cmd+=(--secret "id=internal_root_ca,src=$internal_root_ca_file")
+  fi
+  if [[ -n "$internal_ca_bundle_file" && -f "$internal_ca_bundle_file" ]]; then
+    docker_cmd+=(--secret "id=internal_ca_bundle,src=$internal_ca_bundle_file")
+  fi
 
   # Handle pip_index_url secret for BuildKit mounts
   local pip_index_url_secret=""
@@ -748,6 +801,7 @@ if [ "$BUILD_SCOPE" = "repo" ]; then
       "PYTHON_DOCKER_NAMESPACE=${PYTHON_DOCKER_NAMESPACE}" \
       "PYTHON_DOCKER_IMAGE=${PYTHON_DOCKER_IMAGE}" \
       "PYTHON_DOCKER_TAG=${PYTHON_DOCKER_TAG}" \
+        "PIP_INDEX_URL=${PIP_INDEX_URL}" \
       "PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}" \
       "PIP_TRUSTED_HOST=${PIP_TRUSTED_HOST}"
   fi

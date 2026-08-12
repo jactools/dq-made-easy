@@ -6,6 +6,8 @@
 !.env*.example
 *.tgz
 
+.pi/
+
 ## Node
 node_modules/
 npm-debug.log*

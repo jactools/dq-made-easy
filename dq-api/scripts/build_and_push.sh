@@ -130,8 +130,21 @@ echo "Starting build..."
 docker_build_tags=(-t "$IMAGE_NAME" -t "$LATEST_NAME")
 [ -n "$VERSION_NAME" ] && docker_build_tags+=(-t "$VERSION_NAME")
 
-if docker build --add-host "packages.host.dev.jac.dot=192.168.1.17" --add-host "docker-registery.host.dev.jac.dot=192.168.1.17" $NO_CACHE \
-    --add-host "${PYPI_SERVER_HOST_DNS:-packages.host.dev.jac.dot}=192.168.1.17" \
+pypi_build_host="${PYPI_SERVER_HOST_DNS:-${PYPI_SERVER_DNS:-}}"
+if [ -z "${DOCKER_HOST_IP:-}" ]; then
+    echo "ERROR: DOCKER_HOST_IP is required for the dq-api image build"
+    exit 1
+fi
+if [ -z "$pypi_build_host" ]; then
+    echo "ERROR: PYPI_SERVER_HOST_DNS or PYPI_SERVER_DNS is required for the dq-api image build"
+    exit 1
+fi
+docker_host_args=(--add-host "${pypi_build_host}=${DOCKER_HOST_IP}")
+if [ -n "${PYPI_SERVER_DNS:-}" ] && [ "${PYPI_SERVER_DNS}" != "$pypi_build_host" ]; then
+    docker_host_args+=(--add-host "${PYPI_SERVER_DNS}=${DOCKER_HOST_IP}")
+fi
+
+if docker build "${docker_host_args[@]}" $NO_CACHE \
     --secret id=pip_index_url,env=PIP_INDEX_URL \
     --build-arg PYTHON_DOCKER_REGISTRY="${PYTHON_DOCKER_REGISTRY}" \
     --build-arg PYTHON_DOCKER_NAMESPACE="${PYTHON_DOCKER_NAMESPACE}" \

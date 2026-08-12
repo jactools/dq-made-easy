@@ -24,6 +24,35 @@ fi
 ROOT_DIR="$DOCKER_DIR"
 source "$DOCKER_DIR/scripts/supporting/setup_env.sh"
 
+ensure_local_spark_expectations_package() {
+    local package_index_url="${TWINE_REPOSITORY_URL:-}"
+    local package_index_username="${TWINE_USERNAME:-}"
+    local package_index_password="${TWINE_PASSWORD:-}"
+    local package_name="spark-expectations"
+    local package_version="2.10.1"
+    local package_index_page=""
+
+    if [ "${INFRA_SOURCE:-}" != "HOME" ]; then
+        return 0
+    fi
+
+    if [ -z "$package_index_url" ] || [ -z "$package_index_username" ] || [ -z "$package_index_password" ]; then
+        echo "ERROR: TWINE_REPOSITORY_URL/TWINE_USERNAME/TWINE_PASSWORD are required to publish local vendor packages" >&2
+        exit 1
+    fi
+
+    package_index_page="${package_index_url%/}/simple/${package_name}/"
+    if curl -skLf -u "$package_index_username:$package_index_password" "$package_index_page" | grep -q "spark_expectations-${package_version}-"; then
+        return 0
+    fi
+
+    echo "Publishing vendored ${package_name} ${package_version} to local PyPI server..."
+    PACKAGE_RELEASE_PRINT_WHEEL_PATH=false \
+    "$DOCKER_DIR/scripts/release_python_package.sh" spark-expectations --publish --repository-url "$package_index_url"
+}
+
+ensure_local_spark_expectations_package
+
 PYTHON_BASE_IMAGE_REF="${REGISTRY:?REGISTRY is required}dq-made-easy-python-base:latest"
 
 if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ]; then
@@ -152,8 +181,21 @@ echo "Starting build..."
 docker_build_tags=(-t "$IMAGE_NAME" -t "$LATEST_NAME")
 [ -n "$VERSION_NAME" ] && docker_build_tags+=(-t "$VERSION_NAME")
 
-if docker build --add-host "packages.host.dev.jac.dot=192.168.1.17" --add-host "docker-registery.host.dev.jac.dot=192.168.1.17" $NO_CACHE \
-    --add-host "${PYPI_SERVER_HOST_DNS:-packages.host.dev.jac.dot}=192.168.1.17" \
+pypi_build_host="${PYPI_SERVER_HOST_DNS:-${PYPI_SERVER_DNS:-}}"
+if [ -z "${DOCKER_HOST_IP:-}" ]; then
+    echo "ERROR: DOCKER_HOST_IP is required for the dq-engine image build"
+    exit 1
+fi
+if [ -z "$pypi_build_host" ]; then
+    echo "ERROR: PYPI_SERVER_HOST_DNS or PYPI_SERVER_DNS is required for the dq-engine image build"
+    exit 1
+fi
+docker_host_args=(--add-host "${pypi_build_host}=${DOCKER_HOST_IP}")
+if [ -n "${PYPI_SERVER_DNS:-}" ] && [ "${PYPI_SERVER_DNS}" != "$pypi_build_host" ]; then
+    docker_host_args+=(--add-host "${PYPI_SERVER_DNS}=${DOCKER_HOST_IP}")
+fi
+
+if docker build "${docker_host_args[@]}" $NO_CACHE \
     --secret id=pip_index_url,env=PIP_INDEX_URL \
     --build-arg PYTHON_DOCKER_REGISTRY="${PYTHON_DOCKER_REGISTRY}" \
     --build-arg PYTHON_DOCKER_NAMESPACE="${PYTHON_DOCKER_NAMESPACE}" \

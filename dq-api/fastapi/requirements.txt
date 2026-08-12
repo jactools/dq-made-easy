@@ -18,10 +18,10 @@ boto3==1.43.46
 cryptography==48.0.1
 rapidfuzz==3.14.5
 platform-auth==0.1.0
-metadata-utils==1.0.20
-metadata-delivery-id==1.0.2+192
-metadata-models==1.0.20
-metadata-sdk==0.1.32
+metadata-utils~=1.0.20
+metadata-delivery-id~=1.0.2
+metadata-models~=1.0.20
+metadata-sdk~=0.1.32
 
 # Delivery registry support packages are installed from the package index.
 

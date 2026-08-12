@@ -18,7 +18,7 @@ ARG PIP_EXTRA_INDEX_URL
 ARG PIP_TRUSTED_HOST
 
 COPY python/requirements.txt ./requirements.txt
-RUN PIP_INDEX_URL="$PIP_INDEX_URL" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" pip install --no-cache-dir -r requirements.txt
+RUN PIP_INDEX_URL="$PIP_INDEX_URL" PIP_EXTRA_INDEX_URL="$PIP_EXTRA_INDEX_URL" PIP_TRUSTED_HOST="$PIP_TRUSTED_HOST" pip install --retries 0 --no-cache-dir -r requirements.txt
 
 COPY python ./python
 
