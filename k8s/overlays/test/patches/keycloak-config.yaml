@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-keycloak-config
+data:
+  ENVIRONMENT: test
+  KEYCLOAK_ADMIN_REALM: master
+  KEYCLOAK_INTERNAL_URL: https://keycloak.platform-keycloak.svc.cluster.local:8443/auth
+  KEYCLOAK_REALM: dq-made-easy

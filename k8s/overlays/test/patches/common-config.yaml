@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-common-config
+data:
+  ENVIRONMENT: test
+  PUBLIC_BASE_URL: https://dq-ui.jacloud.nl
+  TRUST_PROXY_AUTH: "true"
+  SSO_PUBLIC_ISSUER_URL: https://keycloak.jacloud.nl/auth/realms/jaccloud
+  KEYCLOAK_PUBLIC_URL: https://keycloak.jacloud.nl
+  OIDC_REDIRECT_BASE_URL: https://dq-ui.jacloud.nl/api
+  REGISTRY_HOST: docker-registry.jacloud.nl:5000

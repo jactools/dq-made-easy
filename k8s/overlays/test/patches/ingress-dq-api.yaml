@@ -1,0 +1,11 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dq-api
+spec:
+  tls:
+    - hosts:
+        - dq-api.jacloud.nl
+      secretName: dq-api.jacloud.nl-tls
+  rules:
+    - host: dq-api.jacloud.nl

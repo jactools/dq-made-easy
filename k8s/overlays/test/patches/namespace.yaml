@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dq-test
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+    app.kubernetes.io/environment: test
+    platform.jaccloud.nl/managed-by: argocd
+    platform.jaccloud.nl/tenant: dq
+    platform.jaccloud.nl/environment: test

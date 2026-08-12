@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-api-config
+data:
+  DQ_API_PORT: "8000"
+  SSO_INTERNAL_ISSUER_URL: https://keycloak.platform-keycloak.svc.cluster.local:8443/auth/realms/dq-made-easy
+  KONG_PUBLIC_URL: https://kong.jacloud.nl:10443
+  REDIS_HOST: redis.platform-redis.svc.cluster.local
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  REDIS_USERNAME: platform-admin
+  REDIS_TLS_ENABLED: "true"
+  REDIS_CA_BUNDLE: /etc/ssl/certs/platform-root-ca.pem
+  GX_EXECUTION_QUEUE_KEY: dq-made-easy:gx-execution
+  GX_JOIN_PAIR_MATERIALIZATION_QUEUE_KEY: dq-made-easy:gx-join-pair-materialization
+  PROFILING_QUEUE_KEY: dq-made-easy:profiling
+  NATURAL_LANGUAGE_DRAFT_QUEUE_KEY: dq-made-easy:natural-language-draft
+  TEST_DATA_MATERIALIZATION_QUEUE_KEY: dq-made-easy:test-data-materialization

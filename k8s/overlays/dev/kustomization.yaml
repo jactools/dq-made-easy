@@ -1,0 +1,55 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dq-dev
+
+resources:
+  - ../../base
+  - config/dq-api-config.yaml
+  - config/dq-frontend-config.yaml
+  - config/dq-engine-config.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq
+      platform.jaccloud.nl/environment: dev
+
+patches:
+  - target:
+      kind: Namespace
+      name: dq-made-easy
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: dq-dev
+      - op: add
+        path: /metadata/labels/platform.jaccloud.nl~1managed-by
+        value: argocd
+      - op: add
+        path: /metadata/labels/platform.jaccloud.nl~1tenant
+        value: dq
+      - op: add
+        path: /metadata/labels/platform.jaccloud.nl~1environment
+        value: dev
+  - path: patches/common-config.yaml
+  - path: patches/keycloak-config.yaml
+  - path: patches/kong-config.yaml
+  - path: patches/ingress-dq-api.yaml
+  - path: patches/ingress-dq-ui.yaml
+  - path: patches/ingress-dq-engine.yaml
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-api
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-api
+    newTag: "0.10-7a9c018"
+  - name: docker.io/jacbeekers/dq-made-easy-db
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-db
+    newTag: "0.10-49540d2"
+  - name: docker.io/jacbeekers/dq-made-easy-frontend
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-frontend
+    newTag: "0.10-bd861ee"
+  - name: docker.io/jacbeekers/dq-made-easy-engine
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-engine
+    newTag: "0.10-b745035"
