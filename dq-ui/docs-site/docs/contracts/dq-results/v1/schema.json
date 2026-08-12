@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dq-made-easy.local/contracts/dq-results/v1/schema.json",
+  "title": "DQ Result Summary v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["expectation_count", "passed_expectation_count", "failed_expectation_count", "records_checked", "records_failed", "records_succeeded", "records_filtered_out", "rule_results"],
+  "properties": {
+    "expectation_count": {"type": "integer", "minimum": 0},
+    "passed_expectation_count": {"type": "integer", "minimum": 0},
+    "failed_expectation_count": {"type": "integer", "minimum": 0},
+    "records_checked": {"type": "integer", "minimum": 0},
+    "records_failed": {"type": ["integer", "null"], "minimum": 0},
+    "records_succeeded": {"type": ["integer", "null"], "minimum": 0},
+    "records_filtered_out": {"type": "integer", "minimum": 0},
+    "rule_results": {"type": "array", "items": {"$ref": "#/$defs/ruleResult"}}
+  },
+  "$defs": {
+    "ruleResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expectation_index", "rule_id", "expectation_type", "result", "records_checked", "records_failed", "records_succeeded", "records_filtered_out"],
+      "properties": {
+        "expectation_index": {"type": "integer", "minimum": 0},
+        "rule_id": {"type": ["string", "null"], "minLength": 1},
+        "expectation_type": {"type": ["string", "null"], "minLength": 1},
+        "result": {"type": "string", "enum": ["passed", "failed"]},
+        "records_checked": {"type": "integer", "minimum": 0},
+        "records_failed": {"type": ["integer", "null"], "minimum": 0},
+        "records_succeeded": {"type": ["integer", "null"], "minimum": 0},
+        "records_filtered_out": {"type": "integer", "minimum": 0},
+        "threshold": {"$ref": "#/$defs/threshold"},
+        "diagnostic_count": {"type": "integer", "minimum": 0},
+        "diagnostics": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "threshold": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["relation"],
+      "properties": {"relation": {"type": "string", "enum": ["met", "below", "above", "within", "outside", "not_met"]}}
+    }
+  }
+}

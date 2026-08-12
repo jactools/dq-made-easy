@@ -5,6 +5,7 @@ import uuid
 import urllib.error
 import urllib.request
 from urllib.parse import quote
+from urllib.parse import urlencode
 from typing import Any, Sequence
 
 from profiling_metrics import (
@@ -262,14 +263,36 @@ def _resolve_redis_url() -> str:
 
     redis_host = str(os.environ.get("REDIS_HOST") or "").strip()
     if not redis_host:
-        return "redis://localhost:6379/0"
+        raise RuntimeError("REDIS_HOST is required")
+
+    redis_tls_enabled_str = str(os.environ.get("REDIS_TLS_ENABLED") or "").strip().lower()
+    if not redis_tls_enabled_str:
+        raise RuntimeError("REDIS_TLS_ENABLED is required")
+    redis_tls_enabled = redis_tls_enabled_str in {"1", "true", "yes", "on"}
+    if not redis_tls_enabled:
+        raise RuntimeError("REDIS_TLS_ENABLED must be true")
 
     redis_port = int(os.environ.get("REDIS_PORT", "6379"))
     redis_db = int(os.environ.get("REDIS_DB", "0"))
-    redis_password = os.environ.get("REDIS_PASSWORD")
-    if redis_password:
-        return f"redis://:{quote(redis_password, safe='')}@{redis_host}:{redis_port}/{redis_db}"
-    return f"redis://{redis_host}:{redis_port}/{redis_db}"
+    redis_username = str(os.environ.get("REDIS_USERNAME") or "").strip()
+    redis_password = str(os.environ.get("REDIS_PASSWORD") or "").strip()
+    redis_ca_bundle = str(os.environ.get("REDIS_CA_BUNDLE") or "").strip()
+    if not redis_ca_bundle:
+        raise RuntimeError("REDIS_CA_BUNDLE is required")
+
+    auth = ""
+    if redis_username and redis_password:
+        auth = f"{quote(redis_username, safe='')}:{quote(redis_password, safe='')}@"
+    elif redis_username:
+        auth = f"{quote(redis_username, safe='')}@"
+    elif redis_password:
+        auth = f":{quote(redis_password, safe='')}@"
+
+    scheme = "rediss" if redis_tls_enabled else "redis"
+    base_url = f"{scheme}://{auth}{redis_host}:{redis_port}/{redis_db}"
+    if not redis_tls_enabled:
+        return base_url
+    return f"{base_url}?{urlencode({'ssl_cert_reqs': 'required', 'ssl_ca_certs': redis_ca_bundle, 'ssl_check_hostname': 'true'})}"
 
 
 def _resolve_api_url() -> str | None:
@@ -395,7 +418,9 @@ def run_worker():
             r.ping()
         except Exception as exc:
             record_redis_failure("connect", _failure_type_from_exception(exc))
-            LOG.error("Cannot connect to Redis at %s: %s", redis_url, exc)
+            import re
+            safe_url = re.sub(r'://(.*?)(@|$)', '://****:****@', redis_url)
+            LOG.error("Cannot connect to Redis at %s: %s", safe_url, exc)
             return 2
 
     LOG.info("Listening on local queue key=%s", queue_key)

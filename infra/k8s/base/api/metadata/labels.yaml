@@ -1,0 +1,16 @@
+apiVersion: builtin
+kind: LabelTransformer
+metadata:
+  name: dq-traceability-labels
+labels:
+  app.kubernetes.io/managed-by: argocd
+  app.kubernetes.io/version: from-version-manifest
+  dq.jaccloud.nl/traceability: enabled
+  platform.jaccloud.nl/tenant: dq-made-easy
+  platform.jaccloud.nl/environment: dev
+fieldSpecs:
+  - path: metadata/labels
+    create: true
+  - path: spec/template/metadata/labels
+    create: true
+    kind: Deployment

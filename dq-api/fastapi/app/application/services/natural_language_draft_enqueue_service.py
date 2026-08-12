@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 import json
 import logging
-import os
 from typing import Any
 from typing import Mapping
 from uuid import uuid4
@@ -14,6 +13,7 @@ from opentelemetry import propagate
 from app.core.otel_metrics import record_natural_language_draft_request_event
 from app.core.otel_metrics import record_suggestions_redis_failure
 from app.core.otel_metrics import record_suggestions_redis_request
+from app.core.redis_connection import build_redis_url
 from app.core.runtime_queues import resolve_natural_language_draft_queue_key as _resolve_runtime_natural_language_draft_queue_key
 from app.domain.entities import NaturalLanguageDraftRequestEntity
 from app.domain.interfaces.v1.suggestions_repository import SuggestionsRepository
@@ -70,22 +70,7 @@ def _resolve_queue_key() -> str:
 
 
 def _resolve_redis_url(settings: Any) -> str | None:
-    explicit_url = os.environ.get("NATURAL_LANGUAGE_DRAFT_REDIS_URL") or os.environ.get("REDIS_URL")
-    if explicit_url:
-        return explicit_url
-
-    redis_host = str(getattr(settings, "redis_host", "") or "").strip()
-    if not redis_host:
-        return None
-
-    redis_port = int(getattr(settings, "redis_port", 6379))
-    redis_db = int(getattr(settings, "redis_db", 0))
-    redis_password = getattr(settings, "redis_password", None)
-    if redis_password:
-        from urllib.parse import quote
-
-        return f"redis://:{quote(str(redis_password), safe='')}@{redis_host}:{redis_port}/{redis_db}"
-    return f"redis://{redis_host}:{redis_port}/{redis_db}"
+    return build_redis_url(settings, explicit_env_names=("NATURAL_LANGUAGE_DRAFT_REDIS_URL",))
 
 
 def _request_key(request_id: str) -> str:

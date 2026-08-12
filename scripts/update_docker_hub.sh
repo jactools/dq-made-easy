@@ -273,15 +273,15 @@ normalize_repository_name() {
         dq-engine|dq-made-easy-engine) printf '%s' 'dq-made-easy-engine' ;;
         dq-profiling|dq-made-easy-profiling) printf '%s' 'dq-made-easy-profiling' ;;
         dq-frontend|dq-made-easy-frontend) printf '%s' 'dq-made-easy-frontend' ;;
-        dq-kong|dq-made-easy-kong) printf '%s' 'dq-made-easy-kong' ;;
+        # Kong image/container lifecycle managed by platform-foundation
         dq-db|dq-made-easy-db) printf '%s' 'dq-made-easy-db' ;;
-        dq-keycloak|dq-made-easy-keycloak) printf '%s' 'dq-made-easy-keycloak' ;;
-        dq-kafka|dq-made-easy-kafka) printf '%s' 'dq-made-easy-kafka' ;;
+        # Keycloak image/container lifecycle managed by platform-foundation
+        # Kafka broker is managed by platform-foundation (platform-kafka).
         dq-kafka-consumer|dq-made-easy-kafka-consumer) printf '%s' 'dq-made-easy-kafka-consumer' ;;
-        dq-trino|dq-made-easy-trino) printf '%s' 'dq-made-easy-trino' ;;
+        # Trino image/container lifecycle managed by platform-foundation (platform-trino).
         dq-edge|dq-made-easy-edge) printf '%s' 'dq-made-easy-edge' ;;
-        dq-airflow|dq-made-easy-airflow) printf '%s' 'dq-made-easy-airflow' ;;
-        dq-llm|dq-made-easy-llm) printf '%s' 'dq-made-easy-llm' ;;
+        # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+        # LLM image/container lifecycle managed by platform-foundation (platform-llm).
         dq-db-seed|dq-made-easy-db-seed) printf '%s' 'dq-made-easy-db-seed' ;;
         dq-keycloak-seed-artifacts|dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-made-easy-keycloak-seed-artifacts' ;;
         dq-openmetadata-db|dq-made-easy-openmetadata-db) printf '%s' 'dq-made-easy-openmetadata-db' ;;

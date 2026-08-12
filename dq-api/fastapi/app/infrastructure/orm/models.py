@@ -1338,6 +1338,12 @@ class DataDeliveryNoteRow(Base):
     checksum: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     checksum_algorithm: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     metadata_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    # DPSG-compliant redelivery fields
+    delivery_type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    predecessor_time_event: Mapped[Optional[str]] = mapped_column(Text, nullable=True, index=True)
+    superseded_by_time_event: Mapped[Optional[str]] = mapped_column(Text, nullable=True, index=True)
+    correction_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    delivered_by: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 
 class MasterRecordRow(Base):

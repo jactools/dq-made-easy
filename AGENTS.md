@@ -1,82 +1,343 @@
-# Agent Instructions
+# AI Agent Instructions
 
-This file is for AI coding assistants (Copilot, Claude, Cursor, etc.).
+This repository follows specific rules that all AI agents must adhere to when making changes.
 
-## Where to find the rules
+## Git Rules
 
-Read `.github/copilot/01-general.md` for the authoritative repository rules:
-- Python file size limit (< 1000 lines)
-- Module naming conventions
-- Dependency layering (no upward imports)
-- Test-proof file layout
+### Only `git status` — NO OTHER GIT COMMANDS
+Agents are **FORBIDDEN** to run any `git` command except `git status`.
 
-Additional instruction files (if they exist):
-- `.github/copilot/02-fastapi-sqlalchemy.md` — FastAPI + SQLAlchemy
-- `.github/copilot/03-testing.md` — Testing conventions; Python tests must use `<repo-root>/venv` and `scripts/python_arm64.sh`
-- `.github/copilot/04-database.md` — Database migrations
-- `.github/copilot/05-versioning.md` — Versioning rules
-- `.github/copilot/06-internal-service-contracts.md` — Internal env, URL, and trust-bundle contracts
-- `.github/copilot/07-tls-transport-enforcement.md` — No-HTTP rule, edge routing model, certificate generation, healthcheck and exception registry conventions
-- `.github/instructions/env-only-connection.instructions.md` — Enforce env-file-only service connectivity; no script-local service defaults or fallback paths
-- `.github/instructions/python-test-module-boundary.instructions.md` — Every Python production module must have its own dedicated unit test module
-- `.github/instructions/commit-validation-gate.instructions.md` — All commits must pass relevant build/test validation before being created; if a script can't be run, the commit is blocked
-- `docs/releases/RELEASE_MANAGEMENT.md` — Release lifecycle, conclusion procedure, and agent instructions for version bumps and test proofs
+**Allowed:**
+- `git status` (the only permitted git command)
 
-## Error handling and validation rules
+**Explicitly forbidden (all other git commands):**
+- `git add` / `git reset` (staging/unstaging)
+- `git diff` / `git diff --cached` (inspecting)
+- `git log` / `git show` (reading history)
+- `git commit`
+- `git revert`
+- `git reset --hard`
+- `git merge`
+- `git push`
+- `git checkout`
+- `git restore`
+- **Any other `git` command**
 
-**NEVER disable, suppress, or work around errors to make them go away.** Errors are signals that indicate:
-- Configuration or structural problems that need fixing
-- Invalid assumptions about code or data
-- Broken contracts or dependencies
+**Rationale:** The user controls all git operations. Agents must never stage, inspect diffs, read history, or modify commit history. Use the `read` tool and `bash` to inspect files instead of `git diff`/`git show`.
 
-**When an error appears:**
-1. **Analyze** — Understand the root cause. Is it a missing file? Invalid configuration? Broken link? Logic error?
-2. **Fix** — Address the underlying issue, not the symptom. For example:
-   - If a build system reports broken links, find and fix the links (don't change error level to 'warn')
-   - If validation fails, correct the invalid state (don't skip the validation)
-   - If a dependency is missing, install it (don't remove the dependency declaration)
-3. **Verify** — Re-run the tool/test/build to confirm the fix works
+## Python Module Rules
 
-**Exception:** Only suppress or work around errors if you've **explicitly asked the user** and received **explicit approval** for that approach. Document the decision and the justification in code comments or commit messages.
+### 1. Line Count Limit (< 1000 LOC)
+Every Python module must have fewer than 1000 lines of code.
 
-## When you are about to create or modify a Python file
+**When you reach ~800 lines, split the module:**
+- Extract helper classes/functions into `*_helpers.py` or `*_utils.py`
+- Extract domain models into `entities.py` or `value_objects.py`
+- Extract route handlers into `routes/*.py` (one route group per file)
+- Extract service logic into `services/*.py` (one responsibility per file)
 
-1. Check if the file already exists and how many lines it has.
-2. If it will exceed 800 lines, plan the split **before** writing code.
-3. If modifying an existing file over 1000 lines, extract new logic into a new module rather than adding to the large file.
-4. Run the validation script through `scripts/python_arm64.sh --python-bin ./venv/bin/python` (see `.github/copilot/03-testing.md`) when done to verify.
+### 2. Single Responsibility Principle (SRP)
+Each module must focus on ONE responsibility.
 
-## Repository workflow notes
+**Allowed groupings (same file is OK):**
+- Multiple enums together (`types.py`)
+- Multiple schemas/models together (`schemas.py`, `contracts.py`)
+- Multiple error classes together (`errors.py`)
+- Multiple entities together (`entities.py`)
+- Multiple ORM models together (`orm.py`)
+- One service class + its factory helper functions
 
-Startup and image refresh:
-- `scripts/common_startup.sh` and `scripts/start-containers.sh` honor `ROOT_ENV_FILE`, but the normal startup path uses `docker compose up -d --no-build` and does not pull updated images.
-- When current registry contents matter, use `scripts/pull_images.sh` or `scripts/start_stack_pull.sh` instead of assuming startup will refresh images.
+**Violations (must split):**
+- Entities + services + persistence in one file
+- Schemas + services + functions in one file
+- More than 2 concern types mixed together
 
-WF6 Kubernetes notes:
-- Base WF6 manifests live under `infra/k8s/base`; overlays own namespace assignment and patch the `Namespace` object name for `dev`, `test`, and `prod`.
-- Kustomize patch matching is strict. When patching namespaced base resources, include the correct namespace or use explicit patch target selectors.
-- Keep overlay/provider patch files inside the overlay directory tree; parent-directory patch references can fail under default kustomize security restrictions.
-- Local Kubernetes bootstrap lives at `scripts/k8s/ensure_local_cluster.sh`; default local cluster/profile name is `dq-made-easy`, and auto runtime selection prefers `kind` over `minikube`.
-- WF6 deploy lifecycle policy: migration jobs run in all environments; seed jobs follow mode semantics (`auto` = dev/test, `always` = all with explicit prod allowance, `never` = disabled).
+### Validation
+Run after every change:
+```bash
+python scripts/validate_module_rules.py
+```
 
-WF7 Azure Container Apps notes:
-- ACA env parameter contracts include `environmentName`, `deploymentPlatform`, `resourceNamePrefix`, `stateKeyPrefixEnvironment`, `stateKeyPrefixApp`, `acaIngressDefault`, and `acaEvidencePath`.
-- ACA environment provisioning uses `stateKeyPrefixEnvironment` for `environment.tfstate`; per-app deployment uses `stateKeyPrefixApp` for individual app state.
-- ACA deploy pipelines publish smoke/evidence output through `azure-pipelines/templates/dq-made-easy-container-app-smoke.yml` into `tmp/release/aca-deploy-evidence/<env>`.
+### 3. Package Structure — DDD Layout
+Every new package under `packages/` must follow this Domain-Driven Design structure:
 
-## Committing changes
+```
+packages/metadata-<name>/
+├── pyproject.toml
+├── README.md
+└── src/metadata_<name>/
+    ├── __init__.py           # Public API exports only
+    ├── config.py             # Config dataclass + load_config()
+    ├── exceptions.py         # Domain exceptions
+    ├── main.py               # FastAPI app + lifespan
+    ├── domain/
+    │   ├── models/           # Domain entities (pure Python, no ORM/Pydantic)
+    │   ├── repositories/     # Abstract repository interfaces (ABC)
+    │   ├── services/         # Domain services (business logic)
+    │   └── vo/               # Value objects
+    ├── application/
+    │   ├── commands/         # Write operations (CQRS)
+    │   ├── queries/          # Read operations (CQRS)
+    │   └── services/         # Application-level orchestration
+    ├── infrastructure/
+    │   ├── database/         # SQLAlchemy ORM + engine management
+    │   ├── repositories/     # Repository implementations (PostgreSQL + in-memory)
+    │   └── extern/           # External service clients (HTTP, etc.)
 
-**Do not create any git commit without explicit user approval.** Before committing:
+**In-memory repositories** must always be provided alongside PostgreSQL implementations:
+- `infrastructure/repositories/in_memory.py` — in-memory implementations of all repository interfaces
+- Used by **unit tests only** — no database dependency
+- Production/integration tests use PostgreSQL repositories exclusively
+- SQLite is NOT supported; in-memory stores replace it for unit tests
+    └── interface/
+        ├── api/              # FastAPI route groups (one per resource)
+        ├── schemas/          # Pydantic request/response models
+        └── dependencies/     # Dependency injection (get_db, etc.)
+```
 
-1. Show the user what changed: `git diff --cached --stat` (or `git status --short` if unstaged)
-2. Explain why the change is needed
-3. Assign a short identifier (e.g. "commit `dockerhub-fix`")
-4. Ask: "Shall I commit `dockerhub-fix`?"
+**Layering rules:**
+- **domain/** — pure Python, no framework imports. Depends on nothing else.
+- **application/** — depends on domain only. Commands/queries orchestrate domain logic + repository interfaces.
+- **infrastructure/** — depends on domain. Provides concrete implementations (PostgreSQL + in-memory).
+- **interface/** — depends on everything. API boundary (Pydantic schemas, FastAPI routes).
 
-The user will respond "Yes, commit `<identifier>`" to confirm. Only commit when the identifier matches. If multiple changes are staged and the user says just "yes", commit only the last one you asked about.
+**Test strategy:**
+- **Unit tests** — use in-memory repositories (no database, fast)
+- **Integration tests** — use PostgreSQL repositories (fail if DB not available, never skip)
+- **Smoke tests** — test service starts and responds
+- See `docs/development/TEST_CLASSIFICATION.md` for details
 
-Exception: If the user says "commit everything" or "commit all", proceed with all staged changes.
+**Existing packages** (metadata-api, metadata-zone-coordinator) retain their current layout. **New packages** must follow DDD.
 
-## Conflict resolution
+## General Guidelines
 
-If a rule conflicts with an explicit developer or system instruction, raise the conflict to the user. Do not silently override.
+### Environment
+- Always use `venv/bin/python` for all Python commands (never bare `python`)
+- All paths are relative to the repository root
+
+### Port Safety — Process Killing
+**Only kill processes on ports in the 10000–11999 range** (dev/test environments).
+
+**Allowed:**
+- `kill <pid>` or `kill <port>` for processes on ports **10000–10999** (dev) or **11000–11999** (test)
+- `docker compose down` for compose-managed containers
+
+**Explicitly forbidden:**
+- Killing any process on ports **below 10000** (system services, host apps)
+- Killing any process on ports **above 11999** (prod ports, other user services)
+- Using `kill -9` or force-killing processes outside the 10000–11999 range
+
+**Rationale:** Ports below 10000 may be used by system services (SSH, DNS, etc.) or other user applications. Never touch them. The agent only manages dev (10000+) and test (11000+) environments.
+
+### Testing
+- All tests must pass: `venv/bin/python -m pytest tests/ -q`
+- Coverage must be ≥ 90%: `venv/bin/python -m pytest tests/ --cov=packages/ --cov-report=term`
+- **No inline JSON payloads** — API request/response payloads must live in `tests/fixtures/*.json` files. Never embed JSON-like dicts (e.g. `{"delivery_id": "…", "producer_system": "…"}`) directly in test code. Use the `load_json_fixture()` helper from `conftest.py`.
+  - *Exception:* trivial single-field dicts used for assertions (e.g. `assert data["status"] == "OK"`) are fine.
+
+### Test Classification
+Every test file must declare its classification in the module docstring:
+- `classification: unit` — fast, no external dependencies (default run)
+- `classification: integration` — requires external infrastructure (PostgreSQL, etc.)
+- `classification: smoke` — quick sanity checks that a service starts and responds
+
+Additionally, apply the matching pytest marker at module level:
+```python
+pytestmark = pytest.mark.unit      # or .integration, .smoke
+```
+
+Default `pytest` run excludes `integration` tests (`-m "not integration"`).
+To run integration tests: `pytest -m integration` (requires `CONTROL_PLANE_DATABASE_URL`).
+
+**Full documentation:** `docs/development/TEST_CLASSIFICATION.md`
+
+### UI Testing — Playwright
+Every significant UI change **must** have automated Playwright tests with test proof generation.
+
+**Location:** `packages/metadata-web/tests/ui/*.spec.ts`
+
+**Setup:**
+```bash
+# Install Playwright browsers (once)
+cd packages/metadata-web && npx playwright install --with-deps chromium
+```
+
+**Run tests:**
+```bash
+# Requires dev stack running: docker compose -f docker-compose.dev.yml up -d
+npx playwright test   # uses http://maas-ui.dev.jac.dot:10300 (from /etc/hosts)
+```
+
+**Generate test proof:**
+```bash
+# Runs tests + generates test proof JSON + publishes docs
+./scripts/run_ui_tests.sh dev
+```
+
+**Validate test proofs (requires env):**
+```bash
+# Sources .env.<env>.local and validates all proof artifacts
+./scripts/validate_test_proof.sh dev
+./scripts/validate_test_proof.sh test
+./scripts/publish_test_proof.sh dev
+```
+
+**Test proof artifacts:**
+- JSON: `test-results/test-proof/0.1.0/ui/ui-playwright-001.json`
+- Docs: `docs/test-proof/0.1.0/ui/ui-playwright-001.md` (via `publish_test_proof.sh`)
+
+**Rules:**
+- Each UI feature gets its own `.spec.ts` file (e.g. `topology-overview.spec.ts`)
+- Tests require the full demo stack (BFF + backends) — no mocking
+- Screenshots captured automatically on failure
+- Test proof must be committed alongside the feature
+
+### Approved Naming
+- Use `Central Registry` / `CR`
+- Use `IVC`
+
+### Enum Values — ALL_CAPS
+All Python `enum` values **MUST be `ALL_CAPS`**.
+
+**Correct:**
+```python
+class DeliveryStatus(str, Enum):
+    REGISTERED = "REGISTERED"
+    COMPLETED = "COMPLETED"
+    SUPERSEDED = "SUPERSEDED"
+```
+
+**Forbidden:**
+```python
+class DeliveryStatus(str, Enum):
+    registered = "registered"   # ❌ lowercase
+    Completed = "Completed"     # ❌ mixed case
+```
+
+### Enum Values — ALL_CAPS
+All Python `enum` values **MUST be `ALL_CAPS`**.
+
+**Correct:**
+```python
+class DeliveryStatus(str, Enum):
+    REGISTERED = "REGISTERED"
+    COMPLETED = "COMPLETED"
+    SUPERSEDED = "SUPERSEDED"
+```
+
+**Forbidden:**
+```python
+class DeliveryStatus(str, Enum):
+    registered = "registered"   # ❌ lowercase
+    Completed = "Completed"     # ❌ mixed case
+```
+
+### API Payloads — snake_case Only
+All API request bodies, response bodies, and query parameters **MUST use `snake_case`**.
+
+**Forbidden in API payloads:**
+- `camelCase` field names (e.g. `deliveryId`, `zoneId`, `syncStatus`)
+- Pydantic `Field(alias="camelCase")` declarations
+- `ConfigDict(populate_by_name=True)` used to enable camelCase
+
+**Allowed in API payloads:**
+- `snake_case` field names (e.g. `delivery_id`, `zone_id`, `sync_status`)
+- `snake_case` everywhere — request bodies, response bodies, query parameters, path parameters
+
+**CamelCase is only allowed in:**
+- The React frontend (BFF responses are snake_case, the UI may display camelCase labels)
+- External system integrations that mandate camelCase (e.g. AIStor/MinIO API)
+
+**Rationale:** Consistent API contract. The API never transforms field names.
+
+### Validation
+```bash
+python scripts/validate_snake_case.py
+```
+
+### Timestamps
+All timestamps must be in UTC.
+
+### Database
+- SQLite is NOT supported. PostgreSQL only.
+- `DATABASE_URL` is required.
+- Database engine must be lazily initialized.
+
+### Diagrams
+- **Never use text/ASCII diagrams** in markdown files.
+- **Always use Mermaid diagrams** (````mermaid` blocks) for any visual representation (architecture, flow, sequence, dependency, topology).
+- **Always generate `.mmd` and `.svg` files** alongside every Mermaid diagram:
+  - `.mmd` — the raw Mermaid source (single diagram per file)
+  - `.svg` — the rendered image (generated via `npx @mermaid-js/mermaid-cli`)
+  - Store both in `<current_dir>/images/` (relative to the document referencing them)
+  - Naming: `<diagram-name>.mmd` / `<diagram-name>.svg`
+  - Example: `docs/demo/foo.md` → `docs/demo/images/bar.mmd` + `docs/demo/images/bar.svg`
+- If `mermaid-cli` is not installed, use: `npx --yes @mermaid-js/mermaid-cli -i <input.mmd> -o <output.svg>`
+
+### Audit Columns
+All database tables must include:
+- `created_at_utc`, `created_by`
+- `updated_at_utc`, `updated_by`
+- `deleted_at_utc`, `deleted_by`
+
+Actor context is passed via the `X-Actor` header.
+
+## Repository Structure
+
+```
+packages/
+├── metadata-sdk/               # Core domain (legacy layout)
+├── metadata-api/               # FastAPI service (legacy layout)
+├── metadata-cli/               # CLI tool
+├── metadata-streaming/         # Streaming abstraction
+├── metadata-registry/          # Registry projection & persistence
+├── metadata-utils/             # Shared utilities (UUIDv7, etc.)
+├── metadata-zone-coordinator/  # Zone coordinator (legacy layout)
+├── metadata-telemetry/         # Telemetry package (legacy layout)
+├── metadata-health/            # Health endpoints (legacy layout)
+├── metadata-control-plane/     # Telemetry ingestion + status (legacy layout)
+├── metadata-central-repo/      # Delivery state + catalog (DDD layout)
+└── metadata-bff/               # Backend For Frontend (thin proxy + React UI)
+```
+
+**Layout note:** Packages created after 2026-07-25 follow the DDD structure (see rule #3 above).
+
+## Implementation Plan
+See `docs/implementation/IMPLEMENTATION_PLAN.md` for current phase status and future stages.
+See `docs/implementation/IMPLEMENTATION_Dev_Path.md` for the dev→test→prod roadmap (44 tasks, 6 phases).
+
+## Implementation Summaries
+
+**Every significant implementation effort must be documented as an implementation summary.**
+
+### Rules
+- **Location:** `docs/implementation/summaries/`
+- **Format:** Markdown (`.md`)
+- **Naming:** `YYYY-MM-DD_<functional-descriptive-name>.md`
+  - Prefix with today's date (`YYYY-MM-DD`)
+  - Followed by underscore and a functional, descriptive name
+  - Use kebab-case for the name (e.g., `srp-refactoring`, `package-rename`, `policy-engine-integration`)
+- **Content:**
+  - Date and status
+  - Objective and scope
+  - Results table (metrics before/after)
+  - New modules/files created
+  - Known issues or remaining work
+  - Next steps
+
+### When to Generate
+- After completing an implementation plan stage
+- After executing a refactoring plan
+- After completing any significant architectural change
+- When a feature or epic is marked as done
+
+### Example
+```
+docs/implementation/summaries/
+├── 2026-07-23_package-rename-delivery-to-metadata.md
+├── 2026-07-23_srp-refactoring.md
+└── 2026-07-24_policy-engine-integration.md
+```
+
+### Index
+Always update the index table in `docs/implementation/summaries/README.md` when adding a new summary.

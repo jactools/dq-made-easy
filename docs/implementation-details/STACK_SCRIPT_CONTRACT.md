@@ -1,6 +1,6 @@
 # Stack Script Contract
 
-Last updated: 2026-07-14
+Last updated: 2026-08-11
 
 ## Purpose
 
@@ -25,13 +25,36 @@ The canonical named env files are:
 
 `--env-file PATH` remains the explicit escape hatch for CI, `/etc`, and diagnostics.
 
-## Orchestrator
+## Operator Entrypoints
 
-The primary operator entry point is the orchestrator:
+`stack_ctl.sh` is the primary operator surface for build, pull, push, start, restart, stop, reconcile, and seed actions. `stack.sh` remains the lifecycle orchestrator for the narrower destroy/start/stop/restart/init/seed flow.
+
+### `stack_ctl.sh`
 
 ```
-scripts/stack.sh <env> <action> [OPTIONS]
+scripts/stack_ctl.sh <action> [OPTIONS]
 ```
+
+| Action | What it does | Uses |
+| --- | --- | --- |
+| `build` | Build repo-managed images | `build_and_push_all.sh` |
+| `pull` | Pull repo-managed and shared images | `pull_images.sh` |
+| `push` | Build and push repo-managed images | `build_and_push_all.sh` |
+| `start` | Start or recreate compose services | `docker compose` via shared lifecycle helpers |
+| `restart` | Recreate compose services | `docker compose` via shared lifecycle helpers |
+| `stop` | Stop compose services without removing containers | `docker compose` via shared teardown helpers |
+| `reconcile` | Run explicit post-start reconciliation actions | `reconcile_stack.sh` |
+| `seed` | Run seed actions | `seed_stack.sh` |
+
+```bash
+./scripts/stack_ctl.sh build --all
+./scripts/stack_ctl.sh pull --scope repo
+./scripts/stack_ctl.sh start --profile core --profile gateway --profile auth
+./scripts/stack_ctl.sh reconcile --all
+./scripts/stack_ctl.sh seed --seed-target postgres --seed-target deliveries
+```
+
+### `stack.sh`
 
 | Action | What it does | Calls |
 | --- | --- | --- |
@@ -56,7 +79,8 @@ scripts/stack.sh <env> <action> [OPTIONS]
 
 | Script | Responsibility |
 | --- | --- |
-| [scripts/stack.sh](../../scripts/stack.sh) | Orchestrator — dispatches to lifecycle scripts based on action |
+| [scripts/stack_ctl.sh](../../scripts/stack_ctl.sh) | Primary operator entrypoint — build, pull, push, start, restart, stop, reconcile, and seed |
+| [scripts/stack.sh](../../scripts/stack.sh) | Lifecycle orchestrator — dispatches to lifecycle scripts based on action |
 | [scripts/stack_destroy.sh](../../scripts/stack_destroy.sh) | Full teardown: stop containers, `compose down -v`, remove all generated artifacts (secrets, rotated passwords, keycloak credentials, TLS certs) |
 | [scripts/stack_start.sh](../../scripts/stack_start.sh) | Detect fresh vs warm start, generate/reuse secrets, rotate passwords, ensure TLS certs, build images, `compose up`, wait for Keycloak and Postgres health |
 | [scripts/stack_stop.sh](../../scripts/stack_stop.sh) | Stop containers, `compose down --remove-orphans` (keeps volumes and all artifacts) |
@@ -108,11 +132,10 @@ Examples: `DQ_ENGINE_OIDC_CLIENT_SECRET`, `GRAFANA_OIDC_SECRET`, `APP_CONFIG_ENC
 
 ## Legacy Scripts (Deprecated)
 
-These scripts are retained but deprecated. Prefer `stack.sh` for all lifecycle operations.
+These scripts are retained but deprecated. Prefer `stack_ctl.sh` for the broad operator flow and `stack.sh` for lifecycle-only operations.
 
 | Legacy script | Replacement |
 | --- | --- |
-| `scripts/stack_ctl.sh` | `stack.sh` (orchestrator) — `stack_ctl.sh` remains for image build/pull/push/status |
 | `scripts/common_startup.sh` | `stack.sh dev start --seed` |
 | `scripts/start-containers.sh` | `stack.sh dev start --seed` |
 | `scripts/start_stack.sh` | `stack.sh dev start` |

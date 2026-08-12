@@ -7,6 +7,7 @@ This document summarizes what is already implemented for WS10-A01, WS10-A02, and
 - WS10-A01: implemented
 - WS10-A02: implemented
 - WS10-A03: implemented baseline workflows
+- WS10-A04: implemented webhook dispatch with retry, payload envelope, and audit trail (job dispatch deferred)
 
 ## First 5-Minute Smoke Flow
 
@@ -19,6 +20,10 @@ Use this checklist to quickly confirm that the WS-10 baseline is live and usable
 5. Send MCP `initialize`, then `tools/list`, then one `tools/call` (`validate_dataset`).
 6. Send MCP `resources/list`, then `resources/read` for `dq://dashboards/execution-monitoring`.
 7. Confirm one audit record appears via `GET /agent/v1/audit/events` (admin scope).
+
+For full round-trip testing, use the MCP test client:
+8. Run `python -m dq_cli.mcp_test_client --server-cmd "python -m dq_cli.mcp_server ..." --scenario smoke_test`
+9. Run `scripts/validation/smoke_test_webhook_dispatch.sh` for end-to-end webhook + MCP dispatch test.
 
 Expected result: all calls succeed with explicit JSON responses, and agent actions are visible in audit history.
 
@@ -357,5 +362,4 @@ Primary tests:
 
 The following WS-10 items are still open and should not be assumed complete:
 
-- WS10-A04 external agent platform integrations
 - WS10-A05 richer governance and observability context for each agent action

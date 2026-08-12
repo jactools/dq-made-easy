@@ -239,7 +239,8 @@ run_full_validation() {
   require_nonempty DQ_LLM_REGISTRY
   require_nonempty DQ_LLM_NAMESPACE
   require_nonempty DQ_LLM_IMAGE
-  require_nonempty DQ_LLM_TAG
+  # Keycloak image/container lifecycle managed by platform-foundation
+  require_nonempty PLATFORM_LLM_TAG
   require_nonempty DQ_LLM_HOST_BIND
   require_nonempty DQ_LLM_HOST_PORT
   require_nonempty DQ_LLM_MODEL_ID
@@ -276,10 +277,12 @@ run_full_validation() {
       validate_prod_tag DQ_ENGINE_TAG
       validate_prod_tag DQ_PROFILING_TAG
       validate_prod_tag DQ_FRONTEND_TAG
-      validate_prod_tag DQ_KONG_TAG
+      # Kong image/container lifecycle managed by platform-foundation
       validate_prod_tag DQ_DB_TAG
-      validate_prod_tag DQ_KEYCLOAK_TAG
-      validate_prod_tag DQ_LLM_TAG
+      # Keycloak image/container lifecycle managed by platform-foundation
+      validate_prod_tag PLATFORM_KEYCLOAK_TAG
+      # LLM image/container lifecycle managed by platform-foundation
+      validate_prod_tag PLATFORM_LLM_TAG
 
       validate_loopback_bind DB_HOST_BIND
       validate_loopback_bind REDIS_HOST_BIND

@@ -1,0 +1,13 @@
+{
+  "app_version": "0.11.6",
+  "proof_id": "shared-platform-evidence-20260805",
+  "proof_type": "api",
+  "status": "passed",
+  "executed_at_utc": "2026-08-05T00:00:00Z",
+  "repository": "dq-made-easy",
+  "cross_repo_evidence": {
+    "dq_made_easy": "platform-auth, platform-ingestion, platform-ingestion-cli consumed by dq-api and dq-engine",
+    "platform_foundation": "92 shared platform tests pass",
+    "metadata_as_a_service": "adoption tracked separately in IMPLEMENTATION_Shared_Platform_Adoption.md"
+  }
+}

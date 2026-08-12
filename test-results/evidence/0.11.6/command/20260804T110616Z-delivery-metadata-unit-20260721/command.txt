@@ -1,0 +1,7 @@
+cwd=/Users/Jac.Beekers/gitrepos/dq-made-easy
+mode=command
+label=delivery-metadata-unit-20260721
+command_parts:
+bash
+-lc
+venv/bin/python -m pip install -e /Users/Jac.Beekers/gitrepos/metadata-as-a-service/packages/metadata-utils -e /Users/Jac.Beekers/gitrepos/metadata-as-a-service/packages/metadata-delivery-id -e /Users/Jac.Beekers/gitrepos/metadata-as-a-service/packages/metadata-models -e /Users/Jac.Beekers/gitrepos/metadata-as-a-service/packages/metadata-sdk --no-deps >/dev/null && venv/bin/python -m pytest dq-api/fastapi/delivery/tests/test_delivery_app.py -q -o addopts=

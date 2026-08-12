@@ -259,6 +259,12 @@ class DataDeliveryNoteView(SnakeModel):
     checksum: str | None = None
     checksum_algorithm: str | None = None
     metadata_json: dict[str, Any] | None = None
+    # DPSG-compliant redelivery fields
+    delivery_type: str = "initial"
+    predecessor_time_event: str | None = None
+    superseded_by_time_event: str | None = None
+    correction_reason: str | None = None
+    delivered_by: str | None = None
 
 
 class DataDeliveryExecutionReferenceView(SnakeModel):

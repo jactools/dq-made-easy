@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/skip: 'true'
+  labels:
+    app.kubernetes.io/name: dq-job-api-migrate
+    app.kubernetes.io/part-of: dq-made-easy
+    dq.jaccloud.nl/trigger: manual
+  name: dq-job-api-migrate
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-job-api-migrate
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+      - args:
+        - "# Wait for database to be ready\necho \"Waiting for database...\"\nfor\
+          \ i in $(seq 1 30); do\n  if psql \"$DATABASE_URL\" -c '\\q' >/dev/null\
+          \ 2>&1; then\n    echo \"Database is ready\"\n    break\n  fi\n  if [[ $i\
+          \ -eq 30 ]]; then\n    echo \"Database not ready after 30 attempts\"\n \
+          \   exit 1\n  fi\n  sleep 2\ndone\ncd /app && python -m alembic -c alembic.ini\
+          \ upgrade heads\n"
+        command:
+        - /bin/sh
+        - -lc
+        envFrom:
+        - configMapRef:
+            name: dq-common-config
+        - configMapRef:
+            name: dq-api-config
+        - secretRef:
+            name: dq-api-secrets
+        image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
+        imagePullPolicy: IfNotPresent
+        name: api-migrate
+      restartPolicy: Never
+  ttlSecondsAfterFinished: 3600

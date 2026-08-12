@@ -1,3 +1,4 @@
+#
 ## Generated .gitignore for Node.js projects
 .npmrc
 .env
@@ -17,6 +18,7 @@ dq-keycloak/jaccloud-realm.json
 !dq-ui/dist/
 dist/
 
+certs/
 build/
 .vite/
 .vite-deps/
@@ -37,6 +39,9 @@ dq-ui/docs-site/docs/test-proof/
 .env.*.local
 
 tmp/
+vendor/
+spark-jars-cache/
+*.bak
 
 ## Logs
 logs/
@@ -88,3 +93,4 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 **/*.egg-info/
+/tmp/.credentials

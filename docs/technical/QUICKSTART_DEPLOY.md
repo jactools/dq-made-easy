@@ -29,11 +29,19 @@ The orchestrator handles secrets generation, TLS certificates, image builds, con
 ## Option 2: Pull then Start
 
 ```bash
-# Pull latest versions
+# Pull the repo-managed image set
 ./scripts/pull_images.sh
 
-# Or pull a shared manual override tag
-./scripts/pull_images.sh v0.10.5
+# Pull the shared platform image set separately
+./scripts/pull_images.sh --scope platform
+
+# Pull a specific shared runner tag
+./scripts/pull_images.sh --image platform-ingestion-runner:v0.10.5
+
+# Local-debugging-only shared image override guidance
+# docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md
+# Pinning and upgrade workflow:
+# docs/technical/SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md
 
 # Then start with seeding
 ./scripts/stack.sh prod start --seed

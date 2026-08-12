@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 
 
 class StatusValueDefinition(BaseModel):

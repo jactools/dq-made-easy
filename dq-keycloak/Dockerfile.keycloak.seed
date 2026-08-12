@@ -1,5 +1,11 @@
-ARG BASE_REGISTRY
-FROM ${BASE_REGISTRY}python:3.14-slim
+ARG PYTHON_DOCKER_REGISTRY=""
+ARG PYTHON_DOCKER_NAMESPACE=""
+ARG PYTHON_DOCKER_IMAGE="dq-made-easy-python-base"
+ARG PYTHON_DOCKER_TAG="latest"
+
+FROM ${PYTHON_DOCKER_REGISTRY}${PYTHON_DOCKER_NAMESPACE}${PYTHON_DOCKER_IMAGE}:${PYTHON_DOCKER_TAG}
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

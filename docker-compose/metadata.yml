@@ -145,6 +145,10 @@ services:
     build:
       context: ..
       dockerfile: dq-metadata/Dockerfile.openmetadata-server
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/openmetadata-server
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/openmetadata-server,mode=max
       args:
         OPENMETADATA_BASE_IMAGE: ${OPENMETADATA_REGISTRY}${OPENMETADATA_NAMESPACE}${OPENMETADATA_IMAGE}:${OPENMETADATA_TAG:?OPENMETADATA_TAG is required}
         OTEL_JAVAAGENT_HELPER_IMAGE: ${OTEL_JAVAAGENT_HELPER_IMAGE?OTEL_JAVAAGENT_HELPER_IMAGE
@@ -244,7 +248,15 @@ services:
     build:
       context: ..
       dockerfile: dq-metadata/Dockerfile.configure
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/openmetadata-configure
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/openmetadata-configure,mode=max
       args:
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
         PIP_INDEX_URL: ${PIP_INDEX_URL:-}
         INTERNAL_CORPORATE_ROOT_CA: ${TLS_INTERNAL_CA_BUNDLE:?TLS_INTERNAL_CA_BUNDLE is required}
     image: ${DQ_METADATA_CONFIGURE_REGISTRY:?DQ_METADATA_CONFIGURE_REGISTRY is required}${DQ_METADATA_CONFIGURE_NAMESPACE:-}${DQ_METADATA_CONFIGURE_IMAGE:?DQ_METADATA_CONFIGURE_IMAGE is required}:${DQ_METADATA_CONFIGURE_TAG:?DQ_METADATA_CONFIGURE_TAG is required}

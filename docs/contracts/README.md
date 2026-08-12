@@ -9,6 +9,7 @@ Available contracts:
 - [internal-api](internal-api/README.md): current generated versioned JSON Schema bundles for the live FastAPI internal API surface.
 - [gx-artifact-envelope](gx-artifact-envelope/README.md): GX artifact envelope contract used by DQ-7.4.
 - [pyspark-native-artifact-envelope](pyspark-native-artifact-envelope/README.md): PySpark-native validation artifact contract for engine_type `pyspark_native`.
+- [dq-results](dq-results/README.md): generalized runtime-neutral DQ result envelope for engine-native GX, Soda, or PySpark-native payloads.
 - [rule-dsl](rule-dsl/README.md): canonical semantic rule authoring contract package for DQ-7 `dsl.schema_version = 2.0.0`.
 - [test-proof](test-proof/README.md): canonical JSON schema for curated UI and API test proof summaries.
 - [validation-artifact-envelope](validation-artifact-envelope/README.md): runtime-neutral artifact envelope that wraps engine-native GX or Soda payloads for ABS-1 multi-runtime expansion.

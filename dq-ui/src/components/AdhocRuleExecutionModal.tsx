@@ -215,11 +215,11 @@ export const AdhocRuleExecutionModal: React.FC<AdhocRuleExecutionModalProps> = (
       if (mode === 'data_object_version') {
         if (!dataObjectVersionId) throw new Error('Missing dataObjectVersionId')
         const params = new URLSearchParams({ dataObjectVersionId, status: 'active', latestOnly: 'true' })
-        url = `${apiBase}/gx/suites?${params.toString()}`
+        url = `${apiBase}/suites?${params.toString()}`
       } else {
         if (!ruleId) throw new Error('Missing ruleId')
         const params = new URLSearchParams({ status: 'active', latestOnly: 'true' })
-        url = `${apiBase}/gx/suites/by-rule/${encodeURIComponent(ruleId)}?${params.toString()}`
+        url = `${apiBase}/suites/by-rule/${encodeURIComponent(ruleId)}?${params.toString()}`
       }
 
       const response = await fetch(url, { headers })
@@ -558,7 +558,7 @@ export const AdhocRuleExecutionModal: React.FC<AdhocRuleExecutionModalProps> = (
         sourceOverrideOptions,
       }
 
-      const response = await fetch(`${apiBase}/gx/runs/adhoc`, {
+      const response = await fetch(`${apiBase}/runs/adhoc`, {
         method: 'POST',
         headers,
         body: JSON.stringify(camelToSnake(payload)),

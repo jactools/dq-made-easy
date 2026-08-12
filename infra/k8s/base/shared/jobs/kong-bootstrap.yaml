@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/skip: 'true'
+  labels:
+    app.kubernetes.io/component: kong-config
+    app.kubernetes.io/name: dq-job-kong-bootstrap
+    app.kubernetes.io/part-of: dq-made-easy
+    dq.jaccloud.nl/trigger: manual
+  name: dq-job-kong-bootstrap
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-job-kong-bootstrap
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+      - command:
+        - /app/scripts/bootstrap_kong.sh
+        env:
+        - name: KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KEYCLOAK_ADMIN_PASSWORD
+              name: dq-keycloak-secrets
+        - name: KONG_OTEL_ENDPOINT
+          value: http://localhost:4318
+        - name: TRUST_PROXY_AUTH
+          value: 'true'
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/platform-root-ca.pem
+        - name: SSO_ENABLED
+          value: 'true'
+        - name: SSO_PUBLIC_ISSUER_URL
+          value: https://keycloak.dev.jac.dot:10443/auth/realms/dq-made-easy
+        - name: DQ_API_INTERNAL_URL
+          value: https://dq-api.dq-made-easy-dev.svc.cluster.local:4010
+        - name: KEYCLOAK_SYSTEM_ADMIN_USERNAME
+          value: admin
+        - name: DQ_ENGINE_OIDC_CLIENT_ID
+          value: dq-engine
+        - name: UI_VITE_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:10443
+        - name: UI_NGINX_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:10443
+        envFrom:
+        - configMapRef:
+            name: dq-common-config
+        - configMapRef:
+            name: dq-kong-config
+        - configMapRef:
+            name: dq-keycloak-config
+        - secretRef:
+            name: dq-kong-secrets
+        - secretRef:
+            name: dq-keycloak-secrets
+        image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
+        imagePullPolicy: IfNotPresent
+        name: kong-bootstrap
+        volumeMounts:
+        - mountPath: /etc/ssl/certs/platform-root-ca.pem
+          name: platform-root-ca
+          readOnly: true
+          subPath: rootCA.pem
+      restartPolicy: Never
+      volumes:
+      - configMap:
+          name: platform-root-ca
+        name: platform-root-ca
+  ttlSecondsAfterFinished: 300

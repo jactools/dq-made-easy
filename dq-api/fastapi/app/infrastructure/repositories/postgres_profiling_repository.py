@@ -1,5 +1,4 @@
 from __future__ import annotations
-import os
 from datetime import UTC, datetime, timedelta
 import json
 from typing import Optional
@@ -262,20 +261,25 @@ class PostgresProfilingRepository(ProfilingRepository):
         source_type: str,
     ) -> None:
         settings = get_settings()
+        from app.core.redis_connection import build_redis_client_kwargs
+        from app.core.redis_connection import resolve_redis_ca_bundle
+
         redis_host = settings.redis_host if hasattr(settings, "redis_host") else "redis"
         redis_port = int(getattr(settings, "redis_port", 6379))
         redis_password = getattr(settings, "redis_password", None)
+        redis_username = str(getattr(settings, "redis_username", "") or "").strip() or None
+        redis_tls_enabled = bool(getattr(settings, "redis_tls_enabled", True))
+        redis_ca_bundle = str(getattr(settings, "redis_ca_bundle", "") or "").strip() or resolve_redis_ca_bundle()
         client = redis.Redis(
-            host=redis_host,
-            port=redis_port,
-            password=redis_password,
-            decode_responses=True,
-            ssl=True,
-            ssl_cert_reqs="required",
-            ssl_ca_certs=os.getenv("REDIS_CA_BUNDLE")
-            or os.getenv("SSL_CERT_FILE")
-            or "/etc/openmetadata/certs/internal-ca-bundle.pem",
-            ssl_check_hostname=True,
+            **build_redis_client_kwargs(
+                redis_host=redis_host,
+                redis_port=redis_port,
+                redis_db=0,
+                redis_username=redis_username,
+                redis_password=redis_password,
+                redis_tls_enabled=redis_tls_enabled,
+                redis_ca_bundle=redis_ca_bundle,
+            )
         )
         queue_name = "bull:data-profiling:wait"
         job_payload = {

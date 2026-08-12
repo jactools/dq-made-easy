@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import Any
 
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 from app.domain.entities.base import EntityModel
 
 

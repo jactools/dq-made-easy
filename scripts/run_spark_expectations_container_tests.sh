@@ -11,6 +11,8 @@ EXTRA_PYTEST_ARGS=("$@")
 
 cd "$REPO_ROOT"
 
+: "${REGISTRY:?REGISTRY is required to build the engine test image against the shared Python base}"
+
 export DQ_S3_ENDPOINT="${DQ_S3_ENDPOINT:-${AWS_ENDPOINT_URL:-https://aistor:9000}}"
 export DQ_S3_ACCESS_KEY="${DQ_S3_ACCESS_KEY:-${AWS_ACCESS_KEY_ID:-aistoradmin}}"
 export DQ_S3_SECRET_KEY="${DQ_S3_SECRET_KEY:-${AWS_SECRET_ACCESS_KEY:-aistoradmin}}"
@@ -62,10 +64,10 @@ for env_name in \
 done
 
 if [[ "$FORCE_REBUILD" == "1" ]]; then
-  docker build --build-arg "MKCERT_ROOT_CA=${MKCERT_ROOT_CA:-}" -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
+  docker build --build-arg "PYTHON_REGISTRY=${REGISTRY}" --build-arg PYTHON_NAMESPACE= --build-arg PYTHON_IMAGE=dq-made-easy-python-base --build-arg PYTHON_TAG=latest --build-arg "MKCERT_ROOT_CA=${MKCERT_ROOT_CA:-}" -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
 else
   if ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
-    docker build --build-arg "MKCERT_ROOT_CA=${MKCERT_ROOT_CA:-}" -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
+    docker build --build-arg "PYTHON_REGISTRY=${REGISTRY}" --build-arg PYTHON_NAMESPACE= --build-arg PYTHON_IMAGE=dq-made-easy-python-base --build-arg PYTHON_TAG=latest --build-arg "MKCERT_ROOT_CA=${MKCERT_ROOT_CA:-}" -f "$REPO_ROOT/dq-engine/Dockerfile.engine" -t "$IMAGE_NAME" "$REPO_ROOT"
   fi
 fi
 

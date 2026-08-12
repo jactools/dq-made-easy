@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dq-made-easy-dev
+
+resources:
+  - ../../base/api
+  - config/service-config.yaml
+  # api-migrate job is now in shared-dev overlay
+
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq-made-easy
+      platform.jaccloud.nl/environment: dev
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-api
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-api
+    newTag: "0.11"
+  - name: docker.io/jacbeekers/dq-made-easy-db
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-db
+    newTag: "0.11"

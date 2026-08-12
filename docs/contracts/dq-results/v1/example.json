@@ -1,0 +1,10 @@
+{
+  "expectation_count": 1,
+  "passed_expectation_count": 0,
+  "failed_expectation_count": 1,
+  "records_checked": 10,
+  "records_failed": null,
+  "records_succeeded": null,
+  "records_filtered_out": 0,
+  "rule_results": [{"expectation_index": 0, "rule_id": "rule_customer_email_completeness", "expectation_type": "expect_column_proportion_of_non_null_values_to_be_between", "result": "failed", "records_checked": 10, "records_failed": 2, "records_succeeded": 8, "records_filtered_out": 0, "threshold": {"min_value": 0.95, "relation": "below"}, "diagnostic_count": 2, "diagnostics": []}]
+}

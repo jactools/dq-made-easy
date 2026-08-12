@@ -1,3 +1,5 @@
+setuptools>=69
+wheel>=0.45
 fastapi==0.139.0
 python-multipart==0.0.20
 uvicorn[standard]==0.51.0
@@ -15,6 +17,13 @@ PyYAML==6.0.3
 boto3==1.43.46
 cryptography==48.0.1
 rapidfuzz==3.14.5
+platform-auth==0.1.0
+metadata-utils==1.0.20
+metadata-delivery-id==1.0.2+192
+metadata-models==1.0.20
+metadata-sdk==0.1.32
+
+# Delivery registry support packages are installed from the package index.
 
 # OpenTelemetry (latest stable baseline, selected 2026-07-13)
 # Note: instrumentation-* packages must match the SDK minor version to avoid

@@ -1,20 +1,29 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.14-slim
+ARG PYTHON_DOCKER_REGISTRY=""
+ARG PYTHON_DOCKER_NAMESPACE=""
+ARG PYTHON_DOCKER_IMAGE="dq-made-easy-python-base"
+ARG PYTHON_DOCKER_TAG="latest"
+
+FROM ${PYTHON_DOCKER_REGISTRY}${PYTHON_DOCKER_NAMESPACE}${PYTHON_DOCKER_IMAGE}:${PYTHON_DOCKER_TAG}
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /workspace
 
-ARG PIP_INDEX_URL
+# Args available in RUN instructions
+ARG PIP_EXTRA_INDEX_URL
+ARG PIP_TRUSTED_HOST
 ARG INTERNAL_CORPORATE_ROOT_CA
+ARG CURL_CA_BUNDLE_PATH
 
 COPY dq-api/fastapi/requirements.txt /tmp/requirements.txt
 
 RUN --mount=type=secret,id=internal_mkcert_root_ca \
     --mount=type=secret,id=internal_root_ca \
     --mount=type=secret,id=internal_ca_bundle \
-    set -eux; \
+    --mount=type=secret,id=pip_index_url \
+    set -ex; \
     apt-get update \
     && apt-get install -y --no-install-recommends bash curl ca-certificates gnupg openssl \
     && rm -rf /var/lib/apt/lists/*; \
@@ -51,11 +60,28 @@ RUN --mount=type=secret,id=internal_mkcert_root_ca \
     update-ca-certificates || true; \
     install -d /usr/share/keyrings \
     && curl -fsSL --insecure https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo \"$VERSION_CODENAME\")-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends postgresql-client-18 \
-    && PIP_CERT=/etc/ssl/certs/ca-certificates.crt PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r /tmp/requirements.txt \
+    && PIP_CERT=/etc/ssl/certs/ca-certificates.crt \
+       PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" \
+       PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-https://pypi.org/simple/}" \
+       PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-packages.host.dev.jac.dot}" \
+       pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm -f /usr/local/share/ca-certificates/internal-*.crt \
     && update-ca-certificates --fresh \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy workspace contents baked into the image (replaces docker-compose volume mounts)
+COPY VERSION_MANIFEST.json /workspace/VERSION_MANIFEST.json
+COPY dq-utils /workspace/dq-utils
+COPY dq-api/fastapi /workspace/dq-api/fastapi
+COPY dq-api/scripts/generate_sql_seeds.py /workspace/dq-api/scripts/generate_sql_seeds.py
+COPY dq-api/scripts/quote_mock_data.py /workspace/dq-api/scripts/quote_mock_data.py
+COPY dq-db/mock-data /workspace/dq-db/mock-data
+COPY dq-db/scripts /workspace/dq-db/scripts
+COPY scripts /workspace/scripts
+COPY dq-api/fastapi/docs/contracts/internal-api /workspace/dq-api/fastapi/docs/contracts/internal-api
+COPY data_sources/contracts /workspace/dq-api/fastapi/data_sources/contracts
+
+ENTRYPOINT ["/bin/bash", "/workspace/dq-db/scripts/run_db_seed_container.sh"]

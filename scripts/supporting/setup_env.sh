@@ -18,8 +18,31 @@ fi
 
 source "$SCRIPT_DIR/logging.sh"
 my_name="setup_env.sh"
+debug "$my_name" "Sourcing setup_env.sh from $SCRIPT_DIR"
+debug "$my_name" "ROOT_DIR: $ROOT_DIR"
 
 debug "$my_name" "Setting up environment variables..."
+
+resolve_tls_internal_ca_bundle_file() {
+    local bundle_file="$1"
+
+    if [ -f "$bundle_file" ]; then
+        printf '%s' "$bundle_file"
+        return 0
+    fi
+
+    if [ -n "${ROOT_DIR:-}" ] && [ -f "$ROOT_DIR/$bundle_file" ]; then
+        printf '%s' "$ROOT_DIR/$bundle_file"
+        return 0
+    fi
+
+    if [ -n "${ROOT_DIR:-}" ] && [ -f "$ROOT_DIR/docker-compose/$bundle_file" ]; then
+        printf '%s' "$ROOT_DIR/docker-compose/$bundle_file"
+        return 0
+    fi
+
+    return 1
+}
 
 VITE_KEYCLOAK_PUBLIC_URL="${VITE_KEYCLOAK_PUBLIC_URL:-${KEYCLOAK_PUBLIC_URL:-}}"
 VITE_SSO_ISSUER_URL="${VITE_SSO_ISSUER_URL:-${SSO_PUBLIC_ISSUER_URL:-}}"
@@ -112,10 +135,6 @@ nexuscloud_password_base64="${NEXUSCLOUD_PASSWORD_BASE64:-}"
 nexuscloud_group_repo="${NEXUSCLOUD_PYPI_GROUP_REPO:-}"
 nexuscloud_maven_group_repo="${NEXUSCLOUD_MAVEN_GROUP_REPO:-${NEXUSCLOUD_MPM_GROUP_REPO:-}}"
 
-if [ -z "$nexuscloud_hostname" ] && [ -n "$nexuscloud_dns" ]; then
-    nexuscloud_hostname="${nexuscloud_dns#//}"
-fi
-
 if [ -n "$nexuscloud_hostname" ]; then
     nexuscloud_dns="//${nexuscloud_hostname}"
     NEXUSCLOUD_HOSTNAME="$nexuscloud_hostname"
@@ -138,11 +157,43 @@ if [ -n "$nexuscloud_hostname" ] || [ -n "$nexuscloud_registry" ]; then
     fi
 fi
 
+dependency_source="${INFRA_SOURCE:-CORPORATE}"
+
+build_corporate_pypi_index_url() {
+    if [ -z "$nexuscloud_hostname" ]; then
+        error "$my_name" "corporate dependency source requires NEXUSCLOUD_HOSTNAME or NEXUSCLOUD_DNS"
+        return 1
+    fi
+
+    if [ -z "$nexuscloud_group_repo" ]; then
+        error "$my_name" "corporate dependency source requires NEXUSCLOUD_PYPI_GROUP_REPO"
+        return 1
+    fi
+
+    if [ -z "$nexuscloud_username" ] || [ -z "$nexuscloud_password" ]; then
+        error "$my_name" "corporate dependency source requires NEXUSCLOUD_USERNAME and NEXUSCLOUD_PASSWORD"
+        return 1
+    fi
+
+    printf 'https://%s:%s@%s/repository/%s/simple/' \
+        "$nexuscloud_username" \
+        "$nexuscloud_password" \
+        "$nexuscloud_hostname" \
+        "$nexuscloud_group_repo"
+}
+
 if [ -n "${NEXUSCLOUD_NPM_REGISTRY:-}" ]; then
     NPM_CONFIG_REGISTRY="$NEXUSCLOUD_NPM_REGISTRY"
-else
-    NPM_CONFIG_REGISTRY="https://registry.npmjs.org/"
+    export NPM_CONFIG_REGISTRY
 fi
+
+if resolved_tls_internal_ca_bundle_file="$(resolve_tls_internal_ca_bundle_file "$TLS_INTERNAL_CA_BUNDLE")"; then
+    TLS_INTERNAL_CA_BUNDLE="$resolved_tls_internal_ca_bundle_file"
+else
+    error "$my_name" "TLS_INTERNAL_CA_BUNDLE is required and must point to an existing file: $TLS_INTERNAL_CA_BUNDLE"
+    return 1
+fi
+export TLS_INTERNAL_CA_BUNDLE
 
 REPO_NPMRC_FILE="${REPO_NPMRC_FILE:-}"
 if [ -n "$REPO_NPMRC_FILE" ] && [ ! -f "$REPO_NPMRC_FILE" ]; then
@@ -153,14 +204,8 @@ if [ -z "$REPO_NPMRC_FILE" ]; then
     if [ -f "$ROOT_DIR/.npmrc" ]; then
         REPO_NPMRC_FILE="$ROOT_DIR/.npmrc"
     else
-        mkdir -p "$ROOT_DIR/tmp"
-        REPO_NPMRC_FILE="$ROOT_DIR/tmp/public.npmrc"
-        if [ ! -f "$REPO_NPMRC_FILE" ]; then
-            cat > "$REPO_NPMRC_FILE" <<'EOF'
-registry=https://registry.npmjs.org/
-EOF
-        fi
-        warning "$my_name" "Repo-root .npmrc not found; using public npm registry fallback"
+        error "$my_name" "Repo-root .npmrc not found; refusing to fall back to the public npm registry"
+        return 1
     fi
 fi
 
@@ -198,18 +243,41 @@ if [ -n "$nexuscloud_hostname" ]; then
     export NEXUSCLOUD_PYPI_URL NEXUSCLOUD_PYPI_URL_NO_AUTH
 fi
 
-if [ -z "${PIP_INDEX_URL:-}" ]; then
-    if [ -n "${NEXUSCLOUD_PYPI_URL:-}" ]; then
-        PIP_INDEX_URL="$NEXUSCLOUD_PYPI_URL"
-    elif [ -n "${NEXUSCLOUD_PYPI_URL_NO_AUTH:-}" ] && [ -n "$nexuscloud_username" ] && [ -n "$nexuscloud_password" ]; then
-        pip_index_host="${NEXUSCLOUD_PYPI_URL_NO_AUTH#https://}"
-        pip_index_host="${pip_index_host%%/repository/*}"
-        PIP_INDEX_URL="https://${nexuscloud_username}:${nexuscloud_password}@${pip_index_host}/repository/${nexuscloud_group_repo}/simple"
-    fi
-fi
+case "$dependency_source" in
+    HOME)
+        # HOME: use local pypi-server (custom wheels) + public pypi.org fallback
+        # .env.dev.local already sets:
+        #   PIP_INDEX_URL=http://packages.dev.jac.dot:10091/simple/
+        #   PIP_EXTRA_INDEX_URL=https://pypi.org/simple/
+        # Preserve these values from .env
+        PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.org/simple/}"
+        PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}"
+        PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-}"
+        ;;
+    CORPORATE)
+        PIP_INDEX_URL="$(build_corporate_pypi_index_url)"
+        PIP_EXTRA_INDEX_URL=""
+        if [ -n "$nexuscloud_hostname" ]; then
+            PIP_TRUSTED_HOST="$nexuscloud_hostname"
+        fi
+        ;;
+    *)
+        error "$my_name" "Unsupported INFRA_SOURCE: $dependency_source (expected CORPORATE or HOME)"
+        return 1
+        ;;
+esac
 
 if [ -n "${PIP_INDEX_URL:-}" ]; then
     export PIP_INDEX_URL
+fi
+if [ -n "${PIP_EXTRA_INDEX_URL:-}" ]; then
+    export PIP_EXTRA_INDEX_URL
+fi
+if [ -n "${PIP_TRUSTED_HOST:-}" ]; then
+    export PIP_TRUSTED_HOST
+fi
+if [ -n "${PYPI_SERVER_NETWORK_NAME:-}" ]; then
+    export PYPI_SERVER_NETWORK_NAME
 fi
 
 # ---------------------------------------------------------------------------
@@ -320,15 +388,10 @@ export DQ_PROFILING_NAMESPACE
 export DQ_PROFILING_IMAGE
 export DQ_PROFILING_TAG
 
-export DQ_KONG_REGISTRY
-export DQ_KONG_NAMESPACE
-export DQ_KONG_IMAGE
-export DQ_KONG_TAG
+# Kong image/container lifecycle managed by platform-foundation
+# (DQ_KONG_* vars removed; bootstrap_kong.sh retained for route/ACL deployment)
 
-export DQ_KEYCLOAK_REGISTRY
-export DQ_KEYCLOAK_NAMESPACE
-export DQ_KEYCLOAK_IMAGE
-export DQ_KEYCLOAK_TAG
+# Keycloak image/container lifecycle managed by platform-foundation
 
 export DQ_DB_REGISTRY
 export DQ_DB_NAMESPACE
@@ -491,12 +554,11 @@ if [ -n "${DOCKER_DOMAIN:-}" ]; then
     # Force base image registries through Nexus group.
     NODE_REGISTRY="${DOCKER_DOMAIN}/"
     NGINX_REGISTRY="${DOCKER_DOMAIN}/"
-    if [ -n "${NEXUSCLOUD_DOCKER_IO_REGISTRY:-}" ]; then
-        PYTHON_REGISTRY=""
-    else
-        PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
-    fi
-    export NODE_REGISTRY NGINX_REGISTRY PYTHON_REGISTRY
+    PYTHON_REGISTRY="${DOCKER_DOMAIN}/"
+    PYTHON_NAMESPACE=""
+    PYTHON_IMAGE="dq-made-easy-python-base"
+    PYTHON_TAG="latest"
+    export NODE_REGISTRY NGINX_REGISTRY PYTHON_REGISTRY PYTHON_NAMESPACE PYTHON_IMAGE PYTHON_TAG
 
     # Ensure Docker is authenticated to Docker Hub for public base-image pulls.
     if [ -n "${DOCKER_HUB_USERNAME:-}" ] && [ -n "${DOCKER_HUB_TOKEN:-}" ]; then

@@ -71,6 +71,7 @@ Environment:
 Env selection:
   --env dev|test|prod      Load .env.dev.local, .env.test.local, or .env.prod.local
   --env-file PATH          Load an explicit env file
+  --source local|corporate  Use public PyPI or corporate Nexus for dependency resolution
 EOF
 }
 

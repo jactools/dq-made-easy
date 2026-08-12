@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ###
 # Name: build_and_push.sh
-# Description: Build and push dq-frontend image to Docker Hub
+# Description: Build and push image to configured registry
 # Usage: ./build_and_push.sh [--no-cache] [--no-push]
 ###
 
@@ -53,7 +53,7 @@ Build and push the dq-frontend Docker image.
 
 Options:
     --no-cache    Build without using Docker cache
-    --no-push     Build only, do not push to Docker Hub
+    --no-push     Build only, do not push to registry
     -h, --help    Show this help message
 
 Environment variables (from the selected root env file):
@@ -64,8 +64,8 @@ Environment variables (from the selected root env file):
 
 Full image name: ${DQ_FRONTEND_REGISTRY:-}${DQ_FRONTEND_NAMESPACE:-}${DQ_FRONTEND_IMAGE:-}:${DQ_FRONTEND_TAG:-}
 
-Before pushing to Docker Hub, make sure you're logged in:
-    docker login docker.io
+Before pushing to registry, make sure you're logged in:
+    docker login <registry>
 
 EOF
             exit 0
@@ -99,11 +99,20 @@ fi
 IMAGE_NAME="${DQ_FRONTEND_REGISTRY}${DQ_FRONTEND_NAMESPACE}${DQ_FRONTEND_IMAGE}:${DQ_FRONTEND_TAG}"
 LATEST_NAME="${DQ_FRONTEND_REGISTRY}${DQ_FRONTEND_NAMESPACE}${DQ_FRONTEND_IMAGE}:latest"
 
+# Also tag with base version (e.g. 0.11-608c9b1 -> 0.11)
+BASE_TAG="${DQ_FRONTEND_TAG%%-*}"
+if [ "$BASE_TAG" != "$DQ_FRONTEND_TAG" ]; then
+    VERSION_NAME="${DQ_FRONTEND_REGISTRY}${DQ_FRONTEND_NAMESPACE}${DQ_FRONTEND_IMAGE}:${BASE_TAG}"
+else
+    VERSION_NAME=""
+fi
+
 echo "========================================"
 echo "Building dq-frontend Docker image"
 echo "========================================"
 echo "Image: $IMAGE_NAME"
 echo "Latest: $LATEST_NAME"
+[ -n "$VERSION_NAME" ] && echo "Version: $VERSION_NAME"
 echo "Build directory: $DOCKER_DIR"
 echo "Cache: $([ -z "$NO_CACHE" ] && echo "enabled" || echo "disabled")"
 echo "Push to registry: $([ "$NO_PUSH" = false ] && echo "yes" || echo "no")"
@@ -120,14 +129,16 @@ try_build() {
     local nginx_image="$3"
     local nginx_tag="$4"
 
+    docker_build_tags=(-t "$IMAGE_NAME" -t "$LATEST_NAME")
+    [ -n "$VERSION_NAME" ] && docker_build_tags+=(-t "$VERSION_NAME")
+
     DOCKER_BUILDKIT=1 docker build $NO_CACHE \
         --build-arg NGINX_REGISTRY="$nginx_registry" \
         --build-arg NGINX_NAMESPACE="$nginx_namespace" \
         --build-arg NGINX_IMAGE="$nginx_image" \
         --build-arg NGINX_TAG="$nginx_tag" \
         -f "$DOCKER_DIR/Dockerfile.frontend" \
-        -t "$IMAGE_NAME" \
-        -t "$LATEST_NAME" \
+        "${docker_build_tags[@]}" \
         "$DOCKER_DIR"
 }
 
@@ -155,30 +166,35 @@ fi
 
 if [ "$NO_PUSH" = false ]; then
     echo "========================================"
-    echo "Pushing to Docker Hub"
+    echo "Pushing to registry"
     echo "========================================"
     echo "Image: $IMAGE_NAME"
     echo ""
 
     if ! docker info | grep -q "Username"; then
-        echo "WARNING: You may not be logged in to Docker Hub."
-        echo "If push fails, please run: docker login docker.io"
+        echo "WARNING: You may not be logged in to the registry."
+        echo "If push fails, please run: docker login <registry>"
         echo ""
     fi
 
     echo "Pushing image..."
-    if docker push "$IMAGE_NAME" && docker push "$LATEST_NAME"; then
+    push_ok=true
+    docker push "$IMAGE_NAME" || push_ok=false
+    docker push "$LATEST_NAME" || push_ok=false
+    [ -n "$VERSION_NAME" ] && { docker push "$VERSION_NAME" || push_ok=false; }
+    if [ "$push_ok" = true ]; then
         echo ""
-        echo "✓ Successfully pushed to Docker Hub!"
+        echo "✓ Successfully pushed to registry!"
         echo "  Image: $IMAGE_NAME"
         echo "  Latest: $LATEST_NAME"
+        [ -n "$VERSION_NAME" ] && echo "  Version: $VERSION_NAME"
         echo ""
     else
         echo ""
         echo "✗ Push failed!"
         echo ""
         echo "If authentication failed, please login:"
-        echo "  docker login docker.io"
+        echo "  docker login <registry>"
         echo ""
         echo "Then run this script again (build will be cached):"
         echo "  ./scripts/build_and_push.sh"

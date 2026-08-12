@@ -16,7 +16,7 @@ Backward-compat aliases:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -72,7 +72,7 @@ class SourceLocation:
 
     uri: str
     format: str
-    options: dict[str, Any]
+    options: dict[str, Any] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------

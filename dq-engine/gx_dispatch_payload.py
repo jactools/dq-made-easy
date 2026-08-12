@@ -7,7 +7,6 @@ validates suite envelopes for runnability.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from typing import Any
 
 from dq_plan_execution import coerce_int
@@ -26,23 +25,12 @@ from gx_dispatch_runtime import (
 )
 from dq_plan_execution_types import GxWorkerConfig
 from dq_plan_execution_types import GxWorkerExecutionError
+from dq_plan_execution_types import SourceLocation
 
-from dq_utils.auth_utils import TokenProvider
+from platform_auth import TokenProvider
 
 
 _parse_dispatch_payload = parse_dispatch_payload
-
-
-# ---------------------------------------------------------------------------
-# Source location dataclass
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class SourceLocation:
-    uri: str
-    format: str  # "parquet" | "delta"
-    options: dict[str, Any] = ()
 
 
 # ---------------------------------------------------------------------------

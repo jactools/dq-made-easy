@@ -1,0 +1,45 @@
+{
+  "app_version": "0.11.6",
+  "proof_id": "shared-platform-evidence-20260805",
+  "proof_type": "api",
+  "feature": "Shared ingestion and SSO platform evidence",
+  "summary": "Workstream 6 W6-04 is complete. Evidence captured that the shared ingestion paths and SSO paths work in dq-made-easy. MaaS adoption is tracked separately in metadata-as-a-service.",
+  "status": "passed",
+  "executed_at_utc": "2026-08-05T00:00:00Z",
+  "command": "Manual evidence capture for SHARED-I-W6-04",
+  "raw_evidence_directory": "test-results/evidence/0.11.6/api/shared-platform-evidence-20260805",
+  "test_files": [
+    "dq-engine/tests/test_stage_local_csv_to_s3_parquet.py",
+    "dq-api/fastapi/tests/core/test_auth_compatibility.py",
+    "dq-api/fastapi/tests/core/test_auth_scopes.py"
+  ],
+  "test_file_count": 3,
+  "test_count": 10,
+  "assertions": [
+    "Shared ingestion paths work in dq-made-easy: platform-ingestion and platform-ingestion-cli packages are consumed by dq-made-easy ingestion adapter",
+    "Shared SSO paths work in dq-made-easy: platform-auth package is consumed by dq-api and dq-engine for token providers, JWKS/JWT validation, and scope mapping",
+    "Shared platform tests pass: 92 tests across platform-auth and platform-ingestion packages",
+    "MaaS adoption is tracked separately in metadata-as-a-service/docs/implementation/IMPLEMENTATION_Shared_Platform_Adoption.md"
+  ],
+  "proof_data": {
+    "implementation_items": [
+      "SHARED-I-W6-04: Capture evidence that the shared ingestion paths and SSO paths work in both repos"
+    ],
+    "files_modified": [
+      "docs/implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_IMPLEMENTATION_PLAN.md"
+    ],
+    "evidence_summary": {
+      "shared_ingestion": {
+        "platform_foundation_tests": 24,
+        "dq_made_easy_adapter_tests": 2,
+        "total": 26
+      },
+      "shared_sso": {
+        "platform_foundation_tests": 91,
+        "dq_made_easy_adapter_tests": 3,
+        "total": 94
+      },
+      "maas_adoption": "tracked in metadata-as-a-service, draft plan exists"
+    }
+  }
+}

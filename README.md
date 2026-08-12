@@ -382,9 +382,19 @@ To pull and run pre-built Docker images on a different machine:
 ### Quick Deploy
 
 ```bash
-# 1. Pull all repo-managed images using the tags from .env.prod.local
-./scripts/pull_images.sh          # pulls repo-managed images from the selected env file
-./scripts/pull_images.sh 0.3.2    # pulls specific version
+# 1. Pull repo-managed images from the selected env file
+./scripts/pull_images.sh                 # pulls repo-managed images
+
+# 1b. Pull shared platform images separately
+./scripts/pull_images.sh --scope platform   # pulls shared platform images
+./scripts/pull_images.sh --image platform-ingestion-runner:latest
+
+# Local-development override for the shared ingestion runner (debugging only)
+# See: docs/technical/SHARED_IMAGE_LOCAL_DEVELOPMENT.md
+# PLATFORM_SHARED_INGESTION_RUNNER_TAG=dev-local
+
+# Consumer pinning guidance:
+# See: docs/technical/SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md
 
 # 2. Start services
 docker compose --env-file .env.prod.local up -d

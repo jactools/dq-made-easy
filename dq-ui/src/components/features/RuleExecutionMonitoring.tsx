@@ -768,7 +768,7 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
     setRecentRunsError(null)
     try {
       const query = buildMonitoringQuery(overrides, { includeLimit: true })
-      const response = await fetch(`${apiV1}/gx/runs/stats?${query}`, {
+      const response = await fetch(`${apiV1}/runs/stats?${query}`, {
         headers: authHeaders(),
       })
 
@@ -803,7 +803,7 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
     setExceptionAnalyticsError(null)
     try {
       const query = buildMonitoringQuery(overrides, { includeLimit: false })
-      const response = await fetch(`${apiV1}/gx/exception-analytics?${query}`, {
+      const response = await fetch(`${apiV1}/exception-analytics?${query}`, {
         headers: authHeaders(),
       })
 
@@ -843,7 +843,7 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
       params.set('status', 'active' satisfies GxSuiteStatus)
       params.set('latestOnly', 'true')
 
-      const response = await fetch(`${apiV1}/gx/suites?${params.toString()}`, {
+      const response = await fetch(`${apiV1}/suites?${params.toString()}`, {
         headers: authHeaders(),
       })
 
@@ -897,10 +897,10 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
     setRunCommentsSaving(false)
 
     const [runResult, historyResult] = await Promise.allSettled([
-      fetch(`${apiV1}/gx/runs/${encodeURIComponent(normalizedRunId)}`, {
+      fetch(`${apiV1}/runs/${encodeURIComponent(normalizedRunId)}`, {
         headers: authHeaders(),
       }),
-      fetch(`${apiV1}/gx/runs/${encodeURIComponent(normalizedRunId)}/status-history`, {
+      fetch(`${apiV1}/runs/${encodeURIComponent(normalizedRunId)}/status-history`, {
         headers: authHeaders(),
       }),
     ])
@@ -957,7 +957,7 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
 
       if (isQueued && queueKey && queueMessageId) {
         setQueueStatusLoading(true)
-        fetch(`${apiV1}/gx/runs/${encodeURIComponent(normalizedRunId)}/queue-status?scanLimit=500`, {
+        fetch(`${apiV1}/runs/${encodeURIComponent(normalizedRunId)}/queue-status?scanLimit=500`, {
           headers: authHeaders(),
         })
           .then(async (response) => {
@@ -1008,7 +1008,7 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
     setRunCommentsError(null)
 
     try {
-      const response = await fetch(`${apiV1}/gx/runs/${encodeURIComponent(run.id)}/comments`, {
+      const response = await fetch(`${apiV1}/runs/${encodeURIComponent(run.id)}/comments`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1048,7 +1048,7 @@ export const RuleExecutionMonitoring: React.FC<RuleExecutionMonitoringProps> = (
     try {
       const scheduledAt = toScheduledAtIso(scheduleAtInput)
       const response = await fetch(
-        `${apiV1}/gx/suites/${encodeURIComponent(selectedSuite.suiteId)}/runs/schedule?suiteVersion=${selectedSuite.suiteVersion}`,
+        `${apiV1}/suites/${encodeURIComponent(selectedSuite.suiteId)}/runs/schedule?suiteVersion=${selectedSuite.suiteVersion}`,
         {
           method: 'POST',
           headers: {

@@ -114,13 +114,73 @@ test -s "$workspace_credentials_env"
 cp -f "$seed_dir/dq_engine_oidc.env" "$workspace_engine_oidc_env"
 test -s "$workspace_engine_oidc_env"
 
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
-printf '.'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+printf '\n'
+
+# Output credentials to stdout for K8s job logging
+echo ""
+echo "=== KEYCLOAK SEED CREDENTIALS ==="
+cat "$credentials_csv"
+echo ""
+echo "=== KEYCLOAK SEED CREDENTIALS END ==="
+echo ""
+
+# Import realm into Keycloak via Admin API
+keycloak_url="${KEYCLOAK_SYSTEM_ADMIN_URL:-https://keycloak:8443}"
+keycloak_url="${keycloak_url%/}"
+admin_user="${KEYCLOAK_ADMIN:-admin}"
+admin_password="${KEYCLOAK_SYSTEM_ADMIN_PASSWORD:-changeme}"
+ca_bundle="${CURL_CA_BUNDLE:-}"
+
+# Get admin token
+admin_token=$(curl -sk --cacert "$ca_bundle" -X POST "$keycloak_url/auth/realms/master/protocol/openid-connect/token" \
+  -d "grant_type=password" \
+  -d "client_id=admin-cli" \
+  -d "username=$admin_user" \
+  -d "password=$admin_password" \
+  | python -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || true)
+
+if [ -n "$admin_token" ]; then
+  echo "Importing realm $realm_name into Keycloak..."
+  curl -sk --cacert "$ca_bundle" -X POST "$keycloak_url/auth/admin/realms" \
+    -H "Authorization: Bearer $admin_token" \
+    -H "Content-Type: application/json" \
+    --data-binary "@$seed_dir/${realm_name}-realm.json" \
+    && echo "Realm $realm_name imported successfully" || echo "Failed to import realm $realm_name" >&2
+
+  # Update user passwords in Keycloak (covers existing realms)
+  echo "Updating user passwords in Keycloak..."
+  tail -n +2 "$credentials_csv" | while IFS=',' read -r email password; do
+    # Strip quotes
+    email=$(echo "$email" | tr -d '"')
+    password=$(echo "$password" | tr -d '"')
+    
+    # Get user ID
+    user_id=$(curl -sk --cacert "$ca_bundle" \
+      -H "Authorization: Bearer $admin_token" \
+      "$keycloak_url/auth/admin/realms/$realm_name/users?email=$email&max=1" \
+      | python -c "import sys,json; users=json.load(sys.stdin); print(users[0]['id'] if users else '')" 2>/dev/null)
+    
+    if [ -n "$user_id" ]; then
+      curl -sk --cacert "$ca_bundle" -X PUT \
+        "$keycloak_url/auth/admin/realms/$realm_name/users/$user_id/reset-password" \
+        -H "Authorization: Bearer $admin_token" \
+        -H "Content-Type: application/json" \
+        -d "{\"type\":\"password\",\"value\":\"$password\",\"temporary\":false}" \
+        > /dev/null 2>&1 && \
+        echo "  Updated password for $email" || \
+        echo "  Failed to update password for $email" >&2
+    else
+      echo "  User not found: $email" >&2
+    fi
+  done
+  echo "Password updates complete."
+fi

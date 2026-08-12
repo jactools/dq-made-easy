@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Purpose: Pull repo-managed dq-made-easy Docker images from the configured registry.
+# Purpose: Pull dq-made-easy and shared platform Docker images from the configured registries.
 # What it does:
 # - Loads image registry/tag configuration from the selected canonical root env file.
 # - Supports pulling either the default image scope or an explicit image subset.
@@ -62,30 +62,48 @@ usage() {
   cat <<EOF
 Usage: $(basename "$0") [OPTIONS] [VERSION]
 
-Pull repo-managed Docker images.
+Pull repo-managed Docker images and shared platform images.
 
 Canonical env options:
   --env dev|test|prod      Use .env.dev.local, .env.test.local, or .env.prod.local
   --env-file PATH          Use an explicit env file
 
 Options:
-  --scope <core|repo>      Pull the default core or full repo-managed image scope (default: repo)
-  --image <name>           Pull only the named repo-managed image (repeatable)
+  --scope <core|repo|platform> Pull the default core, full repo-managed, or platform image scope (default: repo)
+  --image <name[:tag]>      Pull only the named image (repeatable)
   --version <tag>          Override tags for this pull operation
   -h, --help               Show this help message
 
 Core images:
-  dq-made-easy-base dq-made-easy-api dq-made-easy-engine dq-made-easy-profiling dq-made-easy-frontend dq-made-easy-kong dq-made-easy-db dq-made-easy-keycloak
+  dq-made-easy-base dq-made-easy-api dq-made-easy-engine dq-made-easy-profiling dq-made-easy-frontend dq-made-easy-db dq-made-easy-keycloak
 
 Auxiliary repo images:
   dq-made-easy-db-seed dq-made-easy-keycloak-seed-artifacts dq-made-easy-openmetadata-db dq-made-easy-openmetadata-server
   dq-made-easy-metadata-configure dq-made-easy-container-metrics dq-made-easy-zammad-seed dq-made-easy-llm
-  dq-made-easy-kafka dq-made-easy-kafka-consumer dq-made-easy-trino dq-made-easy-edge dq-made-easy-airflow
+  dq-made-easy-kafka-consumer dq-made-easy-trino dq-made-easy-edge dq-made-easy-airflow
+
+Platform service images:
+  platform-ingestion-runner
+  platform-kong
+  platform-keycloak
+  platform-kafka
+  platform-llm
+  platform-trino
+  platform-airflow
+  platform-observability-loki
+  platform-observability-prometheus
+  platform-observability-grafana
+  platform-observability-tempo
+  platform-observability-container-metrics
+  platform-observability-otel-collector
 
 Examples:
   $(basename "$0")
   $(basename "$0") --scope repo
+  $(basename "$0") --scope platform
   $(basename "$0") --image dq-made-easy-api --image dq-made-easy-frontend
+  $(basename "$0") --image platform-ingestion-runner:latest
+  $(basename "$0") --image platform-kong:0.1.0
   $(basename "$0") --env prod --scope repo --version 0.9.0
 EOF
 }
@@ -130,15 +148,15 @@ normalize_repo_image_name() {
     dq-made-easy-engine) printf '%s' 'dq-engine' ;;
     dq-made-easy-profiling) printf '%s' 'dq-profiling' ;;
     dq-made-easy-frontend) printf '%s' 'dq-frontend' ;;
-    dq-made-easy-kong) printf '%s' 'dq-kong' ;;
+    dq-made-easy-kong) printf '%s' 'dq-kong' ;; # Kong image moved to platform-foundation; retained for alias compat
     dq-made-easy-db) printf '%s' 'dq-db' ;;
     dq-made-easy-keycloak) printf '%s' 'dq-keycloak' ;;
-    dq-made-easy-kafka) printf '%s' 'dq-kafka' ;;
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     dq-made-easy-kafka-consumer) printf '%s' 'dq-kafka-consumer' ;;
-    dq-made-easy-trino) printf '%s' 'dq-trino' ;;
+    # Trino image/container lifecycle managed by platform-foundation (platform-trino).
     dq-made-easy-edge) printf '%s' 'dq-edge' ;;
-    dq-made-easy-airflow) printf '%s' 'dq-airflow' ;;
-    dq-made-easy-llm) printf '%s' 'dq-llm' ;;
+    # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+    # LLM image/container lifecycle managed by platform-foundation (platform-llm).
     dq-made-easy-db-seed) printf '%s' 'dq-db-seed' ;;
     dq-made-easy-keycloak-seed-artifacts) printf '%s' 'dq-keycloak-seed-artifacts' ;;
     dq-made-easy-openmetadata-db) printf '%s' 'dq-openmetadata-db' ;;
@@ -151,57 +169,63 @@ normalize_repo_image_name() {
 }
 
 set_aux_image_defaults() {
-  DQ_DB_SEED_REGISTRY="${DQ_DB_SEED_REGISTRY:-${DQ_DB_REGISTRY:-docker.io/}}"
+  DQ_DB_SEED_REGISTRY="${DQ_DB_SEED_REGISTRY:-${DQ_DB_REGISTRY:-docker-registry.dev.jac.dot/}}"
   DQ_DB_SEED_NAMESPACE="${DQ_DB_SEED_NAMESPACE:-${DQ_DB_NAMESPACE:-jacbeekers/}}"
   DQ_DB_SEED_IMAGE="${DQ_DB_SEED_IMAGE:-dq-made-easy-db-seed}"
 
-  DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-docker.io/}}"
+  DQ_KEYCLOAK_SEED_REGISTRY="${DQ_KEYCLOAK_SEED_REGISTRY:-${DQ_KEYCLOAK_REGISTRY:-docker-registry.dev.jac.dot/}}"
   DQ_KEYCLOAK_SEED_NAMESPACE="${DQ_KEYCLOAK_SEED_NAMESPACE:-${DQ_KEYCLOAK_NAMESPACE:-jacbeekers/}}"
   DQ_KEYCLOAK_SEED_IMAGE="${DQ_KEYCLOAK_SEED_IMAGE:-dq-made-easy-keycloak-seed-artifacts}"
 
-  DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker.io/}"
+  DQ_OPENMETADATA_DB_REGISTRY="${DQ_OPENMETADATA_DB_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_OPENMETADATA_DB_NAMESPACE="${DQ_OPENMETADATA_DB_NAMESPACE:-jacbeekers/}"
   DQ_OPENMETADATA_DB_IMAGE="${DQ_OPENMETADATA_DB_IMAGE:-dq-made-easy-openmetadata-db}"
 
-  DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker.io/}"
+  DQ_OPENMETADATA_SERVER_REGISTRY="${DQ_OPENMETADATA_SERVER_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_OPENMETADATA_SERVER_NAMESPACE="${DQ_OPENMETADATA_SERVER_NAMESPACE:-jacbeekers/}"
   DQ_OPENMETADATA_SERVER_IMAGE="${DQ_OPENMETADATA_SERVER_IMAGE:-dq-made-easy-openmetadata-server}"
 
-  DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker.io/}"
+  DQ_METADATA_CONFIGURE_REGISTRY="${DQ_METADATA_CONFIGURE_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_METADATA_CONFIGURE_NAMESPACE="${DQ_METADATA_CONFIGURE_NAMESPACE:-jacbeekers/}"
   DQ_METADATA_CONFIGURE_IMAGE="${DQ_METADATA_CONFIGURE_IMAGE:-dq-made-easy-metadata-configure}"
 
-  DQ_CONTAINER_METRICS_REGISTRY="${DQ_CONTAINER_METRICS_REGISTRY:-docker.io/}"
+  DQ_CONTAINER_METRICS_REGISTRY="${DQ_CONTAINER_METRICS_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_CONTAINER_METRICS_NAMESPACE="${DQ_CONTAINER_METRICS_NAMESPACE:-jacbeekers/}"
   DQ_CONTAINER_METRICS_IMAGE="${DQ_CONTAINER_METRICS_IMAGE:-dq-made-easy-container-metrics}"
 
-  DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker.io/}"
+  DQ_ZAMMAD_SEED_REGISTRY="${DQ_ZAMMAD_SEED_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_ZAMMAD_SEED_NAMESPACE="${DQ_ZAMMAD_SEED_NAMESPACE:-jacbeekers/}"
   DQ_ZAMMAD_SEED_IMAGE="${DQ_ZAMMAD_SEED_IMAGE:-dq-made-easy-zammad-seed}"
 
-  DQ_KAFKA_REGISTRY="${DQ_KAFKA_REGISTRY:-docker.io/}"
-  DQ_KAFKA_NAMESPACE="${DQ_KAFKA_NAMESPACE:-jacbeekers/}"
-  DQ_KAFKA_IMAGE="${DQ_KAFKA_IMAGE:-dq-made-easy-kafka}"
-
-  DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker.io/}"
+  # Kafka broker is managed by platform-foundation (platform-kafka).
+  DQ_KAFKA_CONSUMER_REGISTRY="${DQ_KAFKA_CONSUMER_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_KAFKA_CONSUMER_NAMESPACE="${DQ_KAFKA_CONSUMER_NAMESPACE:-jacbeekers/}"
   DQ_KAFKA_CONSUMER_IMAGE="${DQ_KAFKA_CONSUMER_IMAGE:-dq-made-easy-kafka-consumer}"
 
-  DQ_TRINO_REGISTRY="${DQ_TRINO_REGISTRY:-docker.io/}"
-  DQ_TRINO_NAMESPACE="${DQ_TRINO_NAMESPACE:-jacbeekers/}"
-  DQ_TRINO_IMAGE="${DQ_TRINO_IMAGE:-dq-made-easy-trino}"
-
-  DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker.io/}"
+  # Trino image/container lifecycle managed by platform-foundation (platform-trino).
+  DQ_EDGE_REGISTRY="${DQ_EDGE_REGISTRY:-docker-registry.dev.jac.dot/}"
   DQ_EDGE_NAMESPACE="${DQ_EDGE_NAMESPACE:-jacbeekers/}"
   DQ_EDGE_IMAGE="${DQ_EDGE_IMAGE:-dq-made-easy-edge}"
 
-  DQ_AIRFLOW_REGISTRY="${DQ_AIRFLOW_REGISTRY:-docker.io/}"
-  DQ_AIRFLOW_NAMESPACE="${DQ_AIRFLOW_NAMESPACE:-jacbeekers/}"
-  DQ_AIRFLOW_IMAGE="${DQ_AIRFLOW_IMAGE:-dq-made-easy-airflow}"
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
 
-  DQ_LLM_REGISTRY="${DQ_LLM_REGISTRY:-docker.io/}"
-  DQ_LLM_NAMESPACE="${DQ_LLM_NAMESPACE:-jacbeekers/}"
-  DQ_LLM_IMAGE="${DQ_LLM_IMAGE:-dq-made-easy-llm}"
+  PLATFORM_REGISTRY="${PLATFORM_REGISTRY:-docker-registry.dev.jac.dot/}"
+  PLATFORM_NAMESPACE="${PLATFORM_NAMESPACE:-jacbeekers/}"
+  PLATFORM_INGESTION_RUNNER_IMAGE="${PLATFORM_INGESTION_RUNNER_IMAGE:-platform-ingestion-runner}"
+  PLATFORM_SHARED_INGESTION_RUNNER_TAG="${PLATFORM_SHARED_INGESTION_RUNNER_TAG:-latest}"
+  PLATFORM_KONG_TAG="${PLATFORM_KONG_TAG:-latest}"
+  PLATFORM_KEYCLOAK_TAG="${PLATFORM_KEYCLOAK_TAG:-latest}"
+  PLATFORM_KAFKA_TAG="${PLATFORM_KAFKA_TAG:-latest}"
+  PLATFORM_LLM_TAG="${PLATFORM_LLM_TAG:-latest}"
+  PLATFORM_TRINO_TAG="${PLATFORM_TRINO_TAG:-latest}"
+  PLATFORM_AIRFLOW_TAG="${PLATFORM_AIRFLOW_TAG:-latest}"
+  PLATFORM_OBS_LOKI_TAG="${PLATFORM_OBS_LOKI_TAG:-latest}"
+  PLATFORM_OBS_PROMETHEUS_TAG="${PLATFORM_OBS_PROMETHEUS_TAG:-latest}"
+  PLATFORM_OBS_GRAFANA_TAG="${PLATFORM_OBS_GRAFANA_TAG:-latest}"
+  PLATFORM_OBS_TEMPO_TAG="${PLATFORM_OBS_TEMPO_TAG:-latest}"
+  PLATFORM_OBS_CONTAINER_METRICS_TAG="${PLATFORM_OBS_CONTAINER_METRICS_TAG:-latest}"
+  PLATFORM_OBS_OTEL_COLLECTOR_TAG="${PLATFORM_OBS_OTEL_COLLECTOR_TAG:-latest}"
 }
 
 auto_resolve_tags_from_calculated_versions() {
@@ -215,17 +239,16 @@ auto_resolve_tags_from_calculated_versions() {
     DQ_ENGINE_TAG
     DQ_PROFILING_TAG
     DQ_FRONTEND_TAG
-    DQ_KONG_TAG
     DQ_DB_TAG
-    DQ_KEYCLOAK_TAG
+    # Keycloak image/container lifecycle managed by platform-foundation
     DQ_DB_SEED_TAG
     DQ_KEYCLOAK_SEED_TAG
-    DQ_KAFKA_TAG
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     DQ_KAFKA_CONSUMER_TAG
-    DQ_TRINO_TAG
+    # Trino image/container lifecycle managed by platform-foundation (platform-trino).
     DQ_EDGE_TAG
-    DQ_AIRFLOW_TAG
-    DQ_LLM_TAG
+    # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+    # LLM image/container lifecycle managed by platform-foundation (platform-llm).
     DQ_OPENMETADATA_DB_TAG
     DQ_OPENMETADATA_SERVER_TAG
     DQ_METADATA_CONFIGURE_TAG
@@ -309,6 +332,11 @@ resolve_selected_images() {
         append_unique_image "$image"
       done < <(repo_image_values)
       ;;
+    platform)
+      while IFS= read -r image; do
+        append_unique_image "$image"
+      done < <(platform_image_values)
+      ;;
     *)
       error "$my_name" "Unsupported scope '$PULL_SCOPE'"
       exit 1
@@ -328,7 +356,15 @@ resolve_full_image_name() {
   local image_name=""
   local tag=""
 
-  vars=( $(repo_image_env_vars "$image") )
+  if is_repo_managed_image "$image"; then
+    vars=( $(repo_image_env_vars "$image") )
+  elif is_platform_image "$image"; then
+    vars=( $(platform_image_env_vars "$image") )
+  else
+    error "$my_name" "Missing image configuration for $image"
+    exit 1
+  fi
+
   registry_var="${vars[0]}"
   namespace_var="${vars[1]}"
   image_var="${vars[2]}"
@@ -362,11 +398,11 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --scope)
       if [[ -z "${2:-}" ]]; then
-        error "$my_name" "--scope requires core or repo"
+        error "$my_name" "--scope requires core, repo, or platform"
         exit 1
       fi
       case "$2" in
-        core|repo)
+        core|repo|shared)
           PULL_SCOPE="$2"
           ;;
         *)
@@ -381,26 +417,33 @@ while [[ $# -gt 0 ]]; do
       image_name_arg=""
       image_tag_arg=""
       if [[ -z "${2:-}" ]]; then
-        error "$my_name" "--image requires a repo-managed image name"
+        error "$my_name" "--image requires an image name"
         exit 1
       fi
       image_name_arg="$(extract_image_name_from_ref "$2")"
       image_tag_arg="$(extract_image_tag_from_ref "$2")"
       normalized_image="$(normalize_repo_image_name "$image_name_arg")"
-      if ! is_repo_managed_image "$normalized_image"; then
+      if is_repo_managed_image "$normalized_image"; then
+        if [[ -n "$image_tag_arg" ]]; then
+          if [[ -n "$VERSION" && "$VERSION" != "$image_tag_arg" ]]; then
+            error "$my_name" "Conflicting version values supplied: '$VERSION' and '$image_tag_arg'"
+            exit 1
+          fi
+          VERSION="$image_tag_arg"
+        fi
+        append_unique_image "$normalized_image"
+        if ! is_core_repo_image "$normalized_image"; then
+          PULL_SCOPE="repo"
+        fi
+      elif is_platform_image "$normalized_image"; then
+        append_unique_image "$normalized_image"
+        if [[ -n "$image_tag_arg" ]]; then
+          PLATFORM_SHARED_INGESTION_RUNNER_TAG="$image_tag_arg"
+        fi
+        PULL_SCOPE="shared"
+      else
         error "$my_name" "Unsupported image '$2'"
         exit 1
-      fi
-      if [[ -n "$image_tag_arg" ]]; then
-        if [[ -n "$VERSION" && "$VERSION" != "$image_tag_arg" ]]; then
-          error "$my_name" "Conflicting version values supplied: '$VERSION' and '$image_tag_arg'"
-          exit 1
-        fi
-        VERSION="$image_tag_arg"
-      fi
-      append_unique_image "$normalized_image"
-      if ! is_core_repo_image "$normalized_image"; then
-        PULL_SCOPE="repo"
       fi
       shift 2
       ;;
@@ -422,21 +465,16 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      case "$1" in
-        core|repo)
-          # Backward-compatible fallback: accept bare scope values without --scope.
-          PULL_SCOPE="$1"
-          shift
-          ;;
-        *)
-          if [ -n "$VERSION" ]; then
-            error "$my_name" "Multiple VERSION values supplied"
-            exit 1
-          fi
-          VERSION="$1"
-          shift
-          ;;
-      esac
+      if [[ "$1" == core || "$1" == repo || "$1" == shared ]]; then
+        error "$my_name" "Bare scope values are no longer supported; use --scope $1"
+        exit 1
+      fi
+      if [ -n "$VERSION" ]; then
+        error "$my_name" "Multiple VERSION values supplied"
+        exit 1
+      fi
+      VERSION="$1"
+      shift
       ;;
   esac
  done
@@ -449,10 +487,22 @@ source "$ROOT_DIR/scripts/supporting/setup_env.sh"
 set_aux_image_defaults
 auto_resolve_tags_from_calculated_versions
 resolve_selected_images
+
+if [ -n "$VERSION" ]; then
+  for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
+    if is_platform_image "$image"; then
+      # Platform images use individual tag variables (PLATFORM_*_TAG)
+      # --version is not supported; use --image platform-kong:0.1.0 instead
+      error "$my_name" "--version is not supported with platform images; use --image $image:<tag>"
+      exit 1
+    fi
+  done
+fi
+
 set_override_tags
 
 info "$my_name" "========================================"
-info "$my_name" "Pulling dq-made-easy images"
+info "$my_name" "Pulling dq-made-easy and shared platform images"
 info "$my_name" "========================================"
 info "$my_name" "Env file: $ROOT_ENV_FILE"
 info "$my_name" "Scope: $PULL_SCOPE"
@@ -469,7 +519,10 @@ for image in ${SELECTED_IMAGES[@]+"${SELECTED_IMAGES[@]}"}; do
   full_image="$(resolve_full_image_name "$image")"
   info "$my_name" "Pulling: $full_image"
 
-  if docker pull "$full_image"; then
+  if docker image inspect "$full_image" >/dev/null 2>&1; then
+    success "$my_name" "already present locally $image"
+    success_count=$((success_count+1))
+  elif docker pull "$full_image"; then
     success "$my_name" "pulled $image"
     success_count=$((success_count+1))
   else

@@ -257,12 +257,31 @@ def _build_row_failure_diagnostics(
     return diagnostics
 
 
+def _build_rule_result(
+    *,
+    expectation_index: int,
+    passed: bool,
+    records_checked: int,
+    records_failed: int | None,
+    total_records: int,
+) -> dict[str, Any]:
+    return {
+        "expectation_index": expectation_index,
+        "result": "passed" if passed else "failed",
+        "records_checked": records_checked,
+        "records_failed": records_failed,
+        "records_succeeded": None if records_failed is None else records_checked - records_failed,
+        "records_filtered_out": max(0, total_records - records_checked),
+    }
+
+
 def evaluate_expectations_spark(
     df: Any, expectations: list[dict[str, Any]], *, primary_key_fields: list[str] | None = None
 ) -> tuple[bool, dict[str, Any], list[dict[str, Any]]]:
     from pyspark.sql import functions as F
 
     diagnostics: list[dict[str, Any]] = []
+    rule_results: list[dict[str, Any]] = []
     passed = 0
     failed = 0
     started_at = ""
@@ -275,6 +294,8 @@ def evaluate_expectations_spark(
         if frame_key not in computed_row_counts:
             computed_row_counts[frame_key] = int(frame.count())
         return computed_row_counts[frame_key]
+
+    total_row_count = _get_row_count(df)
 
     df_columns = set(getattr(df, "columns", []) or [])
     native_gx_runner = _NativeGxBatchRunner(df) if _supports_native_gx_execution("expect_query_results_to_match_comparison") and not normalized_primary_key_fields else None
@@ -783,6 +804,17 @@ def evaluate_expectations_spark(
             )
 
         ok = not has_failure
+        records_checked = _get_row_count(scoped_df)
+        records_failed = int(scoped_df.where(failure_condition).count()) if failure_condition is not None else None
+        rule_results.append(
+            _build_rule_result(
+                expectation_index=idx,
+                passed=ok,
+                records_checked=records_checked,
+                records_failed=records_failed,
+                total_records=total_row_count,
+            )
+        )
         if ok:
             passed += 1
         else:
@@ -818,10 +850,11 @@ def evaluate_expectations_spark(
     summary = {
         "started_at": started_at,
         "completed_at": completed_at,
-        "row_count": computed_row_counts.get(id(df)),
+        "row_count": total_row_count,
         "expectation_count": int(len(expectations)),
         "passed_expectation_count": int(passed),
         "failed_expectation_count": int(failed),
+        "rule_results": rule_results,
     }
     return failed == 0, summary, diagnostics
 

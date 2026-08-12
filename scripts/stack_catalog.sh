@@ -57,15 +57,11 @@ repo_image_values() {
     dq-engine \
     dq-profiling \
     dq-frontend \
-    dq-kong \
     dq-db \
-    dq-keycloak \
-    dq-kafka \
+    # Keycloak image/container lifecycle managed by platform-foundation
+    dq-kong \
     dq-kafka-consumer \
-    dq-trino \
     dq-edge \
-    dq-airflow \
-    dq-llm \
     dq-db-seed \
     dq-keycloak-seed-artifacts \
     dq-openmetadata-db \
@@ -75,6 +71,11 @@ repo_image_values() {
     dq-zammad-seed
 }
 
+shared_image_values() {
+  printf '%s\n' \
+    platform-ingestion-runner
+}
+
 core_repo_image_values() {
   printf '%s\n' \
     dq-base \
@@ -82,14 +83,13 @@ core_repo_image_values() {
     dq-engine \
     dq-profiling \
     dq-frontend \
-    dq-kong \
-    dq-db \
-    dq-keycloak
+    dq-db
+    # Keycloak image/container lifecycle managed by platform-foundation
 }
 
 is_core_repo_image() {
   case "$1" in
-    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak)
+    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-db)
       return 0
       ;;
     *)
@@ -100,7 +100,27 @@ is_core_repo_image() {
 
 is_repo_managed_image() {
   case "$1" in
-    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-kong|dq-db|dq-keycloak|dq-kafka|dq-kafka-consumer|dq-trino|dq-edge|dq-airflow|dq-llm|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
+    dq-base|dq-api|dq-engine|dq-profiling|dq-frontend|dq-db|dq-kafka|dq-kafka-consumer|dq-edge|dq-db-seed|dq-keycloak-seed-artifacts|dq-openmetadata-db|dq-openmetadata-server|dq-metadata-configure|dq-container-metrics|dq-zammad-seed)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_platform_image() {
+  case "$1" in
+    platform-ingestion-runner)
+      return 0
+      ;;
+    platform-kong|platform-keycloak|platform-kafka|platform-llm|platform-trino|platform-airflow)
+      return 0
+      ;;
+    platform-observability-loki|platform-observability-prometheus|platform-observability-grafana|platform-observability-tempo)
+      return 0
+      ;;
+    platform-observability-container-metrics|platform-observability-otel-collector)
       return 0
       ;;
     *)
@@ -118,10 +138,10 @@ image_targets_for_profile() {
       printf '%s\n' dq-db dq-api dq-frontend
       ;;
     gateway)
-      printf '%s\n' dq-kong
+      return 2
       ;;
     auth)
-      printf '%s\n' dq-keycloak dq-keycloak-seed-artifacts
+      printf '%s\n' dq-keycloak-seed-artifacts
       ;;
     engine)
       printf '%s\n' dq-engine dq-db-seed
@@ -173,33 +193,20 @@ repo_image_env_vars() {
     dq-frontend)
       printf '%s\n' DQ_FRONTEND_REGISTRY DQ_FRONTEND_NAMESPACE DQ_FRONTEND_IMAGE DQ_FRONTEND_TAG
       ;;
-    dq-kong)
-      printf '%s\n' DQ_KONG_REGISTRY DQ_KONG_NAMESPACE DQ_KONG_IMAGE DQ_KONG_TAG
-      ;;
     dq-db)
       printf '%s\n' DQ_DB_REGISTRY DQ_DB_NAMESPACE DQ_DB_IMAGE DQ_DB_TAG
       ;;
-    dq-keycloak)
-      printf '%s\n' DQ_KEYCLOAK_REGISTRY DQ_KEYCLOAK_NAMESPACE DQ_KEYCLOAK_IMAGE DQ_KEYCLOAK_TAG
-      ;;
-    dq-kafka)
-      printf '%s\n' DQ_KAFKA_REGISTRY DQ_KAFKA_NAMESPACE DQ_KAFKA_IMAGE DQ_KAFKA_TAG
-      ;;
+    # Keycloak image/container lifecycle managed by platform-foundation
+    # Kafka broker is managed by platform-foundation (platform-kafka).
     dq-kafka-consumer)
       printf '%s\n' DQ_KAFKA_CONSUMER_REGISTRY DQ_KAFKA_CONSUMER_NAMESPACE DQ_KAFKA_CONSUMER_IMAGE DQ_KAFKA_CONSUMER_TAG
       ;;
-    dq-trino)
-      printf '%s\n' DQ_TRINO_REGISTRY DQ_TRINO_NAMESPACE DQ_TRINO_IMAGE DQ_TRINO_TAG
-      ;;
+    # Trino image/container lifecycle managed by platform-foundation (platform-trino).
     dq-edge)
       printf '%s\n' DQ_EDGE_REGISTRY DQ_EDGE_NAMESPACE DQ_EDGE_IMAGE DQ_EDGE_TAG
       ;;
-    dq-airflow)
-      printf '%s\n' DQ_AIRFLOW_REGISTRY DQ_AIRFLOW_NAMESPACE DQ_AIRFLOW_IMAGE DQ_AIRFLOW_TAG
-      ;;
-    dq-llm)
-      printf '%s\n' DQ_LLM_REGISTRY DQ_LLM_NAMESPACE DQ_LLM_IMAGE DQ_LLM_TAG
-      ;;
+    # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+    # LLM image/container lifecycle managed by platform-foundation (platform-llm).
     dq-db-seed)
       printf '%s\n' DQ_DB_SEED_REGISTRY DQ_DB_SEED_NAMESPACE DQ_DB_SEED_IMAGE DQ_DB_SEED_TAG
       ;;
@@ -220,6 +227,53 @@ repo_image_env_vars() {
       ;;
     dq-zammad-seed)
       printf '%s\n' DQ_ZAMMAD_SEED_REGISTRY DQ_ZAMMAD_SEED_NAMESPACE DQ_ZAMMAD_SEED_IMAGE DQ_ZAMMAD_SEED_TAG
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+platform_image_env_vars() {
+  case "$1" in
+    platform-ingestion-runner)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_INGESTION_RUNNER_IMAGE PLATFORM_SHARED_INGESTION_RUNNER_TAG
+      ;;
+    platform-kong)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_KONG_TAG
+      ;;
+    platform-keycloak)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_KEYCLOAK_TAG
+      ;;
+    platform-kafka)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_KAFKA_TAG
+      ;;
+    platform-llm)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_LLM_TAG
+      ;;
+    platform-trino)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_TRINO_TAG
+      ;;
+    platform-airflow)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_AIRFLOW_TAG
+      ;;
+    platform-observability-loki)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_LOKI_TAG
+      ;;
+    platform-observability-prometheus)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_PROMETHEUS_TAG
+      ;;
+    platform-observability-grafana)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_GRAFANA_TAG
+      ;;
+    platform-observability-tempo)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_TEMPO_TAG
+      ;;
+    platform-observability-container-metrics)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_CONTAINER_METRICS_TAG
+      ;;
+    platform-observability-otel-collector)
+      printf '%s\n' PLATFORM_REGISTRY PLATFORM_NAMESPACE PLATFORM_OBS_OTEL_COLLECTOR_TAG
       ;;
     *)
       return 1

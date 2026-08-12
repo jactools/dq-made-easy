@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-db-config
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+data:
+  POSTGRES_DB: dq
+  PGDATABASE: dq
+  PGPORT: "5432"
+  DATABASE_SCHEMA: dq

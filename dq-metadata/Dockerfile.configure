@@ -1,8 +1,15 @@
 # Multi-stage: pull docker CLI binary from the official slim image.
 # syntax=docker/dockerfile:1.7
+
+# Args used in FROM must be declared before the first FROM
+ARG PYTHON_DOCKER_REGISTRY
+ARG PYTHON_DOCKER_NAMESPACE
+ARG PYTHON_DOCKER_IMAGE
+ARG PYTHON_DOCKER_TAG
+
 FROM docker:cli AS docker-cli
 
-FROM python:3.14-slim
+FROM ${PYTHON_DOCKER_REGISTRY}${PYTHON_DOCKER_NAMESPACE}${PYTHON_DOCKER_IMAGE}:${PYTHON_DOCKER_TAG}
 
 # docker CLI (needed to restart openmetadata-server and exec into ingestion container)
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
@@ -25,7 +32,14 @@ RUN set -eux; \
     && update-ca-certificates --fresh \
     && rm -rf /var/lib/apt/lists/*
 
-RUN PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir openpyxl
+ARG PIP_EXTRA_INDEX_URL
+ARG PIP_TRUSTED_HOST
+
+RUN --mount=type=secret,id=pip_index_url \
+    PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" \
+    PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-https://pypi.org/simple/}" \
+    PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-packages.host.dev.jac.dot}" \
+    pip install --no-cache-dir openpyxl
 
 # Mirror the repository's relative directory structure under /opt so that
 # sync_dq_db_with_openmetadata.sh's ROOT_DIR calculation

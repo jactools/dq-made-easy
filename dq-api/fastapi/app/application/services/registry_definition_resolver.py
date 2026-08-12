@@ -11,12 +11,12 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request as UrlRequest, urlopen
 
-from dq_utils.auth_utils import AuthConfigError
-from dq_utils.auth_utils import OidcClientCredentialsTokenProvider
-from dq_utils.auth_utils import OidcPasswordTokenProvider
-from dq_utils.auth_utils import StaticTokenProvider
-from dq_utils.auth_utils import TokenProvider
-from dq_utils.auth_utils import resolve_oidc_token_url
+from platform_auth import AuthConfigError
+from platform_auth import OidcClientCredentialsTokenProvider
+from platform_auth import OidcPasswordTokenProvider
+from platform_auth import StaticTokenProvider
+from platform_auth import TokenProvider
+from platform_auth import resolve_oidc_token_url
 
 
 logger = logging.getLogger(__name__)

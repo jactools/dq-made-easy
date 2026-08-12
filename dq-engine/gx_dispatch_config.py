@@ -12,15 +12,17 @@ from __future__ import annotations
 import logging
 import os
 from typing import Any
+from urllib.parse import quote
+from urllib.parse import urlencode
 
 try:
     import redis
 except Exception:  # pragma: no cover
     redis = None
 
-from dq_utils.auth_utils import AuthConfigError
-from dq_utils.auth_utils import TokenProvider
-from dq_utils.auth_utils import build_oidc_token_provider_from_env
+from platform_auth import AuthConfigError
+from platform_auth import TokenProvider
+from platform_auth import build_oidc_token_provider_from_env
 from dq_utils.spark_runtime import resolve_spark_master
 from dq_utils.spark_runtime import resolve_spark_ui_port
 
@@ -63,12 +65,26 @@ def _resolve_redis_url() -> str:
         )
     port = int(os.getenv("REDIS_PORT") or 6379)
     db = int(os.getenv("REDIS_DB") or 0)
-    password = os.getenv("REDIS_PASSWORD")
-    if password:
-        from urllib.parse import quote
+    username = str(os.getenv("REDIS_USERNAME") or "").strip()
+    password = str(os.getenv("REDIS_PASSWORD") or "").strip()
+    tls_enabled = str(os.getenv("REDIS_TLS_ENABLED") or "false").strip().lower() in {"1", "true", "yes", "on"}
+    ca_bundle = str(os.getenv("REDIS_CA_BUNDLE") or "").strip()
+    if not ca_bundle:
+        raise RuntimeError("REDIS_CA_BUNDLE is required")
 
-        return f"redis://:{quote(password, safe='')}@{host}:{port}/{db}"
-    return f"redis://{host}:{port}/{db}"
+    auth = ""
+    if username and password:
+        auth = f"{quote(username, safe='')}:{quote(password, safe='')}@"
+    elif username:
+        auth = f"{quote(username, safe='')}@"
+    elif password:
+        auth = f":{quote(password, safe='')}@"
+
+    scheme = "rediss" if tls_enabled else "redis"
+    base_url = f"{scheme}://{auth}{host}:{port}/{db}"
+    if not tls_enabled:
+        return base_url
+    return f"{base_url}?{urlencode({'ssl_cert_reqs': 'required', 'ssl_ca_certs': ca_bundle, 'ssl_check_hostname': 'true'})}"
 
 
 # ---------------------------------------------------------------------------

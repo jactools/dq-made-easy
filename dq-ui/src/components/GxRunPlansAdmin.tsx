@@ -406,7 +406,7 @@ export const ValidationRunPlansAdmin: React.FC = () => {
       params.set('status', 'active')
       params.set('latestOnly', 'true')
 
-      const response = await fetch(`${apiBaseUrl}/gx/suites?${params.toString()}`, {
+      const response = await fetch(`${apiBaseUrl}/suites?${params.toString()}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
 

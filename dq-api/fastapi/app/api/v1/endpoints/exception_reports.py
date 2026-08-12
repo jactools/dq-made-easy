@@ -22,7 +22,7 @@ from app.api.v1.schemas import ExecutionPlanExceptionSummaryView
 from app.api.v1.schemas.exception_fact_view import build_offset_pagination
 from app.application.use_cases.execution_queries import ScopedGxExecutionExceptionAnalyticsQuery
 from app.application.use_cases.execution_queries import get_gx_execution_exception_analytics_for_scope
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 from app.core.dependencies import get_data_catalog_repository
 from app.core.dependencies import get_admin_repository
 from app.core.dependencies import get_exception_fact_repository

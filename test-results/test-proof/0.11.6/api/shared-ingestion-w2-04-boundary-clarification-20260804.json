@@ -1,0 +1,28 @@
+{
+  "app_version": "0.11.6",
+  "proof_id": "shared-ingestion-w2-04-boundary-clarification-20260804",
+  "proof_type": "api",
+  "feature": "Shared ingestion W2-04 boundary clarification",
+  "summary": "Workstream 2 W2-04 is complete after narrowing the task to dq-made-easy. The shared ingestion adapter remains thin, and the DQ-specific wrapper tests verify that orchestration is delegated to the shared ingestion CLI while keeping application-specific runner setup in dq-made-easy.",
+  "status": "passed",
+  "executed_at_utc": "2026-08-04T10:27:59Z",
+  "command": "scripts/run_test_evidence.sh api --label shared-ingestion-w2-04-boundary-clarification -- ../../dq-engine/tests/test_stage_local_csv_to_s3_parquet.py -q",
+  "raw_evidence_directory": "test-results/evidence/0.11.6/api/20260804T102759Z-shared-ingestion-w2-04-boundary-clarification",
+  "test_files": [
+    "dq-engine/tests/test_stage_local_csv_to_s3_parquet.py"
+  ],
+  "test_file_count": 1,
+  "test_count": 2,
+  "assertions": [
+    "build_dq_csv_to_parquet_runner passes the selected transform name into the shared staging kernel",
+    "main registers the DQ-specific runner and delegates execution through the shared CSV-to-Parquet job entrypoint"
+  ],
+  "proof_data": {
+    "implementation_items": [
+      "SHARED-I-W2-04: Keep application-specific orchestration wrappers in dq-made-easy"
+    ],
+    "files_modified": [
+      "docs/implementation-details/SHARED_INGESTION_AND_SSO_PLATFORM_IMPLEMENTATION_PLAN.md"
+    ]
+  }
+}

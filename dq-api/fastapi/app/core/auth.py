@@ -6,6 +6,9 @@ from urllib.parse import urlparse, urlunparse
 
 from fastapi import Request
 
+from app.core.auth_scopes import expand_granted_scopes as _expand_granted_scopes
+from app.core.auth_scopes import get_scopes_from_payload as _get_scopes_from_payload
+from app.core.auth_scopes import has_required_scope as _has_required_scope
 from app.core.config import Settings
 
 
@@ -323,28 +326,8 @@ def is_jwt_payload_valid(payload: dict[str, Any] | None, settings: Settings) -> 
     return True
 
 
-def _collect_scope_values(values: set[str], raw: Any) -> None:
-    if raw is None:
-        return
-    if isinstance(raw, list):
-        for item in raw:
-            _collect_scope_values(values, item)
-        return
-    for token in str(raw).split():
-        scoped = token.strip().strip(",")
-        if scoped:
-            values.add(scoped)
-
-
 def get_scopes_from_payload(payload: dict[str, Any]) -> list[str]:
-    values: set[str] = set()
-    _collect_scope_values(values, payload.get("scope"))
-    _collect_scope_values(values, payload.get("scp"))
-    _collect_scope_values(values, payload.get("roles"))
-    _collect_scope_values(values, payload.get("permissions"))
-    _collect_scope_values(values, payload.get("realm_access", {}).get("roles"))
-    _collect_scope_values(values, payload.get("resource_access", {}).get("account", {}).get("roles"))
-    return sorted(values)
+    return _get_scopes_from_payload(payload)
 
 
 def get_consumer_groups_from_header(raw_groups: str | None) -> list[str]:
@@ -360,41 +343,11 @@ def get_consumer_groups_from_header(raw_groups: str | None) -> list[str]:
 
 
 def expand_granted_scopes(granted: list[str]) -> set[str]:
-    expanded = {str(scope).strip() for scope in granted if str(scope).strip()}
-
-    if "dq:rules:write" in expanded:
-        expanded.update(
-            {
-                "dq:rules:read",
-                "dq:rules:create",
-                "dq:rules:edit",
-                "dq:rules:delete",
-                "dq:rules:test",
-                "dq:rules:approve",
-                "dq:rules:activate",
-            }
-        )
-
-    return expanded
+    return _expand_granted_scopes(granted)
 
 
 def has_required_scope(granted: list[str], required: list[str]) -> bool:
-    expanded = expand_granted_scopes(granted)
-
-    if "dq:*" in expanded:
-        return True
-
-    for required_scope in required:
-        if required_scope in expanded:
-            return True
-
-        required_parts = str(required_scope).split(":")
-        for i in range(len(required_parts) - 1, 0, -1):
-            parent_scope = f"{':'.join(required_parts[:i])}:*"
-            if parent_scope in expanded:
-                return True
-
-    return False
+    return _has_required_scope(granted, required)
 
 
 def build_principal(

@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dq-made-easy-dev
+
+resources:
+  - ../../base/shared
+  # trino-catalog and kafka-topics jobs are deferred until platform services are available
+  # - ../../base/shared/jobs/trino-catalog.yaml
+  # - ../../base/shared/jobs/kafka-topics.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq-made-easy
+      platform.jaccloud.nl/environment: dev
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-api
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-api
+    newTag: "0.11"
+  - name: docker.io/jacbeekers/dq-made-easy-metadata-configure
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-metadata-configure
+    newTag: "0.11"
+  - name: docker.io/jacbeekers/dq-made-easy-keycloak-seed-artifacts
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-keycloak-seed-artifacts
+    newTag: "0.11"
+  - name: docker.io/jacbeekers/dq-made-easy-db-seed
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-db-seed
+    newTag: "0.11"
+

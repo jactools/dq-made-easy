@@ -35,13 +35,17 @@ export DQ_DB_INTERNAL_URL KEYCLOAK_INTERNAL_URL KEYCLOAK_PUBLIC_URL KEYCLOAK_REA
 wait_for_db() {
   local attempt
   local probe_output
-  for attempt in $(seq 1 90); do
-    info "$my_name" "Waiting for database... (${attempt}/90)"
+  for attempt in $(seq 1 5); do
+    info "$my_name" "Waiting for database... (${attempt}/5)"
     if probe_output="$(psql "$DQ_DB_INTERNAL_URL" -c 'select 1' 2>&1)"; then
       info "$my_name" "database is ready at ${DQ_DB_INTERNAL_URL}"
       return 0
     fi
-    info "$my_name" "  probe error: ${probe_output}"
+    error "$my_name" "  probe error: ${probe_output}"
+    if [ "$attempt" -eq 5 ]; then
+      error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL} after 5 attempts"
+      exit 1
+    fi
     sleep 5
   done
   error "$my_name" "database did not become ready at ${DQ_DB_INTERNAL_URL}"
@@ -307,14 +311,8 @@ cp "$RULE_VERSION_METADATA_SOURCE" "$RULE_VERSION_METADATA_TARGET"
 info "$my_name" "Generating external_id patch from Keycloak..."
 python "$ROOT_DIR/scripts/generate_external_id_patch.py" --output-file "$PATCH_FILE" --unmatched-file "$UNMATCHED_FILE"
 
-info "$my_name" "Resetting schema..."
+info "$my_name" "Resetting public schema for seed data (Alembic done by dq-job-api-migrate)..."
 SEED_ROOT="$INIT_DIR" bash "$ROOT_DIR/dq-db/scripts/reseed_in_container.sh"
-
-info "$my_name" "Applying Alembic migrations..."
-(
-  cd "$FASTAPI_DIR"
-  python -m alembic -c "$FASTAPI_DIR/alembic.ini" upgrade heads
-)
 
 info "$my_name" "Applying generated seed SQL files..."
 SEED_ROOT="$INIT_DIR" bash "$ROOT_DIR/dq-db/scripts/apply_seeds_in_container.sh"

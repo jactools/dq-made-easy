@@ -8,7 +8,7 @@
 # Review quarterly. Remove entries when files are refactored.
 
 # --- dq-api: endpoint modules (candidates for split by feature area) ---
-dq-api/fastapi/app/api/v1/endpoints/agent.py                      # 1321 lines — agent + tool + audit routes mixed
+dq-api/fastapi/app/api/v1/endpoints/agent.py                      # 1544 lines — agent + tool + audit + dispatch routes (WS10-AC04 webhook delivery)
 dq-api/fastapi/app/api/v1/endpoints/approvals.py                  # 1161 lines — approval CRUD + workflow
 dq-api/fastapi/app/api/v1/endpoints/data_assets.py                # 1109 lines — asset CRUD + metadata
 dq-api/fastapi/app/api/v1/endpoints/data_catalog.py               # 1330 lines — catalog search + browse + history

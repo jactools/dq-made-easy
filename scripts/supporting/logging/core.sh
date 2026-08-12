@@ -16,6 +16,17 @@ SUCCESS=4
 
 : "${LOG_LEVEL:=1}"
 
+shell_log_level() {
+    case "${LOG_LEVEL:-1}" in
+        0|1|2|3|4)
+            printf '%s' "$LOG_LEVEL"
+            ;;
+        *)
+            printf '%s' 1
+            ;;
+    esac
+}
+
 log_message() {
     local level="$1"
     shift
@@ -58,11 +69,11 @@ set_log_level() {
     export LOG_LEVEL
 }
 
-debug()   { if [ "$LOG_LEVEL" -le 0 ]; then log_message DEBUG "$@"; fi }
-info()    { if [ "$LOG_LEVEL" -le 1 ]; then log_message INFO "$@"; fi }
-warning() { if [ "$LOG_LEVEL" -le 2 ]; then log_message WARNING "$@"; fi }
-error()   { if [ "$LOG_LEVEL" -le 3 ]; then log_message ERROR "$@"; fi }
-success() { if [ "$LOG_LEVEL" -le 4 ]; then log_message SUCCESS "$@"; fi }
+debug()   { if [ "$(shell_log_level)" -le 0 ]; then log_message DEBUG "$@"; fi }
+info()    { if [ "$(shell_log_level)" -le 1 ]; then log_message INFO "$@"; fi }
+warning() { if [ "$(shell_log_level)" -le 2 ]; then log_message WARNING "$@"; fi }
+error()   { if [ "$(shell_log_level)" -le 3 ]; then log_message ERROR "$@"; fi }
+success() { if [ "$(shell_log_level)" -le 4 ]; then log_message SUCCESS "$@"; fi }
 
 # require_cmd: check that an external command is available on PATH.
 # Emits a clear error with installation hint and exits 1 if missing.

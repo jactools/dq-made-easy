@@ -19,38 +19,28 @@ x-tls-env: &tls-env
 # VOLUMES: Persistent storage for all services
 # ============================================================================
 volumes:
-  loki_data:
-    driver: local
-  prometheus_data:
-    driver: local
-  tempo_data:
-    driver: local
-  grafana_data:
-    driver: local
   aistor_data:
     driver: local
   dq-made-easy-llm-model-cache:
   pgdata_v18:
-  keycloak_data:
-  keycloak_seed_artifacts:
   redis_data:
   zammad_postgresql_data:
   zammad_redis_data:
   zammad_storage:
   zammad_backup:
-  kong-db-data-v17:
   openmetadata_pgdata_v18:
   openmetadata_search_data:
   openmetadata_search_v9_data:
   spark-jars:
   ivy2_cache:
   dq-made-easy-llm-hf-cache:
-  kafka_data:
 
 # ============================================================================
 # SECRETS: Shared secrets for all services
 # ============================================================================
 secrets:
+  pip_index_url:
+    environment: PIP_INDEX_URL
   repo_npmrc:
     file: ${REPO_NPMRC_FILE:?REPO_NPMRC_FILE is required}
   internal_mkcert_root_ca:

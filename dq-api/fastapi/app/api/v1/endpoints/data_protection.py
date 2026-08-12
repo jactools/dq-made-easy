@@ -5,7 +5,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.api.v1.schemas import DataEncryptionKeyCreateRequestView, DataEncryptionKeyView
-from app.core.auth import has_required_scope
+from app.core.auth_scopes import has_required_scope
 from app.core.dependencies import get_admin_repository
 from app.core.dependencies import get_data_protection_repository
 from app.domain.interfaces import AdminRepository

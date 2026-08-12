@@ -1,4 +1,22 @@
 services:
+  python-base:
+    profiles:
+    - base
+    image: ${REGISTRY:?REGISTRY is required}dq-made-easy-python-base:latest
+    build:
+      context: ../dq-python-base
+      dockerfile: Dockerfile.base
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-python-base
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-python-base,mode=max
+      args:
+        SOURCE_PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        SOURCE_PYTHON_NAMESPACE: ""
+        SOURCE_PYTHON_IMAGE: python
+        SOURCE_PYTHON_TAG: 3.13-slim-bookworm
+    networks:
+    - dq-network
   base:
     profiles:
     - base
@@ -6,6 +24,12 @@ services:
     build:
       context: ../dq-base
       dockerfile: Dockerfile.base
+      cache_from:
+      - type=local,src=../tmp/buildkit-cache/dq-base
+      cache_to:
+      - type=local,dest=../tmp/buildkit-cache/dq-base,mode=max
+      secrets:
+      - repo_npmrc
       args:
         NODE_REGISTRY: ${NODE_REGISTRY:?NODE_REGISTRY is required}
         NODE_NAMESPACE: ${NODE_NAMESPACE:-}
@@ -144,61 +168,8 @@ services:
     - dq-network
     labels:
     - monitoring=true
-  kafka:
-    profiles:
-    - engine
-    - core
-    - gateway
-    - observability
-    image: ${DQ_KAFKA_REGISTRY:?DQ_KAFKA_REGISTRY is required}${DQ_KAFKA_NAMESPACE:-}${DQ_KAFKA_IMAGE:?DQ_KAFKA_IMAGE is required}:${DQ_KAFKA_TAG:?DQ_KAFKA_TAG is required}
-    build:
-      context: ../dq-kafka
-      dockerfile: Dockerfile.kafka
-    container_name: dq-made-easy-kafka
-    environment:
-      TZ: UTC
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: SSL://:9092,BROKER://:9094,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: SSL://${KAFKA_ADVERTISED_HOST:?KAFKA_ADVERTISED_HOST is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required},BROKER://kafka:9094
-      KAFKA_CERT_HOST: ${KAFKA_CERT_HOST?KAFKA_CERT_HOST is required}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-      KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.p12
-      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka_keystore_creds
-      KAFKA_SSL_KEY_CREDENTIALS: kafka_key_creds
-      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
-      KAFKA_SSL_CLIENT_AUTH: none
-      KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED:?KAFKA_TLS_ENABLED is required}
-      KAFKA_TLS_KEYSTORE_PASSWORD: ${KAFKA_TLS_KEYSTORE_PASSWORD:?KAFKA_TLS_KEYSTORE_PASSWORD is required}
-      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
-    command:
-    - /opt/kafka/bin/start-kafka.sh
-    ports:
-    - ${KAFKA_HOST_BIND:?KAFKA_HOST_BIND is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required}:9092
-    volumes:
-    - kafka_data:/var/lib/kafka/data
-    - ../tmp/certs:/etc/kafka/certs:ro
-    networks:
-    - dq-network
-    restart: unless-stopped
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - echo | openssl s_client -connect ${KAFKA_HEALTHCHECK_HOST:?KAFKA_HEALTHCHECK_HOST is required}:${KAFKA_HOST_PORT:?KAFKA_HOST_PORT is required}
-        -servername ${KAFKA_CERT_HOST:?KAFKA_CERT_HOST is required} -CAfile /etc/kafka/certs/mkcert-rootCA.pem
-        >/dev/null 2>&1 || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 15s
+  # Kafka is managed by platform-foundation/docker-compose/messaging.yml
+  # Consumer repos provision topics via kafka-topics.sh (no mounts into platform Kafka).
   api-migrate:
     depends_on:
       db:
@@ -217,8 +188,17 @@ services:
     build:
       context: ..
       dockerfile: dq-api/Dockerfile.fastapi
+      extra_hosts:
+      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
+      secrets:
+      - pip_index_url
       args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
+        PIP_EXTRA_INDEX_URL: ${PIP_EXTRA_INDEX_URL:?PIP_EXTRA_INDEX_URL is required}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:?PIP_TRUSTED_HOST is required}
     entrypoint:
     - /bin/sh
     - -lc
@@ -308,8 +288,17 @@ services:
     build:
       context: ..
       dockerfile: dq-api/Dockerfile.fastapi
+      extra_hosts:
+      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
+      secrets:
+      - pip_index_url
       args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-}
+        PYTHON_REGISTRY: ${REGISTRY:?REGISTRY is required}
+        PYTHON_NAMESPACE: ""
+        PYTHON_IMAGE: dq-made-easy-python-base
+        PYTHON_TAG: latest
+        PIP_EXTRA_INDEX_URL: ${PIP_EXTRA_INDEX_URL:?PIP_EXTRA_INDEX_URL is required}
+        PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST:?PIP_TRUSTED_HOST is required}
     ports:
     - ${API_HOST_BIND:?API_HOST_BIND is required}:${API_HOST_PORT:?API_HOST_PORT is required}:4010
     env_file: ../${ROOT_ENV_FILE:?ROOT_ENV_FILE is required}

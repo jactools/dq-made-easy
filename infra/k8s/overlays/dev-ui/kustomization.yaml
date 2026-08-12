@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dq-made-easy-dev
+
+resources:
+  - ../../base/frontend
+
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq-made-easy
+      platform.jaccloud.nl/environment: dev
+
+images:
+  - name: docker.io/jacbeekers/dq-made-easy-frontend
+    newName: docker-registery.host.dev.jac.dot:10443/jacbeekers/dq-made-easy-frontend
+    newTag: "0.11"
+

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - config/common-config.yaml
+  - config/keycloak-config.yaml
+  - config/kong-config.yaml
+  - ingress/frontend.yaml
+  - ingress/openmetadata.yaml
+  # CA bundle ConfigMaps (dq-platform-ca-bundle, platform-root-ca) are managed by generate_dev_certs.sh
+
+transformers:
+  - metadata/labels.yaml
+  - metadata/annotations.yaml

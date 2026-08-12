@@ -16,6 +16,10 @@ env_selector_values() {
   printf '%s' 'dev|test|prod'
 }
 
+dependency_source_values() {
+  printf '%s' 'local|corporate'
+}
+
 describe_root_env_file_selection() {
   local root_dir="$1"
   local env_file="$2"
@@ -181,6 +185,23 @@ consume_root_env_selection_args() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --source)
+        if [[ $# -lt 2 ]]; then
+          error "env/selection.sh" "--source requires one of: $(dependency_source_values)"
+          return 1
+        fi
+        case "$2" in
+          local|corporate)
+            DEPENDENCY_SOURCE="$2"
+            export DEPENDENCY_SOURCE
+            ;;
+          *)
+            error "env/selection.sh" "unsupported --source value: $2"
+            return 1
+            ;;
+        esac
+        shift 2
+        ;;
       --env)
         if [[ $# -lt 2 ]]; then
           error "env/selection.sh" "--env requires one of: $(env_selector_values)"

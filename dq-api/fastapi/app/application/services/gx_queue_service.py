@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 from typing import Any
-from urllib.parse import quote
 
 from fastapi import HTTPException
 
 from app.core.config import Settings
+from app.core.redis_connection import build_redis_url
 from app.domain.entities.gx_execution_run import build_gx_dispatch_payload_entity
 
 try:
@@ -23,20 +22,7 @@ except Exception:
 
 
 def resolve_redis_url(settings: Settings) -> str | None:
-    explicit_url = os.environ.get("GX_EXECUTION_REDIS_URL") or os.environ.get("REDIS_URL")
-    if explicit_url:
-        return explicit_url
-
-    redis_host = str(settings.redis_host or "").strip()
-    if not redis_host:
-        return None
-
-    redis_port = int(settings.redis_port)
-    redis_db = int(settings.redis_db)
-    redis_password = settings.redis_password
-    if redis_password:
-        return f"redis://:{quote(redis_password, safe='')}@{redis_host}:{redis_port}/{redis_db}"
-    return f"redis://{redis_host}:{redis_port}/{redis_db}"
+    return build_redis_url(settings, explicit_env_names=("GX_EXECUTION_REDIS_URL",))
 
 
 async def redis_get(

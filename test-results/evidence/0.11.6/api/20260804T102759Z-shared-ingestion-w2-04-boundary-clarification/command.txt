@@ -1,0 +1,13 @@
+cwd=/Users/Jac.Beekers/gitrepos/dq-made-easy/dq-api/fastapi
+mode=api
+label=shared-ingestion-w2-04-boundary-clarification
+command_parts:
+/Users/Jac.Beekers/gitrepos/dq-made-easy/scripts/python_arm64.sh
+--python-bin
+/Users/Jac.Beekers/gitrepos/dq-made-easy/venv/bin/python
+-m
+pytest
+../../dq-engine/tests/test_stage_local_csv_to_s3_parquet.py
+-q
+--junitxml
+/Users/Jac.Beekers/gitrepos/dq-made-easy/test-results/evidence/0.11.6/api/20260804T102759Z-shared-ingestion-w2-04-boundary-clarification/junit.xml

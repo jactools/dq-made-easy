@@ -211,11 +211,11 @@ function main() {
   const internalOverrides = {
     base: calculatedTags.DQ_BASE_TAG,
     db: calculatedTags.DQ_DB_TAG,
-    keycloak: calculatedTags.DQ_KEYCLOAK_TAG,
+    // Keycloak image/container lifecycle managed by platform-foundation
     'dq-engine': calculatedTags.DQ_ENGINE_TAG,
     'profiling-worker': calculatedTags.DQ_PROFILING_TAG,
     frontend: calculatedTags.DQ_FRONTEND_TAG,
-    kong: calculatedTags.DQ_KONG_TAG,
+    // Kong image/container lifecycle managed by platform-foundation
   };
 
   // Merge:

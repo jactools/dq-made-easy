@@ -1,6 +1,13 @@
-FROM eclipse-temurin:21-jdk-alpine
+ARG JAVA_REGISTRY=""
+ARG JAVA_NAMESPACE=""
+ARG JAVA_IMAGE="eclipse-temurin"
+ARG JAVA_TAG="21-jdk-jammy"
 
-RUN apk add --no-cache openssl bash && \
+FROM ${JAVA_REGISTRY}${JAVA_NAMESPACE}${JAVA_IMAGE}:${JAVA_TAG}
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssl bash ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
     mkdir -p /source /output
 
 COPY docker/trust-bundle/generate.sh /generate.sh

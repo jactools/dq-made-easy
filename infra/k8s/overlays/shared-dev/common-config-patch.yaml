@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-common-config
+  labels:
+    platform.jaccloud.nl/tenant: dq-made-easy
+    platform.jaccloud.nl/environment: dev
+data:
+  ENVIRONMENT: dev
+  PUBLIC_BASE_URL: https://dq-made-easy.dev.jac.dot
+  SSO_PUBLIC_ISSUER_URL: https://keycloak.dev.jac.dot:10443/realms/jaccloud
+  KEYCLOAK_PUBLIC_URL: https://keycloak.dev.jac.dot:10443
+  OPENMETADATA_PUBLIC_URL: https://openmetadata.dev.jac.dot:10443
+  OIDC_REDIRECT_BASE_URL: https://dq-made-easy.dev.jac.dot:10443/api
+  REGISTRY_HOST: docker.io

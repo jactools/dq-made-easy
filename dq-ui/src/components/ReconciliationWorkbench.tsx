@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { getAuthToken } from '../contexts/AuthContext'
+import { toApiGroupV1Base } from '../config/api'
 import { useSettings } from '../hooks/useContexts'
 import { Button, SecondaryButton } from './Button'
 import { ReconcileForm } from './CheckTypeForm/ReconcileForm'
@@ -80,7 +81,7 @@ const prettyPrintJson = (value: unknown): string => JSON.stringify(value, null, 
 
 const formatSummaryValue = (value: number): string => value.toLocaleString(undefined, { maximumFractionDigits: 2 })
 
-const buildApiBaseUrl = (apiBaseUrl: string): string => apiBaseUrl.replace(/\/$/, '')
+
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = getAuthToken()
@@ -138,7 +139,7 @@ export const ReconciliationWorkbench: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [leftDatasourceId, setLeftDatasourceId] = useState('')
   const [rightDatasourceId, setRightDatasourceId] = useState('')
-  const apiBaseUrl = settings.applicationSettings?.apiBaseUrl ? buildApiBaseUrl(settings.applicationSettings.apiBaseUrl) : ''
+  const gxApiBase = toApiGroupV1Base('rulebuilder', settings.applicationSettings?.gxApiBase)
   const workspaceId = settings.workspaceSettings?.workspaceId ?? ''
   const currentUserId = settings.userSettings?.userId ?? null
 
@@ -190,7 +191,7 @@ export const ReconciliationWorkbench: React.FC = () => {
   }, [configuredDatasources])
 
   const refreshHistory = useCallback(async () => {
-    if (!apiBaseUrl || !workspaceId) {
+    if (!gxApiBase || !workspaceId) {
       setHistory([])
       return
     }
@@ -202,7 +203,7 @@ export const ReconciliationWorkbench: React.FC = () => {
     }
 
     const response = await fetch(
-      `${apiBaseUrl}/gx/runs/reconciliation?workspaceId=${encodeURIComponent(workspaceId)}&limit=10`,
+      `${gxApiBase}/runs/reconciliation?workspaceId=${encodeURIComponent(workspaceId)}&limit=10`,
       {
         headers: tokenHeaders,
       },
@@ -214,7 +215,7 @@ export const ReconciliationWorkbench: React.FC = () => {
 
     const payload = await response.json()
     setHistory(toHistoryItems(payload))
-  }, [apiBaseUrl, workspaceId])
+  }, [gxApiBase, workspaceId])
 
   useEffect(() => {
     void refreshHistory().catch((refreshError) => {
@@ -260,7 +261,7 @@ export const ReconciliationWorkbench: React.FC = () => {
 
       setResult(nextResult)
 
-      if (!apiBaseUrl || !workspaceId) {
+      if (!gxApiBase || !workspaceId) {
         throw new Error('Reconciliation history cannot be persisted without an active workspace and API base URL.')
       }
 
@@ -269,7 +270,7 @@ export const ReconciliationWorkbench: React.FC = () => {
         throw new Error('Reconciliation history cannot be persisted without an authentication token.')
       }
 
-      const createResponse = await fetch(`${apiBaseUrl}/gx/runs/reconciliation`, {
+      const createResponse = await fetch(`${gxApiBase}/runs/reconciliation`, {
         method: 'POST',
         headers: {
           ...tokenHeaders,
@@ -295,7 +296,7 @@ export const ReconciliationWorkbench: React.FC = () => {
       }
 
       const createdRun = snakeToCamel<{ id: string }>(await createResponse.json())
-      const reportResponse = await fetch(`${apiBaseUrl}/gx/runs/${createdRun.id}/report`, {
+      const reportResponse = await fetch(`${gxApiBase}/runs/${createdRun.id}/report`, {
         method: 'POST',
         headers: {
           ...tokenHeaders,

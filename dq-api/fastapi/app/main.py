@@ -8,6 +8,7 @@ from pathlib import Path
 
 from app.api.v1.router import api_router
 from app.api.v1.router import internal_api_router
+from delivery.main import get_app as get_delivery_app
 from app.core.api_metrics import api_metrics_store, render_prometheus_metrics
 from app.core.auth_login_metrics import auth_login_metrics_store, render_prometheus_metrics as render_auth_login_prometheus_metrics
 from app.core.config import get_settings
@@ -156,6 +157,11 @@ def create_app() -> FastAPI:
     app.include_router(api_router, prefix=settings.api_v1_prefix)
     app.include_router(internal_api_router, prefix=settings.api_v1_prefix)
     app.include_router(api_router, prefix=settings.gateway_api_prefix, include_in_schema=False)
+
+    # Mount Delivery as a standalone sub-app under /delivery/
+    delivery_app = get_delivery_app()
+    app.mount("/delivery", delivery_app)
+
     instrument_app(app, settings)
 
     return app

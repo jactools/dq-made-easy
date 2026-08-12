@@ -1,0 +1,89 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/skip: 'true'
+  labels:
+    app.kubernetes.io/component: keycloak-config
+    app.kubernetes.io/name: dq-job-keycloak-seed
+    app.kubernetes.io/part-of: dq-made-easy
+    dq.jaccloud.nl/trigger: manual
+  name: dq-job-keycloak-seed
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-job-keycloak-seed
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+      - env:
+        - name: KEYCLOAK_SYSTEM_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: KEYCLOAK_ADMIN_PASSWORD
+              name: dq-keycloak-secrets
+        - name: KEYCLOAK_PUBLIC_URL
+          value: https://keycloak.dev.jac.dot:10443
+        - name: KEYCLOAK_SYSTEM_ADMIN_URL
+          value: https://keycloak.platform-keycloak.svc.cluster.local:8443
+        - name: KEYCLOAK_REALM_DISPLAY_NAME
+          value: DQ Made Easy Realm
+        - name: KONG_PUBLIC_URL
+          value: https://kong.dev.jac.dot:10443
+        - name: OIDC_REDIRECT_BASE_URL
+          value: https://kong.dev.jac.dot:10443
+        - name: UI_VITE_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:10443
+        - name: UI_NGINX_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:10443
+        - name: ZAMMAD_PUBLIC_URL
+          value: https://zammad.dev.jac.dot:10443
+        - name: DQ_ENGINE_OIDC_CLIENT_ID
+          value: dq-engine
+        - name: OPENMETADATA_CALLBACK
+          value: https://openmetadata.dev.jac.dot/callback
+        - name: GRAFANA_PUBLIC_URL
+          value: https://grafana.dev.jac.dot
+        - name: GRAFANA_OIDC_SECRET
+          value: changeme
+        - name: DQ_ENGINE_OIDC_CLIENT_SECRET
+          value: changeme
+        - name: SMOKE_LOGIN_EMAIL
+          value: alice@jaccloud.nl
+        - name: OPERATOR_LOGIN_EMAIL
+          value: alice@jaccloud.nl
+        - name: AUDITOR_LOGIN_EMAIL
+          value: auditor@jaccloud.nl
+        - name: REGULATOR_LOGIN_EMAIL
+          value: regulator@jaccloud.nl
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/trust/internal-ca-bundle.pem
+        envFrom:
+        - configMapRef:
+            name: dq-common-config
+        - configMapRef:
+            name: dq-keycloak-config
+        - secretRef:
+            name: dq-keycloak-secrets
+        image: docker.io/jacbeekers/dq-made-easy-keycloak-seed-artifacts:0.1.0
+        imagePullPolicy: IfNotPresent
+        name: keycloak-seed
+        volumeMounts:
+        - mountPath: /etc/ssl/certs/trust
+          name: ca-bundle
+          readOnly: true
+        - mountPath: /seed-data
+          name: seed-data
+      restartPolicy: Never
+      volumes:
+      - configMap:
+          items:
+          - key: ca-bundle.pem
+            path: internal-ca-bundle.pem
+          name: dq-platform-ca-bundle
+        name: ca-bundle
+      - emptyDir: {}
+        name: seed-data
+  ttlSecondsAfterFinished: 300

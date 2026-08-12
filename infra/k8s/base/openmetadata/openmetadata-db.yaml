@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-openmetadata-db
+  labels:
+    app.kubernetes.io/name: dq-openmetadata-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-openmetadata-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-openmetadata-db
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-openmetadata-db
+          image: docker.io/jacbeekers/dq-made-easy-openmetadata-db:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-openmetadata-db-config
+            - secretRef:
+                name: dq-openmetadata-db-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql
+          readinessProbe:
+            tcpSocket:
+              port: postgres
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: postgres
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: db-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-openmetadata-db
+  labels:
+    app.kubernetes.io/name: dq-openmetadata-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-openmetadata-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

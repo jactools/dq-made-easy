@@ -11,12 +11,12 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
-from dq_utils.auth_utils import AuthConfigError
-from dq_utils.auth_utils import OidcClientCredentialsTokenProvider
-from dq_utils.auth_utils import OidcPasswordTokenProvider
-from dq_utils.auth_utils import StaticTokenProvider
-from dq_utils.auth_utils import TokenProvider
-from dq_utils.auth_utils import resolve_oidc_token_url
+from platform_auth import AuthConfigError
+from platform_auth import OidcClientCredentialsTokenProvider
+from platform_auth import OidcPasswordTokenProvider
+from platform_auth import StaticTokenProvider
+from platform_auth import TokenProvider
+from platform_auth import resolve_oidc_token_url
 
 from app.core.otel_metrics import increment_contract_policy_cache_event
 
@@ -241,21 +241,23 @@ class OpenMetadataContractResolver:
         try:
             import redis  # type: ignore
 
-            self._redis_client = redis.Redis(
-                host=self._redis_host,
-                port=self._redis_port,
-                db=self._redis_db,
-                password=self._redis_password,
-                decode_responses=True,
-                ssl=True,
-                ssl_cert_reqs="required",
-                ssl_ca_certs=os.getenv("REDIS_CA_BUNDLE")
-                or os.getenv("SSL_CERT_FILE")
-                or "/etc/openmetadata/certs/internal-ca-bundle.pem",
-                ssl_check_hostname=True,
-                socket_connect_timeout=0.3,
-                socket_timeout=0.3,
+            from app.core.config import get_settings
+            from app.core.redis_connection import build_redis_client_kwargs
+            from app.core.redis_connection import resolve_redis_ca_bundle
+
+            settings = get_settings()
+            client_kwargs = build_redis_client_kwargs(
+                redis_host=self._redis_host,
+                redis_port=self._redis_port,
+                redis_db=self._redis_db,
+                redis_username=str(getattr(settings, "redis_username", "") or "").strip() or None,
+                redis_password=self._redis_password,
+                redis_tls_enabled=bool(getattr(settings, "redis_tls_enabled", True)),
+                redis_ca_bundle=str(getattr(settings, "redis_ca_bundle", "") or "").strip() or resolve_redis_ca_bundle(),
             )
+            client_kwargs["socket_connect_timeout"] = 0.3
+            client_kwargs["socket_timeout"] = 0.3
+            self._redis_client = redis.Redis(**client_kwargs)
         except Exception as exc:
             logger.warning("Redis cache disabled; Redis client init failed: %s", exc)
             self._redis_client = None

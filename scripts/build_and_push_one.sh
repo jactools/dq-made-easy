@@ -35,6 +35,7 @@ Build and optionally push one image.
 Canonical env options:
   --env dev|test|prod      Use .env.dev.local, .env.test.local, or .env.prod.local
   --env-file PATH          Use an explicit env file
+  --source local|corporate  Use public PyPI or corporate Nexus for dependency resolution
 
 Images:
   dq-base
@@ -42,15 +43,13 @@ Images:
   dq-engine
   dq-profiling
   dq-frontend
-  dq-kong
   dq-db
-  dq-keycloak
-  dq-kafka
+  # Keycloak image/container lifecycle managed by platform-foundation
+  # Kafka broker is managed by platform-foundation (platform-kafka).
   dq-kafka-consumer
-  dq-trino
   dq-edge
-  dq-airflow
-  dq-llm
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
 
 Options:
   --no-cache         Build without Docker cache
@@ -131,48 +130,26 @@ case "$SERVICE" in
     STEP_SCRIPT="$ROOT_DIR/dq-ui/scripts/build_and_push.sh"
     TAG_VAR="DQ_FRONTEND_TAG"
     ;;
-  dq-kong)
-    STEP_SCRIPT="$ROOT_DIR/dq-kong/scripts/build_and_push.sh"
-    TAG_VAR="DQ_KONG_TAG"
-    ;;
+  # Kong image/container lifecycle managed by platform-foundation
   dq-db)
     STEP_SCRIPT="$ROOT_DIR/dq-db/scripts/build_and_push.sh"
     TAG_VAR="DQ_DB_TAG"
     ;;
-  dq-keycloak)
-    STEP_SCRIPT="$ROOT_DIR/dq-keycloak/scripts/build_and_push.sh"
-    TAG_VAR="DQ_KEYCLOAK_TAG"
-    ;;
-  dq-kafka)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_KAFKA_TAG"
-    REPO_IMAGE="dq-made-easy-kafka"
-    ;;
+  # Keycloak image/container lifecycle managed by platform-foundation
+  # Kafka broker is managed by platform-foundation (platform-kafka).
   dq-kafka-consumer)
     STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
     TAG_VAR="DQ_KAFKA_CONSUMER_TAG"
     REPO_IMAGE="dq-made-easy-kafka-consumer"
     ;;
-  dq-trino)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_TRINO_TAG"
-    REPO_IMAGE="dq-made-easy-trino"
-    ;;
+  # Trino image/container lifecycle managed by platform-foundation (platform-trino).
   dq-edge)
     STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
     TAG_VAR="DQ_EDGE_TAG"
     REPO_IMAGE="dq-made-easy-edge"
     ;;
-  dq-airflow)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_AIRFLOW_TAG"
-    REPO_IMAGE="dq-made-easy-airflow"
-    ;;
-  dq-llm)
-    STEP_SCRIPT="$ROOT_DIR/scripts/build_and_push_all.sh"
-    TAG_VAR="DQ_LLM_TAG"
-    REPO_IMAGE="dq-made-easy-llm"
-    ;;
+  # Airflow image/container lifecycle managed by platform-foundation (platform-airflow).
+  # LLM image/container lifecycle managed by platform-foundation (platform-llm).
   *)
     error "$my_name" "Unknown image '$SERVICE'"
     usage

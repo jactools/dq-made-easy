@@ -1,7 +1,14 @@
 # syntax=docker/dockerfile:1.7
+
+# Args used in FROM must be declared before the first FROM
+ARG PYTHON_DOCKER_REGISTRY
+ARG PYTHON_DOCKER_NAMESPACE
+ARG PYTHON_DOCKER_IMAGE
+ARG PYTHON_DOCKER_TAG
+
 FROM docker:cli AS docker-cli
 
-FROM python:3.14-slim
+FROM ${PYTHON_DOCKER_REGISTRY}${PYTHON_DOCKER_NAMESPACE}${PYTHON_DOCKER_IMAGE}:${PYTHON_DOCKER_TAG}
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -29,13 +36,21 @@ RUN --mount=type=secret,id=internal_corporate_root_ca,required=false \
     && rm -rf /var/lib/apt/lists/*
 
 COPY dq-api/fastapi/requirements.txt /tmp/requirements.txt
-RUN PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir -r /tmp/requirements.txt
+RUN --mount=type=secret,id=pip_index_url \
+    PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" \
+    PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-https://pypi.org/simple/}" \
+    PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-packages.host.dev.jac.dot}" \
+    pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY dq-domain-validation/pyproject.toml /tmp/dq-domain-validation/pyproject.toml
 COPY dq-domain-validation/src /tmp/dq-domain-validation/src
 COPY dq-utils/pyproject.toml /tmp/dq-utils/pyproject.toml
 COPY dq-utils/src /tmp/dq-utils/src
-RUN PIP_INDEX_URL="$PIP_INDEX_URL" pip install --no-cache-dir /tmp/dq-domain-validation /tmp/dq-utils
+RUN --mount=type=secret,id=pip_index_url \
+    PIP_INDEX_URL="$(cat /run/secrets/pip_index_url)" \
+    PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-https://pypi.org/simple/}" \
+    PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-packages.host.dev.jac.dot}" \
+    pip install --no-cache-dir /tmp/dq-domain-validation /tmp/dq-utils
 
 COPY dq-api/fastapi /workspace/dq-api/fastapi
 COPY dq-api/scripts/update_support_itsm_token.py /workspace/dq-api/scripts/update_support_itsm_token.py

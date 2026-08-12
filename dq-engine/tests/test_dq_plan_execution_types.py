@@ -89,3 +89,7 @@ class TestSourceLocation:
 
         with pytest.raises(Exception):
             loc.uri = "other"  # type: ignore
+
+    def test_default_options_are_empty_dict(self) -> None:
+        loc = SourceLocation(uri="s3a://bucket/path", format="delta")
+        assert loc.options == {}

@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-job-kafka-topics
+  labels:
+    app.kubernetes.io/name: dq-job-kafka-topics
+    app.kubernetes.io/part-of: dq-made-easy
+    app.kubernetes.io/component: kafka-config
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-job-kafka-topics
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: kafka-topics
+          image: docker.io/apache/kafka:3.9.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka.platform-kafka.svc.cluster.local:9092"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Create topics if they don't exist
+              /opt/kafka/bin/kafka-topics.sh \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVERS" \
+                --create --if-not-exists \
+                --topic dq-made-easy.gx.violations \
+                --partitions 1 \
+                --replication-factor 1 \
+                --config retention.ms=604800000 \
+                --config cleanup.policy=compact
+
+              /opt/kafka/bin/kafka-topics.sh \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVERS" \
+                --create --if-not-exists \
+                --topic dq-made-easy.events \
+                --partitions 1 \
+                --replication-factor 1 \
+                --config retention.ms=2592000000
+
+              # List topics to verify
+              /opt/kafka/bin/kafka-topics.sh \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVERS" \
+                --list

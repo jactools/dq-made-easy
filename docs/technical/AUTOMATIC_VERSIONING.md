@@ -20,6 +20,12 @@ When you run `./scripts/build_and_push_all.sh`:
 
 By default the build wrapper targets the **core** product images. Use `--scope repo` (or `--all-repo-images`) to include the wider repo-managed image set such as `db-seed`, metadata helper images, `container-metrics`, and `zammad-seed`.
 
+Shared platform images are versioned separately in `platform-foundation`. Their
+consumers pin a published tag in the consumer env file rather than relying on
+this repo's automatic content-hash scheme. Pull the specific shared image tag
+from the shared-image scope when you upgrade. See [Shared Image Version
+Pinning and Upgrades](./SHARED_IMAGE_VERSION_PINNING_AND_UPGRADES.md).
+
 ### Example
 
 ```
@@ -234,7 +240,7 @@ node ./scripts/determine_versions.js --write
 ```
 Modify any file in a service directory (even whitespace):
 ```bash
-echo "" >> dq-api/Dockerfile.api.archive
+echo "" >> dq-api/Dockerfile.fastapi
 ./scripts/build_and_push_all.sh
 ```
 

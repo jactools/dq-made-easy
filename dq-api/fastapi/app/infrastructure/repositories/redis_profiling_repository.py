@@ -1,10 +1,12 @@
 from __future__ import annotations
-import os
 from typing import Optional
 
 import json
 
 import redis
+
+from app.core.redis_connection import build_redis_client_kwargs
+from app.core.redis_connection import resolve_redis_ca_bundle
 
 from app.domain.entities import SuggestionProfilingRequestEntity
 from app.domain.entities import SuggestionProfilingStartEntity
@@ -18,19 +20,26 @@ class RedisProfilingRepository(ProfilingRepository):
     Keys used: `profiling:{profiling_request_id}` -> hash of fields
     """
 
-    def __init__(self, redis_host: str = "localhost", redis_port: int = 6379, redis_db: int = 0, password: str | None = None) -> None:
+    def __init__(
+        self,
+        redis_host: str = "localhost",
+        redis_port: int = 6379,
+        redis_db: int = 0,
+        password: str | None = None,
+        username: str | None = None,
+        tls_enabled: bool = True,
+        ca_bundle: str | None = None,
+    ) -> None:
         self._client = redis.Redis(
-            host=redis_host,
-            port=redis_port,
-            db=redis_db,
-            password=password,
-            decode_responses=True,
-            ssl=True,
-            ssl_cert_reqs="required",
-            ssl_ca_certs=os.getenv("REDIS_CA_BUNDLE")
-            or os.getenv("SSL_CERT_FILE")
-            or "/etc/openmetadata/certs/internal-ca-bundle.pem",
-            ssl_check_hostname=True,
+            **build_redis_client_kwargs(
+                redis_host=redis_host,
+                redis_port=redis_port,
+                redis_db=redis_db,
+                redis_username=username,
+                redis_password=password,
+                redis_tls_enabled=tls_enabled,
+                redis_ca_bundle=ca_bundle or resolve_redis_ca_bundle(),
+            )
         )
 
     def _key(self, profiling_request_id: str) -> str:

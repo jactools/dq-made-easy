@@ -27,6 +27,10 @@ init_root_env_file "$ROOT_DIR"
 # Consume --env / --env-file args (but don't error on unknowns)
 consume_root_env_selection_args "$ROOT_DIR" "$@" 2>/dev/null || true
 
+if ! source_selected_root_env_file; then
+  exit 1
+fi
+
 CERTS_DIR="$ROOT_DIR/tmp/certs"
 TRUST_DIR="$CERTS_DIR/trust"
 IMAGE_NAME="dq-made-easy-trust-bundle"
@@ -47,6 +51,10 @@ fi
 
 info "build_trust_bundle.sh" "Building trust-bundle image..."
 docker build -t "$IMAGE_NAME" \
+  --build-arg JAVA_REGISTRY="${REGISTRY:?REGISTRY is required}" \
+  --build-arg JAVA_NAMESPACE="" \
+  --build-arg JAVA_IMAGE="eclipse-temurin" \
+  --build-arg JAVA_TAG="21-jdk-jammy" \
   -f "$ROOT_DIR/docker/trust-bundle/Dockerfile" \
   "$ROOT_DIR" || {
   error "build_trust_bundle.sh" "Failed to build trust-bundle image"
