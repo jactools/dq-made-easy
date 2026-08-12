@@ -65,9 +65,13 @@ source "$env_file"
 set +a
 
 # Docker registry configuration
-DOCKER_REGISTRY_DNS="${DOCKER_REGISTRY_DNS:-docker-registry.dev.jac.dot}"
-DOCKER_REGISTRY_PORT="${DOCKER_REGISTRY_PORT:-5000}"
-DOCKER_REGISTRY_URL="https://${DOCKER_REGISTRY_DNS}:10443"
+DOCKER_REGISTRY_TARGET="${PYTHON_DOCKER_REGISTRY:-${DQ_BASE_REGISTRY:-${REGISTRY:-}}}"
+DOCKER_REGISTRY_TARGET="${DOCKER_REGISTRY_TARGET%/}"
+if [[ -z "$DOCKER_REGISTRY_TARGET" ]]; then
+  echo "Missing registry target. Set PYTHON_DOCKER_REGISTRY, DQ_BASE_REGISTRY, or REGISTRY in $env_file" >&2
+  exit 1
+fi
+DOCKER_REGISTRY_URL="https://${DOCKER_REGISTRY_TARGET}"
 NAMESPACE="${DQ_BASE_NAMESPACE:-jacbeekers/}"
 
 # Base images to pull and publish
@@ -95,7 +99,7 @@ for image_pair in "${BASE_IMAGES[@]}"; do
   }
   
   # Tag for local registry with namespace
-  tagged_image="${DOCKER_REGISTRY_DNS}:10443/${NAMESPACE}${local_image}"
+  tagged_image="${DOCKER_REGISTRY_TARGET}/${NAMESPACE}${local_image}"
   echo "=== Tagging as $tagged_image ==="
   docker tag "$source_image" "$tagged_image"
   
