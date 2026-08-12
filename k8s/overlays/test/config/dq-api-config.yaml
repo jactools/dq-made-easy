@@ -4,7 +4,7 @@ metadata:
   name: dq-api-config
 data:
   DQ_API_PORT: "8000"
-  SSO_INTERNAL_ISSUER_URL: https://keycloak.platform-keycloak.svc.cluster.local:8443/auth/realms/dq-made-easy
+  SSO_INTERNAL_ISSUER_URL: http://keycloak.platform-keycloak.svc.cluster.local:8443/auth/realms/dq-made-easy
   KONG_PUBLIC_URL: https://kong.jacloud.nl:10443
   REDIS_HOST: redis.platform-redis.svc.cluster.local
   REDIS_PORT: "6379"

@@ -17,9 +17,6 @@ spec:
         app.kubernetes.io/part-of: dq-made-easy
     spec:
       volumes:
-        - name: api-tls-certs
-          secret:
-            secretName: dq-dev-tls-cert
         - name: platform-root-ca
           configMap:
             name: platform-root-ca
@@ -29,8 +26,10 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4010
-              name: https
+              name: http
           env:
+            - name: API_HTTPS_ENABLED
+              value: "false"
             - name: CURL_CA_BUNDLE
               value: /etc/ssl/certs/platform-root-ca.pem
             - name: SSO_INTERNAL_ISSUER_URL
@@ -47,9 +46,6 @@ spec:
             - secretRef:
                 name: dq-api-secrets
           volumeMounts:
-            - name: api-tls-certs
-              mountPath: /etc/api/certs
-              readOnly: true
             - name: platform-root-ca
               mountPath: /etc/ssl/certs/platform-root-ca.pem
               subPath: rootCA.pem
@@ -64,8 +60,8 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: https
-              scheme: HTTPS
+              port: http
+              scheme: HTTP
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -73,8 +69,8 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: https
-              scheme: HTTPS
+              port: http
+              scheme: HTTP
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 5
@@ -91,6 +87,6 @@ spec:
   selector:
     app.kubernetes.io/name: dq-api
   ports:
-    - name: https
+    - name: http
       port: 4010
-      targetPort: https
+      targetPort: http
