@@ -10,6 +10,7 @@ resources:
   - config/dq-engine-config.yaml
   - external-secrets/redis-credential-api.yaml
   - external-secrets/redis-credential-engine.yaml
+  - jobs/secret-init.yaml
 
 labels:
   - includeSelectors: true
@@ -41,6 +42,25 @@ patches:
   - path: patches/ingress-dq-api.yaml
   - path: patches/ingress-dq-ui.yaml
   - path: patches/ingress-dq-engine.yaml
+  # Deployments sync after PreSync hooks create secrets
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+        value: "10"
+  - target:
+      kind: Service
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+        value: "5"
+  - target:
+      kind: Ingress
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+        value: "15"
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-api
