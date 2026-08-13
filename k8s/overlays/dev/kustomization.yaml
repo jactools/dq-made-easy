@@ -11,6 +11,7 @@ resources:
   - external-secrets/redis-credential-api.yaml
   - external-secrets/redis-credential-engine.yaml
   - jobs/secret-init.yaml
+  - jobs/api-migrate.yaml
 
 labels:
   - includeSelectors: true

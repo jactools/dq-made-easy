@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-job-api-migrate
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: api-migrate
+          image: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-api:0.11
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-api-config
+            - secretRef:
+                name: redis-credential-api
+            - secretRef:
+                name: dq-api-secrets
+            - secretRef:
+                name: dq-db-secrets
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              # Wait for database to be ready
+              for i in $(seq 1 30); do
+                if psql "$DQ_DB_INTERNAL_URL" -c '\q' >/dev/null 2>&1; then
+                  echo "Database is ready"
+                  break
+                fi
+                if [ $i -eq 30 ]; then
+                  echo "Database not ready after 30 attempts"
+                  exit 1
+                fi
+                sleep 2
+              done
+              cd /app && python -m alembic -c alembic.ini upgrade heads
