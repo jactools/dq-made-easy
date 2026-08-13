@@ -33,7 +33,7 @@ spec:
             - configMapRef:
                 name: dq-engine-config
             - secretRef:
-                name: dq-engine-secrets
+                name: redis-credential-engine
           volumeMounts:
             - name: platform-root-ca
               mountPath: /etc/ssl/certs/platform-root-ca.pem

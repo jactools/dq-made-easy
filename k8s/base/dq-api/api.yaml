@@ -44,7 +44,7 @@ spec:
             - configMapRef:
                 name: dq-api-config
             - secretRef:
-                name: dq-api-secrets
+                name: redis-credential-api
           volumeMounts:
             - name: platform-root-ca
               mountPath: /etc/ssl/certs/platform-root-ca.pem

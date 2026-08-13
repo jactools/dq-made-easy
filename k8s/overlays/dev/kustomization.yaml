@@ -8,6 +8,8 @@ resources:
   - config/dq-api-config.yaml
   - config/dq-frontend-config.yaml
   - config/dq-engine-config.yaml
+  - external-secrets/redis-credential-api.yaml
+  - external-secrets/redis-credential-engine.yaml
 
 labels:
   - includeSelectors: true
