@@ -10,6 +10,8 @@ resources:
   - config/dq-engine-config.yaml
   - external-secrets/redis-credential-api.yaml
   - external-secrets/redis-credential-engine.yaml
+  - secrets/dq-db-secrets.yaml
+  - secrets/dq-frontend-secrets.yaml
 
 labels:
   - includeSelectors: true
@@ -44,14 +46,14 @@ patches:
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-api
-    newName: docker-registry.dev.jac.dot:10500/jacbeekers/dq-made-easy-api
-    newTag: "0.10-7a9c018"
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-api
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-db
-    newName: docker-registry.dev.jac.dot:10500/jacbeekers/dq-made-easy-db
-    newTag: "0.10-49540d2"
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-db
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-frontend
-    newName: docker-registry.dev.jac.dot:10500/jacbeekers/dq-made-easy-frontend
-    newTag: "0.10-bd861ee"
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-frontend
+    newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-engine
-    newName: docker-registry.dev.jac.dot:10500/jacbeekers/dq-made-easy-engine
-    newTag: "0.10-b745035"
+    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-engine
+    newTag: "0.11"
