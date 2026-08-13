@@ -25,6 +25,22 @@ Agents are **FORBIDDEN** to run any `git` command except `git status`.
 
 **Rationale:** The user controls all git operations. Agents must never stage, inspect diffs, read history, or modify commit history. Use the `read` tool and `bash` to inspect files instead of `git diff`/`git show`.
 
+### No Secrets/Certs/CAs in Git
+Agents are **FORBIDDEN** to commit secrets, certificates, CA bundles, passwords, API keys, tokens, or any sensitive material to git.
+
+**Allowed:**
+- File references (e.g., `caProvider.name: kube-root-ca.crt`) — the file itself must be excluded from git
+- Placeholders (e.g., `replace-me`, `0.1.0`) where real values are injected at deploy time
+- `.gitignore` entries that exclude sensitive files
+
+**Explicitly forbidden:**
+- Inline certificates (PEM blocks) in YAML, JSON, ConfigMaps, or any file tracked by git
+- Inline CA bundles in manifests, ConfigMaps, or scripts tracked by git
+- Inline passwords, API keys, tokens, or secrets in any file tracked by git
+- Embedding generated values (certs, keys, passwords) in version-controlled files
+
+**Rationale:** Secrets in git are irreversible (history is permanent), compromise security, and violate platform principles.
+
 ## Python Module Rules
 
 ### 1. Line Count Limit (< 1000 LOC)
