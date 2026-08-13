@@ -20,6 +20,9 @@ spec:
         - name: platform-root-ca
           configMap:
             name: platform-root-ca
+        - name: api-tls
+          secret:
+            secretName: dq-api-tls
       containers:
         - name: dq-api
           image: docker.io/jacbeekers/dq-made-easy-api:0.1.0
@@ -45,10 +48,15 @@ spec:
                 name: dq-api-config
             - secretRef:
                 name: redis-credential-api
+            - secretRef:
+            - secretRef:
           volumeMounts:
             - name: platform-root-ca
               mountPath: /etc/ssl/certs/platform-root-ca.pem
               subPath: rootCA.pem
+              readOnly: true
+            - name: api-tls
+              mountPath: /etc/api/certs
               readOnly: true
           resources:
             requests:
