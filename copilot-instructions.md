@@ -132,4 +132,10 @@ Next steps I can take
 
 When in doubt, ask the maintainers before introducing any behaviour that relaxes this rule.
 
+GitOps direction
+----------------
+- Do not add controller fallbacks, dual-controller support, or new ArgoCD-specific deployment paths for forward development.
+- Flux v2.9 is the only forward GitOps control-plane direction for repo-controlled deployment work.
+- Dev and test Flux Git sources must use SSH; production Flux Git sources must use HTTPS.
+
 Repository-specific env, URL, and trust-bundle contracts live in [.github/copilot/06-internal-service-contracts.md](.github/copilot/06-internal-service-contracts.md).

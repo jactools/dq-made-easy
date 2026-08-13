@@ -131,6 +131,29 @@ packages/metadata-<name>/
 - Always use `venv/bin/python` for all Python commands (never bare `python`)
 - All paths are relative to the repository root
 
+### Deployment — GitOps Controller Of Record
+All services **MUST be deployed through the GitOps controller of record** for the target environment. Agents are **FORBIDDEN** to deploy manifests directly.
+
+**Current direction:**
+- Flux v2.9 is the only forward GitOps control-plane direction
+- Dev and test Flux Git sources must use SSH
+- Production Flux Git sources must use HTTPS
+- Legacy ArgoCD assets may be touched only for stability maintenance of existing environments or for controlled retirement during migration
+- Migration governance is tracked in `platform-foundation/docs/implementation/platform-gitops-control-plane-migration-plan.md` and `platform-foundation/docs/architecture/adr/ADR-002-flux-gitops-control-plane-direction.md`
+
+**Allowed:**
+- Create/update tenant Kustomize overlays and workload manifests consumed by the active controller of record
+- Create/update Flux source and `Kustomization` resources when they are part of the approved migration plan
+- Maintain or retire existing ArgoCD-related assets only when required to keep current environments stable or to remove Argo ownership during migration
+- Use `kubectl` to **inspect** state (get pods, logs, describe, events)
+
+**Explicitly forbidden:**
+- `kubectl apply -f` or `kubectl apply -k` to deploy manifests
+- `kubectl create` or `kubectl patch` to mutate GitOps-managed workloads instead of updating Git
+- Manual `kubectl rollout restart` to trigger deployments instead of controller reconciliation
+- Creating new ArgoCD Applications, ApplicationSets, sync-wave flows, hook-based flows, or `argocd.argoproj.io/*` annotations for forward development
+- Allowing ArgoCD and Flux to reconcile the same resource set in the same environment at the same time
+
 ### Port Safety — Process Killing
 **Only kill processes on ports in the 10000–11999 range** (dev/test environments).
 
