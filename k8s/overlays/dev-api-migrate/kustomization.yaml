@@ -1,0 +1,17 @@
+# DQ api-migrate — runs alembic migrations after deployments are ready
+# Flux ordering: dq-secret-init → dq-made-easy → dq-api-migrate
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dq-dev
+
+resources:
+  - ../jobs/api-migrate.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/tenant: dq
+      platform.jaccloud.nl/environment: dev
