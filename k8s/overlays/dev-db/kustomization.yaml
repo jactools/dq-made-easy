@@ -36,6 +36,9 @@ patches:
       - op: add
         path: /metadata/labels/platform.jaccloud.nl~1environment
         value: dev
+  - path: ../dev/patches/common-config.yaml
+  - path: ../dev/patches/keycloak-config.yaml
+  - path: ../dev/patches/kong-config.yaml
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-db
