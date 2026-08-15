@@ -12,10 +12,6 @@ resources:
   - external-secrets/redis-credential-engine.yaml
   - jobs/secret-init.yaml
   - jobs/api-migrate.yaml
-  - secrets/dq-api-tls.yaml
-  - secrets/dq-ui-tls.yaml
-  - secrets/dq-engine-tls.yaml
-  - secrets/dq-dev-tls-cert.yaml
 
 labels:
   - includeSelectors: true
