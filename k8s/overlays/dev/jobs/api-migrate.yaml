@@ -25,14 +25,14 @@ spec:
             - /bin/sh
             - -ec
             - |
-              # Wait for database to be ready
-              for i in $(seq 1 30); do
-                if psql "$DQ_DB_INTERNAL_URL" -c '\q' >/dev/null 2>&1; then
+              # Wait for database to be ready (using Python psycopg, not psql)
+              for i in $(seq 1 10); do
+                if python -c "import psycopg; psycopg.connect('$DQ_DB_INTERNAL_URL').close()" 2>/dev/null; then
                   echo "Database is ready"
                   break
                 fi
-                if [ $i -eq 30 ]; then
-                  echo "Database not ready after 30 attempts"
+                if [ $i -eq 10 ]; then
+                  echo "Database not ready after 10 attempts"
                   exit 1
                 fi
                 sleep 2
