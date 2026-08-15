@@ -22,9 +22,6 @@ labels:
       platform.jaccloud.nl/environment: dev
 
 patches:
-  - path: patches/common-config.yaml
-  - path: patches/keycloak-config.yaml
-  - path: patches/kong-config.yaml
   - path: patches/ingress-dq-api.yaml
   - path: patches/ingress-dq-ui.yaml
   - path: patches/ingress-dq-engine.yaml
