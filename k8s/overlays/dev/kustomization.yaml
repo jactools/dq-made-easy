@@ -4,13 +4,14 @@ kind: Kustomization
 namespace: dq-dev
 
 resources:
-  - ../../base
+  - ../../base/dq-api/api.yaml
+  - ../../base/dq-api/ingress.yaml
+  - ../../base/dq-api/db-config.yaml
+  - ../../base/dq-ui
+  - ../../base/dq-engine
   - config/dq-api-config.yaml
   - config/dq-frontend-config.yaml
   - config/dq-engine-config.yaml
-  - external-secrets/redis-credential-api.yaml
-  - external-secrets/redis-credential-engine.yaml
-  - jobs/secret-init.yaml
   - jobs/api-migrate.yaml
 
 labels:
@@ -21,22 +22,6 @@ labels:
       platform.jaccloud.nl/environment: dev
 
 patches:
-  - target:
-      kind: Namespace
-      name: dq-made-easy
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: dq-dev
-      - op: add
-        path: /metadata/labels/platform.jaccloud.nl~1managed-by
-        value: argocd
-      - op: add
-        path: /metadata/labels/platform.jaccloud.nl~1tenant
-        value: dq
-      - op: add
-        path: /metadata/labels/platform.jaccloud.nl~1environment
-        value: dev
   - path: patches/common-config.yaml
   - path: patches/keycloak-config.yaml
   - path: patches/kong-config.yaml
@@ -49,9 +34,6 @@ patches:
 images:
   - name: docker.io/jacbeekers/dq-made-easy-api
     newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-api
-    newTag: "0.11"
-  - name: docker.io/jacbeekers/dq-made-easy-db
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-db
     newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-frontend
     newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-frontend
