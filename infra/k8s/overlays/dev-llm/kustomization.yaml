@@ -16,5 +16,5 @@ labels:
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-llm
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-llm
+    newName: jacloud.nl/docker/jacbeekers/dq-made-easy-llm
     newTag: "0.11"

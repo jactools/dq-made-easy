@@ -16,8 +16,8 @@ labels:
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-openmetadata-db
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-openmetadata-db
+    newName: jacloud.nl/docker/jacbeekers/dq-made-easy-openmetadata-db
     newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-openmetadata
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-openmetadata-server
+    newName: jacloud.nl/docker/jacbeekers/dq-made-easy-openmetadata-server
     newTag: "0.11"
