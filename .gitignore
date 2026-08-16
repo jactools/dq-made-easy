@@ -6,6 +6,7 @@
 !.env*.example
 *.tgz
 
+certs/
 .pi/
 
 ## Node
@@ -20,7 +21,6 @@ dq-keycloak/jaccloud-realm.json
 !dq-ui/dist/
 dist/
 
-certs/
 build/
 .vite/
 .vite-deps/

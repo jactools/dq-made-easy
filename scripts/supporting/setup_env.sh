@@ -182,18 +182,43 @@ build_corporate_pypi_index_url() {
         "$nexuscloud_group_repo"
 }
 
+extract_url_host() {
+    local url="${1:-}"
+    local authority=""
+
+    if [ -z "$url" ]; then
+        return 1
+    fi
+
+    authority="$(printf '%s' "$url" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^/]+).*$#\1#')"
+    if [ -z "$authority" ] || [ "$authority" = "$url" ]; then
+        return 1
+    fi
+
+    authority="${authority##*@}"
+    printf '%s' "${authority%%:*}"
+}
+
+resolve_pypi_build_host() {
+    local candidate=""
+
+    for candidate in \
+        "${PYPI_BUILD_HOST_DNS:-}" \
+        "${PYPI_SERVER_HOST_DNS:-}" \
+        "${PYPI_SERVER_DNS:-}"; do
+        if [ -n "$candidate" ]; then
+            printf '%s' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 if [ -n "${NEXUSCLOUD_NPM_REGISTRY:-}" ]; then
     NPM_CONFIG_REGISTRY="$NEXUSCLOUD_NPM_REGISTRY"
     export NPM_CONFIG_REGISTRY
 fi
-
-if resolved_tls_internal_ca_bundle_file="$(resolve_tls_internal_ca_bundle_file "$TLS_INTERNAL_CA_BUNDLE")"; then
-    TLS_INTERNAL_CA_BUNDLE="$resolved_tls_internal_ca_bundle_file"
-else
-    error "$my_name" "TLS_INTERNAL_CA_BUNDLE is required and must point to an existing file: $TLS_INTERNAL_CA_BUNDLE"
-    return 1
-fi
-export TLS_INTERNAL_CA_BUNDLE
 
 REPO_NPMRC_FILE="${REPO_NPMRC_FILE:-}"
 if [ -n "$REPO_NPMRC_FILE" ] && [ ! -f "$REPO_NPMRC_FILE" ]; then
@@ -245,13 +270,13 @@ fi
 
 case "$dependency_source" in
     HOME)
-        # HOME: use local pypi-server (custom wheels) + public pypi.org fallback
-        # .env.dev.local already sets:
-        #   PIP_INDEX_URL=http://packages.dev.jac.dot:10091/simple/
+        # HOME: use the env-configured PyPI endpoint for repo wheels plus public PyPI fallback
+        # .env.dev.local may set:
+        #   PIP_INDEX_URL=https://jacloud.nl/pypi/simple/
         #   PIP_EXTRA_INDEX_URL=https://pypi.org/simple/
         # Preserve these values from .env
         PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.org/simple/}"
-        PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-}"
+        PIP_EXTRA_INDEX_URL="${PIP_EXTRA_INDEX_URL:-https://pypi.org/simple/}"
         PIP_TRUSTED_HOST="${PIP_TRUSTED_HOST:-}"
         ;;
     CORPORATE)
@@ -278,6 +303,11 @@ if [ -n "${PIP_TRUSTED_HOST:-}" ]; then
 fi
 if [ -n "${PYPI_SERVER_NETWORK_NAME:-}" ]; then
     export PYPI_SERVER_NETWORK_NAME
+fi
+
+if pypi_build_host="$(resolve_pypi_build_host)"; then
+    PYPI_BUILD_HOST_DNS="$pypi_build_host"
+    export PYPI_BUILD_HOST_DNS
 fi
 
 # ---------------------------------------------------------------------------

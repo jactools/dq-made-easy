@@ -23,7 +23,7 @@ This is intentionally a staged migration: inventory first, then extraction, then
 | Area | Status | Evidence |
 |---|---|---|
 | Shared repository and package boundary | Complete | `platform-foundation/packages/platform-foundation` |
-| Local wheel distribution | Complete | Docker pypiserver at the env-derived `packages.dev.jac.dot` URL |
+| Local wheel distribution | Complete | Shared package distribution at the env-derived `jacloud.nl/pypi` URL |
 | Clean build verification | Complete | `dq-api` and `dq-engine` both build successfully against the local pypiserver. Java moved into `dq-python-base` (no Debian apt-get at build time). Spark jars pre-cached in `tmp/spark-jars-cache/` (no Maven network access at build time). See dq-engine build proof below. |
 | First shared OIDC primitive extraction | Complete | `platform_foundation` auth modules; direct `dq-made-easy` imports |
 | Shared JWKS/JWT validator extraction | Complete | `JwksCache` + `JwtValidator` + `JwtValidationResult` in `platform_foundation`; 25 unit tests, fail-closed with cryptographic signature verification |

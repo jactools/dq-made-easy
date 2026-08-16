@@ -189,7 +189,7 @@ upload_wheel_to_repository_url() {
   local twine_output_file="${ROOT_DIR}/tmp/twine-upload-output.log"
   local pypi_container_name="${PYPI_CONTAINER_NAME:-platform-pypi-server}"
   local pypi_storage_dir=""
-  local local_pypi_host="${PYPI_SERVER_DNS:-}"
+  local local_pypi_host="${PYPI_BUILD_HOST_DNS:-$(resolve_pypi_build_host || true)}"
 
   rm -f "$twine_output_file"
 
@@ -201,7 +201,8 @@ upload_wheel_to_repository_url() {
     fi
   fi
 
-  if TWINE_REPOSITORY_URL="$target_url" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --non-interactive "$wheel_path" >"$twine_output_file" 2>&1; then
+  # Unset internal CA bundle overrides for twine when publishing to public HTTPS endpoints.
+  if TWINE_REPOSITORY_URL="$target_url" TWINE_CERT="" REQUESTS_CA_BUNDLE="" SSL_CERT_FILE="" CURL_CA_BUNDLE="" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --non-interactive "$wheel_path" >"$twine_output_file" 2>&1; then
     return 0
   fi
 
@@ -284,7 +285,7 @@ build_package() {
     fi
   else
     info "$my_name" "Publishing $PACKAGE_LABEL to $REPOSITORY_NAME"
-    if ! TWINE_REPOSITORY="$REPOSITORY_NAME" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --skip-existing --non-interactive "$WHEEL_PATH"; then
+    if ! TWINE_REPOSITORY="$REPOSITORY_NAME" TWINE_CERT="" REQUESTS_CA_BUNDLE="" SSL_CERT_FILE="" CURL_CA_BUNDLE="" "$PYTHON_RUNNER" --python-bin "$PYTHON_BIN" -m twine upload --skip-existing --non-interactive "$WHEEL_PATH"; then
       error "$my_name" "Failed to publish $PACKAGE_LABEL to $REPOSITORY_NAME"
       exit 1
     fi

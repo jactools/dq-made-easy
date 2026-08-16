@@ -96,7 +96,7 @@ if [ -z "${DQ_BASE_REGISTRY:-}" ] || [ -z "${DQ_BASE_NAMESPACE:-}" ] || [ -z "${
     exit 1
 fi
 
-for variable in PIP_INDEX_URL PIP_EXTRA_INDEX_URL PIP_TRUSTED_HOST PYPI_SERVER_DNS; do
+for variable in PIP_INDEX_URL PIP_EXTRA_INDEX_URL PIP_TRUSTED_HOST; do
     if [ -z "${!variable:-}" ]; then
         echo "ERROR: $variable is required for the dq-api image build"
         exit 1
@@ -130,18 +130,14 @@ echo "Starting build..."
 docker_build_tags=(-t "$IMAGE_NAME" -t "$LATEST_NAME")
 [ -n "$VERSION_NAME" ] && docker_build_tags+=(-t "$VERSION_NAME")
 
-pypi_build_host="${PYPI_SERVER_HOST_DNS:-${PYPI_SERVER_DNS:-}}"
-if [ -z "${DOCKER_HOST_IP:-}" ]; then
-    echo "ERROR: DOCKER_HOST_IP is required for the dq-api image build"
-    exit 1
-fi
-if [ -z "$pypi_build_host" ]; then
-    echo "ERROR: PYPI_SERVER_HOST_DNS or PYPI_SERVER_DNS is required for the dq-api image build"
-    exit 1
-fi
-docker_host_args=(--add-host "${pypi_build_host}=${DOCKER_HOST_IP}")
-if [ -n "${PYPI_SERVER_DNS:-}" ] && [ "${PYPI_SERVER_DNS}" != "$pypi_build_host" ]; then
-    docker_host_args+=(--add-host "${PYPI_SERVER_DNS}=${DOCKER_HOST_IP}")
+pypi_build_host="${PYPI_BUILD_HOST_DNS:-$(resolve_pypi_build_host || true)}"
+docker_host_args=()
+if [ -n "$pypi_build_host" ]; then
+    if [ -z "${DOCKER_HOST_IP:-}" ]; then
+        echo "ERROR: DOCKER_HOST_IP is required when PYPI_BUILD_HOST_DNS is set for the dq-api image build"
+        exit 1
+    fi
+    docker_host_args=(--add-host "${pypi_build_host}=${DOCKER_HOST_IP}")
 fi
 
 if docker build "${docker_host_args[@]}" $NO_CACHE \

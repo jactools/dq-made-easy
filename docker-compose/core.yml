@@ -188,8 +188,6 @@ services:
     build:
       context: ..
       dockerfile: dq-api/Dockerfile.fastapi
-      extra_hosts:
-      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
       secrets:
       - pip_index_url
       args:
@@ -288,8 +286,6 @@ services:
     build:
       context: ..
       dockerfile: dq-api/Dockerfile.fastapi
-      extra_hosts:
-      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
       secrets:
       - pip_index_url
       args:

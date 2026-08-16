@@ -13,8 +13,6 @@ services:
       - type=local,src=../tmp/buildkit-cache/dq-engine
       cache_to:
       - type=local,dest=../tmp/buildkit-cache/dq-engine,mode=max
-      extra_hosts:
-      - ${PYPI_SERVER_DNS:?PYPI_SERVER_DNS is required}:host-gateway
       secrets:
       - pip_index_url
       - internal_corporate_root_ca

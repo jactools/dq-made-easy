@@ -507,22 +507,16 @@ run_direct_build_step() {
     docker_cmd+=(--no-cache)
   fi
 
-  local pypi_build_host="${PYPI_SERVER_HOST_DNS:-${PYPI_SERVER_DNS:-}}"
+  local pypi_build_host="${PYPI_BUILD_HOST_DNS:-$(resolve_pypi_build_host || true)}"
   local mkcert_root_ca_file=""
   local internal_root_ca_file="${ROOT_DIR}/tmp/certs/internal-root-ca-2024.crt"
   local internal_ca_bundle_file="${INTERNAL_CA_BUNDLE_FILE:-}"
-  if [[ -z "${DOCKER_HOST_IP:-}" ]]; then
-    error "$my_name" "DOCKER_HOST_IP is required for local image builds"
-    return 1
-  fi
-  if [[ -z "$pypi_build_host" ]]; then
-    error "$my_name" "PYPI_SERVER_HOST_DNS or PYPI_SERVER_DNS is required for local image builds"
-    return 1
-  fi
-
-  docker_cmd+=(--add-host "${pypi_build_host}=${DOCKER_HOST_IP}")
-  if [[ -n "${PYPI_SERVER_DNS:-}" && "${PYPI_SERVER_DNS}" != "$pypi_build_host" ]]; then
-    docker_cmd+=(--add-host "${PYPI_SERVER_DNS}=${DOCKER_HOST_IP}")
+  if [[ -n "$pypi_build_host" ]]; then
+    if [[ -z "${DOCKER_HOST_IP:-}" ]]; then
+      error "$my_name" "DOCKER_HOST_IP is required when PYPI_BUILD_HOST_DNS is set for local image builds"
+      return 1
+    fi
+    docker_cmd+=(--add-host "${pypi_build_host}=${DOCKER_HOST_IP}")
   fi
 
   if [[ -f "$ROOT_DIR/certs/mkcert-rootCA.pem" ]]; then
