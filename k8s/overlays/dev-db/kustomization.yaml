@@ -5,6 +5,7 @@ namespace: dq-dev
 
 resources:
   - ../../../infra/k8s/base/shared/namespace.yaml
+  - ../../../infra/k8s/base/shared/config/common-config.yaml
   - ../../../infra/k8s/base/api/db.yaml
   - ../../../infra/k8s/base/api/db-config.yaml
 
