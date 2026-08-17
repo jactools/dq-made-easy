@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
   - validation.yaml
-  - ../configmaps/validation-scripts.yaml
+  - validation-scripts.yaml

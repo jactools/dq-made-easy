@@ -8,8 +8,7 @@ resources:
   - config/kong-config.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
-  - configmaps/validation-scripts.yaml
-  - jobs/validation.yaml
+  - jobs/kustomization.yaml
   # CA bundle ConfigMaps (dq-platform-ca-bundle, platform-root-ca) are managed by generate_dev_certs.sh
 
 transformers:
