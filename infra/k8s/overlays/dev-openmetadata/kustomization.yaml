@@ -10,7 +10,7 @@ resources:
 labels:
   - includeSelectors: true
     pairs:
-      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/managed-by: flux
       platform.jaccloud.nl/tenant: dq-made-easy
       platform.jaccloud.nl/environment: dev
 

@@ -1,8 +1,6 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations:
-    argocd.argoproj.io/skip: 'true'
   labels:
     app.kubernetes.io/name: dq-job-api-migrate
     app.kubernetes.io/part-of: dq-made-easy

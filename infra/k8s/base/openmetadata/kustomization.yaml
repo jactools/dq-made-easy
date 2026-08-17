@@ -7,7 +7,7 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/managed-by: argocd
+      app.kubernetes.io/managed-by: flux
       app.kubernetes.io/version: from-version-manifest
       dq.jaccloud.nl/traceability: enabled
       platform.jaccloud.nl/tenant: dq-made-easy

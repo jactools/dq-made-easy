@@ -184,3 +184,51 @@ if [ -n "$admin_token" ]; then
   done
   echo "Password updates complete."
 fi
+
+# ---------------------------------------------------------------------------
+# Write the seeded password to the K8s secret for downstream jobs (validation)
+# ---------------------------------------------------------------------------
+SA_TOKEN_FILE="/var/run/secrets/kubernetes.io/serviceaccount/token"
+if [ -f "$SA_TOKEN_FILE" ]; then
+  SA_TOKEN="$(cat "$SA_TOKEN_FILE")"
+  SA_NAMESPACE="$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)"
+  K8S_CA_CERT="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+  K8S_API="https://kubernetes.default.svc"
+
+  seed_email="${SMOKE_LOGIN_EMAIL:-alice@jaccloud.nl}"
+  seed_password="$(grep "^${seed_email}," "$credentials_csv" | cut -d',' -f2 | tr -d '"')"
+
+  if [ -n "$seed_password" ]; then
+    PASSWORD_B64="$(printf '%s' "$seed_password" | base64)"
+
+    echo "Writing seeded password to K8s secret keycloak-user-password in $SA_NAMESPACE..."
+    if curl -sk --cacert "$K8S_CA_CERT" \
+      -X PUT \
+      -H "Authorization: Bearer $SA_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d "$(cat <<EOJSON
+{
+  "apiVersion": "v1",
+  "kind": "Secret",
+  "metadata": {
+    "name": "keycloak-user-password",
+    "namespace": "${SA_NAMESPACE}"
+  },
+  "type": "Opaque",
+  "data": {
+    "password": "${PASSWORD_B64}"
+  }
+}
+EOJSON
+)" \
+      "$K8S_API/api/v1/namespaces/${SA_NAMESPACE}/secrets/keycloak-user-password"; then
+      echo "K8s secret keycloak-user-password updated successfully"
+    else
+      echo "WARNING: Failed to update K8s secret keycloak-user-password" >&2
+    fi
+  else
+    echo "WARNING: Could not find password for ${seed_email} in credentials CSV" >&2
+  fi
+else
+  echo "INFO: Not running in K8s (no service account token) — skipping secret update"
+fi

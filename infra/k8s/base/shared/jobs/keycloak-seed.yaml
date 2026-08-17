@@ -1,8 +1,6 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations:
-    argocd.argoproj.io/skip: 'true'
   labels:
     app.kubernetes.io/component: keycloak-config
     app.kubernetes.io/name: dq-job-keycloak-seed
@@ -17,6 +15,7 @@ spec:
         app.kubernetes.io/name: dq-job-keycloak-seed
         app.kubernetes.io/part-of: dq-made-easy
     spec:
+      serviceAccountName: dq-keycloak-seed
       containers:
       - env:
         - name: KEYCLOAK_SYSTEM_ADMIN_PASSWORD

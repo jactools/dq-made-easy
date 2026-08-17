@@ -44,6 +44,21 @@ spec:
           value: /env/.env.dev.local
         - name: ROOT_DIR
           value: /tmp/repo
+        # Seeded user credentials (avoid kubectl dependency in pod)
+        - name: KEYCLOAK_JACCLOUD_USERNAME
+          value: alice@jaccloud.nl
+        - name: KEYCLOAK_JACCLOUD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: keycloak-user-password
+        - name: SMOKE_LOGIN_EMAIL
+          value: alice@jaccloud.nl
+        - name: SMOKE_LOGIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: keycloak-user-password
         volumeMounts:
         - name: scripts
           mountPath: /scripts

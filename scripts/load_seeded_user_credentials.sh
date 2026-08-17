@@ -195,20 +195,24 @@ dq_load_seeded_user_credentials_main() {
   fi
 
   if [[ ! -f "$credentials_env_file" ]]; then
-    info "$my_name" "Seed file not found: $credentials_env_file — reading from K8s secrets"
-    # Fallback: read credentials from K8s secrets
-    local kubectl_cmd=""
-    if command -v kubectl >/dev/null 2>&1; then
-      kubectl_cmd="kubectl"
-    elif [ -x /usr/local/bin/kubectl ]; then
-      kubectl_cmd="/usr/local/bin/kubectl"
+    # Check if credentials are already set in environment (e.g., from K8s secret envFrom)
+    if [[ -n "${KEYCLOAK_JACCLOUD_PASSWORD:-}" ]]; then
+      info "$my_name" "Seed file not found: $credentials_env_file — using env vars"
+    else
+      info "$my_name" "Seed file not found: $credentials_env_file — reading from K8s secrets"
+      local kubectl_cmd=""
+      if command -v kubectl >/dev/null 2>&1; then
+        kubectl_cmd="kubectl"
+      elif [ -x /usr/local/bin/kubectl ]; then
+        kubectl_cmd="/usr/local/bin/kubectl"
+      fi
+      if [ -z "$kubectl_cmd" ]; then
+        error "$my_name" "seeded credential file not found and kubectl not available"
+        error "$my_name" "Run the seed-artifacts flow or ensure kubectl is available."
+        return 1
+      fi
+      _dq_load_seeded_credentials_from_k8s "$stage" "$kubectl_cmd"
     fi
-    if [ -z "$kubectl_cmd" ]; then
-      error "$my_name" "seeded credential file not found and kubectl not available"
-      error "$my_name" "Run the seed-artifacts flow or ensure kubectl is available."
-      return 1
-    fi
-    _dq_load_seeded_credentials_from_k8s "$stage" "$kubectl_cmd"
   else
     if ! dq_load_seeded_credentials_env_file "$credentials_env_file"; then
       return 1
