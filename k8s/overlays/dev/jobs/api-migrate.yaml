@@ -9,7 +9,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: api-migrate
-          image: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-api:0.11
+          image: jacloud.nl/docker/jacbeekers/dq-made-easy-api:0.11
           envFrom:
             - configMapRef:
                 name: dq-common-config

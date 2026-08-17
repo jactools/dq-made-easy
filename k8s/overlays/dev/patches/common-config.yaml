@@ -9,4 +9,4 @@ data:
   SSO_PUBLIC_ISSUER_URL: https://keycloak.dev.jac.dot/auth/realms/jaccloud
   KEYCLOAK_PUBLIC_URL: https://keycloak.dev.jac.dot
   OIDC_REDIRECT_BASE_URL: https://dq-ui.dev.jac.dot/api
-  REGISTRY_HOST: docker-registry.dev.jac.dot:5000
+  REGISTRY_HOST: jacloud.nl/docker

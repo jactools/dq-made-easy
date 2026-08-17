@@ -30,11 +30,11 @@ patches:
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-api
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-api
+    newName: jacloud.nl/docker/jacbeekers/dq-made-easy-api
     newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-frontend
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-frontend
+    newName: jacloud.nl/docker/jacbeekers/dq-made-easy-frontend
     newTag: "0.11"
   - name: docker.io/jacbeekers/dq-made-easy-engine
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-engine
+    newName: jacloud.nl/docker/jacbeekers/dq-made-easy-engine
     newTag: "0.11"
