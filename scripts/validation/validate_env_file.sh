@@ -253,7 +253,7 @@ run_full_validation() {
 
   case "$actual_environment" in
     test)
-      require_nonempty COMPOSE_PROJECT_NAME
+      require_nonempty KIND_CLUSTER_NAME
       validate_test_port_diff DB_HOST_PORT 5432
       validate_test_port_diff REDIS_HOST_PORT 6379
       validate_test_port_diff API_HOST_PORT 4010
@@ -266,7 +266,7 @@ run_full_validation() {
       validate_test_port_diff KONG_MANAGER_HOST_PORT 8002
       ;;
     production)
-      require_nonempty COMPOSE_PROJECT_NAME
+      require_nonempty KIND_CLUSTER_NAME
       require_nonempty EDGE_MODE
       if [[ "$EDGE_MODE" != "public" ]]; then
         fail "EDGE_MODE must be public for production env validation (got: $EDGE_MODE)"
@@ -328,7 +328,7 @@ run_stop_validation() {
 
   case "$actual_environment" in
     test|production)
-      require_nonempty COMPOSE_PROJECT_NAME
+      require_nonempty KIND_CLUSTER_NAME
       ;;
   esac
 }

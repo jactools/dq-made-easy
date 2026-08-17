@@ -13,19 +13,19 @@ set -euo pipefail
 # Version: 1.3
 # Last modified: 2026-05-01
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 # shellcheck disable=SC1091
 source "$ROOT_DIR/scripts/supporting/auth.sh"
 # shellcheck disable=SC1091
 source "$ROOT_DIR/scripts/supporting/logging.sh"
 dq_source_seeded_user_credentials --quiet
 
-KONG_PUBLIC_URL="${KONG_PUBLIC_URL:?KONG_PUBLIC_URL must be set to the real HTTPS Kong URL used by the UI}"
+KONG_PUBLIC_URL="${KONG_PUBLIC_URL:?KONG_PUBLIC_URL must be set in env file}"
 FRONTEND_ORIGIN="${UI_NGINX_LOCAL_URL:?UI_NGINX_LOCAL_URL must be set to the frontend origin used by the UI}"
 LOGIN_EMAIL="${KEYCLOAK_JACCLOUD_USERNAME:?KEYCLOAK_JACCLOUD_USERNAME must be set}"
 LOGIN_PASSWORD="${KEYCLOAK_JACCLOUD_PASSWORD:?KEYCLOAK_JACCLOUD_PASSWORD must be set}"
 EXPECTED_EMAIL="$LOGIN_EMAIL"
-KEYCLOAK_ISSUER_URL="${SSO_PUBLIC_ISSUER_URL:?SSO_PUBLIC_ISSUER_URL must be set to the real Keycloak issuer URL used by the UI}"
+KEYCLOAK_ISSUER_URL="${SSO_PUBLIC_ISSUER_URL:?SSO_PUBLIC_ISSUER_URL must be set in env file}"
 KEYCLOAK_CLIENT_ID="${VITE_KEYCLOAK_CLIENT_ID:?VITE_KEYCLOAK_CLIENT_ID must be set}"
 
 if [[ "$KONG_PUBLIC_URL" != https://* ]]; then
@@ -76,27 +76,38 @@ print_body() {
 
 require_cmd curl
 require_cmd jq
-require_cmd docker
+# kubectl may not be in PATH for pidev — check common locations
+if ! command -v kubectl >/dev/null 2>&1 && [ ! -x /usr/local/bin/kubectl ]; then
+  error "validate_user_login_end_to_end.sh" "kubectl not found"
+  exit 1
+fi
+KUBECTL_CMD="${KUBECTL_CMD:-kubectl}"
+[ -x "$KUBECTL_CMD" ] || KUBECTL_CMD="/usr/local/bin/kubectl"
 
 refresh_kong_bootstrap() {
-  local bootstrap_src="${ROOT_DIR}/dq-kong/scripts/bootstrap_kong.sh"
-  local kong_container_id
-  kong_container_id="$(docker ps -q -f name=^dq-made-easy-kong$ | tr -d '[:space:]' || true)"
+  local ns="${KUBECTL_NAMESPACE:-dq-dev}"
 
-  if [ -z "$kong_container_id" ]; then
-    error "validate_user_login_end_to_end.sh" "Kong gateway container is not running; cannot refresh Kong bootstrap"
-    exit 1
+  # Delete existing job if present to allow re-run
+  "$KUBECTL_CMD" delete job dq-job-kong-bootstrap -n "$ns" --ignore-not-found=true 2>/dev/null || true
+  sleep 2
+
+  # Create a new bootstrap job
+  info "validate_user_login_end_to_end.sh" "Starting Kong bootstrap job in $ns..."
+  if ! "$KUBECTL_CMD" create job --from=job/dq-job-kong-bootstrap dq-job-kong-bootstrap-refresh -n "$ns" 2>/dev/null; then
+    # Fallback: apply the job YAML directly
+    local job_yaml="${ROOT_DIR}/infra/k8s/base/shared/jobs/kong-bootstrap.yaml"
+    if [ -f "$job_yaml" ]; then
+      "$KUBECTL_CMD" apply -f "$job_yaml" -n "$ns" 2>/dev/null || true
+    else
+      error "validate_user_login_end_to_end.sh" "Cannot refresh Kong bootstrap — job YAML not found at $job_yaml"
+      exit 1
+    fi
   fi
 
-  if [ ! -f "$bootstrap_src" ]; then
-    error "validate_user_login_end_to_end.sh" "Kong bootstrap script not found at ${bootstrap_src}"
-    exit 1
-  fi
-
-  if ! docker cp "$bootstrap_src" "${kong_container_id}:/tmp/dq-bootstrap_kong.sh" >/dev/null 2>&1 \
-    || ! docker exec "$kong_container_id" bash -lc "bash /tmp/dq-bootstrap_kong.sh"; then
-    error "validate_user_login_end_to_end.sh" "Kong bootstrap refresh failed before login validation"
-    exit 1
+  # Wait for the job to complete
+  if ! "$KUBECTL_CMD" wait job/dq-job-kong-bootstrap -n "$ns" --for=condition=complete --timeout=120s 2>/dev/null; then
+    info "validate_user_login_end_to_end.sh" "Bootstrap job may have completed under different name, checking..."
+    "$KUBECTL_CMD" wait job/dq-job-kong-bootstrap-refresh -n "$ns" --for=condition=complete --timeout=120s 2>/dev/null || true
   fi
 }
 

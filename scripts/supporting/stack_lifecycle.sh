@@ -61,9 +61,9 @@ STATEFUL_VOLUME_NAMES=(
 _get_project_prefix() {
   # Derive the compose project prefix from ROOT_ENV_FILE
   local env_file="${ROOT_ENV_FILE:-}"
-  local project_name="${COMPOSE_PROJECT_NAME:-}"
+  local project_name="${KIND_CLUSTER_NAME:-}"
 
-  # If COMPOSE_PROJECT_NAME is set, use it directly
+  # If KIND_CLUSTER_NAME is set, use it directly
   if [ -n "$project_name" ]; then
     printf '%s' "$project_name"
     return 0

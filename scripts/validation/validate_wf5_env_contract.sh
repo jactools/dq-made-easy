@@ -29,7 +29,7 @@ EDGE_MODE=local
 KONG_PUBLIC_URL=https://kong.dev.example
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_REGISTRY=jacloud.nl/docker/
 PLATFORM_NAMESPACE=jacbeekers/
 PLATFORM_LLM_TAG=dev
 DQ_LLM_HOST_BIND=0.0.0.0
@@ -44,12 +44,12 @@ EOF
 
 cat > "$TMP_DIR/test.env" <<'EOF'
 ENVIRONMENT=test
-COMPOSE_PROJECT_NAME=dq-made-easy-test
+KIND_CLUSTER_NAME=platform-test
 EDGE_MODE=local
 KONG_PUBLIC_URL=https://kong.test.example:19443
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:15432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_REGISTRY=jacloud.nl/docker/
 PLATFORM_NAMESPACE=jacbeekers/
 PLATFORM_LLM_TAG=test
 DQ_LLM_HOST_BIND=127.0.0.1
@@ -74,12 +74,12 @@ EOF
 
 cat > "$TMP_DIR/prod.env" <<'EOF'
 ENVIRONMENT=production
-COMPOSE_PROJECT_NAME=dq-made-easy-prod
+KIND_CLUSTER_NAME=platform-prod
 EDGE_MODE=public
 KONG_PUBLIC_URL=https://prod.example
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_REGISTRY=jacloud.nl/docker/
 PLATFORM_NAMESPACE=jacbeekers/
 PLATFORM_LLM_TAG=0.9-9999999
 DQ_LLM_HOST_BIND=127.0.0.1
@@ -131,12 +131,12 @@ EOF
 
 cat > "$TMP_DIR/prod-invalid.env" <<'EOF'
 ENVIRONMENT=production
-COMPOSE_PROJECT_NAME=dq-made-easy-prod
+KIND_CLUSTER_NAME=platform-prod
 EDGE_MODE=public
 KONG_PUBLIC_URL=https://prod.example
 DQ_DB_INTERNAL_URL=postgresql://postgres:postgres@db:5432/dq
 DQ_DB_LOCAL_URL=postgresql://postgres:postgres@127.0.0.1:5432/dq?sslmode=verify-full&sslrootcert=/etc/openmetadata/certs/internal-ca-bundle.pem
-PLATFORM_REGISTRY=docker-registry.dev.jac.dot/
+PLATFORM_REGISTRY=jacloud.nl/docker/
 PLATFORM_NAMESPACE=jacbeekers/
 PLATFORM_LLM_TAG=0.9-9999999
 DQ_LLM_HOST_BIND=127.0.0.1

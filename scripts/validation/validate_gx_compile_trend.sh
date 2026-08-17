@@ -4,14 +4,14 @@ set -euo pipefail
 # Purpose: Validate GX compile success and failure events appear in Grafana Execution Monitoring.
 #
 # What it does:
-# - Requires the API, Kong, Grafana, Prometheus, and OTel collector containers to already be running.
+# - Requires the API, Kong, Grafana, Prometheus, and OTel collector to be running in Kind.
 # - Mints a seeded user JWT through the shared auth helper.
-# - Posts one valid GX suite save request and one deliberate overwrite conflict to emit compile success and failure events.
+# - Posts one valid GX suite save request and one deliberate overwrite conflict to emit compile events.
 # - Verifies Grafana's Prometheus datasource sees the compile event counters increase.
 #
 # validate: groups=api,observability
-# Version: 1.0
-# Last modified: 2026-05-10
+# Version: 2.0
+# Last modified: 2026-08-17
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
@@ -21,6 +21,8 @@ source "$ROOT_DIR/scripts/supporting/logging.sh"
 source "$ROOT_DIR/scripts/supporting/auth.sh"
 # shellcheck disable=SC1091
 source "$ROOT_DIR/scripts/supporting/grafana_oauth_session.sh"
+# shellcheck disable=SC1091
+source "$ROOT_DIR/scripts/supporting/cluster_helpers.sh"
 
 my_name="validate_gx_compile_trend.sh"
 
@@ -34,15 +36,16 @@ require_cmd() {
   fi
 }
 
-require_running_service() {
-  local service_name="$1"
-  local container_name
-
-  container_name="$(docker ps --filter "label=com.docker.compose.service=${service_name}" --filter 'status=running' --format '{{.Names}}' | head -1)"
-  if [[ -z "$container_name" ]]; then
-    error "$my_name" "${service_name} must already be running; start the stack separately before running this validation"
-    exit 1
-  fi
+require_running_services() {
+  local namespaces=("platform-kong" "dq-dev" "platform-observability")
+  for ns in "${namespaces[@]}"; do
+    local pods
+    pods="$(kubectl get pods -n "$ns" 2>/dev/null | grep -c "Running" || echo "0")"
+    if [ "$pods" -eq 0 ]; then
+      error "$my_name" "No running pods in $ns — ensure the stack is deployed"
+      exit 1
+    fi
+  done
 }
 
 wait_for_http_200() {
@@ -52,7 +55,7 @@ wait_for_http_200() {
   local code
 
   for attempt in 1 2 3 4 5 6 7 8 9 10; do
-    code="$(curl -sS -o /dev/null -w '%{http_code}' "$url" || true)"
+    code="$(curl -sk -o /dev/null -w '%{http_code}' "$url" || true)"
     if [[ "$code" == "200" ]]; then
       return 0
     fi
@@ -71,7 +74,7 @@ prom_query_value() {
   local query="$4"
   local response
 
-  if ! response="$(curl -sS -H "Cookie: ${cookie_header}" --get --data-urlencode "query=${query}" "${grafana_url}/api/datasources/proxy/uid/${datasource_uid}/api/v1/query")"; then
+  if ! response="$(curl -sk -H "Cookie: ${cookie_header}" --get --data-urlencode "query=${query}" "${grafana_url}/api/datasources/proxy/uid/${datasource_uid}/api/v1/query")"; then
     error "$my_name" "Prometheus query request failed for: ${query}"
     return 1
   fi
@@ -143,11 +146,11 @@ post_suite() {
   headers_file="$(mktemp)"
 
   set +e
-  response="$(curl -sS \
+  response="$(curl -sk \
     -D "$headers_file" \
     -o "$response_file" \
     -w '%{http_code}' \
-    -X POST "${KONG_PUBLIC_URL%/}/rulebuilder/v1/gx/suites" \
+    -X POST "${KONG_URL%/}/rulebuilder/v1/gx/suites" \
     "${AUTH_HEADER[@]}" \
     -H 'Content-Type: application/json' \
     -d "$payload")"
@@ -156,8 +159,6 @@ post_suite() {
 
   if [ "$curl_rc" -ne 0 ]; then
     error "$my_name" "HTTP POST ${label} request failed with rc=${curl_rc}"
-    cat "$headers_file" >&2 || true
-    cat "$response_file" >&2 || true
     rm -f "$response_file" "$headers_file"
     exit "$curl_rc"
   fi
@@ -165,8 +166,6 @@ post_suite() {
   http_code="$response"
   if [[ "$http_code" != "$expected_http_code" ]]; then
     error "$my_name" "${label} returned HTTP ${http_code}; expected ${expected_http_code}"
-    cat "$headers_file" >&2 || true
-    cat "$response_file" >&2 || true
     rm -f "$response_file" "$headers_file"
     exit 1
   fi
@@ -175,18 +174,18 @@ post_suite() {
   rm -f "$headers_file"
 }
 
-if [[ -z "${KONG_PUBLIC_URL:-}" ]]; then
-  error "$my_name" "KONG_PUBLIC_URL must be set to the public Kong URL used by the UI"
-  exit 1
+# Set URLs — ingress or port-forward
+KONG_URL="${KONG_LOCAL_URL:-${KONG_PUBLIC_URL:-}}"
+GRAFANA_URL="${GRAFANA_PUBLIC_URL:-}"
+
+if [ -z "$KONG_URL" ] || [ -z "$GRAFANA_URL" ]; then
+  info "$my_name" "No ingress URLs — using port-forwarding..."
+  port_forward_svc kong 9443 platform-kong 9443 || true
+  port_forward_svc grafana 3000 platform-observability 3000 || true
+  KONG_URL="https://127.0.0.1:9443"
+  GRAFANA_URL="http://127.0.0.1:3000"
 fi
-if [[ -z "${GRAFANA_PUBLIC_URL:-}" ]]; then
-  error "$my_name" "GRAFANA_PUBLIC_URL must be set"
-  exit 1
-fi
-if [[ -z "${GRAFANA_ADMIN_USER:-}" || -z "${GRAFANA_ADMIN_PASSWORD:-}" ]]; then
-  error "$my_name" "GRAFANA_ADMIN_USER and GRAFANA_ADMIN_PASSWORD must be set"
-  exit 1
-fi
+
 if [[ -z "${SSO_PUBLIC_ISSUER_URL:-}" ]]; then
   error "$my_name" "SSO_PUBLIC_ISSUER_URL must be set"
   exit 1
@@ -199,6 +198,10 @@ if [[ -z "${VITE_KEYCLOAK_CLIENT_ID:-}" ]]; then
   error "$my_name" "VITE_KEYCLOAK_CLIENT_ID must be set"
   exit 1
 fi
+if [[ -z "${GRAFANA_ADMIN_USER:-}" || -z "${GRAFANA_ADMIN_PASSWORD:-}" ]]; then
+  error "$my_name" "GRAFANA_ADMIN_USER and GRAFANA_ADMIN_PASSWORD must be set"
+  exit 1
+fi
 
 KONG_CA_CERT="${KONG_CA_CERT:-$ROOT_DIR/tmp/certs/mkcert-rootCA.pem}"
 if [[ -f "$KONG_CA_CERT" && -z "${CURL_CA_BUNDLE:-}" ]]; then
@@ -206,25 +209,24 @@ if [[ -f "$KONG_CA_CERT" && -z "${CURL_CA_BUNDLE:-}" ]]; then
 fi
 
 require_cmd curl
-require_cmd docker
 require_cmd jq
+require_cmd kubectl
 
-for service_name in api kong prometheus grafana otel-collector; do
-  require_running_service "$service_name"
-done
+info "$my_name" "[1/7] Verifying K8s services are running..."
+require_running_services
 
-wait_for_http_200 "${KONG_PUBLIC_URL%/}/health" "api health"
+wait_for_http_200 "${KONG_URL%/}/health" "api health"
 
 TOKEN_ENDPOINT="${SSO_PUBLIC_ISSUER_URL%/}/protocol/openid-connect/token"
 ACCESS_TOKEN="$(dq_keycloak_password_grant_access_token "$TOKEN_ENDPOINT" "$VITE_KEYCLOAK_CLIENT_ID" "$KEYCLOAK_JACCLOUD_USERNAME" "$KEYCLOAK_JACCLOUD_PASSWORD")"
 AUTH_HEADER=( -H "Authorization: Bearer ${ACCESS_TOKEN}" )
 
-GRAFANA_URL="${GRAFANA_PUBLIC_URL%/}"
+GRAFANA_URL="${GRAFANA_URL%/}"
 GRAFANA_COOKIE_HEADER="$(grafana_validation_cookie_header "$ROOT_DIR" "$GRAFANA_URL" "$GRAFANA_ADMIN_USER" "$GRAFANA_ADMIN_PASSWORD")"
 
 prometheus_uid=""
 for attempt in 1 2 3 4 5 6 7 8 9 10; do
-  prometheus_uid="$(curl -sS -H "Cookie: ${GRAFANA_COOKIE_HEADER}" "${GRAFANA_URL}/api/datasources/name/Prometheus" | jq -r '.uid // empty')"
+  prometheus_uid="$(curl -sk -H "Cookie: ${GRAFANA_COOKIE_HEADER}" "${GRAFANA_URL}/api/datasources/name/Prometheus" | jq -r '.uid // empty')"
   if [[ -n "$prometheus_uid" ]]; then
     break
   fi

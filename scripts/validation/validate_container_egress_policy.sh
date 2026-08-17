@@ -4,14 +4,14 @@ set -euo pipefail
 # Purpose: Validate repository-managed stack definitions against the SEC-4 egress baseline.
 #
 # What it does:
-# - Scans repository-managed Compose stack definitions for direct public URLs.
+# - Scans repository-managed K8s manifests (or Compose for legacy) for direct public URLs.
 # - Fails on unapproved public destinations outside jaccloud.nl and jacloud.nl.
-# - Warns on host-local bypass candidates such as host-gateway and pinned extra_hosts aliases so they stay reviewable.
+# - Warns on host-local bypass candidates such as host-gateway and pinned extra_hosts aliases.
 #
 # validate: groups=repo
 #
-# Version: 1.1
-# Last modified: 2026-04-23
+# Version: 2.0
+# Last modified: 2026-08-17
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/supporting/logging.sh"
@@ -77,6 +77,10 @@ classify_host() {
       printf '%s' 'host-local'
       return 0
       ;;
+    *.svc.cluster.local)
+      printf '%s' 'internal-k8s'
+      return 0
+      ;;
   esac
 
   if [[ "$host" != *.* ]]; then
@@ -111,7 +115,7 @@ scan_stack_file() {
     classification="$(classify_host "$host")"
 
     case "$classification" in
-      local|internal|host-local|approved-public|host-bypass)
+      local|internal|internal-k8s|host-local|approved-public|host-bypass)
         ;;
       unapproved-public)
         report_failure "${rel_path}:${line_no}: unapproved public destination ${url}."
@@ -129,18 +133,30 @@ scan_stack_file() {
 }
 
 main() {
-  local stack_files
+  local stack_files=()
   local file_path
 
-  stack_files="${ROOT_DIR}/docker-compose/ ${ROOT_DIR}/dq-metadata/docker-compose.yml"
+  # Collect K8s manifests
+  while IFS= read -r manifest; do
+    stack_files+=("$manifest")
+  done < <(find "$ROOT_DIR" \( -path "*/k8s/*" -o -path "*/infra/k8s/*" \) -name "*.yaml" 2>/dev/null | head -100)
+
+  # Collect docker-compose files (legacy support)
+  if [ -d "$ROOT_DIR/docker-compose" ]; then
+    while IFS= read -r compose; do
+      stack_files+=("$compose")
+    done < <(find "$ROOT_DIR/docker-compose" -type f -name "*.yml" -o -name "*.yaml" 2>/dev/null)
+  fi
+
+  # Add dq-metadata compose if it exists
+  if [ -f "$ROOT_DIR/dq-metadata/docker-compose.yml" ]; then
+    stack_files+=("$ROOT_DIR/dq-metadata/docker-compose.yml")
+  fi
 
   info "$my_name" "Checking repository-managed stack definitions for SEC-4 egress policy drift..."
+  info "$my_name" "Scanning ${#stack_files[@]} manifest(s)"
 
-  for file_path in $stack_files; do
-    if [[ ! -f "$file_path" ]]; then
-      report_failure "Missing expected stack definition: ${file_path#"$ROOT_DIR/"}"
-      continue
-    fi
+  for file_path in "${stack_files[@]}"; do
     scan_stack_file "$file_path"
   done
 

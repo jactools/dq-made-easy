@@ -8,6 +8,8 @@ set -euo pipefail
 # - Generates traffic and confirms service.name=dq-openmetadata in Tempo traces.
 #
 # validate: groups=openmetadata,observability
+# validate: ignore=true
+# TODO: deferred — OpenMetadata not yet migrated to Kind
 
 # Version: 1.4
 # Last modified: 2026-05-01

@@ -1,0 +1,1389 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-validation-scripts
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+    dq.jaccloud.nl/type: validation
+data:
+  validation/validate_user_login_end_to_end.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    # Purpose: Validate that a seeded user can authenticate directly with Keycloak and use Kong-protected APIs.
+    #
+    # What it does:
+    # - Obtains a real Keycloak access token for a seeded user.
+    # - Calls /admin/v1/me through Kong with that token.
+    # - Calls /rulebuilder/v1/rules through Kong with that token and verifies data is returned.
+    #
+    # validate: groups=api,ui
+    #
+    # Version: 1.3
+    # Last modified: 2026-05-01
+    
+    ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/scripts/supporting/auth.sh"
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/scripts/supporting/logging.sh"
+    dq_source_seeded_user_credentials --quiet
+    
+    KONG_PUBLIC_URL="${KONG_PUBLIC_URL:?KONG_PUBLIC_URL must be set in env file}"
+    FRONTEND_ORIGIN="${UI_NGINX_LOCAL_URL:?UI_NGINX_LOCAL_URL must be set to the frontend origin used by the UI}"
+    LOGIN_EMAIL="${KEYCLOAK_JACCLOUD_USERNAME:?KEYCLOAK_JACCLOUD_USERNAME must be set}"
+    LOGIN_PASSWORD="${KEYCLOAK_JACCLOUD_PASSWORD:?KEYCLOAK_JACCLOUD_PASSWORD must be set}"
+    EXPECTED_EMAIL="$LOGIN_EMAIL"
+    KEYCLOAK_ISSUER_URL="${SSO_PUBLIC_ISSUER_URL:?SSO_PUBLIC_ISSUER_URL must be set in env file}"
+    KEYCLOAK_CLIENT_ID="${VITE_KEYCLOAK_CLIENT_ID:?VITE_KEYCLOAK_CLIENT_ID must be set}"
+    
+    if [[ "$KONG_PUBLIC_URL" != https://* ]]; then
+      error "validate_user_login_end_to_end.sh" "KONG_PUBLIC_URL must use https:// (got ${KONG_PUBLIC_URL})"
+      exit 1
+    fi
+    
+    if [[ "$FRONTEND_ORIGIN" != https://* ]]; then
+      error "validate_user_login_end_to_end.sh" "Frontend origin must use https:// (got ${FRONTEND_ORIGIN})"
+      exit 1
+    fi
+    
+    if [[ "$KEYCLOAK_ISSUER_URL" != https://* ]]; then
+      error "validate_user_login_end_to_end.sh" "SSO_PUBLIC_ISSUER_URL must use https:// (got ${KEYCLOAK_ISSUER_URL})"
+      exit 1
+    fi
+    
+    KEYCLOAK_TOKEN_URL="${KEYCLOAK_ISSUER_URL%/}/protocol/openid-connect/token"
+    ME_URL="${KONG_PUBLIC_URL%/}/admin/v1/me"
+    RULES_URL="${KONG_PUBLIC_URL%/}/rulebuilder/v1/rules?page=1&limit=1"
+    
+    TMP_DIR="$(mktemp -d)"
+    ME_BODY_FILE="${TMP_DIR}/me.json"
+    RULES_BODY_FILE="${TMP_DIR}/rules.json"
+    
+    cleanup() {
+      rm -rf "$TMP_DIR"
+    }
+    
+    trap cleanup EXIT
+    
+    require_cmd() {
+      local cmd="$1"
+      if ! command -v "$cmd" >/dev/null 2>&1; then
+        error "validate_user_login_end_to_end.sh" "Missing required command: ${cmd}"
+        exit 1
+      fi
+    }
+    
+    print_body() {
+      local file_path="$1"
+      if command -v jq >/dev/null 2>&1 && jq -e . "$file_path" >/dev/null 2>&1; then
+        jq . "$file_path"
+        return 0
+      fi
+      cat "$file_path"
+    }
+    
+    require_cmd curl
+    require_cmd jq
+    # kubectl may not be in PATH for pidev — check common locations
+    if ! command -v kubectl >/dev/null 2>&1 && [ ! -x /usr/local/bin/kubectl ]; then
+      error "validate_user_login_end_to_end.sh" "kubectl not found"
+      exit 1
+    fi
+    KUBECTL_CMD="${KUBECTL_CMD:-kubectl}"
+    [ -x "$KUBECTL_CMD" ] || KUBECTL_CMD="/usr/local/bin/kubectl"
+    
+    refresh_kong_bootstrap() {
+      local ns="${KUBECTL_NAMESPACE:-dq-dev}"
+    
+      # Delete existing job if present to allow re-run
+      "$KUBECTL_CMD" delete job dq-job-kong-bootstrap -n "$ns" --ignore-not-found=true 2>/dev/null || true
+      sleep 2
+    
+      # Create a new bootstrap job
+      info "validate_user_login_end_to_end.sh" "Starting Kong bootstrap job in $ns..."
+      if ! "$KUBECTL_CMD" create job --from=job/dq-job-kong-bootstrap dq-job-kong-bootstrap-refresh -n "$ns" 2>/dev/null; then
+        # Fallback: apply the job YAML directly
+        local job_yaml="${ROOT_DIR}/infra/k8s/base/shared/jobs/kong-bootstrap.yaml"
+        if [ -f "$job_yaml" ]; then
+          "$KUBECTL_CMD" apply -f "$job_yaml" -n "$ns" 2>/dev/null || true
+        else
+          error "validate_user_login_end_to_end.sh" "Cannot refresh Kong bootstrap — job YAML not found at $job_yaml"
+          exit 1
+        fi
+      fi
+    
+      # Wait for the job to complete
+      if ! "$KUBECTL_CMD" wait job/dq-job-kong-bootstrap -n "$ns" --for=condition=complete --timeout=120s 2>/dev/null; then
+        info "validate_user_login_end_to_end.sh" "Bootstrap job may have completed under different name, checking..."
+        "$KUBECTL_CMD" wait job/dq-job-kong-bootstrap-refresh -n "$ns" --for=condition=complete --timeout=120s 2>/dev/null || true
+      fi
+    }
+    
+    info "validate_user_login_end_to_end.sh" "=============================================="
+    info "validate_user_login_end_to_end.sh" "Alice Login End-to-End Validation"
+    info "validate_user_login_end_to_end.sh" "=============================================="
+    info "validate_user_login_end_to_end.sh" "KONG_PUBLIC_URL=${KONG_PUBLIC_URL}"
+    info "validate_user_login_end_to_end.sh" "SSO_PUBLIC_ISSUER_URL=${KEYCLOAK_ISSUER_URL}"
+    info "validate_user_login_end_to_end.sh" "FRONTEND_ORIGIN=${FRONTEND_ORIGIN}"
+    info "validate_user_login_end_to_end.sh" "LOGIN_EMAIL=${LOGIN_EMAIL}"
+    
+    info "validate_user_login_end_to_end.sh" "Refreshing Kong bootstrap from the current Keycloak realm..."
+    refresh_kong_bootstrap
+    
+    info "validate_user_login_end_to_end.sh" "[1/3] Requesting a Keycloak access token for ${LOGIN_EMAIL}..."
+    LOGIN_TOKEN="$(dq_keycloak_password_grant_access_token "$KEYCLOAK_TOKEN_URL" "$KEYCLOAK_CLIENT_ID" "$LOGIN_EMAIL" "$LOGIN_PASSWORD")"
+    
+    case "$LOGIN_TOKEN" in
+      *.*.*) ;;
+      *)
+        error "validate_user_login_end_to_end.sh" "Keycloak returned a non-JWT access token"
+        exit 1
+        ;;
+    esac
+    
+    success "validate_user_login_end_to_end.sh" "Keycloak returned a JWT for ${LOGIN_EMAIL}"
+    
+    info "validate_user_login_end_to_end.sh" "[2/3] Calling /admin/v1/me through Kong with the Keycloak token..."
+    ME_CODE="$(curl -sS -H "Authorization: Bearer ${LOGIN_TOKEN}" -o "$ME_BODY_FILE" -w "%{http_code}" "$ME_URL")"
+    if [ "$ME_CODE" != "200" ]; then
+      error "validate_user_login_end_to_end.sh" "/admin/v1/me returned HTTP ${ME_CODE} when called through Kong with the Keycloak token"
+      print_body "$ME_BODY_FILE"
+      exit 1
+    fi
+    
+    ME_ID="$(jq -r '.id // empty' "$ME_BODY_FILE")"
+    ME_EMAIL="$(jq -r '.email // empty' "$ME_BODY_FILE")"
+    if [ -z "$ME_ID" ] || [ "$ME_ID" = "null" ]; then
+      error "validate_user_login_end_to_end.sh" "/admin/v1/me response did not include a user id"
+      print_body "$ME_BODY_FILE"
+      exit 1
+    fi
+    if [ "$ME_EMAIL" != "$EXPECTED_EMAIL" ]; then
+      error "validate_user_login_end_to_end.sh" "/admin/v1/me returned email ${ME_EMAIL} (expected ${EXPECTED_EMAIL})"
+      print_body "$ME_BODY_FILE"
+      exit 1
+    fi
+    
+    success "validate_user_login_end_to_end.sh" "/admin/v1/me resolved ${ME_ID} for ${ME_EMAIL} through Kong"
+    
+    info "validate_user_login_end_to_end.sh" "[3/3] Calling /rulebuilder/v1/rules through Kong with the Keycloak token..."
+    RULES_CODE="$(curl -sS -H "Authorization: Bearer ${LOGIN_TOKEN}" -o "$RULES_BODY_FILE" -w "%{http_code}" "$RULES_URL")"
+    if [ "$RULES_CODE" != "200" ]; then
+      error "validate_user_login_end_to_end.sh" "/rulebuilder/v1/rules returned HTTP ${RULES_CODE} when called through Kong with the Keycloak token"
+      print_body "$RULES_BODY_FILE"
+      exit 1
+    fi
+    
+    RULES_COUNT="$(jq -r '(.data // []) | length' "$RULES_BODY_FILE" 2>/dev/null || echo 0)"
+    if [ -z "$RULES_COUNT" ] || [ "$RULES_COUNT" = "0" ]; then
+      error "validate_user_login_end_to_end.sh" "/rulebuilder/v1/rules did not return any data for ${LOGIN_EMAIL}"
+      print_body "$RULES_BODY_FILE"
+      exit 1
+    fi
+    
+    success "validate_user_login_end_to_end.sh" "/rulebuilder/v1/rules returned ${RULES_COUNT} row(s) for ${LOGIN_EMAIL} through Kong"
+    info "validate_user_login_end_to_end.sh" "=============================================="
+    success "validate_user_login_end_to_end.sh" "Alice login end-to-end validation succeeded"
+    info "validate_user_login_end_to_end.sh" "=============================================="  supporting/auth.sh: |
+    # Purpose: Canonical entrypoint for shared shell auth helpers.
+    #
+    # What it does:
+    # - Sources seeded user credentials into the current shell on request.
+    # - Mints Keycloak access tokens for validation scripts and seeded-user automation.
+    # - Fails fast when auth dependencies or credentials are missing.
+    #
+    # Version: 1.1
+    # Last modified: 2026-06-11
+    
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+    
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/scripts/supporting/logging.sh"
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/scripts/supporting/env/selection.sh"
+    
+    dq_source_seeded_user_credentials() {
+      # shellcheck disable=SC1090
+      source "$ROOT_DIR/scripts/load_seeded_user_credentials.sh" "$@"
+    }
+    
+    dq_keycloak_seeded_user_access_token() {
+      local token_url="$1"
+      local client_id="$2"
+      local username="$3"
+      local password="$4"
+    
+      if [ -z "$token_url" ] || [ -z "$client_id" ] || [ -z "$username" ] || [ -z "$password" ]; then
+        error "auth.sh" "token_url, client_id, username, and password are required"
+        return 1
+      fi
+    
+      dq_keycloak_password_grant_access_token "$token_url" "$client_id" "$username" "$password"
+    }
+    
+    dq_keycloak_password_grant_access_token() {
+      local token_url="$1"
+      local client_id="$2"
+      local username="$3"
+      local password="$4"
+      shift 4
+    
+      local curl_cmd=(curl)
+      if [ "$#" -gt 0 ]; then
+        curl_cmd+=("$@")
+      fi
+      local response_file
+      local http_code
+      local curl_rc
+      local access_token
+    
+      if ! command -v curl >/dev/null 2>&1; then
+        error "auth.sh" "curl is required"
+        return 127
+      fi
+    
+      if ! command -v jq >/dev/null 2>&1; then
+        error "auth.sh" "jq is required"
+        return 127
+      fi
+    
+      response_file="$(mktemp)"
+    
+      set +e
+      http_code=$("${curl_cmd[@]}" \
+        -sS \
+        -o "$response_file" \
+        -w '%{http_code}' \
+        -X POST "$token_url" \
+        -H 'Content-Type: application/x-www-form-urlencoded' \
+        --data-urlencode 'grant_type=password' \
+        --data-urlencode "client_id=$client_id" \
+        --data-urlencode "username=$username" \
+        --data-urlencode "password=$password")
+      curl_rc=$?
+      set -e
+    
+      if [ "$curl_rc" -ne 0 ]; then
+        error "auth.sh" "Keycloak token request failed with rc=$curl_rc"
+        cat "$response_file" >&2 || true
+        rm -f "$response_file"
+        return "$curl_rc"
+      fi
+    
+      if [ "$http_code" -ge 400 ]; then
+        error "auth.sh" "Keycloak token request returned HTTP $http_code"
+        cat "$response_file" >&2 || true
+        rm -f "$response_file"
+        return 1
+      fi
+    
+      access_token="$(jq -r '.access_token // empty' "$response_file" 2>/dev/null || true)"
+      rm -f "$response_file"
+    
+      if [ -z "$access_token" ]; then
+        error "auth.sh" "Keycloak token response did not include access_token"
+        return 1
+      fi
+    
+      printf '%s' "$access_token"
+    }
+    
+    dq_keycloak_client_credentials_access_token() {
+      local token_url="$1"
+      local client_id="$2"
+      local client_secret="$3"
+      shift 3
+    
+      local curl_cmd=(curl)
+      if [ "$#" -gt 0 ]; then
+        curl_cmd+=("$@")
+      fi
+      local response_file
+      local http_code
+      local curl_rc
+      local access_token
+    
+      if ! command -v curl >/dev/null 2>&1; then
+        error "auth.sh" "curl is required"
+        return 127
+      fi
+    
+      if ! command -v jq >/dev/null 2>&1; then
+        error "auth.sh" "jq is required"
+        return 127
+      fi
+    
+      response_file="$(mktemp)"
+    
+      set +e
+      http_code=$("${curl_cmd[@]}" \
+        -sS \
+        -o "$response_file" \
+        -w '%{http_code}' \
+        -X POST "$token_url" \
+        -H 'Content-Type: application/x-www-form-urlencoded' \
+        --data-urlencode 'grant_type=client_credentials' \
+        --data-urlencode "client_id=$client_id" \
+        --data-urlencode "client_secret=$client_secret")
+      curl_rc=$?
+      set -e
+    
+      if [ "$curl_rc" -ne 0 ]; then
+        error "auth.sh" "Keycloak token request failed with rc=$curl_rc"
+        cat "$response_file" >&2 || true
+        rm -f "$response_file"
+        return "$curl_rc"
+      fi
+    
+      if [ "$http_code" -ge 400 ]; then
+        error "auth.sh" "Keycloak token request returned HTTP $http_code"
+        cat "$response_file" >&2 || true
+        rm -f "$response_file"
+        return 1
+      fi
+    
+      access_token="$(jq -r '.access_token // empty' "$response_file" 2>/dev/null || true)"
+      rm -f "$response_file"
+    
+      if [ -z "$access_token" ]; then
+        error "auth.sh" "Keycloak token response did not include access_token"
+        return 1
+      fi
+    
+      printf '%s' "$access_token"
+    }
+  supporting/logging.sh: |
+    # Purpose: Canonical entrypoint for shared shell logging helpers.
+    #
+    # What it does:
+    # - Loads the logging implementation module from scripts/supporting/logging/core.sh.
+    # - Keeps the public entrypoint stable for existing callers.
+    #
+    # Version: 1.0
+    # Last modified: 2026-05-08
+    
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$SCRIPT_DIR/logging/core.sh"
+    
+  supporting/logging/core.sh: |
+    # Purpose: Implement the shared logging primitives used by shell scripts.
+    #
+    # What it does:
+    # - Defines log levels and a UTC timestamped log format.
+    # - Provides helper functions (debug/info/warning/error/success).
+    # - Supports an optional script tag for grouped log lines.
+    #
+    # Version: 1.0
+    # Last modified: 2026-05-08
+    
+    DEBUG=0
+    INFO=1
+    WARNING=2
+    ERROR=3
+    SUCCESS=4
+    
+    : "${LOG_LEVEL:=1}"
+    
+    shell_log_level() {
+        case "${LOG_LEVEL:-1}" in
+            0|1|2|3|4)
+                printf '%s' "$LOG_LEVEL"
+                ;;
+            *)
+                printf '%s' 1
+                ;;
+        esac
+    }
+    
+    log_message() {
+        local level="$1"
+        shift
+    
+        local script_name
+        script_name="$(basename "$0")"
+    
+        local subscript_name=""
+        local message=""
+    
+        if [ "$#" -ge 2 ]; then
+            if [ "$1" != "$script_name" ]; then
+                subscript_name=" [$1]"
+            fi
+            shift
+        fi
+    
+        message="$*"
+    
+        local timestamp
+        timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    
+        if [ "$level" = ERROR ]; then
+            printf '[%s] [%s] [%s]%s %s\n' "$timestamp" "$level" "$script_name" "$subscript_name" "$message" >&2
+        else
+            printf '[%s] [%s] [%s]%s %s\n' "$timestamp" "$level" "$script_name" "$subscript_name" "$message"
+        fi
+    }
+    
+    set_log_level() {
+        case "$1" in
+            0|DEBUG) LOG_LEVEL=0 ;;
+            1|INFO) LOG_LEVEL=1 ;;
+            2|WARNING) LOG_LEVEL=2 ;;
+            3|ERROR) LOG_LEVEL=3 ;;
+            4|SUCCESS) LOG_LEVEL=4 ;;
+            *) printf 'Invalid log level: %s\n' "$1" >&2; return 1 ;;
+        esac
+    
+        export LOG_LEVEL
+    }
+    
+    debug()   { if [ "$(shell_log_level)" -le 0 ]; then log_message DEBUG "$@"; fi }
+    info()    { if [ "$(shell_log_level)" -le 1 ]; then log_message INFO "$@"; fi }
+    warning() { if [ "$(shell_log_level)" -le 2 ]; then log_message WARNING "$@"; fi }
+    error()   { if [ "$(shell_log_level)" -le 3 ]; then log_message ERROR "$@"; fi }
+    success() { if [ "$(shell_log_level)" -le 4 ]; then log_message SUCCESS "$@"; fi }
+    
+    # require_cmd: check that an external command is available on PATH.
+    # Emits a clear error with installation hint and exits 1 if missing.
+    require_cmd() {
+      local cmd="$1"
+      local hint="${2:-}"
+      if ! command -v "$cmd" >/dev/null 2>&1; then
+        error "require_cmd" "Missing required command: $cmd"
+        if [ -n "$hint" ]; then
+          info "require_cmd" "Installation hint: $hint"
+        fi
+        exit 1
+      fi
+    }
+  supporting/env/selection.sh: |
+    # Purpose: Implement canonical env selection helpers for shell scripts.
+    #
+    # What it does:
+    # - Resolves dev/test/prod env-file paths and custom env-file paths.
+    # - Describes the selected env file in user-facing logs.
+    # - Parses --env and --env-file options into ROOT_ENV_FILE.
+    # - Validates and sources the selected env file.
+    #
+    # Version: 1.0
+    # Last modified: 2026-05-08
+    
+    REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+    source "$REPO_ROOT/scripts/supporting/logging.sh"
+    
+    env_selector_values() {
+      printf '%s' 'dev|test|prod'
+    }
+    
+    dependency_source_values() {
+      printf '%s' 'local|corporate'
+    }
+    
+    describe_root_env_file_selection() {
+      local root_dir="$1"
+      local env_file="$2"
+    
+      case "$env_file" in
+        "$root_dir/.env.dev.local")
+          printf '%s' 'dev (.env.dev.local)'
+          ;;
+        "$root_dir/.env.test.local")
+          printf '%s' 'test (.env.test.local)'
+          ;;
+        "$root_dir/.env.prod.local")
+          printf '%s' 'prod (.env.prod.local)'
+          ;;
+        *)
+          printf 'custom (%s)' "$env_file"
+          ;;
+      esac
+    }
+    
+    resolve_env_file_path() {
+      local root_dir="$1"
+      local requested_path="$2"
+    
+      if [[ "$requested_path" != /* ]]; then
+        requested_path="$root_dir/$requested_path"
+      fi
+    
+      printf '%s' "$requested_path"
+    }
+    
+    named_root_env_file_path() {
+      local root_dir="$1"
+      local selector="$2"
+    
+      case "$selector" in
+        dev|test|prod)
+          printf '%s/.env.%s.local' "$root_dir" "$selector"
+          ;;
+        *)
+          return 1
+          ;;
+      esac
+    }
+    
+    source_runtime_env_dependencies() {
+      local selected_root_env_file="${1:-${ROOT_ENV_FILE:-}}"
+      local phase="${2:-pre-root}"
+      local root_dir=""
+      local basename=""
+      local env_name=""
+      local dependency_file=""
+      local dependency_files=()
+    
+      if [[ -z "$selected_root_env_file" ]]; then
+        return 0
+      fi
+    
+      if [[ "$selected_root_env_file" != /* ]]; then
+        selected_root_env_file="$ROOT_DIR/$selected_root_env_file"
+      fi
+    
+      root_dir="$(dirname "$selected_root_env_file")"
+      basename="$(basename "$selected_root_env_file")"
+    
+      if [[ "$basename" == *.local ]]; then
+        basename="${basename%.local}"
+      fi
+      if [[ "$basename" == .env.* ]]; then
+        basename="${basename#.env.}"
+      fi
+    
+      case "$basename" in
+        dev|development)
+          env_name="dev"
+          ;;
+        test|testing)
+          env_name="test"
+          ;;
+        prod|production)
+          env_name="prod"
+          ;;
+        *)
+          env_name="local"
+          ;;
+      esac
+    
+      case "$phase" in
+        pre-root)
+          dependency_files=(
+            "$root_dir/tmp/secrets.${env_name}.env"
+            "$root_dir/tmp/keycloak_seed_user_credentials.${env_name}.env"
+          )
+          ;;
+        post-root)
+          dependency_files=(
+            "$root_dir/tmp/secrets.${env_name}.env"
+            "$root_dir/tmp/keycloak_seed_user_credentials.${env_name}.env"
+            "$root_dir/tmp/env_passwords/${env_name}.env"
+          )
+          ;;
+        *)
+          dependency_files=()
+          ;;
+      esac
+    
+      for dependency_file in "${dependency_files[@]}"; do
+        if [[ -f "$dependency_file" ]]; then
+          set -a
+          # shellcheck disable=SC1090
+          source "$dependency_file"
+          set +a
+        fi
+      done
+    }
+    
+    init_root_env_file() {
+      local root_dir="$1"
+      local default_env_file
+    
+      default_env_file="$(named_root_env_file_path "$root_dir" dev)"
+      if [ -n "${ROOT_ENV_FILE:-}" ]; then
+        ROOT_ENV_FILE="$(resolve_env_file_path "$root_dir" "$ROOT_ENV_FILE")"
+      else
+        ROOT_ENV_FILE="$default_env_file"
+      fi
+    }
+    
+    ensure_selected_root_env_file_exists() {
+      if [[ ! -f "$ROOT_ENV_FILE" ]]; then
+        error "env/selection.sh" "env file not found: $ROOT_ENV_FILE"
+        return 1
+      fi
+    }
+    
+    source_selected_root_env_file() {
+      ensure_selected_root_env_file_exists || return 1
+    
+      local selected_root_env_file="$ROOT_ENV_FILE"
+      source_runtime_env_dependencies "$selected_root_env_file" pre-root
+      set -a
+      # shellcheck disable=SC1090
+      source "$selected_root_env_file"
+      set +a
+      source_runtime_env_dependencies "$selected_root_env_file" post-root
+    
+      ROOT_ENV_FILE="$selected_root_env_file"
+      export ROOT_ENV_FILE
+    }
+    
+    validate_selected_root_env_file() {
+      local root_dir="$1"
+      local operation="${2:-full}"
+    
+      "$root_dir/scripts/validate_env_file.sh" --env-file "$ROOT_ENV_FILE" --operation "$operation" --quiet
+    }
+    
+    consume_root_env_selection_args() {
+      local root_dir="$1"
+      shift
+    
+      ROOT_ENV_SELECTION_REMAINING_ARGS=()
+    
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --source)
+            if [[ $# -lt 2 ]]; then
+              error "env/selection.sh" "--source requires one of: $(dependency_source_values)"
+              return 1
+            fi
+            case "$2" in
+              local|corporate)
+                DEPENDENCY_SOURCE="$2"
+                export DEPENDENCY_SOURCE
+                ;;
+              *)
+                error "env/selection.sh" "unsupported --source value: $2"
+                return 1
+                ;;
+            esac
+            shift 2
+            ;;
+          --env)
+            if [[ $# -lt 2 ]]; then
+              error "env/selection.sh" "--env requires one of: $(env_selector_values)"
+              return 1
+            fi
+            if ! ROOT_ENV_FILE="$(named_root_env_file_path "$root_dir" "$2")"; then
+              error "env/selection.sh" "unsupported --env value: $2"
+              return 1
+            fi
+            shift 2
+            ;;
+          --env-file)
+            if [[ $# -lt 2 ]]; then
+              error "env/selection.sh" "--env-file requires a path"
+              return 1
+            fi
+            ROOT_ENV_FILE="$(resolve_env_file_path "$root_dir" "$2")"
+            shift 2
+            ;;
+          *)
+            ROOT_ENV_SELECTION_REMAINING_ARGS+=("$1")
+            shift
+            ;;
+        esac
+      done
+    }
+  supporting/cluster_helpers.sh: |
+    #!/usr/bin/env bash
+    # scripts/supporting/cluster_helpers.sh
+    # Shared helpers for Kind/K8s validation scripts.
+    #
+    # Usage:
+    #   source scripts/supporting/cluster_helpers.sh
+    #   port_forward_svc dq-api 8080  # forwards svc/dq-api:80 -> localhost:8080
+    #   cleanup_port_forwards        # kills all background port-forwards
+    
+    set -euo pipefail
+    
+    # Track port-forward PIDs for cleanup
+    declare -a _PF_PIDS=() 2>/dev/null || true
+    
+    _cleanup_one() {
+      local pid="$1"
+      if kill -0 "$pid" 2>/dev/null; then
+        kill "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+      fi
+    }
+    
+    cleanup_port_forwards() {
+      local pid
+      for pid in "${_PF_PIDS[@]+"${_PF_PIDS[@]}"}"; do
+        _cleanup_one "$pid"
+      done
+      _PF_PIDS=()
+    }
+    
+    # Ensure cleanup on exit
+    _trap_set=false
+    _setup_trap() {
+      if ! $_trap_set; then
+        trap cleanup_port_forwards EXIT
+        _trap_set=true
+      fi
+    }
+    
+    # port_forward_svc <service> <port> [<namespace>] [<local_port>]
+    # Starts kubectl port-forward in background. Returns nothing on success.
+    # Example: port_forward_svc dq-api 8080 dq-dev
+    port_forward_svc() {
+      local service="$1"
+      local port="$2"
+      local namespace="${3:-dq-dev}"
+      local local_port="${4:-$port}"
+    
+      _setup_trap
+    
+      if ! command -v kubectl >/dev/null 2>&1; then
+        echo "[cluster_helpers] ERROR: kubectl not found" >&2
+        return 1
+      fi
+    
+      # Check service exists
+      if ! kubectl get svc "$service" -n "$namespace" >/dev/null 2>&1; then
+        echo "[cluster_helpers] ERROR: service $service not found in $namespace" >&2
+        return 1
+      fi
+    
+      kubectl port-forward "svc/$service" "$local_port:$port" -n "$namespace" >/dev/null 2>&1 &
+      local pid=$!
+      _PF_PIDS+=("$pid")
+    
+      # Wait for tunnel (up to 10s)
+      local attempts=0
+      while [ $attempts -lt 20 ]; do
+        if bash -c "echo >/dev/tcp/127.0.0.1/$local_port" 2>/dev/null; then
+          return 0
+        fi
+        sleep 0.5
+        attempts=$((attempts + 1))
+      done
+    
+      echo "[cluster_helpers] WARNING: port-forward $service:$port -> localhost:$local_port may not be ready" >&2
+      return 0
+    }
+    
+    # port_forward_pod <label_selector> <port> [<namespace>] [<local_port>]
+    # Starts kubectl port-forward to a pod matching the label.
+    port_forward_pod() {
+      local label="$1"
+      local port="$2"
+      local namespace="${3:-dq-dev}"
+      local local_port="${4:-$port}"
+    
+      _setup_trap
+    
+      local pod
+      pod="$(kubectl get pods -n "$namespace" -l "$label" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)"
+      if [ -z "$pod" ]; then
+        echo "[cluster_helpers] ERROR: no pod found with label $label in $namespace" >&2
+        return 1
+      fi
+    
+      kubectl port-forward "$pod" "$local_port:$port" -n "$namespace" >/dev/null 2>&1 &
+      local pid=$!
+      _PF_PIDS+=("$pid")
+    
+      local attempts=0
+      while [ $attempts -lt 20 ]; do
+        if bash -c "echo >/dev/tcp/127.0.0.1/$local_port" 2>/dev/null; then
+          return 0
+        fi
+        sleep 0.5
+        attempts=$((attempts + 1))
+      done
+    
+      echo "[cluster_helpers] WARNING: port-forward $pod:$port -> localhost:$local_port may not be ready" >&2
+      return 0
+    }
+    
+    # wait_for_svc_ready <service> <namespace> [<timeout>]
+    # Waits for a deployment to have ready replicas.
+    wait_for_svc_ready() {
+      local service="$1"
+      local namespace="${2:-dq-dev}"
+      local timeout="${3:-120}"
+    
+      if ! command -v kubectl >/dev/null 2>&1; then
+        echo "[cluster_helpers] ERROR: kubectl not found" >&2
+        return 1
+      fi
+    
+      kubectl wait --for=condition=available "deploy/$service" -n "$namespace" --timeout="${timeout}s" 2>/dev/null
+      return $?
+    }
+    
+    # get_svc_url <service> [<namespace>]
+    # Returns the localhost URL for a service (requires port-forward).
+    get_svc_url() {
+      local service="$1"
+      local namespace="${2:-dq-dev}"
+    
+      # Get the service port
+      local port
+      port="$(kubectl get svc "$service" -n "$namespace" -o jsonpath='{.spec.ports[0].port}' 2>/dev/null)"
+      if [ -z "$port" ]; then
+        echo ""
+        return 1
+      fi
+    
+      echo "http://127.0.0.1:$port"
+    }
+  supporting/readiness.sh: |
+    #!/usr/bin/env bash
+    
+    # Purpose: Shared readiness and health polling helpers for stack orchestration.
+    #
+    # What it does:
+    # - Polls HTTP endpoints until an acceptable status code is returned.
+    # - Waits for Kong proxy health via the host-local probe helper.
+    # - Waits for Zammad support containers and application database readiness.
+    # - Fails fast when required commands or dependencies are unavailable.
+    #
+    # Version: 1.0
+    # Last modified: 2026-05-08
+    
+    ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/scripts/supporting/logging.sh"
+    
+    readiness_status_matches() {
+      local candidate="$1"
+      local acceptable_codes_csv="$2"
+      local acceptable_code
+      local IFS=','
+    
+      for acceptable_code in $acceptable_codes_csv; do
+        if [ "$candidate" = "$acceptable_code" ]; then
+          return 0
+        fi
+      done
+    
+      return 1
+    }
+    
+    wait_for_http_ready() {
+      local service_label="$1"
+      local ready_url="$2"
+      local acceptable_codes_csv="$3"
+      local max_attempts="${4:-30}"
+      local sleep_seconds="${5:-1}"
+      shift 5
+    
+      local probe_command=("$@")
+      local attempt
+      local probe_output
+      local probe_rc
+      local http_code=""
+      local last_error=""
+    
+      if [ "${#probe_command[@]}" -eq 0 ]; then
+        probe_command=(curl -sS -o /dev/null -w '%{http_code}')
+      fi
+    
+      if ! command -v "${probe_command[0]}" >/dev/null 2>&1; then
+        error "readiness.sh" "${service_label} readiness helper requires command: ${probe_command[0]}"
+        return 127
+      fi
+    
+      info "readiness.sh" "Waiting for ${service_label} to become ready..."
+    
+      for attempt in $(seq 1 "$max_attempts"); do
+        set +e
+        probe_output="$("${probe_command[@]}" "$ready_url" 2>&1)"
+        probe_rc=$?
+        set -e
+    
+        http_code="$(printf '%s' "$probe_output" | tr -d '\r\n')"
+        if [ "$probe_rc" -eq 0 ] && readiness_status_matches "$http_code" "$acceptable_codes_csv"; then
+          return 0
+        fi
+    
+        if [ "$probe_rc" -ne 0 ]; then
+          last_error="$probe_output"
+          http_code="000"
+        else
+          last_error=""
+        fi
+    
+        if [ "$attempt" -eq 1 ] || (( attempt % 5 == 0 )); then
+          info "readiness.sh" "Waiting for ${service_label}... (${attempt}/${max_attempts})"
+          info "readiness.sh" "  last status: code=${http_code} rc=${probe_rc} url=${ready_url}"
+          if [ -n "$last_error" ]; then
+            info "readiness.sh" "  last error: ${last_error}"
+          fi
+        fi
+    
+        sleep "$sleep_seconds"
+      done
+    
+      error "readiness.sh" "${service_label} did not become ready after ${max_attempts} attempts"
+      error "readiness.sh" "  last status: code=${http_code:-000} rc=${probe_rc:-1} url=${ready_url}"
+      error "readiness.sh" "  acceptable codes: ${acceptable_codes_csv}"
+      if [ -n "$last_error" ]; then
+        error "readiness.sh" "  last error: ${last_error}"
+      fi
+    
+      return 1
+    }
+    
+    wait_for_kong_admin_ready() {
+      local ready_url="$1"
+      local service_label="${2:-Kong Admin API}"
+      local max_attempts="${3:-30}"
+      local sleep_seconds="${4:-1}"
+    
+      wait_for_http_ready "$service_label" "$ready_url" "200" "$max_attempts" "$sleep_seconds" curl -sS -o /dev/null -w '%{http_code}'
+    }
+    
+    wait_for_kong_proxy_ready() {
+      local ready_url="$1"
+      local service_label="${2:-Kong Gateway}"
+      local max_attempts="${3:-30}"
+      local sleep_seconds="${4:-1}"
+    
+      if ! command -v curl_kong_host_probe >/dev/null 2>&1; then
+        error "readiness.sh" "Kong proxy readiness requires curl_kong_host_probe from scripts/supporting/setup_env.sh"
+        return 127
+      fi
+    
+      wait_for_http_ready "$service_label" "$ready_url" "200,401" "$max_attempts" "$sleep_seconds" curl_kong_host_probe --max-time 2 -sS -o /dev/null -w '%{http_code}'
+    }
+    
+    find_running_container_id() {
+      local service_name="$1"
+    
+      docker ps \
+        --filter "label=com.docker.compose.service=${service_name}" \
+        --format '{{.ID}}' \
+        | head -n 1
+    }
+    
+    wait_for_zammad_support_services_ready() {
+      local max_attempts="${1:-60}"
+      local sleep_seconds="${2:-2}"
+      local attempt
+      local zammad_postgres_id
+      local redis_id
+      local memcached_id
+      local railsserver_id
+      local postgres_health
+      local redis_health
+      local memcached_running
+      local railsserver_running
+    
+      if ! command -v docker >/dev/null 2>&1; then
+        error "readiness.sh" "docker is required for Zammad readiness checks"
+        return 127
+      fi
+    
+      info "readiness.sh" "Waiting for Zammad support services to become ready..."
+      for attempt in $(seq 1 "$max_attempts"); do
+        zammad_postgres_id="$(find_running_container_id zammad-postgresql)"
+        redis_id="$(find_running_container_id redis)"
+        memcached_id="$(find_running_container_id zammad-memcached)"
+        railsserver_id="$(find_running_container_id zammad-railsserver)"
+    
+        postgres_health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}unknown{{end}}' "$zammad_postgres_id" 2>/dev/null || true)"
+        redis_health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}unknown{{end}}' "$redis_id" 2>/dev/null || true)"
+        memcached_running="$(docker inspect -f '{{.State.Running}}' "$memcached_id" 2>/dev/null || true)"
+        railsserver_running="$(docker inspect -f '{{.State.Running}}' "$railsserver_id" 2>/dev/null || true)"
+    
+        if [ "$postgres_health" = "healthy" ] \
+          && [ "$redis_health" = "healthy" ] \
+          && [ "$memcached_running" = "true" ] \
+          && [ "$railsserver_running" = "true" ]; then
+          return 0
+        fi
+    
+        if (( attempt % 10 == 0 )); then
+          info "readiness.sh" "Waiting for Zammad support services... (${attempt}/${max_attempts})"
+          info "readiness.sh" "  postgres=${postgres_health:-missing} redis=${redis_health:-missing} memcached=${memcached_running:-missing} railsserver=${railsserver_running:-missing}"
+        fi
+    
+        sleep "$sleep_seconds"
+      done
+    
+      error "readiness.sh" "Zammad support services did not become ready in time"
+      error "readiness.sh" "  postgres=${postgres_health:-missing} redis=${redis_health:-missing} memcached=${memcached_running:-missing} railsserver=${railsserver_running:-missing}"
+      return 1
+    }
+    
+    wait_for_zammad_app_database_ready() {
+      local database_url="${1:-${DQ_DB_INTERNAL_URL:-}}"
+      local max_attempts="${2:-60}"
+      local sleep_seconds="${3:-2}"
+      local attempt
+    
+      if [ -z "$database_url" ]; then
+        error "readiness.sh" "DQ_DB_INTERNAL_URL is required for Zammad database readiness checks"
+        return 1
+      fi
+    
+      info "readiness.sh" "Waiting for Zammad application database to become ready..."
+      for attempt in $(seq 1 "$max_attempts"); do
+        if DQ_DB_INTERNAL_URL="$database_url" "$ROOT_DIR/scripts/python_arm64.sh" --python-bin python3 "$ROOT_DIR/scripts/supporting/startup_helpers.py" check-database >/dev/null 2>&1; then
+          return 0
+        fi
+    
+        if (( attempt % 10 == 0 )); then
+          info "readiness.sh" "Waiting for application database... (${attempt}/${max_attempts})"
+          info "readiness.sh" "  database_url=${database_url}"
+        fi
+    
+        sleep "$sleep_seconds"
+      done
+    
+      error "readiness.sh" "Application database did not become ready in time"
+      error "readiness.sh" "  database_url=${database_url}"
+      return 1
+    }  supporting/keycloak_readiness.sh: |
+    #!/usr/bin/env bash
+    
+    # Purpose: Provide a shared Keycloak readiness polling helper.
+    #
+    # What it does:
+    # - Exposes wait_for_keycloak_ready(url, [label]).
+    # - Polls an OpenID configuration/readiness URL with retries.
+    # - Logs classified curl failures to help diagnose startup issues.
+    # - Uses the repo CA bundle for local mkcert TLS traffic when available.
+    #
+    # Version: 1.1
+    # Last modified: 2026-07-14
+    
+    ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    cd "$ROOT_DIR"
+    source "$ROOT_DIR/scripts/supporting/logging.sh"
+    my_name="keycloak_readiness.sh"
+    
+    wait_for_keycloak_ready() {
+      local ready_url="$1"
+      local service_label="${2:-Keycloak}"
+      local max_attempts="${KEYCLOAK_READINESS_MAX_ATTEMPTS:-10}"
+      local sleep_seconds="${KEYCLOAK_READINESS_SLEEP_SECONDS:-5}"
+      local connect_timeout=10
+      local max_time=20
+      local is_ready=false
+      local curl_status=0
+      local curl_error_output=""
+      local last_failure_kind="unknown"
+      local curl_args=(--connect-timeout "$connect_timeout" --max-time "$max_time" -fsS -o /dev/null)
+      local ca_bundle="${CURL_CA_BUNDLE:-${SSL_CERT_FILE:-}}"
+    
+      if [ -n "$ca_bundle" ] && [ -f "$ca_bundle" ]; then
+        curl_args+=(--cacert "$ca_bundle")
+      fi
+    
+      classify_curl_failure() {
+        local status="$1"
+        local error_text="$2"
+    
+        case "$status" in
+          6)
+            echo "url/dns"
+            return
+            ;;
+          7)
+            echo "connect"
+            return
+            ;;
+          28)
+            if printf '%s' "$error_text" | grep -Eqi 'resolve|resolving'; then
+              echo "url/dns-timeout"
+              return
+            fi
+            if printf '%s' "$error_text" | grep -Eqi 'connect|connection|refused'; then
+              echo "connect-timeout"
+              return
+            fi
+            echo "max-time-timeout"
+            return
+            ;;
+          22)
+            echo "http-status"
+            return
+            ;;
+          *)
+            echo "other"
+            return
+            ;;
+        esac
+      }
+    
+      for attempt in $(seq 1 "$max_attempts"); do
+        curl_status=0
+        if curl_error_output="$(curl "${curl_args[@]}" "$ready_url" 2>&1)"; then
+          curl_status=$?
+          is_ready=true
+          break
+        else
+          curl_status=$?
+          info "$my_name" "  curl attempt ${attempt} failed: exit=${curl_status} url=${ready_url}"
+          info "$my_name" "  curl error output: ${curl_error_output}"
+        fi
+    
+        last_failure_kind="$(classify_curl_failure "$curl_status" "$curl_error_output")"
+    
+        printf '.'
+    
+        if [ "$sleep_seconds" != "0" ]; then
+          sleep "$sleep_seconds"
+        fi
+      done
+    
+      if [ "$is_ready" = true ]; then
+        return 0
+      fi
+    
+      error "$my_name" "  ${service_label} readiness failed after ${max_attempts} attempts"
+      error "$my_name" "  curl diagnostics: kind=${last_failure_kind} exit=${curl_status} url=${ready_url} connect-timeout=${connect_timeout}s max-time=${max_time}s"
+      if [ -n "$curl_error_output" ]; then
+        error "$my_name" "  curl error: ${curl_error_output}"
+      fi
+    
+      return 1
+    }
+  load_seeded_user_credentials.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    # Purpose: Load generated seeded-user credentials for the selected stack environment.
+    # What it does:
+    # - Resolves the canonical root env file using the shared --env/--env-file selector.
+    # - Sources the selected root env file so downstream scripts inherit stack URLs and client ids.
+    # - Sources the matching tmp/keycloak_seed_user_credentials.<stage>.env file.
+    # Version: 1.1
+    # Last modified: 2026-07-01
+    
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+    
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/scripts/supporting/logging.sh"
+    
+    # shellcheck disable=SC1091
+    source "$ROOT_DIR/scripts/supporting/root_env_file.sh"
+    my_name="load_seeded_user_credentials.sh"
+    
+    dq_usage() {
+      cat <<'EOF'
+    Usage:
+      source scripts/load_seeded_user_credentials.sh [--env dev|test|prod|--env-file PATH] [--quiet]
+    
+    Examples:
+      source scripts/load_seeded_user_credentials.sh --env test
+      source scripts/load_seeded_user_credentials.sh --env-file .env.prod.local --quiet
+    EOF
+    }
+    
+    dq_normalize_stage() {
+      local value="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+      case "$value" in
+        dev|development)
+          printf '%s' 'dev'
+          ;;
+        test|testing)
+          printf '%s' 'test'
+          ;;
+        prod|production)
+          printf '%s' 'prod'
+          ;;
+        *)
+          case "$ROOT_ENV_FILE" in
+            "$ROOT_DIR/.env.dev.local")
+              printf '%s' 'dev'
+              ;;
+            "$ROOT_DIR/.env.test.local")
+              printf '%s' 'test'
+              ;;
+            "$ROOT_DIR/.env.prod.local")
+              printf '%s' 'prod'
+              ;;
+            *)
+              printf '%s' ''
+              ;;
+          esac
+          ;;
+      esac
+    }
+    
+    dq_decode_seeded_credential_value() {
+      local value="$1"
+    
+      case "$value" in
+        "'"*"'")
+          value="${value#\'}"
+          value="${value%\'}"
+          ;;
+        '"'*'"')
+          value="${value#\"}"
+          value="${value%\"}"
+          value="${value//\\\"/\"}"
+          value="${value//\\\\/\\}"
+          ;;
+      esac
+    
+      printf '%s' "$value"
+    }
+    
+    _dq_load_seeded_credentials_from_k8s() {
+      local stage="$1"
+      local ns="dq-dev"
+      local kubectl_cmd="$2"
+    
+      # Map stage to namespace
+      case "$stage" in
+        dev) ns="dq-dev" ;;
+        test) ns="dq-test" ;;
+        prod) ns="dq-prod" ;;
+        *) ns="dq-dev" ;;
+      esac
+    
+      # Read credentials from K8s secrets
+      export KEYCLOAK_JACCLOUD_USERNAME="alice@jaccloud.nl"
+      export KEYCLOAK_JACCLOUD_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+      export SMOKE_LOGIN_EMAIL="alice@jaccloud.nl"
+      export SMOKE_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+      export OPERATOR_LOGIN_EMAIL="alice@jaccloud.nl"
+      export OPERATOR_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+      export AUDITOR_LOGIN_EMAIL="auditor@jaccloud.nl"
+      export AUDITOR_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+      export REGULATOR_LOGIN_EMAIL="regulator@jaccloud.nl"
+      export REGULATOR_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+    
+      info "$my_name" "Loaded seeded credentials from K8s secrets in $ns"
+    }
+    
+    dq_load_seeded_credentials_env_file() {
+      local credentials_env_file="$1"
+      local line key value decoded_value
+    
+      while IFS= read -r line || [ -n "$line" ]; do
+        line="${line%$'\r'}"
+        case "$line" in
+          ''|'#'*)
+            continue
+            ;;
+        esac
+    
+        case "$line" in
+          *=*) ;;
+          *)
+            error "$my_name" "invalid seeded credential line in $credentials_env_file"
+            return 1
+            ;;
+        esac
+    
+        key="${line%%=*}"
+        value="${line#*=}"
+        case "$key" in
+          KEYCLOAK_JACCLOUD_USERNAME|KEYCLOAK_JACCLOUD_PASSWORD|SMOKE_LOGIN_EMAIL|SMOKE_LOGIN_PASSWORD|OPERATOR_LOGIN_EMAIL|OPERATOR_LOGIN_PASSWORD|AUDITOR_LOGIN_EMAIL|AUDITOR_LOGIN_PASSWORD|REGULATOR_LOGIN_EMAIL|REGULATOR_LOGIN_PASSWORD) ;;
+          *)
+            error "$my_name" "unsupported seeded credential key in $credentials_env_file: $key"
+            return 1
+            ;;
+        esac
+    
+        decoded_value="$(dq_decode_seeded_credential_value "$value")"
+        export "$key=$decoded_value"
+      done < "$credentials_env_file"
+    }
+    
+    dq_load_seeded_user_credentials_main() {
+      local quiet="false"
+      local credentials_env_file=""
+      local stage=""
+      local preserved_pip_index_url="${PIP_INDEX_URL:-}"
+      local preserved_maven_repositories="${MAVEN_REPOSITORIES:-}"
+    
+      init_root_env_file "$ROOT_DIR"
+    
+      if ! consume_root_env_selection_args "$ROOT_DIR" "$@"; then
+        return 1
+      fi
+      set -- ${ROOT_ENV_SELECTION_REMAINING_ARGS[@]+"${ROOT_ENV_SELECTION_REMAINING_ARGS[@]}"}
+    
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --quiet)
+            quiet="true"
+            shift
+            ;;
+          -h|--help)
+            dq_usage
+            return 0
+            ;;
+          *)
+            error "$my_name" "unsupported argument: $1"
+            dq_usage >&2
+            return 2
+            ;;
+        esac
+      done
+    
+      if ! source_selected_root_env_file; then
+        return 1
+      fi
+    
+      # Keep previously-derived package index settings from setup_env.sh when this
+      # helper is sourced after env bootstrap. The root env file may intentionally
+      # leave PIP_INDEX_URL blank and rely on runtime derivation.
+      if [[ -z "${PIP_INDEX_URL:-}" && -n "$preserved_pip_index_url" ]]; then
+        export PIP_INDEX_URL="$preserved_pip_index_url"
+      fi
+      if [[ -z "${MAVEN_REPOSITORIES:-}" && -n "$preserved_maven_repositories" ]]; then
+        export MAVEN_REPOSITORIES="$preserved_maven_repositories"
+      fi
+    
+      stage="$(dq_normalize_stage "${ENVIRONMENT:-}")"
+      if [[ -n "$stage" ]]; then
+        credentials_env_file="$ROOT_DIR/tmp/keycloak_seed_user_credentials.${stage}.env"
+      fi
+    
+      if [[ ! -f "$credentials_env_file" ]]; then
+        info "$my_name" "Seed file not found: $credentials_env_file — reading from K8s secrets"
+        # Fallback: read credentials from K8s secrets
+        local kubectl_cmd=""
+        if command -v kubectl >/dev/null 2>&1; then
+          kubectl_cmd="kubectl"
+        elif [ -x /usr/local/bin/kubectl ]; then
+          kubectl_cmd="/usr/local/bin/kubectl"
+        fi
+        if [ -z "$kubectl_cmd" ]; then
+          error "$my_name" "seeded credential file not found and kubectl not available"
+          error "$my_name" "Run the seed-artifacts flow or ensure kubectl is available."
+          return 1
+        fi
+        _dq_load_seeded_credentials_from_k8s "$stage" "$kubectl_cmd"
+      else
+        if ! dq_load_seeded_credentials_env_file "$credentials_env_file"; then
+          return 1
+        fi
+      fi
+    
+      export OPENMETADATA_OIDC_SEED_USERNAME="${SMOKE_LOGIN_EMAIL:-${KEYCLOAK_JACCLOUD_USERNAME:-}}"
+      export OPENMETADATA_OIDC_SEED_PASSWORD="${SMOKE_LOGIN_PASSWORD:-${KEYCLOAK_JACCLOUD_PASSWORD:-}}"
+      export DQ_AIRFLOW_USERNAME="${OPERATOR_LOGIN_EMAIL:-${DQ_AIRFLOW_USERNAME:-}}"
+      export DQ_AIRFLOW_PASSWORD="${OPERATOR_LOGIN_PASSWORD:-${DQ_AIRFLOW_PASSWORD:-}}"
+      export DQ_SEEDED_CREDENTIALS_ENV_FILE="$credentials_env_file"
+    
+      if [[ "$quiet" != "true" ]]; then
+        info "$my_name" "Loaded seeded user credentials from $credentials_env_file"
+        info "$my_name" "Environment selection: $(describe_root_env_file_selection "$ROOT_DIR" "$ROOT_ENV_FILE") -> $ROOT_ENV_FILE"
+      fi
+    }
+    
+    if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
+      dq_load_seeded_user_credentials_main "$@"
+    else
+      error "$my_name" "this script must be sourced so it can export credentials into the current shell"
+      error "$my_name" "Example: source scripts/load_seeded_user_credentials.sh --env test"
+      exit 2
+    fi

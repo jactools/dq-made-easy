@@ -80,6 +80,34 @@ dq_decode_seeded_credential_value() {
   printf '%s' "$value"
 }
 
+_dq_load_seeded_credentials_from_k8s() {
+  local stage="$1"
+  local ns="dq-dev"
+  local kubectl_cmd="$2"
+
+  # Map stage to namespace
+  case "$stage" in
+    dev) ns="dq-dev" ;;
+    test) ns="dq-test" ;;
+    prod) ns="dq-prod" ;;
+    *) ns="dq-dev" ;;
+  esac
+
+  # Read credentials from K8s secrets
+  export KEYCLOAK_JACCLOUD_USERNAME="alice@jaccloud.nl"
+  export KEYCLOAK_JACCLOUD_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+  export SMOKE_LOGIN_EMAIL="alice@jaccloud.nl"
+  export SMOKE_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+  export OPERATOR_LOGIN_EMAIL="alice@jaccloud.nl"
+  export OPERATOR_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+  export AUDITOR_LOGIN_EMAIL="auditor@jaccloud.nl"
+  export AUDITOR_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+  export REGULATOR_LOGIN_EMAIL="regulator@jaccloud.nl"
+  export REGULATOR_LOGIN_PASSWORD="$("$kubectl_cmd" get secret keycloak-user-password -n "$ns" -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'changeme')"
+
+  info "$my_name" "Loaded seeded credentials from K8s secrets in $ns"
+}
+
 dq_load_seeded_credentials_env_file() {
   local credentials_env_file="$1"
   local line key value decoded_value
@@ -167,13 +195,24 @@ dq_load_seeded_user_credentials_main() {
   fi
 
   if [[ ! -f "$credentials_env_file" ]]; then
-    error "$my_name" "seeded credential file not found: $credentials_env_file"
-    error "$my_name" "Run the seed-artifacts flow for the selected environment first."
-    return 1
-  fi
-
-  if ! dq_load_seeded_credentials_env_file "$credentials_env_file"; then
-    return 1
+    info "$my_name" "Seed file not found: $credentials_env_file — reading from K8s secrets"
+    # Fallback: read credentials from K8s secrets
+    local kubectl_cmd=""
+    if command -v kubectl >/dev/null 2>&1; then
+      kubectl_cmd="kubectl"
+    elif [ -x /usr/local/bin/kubectl ]; then
+      kubectl_cmd="/usr/local/bin/kubectl"
+    fi
+    if [ -z "$kubectl_cmd" ]; then
+      error "$my_name" "seeded credential file not found and kubectl not available"
+      error "$my_name" "Run the seed-artifacts flow or ensure kubectl is available."
+      return 1
+    fi
+    _dq_load_seeded_credentials_from_k8s "$stage" "$kubectl_cmd"
+  else
+    if ! dq_load_seeded_credentials_env_file "$credentials_env_file"; then
+      return 1
+    fi
   fi
 
   export OPENMETADATA_OIDC_SEED_USERNAME="${SMOKE_LOGIN_EMAIL:-${KEYCLOAK_JACCLOUD_USERNAME:-}}"

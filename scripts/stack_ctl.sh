@@ -269,7 +269,7 @@ EOF
 }
 
 remove_stale_stateful_volumes() {
-  local project_prefix="${COMPOSE_PROJECT_NAME:-dq-made-easy-dev}"
+  local project_prefix="${KIND_CLUSTER_NAME:-dq-made-easy-dev}"
   local volume_name=""
 
   info "stack_ctl.sh" "Removing stale stateful volumes before ${ACTION} so regenerated passwords can take effect"

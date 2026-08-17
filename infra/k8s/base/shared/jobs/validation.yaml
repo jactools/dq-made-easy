@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-validation
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+    dq.jaccloud.nl/type: validation
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 120
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: validate
+        image: jacloud.nl/docker/jacbeekers/dq-made-easy-api:0.11
+        imagePullPolicy: IfNotPresent
+        command:
+        - bash
+        - /scripts/validation/validate_user_login_end_to_end.sh
+        env:
+        - name: ROOT_ENV_FILE
+          value: /env/.env.dev.local
+        - name: ROOT_DIR
+          value: /scripts
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+        - name: env
+          mountPath: /env
+      volumes:
+      - name: scripts
+        configMap:
+          name: dq-validation-scripts
+          defaultMode: 0755
+      - name: env
+        configMap:
+          name: dq-env-dev
