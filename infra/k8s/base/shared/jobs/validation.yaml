@@ -20,7 +20,22 @@ spec:
         imagePullPolicy: IfNotPresent
         command:
         - bash
-        - /repo/scripts/validation/validate_user_login_end_to_end.sh
+        - -c
+        - |
+          # Setup script structure from flat ConfigMap keys
+          mkdir -p /repo/scripts/validation /repo/scripts/supporting/logging /repo/scripts/supporting/env
+          cp /scripts/scripts-validation-validate_user_login_end_to_end.sh /repo/scripts/validation/validate_user_login_end_to_end.sh
+          cp /scripts/scripts-supporting-auth.sh /repo/scripts/supporting/auth.sh
+          cp /scripts/scripts-supporting-logging.sh /repo/scripts/supporting/logging.sh
+          cp /scripts/scripts-supporting-logging-core.sh /repo/scripts/supporting/logging/core.sh
+          cp /scripts/scripts-supporting-root_env_file.sh /repo/scripts/supporting/root_env_file.sh
+          cp /scripts/scripts-supporting-env-selection.sh /repo/scripts/supporting/env/selection.sh
+          cp /scripts/scripts-supporting-cluster_helpers.sh /repo/scripts/supporting/cluster_helpers.sh
+          cp /scripts/scripts-supporting-readiness.sh /repo/scripts/supporting/readiness.sh
+          cp /scripts/scripts-supporting-keycloak_readiness.sh /repo/scripts/supporting/keycloak_readiness.sh
+          cp /scripts/scripts-load_seeded_user_credentials.sh /repo/scripts/load_seeded_user_credentials.sh
+          chmod +x /repo/scripts/validation/*.sh /repo/scripts/supporting/*.sh /repo/scripts/supporting/**/*.sh
+          bash /repo/scripts/validation/validate_user_login_end_to_end.sh
         env:
         - name: ROOT_ENV_FILE
           value: /env/.env.dev.local
@@ -28,38 +43,11 @@ spec:
           value: /repo
         volumeMounts:
         - name: scripts
-          mountPath: /repo/scripts/validation/validate_user_login_end_to_end.sh
-          subPath: scripts-validation-validate_user_login_end_to_end.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/auth.sh
-          subPath: scripts-supporting-auth.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/logging.sh
-          subPath: scripts-supporting-logging.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/logging/core.sh
-          subPath: scripts-supporting-logging-core.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/root_env_file.sh
-          subPath: scripts-supporting-root_env_file.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/env/selection.sh
-          subPath: scripts-supporting-env-selection.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/cluster_helpers.sh
-          subPath: scripts-supporting-cluster_helpers.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/readiness.sh
-          subPath: scripts-supporting-readiness.sh
-        - name: scripts
-          mountPath: /repo/scripts/supporting/keycloak_readiness.sh
-          subPath: scripts-supporting-keycloak_readiness.sh
-        - name: scripts
-          mountPath: /repo/scripts/load_seeded_user_credentials.sh
-          subPath: scripts-load_seeded_user_credentials.sh
+          mountPath: /scripts
+          readOnly: true
         - name: env
-          mountPath: /env/.env.dev.local
-          subPath: .env.dev.local
+          mountPath: /env
+          readOnly: true
       volumes:
       - name: scripts
         configMap:
