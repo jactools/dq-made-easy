@@ -6,7 +6,6 @@ resources:
   - config/common-config.yaml
   - config/keycloak-config.yaml
   - config/kong-config.yaml
-  - config/dq-env-dev.yaml
   - secrets/keycloak-user-password.yaml
   - rbac/keycloak-seed-rbac.yaml
   - ingress/frontend.yaml
