@@ -13,6 +13,7 @@ resources:
   - config/dq-frontend-config.yaml
   - config/dq-engine-config.yaml
   - jobs/api-migrate.yaml
+  - jobs/secret-init.yaml
   - external-secrets/redis-credential-api.yaml
   - external-secrets/redis-credential-engine.yaml
 
