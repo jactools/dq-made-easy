@@ -1,46 +1,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: dq-dev
+namespace: dq-made-easy-dev
 
 resources:
-  - ../../base/shared
-  - ../../base/dq-api/db.yaml
-  - ../../base/dq-api/db-pvc.yaml
-  - ../../base/dq-api/db-config.yaml
-  - ../dev/external-secrets/redis-credential-api.yaml
-  - ../dev/external-secrets/redis-credential-engine.yaml
-  - ../dev/jobs/secret-init.yaml
+  - ../../../infra/k8s/base/api/db.yaml
+  - ../../../infra/k8s/base/api/db-config.yaml
 
 labels:
   - includeSelectors: true
     pairs:
       platform.jaccloud.nl/managed-by: argocd
-      platform.jaccloud.nl/tenant: dq
+      platform.jaccloud.nl/tenant: dq-made-easy
       platform.jaccloud.nl/environment: dev
-
-patches:
-  - target:
-      kind: Namespace
-      name: dq-made-easy
-    patch: |-
-      - op: replace
-        path: /metadata/name
-        value: dq-dev
-      - op: add
-        path: /metadata/labels/platform.jaccloud.nl~1managed-by
-        value: argocd
-      - op: add
-        path: /metadata/labels/platform.jaccloud.nl~1tenant
-        value: dq
-      - op: add
-        path: /metadata/labels/platform.jaccloud.nl~1environment
-        value: dev
-  - path: ../dev/patches/common-config.yaml
-  - path: ../dev/patches/keycloak-config.yaml
-  - path: ../dev/patches/kong-config.yaml
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-db
-    newName: docker-registry.dev.jac.dot:5000/jacbeekers/dq-made-easy-db
+    newName: jacloud.nl/docker/jacbeekers/dq-made-easy-db
     newTag: "0.11"
