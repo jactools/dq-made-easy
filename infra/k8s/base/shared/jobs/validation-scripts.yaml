@@ -185,6 +185,7 @@ data:
     success "validate_user_login_end_to_end.sh" "/rulebuilder/v1/rules returned ${RULES_COUNT} row(s) for ${LOGIN_EMAIL} through Kong"
     info "validate_user_login_end_to_end.sh" "=============================================="
     success "validate_user_login_end_to_end.sh" "Alice login end-to-end validation succeeded"
+    info "validate_user_login_end_to_end.sh" "=============================================="
   scripts-supporting-auth.sh: |
     # Purpose: Canonical entrypoint for shared shell auth helpers.
     #
@@ -1044,6 +1045,7 @@ data:
       error "readiness.sh" "Application database did not become ready in time"
       error "readiness.sh" "  database_url=${database_url}"
       return 1
+    }
   scripts-supporting-keycloak_readiness.sh: |
     #!/usr/bin/env bash
     
@@ -1395,3 +1397,4 @@ data:
       error "$my_name" "this script must be sourced so it can export credentials into the current shell"
       error "$my_name" "Example: source scripts/load_seeded_user_credentials.sh --env test"
       exit 2
+    fi
