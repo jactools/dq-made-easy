@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: dq-dev
 
 resources:
+  - resources/namespace.yaml
   - ../../../infra/k8s/base/api/db.yaml
   - ../../../infra/k8s/base/api/db-config.yaml
 
