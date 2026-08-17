@@ -4,9 +4,20 @@ kind: Kustomization
 namespace: dq-dev
 
 resources:
-  - resources/namespace.yaml
+  - ../../../infra/k8s/base/shared/namespace.yaml
   - ../../../infra/k8s/base/api/db.yaml
   - ../../../infra/k8s/base/api/db-config.yaml
+
+nameSuffix: ""
+
+patches:
+  - target:
+      kind: Namespace
+      name: dq-made-easy
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: dq-dev
 
 labels:
   - includeSelectors: true
