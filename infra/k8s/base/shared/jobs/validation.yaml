@@ -22,25 +22,28 @@ spec:
         - bash
         - -c
         - |
+          set -ex
           # Setup script structure from flat ConfigMap keys
-          mkdir -p /repo/scripts/validation /repo/scripts/supporting/logging /repo/scripts/supporting/env
-          cp /scripts/scripts-validation-validate_user_login_end_to_end.sh /repo/scripts/validation/validate_user_login_end_to_end.sh
-          cp /scripts/scripts-supporting-auth.sh /repo/scripts/supporting/auth.sh
-          cp /scripts/scripts-supporting-logging.sh /repo/scripts/supporting/logging.sh
-          cp /scripts/scripts-supporting-logging-core.sh /repo/scripts/supporting/logging/core.sh
-          cp /scripts/scripts-supporting-root_env_file.sh /repo/scripts/supporting/root_env_file.sh
-          cp /scripts/scripts-supporting-env-selection.sh /repo/scripts/supporting/env/selection.sh
-          cp /scripts/scripts-supporting-cluster_helpers.sh /repo/scripts/supporting/cluster_helpers.sh
-          cp /scripts/scripts-supporting-readiness.sh /repo/scripts/supporting/readiness.sh
-          cp /scripts/scripts-supporting-keycloak_readiness.sh /repo/scripts/supporting/keycloak_readiness.sh
-          cp /scripts/scripts-load_seeded_user_credentials.sh /repo/scripts/load_seeded_user_credentials.sh
-          chmod +x /repo/scripts/validation/*.sh /repo/scripts/supporting/*.sh /repo/scripts/supporting/**/*.sh
-          bash /repo/scripts/validation/validate_user_login_end_to_end.sh
+          WORK=/tmp/repo
+          mkdir -p $WORK/scripts/validation $WORK/scripts/supporting/logging $WORK/scripts/supporting/env
+          cp /scripts/scripts-validation-validate_user_login_end_to_end.sh $WORK/scripts/validation/validate_user_login_end_to_end.sh
+          cp /scripts/scripts-supporting-auth.sh $WORK/scripts/supporting/auth.sh
+          cp /scripts/scripts-supporting-logging.sh $WORK/scripts/supporting/logging.sh
+          cp /scripts/scripts-supporting-logging-core.sh $WORK/scripts/supporting/logging/core.sh
+          cp /scripts/scripts-supporting-root_env_file.sh $WORK/scripts/supporting/root_env_file.sh
+          cp /scripts/scripts-supporting-env-selection.sh $WORK/scripts/supporting/env/selection.sh
+          cp /scripts/scripts-supporting-cluster_helpers.sh $WORK/scripts/supporting/cluster_helpers.sh
+          cp /scripts/scripts-supporting-readiness.sh $WORK/scripts/supporting/readiness.sh
+          cp /scripts/scripts-supporting-keycloak_readiness.sh $WORK/scripts/supporting/keycloak_readiness.sh
+          cp /scripts/scripts-load_seeded_user_credentials.sh $WORK/scripts/load_seeded_user_credentials.sh
+          chmod +x $WORK/scripts/validation/*.sh $WORK/scripts/supporting/*.sh
+          chmod +x $WORK/scripts/supporting/logging/*.sh $WORK/scripts/supporting/env/*.sh
+          bash $WORK/scripts/validation/validate_user_login_end_to_end.sh
         env:
         - name: ROOT_ENV_FILE
           value: /env/.env.dev.local
         - name: ROOT_DIR
-          value: /repo
+          value: /tmp/repo
         volumeMounts:
         - name: scripts
           mountPath: /scripts
