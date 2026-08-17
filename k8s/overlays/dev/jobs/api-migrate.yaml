@@ -3,10 +3,10 @@ kind: Job
 metadata:
   name: dq-job-api-migrate
 spec:
-  backoffLimit: 1
+  backoffLimit: 5
   template:
     spec:
-      restartPolicy: Never
+      restartPolicy: OnFailure
       containers:
         - name: api-migrate
           image: jacloud.nl/docker/jacbeekers/dq-made-easy-api:0.11
