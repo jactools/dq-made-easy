@@ -84,7 +84,9 @@ main() {
   esac
 
   local namespace="dq-${env}"
-  local job_name="validate-${script_name%.sh}"
+  # Replace underscores with dashes for valid K8s names
+  local safe_name="${script_name//_/}"
+  local job_name="validate-${safe_name%.sh}"
 
   # Get kubeconfig from Kind cluster
   local kubeconfig_path="/tmp/kind-${cluster_name}.conf"
@@ -112,13 +114,13 @@ main() {
   _run_kubectl delete job "$job_name" -n "$namespace" --ignore-not-found=true 2>/dev/null || true
   sleep 1
 
-  # Run the validation job (templated from dq-validation)
-  _run_kubectl create job "$job_name" \
-    --from=cronjob/dq-validation \
-    -n "$namespace" 2>/dev/null || \
-  _run_kubectl kustomize "$ROOT_DIR/infra/k8s/base/shared" | \
-    sed "s|name: dq-validation|name: $job_name|g" | \
-    _run_kubectl apply -n "$namespace" -f -
+  # Run the validation job (kustomize + sed to rename)
+  local patched_yaml
+  patched_yaml=$(mktemp)
+  kubectl kustomize "$ROOT_DIR/infra/k8s/base/shared/jobs" 2>/dev/null | \
+    sed "s|name: dq-validation|name: $job_name|g" > "$patched_yaml"
+  _run_kubectl apply -n "$namespace" -f "$patched_yaml"
+  rm -f "$patched_yaml"
 
   # Wait for completion
   info "$my_name" "Waiting for Job $job_name to complete..."

@@ -20,17 +20,46 @@ spec:
         imagePullPolicy: IfNotPresent
         command:
         - bash
-        - /scripts/validation/validate_user_login_end_to_end.sh
+        - /repo/scripts/validation/validate_user_login_end_to_end.sh
         env:
         - name: ROOT_ENV_FILE
           value: /env/.env.dev.local
         - name: ROOT_DIR
-          value: /scripts
+          value: /repo
         volumeMounts:
         - name: scripts
-          mountPath: /scripts
+          mountPath: /repo/scripts/validation/validate_user_login_end_to_end.sh
+          subPath: scripts-validation-validate_user_login_end_to_end.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/auth.sh
+          subPath: scripts-supporting-auth.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/logging.sh
+          subPath: scripts-supporting-logging.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/logging/core.sh
+          subPath: scripts-supporting-logging-core.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/root_env_file.sh
+          subPath: scripts-supporting-root_env_file.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/env/selection.sh
+          subPath: scripts-supporting-env-selection.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/cluster_helpers.sh
+          subPath: scripts-supporting-cluster_helpers.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/readiness.sh
+          subPath: scripts-supporting-readiness.sh
+        - name: scripts
+          mountPath: /repo/scripts/supporting/keycloak_readiness.sh
+          subPath: scripts-supporting-keycloak_readiness.sh
+        - name: scripts
+          mountPath: /repo/scripts/load_seeded_user_credentials.sh
+          subPath: scripts-load_seeded_user_credentials.sh
         - name: env
-          mountPath: /env
+          mountPath: /env/.env.dev.local
+          subPath: .env.dev.local
       volumes:
       - name: scripts
         configMap:

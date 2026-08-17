@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/part-of: dq-made-easy
     dq.jaccloud.nl/type: validation
 data:
-  validation/validate_user_login_end_to_end.sh: |
+  scripts-validation-validate_user_login_end_to_end.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
     
@@ -185,7 +185,7 @@ data:
     success "validate_user_login_end_to_end.sh" "/rulebuilder/v1/rules returned ${RULES_COUNT} row(s) for ${LOGIN_EMAIL} through Kong"
     info "validate_user_login_end_to_end.sh" "=============================================="
     success "validate_user_login_end_to_end.sh" "Alice login end-to-end validation succeeded"
-    info "validate_user_login_end_to_end.sh" "=============================================="  supporting/auth.sh: |
+    info "validate_user_login_end_to_end.sh" "=============================================="  scripts-supporting-auth.sh: |
     # Purpose: Canonical entrypoint for shared shell auth helpers.
     #
     # What it does:
@@ -354,7 +354,7 @@ data:
     
       printf '%s' "$access_token"
     }
-  supporting/logging.sh: |
+  scripts-supporting-logging.sh: |
     # Purpose: Canonical entrypoint for shared shell logging helpers.
     #
     # What it does:
@@ -367,7 +367,7 @@ data:
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     source "$SCRIPT_DIR/logging/core.sh"
     
-  supporting/logging/core.sh: |
+  scripts-supporting-logging-core.sh: |
     # Purpose: Implement the shared logging primitives used by shell scripts.
     #
     # What it does:
@@ -458,7 +458,7 @@ data:
         exit 1
       fi
     }
-  supporting/env/selection.sh: |
+  scripts-supporting-env-selection.sh: |
     # Purpose: Implement canonical env selection helpers for shell scripts.
     #
     # What it does:
@@ -689,7 +689,7 @@ data:
         esac
       done
     }
-  supporting/cluster_helpers.sh: |
+  scripts-supporting-cluster_helpers.sh: |
     #!/usr/bin/env bash
     # scripts/supporting/cluster_helpers.sh
     # Shared helpers for Kind/K8s validation scripts.
@@ -835,7 +835,7 @@ data:
     
       echo "http://127.0.0.1:$port"
     }
-  supporting/readiness.sh: |
+  scripts-supporting-readiness.sh: |
     #!/usr/bin/env bash
     
     # Purpose: Shared readiness and health polling helpers for stack orchestration.
@@ -1044,7 +1044,7 @@ data:
       error "readiness.sh" "Application database did not become ready in time"
       error "readiness.sh" "  database_url=${database_url}"
       return 1
-    }  supporting/keycloak_readiness.sh: |
+    }  scripts-supporting-keycloak_readiness.sh: |
     #!/usr/bin/env bash
     
     # Purpose: Provide a shared Keycloak readiness polling helper.
@@ -1150,7 +1150,7 @@ data:
     
       return 1
     }
-  load_seeded_user_credentials.sh: |
+  scripts-load_seeded_user_credentials.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
     
@@ -1386,4 +1386,12 @@ data:
       error "$my_name" "this script must be sourced so it can export credentials into the current shell"
       error "$my_name" "Example: source scripts/load_seeded_user_credentials.sh --env test"
       exit 2
+    fi  scripts-supporting-root_env_file.sh: |
+    #!/usr/bin/env bash
+    
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$SCRIPT_DIR/env/selection.sh"
+    
+    if [ -z "${ROOT_DIR:-}" ]; then
+    	ROOT_DIR="$REPO_ROOT"
     fi
