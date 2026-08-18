@@ -42,7 +42,7 @@ dq_keycloak_password_grant_access_token() {
   local password="$4"
   shift 4
 
-  local curl_cmd=(curl -k)
+  local curl_cmd=(curl)
   if [ "$#" -gt 0 ]; then
     curl_cmd+=("$@")
   fi
@@ -108,7 +108,7 @@ dq_keycloak_client_credentials_access_token() {
   local client_secret="$3"
   shift 3
 
-  local curl_cmd=(curl -k)
+  local curl_cmd=(curl)
   if [ "$#" -gt 0 ]; then
     curl_cmd+=("$@")
   fi
