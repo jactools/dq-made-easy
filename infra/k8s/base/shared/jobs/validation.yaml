@@ -27,7 +27,7 @@ spec:
           apt-get update -qq && apt-get install -y -qq jq >/dev/null 2>&1 || true
           printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
           # Add platform CA to system trust store (so all curl calls verify correctly)
-          cp /etc/ssl/platform/rootCA.pem /usr/local/share/ca-certificates/platform-ca.pem && update-ca-certificates -q 2>/dev/null || true
+          cp /etc/ssl/platform/rootCA.pem /usr/local/share/ca-certificates/platform-ca.pem && update-ca-certificates 2>/dev/null || true
           # Setup script structure from flat ConfigMap keys
           WORK=/tmp/repo
           mkdir -p $WORK/scripts/validation $WORK/scripts/supporting/logging $WORK/scripts/supporting/env

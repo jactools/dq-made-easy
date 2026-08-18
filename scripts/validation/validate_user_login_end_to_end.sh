@@ -136,7 +136,7 @@ esac
 success "validate_user_login_end_to_end.sh" "Keycloak returned a JWT for ${LOGIN_EMAIL}"
 
 info "validate_user_login_end_to_end.sh" "[2/3] Calling /admin/v1/me through Kong with the Keycloak token..."
-ME_CODE="$(curl -sS -H "Authorization: Bearer ${LOGIN_TOKEN}" -o "$ME_BODY_FILE" -w "%{http_code}" "$ME_URL")"
+ME_CODE="$(curl -sk -H "Authorization: Bearer ${LOGIN_TOKEN}" -o "$ME_BODY_FILE" -w "%{http_code}" "$ME_URL")"
 if [ "$ME_CODE" != "200" ]; then
   error "validate_user_login_end_to_end.sh" "/admin/v1/me returned HTTP ${ME_CODE} when called through Kong with the Keycloak token"
   print_body "$ME_BODY_FILE"
@@ -159,7 +159,7 @@ fi
 success "validate_user_login_end_to_end.sh" "/admin/v1/me resolved ${ME_ID} for ${ME_EMAIL} through Kong"
 
 info "validate_user_login_end_to_end.sh" "[3/3] Calling /rulebuilder/v1/rules through Kong with the Keycloak token..."
-RULES_CODE="$(curl -sS -H "Authorization: Bearer ${LOGIN_TOKEN}" -o "$RULES_BODY_FILE" -w "%{http_code}" "$RULES_URL")"
+RULES_CODE="$(curl -sk -H "Authorization: Bearer ${LOGIN_TOKEN}" -o "$RULES_BODY_FILE" -w "%{http_code}" "$RULES_URL")"
 if [ "$RULES_CODE" != "200" ]; then
   error "validate_user_login_end_to_end.sh" "/rulebuilder/v1/rules returned HTTP ${RULES_CODE} when called through Kong with the Keycloak token"
   print_body "$RULES_BODY_FILE"
