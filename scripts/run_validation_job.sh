@@ -111,9 +111,12 @@ main() {
   # Project keycloak-user-passwords from platform-keycloak into the tenant namespace
   local platform_ns="platform-keycloak"
   if _run_kubectl get secret keycloak-user-passwords -n "$platform_ns" >/dev/null 2>&1; then
-    _run_kubectl get secret keycloak-user-passwords -n "$platform_ns" -o yaml \" \
+    _run_kubectl get secret keycloak-user-passwords -n "$platform_ns" -o yaml \
+      | grep -v "resourceVersion\|uid:\|creationTimestamp\|last-applied-configuration" \
       | sed "s/namespace: ${platform_ns}/namespace: ${namespace}/" \
-      | _run_kubectl apply -n "$namespace" -f -
+      | _run_kubectl replace -n "$namespace" -f - 2>/dev/null \
+      || _run_kubectl create -n "$namespace" -f - 2>/dev/null \
+      || true
     info "$my_name" "Projected keycloak-user-passwords from $platform_ns to $namespace"
   else
     error "$my_name" "keycloak-user-passwords secret not found in $platform_ns"
