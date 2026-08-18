@@ -543,7 +543,9 @@ enable_jwt_for_route() {
   if [ "$REALM_CONSUMERS_SYNCED" != "true" ]; then
     ensure_keycloak_user_consumers "$rsa_public_key"
     ensure_service_account_consumer "$rsa_public_key"
-    ensure_service_account_consumer_for_client "${GRAFANA_OIDC_CLIENT_ID:-grafana}" "$rsa_public_key"
+    if [ -n "${GRAFANA_OIDC_CLIENT_ID:-}" ]; then
+      ensure_service_account_consumer_for_client "$GRAFANA_OIDC_CLIENT_ID" "$rsa_public_key" || true
+    fi
     REALM_CONSUMERS_SYNCED=true
   fi
 }
@@ -561,7 +563,7 @@ disable_jwt_for_route() {
   done
 }
 
-create_service "dq-api" "https://api:4010"
+create_service "dq-api" "$DQ_API_INTERNAL_URL"
 create_route "dq-api" "dq-api-auth-v1" "/api/auth/v1"
 create_route "dq-api" "dq-api-admin-v1" "/admin/v1"
 create_route "dq-api" "dq-api-admin-v1-users" "/admin/v1/users"
@@ -657,8 +659,6 @@ fi
 # KONG_TRACING_INSTRUMENTATIONS and KONG_TRACING_SAMPLING_RATE are set as
 # server-level env vars in docker-compose; this plugin wires the exporter.
 # ---------------------------------------------------------------------------
-KONG_OTEL_ENDPOINT="$(require_env KONG_OTEL_ENDPOINT)"
-
 setup_opentelemetry_plugin() {
   local existing_id
   existing_id=$(curl -s "$KONG_ADMIN_INTERNAL_URL/plugins" | jq -r '.data[]? | select(.name=="opentelemetry") | .id // empty' 2>/dev/null | head -1 || true)
@@ -667,7 +667,6 @@ setup_opentelemetry_plugin() {
   payload=$(printf '{"name":"opentelemetry","config":{"endpoint":"%s","resource_attributes":{"service.name":"dq-kong"},"batch_flush_delay":2}}' "$KONG_OTEL_ENDPOINT")
 
   if [ -n "$existing_id" ]; then
-    # Update endpoint in case it changed; leave other fields intact.
     curl -s -X PATCH "$KONG_ADMIN_INTERNAL_URL/plugins/$existing_id" \
       -H 'Content-Type: application/json' \
       -d "$payload" >/dev/null
@@ -680,6 +679,11 @@ setup_opentelemetry_plugin() {
   fi
 }
 
-setup_opentelemetry_plugin
+# OpenTelemetry is optional — only enabled when KONG_OTEL_ENDPOINT is set.
+if [ -n "${KONG_OTEL_ENDPOINT:-}" ]; then
+  setup_opentelemetry_plugin
+else
+  echo "[kong-bootstrap] KONG_OTEL_ENDPOINT not set; skipping OTel plugin"
+fi
 
 echo "[kong-bootstrap] configuration complete"

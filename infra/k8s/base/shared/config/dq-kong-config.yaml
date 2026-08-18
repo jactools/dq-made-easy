@@ -1,0 +1,23 @@
+---
+# dq-kong-config — Configuration for the Kong bootstrap job (dev).
+# Non-sensitive URLs and settings. Admin password comes from keycloak-admin Secret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-kong-config
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+data:
+  KONG_ADMIN_INTERNAL_URL: "http://kong-admin.platform-kong.svc.cluster.local:8444"
+  KEYCLOAK_INTERNAL_URL: "https://keycloak.platform-keycloak.svc.cluster.local:8443/auth"
+  KEYCLOAK_ADMIN_REALM: "master"
+  KEYCLOAK_REALM: "jaccloud"
+  KEYCLOAK_SYSTEM_ADMIN_USERNAME: "admin"
+  DQ_API_INTERNAL_URL: "http://dq-api.dq-dev.svc.cluster.local:4010"
+  DQ_ENGINE_OIDC_CLIENT_ID: "dq-made-easy-engine-gx-worker"
+  UI_VITE_LOCAL_URL: "https://dq-made-easy.dev.jac.dot"
+  UI_NGINX_LOCAL_URL: "https://dq-made-easy.dev.jac.dot"
+  TRUST_PROXY_AUTH: "true"
+  SSO_ENABLED: "true"
+  SSO_PUBLIC_ISSUER_URL: "https://keycloak.platform-keycloak.svc.cluster.local:8443/auth/realms/jaccloud"
+  CURL_CA_BUNDLE: "/etc/ssl/platform/rootCA.pem"

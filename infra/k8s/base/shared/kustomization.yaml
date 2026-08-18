@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - config/common-config.yaml
   - config/dq-env-dev.yaml
+  - config/dq-kong-config.yaml
   - config/keycloak-config.yaml
   - config/kong-config.yaml
   - secrets/keycloak-user-password.yaml
