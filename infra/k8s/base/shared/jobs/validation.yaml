@@ -44,6 +44,8 @@ spec:
           value: /env/.env.dev.local
         - name: ROOT_DIR
           value: /tmp/repo
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/platform/rootCA.pem
         # Seeded user credentials (projected from platform-keycloak by run_validation_job.sh)
         - name: KEYCLOAK_JACCLOUD_USERNAME
           value: alice@jaccloud.nl
@@ -66,7 +68,14 @@ spec:
         - name: env
           mountPath: /env
           readOnly: true
+        - name: platform-ca
+          mountPath: /etc/ssl/platform/rootCA.pem
+          subPath: rootCA.pem
+          readOnly: true
       volumes:
+      - name: platform-ca
+        configMap:
+          name: platform-root-ca
       - name: scripts
         configMap:
           name: dq-validation-scripts
