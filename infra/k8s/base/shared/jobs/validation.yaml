@@ -42,10 +42,19 @@ spec:
           cp /scripts/scripts-load_seeded_user_credentials.sh $WORK/scripts/load_seeded_user_credentials.sh
           chmod +x $WORK/scripts/validation/*.sh $WORK/scripts/supporting/*.sh
           chmod +x $WORK/scripts/supporting/logging/*.sh $WORK/scripts/supporting/env/*.sh
+
+          # Build env file from ConfigMap volume (each key is a file at /env/)
+          : > /tmp/.env.dev.local
+          for f in /env/*; do
+            [ -f "$f" ] || continue
+            key=$(basename "$f")
+            echo "${key}=$(cat "$f")" >> /tmp/.env.dev.local
+          done
+
           bash $WORK/scripts/validation/validate_user_login_end_to_end.sh
         env:
         - name: ROOT_ENV_FILE
-          value: /env/.env.dev.local
+          value: /tmp/.env.dev.local
         - name: ROOT_DIR
           value: /tmp/repo
         - name: CURL_CA_BUNDLE

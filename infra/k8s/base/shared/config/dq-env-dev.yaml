@@ -1,0 +1,21 @@
+---
+# dq-env-dev — in-cluster environment for DQ services (dev).
+# Non-sensitive URLs and configuration. Secrets come from K8s Secrets.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-env-dev
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+data:
+  ENVIRONMENT: dev
+  KEYCLOAK_K8S_URL: "https://keycloak.platform-keycloak.svc.cluster.local:8443/auth"
+  KEYCLOAK_ADMIN_URL: "https://keycloak.platform-keycloak.svc.cluster.local:8443/auth"
+  KEYCLOAK_PUBLIC_URL: "https://keycloak.platform-keycloak.svc.cluster.local:8443/auth"
+  SSO_PUBLIC_ISSUER_URL: "https://keycloak.platform-keycloak.svc.cluster.local:8443/auth/realms/jaccloud"
+  KONG_PROXY_K8S_URL: "https://kong-proxy.platform-kong.svc.cluster.local:8443"
+  KONG_PUBLIC_URL: "https://kong-proxy.platform-kong.svc.cluster.local:8443"
+  UI_NGINX_LOCAL_URL: "https://kong-proxy.platform-kong.svc.cluster.local:8443"
+  KEYCLOAK_REALM: "jaccloud"
+  SSO_CLIENT_ID: "dq-rules-ui"
+  VITE_KEYCLOAK_CLIENT_ID: "dq-rules-ui"

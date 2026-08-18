@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - config/common-config.yaml
+  - config/dq-env-dev.yaml
   - config/keycloak-config.yaml
   - config/kong-config.yaml
   - secrets/keycloak-user-password.yaml
