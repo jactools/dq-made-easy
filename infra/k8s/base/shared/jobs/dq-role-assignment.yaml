@@ -1,0 +1,70 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-role-assignment
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+    dq.jaccloud.nl/type: role-assignment
+    dq.jaccloud.nl/trigger: manual
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: role-assignment
+        image: jacloud.nl/docker/python:3.13
+        imagePullPolicy: IfNotPresent
+        command: ["bash", "/scripts/dq-role-assignment.sh"]
+        env:
+        - name: KEYCLOAK_INTERNAL_URL
+          value: https://keycloak.platform-keycloak.svc.cluster.local:8443/auth
+        - name: KEYCLOAK_REALM
+          value: jaccloud
+        # TODO: Switch to tenant-admin SA once KC 26 role-mapping API is resolved
+        - name: TENANT_ADMIN_CLIENT_ID
+          value: admin-cli
+        - name: TENANT_ADMIN_CLIENT_SECRET
+          value: ""
+        - name: KEYCLOAK_ADMIN
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-admin
+              key: KEYCLOAK_ADMIN
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-admin
+              key: KEYCLOAK_ADMIN_PASSWORD
+        - name: KONG_PUBLIC_URL
+          value: https://kong-proxy.platform-kong.svc.cluster.local:443
+        - name: UI_NGINX_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:5173
+        - name: UI_VITE_LOCAL_URL
+          value: https://dq-made-easy.dev.jac.dot:5174
+        - name: DQ_ENGINE_OIDC_CLIENT_ID
+          value: dq-made-easy-engine-gx-worker
+        - name: DQ_ENGINE_OIDC_CLIENT_SECRET
+          value: changeme
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/platform/rootCA.pem
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+          readOnly: true
+        - name: platform-ca
+          mountPath: /etc/ssl/platform/rootCA.pem
+          subPath: rootCA.pem
+          readOnly: true
+      volumes:
+      - name: scripts
+        configMap:
+          name: dq-role-assignment-script
+          defaultMode: 0755
+      - name: platform-ca
+        configMap:
+          name: platform-root-ca

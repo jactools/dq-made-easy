@@ -16,13 +16,16 @@ spec:
       restartPolicy: Never
       containers:
       - name: validate
-        image: jacloud.nl/docker/jacbeekers/dq-made-easy-api:0.11
+        image: jacloud.nl/docker/python:3.13
         imagePullPolicy: IfNotPresent
         command:
         - bash
         - -c
         - |
           set -ex
+          # Install jq (required by auth.sh) + stub kubectl (Kong bootstrap is non-fatal)
+          apt-get update -qq && apt-get install -y -qq jq >/dev/null 2>&1 || true
+          printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
           # Setup script structure from flat ConfigMap keys
           WORK=/tmp/repo
           mkdir -p $WORK/scripts/validation $WORK/scripts/supporting/logging $WORK/scripts/supporting/env
@@ -73,9 +76,6 @@ spec:
           subPath: rootCA.pem
           readOnly: true
       volumes:
-      - name: platform-ca
-        configMap:
-          name: platform-root-ca
       - name: scripts
         configMap:
           name: dq-validation-scripts
@@ -83,3 +83,6 @@ spec:
       - name: env
         configMap:
           name: dq-env-dev
+      - name: platform-ca
+        configMap:
+          name: platform-root-ca

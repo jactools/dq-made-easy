@@ -4,3 +4,9 @@ kind: Kustomization
 resources:
   - validation.yaml
   - validation-scripts.yaml
+  - dq-role-assignment.yaml
+
+configMapGenerator:
+- name: dq-role-assignment-script
+  files:
+    - dq-role-assignment.sh
