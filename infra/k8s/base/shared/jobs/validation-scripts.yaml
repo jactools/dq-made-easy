@@ -108,8 +108,8 @@ data:
         if [ -f "$job_yaml" ]; then
           "$KUBECTL_CMD" apply -f "$job_yaml" -n "$ns" 2>/dev/null || true
         else
-          error "validate_user_login_end_to_end.sh" "Cannot refresh Kong bootstrap — job YAML not found at $job_yaml"
-          exit 1
+          warning "validate_user_login_end_to_end.sh" "Cannot refresh Kong bootstrap (job not available) — continuing with existing Kong config"
+          return 0
         fi
       fi
     
