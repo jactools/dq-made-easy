@@ -108,25 +108,18 @@ main() {
     --from-file=".env.${env}.local=$env_file" \
     -n "$namespace" --dry-run=client -o yaml | _run_kubectl apply -f -
 
-  # Ensure keycloak-user-password secret exists (created by keycloak-seed job or locally)
-  local credentials_file="$ROOT_DIR/tmp/keycloak_seed_user_credentials.${env}.env"
-  local seed_password=""
-  if [[ -f "$credentials_file" ]]; then
-    seed_password="$(grep '^KEYCLOAK_JACCLOUD_PASSWORD=' "$credentials_file" | head -1 | cut -d= -f2- | tr -d \"' || true)"
-  fi
-  if [[ -z "$seed_password" || "$seed_password" == *"<<GENERATED_BY"* ]]; then
-    # Fall back to .env file
-    seed_password="$(grep '^KEYCLOAK_JACCLOUD_PASSWORD=' "$env_file" | head -1 | cut -d= -f2- | tr -d \"' || true)"
-  fi
-  if [[ -z "$seed_password" || "$seed_password" == *"<<GENERATED_BY"* ]]; then
-    error "$my_name" "No seeded password found. Run the keycloak-seed job first."
-    error "$my_name" "Expected password in: $credentials_file or $env_file"
+  # Project keycloak-user-passwords from platform-keycloak into the tenant namespace
+  local platform_ns="platform-keycloak"
+  if _run_kubectl get secret keycloak-user-passwords -n "$platform_ns" >/dev/null 2>&1; then
+    _run_kubectl get secret keycloak-user-passwords -n "$platform_ns" -o yaml \" \
+      | sed "s/namespace: ${platform_ns}/namespace: ${namespace}/" \
+      | _run_kubectl apply -n "$namespace" -f -
+    info "$my_name" "Projected keycloak-user-passwords from $platform_ns to $namespace"
+  else
+    error "$my_name" "keycloak-user-passwords secret not found in $platform_ns"
+    error "$my_name" "Run the platform keycloak-seed job first."
     exit 1
   fi
-  _run_kubectl create secret generic keycloak-user-password \
-    --from-literal="password=${seed_password}" \
-    -n "$namespace" --dry-run=client -o yaml | _run_kubectl apply -f -
-  info "$my_name" "Ensured keycloak-user-password secret in $namespace"
 
   info "$my_name" "Running $script_name as Job $job_name in namespace $namespace"
 
