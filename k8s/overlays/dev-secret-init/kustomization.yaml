@@ -8,7 +8,7 @@ namespace: dq-dev
 
 resources:
   - ../base/shared/namespace.yaml
-  - ../jobs/secret-init.yaml
+  - ../dev/jobs/secret-init.yaml
 
 labels:
   - includeSelectors: true

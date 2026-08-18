@@ -8,7 +8,6 @@ resources:
   - config/keycloak-config.yaml
   - config/kong-config.yaml
   - secrets/keycloak-user-password.yaml
-  - secrets/dq-db-secrets.yaml
   - rbac/keycloak-seed-rbac.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
