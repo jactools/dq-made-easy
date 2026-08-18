@@ -5,8 +5,12 @@ resources:
   - validation.yaml
   - validation-scripts.yaml
   - dq-role-assignment.yaml
+  - kong-bootstrap.yaml
 
 configMapGenerator:
 - name: dq-role-assignment-script
   files:
     - dq-role-assignment.sh
+- name: dq-kong-bootstrap-script
+  files:
+    - bootstrap_kong.sh

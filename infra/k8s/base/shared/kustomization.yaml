@@ -5,7 +5,6 @@ resources:
   - namespace.yaml
   - config/common-config.yaml
   - config/dq-env-dev.yaml
-  - config/dq-kong-config.yaml
   - config/keycloak-config.yaml
   - config/kong-config.yaml
   - secrets/keycloak-user-password.yaml
@@ -13,7 +12,7 @@ resources:
   - rbac/keycloak-seed-rbac.yaml
   - ingress/frontend.yaml
   - ingress/openmetadata.yaml
-  - jobs/kustomization.yaml
+  - jobs/
   # CA bundle ConfigMaps (dq-platform-ca-bundle, platform-root-ca) are managed by generate_dev_certs.sh
 
 transformers:
