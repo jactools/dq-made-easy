@@ -56,7 +56,22 @@ spec:
             failureThreshold: 3
       volumes:
         - name: db-data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: dq-db-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dq-db-data
+  labels:
+    app.kubernetes.io/name: dq-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
 ---
 apiVersion: v1
 kind: Service
