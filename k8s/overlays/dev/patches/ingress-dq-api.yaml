@@ -6,6 +6,6 @@ spec:
   tls:
     - hosts:
         - dq-api.dev.jac.dot
-      secretName: dq-api.dev.jac.dot-tls
+      secretName: dq-api-tls
   rules:
     - host: dq-api.dev.jac.dot

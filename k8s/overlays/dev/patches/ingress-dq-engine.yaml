@@ -6,6 +6,6 @@ spec:
   tls:
     - hosts:
         - dq-engine.dev.jac.dot
-      secretName: dq-engine.dev.jac.dot-tls
+      secretName: dq-engine-tls
   rules:
     - host: dq-engine.dev.jac.dot
