@@ -12,7 +12,7 @@ resources:
 labels:
   - includeSelectors: true
     pairs:
-      platform.jaccloud.nl/managed-by: argocd
+      platform.jaccloud.nl/managed-by: flux
       platform.jaccloud.nl/tenant: dq
       platform.jaccloud.nl/environment: test
 
