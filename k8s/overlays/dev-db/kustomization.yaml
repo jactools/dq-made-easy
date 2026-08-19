@@ -8,6 +8,7 @@ resources:
   - ../../../infra/k8s/base/shared/config/common-config.yaml
   - ../../../infra/k8s/base/api/db.yaml
   - ../../../infra/k8s/base/api/db-config.yaml
+  - jobs/secret-init.yaml
 
 nameSuffix: ""
 
