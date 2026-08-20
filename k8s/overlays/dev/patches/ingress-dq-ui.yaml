@@ -5,10 +5,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - dq-ui.dev.jac.dot
-      secretName: dq-ui-tls
+        - dq-made-easy.dev.jac.dot
+      secretName: dq-made-easy.dev.jac.dot-tls
   rules:
-    - host: dq-ui.dev.jac.dot
+    - host: dq-made-easy.dev.jac.dot
       http:
         paths:
           - path: /
