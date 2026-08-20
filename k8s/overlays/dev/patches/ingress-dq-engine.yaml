@@ -9,3 +9,12 @@ spec:
       secretName: dq-engine-tls
   rules:
     - host: dq-engine.dev.jac.dot
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-engine
+                port:
+                  number: 8000

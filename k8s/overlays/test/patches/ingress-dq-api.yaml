@@ -9,3 +9,12 @@ spec:
       secretName: dq-api.jacloud.nl-tls
   rules:
     - host: dq-api.jacloud.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-api
+                port:
+                  number: 4010

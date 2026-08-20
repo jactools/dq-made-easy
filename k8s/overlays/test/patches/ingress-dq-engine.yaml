@@ -9,3 +9,12 @@ spec:
       secretName: dq-engine.jacloud.nl-tls
   rules:
     - host: dq-engine.jacloud.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-engine
+                port:
+                  number: 8000

@@ -9,3 +9,12 @@ spec:
       secretName: dq-ui-tls
   rules:
     - host: dq-ui.dev.jac.dot
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-frontend
+                port:
+                  number: 443

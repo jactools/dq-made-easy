@@ -9,3 +9,12 @@ spec:
       secretName: dq-ui.jacloud.nl-tls
   rules:
     - host: dq-ui.jacloud.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-frontend
+                port:
+                  number: 443

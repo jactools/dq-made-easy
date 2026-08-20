@@ -9,3 +9,12 @@ spec:
       secretName: dq-api-tls
   rules:
     - host: dq-api.dev.jac.dot
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dq-api
+                port:
+                  number: 4010
