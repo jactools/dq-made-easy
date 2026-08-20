@@ -3,6 +3,13 @@ kind: ConfigMap
 metadata:
   name: dq-kong-config
 data:
-  KONG_ADMIN_INTERNAL_URL: https://kong-admin.platform-kong.svc.cluster.local:8444
+  # Kong admin listens on plain HTTP (KONG_ADMIN_LISTEN: 0.0.0.0:8444, no ssl).
+  KONG_ADMIN_INTERNAL_URL: http://kong-admin.platform-kong.svc.cluster.local:8444
   KONG_LUA_SSL_TRUSTED_CERTIFICATE: /etc/kong/certs/trust/internal-ca-bundle.pem
   KONG_PUBLIC_URL: https://kong.dev.jac.dot:10443
+  # Internal (cluster-internal) URL of the DQ API service, for Kong service routing.
+  DQ_API_INTERNAL_URL: http://dq-api.dq-dev.svc.cluster.local:4010
+  # CORS origins allowed to call the API through Kong.
+  CORS_ORIGINS: https://dq-made-easy.dev.jac.dot:10443,https://dq-made-easy.dev.jac.dot,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000
+  # OIDC client whose service account gets a Kong consumer (engine backend).
+  DQ_ENGINE_OIDC_CLIENT_ID: dq-made-easy-engine-gx-worker

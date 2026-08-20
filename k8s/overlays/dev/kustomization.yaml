@@ -9,12 +9,16 @@ resources:
   - ../../base/dq-api/db-config.yaml
   - ../../base/dq-ui
   - ../../base/dq-engine
+  - ../../base/shared/keycloak-config.yaml
+  - ../../base/shared/kong-config.yaml
   - config/dq-api-config.yaml
   - config/dq-frontend-config.yaml
   - config/dq-engine-config.yaml
   - jobs/api-migrate.yaml
+  - jobs/oidc-gateway-init.yaml
   - external-secrets/redis-credential-api.yaml
   - external-secrets/redis-credential-engine.yaml
+  - external-secrets/keycloak-tenant-admin.yaml
 
 labels:
   - includeSelectors: true
@@ -27,8 +31,15 @@ patches:
   - path: patches/ingress-dq-api.yaml
   - path: patches/ingress-dq-ui.yaml
   - path: patches/ingress-dq-engine.yaml
+  - path: patches/keycloak-config.yaml
+  - path: patches/kong-config.yaml
   # Flux ordering is handled by split Kustomizations with dependsOn
   # No sync-wave annotations needed
+
+configMapGenerator:
+  - name: dq-oidc-gateway-init-script
+    files:
+      - jobs/oidc-gateway-init.py
 
 images:
   - name: docker.io/jacbeekers/dq-made-easy-api

@@ -6,6 +6,7 @@ This directory contains implementation summaries for significant architectural o
 
 | Date | Summary | Status | Scope |
 |---|---|---|---|
+| 2026-08-20 | [Flux migration recovery — Kong gateway + Keycloak tenant seeding](./2026-08-20_flux-migration-kong-keycloak-seed-recovery.md) | Code complete | Restored DQ login after Flux migration: GitOps-managed Kong/Keycloak init Job, ExternalSecret, SSO config, seed-users.sh idempotency fix, Kong OOM fix |
 | 2026-08-10 | [Fresh deploy checklist](./2026-08-10_fresh-deploy-checklist.md) | Draft | Step-by-step deploy guide + troubleshooting table |
 | 2026-08-10 | [Kong bootstrap — SSL verification, route paths, SSO session resolution](./2026-08-10_kong-bootstrap-ssl-sso-fix.md) | Complete | Fixed kong-bootstrap job readiness checks, route path drift, Keycloak admin password, and TRUST_PROXY_AUTH |
 | 2026-08-05 | [MaaS target rollout matrix](./2026-08-05_maas-target-rollout-matrix.md) | Complete | Repo-local target/service/instance rollout contract for MaaS workloads |

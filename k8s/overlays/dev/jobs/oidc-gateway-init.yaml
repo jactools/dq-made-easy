@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dq-job-oidc-gateway-init
+  labels:
+    app.kubernetes.io/name: dq-job-oidc-gateway-init
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: oidc-gateway-init
+          image: python:3.13
+          imagePullPolicy: IfNotPresent
+          command:
+            - python3
+            - /scripts/oidc-gateway-init.py
+          envFrom:
+            - configMapRef:
+                name: dq-keycloak-config
+            - configMapRef:
+                name: dq-kong-config
+            - configMapRef:
+                name: dq-common-config
+          env:
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-tenant-admin
+                  key: CLIENT_ID
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-tenant-admin
+                  key: CLIENT_SECRET
+            - name: CA_BUNDLE
+              value: /etc/ssl/ca-bundle.pem
+          volumeMounts:
+            - name: init-script
+              mountPath: /scripts
+              readOnly: true
+            - name: platform-ca
+              mountPath: /etc/ssl/ca-bundle.pem
+              subPath: ca-bundle.pem
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: init-script
+          configMap:
+            name: dq-oidc-gateway-init-script
+            defaultMode: 0555
+        - name: platform-ca
+          configMap:
+            name: dq-platform-ca-bundle

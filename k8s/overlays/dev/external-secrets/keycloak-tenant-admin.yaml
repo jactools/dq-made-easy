@@ -1,0 +1,25 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: keycloak-tenant-admin
+  labels:
+    platform.jaccloud.nl/managed-by: flux
+    platform.jaccloud.nl/tenant: dq
+    platform.jaccloud.nl/service: dq-oidc-init
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: platform-keycloak-secrets-store
+    kind: ClusterSecretStore
+  target:
+    name: keycloak-tenant-admin
+    creationPolicy: Owner
+  data:
+    - secretKey: CLIENT_ID
+      remoteRef:
+        key: keycloak-tenant-admin
+        property: CLIENT_ID
+    - secretKey: CLIENT_SECRET
+      remoteRef:
+        key: keycloak-tenant-admin
+        property: CLIENT_SECRET

@@ -6,4 +6,6 @@ data:
   ENVIRONMENT: dev
   KEYCLOAK_ADMIN_REALM: master
   KEYCLOAK_INTERNAL_URL: https://keycloak.platform-keycloak.svc.cluster.local:8443/auth
-  KEYCLOAK_REALM: dq-made-easy
+  # DQ operates in the platform-managed "jaccloud" realm (separate clients),
+  # per docs/architecture/keycloak-seeding-split.md.
+  KEYCLOAK_REALM: jaccloud

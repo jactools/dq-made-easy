@@ -6,7 +6,11 @@ data:
   ENVIRONMENT: dev
   PUBLIC_BASE_URL: https://dq-made-easy.dev.jac.dot
   TRUST_PROXY_AUTH: "true"
+  # SSO / OIDC (Keycloak "jaccloud" realm, platform-managed)
+  SSO_ENABLED: "true"
+  SSO_CLIENT_ID: dq-rules-ui
   SSO_PUBLIC_ISSUER_URL: https://keycloak.dev.jac.dot/auth/realms/jaccloud
   KEYCLOAK_PUBLIC_URL: https://keycloak.dev.jac.dot
-  OIDC_REDIRECT_BASE_URL: https://dq-made-easy.dev.jac.dot:10443/api
+  # Base URL the browser can reach; the API appends /api/auth/v1/callback itself.
+  OIDC_REDIRECT_BASE_URL: https://dq-made-easy.dev.jac.dot:10443
   REGISTRY_HOST: jacloud.nl/docker

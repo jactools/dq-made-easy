@@ -20,6 +20,7 @@ patches:
       - op: replace
         path: /metadata/name
         value: dq-dev
+  - path: patches/common-config.yaml
 
 labels:
   - includeSelectors: true
