@@ -1,5 +1,8 @@
 # DQ secret-init — generates secrets before main deployment
 # Flux ordering: dq-secret-init → dq-made-easy → dq-api-migrate
+#
+# Self-contained on purpose: modern kustomize rejects individual-file
+# references outside the build root, so the namespace and job live here.
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -7,8 +10,17 @@ kind: Kustomization
 namespace: dq-dev
 
 resources:
-  - ../base/shared/namespace.yaml
-  - ../dev/jobs/secret-init.yaml
+  - namespace.yaml
+  - jobs
+
+patches:
+  - target:
+      kind: Namespace
+      name: dq-made-easy
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: dq-dev
 
 labels:
   - includeSelectors: true

@@ -8,7 +8,9 @@ resources:
   - ../../../infra/k8s/base/shared/config/common-config.yaml
   - ../../../infra/k8s/base/api/db.yaml
   - ../../../infra/k8s/base/api/db-config.yaml
-  - jobs/secret-init.yaml
+  # secret-init job moved to the dev-secret-init overlay (Flux gates this
+  # stage on that Kustomization completing first)
+  - ../dev-secret-init/jobs
 
 nameSuffix: ""
 
