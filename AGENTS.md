@@ -47,6 +47,9 @@ Agents are **FORBIDDEN** to commit secrets, certificates, CA bundles, passwords,
 
 **Rationale:** Secrets in git are irreversible (history is permanent), compromise security, and violate platform principles.
 
+### GitHub API restriction for jactools repositories
+Agents and Copilot are **forbidden** from using the GitHub API to get or update any repositories under the `jactools` namespace or any `jactools` repositories. This includes reading repository contents or metadata and making updates through the GitHub API.
+
 ## Python Module Rules
 
 ### 1. Line Count Limit (< 1000 LOC)

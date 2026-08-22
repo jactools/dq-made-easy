@@ -5,6 +5,9 @@ See `AGENTS.md` for the complete repository rules. The critical rules repeated h
 ## Git — NO COMMITS EVER
 Agents may only run `git status`. All other `git` commands are FORBIDDEN.
 
+## GitHub API restriction for jactools repositories
+Agents and Copilot are **forbidden** from using the GitHub API to get or update any repositories under the `jactools` namespace or any `jactools` repositories.
+
 ## No Fallbacks
 Fail fast when a required API or script is unavailable. Do not silently substitute behavior.
 
