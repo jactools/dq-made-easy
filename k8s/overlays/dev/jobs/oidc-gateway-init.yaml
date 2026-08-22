@@ -12,7 +12,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: oidc-gateway-init
-          image: python:3.13
+          image: jacloud.nl/docker/python:3.13
           imagePullPolicy: IfNotPresent
           command:
             - python3
