@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dq-common-config
+  labels:
+    app.kubernetes.io/part-of: dq-made-easy
+data:
+  ENVIRONMENT: dev
+  TRUST_PROXY_AUTH: 'true'

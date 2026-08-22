@@ -4,13 +4,18 @@ kind: Kustomization
 namespace: dq-dev
 
 resources:
-  - ../../base/dq-api/api.yaml
-  - ../../base/dq-api/ingress.yaml
-  - ../../base/dq-api/db-config.yaml
+  # Base resources are inlined (copies of k8s/base/{dq-api,shared}) so the
+  # overlay is self-contained: kustomize rejects individual-file references
+  # outside the build root. Environment overrides go through patches/ and the
+  # namespace transformer.
+  - base/api.yaml
+  - base/ingress.yaml
+  - base/db-config.yaml
+  - base/keycloak-config.yaml
+  - base/kong-config.yaml
+  # Directory refs to the shared base stay (allowed by kustomize)
   - ../../base/dq-ui
   - ../../base/dq-engine
-  - ../../base/shared/keycloak-config.yaml
-  - ../../base/shared/kong-config.yaml
   - config/dq-api-config.yaml
   - config/dq-frontend-config.yaml
   - config/dq-engine-config.yaml

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dq-db
+  labels:
+    app.kubernetes.io/name: dq-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dq-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dq-db
+        app.kubernetes.io/part-of: dq-made-easy
+    spec:
+      containers:
+        - name: dq-db
+          image: docker.io/jacbeekers/dq-made-easy-db:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - configMapRef:
+                name: dq-common-config
+            - configMapRef:
+                name: dq-db-config
+            - secretRef:
+                name: dq-db-secrets
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            tcpSocket:
+              port: postgres
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: postgres
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: dq-db-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dq-db-data
+  labels:
+    app.kubernetes.io/name: dq-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dq-db
+  labels:
+    app.kubernetes.io/name: dq-db
+    app.kubernetes.io/part-of: dq-made-easy
+spec:
+  selector:
+    app.kubernetes.io/name: dq-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

@@ -39,6 +39,12 @@ Agents are **FORBIDDEN** to commit secrets, certificates, CA bundles, passwords,
 - Inline passwords, API keys, tokens, or secrets in any file tracked by git
 - Embedding generated values (certs, keys, passwords) in version-controlled files
 
+**Patterns to follow:**
+- Use `kube-root-ca.crt` (auto-provisioned by Kubernetes) instead of embedding API server CAs
+- Use `secretKeyRef`/`configMapKeyRef` references instead of inline values
+- Store sensitive files outside git (e.g., `.env.*.local`) and reference them at deploy time
+- Use Kustomize overlays or controller-specific inputs for environment-specific values
+
 **Rationale:** Secrets in git are irreversible (history is permanent), compromise security, and violate platform principles.
 
 ## Python Module Rules
@@ -131,6 +137,22 @@ packages/metadata-<name>/
 - Always use `venv/bin/python` for all Python commands (never bare `python`)
 - All paths are relative to the repository root
 
+### Platform Services — Consumption Only
+Platform-managed shared services (e.g., `platform-redis`, `platform-kafka`, `platform-kong`) are **strictly owned by the platform**.
+
+**Allowed:**
+- Consume platform services via published consumer contracts
+- Create/update tenant-side ConfigMaps, Secrets, and manifest references
+- Raise platform infrastructure requests if a shared service requires configuration changes
+
+**Explicitly forbidden:**
+- Modifying manifests inside `platform-argocd-apps/apps/platform/` or the `platform-*` namespaces
+- Altering, patching, or overriding platform TLS secrets, CA bundles, or admin credentials
+- Deploying a separate service instance to replace or shadow a platform service
+- Using `kubectl apply/patch` to mutate platform-owned infrastructure resources
+
+**Rationale:** Platform services enforce strict multi-tenant isolation, credential scoping, and access control. Consumers must adopt the published service contract without mutating the underlying infrastructure.
+
 ### Deployment — GitOps Controller Of Record
 All services **MUST be deployed through the GitOps controller of record** for the target environment. Agents are **FORBIDDEN** to deploy manifests directly.
 
@@ -138,21 +160,52 @@ All services **MUST be deployed through the GitOps controller of record** for th
 - Flux v2.9 is the only forward GitOps control-plane direction
 - Dev and test Flux Git sources must use SSH
 - Production Flux Git sources must use HTTPS
-- Legacy ArgoCD assets may be touched only for stability maintenance of existing environments or for controlled retirement during migration
-- Migration governance is tracked in `platform-foundation/docs/implementation/platform-gitops-control-plane-migration-plan.md` and `platform-foundation/docs/architecture/adr/ADR-002-flux-gitops-control-plane-direction.md`
+- **ArgoCD is frozen — no new ArgoCD development is authorized.** ArgoCD assets may only be touched for: (a) stability maintenance of existing unmigrated environments, or (b) controlled retirement during migration. No new ArgoCD Applications, AppProjects, ApplicationSets, hooks, or sync-wave flows.
+- Migration governance is tracked in `docs/implementation/platform-gitops-control-plane-migration-plan.md` and `docs/architecture/adr/ADR-002-flux-gitops-control-plane-direction.md`
+
+**Flux bootstrap assets location:**
+All Flux bootstrap and control-plane assets live in `platform-foundation/flux/`:
+- `flux/manifests/flux-system/` — committed controller configuration (CRDs, namespace, RBAC, controllers, services, network policies)
+- `flux/bootstrap/<env>/flux-system.yaml` — environment-specific root self-management seeds
+- `flux/sources/` — shared `GitRepository` catalog (`base/` + environment overlays)
+- `flux/catalog/platform/` — shared platform wrapper `Kustomization` catalog
+- `flux/catalog/tenants/` — shared tenant wrapper `Kustomization` catalog
+- `flux/instances/<env>/` — canonical environment assemblies watched by the root `Kustomization`
+- `scripts/flux_bootstrap.sh` — repeatable bootstrap script
+- `scripts/kind.sh` — Kind cluster lifecycle (create/delete/load)
+
+### Canonical Flux Layout
+
+Agents must use the current canonical Flux structure:
+
+- Environment entrypoints live under `flux/instances/<env>/`.
+- Root self-management seeds live under `flux/bootstrap/<env>/flux-system.yaml`.
+- Shared Git source definitions live under `flux/sources/`.
+- Shared platform wrapper `Kustomization` objects live under `flux/catalog/platform/`.
+- Shared tenant wrapper `Kustomization` objects live under `flux/catalog/tenants/`.
+
+**Do not** introduce new canonical entrypoints under the retired `flux/overlays/` path.
+That path is historical only; new work must target `flux/instances/` and the shared catalogs.
+
+Tenant workload manifests remain owned by tenant repositories. Do not move tenant workload YAML into `platform-foundation`.
 
 **Allowed:**
-- Create/update tenant Kustomize overlays and workload manifests consumed by the active controller of record
-- Create/update Flux source and `Kustomization` resources when they are part of the approved migration plan
-- Maintain or retire existing ArgoCD-related assets only when required to keep current environments stable or to remove Argo ownership during migration
+- Create/update Kustomize overlays consumed by the current controller of record
+- Create/update Flux bootstrap, source, and `Kustomization` resources when they are part of the approved migration plan
+- Maintain or retire existing ArgoCD assets only when required to keep current environments stable or to remove Argo ownership during migration
+- Use repo-managed controller workflows that match the active controller of record; legacy ArgoCD workflows remain operational only for unmigrated environments
 - Use `kubectl` to **inspect** state (get pods, logs, describe, events)
 
 **Explicitly forbidden:**
 - `kubectl apply -f` or `kubectl apply -k` to deploy manifests
-- `kubectl create` or `kubectl patch` to mutate GitOps-managed workloads instead of updating Git
+- `kubectl create` to create Deployments, Services, ConfigMaps, Secrets, Jobs
+- `kubectl patch` to modify running resources instead of GitOps-managed manifests
 - Manual `kubectl rollout restart` to trigger deployments instead of controller reconciliation
-- Creating new ArgoCD Applications, ApplicationSets, sync-wave flows, hook-based flows, or `argocd.argoproj.io/*` annotations for forward development
+- Creating new ArgoCD Applications, AppProjects, ApplicationSets, hooks, or sync-wave-based flows for forward development
+- Expanding `platform-argocd-apps` scope except for controlled retirement or stability maintenance
 - Allowing ArgoCD and Flux to reconcile the same resource set in the same environment at the same time
+
+**Rationale:** GitOps remains the source of truth, but the controller may change over time. Manual `kubectl apply` creates drift regardless of controller. During the Flux transition, the key rule is single-controller ownership per resource set. ArgoCD is in retirement-only mode; all new development must use Flux.
 
 ### Port Safety — Process Killing
 **Only kill processes on ports in the 10000–11999 range** (dev/test environments).
@@ -323,20 +376,24 @@ Actor context is passed via the `X-Actor` header.
 
 ## Document Store — Platform Knowledge Base
 
-The `platform-foundation` document store indexes all platform Markdown documents (134 docs across 3 repos) and is searchable via the document store skill.
+The platform document store indexes all Markdown documents from 3 repositories (134 documents) and is searchable via REST API and MCP tools.
 
-**Skill**: symlinked at `.pi/skills/document-store/` → auto-loaded by pi.
+**Skill**: `.pi/skills/document-store/SKILL.md` — auto-loaded by pi agents.
 
 **Use the document store before:**
 - Writing an implementation summary (check if one already exists)
-- Debugging a known issue (lessons learned may have the answer)
 - Making a platform decision (check past ADRs or lessons learned)
+- Debugging a known issue (lessons learned may have the answer)
 - Onboarding a new repository (consumer contracts, onboarding guides)
+- Designing something new (check existing design docs)
 
-**Quick commands (works from this repo via symlink):**
+**Quick commands:**
 ```bash
+# Check service status
+.pi/skills/document-store/scripts/docstore.sh status
+
 # Search for documents
-.pi/skills/document-store/scripts/docstore.sh search "Kong bootstrap TLS"
+.pi/skills/document-store/scripts/docstore.sh search "ArgoCD bootstrap"
 
 # Get full document content
 .pi/skills/document-store/scripts/docstore.sh get <document_id>
@@ -346,22 +403,20 @@ The `platform-foundation` document store indexes all platform Markdown documents
 
 # Upload a document (auto-detects type and project)
 .pi/skills/document-store/scripts/docstore.sh upload docs/implementation/summaries/2026-08-13_my-summary.md
-
-# Check service status
-.pi/skills/document-store/scripts/docstore.sh status
 ```
 
-**Projects indexed**: `platform-foundation`, `dq-made-easy` (this repo), `platform-argocd-apps, metadata-as-a-service`
+**Document types**: `IMPLEMENTATION_SUMMARY`, `IMPLEMENTATION_PLAN`, `LESSONS_LEARNED`, `CONSUMER_CONTRACT`, `OPERATOR_MANUAL`, `DESIGN_DOC`, `RELEASE_NOTES`, `ADR`
+
+**Projects indexed**: `platform-foundation` (64), `dq-made-easy` (58), `platform-argocd-apps` (12)
 
 **Auto-upload rule**: After creating any implementation summary, lessons learned, or plan document, **always upload it** to the document store:
 ```bash
-.pi/skills/document-store/scripts/docstore.sh upload <path-to-file.md> --project dq-made-easy
+.pi/skills/document-store/scripts/docstore.sh upload <path-to-file.md>
 ```
 
-**Note**: The skill is symlinked from `platform-foundation/.pi/skills/document-store/`. To add to a new repo:
+**Sandbox note**: When running inside a container (pi sandbox), `localhost` is the container itself, not the host. Use:
 ```bash
-mkdir -p .pi/skills
-ln -sf /path/to/platform-foundation/.pi/skills/document-store .pi/skills/document-store
+DOCSTORE_URL=http://host.docker.internal:10093 .pi/skills/document-store/scripts/docstore.sh upload <path-to-file.md>
 ```
 
 ## Repository Structure

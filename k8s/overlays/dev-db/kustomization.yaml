@@ -4,11 +4,15 @@ kind: Kustomization
 namespace: dq-dev
 
 resources:
-  - ../../../infra/k8s/base/shared/namespace.yaml
-  - ../../../infra/k8s/base/shared/config/common-config.yaml
-  - ../../../infra/k8s/base/api/db.yaml
-  - ../../../infra/k8s/base/api/db-config.yaml
-  # secret-init job moved to the dev-secret-init overlay (Flux gates this
+  # Base resources are inlined (copies of infra/k8s/base/{shared,api}) so the
+  # overlay is self-contained: kustomize rejects individual-file references
+  # outside the build root. Environment overrides go through patches/ and the
+  # namespace transformer.
+  - namespace.yaml
+  - common-config.yaml
+  - db.yaml
+  - db-config.yaml
+  # secret-init job lives in the dev-secret-init overlay (Flux gates this
   # stage on that Kustomization completing first)
   - ../dev-secret-init/jobs
 
